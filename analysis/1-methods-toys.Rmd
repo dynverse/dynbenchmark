@@ -1,0 +1,96 @@
+---
+title: "1-methods-toys"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Testing methods on simple toy datasets
+
+```{r}
+library(tidyverse)
+library(dyneval)
+
+set.seed(1)
+
+tasks <- generate_toy_datasets()
+tasks <- tasks[1, ]
+```
+
+We choose certain parameters for which we know that the method will find (or focus on finding) a linear trajectory, and will do this quickly
+```{r}
+method_descriptions <- list(
+  waterfall=list(),
+  scorpius=list(),
+  slingshot=list(),
+  gpfates=list(nfates=1),
+  stemid=list(clustnr=10, bootnr=10, pdishuf=10),
+  tscan=list(),
+  embeddr=list(nn_pct = 2),
+  celltree_gibbs=list(sd_filter = 0),
+  celltree_maptpx=list(sd_filter = 0),
+  celltree_vem=list(sd_filter = 0),
+  scuba=list(),
+  slicer = list(min_branch_len=50),
+  monocle_ddrtree=list(),
+  wishbone = list(branch=F),
+  pseudogp = list(iter=100, initialise_from="principal_curve"),
+  mpath = list(numcluster=6),
+  random_linear=list()
+)
+```
+
+```{r}
+results <- parallel::mclapply(names(method_descriptions), function(method_name) {
+  library(dyneval)
+
+  cat("Processing ", method_name, "\n", sep="")
+  method <- get(paste0("description_", method_name))()
+  method_params <- method_descriptions[[method_name]]
+
+  factory <- function(fun) {
+    function(...) {
+      warn <- err <- NULL
+      res <- withCallingHandlers(
+        tryCatch(fun(...), error=function(e) {
+          err <<- conditionMessage(e)
+          NULL
+        }), warning=function(w) {
+          warn <<- append(warn, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        })
+      list(res, warn=warn, err=err, method_name=method_name)
+    }
+  }
+
+  factory(function() {
+    dyneval:::execute_evaluation(tasks, method, method_params, metrics = metric_names, suppress_output = F)
+  }
+  )()
+}, mc.cores=4)
+```
+
+Gather the output of the different methods, and check whether there were any errors
+```{r}
+scores <- purrr::map(results, function(.) {
+  bind_cols(
+    tibble(error=list(.$err), warning=list(.$warning)),
+    attr(.[[1]], "extras")$.summary,
+    tibble(method_name=.$method_name)
+  )
+}) %>% bind_rows() %>% mutate(errored = !map_lgl(error, is.null)) %>% dplyr::select(-contains("method_name1"))
+```
+
+```{r}
+scores %>% filter(errored)
+```
+
+
+```{r}
+scores %>%
+  dplyr::select(-starts_with("time")) %>%
+  gather(score_id, score, -method_name, -method_short_name, -task_id, -error, -warning) %>%
+  ggplot() + geom_bar(aes(method_name, score, fill=score_id), stat="identity") + facet_wrap(~score_id) + coord_flip()
+```
