@@ -19,3 +19,7 @@ Encoding: UTF-8
 LazyData: true
 URL: https://github.com/Zouter/dynanalysis
 BugReports: https://github.com/Zouter/dynanalysis/issues
+Imports: 
+  bookdown
+  dyneval
+  dyngen

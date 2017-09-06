@@ -1,0 +1,44 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# dynanalysis
+
+The goal of dynanalysis is to ...
+
+### Citation
+
+Please cite this compendium as:
+
+> Authors, (`r format(Sys.Date(), "%Y")`). _Title of compendium_. Accessed `r format(Sys.Date(), "%d %b %Y")`. Online at <https://doi.org/xxx/xxx>
+
+### Installation
+
+You can install dynanalysis from github with:
+
+```{r gh-installation, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("Zouter/dynanalysis")
+```
+
+### Licenses
+
+**Text and figures:**  [CC-BY-4.0](http://creativecommons.org/licenses/by/4.0/)
+
+**Code:** See the [DESCRIPTION](DESCRIPTION) file
+
+$\textbf{Data:}$ [CC-0](http://creativecommons.org/publicdomain/zero/1.0/) attribution requested in reuse
+
+### Contributions
+
+We welcome contributions from everyone. Before you get started, please see our [contributor guidelines](CONTRIBUTING.md). Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.

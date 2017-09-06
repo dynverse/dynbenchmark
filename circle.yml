@@ -1,0 +1,14 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  override:
+    - docker info
+    - docker build -t $DOCKER_USER/dynanalysis  .
+
+test:
+  override:
+  # see if we can start container...
+    - docker run --name dynanalysis -d -p 8787:8787 $DOCKER_USER/dynanalysis
+
