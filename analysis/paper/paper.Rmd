@@ -32,6 +32,7 @@ knitr::opts_chunk$set(
 )
 
 library(dynalysis)
+library(tidyverse)
 ```
 
 # Introduction
@@ -48,9 +49,13 @@ Here is a citation [@Marwick2017]
 
 # Results
 
-```{r get-data, eval = FALSE}
-# Note the path that we need to use to access our data files when rendering this document
-my_data <- readr::read_csv("../data/raw_data/my_csv_file.csv")
+```{r get-data}
+scores <- read_rds("../data/derived_data/toy_method_scores.rds")
+
+scores %>%
+  dplyr::select(-starts_with("time")) %>%
+  gather(score_id, score, -method_name, -method_short_name, -task_id, -error, -warning) %>%
+  ggplot() + geom_bar(aes(method_name, score, fill=score_id), stat="identity") + facet_wrap(~score_id) + coord_flip()
 ```
 
 # Discussion
