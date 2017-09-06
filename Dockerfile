@@ -9,7 +9,7 @@ MAINTAINER Robrecht Cannoodt <robrecht.cannoodt@ugent.be>
 RUN easy_install pip
 RUN pip install virtualenv
 
-RUN sudo apt-get install python3-tk # for pySCUBA
+RUN sudo apt-get install python3-tk -y # for pySCUBA
 
 COPY . dynalysis
 
