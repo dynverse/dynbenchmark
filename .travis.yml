@@ -2,7 +2,7 @@
 
 env:
   global:
-  - REPO=Zouter/dynalysis
+  - REPO=dynalysis
 
 sudo: required
 
