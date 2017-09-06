@@ -17,6 +17,7 @@ RUN . /etc/environment \
   && sudo apt-get update \
   && sudo apt-get install libudunits2-dev -y \
   && sudo apt-get install subversion -y \
+  && sudo apt-get install libgsl-dev libsdl1.2-dev -y \
 
   # build this compendium package
   && R -e "devtools::install('dynalysis', dependencies=TRUE)" \

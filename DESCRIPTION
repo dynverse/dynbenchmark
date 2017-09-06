@@ -25,3 +25,4 @@ Imports:
 Remotes:
   Zouter/dyngen,
   rcannood/dyneval
+RoxygenNote: 6.0.1
