@@ -24,4 +24,5 @@ RUN . /etc/environment \
 
  # render the manuscript into a docx, you'll need to edit this if you've
  # customised the location and name of your main Rmd file
+  && R -e "rmarkdown::render('dynalysis/analysis/1-methods-toys.Rmd')"
   && R -e "rmarkdown::render('dynalysis/analysis/paper/paper.Rmd')"
