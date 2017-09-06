@@ -1,4 +1,4 @@
-Package: dynanalysis
+Package: dynalysis
 Title: Analysis of "Comparison of methods for pseudo-temporal ordering of single-cell data"
 Version: 0.0.0.9000
 Authors@R: c(
@@ -17,8 +17,8 @@ Depends: R (>= 3.4.1)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/Zouter/dynanalysis
-BugReports: https://github.com/Zouter/dynanalysis/issues
+URL: https://github.com/Zouter/dynalysis
+BugReports: https://github.com/Zouter/dynalysis/issues
 Imports: 
   bookdown
   dyneval

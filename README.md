@@ -1,9 +1,9 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-dynanalysis
+dynalysis
 ===========
 
-The goal of dynanalysis is to ...
+The goal of dynalysis is to ...
 
 ### Citation
 
@@ -13,11 +13,11 @@ Please cite this compendium as:
 
 ### Installation
 
-You can install dynanalysis from github with:
+You can install dynalysis from github with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("Zouter/dynanalysis")
+devtools::install_github("Zouter/dynalysis")
 ```
 
 ### Licenses

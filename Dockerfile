@@ -5,7 +5,7 @@ FROM rocker/verse:3.4.1
 MAINTAINER Wouter Saelens <wouter.saelens@ugent.be>
 MAINTAINER Robrecht Cannoodt <robrecht.cannoodt@ugent.be>
 
-COPY . /dynanalysis
+COPY . /dynalysis
 
 # go into the repo directory
 RUN . /etc/environment \
@@ -16,8 +16,8 @@ RUN . /etc/environment \
   && sudo apt-get install libudunits2-dev -y \
 
   # build this compendium package
-  && R -e "devtools::install('/dynanalysis', dep=TRUE)" \
+  && R -e "devtools::install('/dynalysis', dep=TRUE)" \
 
  # render the manuscript into a docx, you'll need to edit this if you've
  # customised the location and name of your main Rmd file
-  && R -e "rmarkdown::render('/dynanalysis/analysis/paper/paper.Rmd')"
+  && R -e "rmarkdown::render('/dynalysis/analysis/paper/paper.Rmd')"

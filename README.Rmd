@@ -12,9 +12,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-# dynanalysis
+# dynalysis
 
-The goal of dynanalysis is to ...
+The goal of dynalysis is to ...
 
 ### Citation
 
@@ -24,11 +24,11 @@ Please cite this compendium as:
 
 ### Installation
 
-You can install dynanalysis from github with:
+You can install dynalysis from github with:
 
 ```{r gh-installation, eval = FALSE}
 # install.packages("devtools")
-devtools::install_github("Zouter/dynanalysis")
+devtools::install_github("Zouter/dynalysis")
 ```
 
 ### Licenses
