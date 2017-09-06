@@ -5,7 +5,7 @@ FROM rocker/verse:3.4.1
 MAINTAINER Wouter Saelens <wouter.saelens@ugent.be>
 MAINTAINER Robrecht Cannoodt <robrecht.cannoodt@ugent.be>
 
-COPY . /dynalysis
+COPY . Zouter/dynalysis
 
 # go into the repo directory
 RUN . /etc/environment \
