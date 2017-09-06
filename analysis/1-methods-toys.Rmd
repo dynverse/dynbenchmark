@@ -40,10 +40,12 @@ method_descriptions <- list(
   mpath = list(numcluster=6),
   random_linear=list()
 )
+
+metric_names <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation", "isomorphic", "robbie_network_score")
 ```
 
 ```{r}
-results <- parallel::mclapply(names(method_descriptions), function(method_name) {
+results <- purrr::map(names(method_descriptions), function(method_name) {
   library(dyneval)
 
   cat("Processing ", method_name, "\n", sep="")
@@ -69,7 +71,7 @@ results <- parallel::mclapply(names(method_descriptions), function(method_name) 
     dyneval:::execute_evaluation(tasks, method, method_params, metrics = metric_names, suppress_output = F)
   }
   )()
-}, mc.cores=4)
+})
 ```
 
 Gather the output of the different methods, and check whether there were any errors
