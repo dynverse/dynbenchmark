@@ -31,6 +31,10 @@ You can install dynalysis from github with:
 devtools::install_github("Zouter/dynalysis")
 ```
 
+### Running
+
+To run locally, install `docker` and run `docker build -t dynalysis .`
+
 ### Licenses
 
 **Text and figures:**  [CC-BY-4.0](http://creativecommons.org/licenses/by/4.0/)
