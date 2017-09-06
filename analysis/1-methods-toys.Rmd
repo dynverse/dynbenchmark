@@ -81,6 +81,8 @@ scores <- purrr::map(results, function(.) {
     tibble(method_name=.$method_name)
   )
 }) %>% bind_rows() %>% mutate(errored = !map_lgl(error, is.null)) %>% dplyr::select(-contains("method_name1"))
+
+scores %>% saveRDS("data/derived_data/toy_method_scores.rds")
 ```
 
 ```{r}
