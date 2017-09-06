@@ -9,8 +9,7 @@ Authors@R: c(
   ),
   person("Robrecht", "Cannoodt", email="robrecht.cannoodt@ugent.be", role="aut"),
   person("Wouter", "Saelens", email="wouter.saelens@ugent.be", role="aut"),
-  person("Helena", "Todorov", email="helena.todorov@ugent.be", role="aut")
-  )
+  person("Helena", "Todorov", email="helena.todorov@ugent.be", role="aut"))
 Description: This package contains the code to reproduce the main analyses of our paper "Comparison of methods for pseudo-temporal ordering of single-cell data"
   Using code from our other packages dyneval, dyngen and dynutils
 Depends: R (>= 3.4.1)
@@ -20,6 +19,6 @@ LazyData: true
 URL: https://github.com/Zouter/dynalysis
 BugReports: https://github.com/Zouter/dynalysis/issues
 Imports: 
-  bookdown
-  dyneval
+  bookdown,
+  dyneval,
   dyngen
