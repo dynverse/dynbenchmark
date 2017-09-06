@@ -19,6 +19,4 @@ LazyData: true
 URL: https://github.com/Zouter/dynalysis
 BugReports: https://github.com/Zouter/dynalysis/issues
 Imports: 
-  bookdown,
-  dyneval,
-  dyngen
+  bookdown
