@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 */data/*
+*log
+analysis_output.tar

@@ -1,0 +1,85 @@
+---
+title: "Title Goes Here"
+author:
+  - Robrecht Cannoodt
+  - Wouter Saelens
+  - Helena Todorov
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+    bookdown::html_document2:
+    fig_caption: yes
+    reference_docx: templates/template.docx
+bibliography: references.bib
+csl: journal-of-archaeological-science.csl
+abstract: |
+  Text of abstract
+keywords: |
+  keyword 1; keyword 2; keyword 3
+highlights: |
+  These are the highlights. 
+---
+
+
+<!-- This is the format for text comments that will be ignored during renderings. Do not put R code in these comments because it will not be ignored. -->
+
+```{r, setup, echo = FALSE, message=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  echo = FALSE,
+  comment = "#>",
+  fig.path = "../figures/"
+)
+
+library(dynalysis)
+library(tidyverse)
+```
+
+# Introduction
+
+Here is a citation [@Marwick2017]
+
+# Background
+
+```{r demo, eval = FALSE}
+1 + 1
+```
+
+# Methods
+
+# Results
+
+```{r get-data}
+scores <- read_rds("../data/derived_data/toy_method_scores.rds")
+
+scores %>%
+  dplyr::select(-starts_with("time")) %>%
+  gather(score_id, score, -method_name, -method_short_name, -task_id, -error, -warning) %>%
+  ggplot() + geom_bar(aes(method_name, score, fill=score_id), stat="identity") + facet_wrap(~score_id) + coord_flip()
+```
+
+# Discussion
+
+# Conclusion
+
+# Acknowledgements
+
+# References 
+
+### Colophon
+
+This report was generated on `r Sys.time()` using the following computational environment and dependencies: 
+
+```{r colophon, cache = FALSE}
+# which R packages and versions?
+devtools::session_info()
+```
+
+The current Git commit details are:
+
+```{r}
+# what commit is this file at? You may need to change the path value
+# if your Rmd is not in analysis/paper/
+git2r::repository("../..")
+```
