@@ -81,11 +81,11 @@ Gather the output of the different methods, and check whether there were any err
 ```{r}
 scores <- purrr::map(results, function(.) {
   bind_cols(
-    tibble(error=list(.$err), warning=list(.$warning)),
+    tibble(error=list(.$err), warning=list(.$warning), model=list(attr(.[[1]], "extras")$.models[[1]])),
     attr(.[[1]], "extras")$.summary,
     tibble(method_name=.$method_name)
   )
-}) %>% bind_rows() %>% mutate(errored = !map_lgl(error, is.null)) %>% dplyr::select(-contains("method_name1"))
+}) %>% bind_rows() %>% mutate(errored = !map_lgl(error, is.null), method_id=method_names) %>% dplyr::select(-contains("method_name1"))
 
 scores %>% saveRDS("data/derived_data/toy_method_scores.rds")
 ```
