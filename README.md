@@ -1,7 +1,9 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 dynalysis
-===========
+=========
+
+![overview](analysis/figures/toy_method_plots/grid.png)
 
 The goal of dynalysis is to ...
 
@@ -9,7 +11,7 @@ The goal of dynalysis is to ...
 
 Please cite this compendium as:
 
-> Authors, (2017). *Title of compendium*. Accessed 06 Sep 2017. Online at <https://doi.org/xxx/xxx>
+> Authors, (2017). *Title of compendium*. Accessed 07 Sep 2017. Online at <https://doi.org/xxx/xxx>
 
 ### Installation
 
@@ -19,6 +21,10 @@ You can install dynalysis from github with:
 # install.packages("devtools")
 devtools::install_github("Zouter/dynalysis")
 ```
+
+### Running
+
+To run locally, install `docker` and run `docker build -t dynalysis .`
 
 ### Licenses
 
