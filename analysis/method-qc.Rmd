@@ -1,0 +1,48 @@
+---
+title: "method-qc"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(googlesheets)
+library(cowplot)
+rules_info <- gs_title("Trajectory Inference Methods") %>% gs_read(skip=1)
+```
+
+
+```{r}
+ggplot(rules_info,aes(log(Citations+1),`QC score`))+
+  geom_smooth(method='lm',formula=y~x) +
+  geom_point() +
+  ggrepel::geom_label_repel(aes(label=Name))
+
+ggplot(rules_info,aes(log(Citations+1),`QC score`))+
+  geom_smooth(method='lm',formula=y~x) +
+  geom_point() +
+  ggrepel::geom_label_repel(aes(label=Name))
+
+rules_info$date <- pmax(
+  lubridate::as_date(lubridate::ymd(rules_info$PubDate)),
+  lubridate::as_date(lubridate::ymd(rules_info$Preprint)),
+  na.rm=T
+)
+
+ggplot(rules_info,aes(date,`QC score`))+
+  geom_smooth(method='lm',formula=y~x) +
+  geom_point() +
+  ggrepel::geom_label_repel(aes(label=Name))
+
+rules_info$published <- !is.na(rules_info$PubDate)
+  
+ggplot(rules_info,aes(published,`QC score`))+
+  geom_violin() +
+  geom_point() +
+  ggrepel::geom_text_repel(aes(label=Name))
+
+```
+
