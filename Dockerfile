@@ -21,6 +21,9 @@ RUN . /etc/environment \
 RUN . /etc/environment \
   && R -e "rmarkdown::render('dynalysis/analysis/1-methods-toys.Rmd')"
 
+RUN . /etc/environment \
+  && R -e "rmarkdown::render('dynalysis/analysis/2-methods-plots.Rmd')"
+
 # manuscript render
 RUN . /etc/environment \
   && R -e "rmarkdown::render('dynalysis/analysis/paper/paper.Rmd')"
