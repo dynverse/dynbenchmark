@@ -23,7 +23,7 @@ We choose certain parameters for which we know that the method will find (or foc
 ```{r}
 method_params <- yaml::yaml.load_file("conf/toy_params.yml")$linear
 method_names <- names(method_params)
-method_names <- c("topslam")
+# method_names <- c("celltree_maptpx")
 
 method_descriptions <- map(method_names, ~get(paste0("description_", .))()) %>% set_names(method_names)
 
@@ -31,8 +31,8 @@ metric_names <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation",
 ```
 
 ```{r}
-# results <- PRISM::qsub_lapply(names(method_descriptions), function(method_name) {
-results <- purrr::map(method_names, function(method_name) {
+results <- PRISM::qsub_lapply(names(method_descriptions), function(method_name) {
+# results <- purrr::map(method_names, function(method_name) {
   library(dyneval)
 
   cat("Processing ", method_name, "\n", sep="")
@@ -58,8 +58,8 @@ results <- purrr::map(method_names, function(method_name) {
     dyneval:::execute_evaluation(tasks, method, params, metrics = metric_names, suppress_output = F)
   }
   )()
-})
-# }, qsub_environment = list2env(lst(method_descriptions, tasks, metric_names, method_params)), qsub_config = PRISM::override_qsub_config(memory = "10G", execute_before=c("module load python/x86_64/3.5.1")))
+# })
+}, qsub_environment = list2env(lst(method_descriptions, tasks, metric_names, method_params)), qsub_config = PRISM::override_qsub_config(memory = "10G", execute_before=c("module load python/x86_64/3.5.1")))
 ```
 
 Gather the output of the different methods, and check whether there were any errors
