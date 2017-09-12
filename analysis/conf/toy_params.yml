@@ -37,7 +37,9 @@ linear:
   mfa:
     b: 1
   dpt:
+  topslam:
   shuffled:
+
 branching:
   waterfall:
   scorpius:
@@ -76,4 +78,5 @@ branching:
   mfa:
     b: 2
   dpt:
+  topslam:
   shuffled:
