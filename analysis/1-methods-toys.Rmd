@@ -21,26 +21,9 @@ tasks <- tasks[1, ]
 
 We choose certain parameters for which we know that the method will find (or focus on finding) a linear trajectory, and will do this quickly
 ```{r}
-method_params <- list(
-  waterfall=list(),
-  scorpius=list(),
-  slingshot=list(),
-  gpfates=list(nfates=1),
-  stemid=list(clustnr=10, bootnr=10, pdishuf=10),
-  tscan=list(),
-  embeddr=list(nn_pct = 2),
-  celltree_gibbs=list(sd_filter = 0),
-  celltree_maptpx=list(sd_filter = 0),
-  celltree_vem=list(sd_filter = 0),
-  scuba=list(),
-  slicer = list(min_branch_len=50),
-  monocle_ddrtree=list(),
-  wishbone = list(branch=F),
-  pseudogp = list(iter=100, initialise_from="principal_curve"),
-  mpath = list(numcluster=6),
-  random_linear=list()
-)
+method_params <- yaml::yaml.load_file("conf/toy_params.yml")$linear
 method_names <- names(method_params)
+method_names <- c("topslam")
 
 method_descriptions <- map(method_names, ~get(paste0("description_", .))()) %>% set_names(method_names)
 
@@ -48,6 +31,7 @@ metric_names <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation",
 ```
 
 ```{r}
+# results <- PRISM::qsub_lapply(names(method_descriptions), function(method_name) {
 results <- purrr::map(method_names, function(method_name) {
   library(dyneval)
 
@@ -75,6 +59,7 @@ results <- purrr::map(method_names, function(method_name) {
   }
   )()
 })
+# }, qsub_environment = list2env(lst(method_descriptions, tasks, metric_names, method_params)), qsub_config = PRISM::override_qsub_config(memory = "10G", execute_before=c("module load python/x86_64/3.5.1")))
 ```
 
 Gather the output of the different methods, and check whether there were any errors
@@ -87,7 +72,7 @@ scores <- purrr::map(results, function(.) {
   )
 }) %>% bind_rows() %>% mutate(errored = !map_lgl(error, is.null), method_id=method_names) %>% dplyr::select(-contains("method_name1"))
 
-scores %>% saveRDS("data/derived_data/toy_method_scores.rds")
+scores %>% saveRDS("results/toy_method_scores.rds")
 ```
 
 ```{r}
@@ -97,9 +82,10 @@ print(scores$error)
 ```
 
 
-```{r}
+```{r fig.height=10, fig.width=10}
 scores %>%
   dplyr::select(-starts_with("time")) %>%
-  gather(score_id, score, -method_name, -method_short_name, -task_id, -error, -warning) %>%
+  gather(score_id, score, -method_name, -method_short_name, -method_id, -task_id, -error, -warning, -model) %>%
+  filter(score_id %in% c("errored", "correlation", "robbie_network_score", "mean_R_nx")) %>% 
   ggplot() + geom_bar(aes(method_name, score, fill=score_id), stat="identity") + facet_wrap(~score_id) + coord_flip()
 ```

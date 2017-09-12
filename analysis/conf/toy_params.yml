@@ -1,0 +1,79 @@
+linear:
+  waterfall:
+  scorpius:
+  slingshot:
+  gpfates:
+    nfates: 1
+    log_expression_cutoff: 0
+  stemid:
+    clustnr: 10
+    bootnr: 10
+    pdishuf: 10
+  tscan:
+  embeddr:
+    nn_pct: 2
+  celltree_gibbs:
+    sd_filter: 0
+  celltree_maptpx:
+    sd_filter: 0
+  celltree_vem:
+    sd_filter: 0
+  scuba:
+  slicer:
+    min_branch_len: 50
+  monocle_ddrtree:
+  wishbone:
+    branch: FALSE
+  pseudogp:
+    iter: 100
+    initialise_from: principal_curve
+  mpath:
+    numcluster: 6
+  scoup:
+    nbranch: 1
+  slice:
+  ouija:
+  phenopath:
+  mfa:
+    b: 1
+  dpt:
+  shuffled:
+branching:
+  waterfall:
+  scorpius:
+  slingshot:
+  gpfates:
+    nfates: 2
+    log_expression_cutoff: 0
+  stemid:
+    clustnr: 10
+    bootnr: 10
+    pdishuf: 10
+  tscan:
+  embeddr:
+    nn_pct: 2
+  celltree_gibbs:
+    sd_filter: 0
+  celltree_maptpx:
+    sd_filter: 0
+  celltree_vem:
+    sd_filter: 0
+  scuba:
+  slicer:
+    min_branch_len: 50
+  monocle_ddrtree:
+  wishbone:
+    branch: TRUE
+  pseudogp:
+    iter: 100
+    initialise_from: principal_curve
+  mpath:
+    numcluster: 10
+  scoup:
+    nbranch: 2
+  slice:
+  ouija:
+  mfa:
+    b: 2
+  dpt:
+  shuffled:

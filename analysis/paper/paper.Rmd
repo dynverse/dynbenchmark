@@ -51,7 +51,7 @@ Here is a citation [@Marwick2017]
 # Results
 
 ```{r get-data}
-scores <- read_rds("../data/derived_data/toy_method_scores.rds")
+scores <- read_rds("../results/toy_method_scores.rds")
 
 scores %>%
   dplyr::select(-starts_with("time")) %>%
