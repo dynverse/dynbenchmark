@@ -15,5 +15,5 @@ services:
 
 before_install:
     # create & run container using our dockerfile, i.e. compile pkg and render Rmd to Word doc
-  - docker build -t dynalysis_base base_docker/
+  - docker build -t dynalysis_base scripts/base_docker/
   - docker build -t $REPO .
