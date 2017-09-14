@@ -50,7 +50,7 @@ toys_blueprint <- tribble(
   "cycle", "remove_cells",
   "cycle", "add_distant_edge"
 ) %>% 
-  # bind_rows(tibble(generator_id="linear", perturbator_id=paste0("switch_", percs * 100))) %>% 
+  bind_rows(tibble(generator_id="linear", perturbator_id=paste0("switch_", percs * 100))) %>%
   rowwise() %>% 
   mutate(
   generator=list(get(paste0("generate_", generator_id))),
