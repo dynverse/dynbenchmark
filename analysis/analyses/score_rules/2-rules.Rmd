@@ -4,6 +4,12 @@ output: html_document
 ---
 
 ```{r}
+library(tidyverse)
+library(dyneval)
+```
+
+
+```{r}
 scores <- read_rds("scores.rds")
 toys <- read_rds("toys.rds")
 timings <- read_rds("timings.rds")
@@ -125,7 +131,8 @@ scores2_summary <- scores2 %>% gather(score_id, score, -toy_id, -comparison) %>%
   spread(comparison, score) %>% mutate(
     score=`gs-toy`,
     diff= `gs-toy`-`gs-gs`,
-    frac=`gs-toy`/`gs-gs`
+    frac=`gs-toy`/`gs-gs`,
+    score_grouped = `gs_groupid-toy`
   ) %>% select(-`gs-toy`, -`gs-gs`) %>% left_join(toys, by="toy_id")
 
 # check whether a score follows a rule
@@ -147,12 +154,8 @@ rules %>% group_by(score_id) %>%
 
 ## Grouping cells
 ```{r}
-scores_summary %>% ggplot() + geom_point(aes(score, score_grouped, color=generator_id)) + facet_wrap(~score_id)
+check_grouping(scores_summary)
 
-scores_summary %>% group_by(score_id) %>% summarise(
-  cor = cor(score, score_grouped),
-  rms = sqrt(sum((score - score_grouped)^2)),
-  rms_shifted = sqrt(sum((score - mean(score) - score_grouped + mean(score_grouped))^2))
-)
+plot_grouping(scores_summary)
 ```
 

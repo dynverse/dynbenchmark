@@ -230,7 +230,7 @@ check_different_terminal_lengths <- function(scores_summary) {
     summarise(rule=all(diff < -1e-5))
 }
 
-# both position and structure
+# both position and structure ----------------------
 check_structure_and_position <- function(scores_summary) {
   scores_summary_both <- scores_summary %>%
     filter(perturbator_id %in% c("structure_and_position", "add_distant_edge", "switch_all_cells")) %>%
@@ -247,4 +247,19 @@ check_structure_and_position <- function(scores_summary) {
       rule = all(maxdiff <= meandiff/10)
     ) %>%
     select(-meandiff, -maxdiff)
+}
+
+
+# grouping -----------------------------
+check_grouping <- function(scores_summary) {
+  scores_summary %>% group_by(score_id) %>% summarise(
+    cor = cor(score, score_grouped),
+    rms = sqrt(sum((score - score_grouped)^2)),
+    cosine = sum(score*score_grouped)/sqrt(sum(score^2)*sum(score_grouped^2)),
+    rms_normalized = sqrt(sum((score - score_grouped)^2))/sd(score)
+  ) %>% mutate(rule = cor > 0.9)
+}
+
+plot_grouping <- function(scores_summary) {
+  scores_summary %>% ggplot() + geom_point(aes(score, score_grouped, color=perturbator_id, shape=generator_id)) + facet_wrap(~score_id)
 }
