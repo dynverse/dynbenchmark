@@ -10,8 +10,9 @@ linear:
     bootnr: 10
     pdishuf: 10
   tscan:
+    exprmclust_clusternum_lower: 10
   embeddr:
-    nn_pct: 2
+    nn_pct: 0
   celltree_gibbs:
     sd_filter: 0
   celltree_maptpx:
@@ -22,13 +23,15 @@ linear:
   slicer:
     min_branch_len: 50
   monocle_ddrtree:
+  monocle_pqtree:
   wishbone:
     branch: FALSE
   pseudogp:
-    iter: 100
+    iter: 50
     initialise_from: principal_curve
   mpath:
     numcluster: 6
+    distMethod: pearson
   scoup:
     nbranch: 1
   slice:
@@ -36,47 +39,6 @@ linear:
   phenopath:
   mfa:
     b: 1
-  dpt:
-  topslam:
-  shuffled:
-
-branching:
-  waterfall:
-  scorpius:
-  slingshot:
-  gpfates:
-    nfates: 2
-    log_expression_cutoff: 0
-  stemid:
-    clustnr: 10
-    bootnr: 10
-    pdishuf: 10
-  tscan:
-  embeddr:
-    nn_pct: 2
-  celltree_gibbs:
-    sd_filter: 0
-  celltree_maptpx:
-    sd_filter: 0
-  celltree_vem:
-    sd_filter: 0
-  scuba:
-  slicer:
-    min_branch_len: 50
-  monocle_ddrtree:
-  wishbone:
-    branch: TRUE
-  pseudogp:
-    iter: 100
-    initialise_from: principal_curve
-  mpath:
-    numcluster: 10
-  scoup:
-    nbranch: 2
-  slice:
-  ouija:
-  mfa:
-    b: 2
   dpt:
   topslam:
   shuffled:
