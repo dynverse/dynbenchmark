@@ -3,7 +3,7 @@ perturb_gs <- function(task) {
   task
 }
 
-# Switch cells
+## Switch cells
 perturb_switch_n_cells <- function(task, n=length(task$cell_ids)) {
   the_chosen_ones <- sample(task$cell_ids, n)
 
@@ -124,7 +124,9 @@ perturb_split_linear <- function(task) {
 # Make a trajectory hairy
 #task <- generate_linear()
 
-perturb_hairy <- function(task, nhairs=10) {
+perturb_hairy <- function(task, nhairs=10, overall_hair_length=1) {
+  if(overall_hair_length < 1) {stop("hair length should be larger than 1")}
+
   newmilestone_network <- task$milestone_network
   newprogressions <- task$progressions
 
@@ -151,7 +153,7 @@ perturb_hairy <- function(task, nhairs=10) {
       mutate(
         from = new_from,
         to = new_to,
-        percentage = (percentage - min(percentage)) / (window_end - window_start)
+        percentage = ((percentage - min(percentage)) / (window_end - window_start)) / overall_hair_length
       )
 
     subset_before <- (
@@ -186,7 +188,7 @@ perturb_hairy <- function(task, nhairs=10) {
       bind_rows(tibble(
         from = c(chosen_edge$from, new_from, new_from),
         to = c(new_from, new_to, chosen_edge$to),
-        length = chosen_edge$length * c(window_start, window_end - window_start, 1-window_end)
+        length = chosen_edge$length * c(window_start, window_end - window_start, 1-window_end) * overall_hair_length
       ))
   }
 
@@ -199,16 +201,14 @@ perturb_hairy <- function(task, nhairs=10) {
     progressions = newprogressions
   )
 
-  newtask$geodesic_dist <- compute_emlike_dist(newtask)
-
-  #dyneval::plot_default(task)
-  #dyneval::plot_default(newtask)
+  newtask$geodesic_dist <- dyneval:::compute_emlike_dist(newtask)
 
   newtask
 }
 
 perturb_hairy_small <- function(task) {perturb_hairy(task, nhairs=2)}
 perturb_hairy_large <- function(task) {perturb_hairy(task, nhairs=20)}
+# perturb_hairy_long <- function(task) {perturb_hairy(task, overall_hair_length = 2)}
 
 # Warping the times
 # very quick and dirty way to wrap, but it works :p
@@ -245,9 +245,33 @@ perturb_add_distant_edge <- function(task) {
   recreate_task(task)
 }
 
+## Change lengths
+# randomly change all lengths
+perturb_change_lengths <- function(task) {
+  task$milestone_network <- task$milestone_network %>%
+    mutate(length = runif(n()))
+  recreate_task(task)
+}
+
+# change lengths of only terminal edges, while keeping the distances constant
+perturb_change_terminal_lengths <- function(task) {
+  task$milestone_network <- task$milestone_network %>%
+    mutate(length = ifelse(to %in% from, length, length*2))
+  task$progressions <- task$progressions %>%
+    mutate(percentage = ifelse(to %in% from, percentage, percentage/2))
+  recreate_task(task)
+}
+
+
+## Perturb structure and position
+perturb_structure_and_position <- function(task) {
+  task <- perturb_switch_all_cells(task)
+  task <- perturb_add_distant_edge(task)
+  task
+}
+
 
 ### Some helper functions-------------------
-
 # Recreate task, forcing a reculaculation of geodesic distances
 recreate_task <- function(task) {
   task <- wrap_ti_prediction(
@@ -258,10 +282,31 @@ recreate_task <- function(task) {
     task$milestone_network,
     progression=task$progression
   )
-  task$geodesic_dist <- compute_emlike_dist(task)
+  task$geodesic_dist <- dyneval:::compute_emlike_dist(task)
 
   task
 }
 
 
 rename_toy <- function(task, toy_id) {task$id<-toy_id;task}
+
+# same task, but with the cell_percentages grouped at their maximal milestone, simulating the effect of a "marker-based" or "clustering-based" gold standard for real data
+group_task <- function(task) {
+  task$milestone_percentages <- task$milestone_percentages %>%
+    group_by(cell_id) %>%
+    arrange(-percentage) %>%
+    filter(row_number() == 1) %>%
+    mutate(percentage = 1) %>%
+    ungroup()
+
+  task <- wrap_ti_prediction(
+    task$ti_type,
+    task$id,
+    task$cell_ids,
+    task$milestone_ids,
+    task$milestone_network,
+    task$milestone_percentages
+  )
+  task$geodesic_dist <- dyneval:::compute_emlike_dist(task)
+  task
+}

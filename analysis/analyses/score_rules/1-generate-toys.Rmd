@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Generate toy datasets for comparing scores
 ```{r}
 library(tidyverse)
+library(dyneval)
 
 source("generation.R")
 source("perturbation.R")
@@ -30,13 +31,17 @@ toys_blueprint <- tribble(
   "linear", "hairy_large",
   "linear", "remove_cells",
   "linear", "add_distant_edge",
+  "linear", "structure_and_position",
   "bifurcating", "gs",
+  "bifurcating", "change_lengths",
+  "bifurcating", "change_terminal_lengths",
   "bifurcating", "switch_two_cells",
   "bifurcating", "switch_all_cells",
   "bifurcating", "warp",
   "bifurcating", "hairy",
   "bifurcating", "remove_cells",
   "bifurcating", "add_distant_edge",
+  "bifurcating", "structure_and_position",
   "cycle", "gs",
   "cycle", "switch_all_cells",
   "cycle", "break_cycles",
@@ -44,7 +49,8 @@ toys_blueprint <- tribble(
   "cycle", "hairy",
   "cycle", "remove_cells",
   "cycle", "add_distant_edge"
-) %>% bind_rows(tibble(generator_id="linear", perturbator_id=paste0("switch_", percs * 100))) %>% 
+) %>% 
+  # bind_rows(tibble(generator_id="linear", perturbator_id=paste0("switch_", percs * 100))) %>% 
   rowwise() %>% 
   mutate(
   generator=list(get(paste0("generate_", generator_id))),
@@ -73,6 +79,8 @@ toys$toy <- toys %>% split(seq_len(nrow(toys))) %>% parallel::mclapply(function(
 # toys$toy <- map2(toys$perturbator, toys$gs, ~.x(.y))
 toys$toy <- map2(toys$toy, toys$toy_id, ~rename_toy(.x, .y))
 
+toys$gs_grouped <- parallel::mclapply(toys$gs, group_task, mc.cores=8)
+
 # plot toys
 toyplots <- toys %>% group_by(toy_category) %>% filter(row_number()==1) %>%
   {split(., seq_len(nrow(.)))} %>% parallel::mclapply(function(row) dynplot::plot_strip_connections(row$gs[[1]], row$toy[[1]]), mc.cores = 8)
@@ -84,22 +92,44 @@ write_rds(toys, "toys.rds")
 toys <- read_rds("toys.rds")
 
 # get the scores when comparing the gs to toy
-metrics <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation", "isomorphic", "robbie_network_score", "mantel_pval")
 compare_toy <- function(gs, toy, id=toy$id) {
   scores <- dyneval:::calculate_metrics(gs, toy, metrics=metrics)$summary
   scores %>% mutate(toy_id=id)
 }
 
 # get the scores when both comparing gs to gs and comparing gs to toy
-compare_gs_toy <- function(gs, toy) {
+compare_gs_toy <- function(gs, toy, gs_grouped) {
   bind_rows(
     compare_toy(gs, toy) %>% mutate(comparison="gs-toy"),
-    compare_toy(gs, gs, id=toy$id) %>% mutate(comparison="gs-gs")
+    compare_toy(gs, gs, id=toy$id) %>% mutate(comparison="gs-gs"),
+    compare_toy(gs_grouped, toy) %>% mutate(comparison="gs_groupid-toy")
   )
 }
 
-scores <- toys %>% rowwise() %>% do(compare_gs_toy(.$gs, .$toy)) %>% select(-starts_with("time"))
+metrics <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation", "isomorphic", "robbie_network_score", "mantel_pval", "ged")
+
+results <- toys %>% rowwise() %>% do(compare_gs_toy(.$gs, .$toy, .$gs_grouped))# %>% select(-starts_with("time"))
+scores <- results %>% select(-starts_with("time"))
 
 write_rds(scores, "scores.rds")
 ```
+
+```{r}
+timings <- results %>% 
+  select(starts_with("time")) %>% 
+  rename_all(list(function(x) substring(x, 6))) %>% 
+  gather(metric_group_id, time) %>% 
+  group_by(metric_group_id) %>% 
+  summarise(time = mean(time))
+
+metric_groups <- c("mean_R_nx"="coranking", "auc_R_nx"="coranking", "Q_local"="coranking", "Q_global"="coranking", "correlation"="correlation", "isomorphic"="isomorphic", "robbie_network_score"="robbie_network_score", "mantel_pval"="mantel", "ged"="ged") %>%
+  enframe("metric_id", "metric_group_id")
+
+timings %>% 
+  left_join(metric_groups, by="metric_group_id") %>% 
+  write_rds("timings.rds")
+```
+
+
+
 
