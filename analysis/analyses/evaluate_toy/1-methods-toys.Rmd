@@ -11,13 +11,19 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(tidyverse)
-library(dyneval)
+library(dyntoy)
 
 set.seed(1)
 
-tasks <- generate_toy_datasets()
-tasks <- tasks[1, ]
+tasks <- generate_toy_datasets(num_cells=500)
+#tasks <- tasks[1, ]
 ```
+
+```{r}
+task <- dynutils::extract_row_to_list(tasks, 2)
+pheatmap::pheatmap(task$counts)
+```
+
 
 We choose certain parameters for which we know that the method will find (or focus on finding) a linear trajectory, and will do this quickly
 ```{r}

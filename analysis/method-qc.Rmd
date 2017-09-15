@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(googlesheets)
 library(cowplot)
+library(tidyverse)
 rules_info <- gs_title("Trajectory Inference Methods") %>% gs_read(skip=1)
 ```
 
@@ -43,6 +44,10 @@ ggplot(rules_info,aes(published,`QC score`))+
   geom_violin() +
   geom_point() +
   ggrepel::geom_text_repel(aes(label=Name))
+
+```
+
+```{r}
 
 ```
 

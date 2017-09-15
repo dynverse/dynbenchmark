@@ -260,6 +260,13 @@ check_grouping <- function(scores_summary) {
   ) %>% mutate(rule = cor > 0.9)
 }
 
+# equivalence relation ---------------------
+check_reflexivity <- function(scores_summary) {
+  scores_summary %>% group_by(score_id) %>% summarise(
+    rule = all(score == score_same)
+  )
+}
+
 plot_grouping <- function(scores_summary) {
   scores_summary %>% ggplot() + geom_point(aes(score, score_grouped, color=perturbator_id, shape=generator_id)) + facet_wrap(~score_id)
 }
