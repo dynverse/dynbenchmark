@@ -50,6 +50,20 @@ Here is a citation [@Marwick2017]
 
 # Results
 
+## Evaluation workflow
+Overview of methods...
+Overview of parameter optimalisation...
+Nicely illustrated using the toy datasets: Simpele toy datasets. Theoretische mogelijkheden van elke methode + bewijs van waarde van parameteroptimalisatie
+
+## Evaluation on synthetic data
+Initial evaluation..
+Robustness..
+Gegenereerde synthetische data. Parameter tuning voor echte data + initiële evaluatie (tot wat is de methode in staat) + robustness etc testing
+
+## Evaluation on real data
+Biological relevance..
+Echte data. Evaluatie (biologische relevantie van de methode)
+
 ```{r get-data}
 scores <- read_rds("../results/toy_method_scores.rds")
 

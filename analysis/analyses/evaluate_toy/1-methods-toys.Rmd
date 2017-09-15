@@ -1,0 +1,98 @@
+---
+title: "1-methods-toys"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Testing methods on simple toy datasets
+
+```{r}
+library(tidyverse)
+library(dyntoy)
+
+set.seed(1)
+
+tasks <- generate_toy_datasets(num_cells=500)
+#tasks <- tasks[1, ]
+```
+
+```{r}
+task <- dynutils::extract_row_to_list(tasks, 2)
+pheatmap::pheatmap(task$counts)
+```
+
+
+We choose certain parameters for which we know that the method will find (or focus on finding) a linear trajectory, and will do this quickly
+```{r}
+method_params <- yaml::yaml.load_file("conf/toy_params.yml")$linear
+method_names <- names(method_params)
+# method_names <- c("ouija", "slice")
+
+method_descriptions <- map(method_names, ~get(paste0("description_", .))()) %>% set_names(method_names)
+
+metric_names <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation", "isomorphic", "robbie_network_score")
+```
+
+```{r}
+results <- PRISM::qsub_lapply(names(method_descriptions), function(method_name) {
+# results <- purrr::map(method_names, function(method_name) {
+  library(dyneval)
+
+  cat("Processing ", method_name, "\n", sep="")
+  method <- method_descriptions[[method_name]]
+  params <- method_params[[method_name]]
+
+  factory <- function(fun) {
+    function(...) {
+      warn <- err <- NULL
+      res <- withCallingHandlers(
+        tryCatch(fun(...), error=function(e) {
+          err <<- conditionMessage(e)
+          NULL
+        }), warning=function(w) {
+          warn <<- append(warn, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        })
+      list(res, warn=warn, err=err, method_name=method_name)
+    }
+  }
+
+  factory(function() {
+    dyneval:::execute_evaluation(tasks, method, params, metrics = metric_names, suppress_output = F)
+  }
+  )()
+# })
+}, qsub_environment = list2env(lst(method_descriptions, tasks, metric_names, method_params)), qsub_config = PRISM::override_qsub_config(memory = "10G", execute_before=c("module load python/x86_64/3.5.1"), wait=F))
+```
+
+Gather the output of the different methods, and check whether there were any errors
+```{r}
+results <- PRISM::qsub_retrieve(results)
+scores <- purrr::map(results, function(.) {
+  bind_cols(
+    tibble(error=list(.$err), warning=list(.$warning), model=list(attr(.[[1]], "extras")$.models[[1]])),
+    attr(.[[1]], "extras")$.summary,
+    tibble(method_name=.$method_name)
+  )
+}) %>% bind_rows() %>% mutate(errored = !map_lgl(error, is.null), method_id=method_names) %>% dplyr::select(-contains("method_name1"))
+
+scores %>% saveRDS("results/toy_method_scores.rds")
+```
+
+```{r}
+scores %>% filter(errored)
+
+print(scores$error)
+```
+
+
+```{r fig.height=10, fig.width=10}
+scores %>%
+  dplyr::select(-starts_with("time")) %>%
+  gather(score_id, score, -method_name, -method_short_name, -method_id, -task_id, -error, -warning, -model) %>%
+  filter(score_id %in% c("errored", "correlation", "robbie_network_score", "mean_R_nx")) %>% 
+  ggplot() + geom_bar(aes(method_name, score, fill=score_id), stat="identity") + facet_wrap(~score_id) + coord_flip()
+```
