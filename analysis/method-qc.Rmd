@@ -1,6 +1,8 @@
 ---
 title: "method-qc"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -12,7 +14,27 @@ knitr::opts_chunk$set(echo = TRUE)
 library(googlesheets)
 library(cowplot)
 library(tidyverse)
-rules_info <- gs_title("Trajectory Inference Methods") %>% gs_read(skip=1)
+rules_info <- gs_title("Trajectory Inference Methods") %>% 
+  gs_read(ws = "Software", col_types = cols(GScholarClusterID = "c"), skip = 1)
+```
+
+Update number of citations
+```{r}
+# script_file <- "analysis/scholar.py"
+# download.file("https://raw.githubusercontent.com/ckreibich/scholar.py/master/scholar.py", destfile = script_file)
+
+num_citations_by_clusterid <- function(clusterid, scholar_file = script_file) {
+  tryCatch({
+    command <- paste0("python ", scholar_file, " -C ", clusterid, " --csv-header")
+    output <- system(command, intern = T)
+    tab <- readr::read_delim(paste(gsub("\n", " ", output), collapse = "\n"), delim = "|")
+    sum(tab$num_citations)
+  }, error = function(e) NA)
+}
+
+# If you're connected to UGentNet:
+# rules_info <- rules_info %>%
+#   mutate(Citations = pbapply::pbsapply(GScholarClusterID, num_citations_by_clusterid))
 ```
 
 
@@ -22,10 +44,12 @@ ggplot(rules_info,aes(log(Citations+1),`QC score`))+
   geom_point() +
   ggrepel::geom_label_repel(aes(label=Name))
 
-ggplot(rules_info,aes(log(Citations+1),`QC score`))+
+cit_breaks <- c(0, 1, 10, 100, max(rules_info$Citations))
+ggplot(rules_info,aes(Citations+1,`QC score`))+
   geom_smooth(method='lm',formula=y~x) +
   geom_point() +
-  ggrepel::geom_label_repel(aes(label=Name))
+  ggrepel::geom_label_repel(aes(label=Name)) +
+  scale_x_log10(breaks = cit_breaks+1, labels = cit_breaks)
 
 rules_info$date <- pmax(
   lubridate::as_date(lubridate::ymd(rules_info$PubDate)),
@@ -36,7 +60,8 @@ rules_info$date <- pmax(
 ggplot(rules_info,aes(date,`QC score`))+
   geom_smooth(method='lm',formula=y~x) +
   geom_point() +
-  ggrepel::geom_label_repel(aes(label=Name))
+  ggrepel::geom_label_repel(aes(label=Name)) +
+  scale_y_continuous(breaks = seq_len(10))
 
 rules_info$published <- !is.na(rules_info$PubDate)
   
