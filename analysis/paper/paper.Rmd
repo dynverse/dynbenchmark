@@ -55,6 +55,9 @@ Overview of methods...
 Overview of parameter optimalisation...
 Nicely illustrated using the toy datasets: Simpele toy datasets. Theoretische mogelijkheden van elke methode + bewijs van waarde van parameteroptimalisatie
 
+*Points to maybe raise*:
+- Some methods can handle different trajectories which are not directly described in the main paper: eg. circular trajectories (for a lot of principal curves algorithms using `periodic.lowess`), trees (for a lot of bifurcation methods)
+
 ## Evaluation on synthetic data
 Initial evaluation..
 Robustness..
