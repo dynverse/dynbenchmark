@@ -17,15 +17,15 @@ rules_info <- gs_title("Trajectory Inference Methods") %>% gs_read(skip=1)
 
 
 ```{r}
-ggplot(rules_info,aes(log(Citations+1),`QC score`))+
+ggplot(rules_info,aes(log(Citations+1), qc_score))+
   geom_smooth(method='lm',formula=y~x) +
   geom_point() +
-  ggrepel::geom_label_repel(aes(label=Name))
+  ggrepel::geom_label_repel(aes(label=name))
 
-ggplot(rules_info,aes(log(Citations+1),`QC score`))+
+ggplot(rules_info,aes(log(Citations+1), qc_score))+
   geom_smooth(method='lm',formula=y~x) +
   geom_point() +
-  ggrepel::geom_label_repel(aes(label=Name))
+  ggrepel::geom_label_repel(aes(label=name))
 
 rules_info$date <- pmax(
   lubridate::as_date(lubridate::ymd(rules_info$PubDate)),
@@ -33,21 +33,28 @@ rules_info$date <- pmax(
   na.rm=T
 )
 
-ggplot(rules_info,aes(date,`QC score`))+
+ggplot(rules_info,aes(date, qc_score))+
   geom_smooth(method='lm',formula=y~x) +
   geom_point() +
-  ggrepel::geom_label_repel(aes(label=Name))
+  ggrepel::geom_label_repel(aes(label=name))
 
 rules_info$published <- !is.na(rules_info$PubDate)
   
-ggplot(rules_info,aes(published,`QC score`))+
+ggplot(rules_info,aes(published, qc_score))+
   geom_violin() +
   geom_point() +
-  ggrepel::geom_text_repel(aes(label=Name))
+  ggrepel::geom_text_repel(aes(label=name))
 
 ```
 
+Different methods generate different kinds of output...
 ```{r}
-
+rules_info %>% filter(wrapper == "Done") %>% select(ids, output) %>% 
+  separate_rows(ids, sep=",") %>% 
+  separate_rows(output, sep=",") %>% 
+  mutate(output=trimws(output)) %>% 
+  ggplot() + 
+    geom_bar(aes(output)) +
+    coord_flip()
 ```
 
