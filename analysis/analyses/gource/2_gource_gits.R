@@ -1,32 +1,34 @@
 library(tidyverse)
 
-dyn_folders <- list.files("..", pattern = "dyn*")
-other_folders <- unlist(recursive = FALSE, lapply(c("methods/", "libraries/"), function(x) {
-  paste0(x, list.files(paste0("../", x)))
-}))
-gourced_folders <- c(dyn_folders, other_folders)
+gitlinks_folder <- "analysis/data/derived_data/gource/git_links/"
+output_folder <- "analysis/data/derived_data/gource/git_output"
 
-for (fold in gourced_folders) {
-  paste0(
-    "gource --output-custom-log analysis/data/derived_data/gource/output/",
-    gsub("/", "_", fold),
-    ".txt ../", fold
+gitmodules <- readr::read_lines("../.gitmodules") %>%
+  keep(~ grepl("submodule", .)) %>%
+  gsub(".*\"(.*)\".*", "\\1", .)
+
+unlink(gitlinks_folder, recursive = T)
+for (gitmodule in gitmodules) {
+  gource_output <- paste0(
+    output_folder, "/",
+    gsub("/", "_", gitmodule),
+    ".txt"
   )
+
+  dir.create(paste0(gitlinks_folder, gitmodule), recursive = T, showWarnings = F)
+  file.symlink(
+    normalizePath(paste0("../.git/modules/", gitmodule)),
+    paste0(gitlinks_folder, gitmodule, "/.git")
+  )
+  cmd <- paste0("gource --output-custom-log ", gource_output, " ", gitlinks_folder, gitmodule)
+  system(cmd)
+
+  read_lines(gource_output) %>%
+    gsub("(\\|[AMD]\\|)", paste0("\\1/", gitmodule), .) %>%
+    write_lines(gource_output)
 }
+unlink(gitlinks_folder, recursive = T)
 
-# echo Processing \1
-# cd \1; git pull
-# cd ~/Workspace/dynverse
-# gource --output-custom-log ../gource/\1.txt \1
-# sed -i -r "s~([^|]*)$~/\1\\1~" ../gource/\1.txt
+cmd <- paste0("gource --output-custom-log ", output_folder, "/dynverse.txt ..")
+system(cmd)
 
-# #!/bin/bash
-# # in dynverse folder
-# ls -1 -d dyn*/ methods/*/ libraries/*/ | sed 's#\(.*\)/#echo Processing \1; cd \1; git pull; cd ~/Workspace/dynverse; gource --output-custom-log ../gource/\1.txt \1; sed -i -r "s~([^|]*)$~/\1\\1~" ../gource/\1.txt#' | sh
-# cp dynvaria/drive/gource.txt ../gource/googledrive.txt
-# cd ../gource
-# cat *.txt libraries/*.txt methods/*.txt | sort -n | sed 's#Zouter#Wouter Saelens#' | grep "Robrecht Cannoodt\|Wouter Saelens\|Helena Todorov" > combined.out
-# #gource combined.out --user-image-dir avatar/
-#
-# gource -1920x1080 -s 3 combined.out --user-image-dir avatar/ -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -crf 1 -threads 0 -bf 0 gource.mp4
-#
