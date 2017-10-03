@@ -3,6 +3,7 @@
 .RData
 */data/derived_data/*
 */data/datasets/*
+*/data/datasets_preproc/*
 *log
 analysis_output.tar
 .rds
