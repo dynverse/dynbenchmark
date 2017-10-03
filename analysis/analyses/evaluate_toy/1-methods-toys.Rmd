@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 library(dyntoy)
+library(dyneval)
 
 set.seed(1)
 
@@ -27,7 +28,7 @@ pheatmap::pheatmap(task$counts)
 
 We choose certain parameters for which we know that the method will find (or focus on finding) a linear trajectory, and will do this quickly
 ```{r}
-method_params <- yaml::yaml.load_file("conf/toy_params.yml")$linear
+method_params <- yaml::yaml.load_file("toy_params.yml")$linear
 method_names <- names(method_params)
 # method_names <- c("ouija", "slice")
 
