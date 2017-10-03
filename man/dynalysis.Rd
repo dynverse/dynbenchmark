@@ -6,6 +6,10 @@
 \alias{dynalysis-package}
 \title{Easy installing and loading of the dynverse}
 \description{
-The 'dynalysis' is a set of packages with which to
+The 'dynverse' is a set of packages with which to
 evaluate trajectory inference methods for dynamic processes.
+}
+\details{
+The dynalysis package contains the code to generate/preprocess datasets, evaluate these datasets, and finally
+The code within this package can be run locally, but can also be run within a docker environment, for which the scripts are contained in the `scripts` folder.
 }

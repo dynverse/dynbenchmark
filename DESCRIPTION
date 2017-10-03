@@ -4,7 +4,7 @@ Version: 0.0.0.9000
 Authors@R: c(
   person("Yvan", "Saeys", email = "yvan.saeys@ugent.be", role = c("ths")),
   person("Robrecht", "Cannoodt", email="robrecht.cannoodt@gmail.com", role="aut"),
-  person("Wouter", "Saelens", email="wouter.saelens@ugent.be", role=c("cre", "aut")),
+  person("Wouter", "Saelens", email="wouter.saelens@gmail.com", role=c("cre", "aut")),
   person("Helena", "Todorov", email="helena.todorov@ugent.be", role="aut"))
 Description: This package contains the code to reproduce the main analyses of our paper "Comparison of methods for pseudo-temporal ordering of single-cell data"
   Using code from our other packages such as dyneval, dyngen and dynutils
@@ -22,7 +22,12 @@ URL: https://github.com/Zouter/dynalysis
 BugReports: https://github.com/Zouter/dynalysis/issues
 Suggests: testthat
 Imports: 
-  bookdown
+  bookdown,
+  dplyr,
+  tidyr,
+  tibble,
+  purrr,
+  ggplot2
 Remotes:
   rcannood/dynutils,
   rcannood/dyneval,
