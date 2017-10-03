@@ -12,7 +12,6 @@ Depends:
   R (>= 3.4.1),
   dynutils,
   dyntoy,
-  dynreal,
   dyneval,
   dyngen
 License: GPL-3
@@ -32,6 +31,5 @@ Remotes:
   rcannood/dynutils,
   rcannood/dyneval,
   Zouter/dyntoy,
-  Zouter/dynreal,
   Zouter/dyngen
 RoxygenNote: 6.0.1
