@@ -1,7 +1,7 @@
 .Rproj.user
 .Rhistory
 .RData
-*/data/*
+*/data/derived_data/*
 *log
 analysis_output.tar
 .rds

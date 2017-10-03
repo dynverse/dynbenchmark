@@ -2,27 +2,30 @@ Package: dynalysis
 Title: Analysis of "Comparison of methods for pseudo-temporal ordering of single-cell data"
 Version: 0.0.0.9000
 Authors@R: c(
-  person(
-    given="Data mining and modelling for biomedicine group, Ghent University", 
-    email = "yvan.saeys@ugent.be", 
-    role = c("cre")
-  ),
-  person("Robrecht", "Cannoodt", email="robrecht.cannoodt@ugent.be", role="aut"),
-  person("Wouter", "Saelens", email="wouter.saelens@ugent.be", role="aut"),
+  person("Yvan", "Saeys", email = "yvan.saeys@ugent.be", role = c("ths")),
+  person("Robrecht", "Cannoodt", email="robrecht.cannoodt@gmail.com", role="aut"),
+  person("Wouter", "Saelens", email="wouter.saelens@ugent.be", role=c("cre", "aut")),
   person("Helena", "Todorov", email="helena.todorov@ugent.be", role="aut"))
 Description: This package contains the code to reproduce the main analyses of our paper "Comparison of methods for pseudo-temporal ordering of single-cell data"
-  Using code from our other packages dyneval, dyngen and dynutils
-Depends: R (>= 3.4.1)
-License: MIT + file LICENSE
+  Using code from our other packages such as dyneval, dyngen and dynutils
+Depends: 
+  R (>= 3.4.1),
+  dynutils,
+  dyntoy,
+  dynreal,
+  dyneval,
+  dyngen
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 URL: https://github.com/Zouter/dynalysis
 BugReports: https://github.com/Zouter/dynalysis/issues
 Imports: 
-  bookdown,
-  dyngen,
-  dyneval
+  bookdown
 Remotes:
-  Zouter/dyngen,
-  rcannood/dyneval
+  rcannood/dynutils,
+  rcannood/dyneval,
+  Zouter/dyntoy,
+  Zouter/dynreal,
+  Zouter/dyngen
 RoxygenNote: 6.0.1
