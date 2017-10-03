@@ -4,13 +4,14 @@ author:
   - Robrecht Cannoodt
   - Wouter Saelens
   - Helena Todorov
+  - Yvan Saeys
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
     bookdown::html_document2:
     fig_caption: yes
     reference_docx: templates/template.docx
 bibliography: references.bib
-csl: journal-of-archaeological-science.csl
+csl: nature-methods.csl
 abstract: |
   Text of abstract
 keywords: |
