@@ -10,6 +10,7 @@
 #' @import tidyr
 #' @import tibble
 #' @import ggplot2
+#' @import readr
 #' @importFrom purrr %>% map set_names map_dbl map2_dbl
 #'
 #' @docType package

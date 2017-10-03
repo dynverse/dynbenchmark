@@ -26,7 +26,8 @@ Imports:
   tidyr,
   tibble,
   purrr,
-  ggplot2
+  ggplot2,
+  readr
 Remotes:
   rcannood/dynutils,
   rcannood/dyneval,
