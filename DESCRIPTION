@@ -9,7 +9,7 @@ Authors@R: c(
 Description: This package contains the code to reproduce the main analyses of our paper "Comparison of methods for pseudo-temporal ordering of single-cell data"
   Using code from our other packages such as dyneval, dyngen and dynutils
 Depends: 
-  R (>= 3.4.1),
+  R (>= 3.4.0),
   dynutils,
   dyntoy,
   dyneval,
