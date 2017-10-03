@@ -3,7 +3,7 @@
 #' The 'dynverse' is a set of packages with which to
 #' evaluate trajectory inference methods for dynamic processes.
 #'
-#' The dynalysis package contains the code to generate/preprocess datasets, evaluate these datasets, and finally
+#' The dynalysis package contains the code to generate/preprocess datasets, evaluate TI methods on these datasets, and finally wrap all results together in a scientific paper.
 #' The code within this package can be run locally, but can also be run within a docker environment, for which the scripts are contained in the `scripts` folder.
 #'
 #' @import dplyr
