@@ -30,7 +30,7 @@ process <- function(file, docname) {
   )
 }
 
-files <- list.files("analysis/data/raw_data/gource", full.names = T)
+files <- list.files("analysis/data/raw_data/gource/google_drive/", pattern = "*.xml", full.names = T)
 df <- files %>% map_df(function(fn) {
   output_name <- gsub("^.*/[0-9]*_([0-9A-Za-z\\.\\-]*)\\.xml$", "\\1", fn) %>% paste0("/google_drive/", .)
   process(fn, output_name)
