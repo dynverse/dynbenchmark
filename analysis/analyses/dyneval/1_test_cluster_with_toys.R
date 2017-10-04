@@ -36,8 +36,7 @@ benchmark_suite_submit(
   num_init_params = 16
 )
 
-outputs
-<- benchmark_suite_retrieve(derived_dir)
+outputs <- benchmark_suite_retrieve(derived_dir)
 
 succeeded <- outputs %>% list_as_tibble() %>% filter(!sapply(which_errored, any))
 
