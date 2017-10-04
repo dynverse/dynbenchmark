@@ -2,7 +2,7 @@ library(dynalysis)
 library(tidyverse)
 library(cowplot)
 
-derived_dir <- "analysis/data/derived_data/dyneval/1_test_cluster_with_toys/"
+derived_dir <- "analysis/data/derived_data/dyneval/2_test_cluster_with_moretoys/"
 
 # remove previous output
 # unlink(derived_dir, recursive=TRUE)
@@ -21,27 +21,27 @@ if (file.exists(tasks_file)) {
 }
 methods <- get_descriptions(as_tibble = T)
 
-# benchmark_suite_submit(
-#   tasks,
-#   task_group,
-#   task_fold,
-#   out_dir = derived_dir,
-#   methods = methods,
-#   metrics = c("correlation", "robbie_network_score"),
-#   timeout = 600,
-#   memory = "16G",
-#   num_cores = 2,
-#   num_iterations = 5,
-#   num_init_params = 16
-# )
+benchmark_suite_submit(
+  tasks,
+  task_group,
+  task_fold,
+  out_dir = derived_dir,
+  methods = methods,
+  metrics = c("correlation", "robbie_network_score"),
+  timeout = 600,
+  memory = "16G",
+  num_cores = 2,
+  num_iterations = 200,
+  num_init_params = 100
+)
 
-outputs <- benchmark_suite_retrieve(derived_dir)
-
-failed <- outputs %>% filter(which_errored)
-
-failed %>% filter(error != "job is still running")
-failed %>% filter(error != "job is still running") %>% extract_row_to_list(1) %>% .$error %>% cat
-
+# outputs <- benchmark_suite_retrieve(derived_dir)
+#
+# failed <- outputs %>% filter(which_errored)
+#
+# failed %>% filter(error != "job is still running")
+# failed %>% filter(error != "job is still running") %>% extract_row_to_list(1) %>% .$error %>% cat
+#
 # succeeded <- outputs %>% filter(!which_errored)
 #
 # time_df <- bind_rows(succeeded$eval_ind) %>% select(method_name, starts_with("time_")) %>% group_by(method_name) %>% summarise_all(mean) %>%
