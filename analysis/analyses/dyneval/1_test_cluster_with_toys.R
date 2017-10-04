@@ -11,9 +11,15 @@ derived_dir <- "analysis/data/derived_data/dyneval/1_test_cluster_with_toys/"
 dir.create(derived_dir, recursive = T)
 
 # easy test
-tasks <- generate_toy_datasets(num_replicates = 2)
-task_group <- rep("group", nrow(tasks))
-task_fold <- gsub(".*_", "", tasks$id) %>% as.integer()
+tasks_file <- paste0(derived_dir, "tasks.RData")
+if (file.exists(tasks_file)) {
+  load(tasks_file)
+} else {
+  tasks <- generate_toy_datasets(num_replicates = 2)
+  task_group <- rep("group", nrow(tasks))
+  task_fold <- gsub(".*_", "", tasks$id) %>% as.integer()
+  save(tasks, task_group, task_fold, file = tasks_file)
+}
 methods <- get_descriptions(as_tibble = T)
 
 benchmark_suite_submit(
@@ -30,7 +36,8 @@ benchmark_suite_submit(
   num_init_params = 16
 )
 
-outputs <- benchmark_suite_retrieve(derived_dir)
+outputs
+<- benchmark_suite_retrieve(derived_dir)
 
 succeeded <- outputs %>% list_as_tibble() %>% filter(!sapply(which_errored, any))
 
