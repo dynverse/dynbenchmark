@@ -33,6 +33,7 @@ benchmark_suite_submit(
   task_group,
   task_fold,
   out_dir = derived_dir,
+  save_r2g_to_outdir = TRUE,
   methods = methods,
   metrics = c("correlation", "robbie_network_score"),
   timeout = 600,
