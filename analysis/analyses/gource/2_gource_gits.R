@@ -1,7 +1,9 @@
 library(tidyverse)
 
 gitlinks_folder <- "analysis/data/derived_data/gource/git_links/"
-output_folder <- "analysis/data/derived_data/gource/git_output"
+output_folder <- "analysis/data/derived_data/gource/git_output/"
+
+dir.create(output_folder)
 
 gitmodules <- readr::read_lines("../.gitmodules") %>%
   keep(~ grepl("submodule", .)) %>%
