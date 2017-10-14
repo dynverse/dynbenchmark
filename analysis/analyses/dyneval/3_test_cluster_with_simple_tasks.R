@@ -40,8 +40,7 @@ benchmark_suite_submit(
   memory = "16G",
   num_cores = 1,
   num_iterations = 10,
-  num_init_params = 20,
-  save_r2g_to_outdir = TRUE
+  num_init_params = 20
 )
 
 # retrieve results
