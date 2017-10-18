@@ -225,4 +225,4 @@
 1507034906|Robrecht Cannoodt|D|/dynreal/tests/tests/test_datasets.R
 1507034906|Robrecht Cannoodt|D|/dynreal/tests/tests/test_score.R
 1507034906|Robrecht Cannoodt|D|/dynreal/tests/testthat.R
-1507034906|Robrecht Cannoodt|D|/dynreal
+1507034906|Robrecht Cannoodt|D|/dynreal/
