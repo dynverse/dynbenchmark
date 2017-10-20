@@ -1,11 +1,10 @@
 library(dynalysis)
 library(tidyverse)
-library(cowplot)
 
 derived_dir <- "analysis/data/derived_data/dyneval/2_test_cluster_with_moretoys/"
 
-# # # remove previous output
-# # unlink(derived_dir, recursive=TRUE)
+# # remove previous output
+# unlink(derived_dir, recursive=TRUE)
 
 dir.create(derived_dir, recursive = T)
 
@@ -19,7 +18,7 @@ if (file.exists(tasks_file)) {
   task_fold <- gsub(".*_", "", tasks$id) %>% as.integer()
   save(tasks, task_group, task_fold, file = tasks_file)
 }
-methods <- get_descriptions(as_tibble = T)
+methods <- get_descriptions(as_tibble = T) %>% arrange(desc(name == "shuffle"))
 
 # metrics <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation",
 #              "isomorphic", "ged", "robbie_network_score", "mantel_pval")
@@ -33,8 +32,8 @@ benchmark_suite_submit(
   save_r2g_to_outdir = TRUE,
   methods = methods,
   metrics = metrics,
-  timeout = 1200,
-  memory = "16G",
+  timeout = 120,
+  memory = "8G",
   num_cores = 2,
   num_iterations = 200,
   num_init_params = 100

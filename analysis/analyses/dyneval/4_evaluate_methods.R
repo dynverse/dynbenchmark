@@ -38,8 +38,8 @@ benchmark_suite_submit(
   save_r2g_to_outdir = TRUE,
   methods = methods,
   metrics = metrics,
-  timeout = 2400,
-  memory = "32G", # with more memory?
+  timeout = 1200,
+  memory = "16G", # with more memory?
   num_cores = 1,
   num_iterations = 500, # with less iterations?
   num_init_params = 100
