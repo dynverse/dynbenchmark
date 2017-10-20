@@ -4,14 +4,12 @@
 \alias{experiment}
 \title{Helper function for controlling experiments}
 \usage{
-experiment(dirname, description, code_block, auto_create_folders = TRUE)
+experiment(dirname, description, auto_create_folders = TRUE)
 }
 \arguments{
 \item{dirname}{Foldername for the experiment}
 
 \item{description}{TODO}
-
-\item{code_block}{A code block to execute}
 
 \item{auto_create_folders}{Automatically create folders
 when one of the file functions is called.}
