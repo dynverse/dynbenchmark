@@ -2,7 +2,6 @@
 #'
 #' @param dirname Foldername for the experiment
 #' @param description TODO
-#' @param code_block A code block to execute
 #' @param auto_create_folders Automatically create folders
 #'  when one of the file functions is called.
 #'
@@ -25,15 +24,12 @@
 #'   }
 #' )
 #' }
-experiment <- function(dirname, description, code_block, auto_create_folders = TRUE) {
-  # substitute code block to stop from executing
-  code_block <- substitute(code_block)
-
-  # get environment
-  env <- environment(code_block)
-
+experiment <- function(dirname, description, auto_create_folders = TRUE) {
   # check whether the working directory is indeed the dynalysis folder
   testthat::expect_match(getwd(), "/dynalysis/?$")
+
+  # get environment
+  env <- parent.env(environment())
 
   # create a few directories in which to store possible output
   scratch_dir <- glue::glue("analysis/data/derived_data/{dirname}/")
@@ -55,8 +51,5 @@ experiment <- function(dirname, description, code_block, auto_create_folders = T
   env$scratch_file <- auto_create_fun(scratch_dir)
   env$figure_file <- auto_create_fun(figure_dir)
   env$result_file <- auto_create_fun(result_dir)
-
-  # execute code block
-  eval(code_block, envir = env)
 }
 
