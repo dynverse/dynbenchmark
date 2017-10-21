@@ -2,9 +2,18 @@
 % Please edit documentation in R/experiment_setup.R
 \name{experiment}
 \alias{experiment}
+\alias{scratch_file}
+\alias{figure_file}
+\alias{result_file}
 \title{Helper function for controlling experiments}
 \usage{
 experiment(dirname, description, auto_create_folders = TRUE)
+
+scratch_file(...)
+
+figure_file(...)
+
+result_file(...)
 }
 \arguments{
 \item{dirname}{Foldername for the experiment}
@@ -13,6 +22,8 @@ experiment(dirname, description, auto_create_folders = TRUE)
 
 \item{auto_create_folders}{Automatically create folders
 when one of the file functions is called.}
+
+\item{...}{Strings that will be pasted together to create a filename}
 }
 \description{
 Helper function for controlling experiments

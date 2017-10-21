@@ -4,11 +4,14 @@
 #' @param description TODO
 #' @param auto_create_folders Automatically create folders
 #'  when one of the file functions is called.
+#' @param ... Strings that will be pasted together to create a filename
 #'
 #' @importFrom glue glue
 #' @importFrom lazyeval lazy_eval
 #' @importFrom testthat expect_match
 #' @export
+#'
+#' @rdname experiment
 #'
 #' @examples
 #' \dontrun{
@@ -28,28 +31,40 @@ experiment <- function(dirname, description, auto_create_folders = TRUE) {
   # check whether the working directory is indeed the dynalysis folder
   testthat::expect_match(getwd(), "/dynalysis/?$")
 
-  # get environment
-  env <- parent.env(environment())
+  # set option
+  options(dynalysis_experiment_folder = dirname)
+  options(dynalysis_experiment_autocreate = TRUE)
 
   # create a few directories in which to store possible output
   scratch_dir <- glue::glue("analysis/data/derived_data/{dirname}/")
   figure_dir <- glue::glue("analysis/figures/{dirname}/")
   result_dir <- glue::glue("analysis/results/{dirname}/")
-
-  # create a helper function
-  auto_create_fun <- function(path) {
-    function(...) {
-      if (!file.exists(path)) {
-        dir.create(path, recursive = TRUE)
-      }
-      paste(path, ..., collapse = "")
-    }
-  }
-  if (auto_create_folders) dir.create(c(scratch_dir, figure_dir, result_dir))
-
-  # create and expose functions
-  env$scratch_file <- auto_create_fun(scratch_dir)
-  env$figure_file <- auto_create_fun(figure_dir)
-  env$result_file <- auto_create_fun(result_dir)
 }
+
+# create a helper function
+auto_create_fun <- function(path) {
+  function(...) {
+    dynfold <- getOption("dynalysis_experiment_folder")
+    if (is.null(dynfold)) {
+      stop("No experiment folder found. Did you run experiment(...) yet?")
+    }
+    full_path <- paste0(path, "/", dynfold, "/")
+    if (getOption("dynalysis_experiment_autocreate") && !file.exists(full_path)) {
+      dir.create(full_path, recursive = TRUE)
+    }
+    paste(full_path, ..., collapse = "", sep = "")
+  }
+}
+
+#' @rdname experiment
+#' @export
+scratch_file <- auto_create_fun("analysis/data/derived_data")
+
+#' @rdname experiment
+#' @export
+figure_file <- auto_create_fun("analysis/figures")
+
+#' @rdname experiment
+#' @export
+result_file <- auto_create_fun("analysis/results")
 
