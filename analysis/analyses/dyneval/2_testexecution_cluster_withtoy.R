@@ -17,26 +17,26 @@ task <- extract_row_to_list(tasks, 1)
 
 metrics <- c("auc_R_nx", "correlation")
 parameters <- list()
-timeout <- 300
+timeout <- 600
 
 # run each method
-# outs <- PRISM::qsub_lapply(
-#   X = methods,
-#   qsub_packages = c("dyneval", "dynplot", "tidyverse", "dynutils"),
-#   qsub_config = PRISM::override_qsub_config(
-#     remove_tmp_folder = F,
-#     local_tmp_path = scratch_file("suite/"),
-#     name = "testexecution",
-#     memory = "16G"
-#   ),
-#   FUN = function(method) {
-#     score <- dyneval::execute_evaluation(tasks, method, parameters = parameters, metrics = metrics, timeout = timeout)
-#     summary <- attr(score,"extras")$.summary
-#     prediction <- attr(score,"extras")$.models[[1]]
-#     attr(score,"extras") <- NULL
-#     lst(method, score, summary, prediction)#, meth_plot, default_plot, strip_plot)
-#   })
-# saveRDS(outs, file = result_file("outs.rds"))
+outs <- PRISM::qsub_lapply(
+  X = methods,
+  qsub_packages = c("dyneval", "dynplot", "tidyverse", "dynutils"),
+  qsub_config = PRISM::override_qsub_config(
+    remove_tmp_folder = F,
+    local_tmp_path = scratch_file("suite/"),
+    name = "testexecution",
+    memory = "16G"
+  ),
+  FUN = function(method) {
+    score <- dyneval::execute_evaluation(tasks, method, parameters = parameters, metrics = metrics, timeout = timeout)
+    summary <- attr(score,"extras")$.summary
+    prediction <- attr(score,"extras")$.models[[1]]
+    attr(score,"extras") <- NULL
+    lst(method, score, summary, prediction)#, meth_plot, default_plot, strip_plot)
+  })
+saveRDS(outs, file = result_file("outs.rds"))
 outs <- readRDS(result_file("outs.rds"))
 
 plots <- pbapply::pblapply(seq_along(outs), function(i) {
