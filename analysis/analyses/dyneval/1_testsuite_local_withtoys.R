@@ -4,7 +4,7 @@ library(mlr)
 library(mlrMBO)
 
 experiment(
-  dirname = "dyneval/1_testsuite_with_toys",
+  dirname = "dyneval/1_testsuite_local_withtoys",
   description = "Testing whether each method is able to run locally",
   auto_create_folders = TRUE
 )
