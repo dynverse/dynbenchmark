@@ -3,7 +3,7 @@ library(tidyverse)
 library(dynplot)
 
 experiment(
-  dirname = "dyneval/0_testexecution_withtoy",
+  dirname = "dyneval/2_testexecution_cluster_withtoy",
   description = "Testing whether each method is able to run locally",
   auto_create_folders = TRUE
 )
@@ -20,27 +20,48 @@ parameters <- list()
 timeout <- 300
 
 # run each method
-outs <- pbapply::pblapply(methods, function(method) {
-  tryCatch({
-    score <- execute_evaluation(tasks, method, parameters = parameters, metrics = metrics, timeout = timeout)
-    summary <- attr(score,"extras")$.summary
-    prediction <- attr(score,"extras")$.models[[1]]
-    attr(score,"extras") <- NULL
+# outs <- PRISM::qsub_lapply(
+#   X = methods,
+#   qsub_packages = c("dyneval", "dynplot", "tidyverse", "dynutils"),
+#   qsub_config = PRISM::override_qsub_config(
+#     remove_tmp_folder = F,
+#     local_tmp_path = scratch_file("suite/"),
+#     name = "testexecution",
+#     memory = "16G"
+#   ),
+#   FUN = function(method) {
+#     score <- dyneval::execute_evaluation(tasks, method, parameters = parameters, metrics = metrics, timeout = timeout)
+#     summary <- attr(score,"extras")$.summary
+#     prediction <- attr(score,"extras")$.models[[1]]
+#     attr(score,"extras") <- NULL
+#     lst(method, score, summary, prediction)#, meth_plot, default_plot, strip_plot)
+#   })
+# saveRDS(outs, file = result_file("outs.rds"))
+outs <- readRDS(result_file("outs.rds"))
+
+plots <- pbapply::pblapply(seq_along(outs), function(i) {
+  cat(i, "\n", sep="")
+  method <- methods[[i]]
+  prediction <- outs[[i]]$prediction
+  if (!is.null(prediction)) {
     meth_plot <- method$plot_fun(prediction)
-    default_plot <- plot_default(prediction)
-    strip_plot <- plot_strip_connections(prediction, task)
-    lst(method, score, summary, prediction, meth_plot, default_plot, strip_plot)
-  }, error = function(e) NULL)
+    default_plot <- dyneval::plot_default(prediction)
+    strip_plot <- dynplot::plot_strip_connections(prediction, task)
+    lst(meth_plot, default_plot, strip_plot)
+  } else {
+    NULL
+  }
 })
-save(outs, file = result_file("outs.rds"))
 
 check_df <- seq_along(outs) %>% map_df(function(i) {
   method <- methods[[i]]
   outm <- outs[[i]]
+  plotm <- plots[[i]]
   data.frame(
     name = method$name,
-    failed = length(outm) == 0 && is.null(outm),
-    produced_ggplot = "ggplot" %in% class(outm$meth_plot),
+    failed = (length(outm) == 0 && is.null(outm)) || (length(outm$prediction) == 0 && is.null(outm$prediction)),
+    produced_ggplot = "ggplot" %in% class(plotm$meth_plot),
+    error = ifelse(is.null(outm$summary$error[[1]]), "", outm$summary$error[[1]][[1]]),
     stringsAsFactors = F
   )
 }) %>% as_data_frame()
@@ -95,12 +116,16 @@ timings <- summary %>%
 
 pdf(figure_file("2_timings.pdf"), 24, 16)
 ggplot(timings) +
-  geom_bar(aes(method_name_f, time, fill = part), stat = "identity") +
-  cowplot::theme_cowplot() +
+  geom_point(aes(method_name_f, time, colour = part), stat = "identity") +
+  theme_bw() +
   coord_flip() +
   facet_wrap(~part, nrow = 2, scales = "free") +
   labs(y = "Time (s)", x = NULL, title = paste0("Timings on \"", task$id, "\", containing a ", nrow(task$counts), "-by-", ncol(task$counts), " expression matrix")) +
-  scale_fill_brewer(palette = "Dark2")
+  scale_colour_brewer(palette = "Dark2") +
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  )
 dev.off()
 
 # scores
