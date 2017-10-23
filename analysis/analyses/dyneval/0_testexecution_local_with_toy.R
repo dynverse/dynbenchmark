@@ -1,7 +1,6 @@
 library(dynalysis)
 library(tidyverse)
 library(dynplot)
-library(glue)
 
 experiment(
   dirname = "dyneval/0_testexecution_withtoy",
