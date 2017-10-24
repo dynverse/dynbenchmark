@@ -17,7 +17,7 @@ task <- extract_row_to_list(tasks, 1)
 
 metrics <- c("auc_R_nx", "correlation")
 parameters <- list()
-timeout <- 300
+timeout <- 500
 
 # run each method
 outs <- pbapply::pblapply(methods, function(method) {
@@ -26,31 +26,43 @@ outs <- pbapply::pblapply(methods, function(method) {
     summary <- attr(score,"extras")$.summary
     prediction <- attr(score,"extras")$.models[[1]]
     attr(score,"extras") <- NULL
-    meth_plot <- method$plot_fun(prediction)
-    default_plot <- plot_default(prediction)
-    strip_plot <- plot_strip_connections(prediction, task)
-    lst(method, score, summary, prediction, meth_plot, default_plot, strip_plot)
+    lst(method, score, summary, prediction)
   }, error = function(e) NULL)
 })
 save(outs, file = result_file("outs.rds"))
 
+plots <- pbapply::pblapply(seq_along(outs), function(i) {
+  method <- methods[[i]]
+  prediction <- outs[[i]]$prediction
+  if (!is.null(prediction)) {
+    meth_plot <- method$plot_fun(prediction)
+    default_plot <- dyneval::plot_default(prediction)
+    strip_plot <- dynplot::plot_strip_connections(prediction, task)
+    lst(meth_plot, default_plot, strip_plot)
+  } else {
+    NULL
+  }
+})
+
 check_df <- seq_along(outs) %>% map_df(function(i) {
   method <- methods[[i]]
   outm <- outs[[i]]
+  plotm <- plots[[i]]
   data.frame(
     name = method$name,
-    failed = length(outm) == 0 && is.null(outm),
-    produced_ggplot = "ggplot" %in% class(outm$meth_plot),
+    failed = (length(outm) == 0 && is.null(outm)) || (length(outm$prediction) == 0 && is.null(outm$prediction)),
+    produced_ggplot = "ggplot" %in% class(plotm$meth_plot),
+    error = ifelse(is.null(outm$summary$error[[1]]), "", outm$summary$error[[1]][[1]]),
     stringsAsFactors = F
   )
 }) %>% as_data_frame()
 check_df %>% as.data.frame
 
 # rerun something
-# i <- 24
-# method <- methods[[i]]
-# score <- execute_evaluation(tasks, method, parameters = parameters, metrics = metrics, timeout = timeout)
-# summary <- attr(score,"extras")$.summary
+i <- 4
+method <- methods[[i]]
+score <- execute_evaluation(tasks, method, parameters = parameters, metrics = metrics, timeout = timeout)
+summary <- attr(score,"extras")$.summary
 # prediction <- attr(score,"extras")$.models[[1]]
 # attr(score,"extras") <- NULL
 # meth_plot <- method$plot_fun(prediction)
@@ -58,7 +70,7 @@ check_df %>% as.data.frame
 # outs[[i]] <- lst(method, score, summary, prediction, meth_plot, default_plot)
 # rerun stop
 
-plotlist <- outs[check_df$produced_ggplot] %>% map(~ .$meth_plot)
+plotlist <- plots[check_df$produced_ggplot] %>% map(~ .$meth_plot)
 num_plots <- length(plotlist)
 ncol <- ceiling(sqrt(num_plots))
 nrow <- ceiling(num_plots / ncol)
