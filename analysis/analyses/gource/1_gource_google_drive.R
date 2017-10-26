@@ -1,6 +1,12 @@
+library(dynverse)
 library(tidyverse)
 library(purrr)
 library(XML)
+
+experiment(
+  dirname = "gource",
+  description = "Making a movie of our business"
+)
 
 process <- function(file, docname) {
   data <- xmlParse(file)
