@@ -1,4 +1,10 @@
+library(dynverse)
 library(tidyverse)
+
+experiment(
+  dirname = "gource",
+  description = "Making a movie of our business"
+)
 
 gitlinks_folder <- "analysis/data/derived_data/gource/git_links/"
 output_folder <- "analysis/data/derived_data/gource/git_output/"
