@@ -3,6 +3,7 @@
 export(experiment)
 export(figure_file)
 export(load_dataset)
+export(raw_file)
 export(result_file)
 export(score_aggregation)
 export(score_milestone_connectivity)
