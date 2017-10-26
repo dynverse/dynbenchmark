@@ -62,6 +62,10 @@ scratch_file <- auto_create_fun("analysis/data/derived_data")
 
 #' @rdname experiment
 #' @export
+raw_file <- auto_create_fun("analysis/data/raw_data")
+
+#' @rdname experiment
+#' @export
 figure_file <- auto_create_fun("analysis/figures")
 
 #' @rdname experiment
