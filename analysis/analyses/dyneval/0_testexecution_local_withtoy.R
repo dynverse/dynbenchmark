@@ -17,11 +17,12 @@ task <- extract_row_to_list(tasks, 1)
 
 metrics <- c("auc_R_nx", "correlation")
 parameters <- list()
-timeout <- 500
+timeout <- 60
 
 # run each method
-outs <- pbapply::pblapply(methods, function(method) {
+outs <- pbapply::pblapply(seq_along(methods), function(mi) {
   tryCatch({
+    method <- methods[[mi]]
     score <- execute_evaluation(tasks, method, parameters = parameters, metrics = metrics, timeout = timeout)
     summary <- attr(score,"extras")$.summary
     prediction <- attr(score,"extras")$.models[[1]]
@@ -31,7 +32,7 @@ outs <- pbapply::pblapply(methods, function(method) {
 })
 save(outs, file = result_file("outs.rds"))
 
-plots <- pbapply::pblapply(seq_along(outs), function(i) {
+plots <- pbapply::pblapply(seq_along(outs), cl = 8, function(i) {
   method <- methods[[i]]
   prediction <- outs[[i]]$prediction
   if (!is.null(prediction)) {
@@ -59,7 +60,7 @@ check_df <- seq_along(outs) %>% map_df(function(i) {
 check_df %>% as.data.frame
 
 # rerun something
-i <- 4
+i <- 5
 method <- methods[[i]]
 score <- execute_evaluation(tasks, method, parameters = parameters, metrics = metrics, timeout = timeout)
 summary <- attr(score,"extras")$.summary
