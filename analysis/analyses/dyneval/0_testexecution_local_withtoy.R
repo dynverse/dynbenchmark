@@ -17,20 +17,21 @@ task <- extract_row_to_list(tasks, 1)
 
 metrics <- c("auc_R_nx", "correlation")
 parameters <- list()
-timeout <- 60
+timeout <- 600
 
 # run each method
-outs <- pbapply::pblapply(seq_along(methods), function(mi) {
-  tryCatch({
-    method <- methods[[mi]]
-    score <- execute_evaluation(tasks, method, parameters = parameters, metrics = metrics, timeout = timeout)
-    summary <- attr(score,"extras")$.summary
-    prediction <- attr(score,"extras")$.models[[1]]
-    attr(score,"extras") <- NULL
-    lst(method, score, summary, prediction)
-  }, error = function(e) NULL)
-})
-save(outs, file = result_file("outs.rds"))
+# outs <- pbapply::pblapply(seq_along(methods), function(mi) {
+#   tryCatch({
+#     method <- methods[[mi]]
+#     score <- execute_evaluation(tasks, method, parameters = parameters, metrics = metrics, timeout = timeout)
+#     summary <- attr(score,"extras")$.summary
+#     prediction <- attr(score,"extras")$.models[[1]]
+#     attr(score,"extras") <- NULL
+#     lst(method, score, summary, prediction)
+#   }, error = function(e) NULL)
+# })
+# saveRDS(outs, file = result_file("outs.rds"))
+outs <- readRDS(file = result_file("outs.rds"))
 
 plots <- pbapply::pblapply(seq_along(outs), cl = 8, function(i) {
   method <- methods[[i]]
@@ -60,16 +61,14 @@ check_df <- seq_along(outs) %>% map_df(function(i) {
 check_df %>% as.data.frame
 
 # rerun something
-i <- 5
-method <- methods[[i]]
-score <- execute_evaluation(tasks, method, parameters = parameters, metrics = metrics, timeout = timeout)
-summary <- attr(score,"extras")$.summary
+# i <- 27
+# method <- methods[[i]]
+# score <- execute_evaluation(tasks, method, parameters = parameters, metrics = metrics, timeout = timeout)
+# summary <- attr(score,"extras")$.summary
 # prediction <- attr(score,"extras")$.models[[1]]
 # attr(score,"extras") <- NULL
-# meth_plot <- method$plot_fun(prediction)
-# default_plot <- plot_default(prediction)
-# outs[[i]] <- lst(method, score, summary, prediction, meth_plot, default_plot)
-# rerun stop
+# outs[[i]] <- lst(method, score, summary, prediction)
+# rerun end
 
 plotlist <- plots[check_df$produced_ggplot] %>% map(~ .$meth_plot)
 num_plots <- length(plotlist)

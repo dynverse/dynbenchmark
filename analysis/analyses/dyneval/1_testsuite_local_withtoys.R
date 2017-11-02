@@ -10,16 +10,16 @@ experiment(
 )
 
 # trying all methods
-methods <- dyneval::get_descriptions(T) %>% filter(name == "shuffle")
+methods <- dyneval::get_descriptions(T) %>% filter(name == "SCORPIUS")
 
 # toys
 tasks <- dyntoy::toy_tasks[c(2,5),]
 task_group <- rep("group", nrow(tasks))
-task_fold <- gsub(".*_([0-9]*)$", "\\1", tasks$id) %>% as.integer
+task_fold <- tasks$replicate
 
 #metrics <- c("auc_R_nx", "correlation")
 metrics <- c("auc_R_nx")
-timeout <- 60
+timeout <- 600
 
 # start benchmark suite
 out <- benchmark_suite_submit(
@@ -32,9 +32,11 @@ out <- benchmark_suite_submit(
   metrics = metrics,
   timeout = timeout,
   memory = NA,
-  num_cores = 1,
-  num_iterations = 5,
+  num_cores = 8,
+  num_iterations = 10,
   num_repeats = 1,
-  num_init_params = 16,
+  num_init_params = 99,
   do_it_local = TRUE
 )
+
+plot(out[[1]][[1]]$tune_train)
