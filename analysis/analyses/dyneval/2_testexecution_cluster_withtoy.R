@@ -4,7 +4,7 @@ library(dynplot)
 
 experiment(
   dirname = "dyneval/2_testexecution_cluster_withtoy",
-  description = "Testing whether each method is able to run locally",
+  description = "Testing whether each method is able to run on the cluster",
   auto_create_folders = TRUE
 )
 

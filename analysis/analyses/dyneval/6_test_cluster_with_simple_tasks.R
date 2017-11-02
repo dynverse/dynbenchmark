@@ -12,6 +12,7 @@ dir.create(derived_dir, recursive = T)
 
 # preprocess tasks
 tasks <- load_datasets(8) # this function takes way too long due to the geodesic distances being calculated
+# dyngen_derived_dir <- "analysis/data/derived_data/dyngen/"
 saveRDS(tasks, paste0(dyngen_derived_dir, "tasks_v4.rds"))
 
 # load tasks
