@@ -79,7 +79,7 @@ check_df %>% as.data.frame
 # outs[[i]] <- lst(method, score, summary, prediction, meth_plot, default_plot)
 # rerun stop
 
-plotlist <- outs[check_df$produced_ggplot] %>% map(~ .$meth_plot)
+plotlist <- plots[check_df$produced_ggplot] %>% map(~ .$meth_plot)
 num_plots <- length(plotlist)
 ncol <- ceiling(sqrt(num_plots))
 nrow <- ceiling(num_plots / ncol)
