@@ -3,16 +3,22 @@ library(tidyverse)
 library(dynplot)
 
 experiment(
-  dirname = "dyneval/2_testexecution_cluster_withtoy",
-  description = "Testing whether each method is able to run on the cluster",
+  dirname = "dyneval/5_testexecution_cluster_withfewtasks",
+  description = "Testing whether each method is able to run on the cluster with a dyngen task",
   auto_create_folders = TRUE
 )
 
 # trying all methods
 methods <- dyneval::get_descriptions(F)
 
-# toys
-tasks <- dyntoy::toy_tasks[5,]
+# tasks
+tasks <- readRDS("analysis/data/derived_data/dyngen/tasks_v4.rds") %>%
+  filter(
+    platform_id == "fluidigm_c1",
+    takesetting_type == "snapshot",
+    ti_type == "consecutive_bifurcating",
+    model_replicate %in% c(1,2))
+
 task <- extract_row_to_list(tasks, 1)
 
 metrics <- c("auc_R_nx", "correlation")
@@ -20,23 +26,23 @@ parameters <- list()
 timeout <- 600
 
 # run each method
-outs <- PRISM::qsub_lapply(
-  X = methods,
-  qsub_packages = c("dyneval", "dynplot", "tidyverse", "dynutils"),
-  qsub_config = PRISM::override_qsub_config(
-    remove_tmp_folder = F,
-    local_tmp_path = scratch_file("suite/"),
-    name = "testexecution",
-    memory = "16G"
-  ),
-  FUN = function(method) {
-    score <- dyneval::execute_evaluation(tasks, method, parameters = parameters, metrics = metrics, timeout = timeout)
-    summary <- attr(score,"extras")$.summary
-    prediction <- attr(score,"extras")$.models[[1]]
-    attr(score,"extras") <- NULL
-    lst(method, score, summary, prediction)#, meth_plot, default_plot, strip_plot)
-  })
-saveRDS(outs, file = result_file("outs.rds"))
+# outs <- PRISM::qsub_lapply(
+#   X = methods,
+#   qsub_packages = c("dyneval", "dynplot", "tidyverse", "dynutils"),
+#   qsub_config = PRISM::override_qsub_config(
+#     remove_tmp_folder = F,
+#     local_tmp_path = scratch_file("suite/"),
+#     name = "testexecution",
+#     memory = "16G"
+#   ),
+#   FUN = function(method) {
+#     score <- dyneval::execute_evaluation(tasks, method, parameters = parameters, metrics = metrics, timeout = timeout)
+#     summary <- attr(score,"extras")$.summary
+#     prediction <- attr(score,"extras")$.models[[1]]
+#     attr(score,"extras") <- NULL
+#     lst(method, score, summary, prediction)#, meth_plot, default_plot, strip_plot)
+#   })
+# saveRDS(outs, file = result_file("outs.rds"))
 outs <- readRDS(result_file("outs.rds"))
 
 plots <- pbapply::pblapply(seq_along(outs), function(i) {
@@ -92,11 +98,12 @@ pdf(figure_file("1_multipleplots.pdf"), 24, 8.4)
 for (i in seq_along(outs)) {
   if (check_df$produced_ggplot[[i]]) {
     ou <- outs[[i]]
+    pl <- plots[[i]]
     ou_name <- ou$method$name
     g <- cowplot::plot_grid(
-      ou$meth_plot,
-      ou$default_plot,
-      ou$strip_plot,
+      pl$meth_plot,
+      pl$default_plot,
+      pl$strip_plot,
       nrow = 1
     )
     print(g)
@@ -104,7 +111,7 @@ for (i in seq_along(outs)) {
 }
 dev.off()
 
-summary <- outs %>% map_df(~ .$summary)
+summary <- outs %>% map_df(~ .$summary) %>% filter(task_id == "consecutive_bifurcating_1_snapshot_fluidigm_c1")
 
 # timings
 timings <- summary %>%
@@ -144,4 +151,3 @@ ggplot(scores) +
   labs(x = "Score", y = NULL, title = paste0("Scores of a single execution on \"", task$id, "\", using the default parameters")) +
   scale_fill_brewer(palette = "Dark2")
 dev.off()
-
