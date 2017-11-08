@@ -3,7 +3,7 @@ library(tidyverse)
 library(dynplot)
 
 experiment(
-  dirname = "dyneval/6_testsuite_cluster_withfewtasks",
+  dirname = "dyneval/7_testsuite_cluster_alltasks",
   description = "Testing whether each method is able to get optimised on the cluster with a dyngen task",
   auto_create_folders = TRUE
 )
@@ -15,14 +15,12 @@ methods <- dyneval::get_descriptions(F)
 tasks <- readRDS("analysis/data/derived_data/dyngen/tasks_v4.rds") %>%
   filter(
     platform_id == "fluidigm_c1",
-    takesetting_type == "snapshot",
-    ti_type == "consecutive_bifurcating",
-    model_replicate %in% c(1,2))
+    takesetting_type == "snapshot")
 
 # configure run
 task_group <- rep("group", nrow(tasks))
 task_fold <- tasks$model_replicate
-methods <- get_descriptions(as_tibble = T)
+methods <- get_descriptions(as_tibble = T) %>% arrange(desc(name == "shuffle"), name)
 
 #metrics <- c("auc_R_nx", "correlation")
 metrics <- "auc_R_nx"
