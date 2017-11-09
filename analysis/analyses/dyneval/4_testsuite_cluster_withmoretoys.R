@@ -42,6 +42,7 @@ benchmark_suite_submit(
 outputs <- benchmark_suite_retrieve(scratch_file("suite/"))
 
 save(outputs, file = result_file("outputs.RData"))
+load(file = result_file("outputs.RData"))
 
 outputs2 <- outputs %>%
   rowwise() %>%
@@ -94,7 +95,7 @@ best_summ_agg <- best_summ %>%
 # gathering the different metrics
 best_summ_agg_spr <- best_summ_agg %>% gather(metric, value, -method_name:-group_sel)
 
-meth_ord <- best_summ_agg %>% filter(fold_type == "train") %>% arrange(desc(auc_R_nx)) %>% .$method_name
+meth_ord <- best_summ_agg %>% filter(fold_type == "test") %>% arrange(desc(auc_R_nx)) %>% .$method_name
 
 # plot
 pdf(figure_file("all_scores.pdf"), 20, 15)
