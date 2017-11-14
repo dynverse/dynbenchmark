@@ -27,21 +27,21 @@ metrics <- "auc_R_nx"
 timeout <- 120
 
 # start benchmark suite
-benchmark_suite_submit(
-  tasks,
-  task_group,
-  task_fold,
-  out_dir = scratch_file("suite/"),
-  save_r2g_to_outdir = TRUE,
-  methods = methods,
-  metrics = metrics,
-  timeout = timeout,
-  memory = "16G",
-  num_cores = 4,
-  num_iterations =  100,
-  num_repeats = 1,
-  num_init_params = 100
-)
+# benchmark_suite_submit(
+#   tasks,
+#   task_group,
+#   task_fold,
+#   out_dir = scratch_file("suite/"),
+#   save_r2g_to_outdir = TRUE,
+#   methods = methods,
+#   metrics = metrics,
+#   timeout = timeout,
+#   memory = "16G",
+#   num_cores = 4,
+#   num_iterations =  100,
+#   num_repeats = 1,
+#   num_init_params = 100
+# )
 
 outputs <- benchmark_suite_retrieve(scratch_file("suite/"))
 
@@ -168,3 +168,5 @@ dev.off()
 errored <- outputs2 %>% filter(any_errored)
 
 errored$qsub_error[[1]]
+
+error_summ <- errored %>% group_by(method_name) %>% summarise(n = n(), errors = paste0(unlist(qsub_error), collapse="\n\n"))
