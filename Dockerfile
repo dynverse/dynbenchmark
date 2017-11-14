@@ -13,16 +13,17 @@ ENV R_MAX_NUM_DLLS 300
 # build package
 RUN . /etc/environment \
   && R -e "devtools::install_github('rcannood/dyneval')" \
+  && R -e "devtools::install_github('rcannood/dynmethods')" \
   && R -e "devtools::install('dynalysis')"
 
 RUN . /etc/environment \
   && R -e "library(dyneval);dyneval::check_dependencies()"
 
 RUN . /etc/environment \
-  && R -e "rmarkdown::render('dynalysis/analysis/1-methods-toys.Rmd')"
+  && R -e "rmarkdown::render('dynalysis/analysis/evaluate_toy/1-methods-toys.Rmd')"
 
 RUN . /etc/environment \
-  && R -e "rmarkdown::render('dynalysis/analysis/2-methods-plots.Rmd')"
+  && R -e "rmarkdown::render('dynalysis/analysis/evaluate_toy/2-methods-plots.Rmd')"
 
 # manuscript render
 RUN . /etc/environment \
