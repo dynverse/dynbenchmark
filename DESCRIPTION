@@ -10,10 +10,11 @@ Description: This package contains the code to reproduce the main analyses of ou
   Using code from our other packages such as dyneval, dyngen and dynutils
 Depends: 
   R (>= 3.4.0),
-  dynutils,
-  dyntoy,
   dyneval,
-  dyngen
+  dyngen,
+  dynmethods,
+  dyntoy,
+  dynutils
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -29,8 +30,9 @@ Imports:
   ggplot2,
   readr
 Remotes:
-  rcannood/dynutils,
   rcannood/dyneval,
+  rcannood/dynmethods,
+  rcannood/dynutils,
   Zouter/dyntoy,
   Zouter/dyngen
 RoxygenNote: 6.0.1
