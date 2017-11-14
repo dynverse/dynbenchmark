@@ -27,21 +27,21 @@ metrics <- "auc_R_nx"
 timeout <- 120
 
 # start benchmark suite
-benchmark_suite_submit(
-  tasks,
-  task_group,
-  task_fold,
-  out_dir = scratch_file("suite/"),
-  save_r2g_to_outdir = TRUE,
-  methods = methods,
-  metrics = metrics,
-  timeout = timeout,
-  memory = "16G",
-  num_cores = 4,
-  num_iterations =  100,
-  num_repeats = 1,
-  num_init_params = 100
-)
+# benchmark_suite_submit(
+#   tasks,
+#   task_group,
+#   task_fold,
+#   out_dir = scratch_file("suite/"),
+#   save_r2g_to_outdir = TRUE,
+#   methods = methods,
+#   metrics = metrics,
+#   timeout = timeout,
+#   memory = "16G",
+#   num_cores = 4,
+#   num_iterations =  100,
+#   num_repeats = 1,
+#   num_init_params = 100
+# )
 
 outputs <- benchmark_suite_retrieve(scratch_file("suite/"))
 
@@ -58,12 +58,13 @@ outputs2 <- outputs %>%
 
 
 # select only the runs that succeeded
-succeeded <- outputs2 %>% filter(!any_errored) %>% group_by(method_name) %>% filter(n() == 2) %>% ungroup()
+succeeded <- outputs2 %>% filter(!any_errored) %>% group_by(method_name) %>% filter(n() == 4) %>% ungroup()
 
 # bind the metrics of the individual runs
 eval_ind <-
   bind_rows(succeeded$individual_scores) %>%
-  left_join(tasks %>% select(task_id = id, ti_type), by = "task_id")
+  left_join(tasks %>% select(task_id = id, ti_type), by = "task_id") %>%
+  filter(!method_short_name %in% c("identity", "shuffle", "random"))
 
 # summarising at a global level
 summ <- eval_ind %>%
@@ -120,7 +121,7 @@ ggplot(mapping = aes(factor(method_name, levels = rev(meth_ord)), value, fill = 
   labs(
     x = NULL,
     y = "score",
-    title = paste0("Dyneval parameter optimisation on 2 in silico datasets\n100 initial, 100 iterations of 4 new parameters)\npoint = train score, bar = test score, cirle = score of default params on test data.")
+    title = paste0("Dyneval parameter optimisation on in silico datasets\n100 initial, 100 iterations of 4 new parameters)\npoint = train score, bar = test score, cirle = score of default params on test data.")
   )
 dev.off()
 
@@ -150,15 +151,22 @@ default_grp <- eval_ind %>%
 
 pdf(figure_file("by-ti-type_auc-R-nx.pdf"), 20, 15)
 ggplot(mapping = aes(factor(method_name, levels = rev(meth_ord)), value, fill = ti_type)) +
-  geom_bar(stat = "identity", data = grp %>% filter(fold_type == "test", metric == "auc_R_nx")) +
-  geom_point(data = best_grp %>% filter(fold_type == "train", metric == "auc_R_nx")) +
-  geom_point(data = default_grp %>% filter(fold_type == "test", metric == "auc_R_nx")) +
+  geom_bar(stat = "identity", data = best_grp %>% filter(fold_type == "test", metric == "auc_R_nx")) +
+  geom_point(aes(shape = "train"), data = best_grp %>% filter(fold_type == "train", metric == "auc_R_nx")) +
+  geom_point(aes(shape = "default param"), data = default_grp %>% filter(fold_type == "test", metric == "auc_R_nx")) +
   facet_wrap(~ti_type, scales = "free") +
   cowplot::theme_cowplot() +
   coord_flip() +
   labs(
     x = NULL,
     y = "auc_R_nx",
-    title = paste0("Dyneval parameter optimisation on 2 in silico datasets\n100 initial, 100 iterations of 4 new parameters)\npoint = train score, bar = test score, cirle = score of default params on test data.")
+    title = paste0("Dyneval parameter optimisation on in silico datasets\n100 initial, 100 iterations of 4 new parameters)\npoint = train score, bar = test score, cirle = score of default params on test data.")
   )
 dev.off()
+
+
+errored <- outputs2 %>% filter(any_errored)
+
+errored$qsub_error[[1]]
+
+error_summ <- errored %>% group_by(method_name) %>% summarise(n = n(), errors = paste0(unlist(qsub_error), collapse="\n\n"))
