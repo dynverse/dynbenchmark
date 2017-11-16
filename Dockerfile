@@ -8,7 +8,7 @@ MAINTAINER Robrecht Cannoodt <robrecht.cannoodt@ugent.be>
 COPY . dynalysis
 
 RUN . /etc/environment \
-  && R -e "library(dyneval);dyneval::check_dependencies()"
+  && R -e "library(dynmethods);dynmethods::check_dependencies()"
 
 RUN . /etc/environment \
   && R -e "rmarkdown::render('dynalysis/analysis/evaluate_toy/1-methods-toys.Rmd')"
