@@ -30,4 +30,4 @@ RUN . /etc/environment \
   && R -e "devtools::install_github('rcannood/dyneval', dependencies=TRUE, upgrade_dependencies=TRUE)" \
   && R -e "devtools::install_github('rcannood/dynmethods', dependencies=TRUE, upgrade_dependencies=TRUE)" \
   && R -e "devtools::install_github('Zouter/dyngen', dependencies=TRUE, upgrade_dependencies=TRUE)" \
-  && R -e "devtools::install('dynalysis')"
+  && R -e "devtools::install('dynalysis', dependencies=TRUE, upgrade_dependencies=TRUE)"
