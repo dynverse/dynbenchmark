@@ -18,8 +18,7 @@ RUN sudo apt-get install python3-tk -y # for pySCUBA
 
 RUN . /etc/environment \
   && sudo apt-get update \
-  && sudo apt-get install subversion -y \ # for devtools
-    # for dynmethods and dyneval
+  && sudo apt-get install subversion -y \
   && sudo apt-get install libudunits2-dev libgsl-dev libsdl1.2-dev libreadline-dev imagemagick libfftw3-dev libudunits2-dev -y
 
 # install some basic python packages used by all methods (do not have to be installed in individual virtual environments)
