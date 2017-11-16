@@ -6,7 +6,7 @@ env:
 
 sudo: required
 
-warnings_are_errors: false
+#warnings_are_errors: false
 
 language: generic
 
