@@ -10,7 +10,7 @@
 \usage{
 experiment(dirname, description, auto_create_folders = TRUE)
 
-scratch_file(...)
+derived_file(...)
 
 raw_file(...)
 
