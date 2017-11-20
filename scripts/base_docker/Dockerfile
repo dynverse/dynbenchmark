@@ -11,7 +11,7 @@ ENV R_MAX_NUM_DLLS 250
 RUN sudo apt-get update
 
 # install many python requirements, all else will be installed in virtual environments
-RUN sudo apt-get install python3-dev python3-pip -y
+RUN sudo apt-get install python2.7-dev python3-dev python3-pip -y
 RUN pip3 install virtualenv
 
 RUN sudo apt-get install python3-tk -y # for pySCUBA
