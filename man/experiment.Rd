@@ -4,7 +4,6 @@
 \alias{experiment}
 \alias{scratch_file}
 \alias{raw_file}
-\alias{dataset_file}
 \alias{figure_file}
 \alias{result_file}
 \title{Helper function for controlling experiments}
@@ -14,8 +13,6 @@ experiment(dirname, description, auto_create_folders = TRUE)
 scratch_file(...)
 
 raw_file(...)
-
-dataset_file(...)
 
 figure_file(...)
 
