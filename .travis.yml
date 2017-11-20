@@ -1,19 +1,7 @@
-# Build our Docker container and R pkg on Travis
-
-env:
-  global:
-  - REPO=dynalysis
-
 sudo: required
-
-#warnings_are_errors: false
-
 language: generic
-
 services:
   - docker
-
 before_install:
-    # create & run container using our dockerfile, i.e. compile pkg and render Rmd to Word doc
-  - docker build -t dynalysis_base scripts/base_docker/
-  - docker build -t $REPO .
+  - docker build -t dynalysis_base . --file scripts/base_docker/Dockerfile --build-arg GITHUB_PAT=$GITHUB_PAT
+  - docker build -t dynalysis .
