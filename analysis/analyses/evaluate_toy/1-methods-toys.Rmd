@@ -16,15 +16,23 @@ library(dyneval)
 
 set.seed(1)
 
-tasks <- generate_toy_datasets(num_cells=500)
-#tasks <- tasks[1, ]
+tasks <- generate_toy_datasets(num_replicates = 1, num_cells=300)
 ```
 
 ```{r}
+tasks$counts <- map(tasks$counts, function(counts) {
+  cbind2(counts, matrix(sample(1:100, nrow(counts)*100, replace=TRUE), nrow=nrow(counts))) %>% {magrittr::set_colnames(., paste0("G", 1:ncol(.)))}
+})
 task <- dynutils::extract_row_to_list(tasks, 2)
 pheatmap::pheatmap(task$counts)
-```
 
+source("~/thesis/projects/dynverse/dynmodular/dimred_wrappers.R")
+space <- task$counts %>% dimred_dp(2, neigen=2) %>% as.data.frame
+# space <- task$counts %>% dimred_mds(2) %>% as.data.frame
+# space <- task$counts %>% dimred_lle(2) %>% as.data.frame
+space <- space %>% bind_cols(task$cell_grouping %>% slice(match(rownames(task$counts), cell_id)))
+space %>%  ggplot() + geom_point(aes(Comp1, Comp2, color=group_id))
+```
 
 We choose certain parameters for which we know that the method will find (or focus on finding) a linear trajectory, and will do this quickly
 ```{r}
@@ -35,11 +43,13 @@ method_names <- names(method_params)
 method_descriptions <- map(method_names, ~get(paste0("description_", .))()) %>% set_names(method_names)
 
 metric_names <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation", "isomorphic", "robbie_network_score")
+
+method_names <- c("monocle_ddrtree", "scorpius")
 ```
 
 ```{r}
-results <- PRISM::qsub_lapply(names(method_descriptions), function(method_name) {
-# results <- purrr::map(method_names, function(method_name) {
+# results <- PRISM::qsub_lapply(names(method_descriptions), function(method_name) {
+results <- purrr::map(method_names, function(method_name) {
   library(dyneval)
 
   cat("Processing ", method_name, "\n", sep="")
@@ -62,25 +72,28 @@ results <- PRISM::qsub_lapply(names(method_descriptions), function(method_name) 
   }
 
   factory(function() {
-    dyneval:::execute_evaluation(tasks, method, params, metrics = metric_names, suppress_output = F)
+    dyneval:::execute_evaluation(tasks, method, params, metrics = metric_names, timeout = 99999999999999)
   }
   )()
-# })
-}, qsub_environment = list2env(lst(method_descriptions, tasks, metric_names, method_params)), qsub_config = PRISM::override_qsub_config(memory = "10G", execute_before=c("module load python/x86_64/3.5.1"), wait=F))
+})
+# }, qsub_environment = list2env(lst(method_descriptions, tasks, metric_names, method_params)), qsub_config = PRISM::override_qsub_config(memory = "10G", execute_before=c("module load python/x86_64/3.5.1"), wait=F))
 ```
 
 Gather the output of the different methods, and check whether there were any errors
 ```{r}
-results <- PRISM::qsub_retrieve(results)
+# results <- PRISM::qsub_retrieve(results)
 scores <- purrr::map(results, function(.) {
   bind_cols(
-    tibble(error=list(.$err), warning=list(.$warning), model=list(attr(.[[1]], "extras")$.models[[1]])),
-    attr(.[[1]], "extras")$.summary,
-    tibble(method_name=.$method_name)
-  )
-}) %>% bind_rows() %>% mutate(errored = !map_lgl(error, is.null), method_id=method_names) %>% dplyr::select(-contains("method_name1"))
+    tibble(
+      error=list(.$err), 
+      warning=list(.$warning), 
+      model=attr(.[[1]], "extras")$.models
+    ),
+    attr(.[[1]], "extras")$.summary
+  ) %>% mutate(method_name=.$method_name)
+}) %>% bind_rows() %>% mutate(errored = !map_lgl(error, is.null), method_id=rep(method_names, each=nrow(tasks))) %>% dplyr::select(-contains("method_name1"))
 
-scores %>% saveRDS("results/toy_method_scores.rds")
+# scores %>% saveRDS("results/toy_method_scores.rds")
 ```
 
 ```{r}
@@ -91,9 +104,10 @@ print(scores$error)
 
 
 ```{r fig.height=10, fig.width=10}
-scores %>%
+scores %>% left_join(tasks %>% select(id, ti_type), by=c("task_id"="id")) %>% 
   dplyr::select(-starts_with("time")) %>%
-  gather(score_id, score, -method_name, -method_short_name, -method_id, -task_id, -error, -warning, -model) %>%
+  gather(score_id, score, -method_name, -method_short_name, -method_id, -task_id, -error, -warning, -model, -ti_type) %>%
   filter(score_id %in% c("errored", "correlation", "robbie_network_score", "mean_R_nx")) %>% 
-  ggplot() + geom_bar(aes(method_name, score, fill=score_id), stat="identity") + facet_wrap(~score_id) + coord_flip()
+  ggplot() + geom_bar(aes(method_name, score, fill=score_id), stat="identity") + 
+  facet_grid(ti_type~score_id) + coord_flip()
 ```
