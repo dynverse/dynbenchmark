@@ -66,6 +66,10 @@ raw_file <- auto_create_fun("analysis/data/raw_data")
 
 #' @rdname experiment
 #' @export
+dataset_file <- auto_create_fun("analysis/data/datasets")
+
+#' @rdname experiment
+#' @export
 figure_file <- auto_create_fun("analysis/figures")
 
 #' @rdname experiment

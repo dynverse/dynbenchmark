@@ -14,9 +14,3 @@ PRISM:::rsync_remote(
   remote_dest = "",
   path_dest = paste0(getwd(), "/analysis/data/")
 )
-
-# load tasks from files
-.datasets_location <- scratch_file("4/")
-tasks <- dyngen::load_datasets()
-
-saveRDS(tasks, scratch_file("tasks_v4.rds"))
