@@ -15,15 +15,20 @@ linear:
     nn_pct: 0
   celltree_gibbs:
     sd_filter: 0
+    method: gibbs
   celltree_maptpx:
     sd_filter: 0
+    method: maptpx
   celltree_vem:
     sd_filter: 0
+    method: vem
   scuba:
   slicer:
     min_branch_len: 50
   monocle_ddrtree:
+    reduction_method: DDRTree
   monocle_pqtree:
+    reduction_method: ICA
   wishbone:
     branch: FALSE
   pseudogp:
