@@ -192,7 +192,7 @@ perturb_hairy <- function(task, nhairs=10, overall_hair_length=1) {
       ))
   }
 
-  newtask <- wrap_ti_prediction(
+  newtask <- dynutils::wrap_ti_prediction(
     task$ti_type,
     task$id,
     task$cell_ids,
@@ -201,7 +201,7 @@ perturb_hairy <- function(task, nhairs=10, overall_hair_length=1) {
     progressions = newprogressions
   )
 
-  newtask$geodesic_dist <- dyneval:::compute_emlike_dist(newtask)
+  newtask$geodesic_dist <- dynutils:::compute_emlike_dist(newtask)
 
   newtask
 }
@@ -274,7 +274,7 @@ perturb_structure_and_position <- function(task) {
 ### Some helper functions-------------------
 # Recreate task, forcing a reculaculation of geodesic distances
 recreate_task <- function(task) {
-  task <- wrap_ti_prediction(
+  task <- dynutils::wrap_ti_prediction(
     task$ti_type,
     task$id,
     task$cell_ids,
@@ -282,7 +282,7 @@ recreate_task <- function(task) {
     task$milestone_network,
     progression=task$progression
   )
-  task$geodesic_dist <- dyneval:::compute_emlike_dist(task)
+  task$geodesic_dist <- dynutils:::compute_emlike_dist(task)
 
   task
 }
@@ -299,7 +299,7 @@ group_task <- function(task) {
     mutate(percentage = 1) %>%
     ungroup()
 
-  task <- wrap_ti_prediction(
+  task <- dynutils::wrap_ti_prediction(
     task$ti_type,
     task$id,
     task$cell_ids,
@@ -307,6 +307,6 @@ group_task <- function(task) {
     task$milestone_network,
     task$milestone_percentages
   )
-  task$geodesic_dist <- dyneval:::compute_emlike_dist(task)
+  task$geodesic_dist <- dynutils:::compute_emlike_dist(task)
   task
 }
