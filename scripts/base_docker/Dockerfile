@@ -34,4 +34,4 @@ ENV GITHUB_PAT=$GITHUB_PAT
 RUN . /etc/environment && R -e "devtools::install_github('rcannood/dyneval', dependencies=TRUE, upgrade_dependencies=TRUE)"
 RUN . /etc/environment && R -e "devtools::install_github('rcannood/dynmethods', dependencies=TRUE, upgrade_dependencies=TRUE)"
 RUN . /etc/environment && R -e "devtools::install_github('Zouter/dyngen', dependencies=TRUE, upgrade_dependencies=TRUE)"
-RUN . /etc/environment && R -e "devtools::install_github('dynalysis', dependencies=TRUE, upgrade_dependencies=TRUE)"
+RUN . /etc/environment && R -e "devtools::install('dynalysis', dependencies=TRUE, upgrade_dependencies=TRUE)"
