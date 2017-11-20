@@ -34,11 +34,6 @@ experiment <- function(dirname, description, auto_create_folders = TRUE) {
   # set option
   options(dynalysis_experiment_folder = dirname)
   options(dynalysis_experiment_autocreate = TRUE)
-
-  # create a few directories in which to store possible output
-  scratch_dir <- glue::glue("analysis/data/derived_data/{dirname}/")
-  figure_dir <- glue::glue("analysis/figures/{dirname}/")
-  result_dir <- glue::glue("analysis/results/{dirname}/")
 }
 
 # create a helper function
@@ -63,10 +58,6 @@ scratch_file <- auto_create_fun("analysis/data/derived_data")
 #' @rdname experiment
 #' @export
 raw_file <- auto_create_fun("analysis/data/raw_data")
-
-#' @rdname experiment
-#' @export
-dataset_file <- auto_create_fun("analysis/data/datasets")
 
 #' @rdname experiment
 #' @export
