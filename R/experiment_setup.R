@@ -53,7 +53,7 @@ auto_create_fun <- function(path) {
 
 #' @rdname experiment
 #' @export
-scratch_file <- auto_create_fun("analysis/data/derived_data")
+derived_file <- auto_create_fun("analysis/data/derived_data")
 
 #' @rdname experiment
 #' @export

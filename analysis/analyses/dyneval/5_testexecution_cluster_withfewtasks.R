@@ -31,7 +31,7 @@ timeout <- 600
 #   qsub_packages = c("dyneval", "dynplot", "tidyverse", "dynutils"),
 #   qsub_config = PRISM::override_qsub_config(
 #     remove_tmp_folder = F,
-#     local_tmp_path = scratch_file("suite/"),
+#     local_tmp_path = derived_file("suite/"),
 #     name = "testexecution",
 #     memory = "16G"
 #   ),
