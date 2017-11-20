@@ -1,5 +1,4 @@
-# get the base image, the rocker/verse has R, RStudio and pandoc
-FROM dynalysis_base
+FROM dynalysis_dependencies
 
 # required
 MAINTAINER Wouter Saelens <wouter.saelens@ugent.be>

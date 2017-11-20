@@ -3,5 +3,6 @@ language: generic
 services:
   - docker
 before_install:
-  - docker build -t dynalysis_base . --file scripts/base_docker/Dockerfile --build-arg GITHUB_PAT=$GITHUB_PAT
-  - docker build -t dynalysis .
+  - sh docker/run_env.sh
+  - sh docker/run_dependencies.sh
+  - sh docker/run_dynalysis.sh
