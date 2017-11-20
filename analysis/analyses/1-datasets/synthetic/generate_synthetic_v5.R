@@ -43,9 +43,10 @@ paramsets <- map(seq_len(nrow(updates)), function(row_id) {
   row <- dynutils::extract_row_to_list(updates, row_id)
   invoke(update_params, row)
 })
+# mutate <<- dplyr::mutate;filter <<- dplyr::filter
 
-# params <- paramsets[[1]]
-# params$experiment %>% list2env(.GlobalEnv)
+params <- paramsets[[1]]
+params$experiment %>% list2env(.GlobalEnv)
 
 # creating folder structure locally and remote
 folder <- "~/thesis/projects/dynverse/dynalysis/analysis/data/datasets/synthetic/v5/"
@@ -171,5 +172,7 @@ tasks <- map(seq_along(paramsets), function(params_i) {
 
   wrap_task(params, model, simulation, gs, experiment)
 })
+
+tasks <- dynutils::list_as_tibble(tasks)
 
 write_rds(tasks, "../dynalysis/analysis/data/datasets/synthetic/v5.rds")
