@@ -8,7 +8,7 @@ experiment(
 )
 
 # # remove previous output
-# unlink(scratch_file("suite/"), recursive = T, force = T)
+# unlink(derived_file("suite/"), recursive = T, force = T)
 
 # trying all methods
 methods <- dyneval::get_descriptions() #%>% filter(name == "shuffle")
@@ -27,7 +27,7 @@ benchmark_suite_submit(
   tasks,
   task_group,
   task_fold,
-  out_dir = scratch_file("suite/"),
+  out_dir = derived_file("suite/"),
   save_r2g_to_outdir = TRUE,
   methods = methods,
   metrics = metrics,
@@ -39,7 +39,7 @@ benchmark_suite_submit(
   num_init_params = 16
 )
 
-outputs <- benchmark_suite_retrieve(scratch_file("suite/"))
+outputs <- benchmark_suite_retrieve(derived_file("suite/"))
 
 outputs %>% rowwise() %>% mutate(memory = qacct$maxvmem) %>% ungroup() %>% View
 outputs$qsub_error[[1]][[1]] %>% cat
