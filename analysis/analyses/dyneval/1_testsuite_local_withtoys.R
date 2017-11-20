@@ -26,7 +26,7 @@ out <- benchmark_suite_submit(
   tasks,
   task_group,
   task_fold,
-  out_dir = scratch_file("suite/"),
+  out_dir = derived_file("suite/"),
   save_r2g_to_outdir = TRUE,
   methods = methods,
   metrics = metrics,
