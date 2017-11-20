@@ -2,7 +2,7 @@
 % Please edit documentation in R/experiment_setup.R
 \name{experiment}
 \alias{experiment}
-\alias{scratch_file}
+\alias{derived_file}
 \alias{raw_file}
 \alias{figure_file}
 \alias{result_file}
@@ -10,7 +10,7 @@
 \usage{
 experiment(dirname, description, auto_create_folders = TRUE)
 
-scratch_file(...)
+derived_file(...)
 
 raw_file(...)
 
