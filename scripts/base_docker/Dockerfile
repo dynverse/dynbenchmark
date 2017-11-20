@@ -21,12 +21,18 @@ RUN . /etc/environment \
   && sudo apt-get install subversion -y \
   && sudo apt-get install libudunits2-dev libgsl-dev libsdl1.2-dev libreadline-dev imagemagick libfftw3-dev libudunits2-dev -y
 
-# install some basic python packages used by all methods (do not have to be installed in individual virtual environments)
 RUN python3 -m pip install numpy matplotlib pandas six jinja2 python-dateutil pytz pyparsing cycler tqdm python-igraph rpy2 Cython scipy statsmodels sklearn seaborn
+
+# copy all local dynalysis files to docker
+COPY . dynalysis
+
+# set up github path, given by an argument in the docker build
+ARG GITHUB_PAT
+ENV GITHUB_PAT=$GITHUB_PAT
 
 # build package
 RUN . /etc/environment \
   && R -e "devtools::install_github('rcannood/dyneval', dependencies=TRUE, upgrade_dependencies=TRUE)" \
   && R -e "devtools::install_github('rcannood/dynmethods', dependencies=TRUE, upgrade_dependencies=TRUE)" \
   && R -e "devtools::install_github('Zouter/dyngen', dependencies=TRUE, upgrade_dependencies=TRUE)" \
-  && R -e "devtools::install(dependencies=TRUE, upgrade_dependencies=TRUE)"
+  && R -e "devtools::install('dynalysis', dependencies=TRUE, upgrade_dependencies=TRUE)"
