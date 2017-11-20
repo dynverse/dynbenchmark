@@ -31,7 +31,7 @@ timeout <- 120
 #   tasks,
 #   task_group,
 #   task_fold,
-#   out_dir = scratch_file("suite/"),
+#   out_dir = derived_file("suite/"),
 #   save_r2g_to_outdir = TRUE,
 #   methods = methods,
 #   metrics = metrics,
@@ -43,7 +43,7 @@ timeout <- 120
 #   num_init_params = 100
 # )
 
-outputs <- benchmark_suite_retrieve(scratch_file("suite/"))
+outputs <- benchmark_suite_retrieve(derived_file("suite/"))
 
 save(outputs, file = result_file("outputs.RData"))
 
