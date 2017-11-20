@@ -8,12 +8,12 @@ experiment(
 )
 
 # update the local dyngen datasets from what is stored on the prism
-# PRISM:::rsync_remote(
-#   remote_src = "prism",
-#   path_src = "/group/irc/shared/dyngen_results/4",
-#   remote_dest = "",
-#   path_dest = paste0(getwd(), "/", scratch_file())
-# )
+PRISM:::rsync_remote(
+  remote_src = "prism",
+  path_src = "/group/irc/shared/dynalysis/analysis/data/",
+  remote_dest = "",
+  path_dest = paste0(getwd(), "/analysis/data/")
+)
 
 # load tasks from files
 .datasets_location <- scratch_file("4/")
