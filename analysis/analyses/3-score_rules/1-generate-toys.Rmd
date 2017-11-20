@@ -3,10 +3,6 @@ title: "1-generate-toys"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ## Generate toy datasets for comparing scores
 ```{r}
 library(tidyverse)
