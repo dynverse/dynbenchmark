@@ -38,7 +38,8 @@ experiment <- function(dirname, description, auto_create_folders = TRUE) {
 
 # create a helper function
 auto_create_fun <- function(path) {
-  function(...) {
+  function(..., experiment_name=NULL) {
+    if (!is.null(experiment_name)) experiment(experiment_name, "")
     dynfold <- getOption("dynalysis_experiment_folder")
     if (is.null(dynfold)) {
       stop("No experiment folder found. Did you run experiment(...) yet?")
