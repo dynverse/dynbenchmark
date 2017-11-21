@@ -144,7 +144,7 @@ publication_cumulative_by_type_interpolated <- publication_cumulative_by_type_in
 # now we make the plot step-like, by adding an extra row just before every row with n_methods equal to the previous row
 publication_cumulative_by_type_interpolated <- publication_cumulative_by_type_interpolated %>%
   arrange(publication_type, publication_date) %>%
-  mutate(n_methods_cumulative = lag(n_methods_cumulative, 0.01), publication_date = publication_date - 0.1, counter=0, prefix=TRUE) %>%
+  mutate(n_methods_cumulative = lag(n_methods_cumulative, 1), publication_date = publication_date - 0.1, counter=0, prefix=TRUE) %>%
   drop_na(n_methods_cumulative) %>%
   bind_rows(publication_cumulative_by_type_interpolated) %>%
   arrange(publication_type, publication_date, n_methods_cumulative)
@@ -157,14 +157,15 @@ publication_cumulative_by_type_interpolated_text <- publication_cumulative_by_ty
   mutate(run = rle(n_methods_cumulative) %>% {rep(seq_along(.$lengths), .$lengths)}) %>%
   filter(counter == 1) %>%
   group_by(publication_type, n_methods_cumulative, run) %>%
-  summarise(name = paste0(name, collapse=" "), publication_date = min(publication_date))
+  summarise(name = paste0(name, collapse="   "), publication_date = min(publication_date))
 
 n_methods_over_time <- publication_cumulative_by_type_interpolated %>%
   ggplot() +
     geom_area(aes(publication_date, n_methods_cumulative, fill=publication_type), position="identity") +
-    geom_text(aes(publication_date + 1, n_methods_cumulative - 0.5, label=name, group=publication_type), data = publication_cumulative_by_type_interpolated_text, color="white", vjust=0.5, hjust=0, fontface = "bold")
-plot_area
-ggsave(figure_file("n_methods_over_time.png"), n_methods_over_time, width = 15, height = 8)
+    geom_text(aes(publication_date + 1, n_methods_cumulative - 0.5, label=name, group=publication_type), data = publication_cumulative_by_type_interpolated_text, color="white", vjust=0.5, hjust=0, fontface = "bold", size=3)
+n_methods_over_time
+# ggsave(figure_file("n_methods_over_time.png"), n_methods_over_time, width = 15, height = 8)
+saveRDS(n_methods_over_time, figure_file("n_methods_over_time.rds"))
 
 
 
@@ -184,7 +185,7 @@ platforms <- method_df %>% separate_rows(platform=platforms, sep=", ") %>%
     theme_void() +
     theme(legend.position="none")
 
-ggsave(figure_file("platforms.png"), platforms, width = 5, height = 5)
+# ggsave(figure_file("platforms.png"), platforms, width = 5, height = 5)
 
 
 # Prior information ----------------------------------
@@ -215,3 +216,56 @@ method_df_evaluated %>%
 # })
 #
 # cowplot::plot_grid(plotlist = prior_plots, nrow=1)
+
+
+# Trajectory components -------------------------------------------
+
+trajectory_components <- method_df_evaluated %>%
+  select(name, trajectory_components, date) %>%
+  mutate(
+    segment = stringr::str_detect(trajectory_components, "segment"),
+    fork = stringr::str_detect(trajectory_components, "fork"),
+    convergence = stringr::str_detect(trajectory_components, "convergence"),
+    n_forks = as.numeric(ifelse(fork, gsub(".*fork\\(.*,([0-9]|inf)\\)", "\\1", trajectory_components), NA)),
+    n_fork_paths = as.numeric(ifelse(fork, gsub(".*fork\\(([0-9]|inf),.*", "\\1", trajectory_components), NA)),
+    n_convergences = as.numeric(ifelse(convergence, gsub(".*convergence\\(.*,([0-9]|inf)\\)", "\\1", trajectory_components), NA)),
+    n_convergence_paths = as.numeric(ifelse(convergence, gsub(".*convergence\\(([0-9]|inf),.*", "\\1", trajectory_components), NA))
+  ) %>%
+  mutate(
+    linear = segment,
+    single_bifurcation = fork,
+    multiple_bifurcations = fork & n_forks > 1,
+    single_multifurcation = fork & n_fork_paths > 2,
+    multiple_multifurcations = multiple_bifurcations & single_multifurcation,
+    multiple_multifurcations_convergence =multiple_bifurcations & single_multifurcation & convergence
+  )
+
+trajectory_components <- trajectory_components %>%
+  arrange(date) %>%
+  mutate(count = 1)
+
+add_step <- function(df) {
+  df <- df %>%
+    mutate(date = date - 0.2, prefix=TRUE, count = 0) %>%
+    bind_rows(df)
+  df %>% arrange(date)
+}
+
+trajectory_components <- add_step(arrange(trajectory_components, date))
+trajectory_types <- c("linear", "single_bifurcation", "multiple_bifurcations", "single_multifurcation", "multiple_multifurcations", "multiple_multifurcations_convergence")
+
+trajectory_components_gathered <- trajectory_components %>%
+  gather(trajectory_type, can_trajectory_type, !!trajectory_types) %>%
+  mutate(trajectory_type = factor(trajectory_type, levels=trajectory_types)) %>%
+  group_by(trajectory_type) %>%
+  arrange(date) %>%
+  mutate(n_methods = cumsum(count), n_methods_oi = cumsum(count * can_trajectory_type))
+
+trajectory_components_over_time <- trajectory_components_gathered %>%
+  arrange(date) %>%
+  ggplot() +
+  geom_area(aes(date, n_methods), stat="identity") +
+  geom_area(aes(date, n_methods_oi, fill=trajectory_type), stat="identity") +
+  facet_grid(.~trajectory_type)
+
+saveRDS(trajectory_components_over_time, figure_file("trajectory_components_over_time.rds"))
