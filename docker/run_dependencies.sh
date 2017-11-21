@@ -1,1 +1,1 @@
-docker build -t dynalysis_dependencies . --file docker/Dockerfile_dependencies
+docker build -t dynalysis_dependencies . --file docker/Dockerfile_dependencies | tee log
