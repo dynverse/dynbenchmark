@@ -1,1 +1,1 @@
-docker build --no-cache -t dynalysis .
+docker build --no-cache -t dynalysis . | tee log
