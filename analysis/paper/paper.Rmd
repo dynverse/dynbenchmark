@@ -13,9 +13,9 @@ output:
 bibliography: references.bib
 csl: nature-methods.csl
 abstract: |
-  Text of abstract
+  Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cell differentiation. Dozens of trajectory inference methods have been developed, early methods mostly focussing on linear trajectories, while recently methods also model more complex branching trajectories. However, the performance of these methods have not yet been comprehensively evaluated. Here we compare a total of 22 trajectory inference methods, on both realistic synthetic datasets and a large set is real datasets. We employ a novel parameter optimisation procedure, and compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, as well as future . Our whole evaluation pipeline is fully reproducible and available at www.github.com/dynverse.
 keywords: |
-  keyword 1; keyword 2; keyword 3
+  trajectory inference; pseudotemporal ordering; single-cell transcriptomics
 highlights: |
   These are the highlights. 
 ---
@@ -38,10 +38,7 @@ library(tidyverse)
 ```
 
 # Introduction
-
-Here is a citation [@Marwick2017]
-
-# Background
+Single-cell omics technologies 
 
 ```{r demo, eval = FALSE}
 1 + 1
@@ -69,12 +66,6 @@ Biological relevance..
 Echte data. Evaluatie (biologische relevantie van de methode)
 
 ```{r get-data}
-scores <- read_rds("../results/toy_method_scores.rds")
-
-scores %>%
-  dplyr::select(-starts_with("time")) %>%
-  gather(score_id, score, -method_name, -method_short_name, -task_id, -error, -warning) %>%
-  ggplot() + geom_bar(aes(method_name, score, fill=score_id), stat="identity") + facet_wrap(~score_id) + coord_flip()
 ```
 
 # Discussion
