@@ -3,6 +3,8 @@
 dynalysis
 =========
 
+![travis](https://travis-ci.com/Zouter/dynalysis.svg?token=pzNqJjk3yapU1Hk7sDg8&branch=master)
+
 ![overview](analysis/figures/toy_method_plots/grid.png)
 
 The goal of dynalysis is to ...
@@ -11,7 +13,7 @@ The goal of dynalysis is to ...
 
 Please cite this compendium as:
 
-> Authors, (2017). *Title of compendium*. Accessed 07 Sep 2017. Online at <https://doi.org/xxx/xxx>
+> Authors, (2017). *Title of compendium*. Accessed 21 Nov 2017. Online at <https://doi.org/xxx/xxx>
 
 ### Installation
 

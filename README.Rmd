@@ -12,7 +12,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-# dynalysis
+# An evaluation framework for trajectory inference methods
+
+![travis](https://travis-ci.com/Zouter/dynalysis.svg?token=pzNqJjk3yapU1Hk7sDg8&branch=master)
 
 ![overview](analysis/figures/toy_method_plots/grid.png)
 
