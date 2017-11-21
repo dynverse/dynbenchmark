@@ -10,12 +10,6 @@ RUN . /etc/environment && R -e "devtools::install('dynalysis', dependencies=TRUE
 RUN . /etc/environment \
   && R -e "library(dynmethods);dynmethods::check_dependencies()"
 
-RUN . /etc/environment \
-  && R -e "rmarkdown::render('dynalysis/analysis/analyses/evaluate_toy/1-methods-toys.Rmd')"
-
-RUN . /etc/environment \
-  && R -e "rmarkdown::render('dynalysis/analysis/analyses/evaluate_toy/2-methods-plots.Rmd')"
-
 # manuscript render
 RUN . /etc/environment \
   && R -e "rmarkdown::render('dynalysis/analysis/paper/paper.Rmd')"
