@@ -1,8 +1,8 @@
 ---
-title: "Title Goes Here"
+title: "An evaluation framework for trajectory inference methods"
 author:
-  - Robrecht Cannoodt
-  - Wouter Saelens
+  - Robrecht Cannoodt*
+  - Wouter Saelens*
   - Helena Todorov
   - Yvan Saeys
 date: "`r format(Sys.time(), '%d %B, %Y')`"
@@ -13,46 +13,67 @@ output:
 bibliography: references.bib
 csl: nature-methods.csl
 abstract: |
-  Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cell differentiation. Dozens of trajectory inference methods have been developed, early methods mostly focussing on linear trajectories, while recently methods also model more complex branching trajectories. However, the performance of these methods have not yet been comprehensively evaluated. Here we compare a total of 22 trajectory inference methods, on both realistic synthetic datasets and a large set is real datasets. We employ a novel parameter optimisation procedure, and compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, as well as future . Our whole evaluation pipeline is fully reproducible and available at www.github.com/dynverse.
+  Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Dozens of trajectory inference methods have been developed, early methods mostly focussing on linear trajectories, while recently methods also model more complex branching trajectories. However, the performance of these methods have not yet been comprehensively evaluated. Here, we compare a total of 22 trajectory inference methods, on both realistic synthetic datasets and a large set is real datasets. We employ a novel parameter optimisation procedure, and compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our whole evaluation pipeline is fully reproducible, can be easily extended and is available at www.github.com/dynverse.
 keywords: |
   trajectory inference; pseudotemporal ordering; single-cell transcriptomics
 highlights: |
   These are the highlights. 
 ---
+\* Equal contribution
 
-
-<!-- This is the format for text comments that will be ignored during renderings. Do not put R code in these comments because it will not be ignored. -->
-
-```{r, setup, echo = FALSE, message=FALSE}
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 knitr::opts_chunk$set(
   collapse = TRUE,
   warning = FALSE,
   message = FALSE,
   echo = FALSE,
   comment = "#>",
-  fig.path = "../figures/"
+  fig.path = "analysis/figures/"
 )
 
 library(dynalysis)
 library(tidyverse)
+
+
+figs <- list()
+sfigs <- list()
 ```
 
 # Introduction
-Single-cell omics technologies 
+<!-- Three paragraph introduction, typical for Nat Biotech papers -->
+<!-- General into about single-cell & trajectories -->
+Single-cell -omics technologies now make it possible to more accuratly model biological systems than ever before. One area where single-cell data can be particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation. When cells are sampled from a population in which cells are at different unknown points in the dynamic process, trajectory inference methods can be used to computationally order these cells along their dynamic process [@cannoodt_computational_2016]. Offering an unbiased and transcriptome-wide understanding of the dynamic process, trajectories then allow the identification new (primed) subsets of cells, delineation the exact wiring of a differentiation tree and inference of regulatory interaction responsible for a bifurcation <!-- refs -->.
 
-```{r demo, eval = FALSE}
-1 + 1
-```
+<!-- Discussion of TI, history, different methods, brief future perspectives -->
+Dozens of trajectory inference methods have been developed over the last years, and more are being published almost every month. At first, most trajectory inference was done for linear trajectories, but several methods which can detect complex branching or cyclical behaviour 
+
+<!-- Context and general overview of our evaluation -->
+Given this plethora of available trajectory inference methods, 
+
+Trajectories can then be used to delineate the different stages in the dynamic process and their associated gene signatures <!-- REF -->,  
+
+
 
 # Methods
 
 # Results
-
 ## Evaluation workflow
-Overview of methods...
-Overview of parameter optimalisation...
-Nicely illustrated using the toy datasets: Simpele toy datasets. Theoretische mogelijkheden van elke methode + bewijs van waarde van parameteroptimalisatie
+### Method characterization
+```{r}
+# Load method characteristics
+method_df <- readRDS(derived_file("method_df.rds", experiment_name="method_characteristics"))
+```
 
+<!-- I would move some stuff from this paragraph to the supplementary if necessary -->
+We gathered a total of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods, and selected a subset of `r sum(!is.na(method_df$qc_score))` for evaluation, based on free availability and being able to be used within a programming context. We characterized the methods from both a computational and a user perspective. Computationally, methods use a variety of algorithms and subcomponents to reach a final ordering. However, most use a common framework consisting of three steps: (i) preprocessing (filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction or clustering and (iii) ordering the cells along the simplified representation. <!-- -> add supplementary information -->  We assessed the quality of the implementation of each method, using metrics looking at code availability, documentation, code style and extendability. We first contacted all the authors, to allow them to improve their method before publishing our evaluation. While most methods lack at several metrics, code quality tends to increase over time.
+
+### Data sources
+We used three different data sources 
+
+### Score metrics and parameter optimisation
+
+## Overall method comparison
 *Points to maybe raise*:
 - Some methods can handle different trajectories which are not directly described in the main paper: eg. circular trajectories (for a lot of principal curves algorithms using `periodic.lowess`), trees (for a lot of bifurcation methods)
 
@@ -74,9 +95,7 @@ Echte data. Evaluatie (biologische relevantie van de methode)
 
 # Acknowledgements
 
-# References 
-
-### Colophon
+# Colophon
 
 This report was generated on `r Sys.time()` using the following computational environment and dependencies: 
 
@@ -90,5 +109,7 @@ The current Git commit details are:
 ```{r}
 # what commit is this file at? You may need to change the path value
 # if your Rmd is not in analysis/paper/
-git2r::repository("../..")
+git2r::repository(".")
 ```
+
+# References 
