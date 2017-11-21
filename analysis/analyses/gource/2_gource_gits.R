@@ -1,4 +1,4 @@
-library(dynverse)
+library(dynalysis)
 library(tidyverse)
 
 experiment(
