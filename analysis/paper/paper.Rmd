@@ -55,26 +55,31 @@ create_names <- list(
 ```
 
 # Introduction
-<!-- Three paragraph introduction, typical for Nat Biotech papers -->
-<!-- General into about single-cell & trajectories -->
-Single-cell -omics technologies now make it possible to more accuratly model biological systems than ever before. One area where single-cell data can be particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation. When cells are sampled from a population in which cells are at different unknown points in the dynamic process, trajectory inference methods can be used to computationally order these cells along their dynamic process [@cannoodt_computational_2016]. Offering an unbiased and transcriptome-wide understanding of the dynamic process, trajectories then allow the identification new (primed) subsets of cells, delineation the exact wiring of a differentiation tree and inference of regulatory interaction responsible for a bifurcation<!-- refs -->.
 
-<!-- Discussion of TI, history, different methods, brief future perspectives -->
-Dozens of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially most trajectory inference was focused on linear trajectories, with one start and one end point. However, the prospect of branching trajectories was already described early [@trapnell_dynamics_2014], and about half of the current methods can handle one or more bifurcations in the trajectory (`r ref("sfig", "methods_over_time", "b")`). Some methods can already handle more complex, cyclical and branching behaviour, and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes hapening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
+
+Single-cell[a] -omics technologies now make it possible to more accurately model biological systems than ever before. One area where single-cell data can be particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation. When cells are sampled from a population in which cells are at different unknown points in the dynamic process, trajectory inference methods can be used to computationally order these cells along their dynamic process [@cannoodt_computational_2016]. Because they offer an unbiased and transcriptome-wide understanding of the dynamic process, trajectories then allow the identification new (primed) subsets of cells, delineation the exact wiring of a differentiation tree and inference of regulatory interaction responsible for a bifurcation refs.
+
 
 ```{r, fig.width = 15, fig.height = 10}
 n_methods_over_time <- readRDS(figure_file("n_methods_over_time.rds", experiment_name="method_characteristics"))
 trajectory_components_over_time <- readRDS(figure_file("trajectory_components_over_time.rds", experiment_name="method_characteristics"))
 
+
 cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over_time), nrow=2, rel_heights = c(0.7, 0.3), labels="auto")
 ```
-`r ref("sfig", "methods_over_time")` New TI methods over time. **a** Number of methods published or in preprint. **b** Number of methods which can handle a particular type of trajectory.
 
-<!-- Common framework of TI, different components, naturally progressing towards the need for an evaluation -->
-Although trajectory inference methods use a variety of algorithms and subcomponents to reach a final ordering, most consist of the following three steps: (i) preprocessing (filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction or clustering and (iii) ordering the cells along the simplified representation. These components are frequently interchangeable. Depending on the way the cells are ordered, some prior information about the dynamic process can also be required, or optional. <!---- TODO --->
 
-<!-- Context and general overview of our evaluation -->
-Given this plethora of available trajectory inference methods, it is important that methods are compared, so that users can use the most optimal method available for their problem. Moreover, new methods need to be rigorously tested, so that development can focus on improving the current state-of-the-art. In this study, we therefore for the first time developed a comprehensive evaluation framework for trajectory inference methods. We test both on synthetic data, for which the gold standard is known, and real data, for which in some cases the gold standard can be extracted from current knowledge. We include a rigorous parameter optimisation. To make our framework reusable and extendable, we make use of continuous analysis [@beaulieu-jones_reproducibility_2017], which allows the developers of new methods to easily test their methods and compare them against the state-of-the-art.
+`r ref("sfig", "methods_over_time", anchor=TRUE)` New TI methods over time. **a** Number of methods published or in preprint. **b** Number of methods which can handle a particular type of trajectory.
+
+
+Dozens[b] of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially most trajectory inference was focused on linear trajectories, with one start and one end point. However, the prospect of branching trajectories was already described early [@trapnell_dynamics_2014], and about half of the current methods can handle one or more bifurcations in the trajectory (`r ref("sfig", "methods_over_time", "b")`). Some methods can already handle more complex, cyclical and branching behaviour, and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes hapening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
+
+
+Although[c] trajectory inference methods use a variety of algorithms and subcomponents to reach a final ordering, most consist of the following three steps: (i) preprocessing (filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction or clustering and (iii) ordering the cells along the simplified representation. These components are frequently interchangeable. Depending on the way the cells are ordered, some prior information about the dynamic process can also be required, or optional. 
+
+
+Given[d] this plethora of available trajectory inference methods, it is important that methods are compared, so that users can use the most optimal method available for their problem. Moreover, new methods need to be rigorously tested, so that development can focus on improving the current state-of-the-art. In this study, we therefore for the first time developed a comprehensive evaluation framework for trajectory inference methods. We test both on synthetic data, for which the gold standard is known, and real data, for which in some cases the gold standard can be extracted from current knowledge. We include a rigorous parameter optimisation. To make our framework reusable and extendable, we make use of continuous analysis [@beaulieu-jones_reproducibility_2017], which allows the developers of new methods to easily test their methods and compare them against the state-of-the-art.
+
 
 # Results
 ## Evaluation workflow
@@ -84,48 +89,62 @@ Given this plethora of available trajectory inference methods, it is important t
 method_df <- readRDS(derived_file("method_df.rds", experiment_name="method_characteristics"))
 ```
 
-<!-- I would move some stuff from this paragraph to the supplementary if necessary -->
-We gathered a total of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods, and selected a subset of `r sum(!is.na(method_df$qc_score))` for evaluation, based on free availability and being able to be used within a programming context. We characterized the methods from both a computational and a user perspective.  <!-- -> add supplementary information -->  We assessed the quality of the implementation of each method, using metrics looking at code availability, documentation, code style and extendability. We first contacted all the authors, to allow them to improve their method before publishing our evaluation. While most methods lack at several metrics, code quality tends to increase over time.
+
+
+
+[e]
+We gathered a list of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(!is.na(method_df$qc_score))` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized the methods from both a computational and a user perspective. From a computational perspective, each method uses different interchangeable components We assessed the quality of the implementation of each method, using metrics looking at code availability, documentation, code style and extensibility. We first contacted all the authors, to allow them to improve their method before publishing our evaluation. While most methods lack at several metrics, code quality tends to increase over time.
+
 
 ### Data sources
 We used three different data sources 
 
+
 ### Score metrics and parameter optimisation
+
 
 ## Overall method comparison
 *Points to maybe raise*:
 - Some methods can handle different trajectories which are not directly described in the main paper: eg. circular trajectories (for a lot of principal curves algorithms using `periodic.lowess`), trees (for a lot of bifurcation methods)
+
 
 ## Evaluation on synthetic data
 Initial evaluation..
 Robustness..
 Gegenereerde synthetische data. Parameter tuning voor echte data + initiële evaluatie (tot wat is de methode in staat) + robustness etc testing
 
+
 ## Evaluation on real data
 Biological relevance..
 Echte data. Evaluatie (biologische relevantie van de methode)
 
-```{r get-data}
-```
 
 # Discussion
 
+
 # Conclusion
+
 
 # Online Methods
 
+
 # Acknowledgements
+
 
 # Colophon
 
+
 This report was generated on `r Sys.time()` using the following computational environment and dependencies: 
+
 
 ```{r colophon, cache = FALSE}
 # which R packages and versions?
 devtools::session_info()
 ```
 
+
 The current Git commit details are:
+
 
 ```{r}
 # what commit is this file at? You may need to change the path value
@@ -133,4 +152,12 @@ The current Git commit details are:
 git2r::repository(".")
 ```
 
+
 # References 
+
+
+[a]General info about single-cell & trajectories
+[b]History of TI, different methods
+[c]Common framework of TI, different components, naturally progressing towards the need for an evaluation
+[d]Context and general overview of our evaluation
+[e]I would move some stuff from this paragraph to supplementary if possible
