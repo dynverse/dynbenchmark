@@ -1,6 +1,6 @@
 #' Helper function for controlling experiments
 #'
-#' @param dirname Foldername for the experiment
+#' @param experiment_id id for the experiment
 #'
 #' @importFrom glue glue
 #' @importFrom lazyeval lazy_eval
@@ -23,14 +23,14 @@ experiment <- function(experiment_id) {
   dyn_fold <- get_dynalysis_folder()
 
   # set option
-  options(dynalysis_experiment_folder = experiment_id)
+  options(dynalysis_experiment_id = experiment_id)
 }
 
 # create a helper function
 experiment_subfolder <- function(path) {
   function(...) {
     dyn_fold <- get_dynalysis_folder()
-    exp_fold <- getOption("dynalysis_experiment_folder")
+    exp_id <- getOption("dynalysis_experiment_id")
 
     # check whether exp_fold could be found
     if (is.null(exp_fold)) {
@@ -38,7 +38,7 @@ experiment_subfolder <- function(path) {
     }
 
     # determine the full path
-    full_path <- paste0(dyn_fold, "/", path, "/", dynfold, "/")
+    full_path <- paste0(dyn_fold, "/", path, "/", exp_id, "/")
 
     # create if necessary
     dir.create(full_path, recursive = TRUE, showWarnings = FALSE)
