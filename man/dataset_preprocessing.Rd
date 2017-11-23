@@ -19,6 +19,8 @@ save_dataset(dataset)
 \item{prefix}{Dataset prefix}
 
 \item{dataset_id}{Dataset id}
+
+\item{...}{filenames}
 }
 \description{
 Helper function for creating new datasets

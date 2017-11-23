@@ -12,8 +12,6 @@ score_milestone_transitions(counts_grouped, milestone_ids, milestone_network)
 \item{milestone_ids}{vector of all milestones}
 
 \item{milestone_network}{data frame contain the milestone network}
-
-\item{perc}{Percentage of lowest distances to use between groups}
 }
 \description{
 Compare the known transitions of the milestone_network with all other possible transitions

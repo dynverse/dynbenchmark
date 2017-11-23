@@ -4,6 +4,10 @@
 #' @param milestone_ids vector of all milestones
 #' @param milestone_network data frame contain the milestone network
 #' @param perc Percentage of lowest distances to use between groups
+#'
+#' @importFrom SCORPIUS correlation_distance
+#' @importFrom reshape2 melt
+#'
 #' @export
 score_milestone_connectivity <- function(counts, cell_grouping, milestone_ids, milestone_network, perc=0.1) {
   distances <- SCORPIUS::correlation_distance(counts)
