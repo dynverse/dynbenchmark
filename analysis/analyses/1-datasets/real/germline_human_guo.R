@@ -7,7 +7,7 @@ source_info <- conquer_infos$germline_human_guo
 
 rds_location <- paste0("analysis/data/datasets_preproc/conquer/", source_info$rds_name, ".rds")
 if (!file.exists(rds_location)) {
-  download.file(paste0("http://imlspenticton.uzh.ch/robinson_lab/conquer/data-mae/", source_info$rds_name, ".rds"), rds_location, method="libcurl") # libcurl muuuuuuuuuch faster, usualy
+  download.file(paste0("http://imlspenticton.uzh.ch/robinson_lab/conquer/data-mae/", source_info$rds_name, ".rds"), rds_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
 }
 data <- read_rds(rds_location)
 
