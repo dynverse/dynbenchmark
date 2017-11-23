@@ -1,13 +1,10 @@
 library(dynalysis)
 library(tidyverse)
 
-experiment(
-  dirname = "gource",
-  description = "Making a movie of our business"
-)
+experiment("gource")
 
-gitlinks_folder <- "analysis/data/derived_data/gource/git_links/"
-output_folder <- "analysis/data/derived_data/gource/git_output/"
+gitlinks_folder <- derived_file("git_links/")
+output_folder <- derived_file("git_output/")
 
 dir.create(output_folder)
 
