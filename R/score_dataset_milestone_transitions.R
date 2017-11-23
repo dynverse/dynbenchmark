@@ -3,7 +3,6 @@
 #' @param counts_grouped grouped counts matrix
 #' @param milestone_ids vector of all milestones
 #' @param milestone_network data frame contain the milestone network
-#' @param perc Percentage of lowest distances to use between groups
 #' @export
 score_milestone_transitions <- function(counts_grouped, milestone_ids, milestone_network) {
   if (!all(milestone_ids %in% rownames(counts_grouped))) stop("Counts should be grouped according to the milestones")

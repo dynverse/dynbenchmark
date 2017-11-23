@@ -1,6 +1,10 @@
 #' Score milestone grouping
 #' @param counts counts matrix
 #' @param cell_grouping data frame contain cell groups
+#'
+#' @importFrom cluster silhouette
+#' @importFrom SCORPIUS correlation_distance
+#'
 #' @export
 score_milestone_grouping <- function(counts, cell_grouping) {
   if(nrow(counts) > 1000) {
