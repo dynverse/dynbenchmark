@@ -20,7 +20,6 @@ Encoding: UTF-8
 LazyData: true
 URL: https://github.com/Zouter/dynalysis
 BugReports: https://github.com/Zouter/dynalysis/issues
-Suggests: testthat
 Imports: 
   bookdown,
   dplyr,
@@ -28,7 +27,12 @@ Imports:
   tibble,
   purrr,
   ggplot2,
-  readr
+  readr,
+  testthat,
+  lazyeval,
+  SCORPIUS,
+  cluster,
+  reshape2
 Remotes:
   rcannood/dyneval,
   rcannood/dynmethods,

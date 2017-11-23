@@ -1,8 +1,8 @@
 #' Helper function for controlling experiments
 #'
 #' @param experiment_id id for the experiment
+#' @param ... filenames
 #'
-#' @importFrom glue glue
 #' @importFrom lazyeval lazy_eval
 #' @importFrom testthat expect_match
 #' @export
