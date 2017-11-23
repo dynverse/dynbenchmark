@@ -5,6 +5,8 @@ library(cowplot)
 
 experiment("method_characteristics")
 
+# Preprocessing the method_df file ---------------------------
+
 # # If it's your first time running this script, run this:
 # gs_auth()
 
@@ -37,6 +39,34 @@ method_df_evaluated <- method_df %>%
 write_rds(method_df, derived_file("method_df.rds"))
 write_rds(method_df_evaluated, derived_file("method_df_evaluated.rds"))
 
+# Trajectory components --------------------------
+trajectory_components <- method_df_evaluated %>%
+  select(name, trajectory_components, date) %>%
+  mutate(
+    segment = stringr::str_detect(trajectory_components, "segment"),
+    fork = stringr::str_detect(trajectory_components, "fork"),
+    convergence = stringr::str_detect(trajectory_components, "convergence"),
+    loop = stringr::str_detect(trajectory_components, "loop"),
+    n_forks = as.numeric(ifelse(fork, gsub(".*fork\\(.*,([0-9]|inf)\\).*", "\\1", trajectory_components), NA)),
+    n_fork_paths = as.numeric(ifelse(fork, gsub(".*fork\\(([0-9]|inf),.*", "\\1", trajectory_components), NA)),
+    n_convergences = as.numeric(ifelse(convergence, gsub(".*convergence\\(.*,([0-9]|inf)\\).*", "\\1", trajectory_components), NA)),
+    n_convergence_paths = as.numeric(ifelse(convergence, gsub(".*convergence\\(([0-9]|inf),.*", "\\1", trajectory_components), NA))
+  ) %>%
+  mutate(
+    linear = segment,
+    single_bifurcation = fork,
+    multiple_bifurcations = fork & n_forks > 1,
+    single_multifurcation = fork & n_fork_paths > 2,
+    multiple_multifurcations = multiple_bifurcations & single_multifurcation,
+    cyclic = loop,
+    multiple_multifurcations_convergence =multiple_bifurcations & single_multifurcation & convergence
+  )
+
+write_rds(trajectory_components, derived_file("trajectory_components.rds"))
+
+# Running the analyses ----------------------------
+method_df <- read_rds(derived_file("method_df.rds"))
+method_df_evaluated <- read_rds(derived_file("method_df_evaluated.rds"))
 
 # Comparing number of citations, qc score, and time -------------------------------------
 g1 <- ggplot(method_df_evaluated, aes(date, qc_score)) +
@@ -150,10 +180,27 @@ publication_cumulative_by_type_interpolated_text <- publication_cumulative_by_ty
   group_by(publication_type, n_methods_cumulative, run) %>%
   summarise(name = paste0(name, collapse="   "), publication_date = min(publication_date))
 
+publication_cumulative_text <- method_publication_data %>%
+  group_by(name) %>%
+  arrange(publication_date) %>%
+  filter(row_number() == 1) %>%
+  ungroup() %>%
+  mutate(n_methods_cumulative = seq_len(n()))
+
+
 n_methods_over_time <- publication_cumulative_by_type_interpolated %>%
   ggplot() +
     geom_area(aes(publication_date, n_methods_cumulative, fill=publication_type), position="identity") +
-    geom_text(aes(publication_date + 1, n_methods_cumulative - 0.5, label=name, group=publication_type), data = publication_cumulative_by_type_interpolated_text, color="white", vjust=0.5, hjust=0, fontface = "bold", size=3)
+    geom_text(
+      aes(publication_date + 1, n_methods_cumulative - 0.5, label=name, group=publication_type),
+      data = publication_cumulative_text,
+      color="white",
+      vjust=0.5,
+      hjust=0,
+      fontface = "bold",
+      size=3
+    ) +
+    theme(legend.position = c(0.05, 0.95), legend.background = element_rect(color = "black", fill = "white", size = 0.5, linetype = "solid"))
 n_methods_over_time
 # ggsave(figure_file("n_methods_over_time.png"), n_methods_over_time, width = 15, height = 8)
 saveRDS(n_methods_over_time, figure_file("n_methods_over_time.rds"))
@@ -175,16 +222,9 @@ platforms <- method_df %>% separate_rows(platform=platforms, sep=", ") %>%
     coord_polar("y") +
     theme_void() +
     theme(legend.position="none")
+saveRDS(n_methods_over_time, figure_file("platforms.rds"))
 
 # ggsave(figure_file("platforms.png"), platforms, width = 5, height = 5)
-
-
-# Prior information ----------------------------------
-method_df_evaluated %>%
-  gather(prior_id, prior, c(start, cell_grouping, timecourse, end, `number of branches`, `marker genes`), factor_key=TRUE) %>%
-  select(prior_id, prior, name) %>%
-  drop_na() %>%
-  ggplot() + geom_raster(aes(prior_id, name, fill = prior)) + geom_text(aes(prior_id, name, label=prior))
 
 #
 # prior_plots <- map(c("start", "cell_grouping", "timecourse", "end", "number of branches", "marker genes"), function(prior) {
@@ -209,27 +249,8 @@ method_df_evaluated %>%
 # cowplot::plot_grid(plotlist = prior_plots, nrow=1)
 
 
-# Trajectory components -------------------------------------------
-
-trajectory_components <- method_df_evaluated %>%
-  select(name, trajectory_components, date) %>%
-  mutate(
-    segment = stringr::str_detect(trajectory_components, "segment"),
-    fork = stringr::str_detect(trajectory_components, "fork"),
-    convergence = stringr::str_detect(trajectory_components, "convergence"),
-    n_forks = as.numeric(ifelse(fork, gsub(".*fork\\(.*,([0-9]|inf)\\)", "\\1", trajectory_components), NA)),
-    n_fork_paths = as.numeric(ifelse(fork, gsub(".*fork\\(([0-9]|inf),.*", "\\1", trajectory_components), NA)),
-    n_convergences = as.numeric(ifelse(convergence, gsub(".*convergence\\(.*,([0-9]|inf)\\)", "\\1", trajectory_components), NA)),
-    n_convergence_paths = as.numeric(ifelse(convergence, gsub(".*convergence\\(([0-9]|inf),.*", "\\1", trajectory_components), NA))
-  ) %>%
-  mutate(
-    linear = segment,
-    single_bifurcation = fork,
-    multiple_bifurcations = fork & n_forks > 1,
-    single_multifurcation = fork & n_fork_paths > 2,
-    multiple_multifurcations = multiple_bifurcations & single_multifurcation,
-    multiple_multifurcations_convergence =multiple_bifurcations & single_multifurcation & convergence
-  )
+# Trajectory components over time -------------------------------------------
+trajectory_components <- read_rds(derived_file("trajectory_components.rds"))
 
 trajectory_components <- trajectory_components %>%
   arrange(date) %>%
@@ -242,10 +263,10 @@ add_step <- function(df) {
   df %>% arrange(date)
 }
 
-trajectory_components <- add_step(arrange(trajectory_components, date))
-trajectory_types <- c("linear", "single_bifurcation", "multiple_bifurcations", "single_multifurcation", "multiple_multifurcations", "multiple_multifurcations_convergence")
+trajectory_components_step <- add_step(arrange(trajectory_components, date))
+trajectory_types <- c("linear", "single_bifurcation", "multiple_bifurcations", "single_multifurcation", "multiple_multifurcations", "cyclic", "multiple_multifurcations_convergence")
 
-trajectory_components_gathered <- trajectory_components %>%
+trajectory_components_gathered <- trajectory_components_step %>%
   gather(trajectory_type, can_trajectory_type, !!trajectory_types) %>%
   mutate(trajectory_type = factor(trajectory_type, levels=trajectory_types)) %>%
   group_by(trajectory_type) %>%
@@ -257,6 +278,103 @@ trajectory_components_over_time <- trajectory_components_gathered %>%
   ggplot() +
   geom_area(aes(date, n_methods), stat="identity") +
   geom_area(aes(date, n_methods_oi, fill=trajectory_type), stat="identity") +
-  facet_grid(.~trajectory_type)
+  facet_grid(.~trajectory_type) +
+  theme(legend.position = "none")
+
+trajectory_components_over_time
 
 saveRDS(trajectory_components_over_time, figure_file("trajectory_components_over_time.rds"))
+
+
+# Method aspects -------------------------------------------
+horizontal_lines <- geom_hline(aes(yintercept = seq_along(name)-0.5), alpha=0.2)
+method_order <- method_df_evaluated %>% arrange(qc_score) %>% pull(name)
+
+rotated_axis_text_x <- element_text(angle=45, hjust=1)
+
+base_theme <- theme(
+  plot.margin = unit(c(0, 0, 0, 0), "cm"),
+  axis.text.x=rotated_axis_text_x,
+  legend.position = "top",
+  legend.box = "horizontal"
+)
+empty_left_theme <- theme(
+  axis.text.y = element_blank(),
+  axis.title.y = element_blank(),
+  axis.line.y = element_blank(),
+  axis.ticks.y = element_blank()
+)
+# QC
+
+qcs <- c("code_availability", "documentation", "examples", "unit_tests", "behaviour", "code_quality", "support")
+
+score_max <- set_names(rep(1, length(qcs)), qcs)
+score_max[c("behaviour", "code_quality")] <- 0.5
+method_qc_individual <- method_df_evaluated %>%
+  select(name, !!qcs) %>%
+  gather(score_id, score, !!qcs, factor_key=TRUE) %>%
+  mutate(
+    score_text = ifelse(score == 0, "-", ifelse(score == score_max[score_id], "+", "~")),
+    score_fill = ifelse(score == 0, "#FF4136", ifelse(score == score_max[score_id], "#2ECC40", "#FF851B")),
+    name = factor(name, levels=method_order)
+  ) %>%
+  ggplot(aes(score_id, name)) +
+    geom_raster(aes(fill=score_fill)) +
+    scale_fill_identity() +
+    geom_text(aes(label = score_text), color="white", size=8, fontface = "bold") +
+    theme(axis.text.x=rotated_axis_text_x) +
+    base_theme +
+    horizontal_lines
+method_qc_individual
+
+method_qc_overall <- method_df_evaluated %>%
+  select(name, qc_score) %>%
+  mutate(name = factor(name, levels=method_order)) %>%
+  ggplot(aes("qc_score", name)) +
+    geom_raster(aes(fill = qc_score)) +
+    viridis::scale_fill_viridis(option="A", guide=guide_colorbar(direction = "horizontal")) +
+    base_theme +
+    empty_left_theme +
+    horizontal_lines
+method_qc_overall
+
+# Prior information
+prior_information <- method_df_evaluated %>%
+  gather(prior_id, prior, c(start, cell_grouping, timecourse, end, `number of branches`, `marker genes`), factor_key=TRUE) %>%
+  select(prior_id, prior, name) %>%
+  mutate(name = factor(name, levels=method_order)) %>%
+  drop_na() %>%
+  ggplot() +
+    geom_raster(aes(prior_id, name, fill = prior)) +
+  geom_text(aes(prior_id, name, label=ifelse(prior == "No", "-", prior))) +
+    scale_fill_manual(values=c("?" = "#AAAAAA", "No" = "#EEEEEE", "Yes" = "#FF4136", "CanUse" = "#0074D9", "CanRoot" = "#39CCCC")) +
+    base_theme +
+    empty_left_theme +
+    horizontal_lines
+prior_information
+
+saveRDS(n_methods_over_time, figure_file("n_methods_over_time.rds"))
+
+# Trajectory components
+trajectory_components <- readRDS(derived_file("trajectory_components.rds"))
+trajectory_types <- c("linear", "single_bifurcation", "multiple_bifurcations", "single_multifurcation", "multiple_multifurcations", "cyclic", "multiple_multifurcations_convergence")
+trajectory_components_plot <- trajectory_components %>%
+  gather(trajectory_type, can, !!trajectory_types, factor_key=TRUE) %>%
+  select(trajectory_type, can, name) %>%
+  mutate(name = factor(name, levels=method_order)) %>%
+  drop_na() %>%
+  ggplot() +
+    geom_raster(aes(trajectory_type, name, fill = factor(can * as.numeric(trajectory_type)))) +
+    scale_fill_manual(values = c("white", RColorBrewer::brewer.pal(8, name="Set2")), guide=FALSE) +
+    empty_left_theme +
+    base_theme +
+    empty_left_theme +
+    horizontal_lines
+trajectory_components_plot
+
+
+method_overview <- plot_grid(method_qc_individual, method_qc_overall, prior_information, trajectory_components_plot, nrow=1, align="h", rel_widths = c(0.8, 0.2, 0.8, 0.4), axis="bt")
+method_overview
+
+saveRDS(method_overview, figure_file("method_overview.rds"))
+
