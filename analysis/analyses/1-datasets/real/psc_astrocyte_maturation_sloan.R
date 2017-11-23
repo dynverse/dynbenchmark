@@ -5,7 +5,7 @@ txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE99951&for
 txt_location <- "analysis/data/datasets_preproc/GSE99951_all_data_htseq_out.csv"
 
 if (!file.exists(txt_location)) {
-  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usualy
+  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
 }
 
 geo <- GEOquery::getGEO("GSE99951", destdir="analysis/data/datasets_preproc/")

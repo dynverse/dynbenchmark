@@ -4,14 +4,14 @@ txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE71982&for
 count_location <- "analysis/data/datasets_preproc/GSE71982_RSEM_Counts_Matrix.txt.gz"
 
 if (!file.exists(count_location)) {
-  download.file(paste0(txt_web_location), count_location, method="libcurl") # libcurl muuuuuuuuuch faster, usualy
+  download.file(paste0(txt_web_location), count_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
 }
 
 txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE71982&format=file&file=GSE71982%5FP1%5FUtricle%5FPhenoData%2Etxt%2Egz"
 phenodata_location <- "analysis/data/datasets_preproc/GSE71982_P1_Utricle_PhenoData.txt.gz"
 
 if (!file.exists(phenodata_location)) {
-  download.file(paste0(txt_web_location), phenodata_location, method="libcurl") # libcurl muuuuuuuuuch faster, usualy
+  download.file(paste0(txt_web_location), phenodata_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
 }
 
 counts_all <- read_tsv(count_location)[-c(1, 2),] %>% column_to_rownames("X1") %>% as.matrix() %>% t
