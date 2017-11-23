@@ -28,7 +28,9 @@ Imports:
   tibble,
   purrr,
   ggplot2,
-  readr
+  readr,
+  testthat,
+  lazyeval
 Remotes:
   rcannood/dyneval,
   rcannood/dynmethods,

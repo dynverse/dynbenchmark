@@ -1,5 +1,4 @@
 library(tidyverse)
-library(glue)
 library(googlesheets)
 
 dataset_infos <- gs_title("Real datasets") %>%
@@ -23,17 +22,17 @@ dataset_docs <- parallel::mclapply(dataset_ids, function(dataset_id) {
 
   dataset_info <- dataset_infos %>% filter(id == dataset_id)
 
-  contains <- glue("`{names(dataset)}`") %>% paste0(collapse=", ")
+  contains <- pritt("`{names(dataset)}`") %>% paste0(collapse=", ")
 
   list(
-    glue("#' {dataset$info$id}"),
-    glue("#' "),
-    glue("#' Expression dataset of {nrow(dataset$expression)} cells and {ncol(dataset$expression)} features."),
-    glue("#' "),
-    glue("#' @format list containing {contains}"),
-    glue("#' @source dataset_info$gse"),
-    glue("\"{dataset_info$id}\""),
-    glue("")
+    pritt("#' {dataset$info$id}"),
+    pritt("#' "),
+    pritt("#' Expression dataset of {nrow(dataset$expression)} cells and {ncol(dataset$expression)} features."),
+    pritt("#' "),
+    pritt("#' @format list containing {contains}"),
+    pritt("#' @source dataset_info$gse"),
+    pritt("\"{dataset_info$id}\""),
+    pritt("")
   )
 }, mc.cores=8)
 
@@ -47,6 +46,6 @@ dataset_docs %>% unlist() %>% paste0(collapse="\n") %>% write("R/data.R")
 #   load(dataset_file)
 #   assign(dataset$info$id, dataset)
 #
-#   save(list=c(dataset$info$id), file=glue("data/{dataset$info$id}.rda"))
+#   save(list=c(dataset$info$id), file=pritt("data/{dataset$info$id}.rda"))
 # }, mc.cores=6)
 
