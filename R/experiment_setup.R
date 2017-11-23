@@ -2,7 +2,6 @@
 #'
 #' @param experiment_id id for the experiment
 #'
-#' @importFrom glue glue
 #' @importFrom lazyeval lazy_eval
 #' @importFrom testthat expect_match
 #' @export
