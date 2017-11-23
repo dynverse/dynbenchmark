@@ -3,7 +3,6 @@
 #' @param prefix Dataset prefix
 #' @param dataset_id Dataset id
 #'
-#' @importFrom glue glue
 #' @importFrom lazyeval lazy_eval
 #' @importFrom testthat expect_match
 #' @export
