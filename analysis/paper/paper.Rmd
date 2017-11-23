@@ -38,7 +38,7 @@ library(cowplot)
 
 # refering to figures & supplementary figures
 refs <- tibble(ref_id = character(), name = character(), ref_type = character())
-ref <- function(ref_type, ref_id, suffix="") {
+ref <- function(ref_type, ref_id, suffix="", anchor=FALSE) {
   if(nrow(refs %>% filter(ref_id == !!ref_id)) == 0) {
     refs <<- refs %>% bind_rows(tibble(
       name = create_names[[ref_type]](sum(refs$ref_type == ref_type) + 1),
@@ -46,14 +46,18 @@ ref <- function(ref_type, ref_id, suffix="") {
       ref_id = ref_id
     ))
   }
-  refs %>% filter(ref_id == !!ref_id) %>% pull(name) %>% paste0("**", ., suffix, "**")
+  ref <- refs %>% filter(ref_id == !!ref_id) %>% 
+    pull(name) %>% 
+    {glue::glue("[**{.}{suffix}**](#{ref_type}_{ref_id})")}
+  
+  if (anchor) ref <- glue::glue("{ref}<a name='{ref_type}_{ref_id}'></a>")
+  ref
 }
 create_names <- list(
   sfig = function(i) {glue::glue("Supplementary Figure {i}")},
   fig = function(i) {glue::glue("Figure {i}")}
 )
 ```
-
 # Introduction
 
 
@@ -72,7 +76,7 @@ cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over
 `r ref("sfig", "methods_over_time", anchor=TRUE)` New TI methods over time. **a** Number of methods published or in preprint. **b** Number of methods which can handle a particular type of trajectory.
 
 
-Dozens[b] of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially most trajectory inference was focused on linear trajectories, with one start and one end point. However, the prospect of branching trajectories was already described early [@trapnell_dynamics_2014], and about half of the current methods can handle one or more bifurcations in the trajectory (`r ref("sfig", "methods_over_time", "b")`). Some methods can already handle more complex, cyclical and branching behaviour, and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes hapening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
+Dozens[b] of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially most trajectory inference was focused on linear trajectories, with one start and one end point. However, the prospect of branching trajectories was already described early [@trapnell_dynamics_2014], and about half of the current methods can handle one or more bifurcations in the trajectory (`r ref("sfig", "methods_over_time", "b")`). Some methods can already handle more complex, cyclical and branching behaviour, and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes happening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
 
 
 Although[c] trajectory inference methods use a variety of algorithms and subcomponents to reach a final ordering, most consist of the following three steps: (i) preprocessing (filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction or clustering and (iii) ordering the cells along the simplified representation. These components are frequently interchangeable. Depending on the way the cells are ordered, some prior information about the dynamic process can also be required, or optional. 
@@ -93,11 +97,21 @@ method_df <- readRDS(derived_file("method_df.rds", experiment_name="method_chara
 
 
 [e]
-We gathered a list of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(!is.na(method_df$qc_score))` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized the methods from both a computational and a user perspective. From a computational perspective, each method uses different interchangeable components We assessed the quality of the implementation of each method, using metrics looking at code availability, documentation, code style and extensibility. We first contacted all the authors, to allow them to improve their method before publishing our evaluation. While most methods lack at several metrics, code quality tends to increase over time.
+We gathered a list of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(!is.na(method_df$qc_score))` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized all methods in four different ways: underlying algorithm(s), implementation quality, prior information and possible trajectory structures. From a computational perspective, each method uses different interchangeable components We assessed the quality of the implementation of each method, using metrics looking at code availability, documentation, code style and extensibility (`r ref("fig", "overview")`). We first contacted all the authors, to allow them to improve their method before publishing our evaluation. While most methods lack at several metrics, code quality tends to increase over time.
+
+
+```{r, fig.width = 12, fig.height = 9}
+method_overview <- readRDS(figure_file("method_overview.rds", experiment_name="method_characteristics"))
+
+
+print(method_overview)
+```
+
+
+`r ref("fig", "overview", anchor=TRUE)` Evaluation overview and method overview.
 
 
 ### Data sources
-We used three different data sources 
 
 
 ### Score metrics and parameter optimisation
