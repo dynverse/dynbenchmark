@@ -10,6 +10,7 @@ all_files <- list.files("data", rec=F, full.names=T)
 dataset_files <- all_files[!is.na(file.info(all_files)$isdir)]
 dataset_ids <- dataset_files %>% gsub("data/(.*).rda", "\\1", .)
 
+# look into dynalysis::load_dataset?
 load_dataset <- function(dataset_id) {
   load(paste0("data/", dataset_id, ".rda"))
   get(dataset_id)
