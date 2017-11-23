@@ -3,11 +3,7 @@ library(googlesheets)
 library(dynalysis)
 library(cowplot)
 
-experiment(
-  dirname = "method_characteristics",
-  description = "Some characteristics of the methods, mainly using the methods spreadsheet",
-  auto_create_folders = TRUE
-)
+experiment("method_characteristics")
 
 # # If it's your first time running this script, run this:
 # gs_auth()
@@ -41,11 +37,6 @@ method_df_evaluated <- method_df %>%
 write_rds(method_df, derived_file("method_df.rds"))
 write_rds(method_df_evaluated, derived_file("method_df_evaluated.rds"))
 
-experiment(
-  dirname = "method_characteristics",
-  description = "Some characteristics of the methods, mainly using the methods spreadsheet",
-  auto_create_folders = TRUE
-)
 
 # Comparing number of citations, qc score, and time -------------------------------------
 g1 <- ggplot(method_df_evaluated, aes(date, qc_score)) +

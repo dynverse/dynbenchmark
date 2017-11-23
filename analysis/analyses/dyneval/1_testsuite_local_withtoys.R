@@ -3,11 +3,7 @@ library(tidyverse)
 library(mlr)
 library(mlrMBO)
 
-experiment(
-  dirname = "dyneval/1_testsuite_local_withtoys",
-  description = "Testing whether each method is able to run locally",
-  auto_create_folders = TRUE
-)
+experiment("dyneval/1_testsuite_local_withtoys")
 
 # trying all methods
 methods <- dyneval::get_descriptions(T) %>% filter(name == "SCORPIUS")
