@@ -13,8 +13,10 @@ dataset_ids <- dataset_infos$id
 map_prism <- function (x, f) PRISM::qsub_lapply(x, f, qsub_environment = list2env(list()), qsub_config = PRISM::override_qsub_config(memory="4G"))
 map_local <- function(x, f) parallel::mclapply(x, f, mc.cores=6)
 
-dataset_checks <- map_prism(dataset_ids, function(dataset_id) {
-# dataset_checks <- map_local(dataset_ids, function(dataset_id) {
+
+# Check the datasets ------------------------------------
+# dataset_checks <- map_prism(dataset_ids, function(dataset_id) {
+dataset_checks <- map_local(dataset_ids, function(dataset_id) {
   library(tidyverse)
 # dataset_checks <- parallel::mclapply(mc.cores=1, dataset_ids, function(dataset_id) {
   print(paste0("-------------", dataset_id))
@@ -28,6 +30,7 @@ dataset_checks <- map_prism(dataset_ids, function(dataset_id) {
 })
 dataset_checks <- dataset_checks %>% bind_rows()
 
+# Score the datasets ---------------------------------
 # dataset_scores <- map_local(dataset_ids, function(dataset_id) {
 dataset_scores <- map_prism(dataset_ids, function(dataset_id) {
   library(tidyverse)
