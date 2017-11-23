@@ -2,7 +2,7 @@ txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE81275&for
 txt_location <- "data/preproc/GSE81275_esc1.expMatrix.txt.gz"
 
 if (!file.exists(txt_location)) {
-  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usualy
+  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
 }
 
 counts <- read_tsv(txt_location) %>% na.omit() %>% column_to_rownames("Gene") %>% as.matrix() %>% t

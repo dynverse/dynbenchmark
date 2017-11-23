@@ -1,11 +1,7 @@
 library(dynalysis)
 library(tidyverse)
 
-experiment(
-  dirname = "dyneval/4_testsuite_cluster_withmoretoys",
-  description = "Testing whether each method is able to run on the cluster",
-  auto_create_folders = TRUE
-)
+experiment("dyneval/4_testsuite_cluster_withmoretoys")
 
 # # remove previous output
 # unlink(derived_file("suite/"), recursive = T, force = T)

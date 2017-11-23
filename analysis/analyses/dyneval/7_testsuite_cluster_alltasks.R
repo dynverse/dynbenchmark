@@ -2,11 +2,7 @@ library(dynalysis)
 library(tidyverse)
 library(dynplot)
 
-experiment(
-  dirname = "dyneval/7_testsuite_cluster_alltasks",
-  description = "Testing whether each method is able to get optimised on the cluster with a dyngen task",
-  auto_create_folders = TRUE
-)
+experiment("dyneval/7_testsuite_cluster_alltasks")
 
 # trying all methods
 methods <- dyneval::get_descriptions(F)

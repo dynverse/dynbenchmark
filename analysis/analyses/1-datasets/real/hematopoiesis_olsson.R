@@ -9,7 +9,7 @@ files <- c(
 
 walk2(files, names(files), function(txt_web_location, txt_location) {
   if (!file.exists(txt_location)) {
-    download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usualy
+    download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
   }
 })
 
@@ -19,7 +19,7 @@ txt_web_location <- "https://www.nature.com/nature/journal/v537/n7622/source_dat
 txt_location <- "analysis/data/datasets_preproc/nature19348-f1.xlsx"
 
 if (!file.exists(txt_location)) {
-  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usualy
+  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
 }
 
 small_expression <- readxl::read_xlsx(txt_location, 1)
