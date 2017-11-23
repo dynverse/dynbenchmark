@@ -18,12 +18,12 @@
 #' plot(data)
 #' dev.off()
 #' }
-experiment <- function(dirname) {
+experiment <- function(experiment_id) {
   # check whether the working directory is indeed the dynalysis folder
   dyn_fold <- get_dynalysis_folder()
 
   # set option
-  options(dynalysis_experiment_folder = dirname)
+  options(dynalysis_experiment_folder = experiment_id)
 }
 
 # create a helper function
