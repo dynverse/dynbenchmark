@@ -3,10 +3,7 @@ library(tidyverse)
 library(purrr)
 library(XML)
 
-experiment(
-  dirname = "gource",
-  description = "Making a movie of our business"
-)
+experiment("gource")
 
 process <- function(file, docname) {
   data <- xmlParse(file)
@@ -36,10 +33,10 @@ process <- function(file, docname) {
   )
 }
 
-files <- list.files("analysis/data/raw_data/gource/google_drive/", pattern = "*.xml", full.names = T)
+files <- list.files(raw_file("google_drive/"), pattern = "*.xml", full.names = T)
 df <- files %>% map_df(function(fn) {
   output_name <- gsub("^.*/[0-9]*_([0-9A-Za-z\\.\\-]*)\\.xml$", "\\1", fn) %>% paste0("/google_drive/", .)
   process(fn, output_name)
 }) %>% na.omit
 
-write_lines(df$final, "analysis/data/derived_data/gource/google_drive.txt")
+write_lines(df$final, derived_file("google_drive.txt"))

@@ -2,11 +2,7 @@ library(dynalysis)
 library(tidyverse)
 library(dynplot)
 
-experiment(
-  dirname = "dyneval/2_testexecution_cluster_withtoy",
-  description = "Testing whether each method is able to run on the cluster",
-  auto_create_folders = TRUE
-)
+experiment("dyneval/2_testexecution_cluster_withtoy")
 
 # trying all methods
 methods <- dyneval::get_descriptions(F)
