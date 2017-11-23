@@ -1,10 +1,10 @@
 ---
 title: "An evaluation framework for trajectory inference methods"
 author:
-  - Robrecht Cannoodt*
-  - Wouter Saelens*
-  - Helena Todorov
-  - Yvan Saeys
+  - Robrecht Cannoodt* ¹ ² ³
+  - Wouter Saelens* ¹ ²
+  - Helena Todorov¹ ²
+  - Yvan Saeys¹ ²
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
     bookdown::html_document2:
@@ -19,7 +19,10 @@ keywords: |
 highlights: |
   These are the highlights. 
 ---
-\* Equal contribution
+\* Equal contribution  
+¹ Data mining and modelling for biomedicine, VIB Center for Inflammation Research, Ghent, Belgium  
+² Department of ???, Ghent University, Ghent, Belgium  
+³ Center for Medical Genetics, Ghent University  
 
 ```{r setup, include=FALSE}
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
@@ -94,21 +97,19 @@ method_df <- readRDS(derived_file("method_df.rds", experiment_name="method_chara
 ```
 
 
-
-
 [e]
-We gathered a list of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(!is.na(method_df$qc_score))` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized all methods in four different ways: underlying algorithm(s), implementation quality, prior information and possible trajectory structures. From a computational perspective, each method uses different interchangeable components We assessed the quality of the implementation of each method, using metrics looking at code availability, documentation, code style and extensibility (`r ref("fig", "overview")`). We first contacted all the authors, to allow them to improve their method before publishing our evaluation. While most methods lack at several metrics, code quality tends to increase over time.
+We gathered a list of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(!is.na(method_df$qc_score))` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized all methods in four different ways: underlying algorithm(s), implementation quality, prior information and possible trajectory structures (`r ref("fig", "method_characteristics")`). The underlying algorithms can be divided into several subcomponents, and these components are frequently shared between different algorithms. Some components, such as a minimal spanning tree or principal curves for cellular ordering, or PCA or diffusion map for dimensionality reduction are shared by more than 5 methods sFIG?. While not directly related to the quality of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it easier for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their implementation quality using a transparent scoring scheme sNOTE. We first contacted all the authors, to allow them to improve their method before publishing our evaluation. While most methods lack at several metrics (`r ref("fig", "method_characteristics", "a")`), code quality tends to increase over time sFIG. However, some implementation details are lacking for the majority of the methods and should receive extra attention from developers: code availability, documentation and unit testing (`r ref("fig", "method_characteristics", "a")`).
 
 
 ```{r, fig.width = 12, fig.height = 9}
-method_overview <- readRDS(figure_file("method_overview.rds", experiment_name="method_characteristics"))
+method_characteristics <- readRDS(figure_file("method_characteristics.rds", experiment_name="method_characteristics"))
 
 
-print(method_overview)
+print(method_characteristics)
 ```
 
 
-`r ref("fig", "overview", anchor=TRUE)` Evaluation overview and method overview.
+`r ref("fig", "method_characteristics", anchor=TRUE)` Evaluation overview and method overview.
 
 
 ### Data sources

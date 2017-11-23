@@ -1,10 +1,10 @@
 ---
 title: "An evaluation framework for trajectory inference methods"
 author:
-  - Robrecht Cannoodt*
-  - Wouter Saelens*
-  - Helena Todorov
-  - Yvan Saeys
+  - Robrecht Cannoodt* ¹ ² ³
+  - Wouter Saelens* ¹ ²
+  - Helena Todorov¹ ²
+  - Yvan Saeys¹ ²
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
     bookdown::html_document2:
@@ -19,7 +19,10 @@ keywords: |
 highlights: |
   These are the highlights. 
 ---
-\* Equal contribution
+\* Equal contribution  
+¹ Data mining and modelling for biomedicine, VIB Center for Inflammation Research, Ghent, Belgium  
+² Department of ???, Ghent University, Ghent, Belgium  
+³ Center for Medical Genetics, Ghent University  
 
 ```{r setup, include=FALSE}
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
