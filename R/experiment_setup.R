@@ -1,6 +1,7 @@
 #' Helper function for controlling experiments
 #'
 #' @param experiment_id id for the experiment
+#' @param ... filenames
 #'
 #' @importFrom lazyeval lazy_eval
 #' @importFrom testthat expect_match
