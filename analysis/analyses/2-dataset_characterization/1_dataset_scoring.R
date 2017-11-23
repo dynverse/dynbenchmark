@@ -10,6 +10,8 @@ dataset_infos <- gs_title("Real datasets") %>%
 
 dataset_ids <- dataset_infos$id
 
+# do an export DYNALYSIS_PATH="/group/irc/shared/dynalysis" on prism beforehand
+stop("read above comment")
 map_prism <- function (x, f) PRISM::qsub_lapply(x, f, qsub_environment = list2env(list()), qsub_config = PRISM::override_qsub_config(memory="4G"))
 map_local <- function(x, f) parallel::mclapply(x, f, mc.cores=6)
 
@@ -19,7 +21,9 @@ dataset_checks <- map_prism(dataset_ids, function(dataset_id) {
 # dataset_checks <- parallel::mclapply(mc.cores=1, dataset_ids, function(dataset_id) {
   print(paste0("-------------", dataset_id))
   print("loading")
-  dataset <- dynalysis::load_dataset(dataset_id, "real")
+
+  stop("The function below does not exist anymore, use ")
+  dataset <- load_dataset("real", dataset_id)
   dataset %>% list2env(.GlobalEnv)
 
   all_milestones_represented <- all(milestone_ids %in% cell_grouping$group_id)
@@ -34,7 +38,7 @@ dataset_scores <- map_prism(dataset_ids, function(dataset_id) {
   library(dynalysis)
   print(paste0("-------------", dataset_id))
   print("loading")
-  dataset <- dynalysis::load_dataset(dataset_id, "real")
+  dataset <- load_dataset("real", dataset_id)
   dataset %>% list2env(.GlobalEnv)
 
   Coi <- rowMeans(dataset$expression) %>% {(. > (median(.) - IQR(., 0.5)*2)) & (. < (median(.) + IQR(., 0.5)*2))} %>% keep(~.) %>% names
@@ -108,7 +112,7 @@ cell_plots <- map_prism(dataset_ids, function(dataset_id) {
   library(tidyverse)
   plots <- list()
 
-  dataset <- dynalysis::load_dataset(dataset_id, "real")
+  dataset <- load_dataset("real", dataset_id)
 
   gene_sds <- apply(dataset$expression, 2, sd) %>% sort(decreasing = TRUE)
   Goi <- gene_sds %>% head(5000) %>% names()
@@ -165,7 +169,7 @@ network_plots <- parallel::mclapply(dataset_ids, function(dataset_id) {
   library(tidyverse)
   print(paste0("-------------", dataset_id))
   print("loading")
-  dataset <- dynalysis::load_dataset(dataset_id, "real")
+  dataset <- load_dataset("real", dataset_id)
 
   milestone_network <- dataset$milestone_network
   milestone_nodes <- dataset$cell_info %>% group_by(milestone_id) %>% summarise(n=n())
@@ -219,7 +223,7 @@ network_characteristics <- parallel::mclapply(dataset_ids, function(dataset_id) 
   library(tidyverse)
   print(paste0("-------------", dataset_id))
   print("loading")
-  dataset <- load_dataset(dataset_id)
+  dataset <- load_dataset("real", dataset_id)
 
   contains_cycle <- FALSE
   tryCatch(

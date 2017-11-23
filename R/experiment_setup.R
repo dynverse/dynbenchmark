@@ -1,10 +1,6 @@
 #' Helper function for controlling experiments
 #'
 #' @param dirname Foldername for the experiment
-#' @param description TODO
-#' @param auto_create_folders Automatically create folders
-#'  when one of the file functions is called.
-#' @param ... Strings that will be pasted together to create a filename
 #'
 #' @importFrom glue glue
 #' @importFrom lazyeval lazy_eval
@@ -15,55 +11,56 @@
 #'
 #' @examples
 #' \dontrun{
-#' experiment(
-#'   dirname = "test_plots",
-#'   description = "this parameter does not do anything yet",
-#'   auto_create_folders = TRUE,
-#'   {
-#'     data <- matrix(runif(200), ncol = 2)
-#'     pdf(figure_file("testplot.pdf"), 5, 5)
-#'     plot(data)
-#'     dev.off()
-#'   }
-#' )
+#' experiment("test_plots")
+#'
+#' data <- matrix(runif(200), ncol = 2)
+#' pdf(figure_file("testplot.pdf"), 5, 5)
+#' plot(data)
+#' dev.off()
 #' }
-experiment <- function(dirname, description, auto_create_folders = TRUE) {
+experiment <- function(dirname) {
   # check whether the working directory is indeed the dynalysis folder
-  testthat::expect_match(getwd(), "/dynalysis/?$")
+  dyn_fold <- get_dynalysis_folder()
 
   # set option
   options(dynalysis_experiment_folder = dirname)
-  options(dynalysis_experiment_autocreate = TRUE)
 }
 
 # create a helper function
-auto_create_fun <- function(path) {
+experiment_subfolder <- function(path) {
   function(...) {
-    dynfold <- getOption("dynalysis_experiment_folder")
-    if (is.null(dynfold)) {
+    dyn_fold <- get_dynalysis_folder()
+    exp_fold <- getOption("dynalysis_experiment_folder")
+
+    # check whether exp_fold could be found
+    if (is.null(exp_fold)) {
       stop("No experiment folder found. Did you run experiment(...) yet?")
     }
-    full_path <- paste0(path, "/", dynfold, "/")
-    if (getOption("dynalysis_experiment_autocreate") && !file.exists(full_path)) {
-      dir.create(full_path, recursive = TRUE)
-    }
+
+    # determine the full path
+    full_path <- paste0(dyn_fold, "/", path, "/", dynfold, "/")
+
+    # create if necessary
+    dir.create(full_path, recursive = TRUE, showWarnings = FALSE)
+
+    # get complete filename
     paste(full_path, ..., collapse = "", sep = "")
   }
 }
 
 #' @rdname experiment
 #' @export
-derived_file <- auto_create_fun("analysis/data/derived_data")
+derived_file <- experiment_subfolder("analysis/data/derived_data")
 
 #' @rdname experiment
 #' @export
-raw_file <- auto_create_fun("analysis/data/raw_data")
+raw_file <- experiment_subfolder("analysis/data/raw_data")
 
 #' @rdname experiment
 #' @export
-figure_file <- auto_create_fun("analysis/figures")
+figure_file <- experiment_subfolder("analysis/figures")
 
 #' @rdname experiment
 #' @export
-result_file <- auto_create_fun("analysis/results")
+result_file <- experiment_subfolder("analysis/results")
 
