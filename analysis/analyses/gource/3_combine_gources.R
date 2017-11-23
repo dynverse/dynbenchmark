@@ -1,7 +1,6 @@
 library(dynalysis)
 library(tidyverse)
 library(purrr)
-library(glue)
 
 experiment("gource")
 
@@ -24,7 +23,7 @@ changes <- files %>%
 
 write_delim(changes, derived_file("combined_out.txt"), delim = "|", col_names = FALSE)
 
-system(glue(
+system(pritt(
   "gource -1920x1080 -s 3 {derived_file('combined_out.txt')} --user-image-dir {raw_file('avatar/')} -o - | ",
   "ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -vcodec libx264 -preset ultrafast -pix_fmt yuv420p ",
   "-crf 1 -threads 0 -bf 0 {derived_file('gource.mp4')}"
