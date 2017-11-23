@@ -33,7 +33,7 @@ experiment_subfolder <- function(path) {
     exp_id <- getOption("dynalysis_experiment_id")
 
     # check whether exp_fold could be found
-    if (is.null(exp_fold)) {
+    if (is.null(exp_id)) {
       stop("No experiment folder found. Did you run experiment(...) yet?")
     }
 
