@@ -4,7 +4,11 @@
 ^README-.*\.png$
 ^CONDUCT\.md$
 ^CONTRIBUTING\.md$
-analysis
+^analysis
 ^Dockerfile$
 ^\.travis\.yml$
 ^\.httr-oauth$
+^\.dockerignore$
+^\.git$
+^docker
+^scripts

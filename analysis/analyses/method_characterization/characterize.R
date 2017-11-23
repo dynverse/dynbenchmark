@@ -218,7 +218,7 @@ platforms <- method_df %>% separate_rows(platform=platforms, sep=", ") %>%
   mutate(pos = cumsum(quantity) - quantity/2) %>%
   ggplot(aes(1, quantity)) +
     geom_bar(aes(fill=platform), width = 1, stat="identity") +
-    ggrepel::geom_label_repel(aes(1, pos, label=glue::glue("{platform}: {quantity}"), fill=platform), color="white", fontface = "bold", direction = "y", segment.alpha=0) +
+    ggrepel::geom_label_repel(aes(1, pos, label=pritt("{platform}: {quantity}"), fill=platform), color="white", fontface = "bold", direction = "y", segment.alpha=0) +
     coord_polar("y") +
     theme_void() +
     theme(legend.position="none")
@@ -240,7 +240,7 @@ saveRDS(n_methods_over_time, figure_file("platforms.rds"))
 #     mutate(pos = cumsum(quantity) - quantity/2) %>%
 #     ggplot(aes(1, quantity)) +
 #     geom_bar(aes(fill=prior), width = 1, stat="identity") +
-#     geom_label(aes(1, pos, label=glue::glue("{prior}: {quantity}"), fill=prior), color="white", fontface = "bold") +
+#     geom_label(aes(1, pos, label=pritt("{prior}: {quantity}"), fill=prior), color="white", fontface = "bold") +
 #     theme_void() +
 #     theme(legend.position="none") +
 #     ggtitle(prior)
