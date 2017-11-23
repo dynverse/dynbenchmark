@@ -24,21 +24,6 @@
 #' @export
 #'
 #' @rdname dataset_preproccessing
-#'
-#' @examples
-#' \dontrun{
-#' dataset_preproccessing("real", "
-#'   dirname = "test_plots",
-#'   description = "this parameter does not do anything yet",
-#'   auto_create_folders = TRUE,
-#'   {
-#'     data <- matrix(runif(200), ncol = 2)
-#'     pdf(figure_file("testplot.pdf"), 5, 5)
-#'     plot(data)
-#'     dev.off()
-#'   }
-#' )
-#' }
 dataset_preproccessing <- function(prefix, dataset_id) {
   # check whether the working directory is indeed the dynalysis folder
   dynalysis_folder <- get_dynalysis_folder()
@@ -46,7 +31,7 @@ dataset_preproccessing <- function(prefix, dataset_id) {
   # set option
   options(
     dynalysis_datasetpreproc_id = dataset_id,
-    dynalysis_datasetpreproc_prefix = prefix,
+    dynalysis_datasetpreproc_prefix = prefix
   )
 }
 

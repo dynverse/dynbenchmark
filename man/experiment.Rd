@@ -8,7 +8,7 @@
 \alias{result_file}
 \title{Helper function for controlling experiments}
 \usage{
-experiment(dirname, description, auto_create_folders = TRUE)
+experiment(experiment_id)
 
 derived_file(...)
 
@@ -20,29 +20,17 @@ result_file(...)
 }
 \arguments{
 \item{dirname}{Foldername for the experiment}
-
-\item{description}{TODO}
-
-\item{auto_create_folders}{Automatically create folders
-when one of the file functions is called.}
-
-\item{...}{Strings that will be pasted together to create a filename}
 }
 \description{
 Helper function for controlling experiments
 }
 \examples{
 \dontrun{
-experiment(
-  dirname = "test_plots",
-  description = "this parameter does not do anything yet",
-  auto_create_folders = TRUE,
-  {
-    data <- matrix(runif(200), ncol = 2)
-    pdf(figure_file("testplot.pdf"), 5, 5)
-    plot(data)
-    dev.off()
-  }
-)
+experiment("test_plots")
+
+data <- matrix(runif(200), ncol = 2)
+pdf(figure_file("testplot.pdf"), 5, 5)
+plot(data)
+dev.off()
 }
 }
