@@ -298,7 +298,7 @@ method_order <- method_df_evaluated %>% arrange(qc_score) %>% pull(name)
 rotated_axis_text_x <- element_text(angle=45, hjust=1)
 
 base_theme <- theme(
-  plot.margin = unit(c(0, 0, 0, 0), "cm"),
+  plot.margin = unit(c(2, 0, 0.5, 0), "lines"),
   axis.text.x=rotated_axis_text_x,
   legend.position = "top",
   legend.box = "horizontal"
@@ -340,7 +340,8 @@ method_qc_overall <- method_df_evaluated %>%
     viridis::scale_fill_viridis(option="A", guide=guide_colorbar(direction = "horizontal")) +
     base_theme +
     empty_left_theme +
-    horizontal_lines
+    horizontal_lines +
+    theme(legend.position = "none")
 method_qc_overall
 
 # Prior information
@@ -355,7 +356,8 @@ prior_information <- method_df_evaluated %>%
     scale_fill_manual(values=c("?" = "#AAAAAA", "No" = "#EEEEEE", "Yes" = "#FF4136", "CanUse" = "#0074D9", "CanRoot" = "#39CCCC")) +
     base_theme +
     empty_left_theme +
-    horizontal_lines
+    horizontal_lines +
+    theme(legend.position = "none")
 prior_information
 
 saveRDS(n_methods_over_time, figure_file("n_methods_over_time.rds"))
@@ -378,8 +380,8 @@ trajectory_components_plot <- trajectory_components %>%
 trajectory_components_plot
 
 
-method_overview <- plot_grid(method_qc_individual, method_qc_overall, prior_information, trajectory_components_plot, nrow=1, align="h", rel_widths = c(0.8, 0.2, 0.8, 0.4), axis="bt")
-method_overview
+method_characteristics <- plot_grid(method_qc_individual, method_qc_overall, prior_information, trajectory_components_plot, nrow=1, align="h", rel_widths = c(0.8, 0.2, 0.8, 0.4), axis="bt", labels="auto")
+method_characteristics
 
-saveRDS(method_overview, figure_file("method_overview.rds"))
+saveRDS(method_characteristics, figure_file("method_characteristics.rds"))
 
