@@ -51,14 +51,14 @@ ref <- function(ref_type, ref_id, suffix="", anchor=FALSE) {
   }
   ref <- refs %>% filter(ref_id == !!ref_id) %>% 
     pull(name) %>% 
-    {glue::glue("[**{.}{suffix}**](#{ref_type}_{ref_id})")}
+    {pritt("[**{.}{suffix}**](#{ref_type}_{ref_id})")}
   
-  if (anchor) ref <- glue::glue("{ref}<a name='{ref_type}_{ref_id}'></a>")
+  if (anchor) ref <- pritt("{ref}<a name='{ref_type}_{ref_id}'></a>")
   ref
 }
 create_names <- list(
-  sfig = function(i) {glue::glue("Supplementary Figure {i}")},
-  fig = function(i) {glue::glue("Figure {i}")}
+  sfig = function(i) {pritt("Supplementary Figure {i}")},
+  fig = function(i) {pritt("Figure {i}")}
 )
 ```
 # Introduction
@@ -109,7 +109,7 @@ print(method_characteristics)
 ```
 
 
-`r ref("fig", "method_characteristics", anchor=TRUE)` Evaluation overview and method overview.
+`r ref("fig", "method_characteristics", anchor=TRUE)` FIrst characterization of each method.
 
 
 ### Data sources

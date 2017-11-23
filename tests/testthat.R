@@ -1,5 +1,4 @@
 library(testthat)
-library(dynreal)
 library(dynutils)
 library(dplyr)
 library(ggplot2)
