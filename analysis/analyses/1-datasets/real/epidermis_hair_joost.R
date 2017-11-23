@@ -6,7 +6,7 @@ txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE67602&for
 txt_location <- "analysis/data/datasets_preproc/GSE67602_Joost_et_al_expression.txt.gz"
 
 if (!file.exists(txt_location)) {
-  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usualy
+  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
 }
 
 counts_all <- read_tsv(txt_location) %>% filter(!startsWith(`Gene\\Cell`, "ERCC")) %>% tibble::column_to_rownames("Gene\\Cell") %>% as.matrix() %>% t

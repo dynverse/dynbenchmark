@@ -5,7 +5,7 @@ txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE67310&for
 txt_location <- "analysis/data/datasets_preproc/GSE67310_iN_data_log2FPKM_annotated.txt.gz"
 
 if (!file.exists(txt_location)) {
-  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usualy
+  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
 }
 
 expr <- read_tsv(txt_location)
