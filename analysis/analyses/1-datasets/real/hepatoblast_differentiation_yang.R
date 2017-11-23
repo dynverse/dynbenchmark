@@ -5,7 +5,7 @@ txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE90047&for
 txt_location <- "analysis/data/datasets_preproc/GSE90047_Single-cell_RNA-seq_TPM.txt.gz"
 
 if (!file.exists(txt_location)) {
-  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usualy
+  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
 }
 
 counts <- read_tsv(txt_location) %>% select(-Symbol) %>% column_to_rownames("ID") %>% as.matrix() %>% t

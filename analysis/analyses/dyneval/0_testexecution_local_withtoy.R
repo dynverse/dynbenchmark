@@ -2,11 +2,7 @@ library(dynalysis)
 library(tidyverse)
 library(dynplot)
 
-experiment(
-  dirname = "dyneval/0_testexecution_local_withtoy",
-  description = "Testing whether each method is able to run locally",
-  auto_create_folders = TRUE
-)
+experiment("dyneval/0_testexecution_local_withtoy")
 
 # trying all methods
 methods <- dyneval::get_descriptions(F)

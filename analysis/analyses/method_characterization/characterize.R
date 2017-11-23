@@ -3,12 +3,7 @@ library(googlesheets)
 library(dynalysis)
 library(cowplot)
 
-experiment(
-  dirname = "method_characteristics",
-  description = "Some characteristics of the methods, mainly using the methods spreadsheet",
-  auto_create_folders = TRUE
-)
-
+experiment("method_characteristics")
 
 # Preprocessing the method_df file ---------------------------
 
