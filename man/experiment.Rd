@@ -19,7 +19,7 @@ figure_file(...)
 result_file(...)
 }
 \arguments{
-\item{dirname}{Foldername for the experiment}
+\item{experiment_id}{id for the experiment}
 }
 \description{
 Helper function for controlling experiments
