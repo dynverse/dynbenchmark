@@ -20,6 +20,8 @@ result_file(...)
 }
 \arguments{
 \item{experiment_id}{id for the experiment}
+
+\item{...}{filenames}
 }
 \description{
 Helper function for controlling experiments

@@ -2,6 +2,8 @@
 #'
 #' @param prefix Dataset prefix
 #' @param dataset_id Dataset id
+#' @param dataset Dataset object to save
+#' @param ... filenames
 #'
 #' @importFrom lazyeval lazy_eval
 #' @importFrom testthat expect_match
