@@ -24,14 +24,14 @@ cell_info <- cell_info %>%
   mutate_all(funs(as.character))
 
 milestone_network <- tribble(
-  ~from, ~to, ~length, ~directed,
-  "E18#0", "P2#1", 4, TRUE,
-  "E18#0", "P2#2", 4, TRUE,
-  "E18#0", "P2#3", 4, TRUE,
-  "P2#1", "P5#1", 3, TRUE,
-  "P2#2", "P5#2", 3, TRUE,
-  "P2#3", "P5#3", 3, TRUE
-)
+  ~from, ~to, ~length,
+  "E18#0", "P2#1", 4,
+  "E18#0", "P2#2", 4,
+  "E18#0", "P2#3", 4,
+  "P2#1", "P5#1", 3,
+  "P2#2", "P5#2", 3,
+  "P2#3", "P5#3", 3
+) %>% mutate(directed = TRUE)
 milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
 cell_info <- cell_info %>% filter(milestone_id %in% milestone_ids)
@@ -43,7 +43,7 @@ milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mut
 
 feature_info <- tibble(feature_id = colnames(counts))
 
-# todo: use scater normalisation
+# todo: use dynutils normalisation
 expression <- log2(counts + 1)
 
 dataset <- wrap_ti_task_data(
