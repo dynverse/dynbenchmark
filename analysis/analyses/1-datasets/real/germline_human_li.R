@@ -1,15 +1,34 @@
 rm(list=ls())
-
 library(tidyverse)
+library(dynalysis)
 
-preproc_folder <- "analysis/data/datasets_preproc/GSE86146/"
-GSMs <- list.files(preproc_folder) %>% {.[startsWith(., "GSM")]}
-samples <- map(GSMs, ~read_tsv(paste0(preproc_folder, .)))
-genes <- samples[[1]]$Gene
-samples <- map(samples, ~select(., -Gene))
-allcounts <- bind_cols(samples) %>% as.matrix() %>% magrittr::set_rownames(genes) %>% t
+id <- "germline_human_li"
+dataset_preprocessing("real", id)
 
-allcell_info <- readxl::read_xlsx("analysis/data/datasets_preproc/GSE86146/mmc2.xlsx", sheet=3) %>%
+tar_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE86146&format=file"
+tar_location <- dataset_preproc_file("GSE86146_RAW.tar")
+if (!file.exists(tar_location)) {
+  download.file(tar_web_location, tar_location, method = "libcurl")
+  utils::untar(tar_location, exdir = dataset_preproc_file())
+}
+
+allcounts <- list.files(dataset_preproc_file()) %>%
+  keep(~ startsWith(., "GSM")) %>%
+  map(~ read_tsv(dataset_preproc_file(.), col_types = cols(.default = "d", Gene = "c")) %>% gather(Sample, Expression, -Gene)) %>%
+  bind_rows() %>%
+  spread(Gene, Expression) %>%
+  as.data.frame() %>%
+  magrittr::set_rownames(., .$Sample) %>%
+  select(-Sample) %>%
+  as.matrix
+
+mmc2_web_location <- "http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S1934590917300784/1-s2.0-S1934590917300784-mmc2.xlsx/274143/html/S1934590917300784/139b580f8ca22e965c646ac00b373e93/mmc2.xlsx"
+mmc2_location <- dataset_preproc_file("mmc2.xlsx")
+if (!file.exists(mmc2_location)) {
+  download.file(mmc2_web_location, mmc2_location, method = "libcurl")
+}
+
+allcell_info <- readxl::read_xlsx(mmc2_location, sheet = 3) %>%
   rename(cell_id = Cell, cluster=Cluster) %>%
   filter(cell_id %in% rownames(allcounts)) %>%
   mutate(
@@ -26,7 +45,7 @@ milestone_order_to_network <- function(order) {
 settings <- list(
   list(
     id="germline_human_male_li",
-    milestone_network = tibble(from=c("Male_FGC#1", "Male_FGC#2"), to=c("Male_FGC#2", "Male_FGC#3")),
+    milestone_network = tibble(from = c("Male_FGC#1", "Male_FGC#2"), to = c("Male_FGC#2", "Male_FGC#3")),
     milestone_source = "cluster"
   ),
   list(
@@ -44,11 +63,12 @@ settings <- list(
     milestone_network = milestone_order_to_network(allcell_info %>% filter(gender == "F" & type == "FGC") %>% arrange(week) %>% pull(weekgendertype) %>% unique()),
     milestone_source = "weekgendertype"
   )
-)
+) %>% lapply(function(l) {
+  l$milestone_network <- l$milestone_network %>% mutate(length = 1, directed = TRUE)
+  l
+})
 
 for (setting in settings) {
-  source_info <- list(source_id="GEO")
-
   milestone_network <- setting$milestone_network
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
@@ -61,12 +81,24 @@ for (setting in settings) {
   cell_grouping <- cell_info %>% select(cell_id, milestone_id) %>% rename(group_id = milestone_id)
   milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mutate(percentage=1)
 
-  gene_info <- tibble(id=colnames(counts))
-  gene_ids <- gene_info$id
+  feature_info <- tibble(feature_id = colnames(counts))
 
+  # TODO: normalise using dynutils
   expression <- log2(counts + 1)
 
-  dataset <- lst(gene_info, cell_info, cell_grouping, cell_ids, gene_ids, counts, expression, milestone_network, milestone_ids, milestone_percentages, info=list(id=setting$id))
+  dataset <- wrap_ti_task_data(
+    ti_type = "real",
+    id = setting$id,
+    counts = counts,
+    expression = expression,
+    cell_ids = cell_ids,
+    milestone_ids = milestone_ids,
+    milestone_network = milestone_network,
+    milestone_percentages = milestone_percentages,
+    cell_grouping = cell_grouping,
+    cell_info = cell_info,
+    feature_info = feature_info
+  )
 
-  dynalysis:::save_dataset(dataset)
+  save_dataset(dataset, real, setting$id)
 }
