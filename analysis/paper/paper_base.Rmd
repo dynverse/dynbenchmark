@@ -32,7 +32,7 @@ knitr::opts_chunk$set(
   message = FALSE,
   echo = FALSE,
   comment = "#>",
-  fig.path = "analysis/figures/"
+  fig.path = ".scratch/"
 )
 
 library(dynalysis)
