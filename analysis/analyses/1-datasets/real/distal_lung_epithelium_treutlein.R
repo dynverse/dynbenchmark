@@ -22,10 +22,10 @@ cell_info <- df[, c(1:4)] %>% as.data.frame() %>% magrittr::set_rownames(expr$ce
 expression <- expression[cell_info$cell_id, ]
 
 milestone_network = tribble(
-  ~from, ~to, ~length, ~directed,
-  "BP", "AT1", 1, TRUE,
-  "BP", "AT2", 1, TRUE
-)
+  ~from, ~to,
+  "BP", "AT1",
+  "BP", "AT2"
+) %>% mutate(length = 1, directed = TRUE)
 milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
 cell_info <- cell_info %>% filter(milestone_id %in% milestone_ids)
