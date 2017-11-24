@@ -33,7 +33,7 @@ experiment_subfolder <- function(path) {
 
     # check whether exp_id is given
     if (is.null(experiment_id)) {
-      exp_id <- getOption("dynalysis_experiment_id")
+      experiment_id <- getOption("dynalysis_experiment_id")
     }
 
     # check whether exp_fold could be found
