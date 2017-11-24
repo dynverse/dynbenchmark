@@ -22,8 +22,8 @@ dataset_preprocessing <- function(prefix, dataset_id) {
 }
 
 # create a helper function
-datasetpreproc_subfolder <- function(path, prefix = NULL, dataset_id = NULL) {
-  function(...) {
+datasetpreproc_subfolder <- function(path) {
+  function(..., prefix = NULL, dataset_id = NULL) {
     dyn_fold <- get_dynalysis_folder()
 
     if (is.null(prefix)) {
@@ -59,8 +59,8 @@ dataset_file <- datasetpreproc_subfolder("analysis/data/derived_data/datasets")
 
 #' @rdname dataset_preprocessing
 #' @export
-save_dataset <- function(dataset) {
-  write_rds(dataset, dataset_file("dataset.rds"))
+save_dataset <- function(dataset, prefix = NULL, dataset_id = NULL) {
+  write_rds(dataset, dataset_file("dataset.rds", prefix = NULL, dataset_id = dataset_id))
 }
 
 #' Loading a dataset after it has been preprocessed
