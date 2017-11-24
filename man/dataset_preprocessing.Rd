@@ -9,11 +9,11 @@
 \usage{
 dataset_preprocessing(prefix, dataset_id)
 
-dataset_preproc_file(...)
+dataset_preproc_file(..., prefix = NULL, dataset_id = NULL)
 
-dataset_file(...)
+dataset_file(..., prefix = NULL, dataset_id = NULL)
 
-save_dataset(dataset)
+save_dataset(dataset, prefix = NULL, dataset_id = NULL)
 }
 \arguments{
 \item{prefix}{Dataset prefix}
