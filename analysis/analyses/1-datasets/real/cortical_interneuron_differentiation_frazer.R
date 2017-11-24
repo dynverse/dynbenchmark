@@ -10,16 +10,13 @@ txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE90860&for
 txt_location <- dataset_preproc_file("GSE90860_SupplementaryData1_revised_julien.tsv.gz")
 
 if (!file.exists(txt_location)) {
-  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
+  download.file(txt_web_location, txt_location, method="libcurl")
 }
 
 counts_df <- read_tsv(txt_location)
-counts <- counts_df %>% select(-X1) %>% as.matrix %>% t
-colnames(counts) <- counts_df$X1
+counts <- counts_df %>% select(-X1) %>% as.matrix %>% t %>% magrittr::set_colnames(counts_df$X1)
 
-geo_folder <- dataset_preproc_file("geo")
-dir.create(geo_folder, recursive = TRUE)
-geo <- GEOquery::getGEO(GEO = "GSE90860", destdir = geo_folder)
+geo <- GEOquery::getGEO(GEO = "GSE90860", destdir = dataset_preproc_file())
 cell_info <- geo[[1]] %>% Biobase::phenoData() %>% as("data.frame") %>% mutate(cell_id=rownames(counts))
 cell_info <- cell_info %>%
   mutate(milestone_id = paste0(gsub("age: (.*)", "\\1", characteristics_ch1), "#", gsub("assigned_subgroup: (.*)", "\\1", characteristics_ch1.1))) %>%
@@ -44,8 +41,7 @@ cell_ids <- cell_info$cell_id
 cell_grouping <- cell_info %>% select(cell_id, milestone_id) %>% rename(group_id = milestone_id)
 milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mutate(percentage=1)
 
-gene_info <- tibble(id=colnames(counts))
-gene_ids <- gene_info$id
+feature_info <- tibble(feature_id = colnames(counts))
 
 # todo: use scater normalisation
 expression <- log2(counts + 1)
@@ -61,7 +57,7 @@ dataset <- wrap_ti_task_data(
   milestone_percentages = milestone_percentages,
   cell_grouping = cell_grouping,
   cell_info = cell_info,
-  gene_info = gene_info
+  feature_info = feature_info
 )
 
 save_dataset(dataset)
