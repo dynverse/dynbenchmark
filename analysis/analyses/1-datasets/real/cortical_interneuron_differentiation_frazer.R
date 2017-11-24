@@ -47,12 +47,14 @@ milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mut
 gene_info <- tibble(id=colnames(counts))
 gene_ids <- gene_info$id
 
+# todo: use scater normalisation
 expression <- log2(counts + 1)
 
 dataset <- wrap_ti_task_data(
   ti_type = "real",
   id = id,
   counts = counts,
+  expression = expression,
   cell_ids = cell_ids,
   milestone_ids = milestone_ids,
   milestone_network = milestone_network,
