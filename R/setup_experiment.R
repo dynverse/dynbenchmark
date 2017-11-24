@@ -28,21 +28,21 @@ experiment <- function(experiment_id) {
 
 # create a helper function
 experiment_subfolder <- function(path) {
-  function(..., exp_id = NULL) {
+  function(..., experiment_id = NULL) {
     dyn_fold <- get_dynalysis_folder()
 
     # check whether exp_id is given
-    if (is.null(exp_id)) {
+    if (is.null(experiment_id)) {
       exp_id <- getOption("dynalysis_experiment_id")
     }
 
     # check whether exp_fold could be found
-    if (is.null(exp_id)) {
+    if (is.null(experiment_id)) {
       stop("No experiment folder found. Did you run experiment(...) yet?")
     }
 
     # determine the full path
-    full_path <- paste0(dyn_fold, "/", path, "/", exp_id, "/")
+    full_path <- paste0(dyn_fold, "/", path, "/", experiment_id, "/")
 
     # create if necessary
     dir.create(full_path, recursive = TRUE, showWarnings = FALSE)
