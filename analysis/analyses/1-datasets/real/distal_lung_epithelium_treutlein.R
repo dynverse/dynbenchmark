@@ -1,8 +1,12 @@
 rm(list=ls())
+library(dynalysis)
 library(tidyverse)
 
+id <- "distal_lung_epithelium_treutlein"
+dataset_preprocessing("real", id)
+
 txt_web_location <- "http://www.nature.com/nature/journal/v509/n7500/extref/nature13173-s4.txt"
-txt_location <- "analysis/data/datasets_preproc/nature13173-s4.txt"
+txt_location <- dataset_preproc_file("nature13173-s4.txt")
 
 if (!file.exists(txt_location)) {
   download.file(paste0(txt_web_location), txt_location, method="libcurl")
@@ -17,13 +21,10 @@ cell_info <- expr[, c(1:4)] %>% as.data.frame() %>% magrittr::set_rownames(expr$
   ) %>% filter(sample == "singleCell")
 expression <- expression[cell_info$cell_id, ]
 
-info <- list(id="distal_lung_epithelium_treutlein")
-
-# milestone_network <- tibble(from=cell_info$milestone_id, to=cell_info$milestone_id)
 milestone_network = tribble(
-  ~from, ~to,
-  "BP", "AT1",
-  "BP", "AT2"
+  ~from, ~to, ~length, ~directed,
+  "BP", "AT1", 1, TRUE,
+  "BP", "AT2", 1, TRUE
 )
 milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
@@ -37,6 +38,21 @@ milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mut
 gene_info <- tibble(id=colnames(expression))
 gene_ids <- gene_info$id
 
-dataset <- lst(gene_info, cell_info, cell_grouping, cell_ids, gene_ids, expression, milestone_network, milestone_ids, milestone_percentages, info)
+# TODO: check whether the original counts exist
+counts <- round(2^expression - 1)
 
-dynalysis:::save_dataset(dataset)
+dataset <- wrap_ti_task_data(
+  ti_type = "real",
+  id = id,
+  counts = counts,
+  expression = expression,
+  cell_ids = cell_ids,
+  milestone_ids = milestone_ids,
+  milestone_network = milestone_network,
+  milestone_percentages = milestone_percentages,
+  cell_grouping = cell_grouping,
+  cell_info = cell_info,
+  gene_info = gene_info
+)
+
+save_dataset(dataset)
