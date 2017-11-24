@@ -68,8 +68,8 @@ Single-cell[a] -omics technologies now make it possible to more accurately model
 
 
 ```{r, fig.width = 15, fig.height = 10}
-n_methods_over_time <- readRDS(figure_file("n_methods_over_time.rds", exp_id="method_characteristics"))
-trajectory_components_over_time <- readRDS(figure_file("trajectory_components_over_time.rds", exp_id="method_characteristics"))
+n_methods_over_time <- readRDS(figure_file("n_methods_over_time.rds", experiment_id="method_characteristics"))
+trajectory_components_over_time <- readRDS(figure_file("trajectory_components_over_time.rds", experiment_id="method_characteristics"))
 
 
 cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over_time), nrow=2, rel_heights = c(0.7, 0.3), labels="auto")
@@ -91,16 +91,15 @@ Given[d] this plethora of available trajectory inference methods, it is importan
 ### Method characterization
 ```{r}
 # Load method characteristics
-method_df <- readRDS(derived_file("method_df.rds", exp_id="method_characteristics"))
+method_df <- readRDS(derived_file("method_df.rds", experiment_id="method_characteristics"))
 ```
 
 
-[e]
-We gathered a list of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(!is.na(method_df$qc_score))` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized all methods in four different ways: underlying algorithm(s), implementation quality, prior information and possible trajectory structures (`r ref("fig", "method_characteristics")`). The underlying algorithms can be divided into several subcomponents, and these components are frequently shared between different algorithms. Some components, such as a minimal spanning tree or principal curves for cellular ordering, or PCA or diffusion map for dimensionality reduction are shared by more than 5 methods sFIG?. While not directly related to the quality of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it easier for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their implementation quality using a transparent scoring scheme sNOTE. We first contacted all the authors, to allow them to improve their method before publishing our evaluation. While most methods lack at several metrics (`r ref("fig", "method_characteristics", "a")`), code quality tends to increase over time sFIG. However, some implementation details are lacking for the majority of the methods and should receive extra attention from developers: code availability, documentation and unit testing (`r ref("fig", "method_characteristics", "a")`).
+We gathered a list of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(!is.na(method_df$qc_score))` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized all methods in four different ways: underlying algorithm(s), implementation quality, prior information and possible trajectory structures (`r ref("fig", "method_characteristics")`). The underlying algorithms can be divided into several subcomponents, and these components are frequently shared between different algorithms. Some components, such as a minimal spanning tree or principal curves for cellular ordering, or PCA or diffusion map for dimensionality reduction are shared by more than 5 methods sFIG?. While not directly related to the quality of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their implementation quality using a transparent scoring scheme sNOTE. After initial scoring we contacted all the authors, to allow them to improve their method before publishing. While most methods lack at several metrics (`r ref("fig", "method_characteristics", "a")`), recent methods tend to have higher code quality sFIG. However, some implementation details are lacking for the majority of the methods and should receive extra attention from developers: code availability, documentation and unit testing (`r ref("fig", "method_characteristics", "a")`).
 
 
 ```{r, fig.width = 12, fig.height = 9}
-method_characteristics <- readRDS(figure_file("method_characteristics.rds", exp_id="method_characteristics"))
+method_characteristics <- readRDS(figure_file("method_characteristics.rds", experiment_id="method_characteristics"))
 
 
 print(method_characteristics)
@@ -111,8 +110,11 @@ print(method_characteristics)
 
 
 ### Data sources
+![evaluation_overview](../../analysis/figures/evaluation_overview.png)
+`r ref("fig", "evaluation_overview", anchor=TRUE)` Overview of the evaluation
 
 
+We use three types of datasets for our evaluation
 ### Score metrics and parameter optimisation
 
 
@@ -172,4 +174,3 @@ git2r::repository(".")
 [b]History of TI, different methods
 [c]Common framework of TI, different components, naturally progressing towards the need for an evaluation
 [d]Context and general overview of our evaluation
-[e]I would move some stuff from this paragraph to supplementary if possible
