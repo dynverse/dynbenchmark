@@ -28,9 +28,13 @@ experiment <- function(experiment_id) {
 
 # create a helper function
 experiment_subfolder <- function(path) {
-  function(...) {
+  function(..., exp_id = NULL) {
     dyn_fold <- get_dynalysis_folder()
-    exp_id <- getOption("dynalysis_experiment_id")
+
+    # check whether exp_id is given
+    if (is.null(exp_id)) {
+      exp_id <- getOption("dynalysis_experiment_id")
+    }
 
     # check whether exp_fold could be found
     if (is.null(exp_id)) {
