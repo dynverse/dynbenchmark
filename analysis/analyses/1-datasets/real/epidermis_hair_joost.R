@@ -3,7 +3,7 @@ library(tidyverse)
 library(dynalysis)
 options('download.file.method.GEOquery'='curl')
 
-id <- "epidermis_hair_spatial_joost"
+id <- "epidermis_hair_joost"
 dataset_preprocessing("real", id)
 
 txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE67602&format=file&file=GSE67602%5FJoost%5Fet%5Fal%5Fexpression%2Etxt%2Egz"
@@ -29,29 +29,29 @@ settings <- list(
     # this ordering is different than in the paper,
     # but spatially speaking, OB is first and IB second, so this makes much more sense
     milestone_network = tribble(
-      ~from, ~to, ~length, ~directed,
-      "OB", "IB", 1, TRUE,
-      "IB", "uHF-I", 1, TRUE,
-      "uHF-I", "IFE-B", 1, TRUE
-    ),
+      ~from, ~to,
+      "OB", "IB",
+      "IB", "uHF-I",
+      "uHF-I", "IFE-B"
+    ) %>% mutate(length = 1, directed = TRUE),
     id = "epidermis_hair_spatial_joost"
   ),
   list(
     milestone_network = tribble(
-      ~from, ~to, ~length, ~directed,
-      "IFE-B", "IFE-DI", 1, TRUE,
-      "IFE-DI", "IFE-DII", 1, TRUE,
-      "IFE-DII", "IFE-KI", 1, TRUE,
-      "IFE-KI", "IFE-KII", 1, TRUE
-    ),
+      ~from, ~to,
+      "IFE-B", "IFE-DI",
+      "IFE-DI", "IFE-DII",
+      "IFE-DII", "IFE-KI",
+      "IFE-KI", "IFE-KII"
+    ) %>% mutate(length = 1, directed = TRUE),
     id = "epidermis_hair_IFE_joost"
   ),
   list(
     milestone_network = tribble(
-      ~from, ~to, ~length, ~directed,
-      "uHF-I", "uHF-II",  1, TRUE,
-      "uHF-II", "uHF-III",  1, TRUE
-    ),
+      ~from, ~to,
+      "uHF-I", "uHF-II",
+      "uHF-II", "uHF-III"
+    ) %>% mutate(length = 1, directed = TRUE),
     id = "epidermis_hair_uHF_joost"
   )
 )
@@ -88,5 +88,5 @@ for (setting in settings) {
     feature_info = feature_info
   )
 
-  save_dataset(dataset, dataset_id = setting$id)
+  save_dataset(dataset, prefix = "real", dataset_id = setting$id)
 }
