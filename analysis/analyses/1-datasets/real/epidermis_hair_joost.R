@@ -88,5 +88,5 @@ for (setting in settings) {
     feature_info = feature_info
   )
 
-  save_dataset(dataset)
+  save_dataset(dataset, dataset_id = setting$id)
 }
