@@ -55,7 +55,7 @@ dataset_preproc_file <- datasetpreproc_subfolder("analysis/data/derived_data/dat
 
 #' @rdname dataset_preprocessing
 #' @export
-dataset_file <- datasetpreproc_subfolder("analysis/data/datasets")
+dataset_file <- datasetpreproc_subfolder("analysis/data/derived_data/datasets")
 
 #' @rdname dataset_preprocessing
 #' @export
