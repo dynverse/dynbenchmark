@@ -16,20 +16,25 @@ dataset_preprocessing <- function(prefix, dataset_id) {
 
   # set option
   options(
-    dynalysis_datasetpreproc_id = dataset_id,
-    dynalysis_datasetpreproc_prefix = prefix
+    dynalysis_datasetpreproc_prefix = prefix,
+    dynalysis_datasetpreproc_id = dataset_id
   )
 }
 
 # create a helper function
-datasetpreproc_subfolder <- function(path) {
+datasetpreproc_subfolder <- function(path, prefix = NULL, dataset_id = NULL) {
   function(...) {
     dyn_fold <- get_dynalysis_folder()
-    prefix <- getOption("dynalysis_datasetpreproc_id")
-    dataset_id <- getOption("dynalysis_datasetpreproc_prefix")
+
+    if (is.null(prefix)) {
+      prefix <- getOption("dynalysis_datasetpreproc_prefix")
+    }
+    if (is.null(dataset_id)) {
+      dataset_id <- getOption("dynalysis_datasetpreproc_id")
+    }
 
     # check whether exp_fold could be found
-    if (is.null(dataset_id)) {
+    if (is.null(prefix) || is.null(dataset_id)) {
       stop("No dataset folder found. Did you run dataset_preprocessing(...) yet?")
     }
 
@@ -58,17 +63,9 @@ save_dataset <- function(dataset) {
   write_rds(dataset, dataset_file("dataset.rds"))
 }
 
-#' Determining the location of a dataset after it has been preprocessed
-#' @export
-#' @inheritParams dataset_preprocessing
-dataset_location <- function(prefix, dataset_id) {
-  dyn_fold <- get_dynalysis_folder()
-  pritt("{dyn_fold}/analysis/data/datasets/{prefix}/{dataset_id}/dataset.rds")
-}
-
 #' Loading a dataset after it has been preprocessed
 #' @export
 #' @inheritParams dataset_preprocessing
 load_dataset <- function(prefix, dataset_id) {
-  read_rds(dataset_location(prefix, dataset_id))
+  read_rds(dataset_file("dataset.rds", prefix, dataset_id))
 }
