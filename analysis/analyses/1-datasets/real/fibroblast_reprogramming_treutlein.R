@@ -2,8 +2,7 @@ rm(list=ls())
 library(tidyverse)
 library(dynalysis)
 
-id <- "fibroblast_reprogramming_treutlein"
-dataset_preprocessing("real", id)
+dataset_preprocessing("real", "fibroblast_reprogramming_treutlein")
 
 txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE67310&format=file&file=GSE67310%5FiN%5Fdata%5Flog2FPKM%5Fannotated%2Etxt%2Egz"
 txt_location <- dataset_preproc_file("GSE67310_iN_data_log2FPKM_annotated.txt.gz")
@@ -45,7 +44,7 @@ counts <- round(2^expression - 1)
 
 dataset <- wrap_ti_task_data(
   ti_type = "real",
-  id = id,
+  id = datasetpreproc_getid(),
   counts = counts,
   expression = expression,
   cell_ids = cell_ids,
