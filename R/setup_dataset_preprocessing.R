@@ -1,4 +1,4 @@
-#' Helper function for creating new datasets
+#' Helper functions for creating new datasets
 #'
 #' @param prefix Dataset prefix
 #' @param dataset_id Dataset id
@@ -21,21 +21,37 @@ dataset_preprocessing <- function(prefix, dataset_id) {
   )
 }
 
+#' @rdname dataset_preprocessing
+#' @export
+datasetpreproc_getprefix <- function() {
+  prefix <- getOption("dynalysis_datasetpreproc_prefix")
+  if (is.null(prefix)) {
+    stop("No prefix found. Did you run dataset_preprocessing(...)?")
+  }
+  prefix
+}
+
+#' @rdname dataset_preprocessing
+#' @export
+datasetpreproc_getid <- function() {
+  dataset_id <- getOption("dynalysis_datasetpreproc_id")
+  if (is.null(dataset_id)) {
+    stop("No dataset_id found. Did you run dataset_preprocessing(...)?")
+  }
+  dataset_id
+}
+
+
 # create a helper function
 datasetpreproc_subfolder <- function(path) {
   function(..., prefix = NULL, dataset_id = NULL) {
     dyn_fold <- get_dynalysis_folder()
 
     if (is.null(prefix)) {
-      prefix <- getOption("dynalysis_datasetpreproc_prefix")
+      prefix <- datasetpreproc_getprefix()
     }
     if (is.null(dataset_id)) {
-      dataset_id <- getOption("dynalysis_datasetpreproc_id")
-    }
-
-    # check whether exp_fold could be found
-    if (is.null(prefix) || is.null(dataset_id)) {
-      stop("No dataset folder found. Did you run dataset_preprocessing(...) yet?")
+      dataset_id <- datasetpreproc_getid()
     }
 
     # determine the full path
@@ -60,7 +76,7 @@ dataset_file <- datasetpreproc_subfolder("analysis/data/derived_data/datasets")
 #' @rdname dataset_preprocessing
 #' @export
 save_dataset <- function(dataset, prefix = NULL, dataset_id = NULL) {
-  write_rds(dataset, dataset_file("dataset.rds", prefix = NULL, dataset_id = dataset_id))
+  write_rds(dataset, dataset_file("dataset.rds", prefix = prefix, dataset_id = dataset_id))
 }
 
 #' Loading a dataset after it has been preprocessed
