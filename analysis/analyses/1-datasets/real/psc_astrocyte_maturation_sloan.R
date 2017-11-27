@@ -72,14 +72,11 @@ for (setting in settings) {
 
   feature_info <- tibble(feature_id = colnames(counts))
 
-  # todo: use dynutils normalisation
-  expression <- log2(counts + 1)
-
-  dataset <- wrap_ti_task_data(
-    ti_type = "real",
-    id = datasetpreproc_getid(),
+  datasetpreproc_normalise_filter_wrap_and_save(
+    dataset_prefix = datasetpreproc_getprefix(),
+    dataset_id = setting$id,
+    ti_type = "linear",
     counts = counts,
-    expression = expression,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,
     milestone_network = milestone_network,
@@ -88,7 +85,5 @@ for (setting in settings) {
     cell_info = cell_info,
     feature_info = feature_info
   )
-
-  save_dataset(dataset)
 }
 
