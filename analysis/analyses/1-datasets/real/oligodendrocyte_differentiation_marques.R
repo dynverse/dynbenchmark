@@ -26,7 +26,7 @@ allcell_info <- geo[[1]] %>%
 
 settings <- list(
   list(
-    id = "oligodendrocyte_differentiation_marques_subclusters",
+    id = "oligodendrocyte_differentiation_subclusters_marques",
     milestone_source = "subcluster",
     milestone_network = tribble(
       ~from, ~to,
@@ -45,7 +45,7 @@ settings <- list(
     ti_type = "tree"
   ),
   list(
-    id = "oligodendrocyte_differentiation_marques_clusters",
+    id = "oligodendrocyte_differentiation_clusters_marques",
     milestone_source = "cluster",
     milestone_network = tribble(
       ~from, ~to,
