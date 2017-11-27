@@ -2,15 +2,12 @@ rm(list=ls())
 library(dynalysis)
 library(tidyverse)
 
-id <- "distal_lung_epithelium_treutlein"
-dataset_preprocessing("real", id)
+dataset_preprocessing("real", "distal_lung_epithelium_treutlein")
 
-txt_web_location <- "http://www.nature.com/nature/journal/v509/n7500/extref/nature13173-s4.txt"
-txt_location <- dataset_preproc_file("nature13173-s4.txt")
-
-if (!file.exists(txt_location)) {
-  download.file(txt_web_location, txt_location, method = "libcurl")
-}
+txt_location <- download_dataset_file(
+  "http://www.nature.com/nature/journal/v509/n7500/extref/nature13173-s4.txt",
+  "nature13173-s4.txt"
+)
 
 df <- read_tsv(txt_location, col_types = cols(cell_name = "c", time_point = "c", sample = "c", putative_cell_type = "c", .default = "d"))
 expression <- df[, -c(1:4)] %>% as.matrix() %>% magrittr::set_rownames(expr$cell_name)
@@ -42,7 +39,7 @@ counts <- round(2^expression - 1)
 
 dataset <- wrap_ti_task_data(
   ti_type = "real",
-  id = id,
+  id = datasetpreproc_getid(),
   counts = counts,
   expression = expression,
   cell_ids = cell_ids,
