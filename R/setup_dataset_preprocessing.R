@@ -85,3 +85,17 @@ save_dataset <- function(dataset, prefix = NULL, dataset_id = NULL) {
 load_dataset <- function(prefix, dataset_id) {
   read_rds(dataset_file("dataset.rds", prefix, dataset_id))
 }
+
+#' Download a file and return its location path
+#' @param url The url of the file to download
+#' @param filename What name to give to the file
+#' @export
+download_dataset_file <- function(url, filename) {
+  loc <- dataset_preproc_file(filename)
+
+  if (!file.exists(loc)) {
+    download.file(url, loc, method="libcurl")
+  }
+
+  loc
+}
