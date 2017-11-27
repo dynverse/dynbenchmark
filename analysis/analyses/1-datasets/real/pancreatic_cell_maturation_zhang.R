@@ -58,7 +58,8 @@ settings <- list(
       "α-cell P9", "α-cell P15", 6,
       "α-cell P15", "α-cell P18", 3,
       "α-cell P18", "α-cell P60", 42
-    ) %>% mutate(directed = TRUE)
+    ) %>% mutate(directed = TRUE),
+    ti_type = "linear"
   ),
   list(
     id = "pancreatic_beta_cell_maturation_zhang",
@@ -70,7 +71,8 @@ settings <- list(
       "β-cell P9", "β-cell P15", 6,
       "β-cell P15", "β-cell P18", 3,
       "β-cell P18", "β-cell P60", 42
-    ) %>% mutate(directed = TRUE)
+    ) %>% mutate(directed = TRUE),
+    ti_type = "linear"
   )
 )
 
@@ -90,14 +92,11 @@ for (setting in settings) {
 
   feature_info <- tibble(feature_id = colnames(counts))
 
-  # todo: use dynutils normalisation
-  expression <- log2(counts + 1)
-
-  dataset <- wrap_ti_task_data(
-    ti_type = "real",
-    id = datasetpreproc_getid(),
+  datasetpreproc_normalise_filter_wrap_and_save(
+    dataset_prefix = datasetpreproc_getprefix(),
+    dataset_id = setting$id,
+    ti_type = setting$ti_type,
     counts = counts,
-    expression = expression,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,
     milestone_network = milestone_network,
@@ -106,6 +105,4 @@ for (setting in settings) {
     cell_info = cell_info,
     feature_info = feature_info
   )
-
-  save_dataset(dataset)
 }

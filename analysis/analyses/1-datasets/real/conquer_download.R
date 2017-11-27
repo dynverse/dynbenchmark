@@ -19,7 +19,7 @@ conquer_infos <- list(
       "S", "G2M",
       "G2M", "G1"
     ) %>% addcols,
-    organism = "??",
+    ti_type = "cyclical",
     source_id = "conquer"
   ),
   list(
@@ -33,7 +33,7 @@ conquer_infos <- list(
       "embryonic day 5", "embryonic day 6",
       "embryonic day 6", "embryonic day 7"
     ) %>% addcols,
-    organism = "human",
+    ti_type = "linear",
     source_id = "conquer"
   ),
   list(
@@ -46,7 +46,7 @@ conquer_infos <- list(
       "vα14 inkt thymocyte subset: NKT0", "vα14 inkt thymocyte subset: NKT17",
       "vα14 inkt thymocyte subset: NKT0", "vα14 inkt thymocyte subset: NKT2"
     ) %>% addcols,
-    organism = "mus_musculus",
+    ti_type = "trifurcating",
     source_id = "conquer"
   ),
   list(
@@ -58,7 +58,8 @@ conquer_infos <- list(
       "G1", "S",
       "S", "G2",
       "G2", "G1"
-    ) %>% addcols
+    ) %>% addcols,
+    ti_type = "cyclical"
   ),
   list(
     id = "mesoderm_development_loh",
@@ -75,12 +76,12 @@ conquer_infos <- list(
       "H7_derived_MPS", "H7_derived_D2LtM",
       "H7_derived_D2LtM", "H7_derived_D3GARPpCrdcM",
       "H7_derived_D2LtM", "H7_dreived_D2.25_Smtmrs"
-    ) %>% addcols
+    ) %>% addcols,
+    ti_type = "consecutive_bifurcating"
   ),
   list(
     id = "myoblast_differentiation_trapnell",
     rds_name = c("GSE52529-GPL11154", "GSE52529-GPL16791"),
-    paper = "https://www.nature.com/nbt/journal/v32/n4/full/nbt.2859.html",
     milestone_source = function(cell_info) gsub("Cell (T\\d*)_.*", "\\1", as.character(cell_info$title)),
     milestone_network = tribble(
       ~from, ~to,
@@ -88,8 +89,8 @@ conquer_infos <- list(
       "T24", "T48",
       "T48", "T72"
     ) %>% addcols,
-    organism = "mus_musculus",
-    source_id = "conquer"
+    source_id = "conquer",
+    ti_type = "linear"
   ),
   list(
     id = "germline_human_female_guo",
@@ -101,7 +102,8 @@ conquer_infos <- list(
       "F10W", "F11W", 1, TRUE,
       "F11W", "F17W", 6, TRUE
     ),
-    milestone_source = function(cell_info) gsub("(.).*_([0-9]*W)_.*", "\\1\\2", cell_info$title)
+    milestone_source = function(cell_info) gsub("(.).*_([0-9]*W)_.*", "\\1\\2", cell_info$title),
+    ti_type = "linear"
   ),
   list(
     id = "germline_human_male_guo",
@@ -113,7 +115,8 @@ conquer_infos <- list(
       "M10W", "M11W", 1, TRUE,
       "M11W", "M19W", 8, TRUE
     ),
-    milestone_source = function(cell_info) gsub("(.).*_([0-9]*W)_.*", "\\1\\2", cell_info$title)
+    milestone_source = function(cell_info) gsub("(.).*_([0-9]*W)_.*", "\\1\\2", cell_info$title),
+    ti_type = "linear"
   ),
   list(
     id = "germline_human_both_guo",
@@ -130,7 +133,8 @@ conquer_infos <- list(
     milestone_source = function(cell_info) {
       src <- gsub("(.).*_([0-9]*W)_.*", "\\1\\2", cell_info$title)
       ifelse(src %in% c("F17W", "M19W"), src, gsub("[FM]", "", src))
-    }
+    },
+    ti_type = "linear"
   )
 )
 
@@ -191,15 +195,11 @@ for (source_info in conquer_infos) {
 
   cell_ids <- rownames(counts)
 
-  # TODO: use dynutils normalisation
-  # expression <- normalize_filter_counts(counts)
-  expression <- log2(counts + 1)
-
-  dataset <- wrap_ti_task_data(
-    ti_type = "real",
-    id = source_info$id,
+  datasetpreproc_normalise_filter_wrap_and_save(
+    dataset_prefix = datasetpreproc_getprefix(),
+    dataset_id = source_info$id,
+    ti_type = source_info$ti_type,
     counts = counts,
-    expression = expression,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,
     milestone_network = milestone_network,
@@ -208,6 +208,4 @@ for (source_info in conquer_infos) {
     cell_info = cell_info,
     feature_info = feature_info
   )
-
-  save_dataset(dataset, "real", source_info$id)
 }

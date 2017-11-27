@@ -10,7 +10,12 @@ txt_location <- download_dataset_file(
   "GSE67602_Joost_et_al_expression.txt.gz"
 )
 
-counts_all <- read_tsv(txt_location) %>% filter(!startsWith(`Gene\\Cell`, "ERCC")) %>% tibble::column_to_rownames("Gene\\Cell") %>% as.matrix() %>% t
+counts_all <- read_tsv(txt_location) %>%
+  as.data.frame() %>%
+  filter(!startsWith(`Gene\\Cell`, "ERCC")) %>%
+  tibble::column_to_rownames("Gene\\Cell") %>%
+  as.matrix() %>%
+  t
 
 geo <- GEOquery::getGEO("GSE67602", destdir = dataset_preproc_file())
 cell_info_all <- geo[[1]] %>%
@@ -31,7 +36,8 @@ settings <- list(
       "IB", "uHF-I",
       "uHF-I", "IFE-B"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "epidermis_hair_spatial_joost"
+    id = "epidermis_hair_spatial_joost",
+    ti_type = "linear"
   ),
   list(
     milestone_network = tribble(
@@ -41,7 +47,8 @@ settings <- list(
       "IFE-DII", "IFE-KI",
       "IFE-KI", "IFE-KII"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "epidermis_hair_IFE_joost"
+    id = "epidermis_hair_IFE_joost",
+    ti_type = "linear"
   ),
   list(
     milestone_network = tribble(
@@ -49,7 +56,8 @@ settings <- list(
       "uHF-I", "uHF-II",
       "uHF-II", "uHF-III"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "epidermis_hair_uHF_joost"
+    id = "epidermis_hair_uHF_joost",
+    ti_type = "linear"
   )
 )
 
@@ -68,14 +76,11 @@ for (setting in settings) {
 
   feature_info <- tibble(feature_id = colnames(counts))
 
-  # TODO: use dynutils normalisation
-  expression <- log2(counts + 1)
-
-  dataset <- wrap_ti_task_data(
-    ti_type = "real",
-    id = setting$id,
+  datasetpreproc_normalise_filter_wrap_and_save(
+    dataset_prefix = datasetpreproc_getprefix(),
+    dataset_id = setting$id,
+    ti_type = setting$ti_type,
     counts = counts,
-    expression = expression,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,
     milestone_network = milestone_network,
@@ -84,6 +89,4 @@ for (setting in settings) {
     cell_info = cell_info,
     feature_info = feature_info
   )
-
-  save_dataset(dataset, prefix = "real", dataset_id = setting$id)
 }
