@@ -3,6 +3,8 @@
 export(dataset_file)
 export(dataset_preproc_file)
 export(dataset_preprocessing)
+export(datasetpreproc_getid)
+export(datasetpreproc_getprefix)
 export(derived_file)
 export(experiment)
 export(figure_file)
