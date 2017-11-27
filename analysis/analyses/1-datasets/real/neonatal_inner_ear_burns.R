@@ -29,7 +29,8 @@ settings <- list(
       "TEC", "HC (i)",
       "HC (i)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "neonatal_inner_ear_all_burns"
+    id = "neonatal_inner_ear_all_burns",
+    ti_type = "bifurcating_convergence"
   ),
   list(
     milestone_network = tribble(
@@ -38,7 +39,8 @@ settings <- list(
       "SC (ii)", "HC (ii)",
       "HC (ii)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "neonatal_inner_ear_SC_HC_burns"
+    id = "neonatal_inner_ear_SC_HC_burns",
+    ti_type = "linear"
   ),
   list(
     milestone_network = tribble(
@@ -46,7 +48,8 @@ settings <- list(
       "TEC", "SC (i)",
       "SC (i)", "SC (ii)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "neonatal_inner_ear_TEC_SC_burns"
+    id = "neonatal_inner_ear_TEC_SC_burns",
+    ti_type = "linear"
   ),
   list(
     milestone_network = tribble(
@@ -54,7 +57,8 @@ settings <- list(
       "TEC", "HC (i)",
       "HC (i)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "neonatal_inner_ear_TEC_HSC_burns"
+    id = "neonatal_inner_ear_TEC_HSC_burns",
+    ti_type = "linear"
   )
 )
 
@@ -75,14 +79,11 @@ for (setting in settings) {
 
   feature_info <- tibble(feature_id = colnames(counts))
 
-  # todo: use dynutils normalisation
-  expression <- log2(counts + 1)
-
-  dataset <- wrap_ti_task_data(
-    ti_type = "real",
-    id = datasetpreproc_getid(),
+  datasetpreproc_normalise_filter_wrap_and_save(
+    dataset_prefix = datasetpreproc_getprefix(),
+    dataset_id = setting$id,
+    ti_type = setting$ti_type,
     counts = counts,
-    expression = expression,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,
     milestone_network = milestone_network,
@@ -91,6 +92,4 @@ for (setting in settings) {
     cell_info = cell_info,
     feature_info = feature_info
   )
-
-  save_dataset(dataset)
 }

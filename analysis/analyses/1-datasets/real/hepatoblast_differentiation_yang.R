@@ -60,14 +60,11 @@ milestone_percentages <- cell_grouping %>%
 
 feature_info <- tibble(feature_id = colnames(counts))
 
-# todo: use dynutils normalisation
-expression <- log2(counts + 1)
-
-dataset <- wrap_ti_task_data(
-  ti_type = "real",
-  id = datasetpreproc_getid(),
+datasetpreproc_normalise_filter_wrap_and_save(
+  dataset_prefix = datasetpreproc_getprefix(),
+  dataset_id = datasetpreproc_getid(),
+  ti_type = "bifurcating",
   counts = counts,
-  expression = expression,
   cell_ids = cell_ids,
   milestone_ids = milestone_ids,
   milestone_network = milestone_network,
@@ -76,5 +73,3 @@ dataset <- wrap_ti_task_data(
   cell_info = cell_info,
   feature_info = feature_info
 )
-
-save_dataset(dataset)

@@ -10,8 +10,8 @@ txt_location <- download_dataset_file(
 )
 
 df <- read_tsv(txt_location, col_types = cols(cell_name = "c", time_point = "c", sample = "c", putative_cell_type = "c", .default = "d"))
-expression <- df[, -c(1:4)] %>% as.matrix() %>% magrittr::set_rownames(expr$cell_name)
-cell_info <- df[, c(1:4)] %>% as.data.frame() %>% magrittr::set_rownames(expr$cell_name) %>%
+expression <- df[, -c(1:4)] %>% as.matrix() %>% magrittr::set_rownames(df$cell_name)
+cell_info <- df[, c(1:4)] %>% as.data.frame() %>% magrittr::set_rownames(df$cell_name) %>%
   rename(
     cell_id = cell_name,
     milestone_id = putative_cell_type
@@ -34,14 +34,11 @@ milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mut
 
 feature_info <- tibble(feature_id = colnames(expression))
 
-# TODO: check whether the original counts exist
-counts <- round(2^expression - 1)
-
-dataset <- wrap_ti_task_data(
-  ti_type = "real",
-  id = datasetpreproc_getid(),
-  counts = counts,
-  expression = expression,
+datasetpreproc_normalise_filter_wrap_and_save(
+  dataset_prefix = datasetpreproc_getprefix(),
+  dataset_id = datasetpreproc_getid(),
+  ti_type = "bifurcating",
+  counts = 2^expression-1, # TODO: fix this
   cell_ids = cell_ids,
   milestone_ids = milestone_ids,
   milestone_network = milestone_network,
@@ -50,5 +47,3 @@ dataset <- wrap_ti_task_data(
   cell_info = cell_info,
   feature_info = feature_info
 )
-
-save_dataset(dataset)
