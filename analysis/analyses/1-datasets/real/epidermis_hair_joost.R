@@ -5,12 +5,10 @@ options('download.file.method.GEOquery'='curl')
 
 dataset_preprocessing("real", "epidermis_hair_joost")
 
-txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE67602&format=file&file=GSE67602%5FJoost%5Fet%5Fal%5Fexpression%2Etxt%2Egz"
-txt_location <- dataset_preproc_file("GSE67602_Joost_et_al_expression.txt.gz")
-
-if (!file.exists(txt_location)) {
-  download.file(txt_web_location, txt_location, method = "libcurl")
-}
+txt_location <- download_dataset_file(
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE67602&format=file&file=GSE67602%5FJoost%5Fet%5Fal%5Fexpression%2Etxt%2Egz",
+  "GSE67602_Joost_et_al_expression.txt.gz"
+)
 
 counts_all <- read_tsv(txt_location) %>% filter(!startsWith(`Gene\\Cell`, "ERCC")) %>% tibble::column_to_rownames("Gene\\Cell") %>% as.matrix() %>% t
 

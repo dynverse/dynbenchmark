@@ -4,20 +4,15 @@ library(dynalysis)
 
 dataset_preprocessing("real", "neonatal_inner_ear_burns")
 
+count_location <- download_dataset_file(
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE71982&format=file&file=GSE71982%5FRSEM%5FCounts%5FMatrix%2Etxt%2Egz",
+  "GSE71982_RSEM_Counts_Matrix.txt.gz"
+)
 
-txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE71982&format=file&file=GSE71982%5FRSEM%5FCounts%5FMatrix%2Etxt%2Egz"
-count_location <- dataset_preproc_file("GSE71982_RSEM_Counts_Matrix.txt.gz")
-
-if (!file.exists(count_location)) {
-  download.file(txt_web_location, count_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
-}
-
-txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE71982&format=file&file=GSE71982%5FP1%5FUtricle%5FPhenoData%2Etxt%2Egz"
-phenodata_location <- dataset_preproc_file("GSE71982_P1_Utricle_PhenoData.txt.gz")
-
-if (!file.exists(phenodata_location)) {
-  download.file(txt_web_location, phenodata_location, method="libcurl")
-}
+phenodata_location <- download_dataset_file(
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE71982&format=file&file=GSE71982%5FP1%5FUtricle%5FPhenoData%2Etxt%2Egz",
+  "GSE71982_P1_Utricle_PhenoData.txt.gz"
+)
 
 counts_all <- read_tsv(count_location)[-c(1, 2),] %>% as.data.frame %>%  column_to_rownames("X1") %>% as.matrix() %>% t
 colnames(counts_all) <- colnames(counts_all) %>% gsub("[\\\\\"]*([^\\\\\"]*)[\\\\\"]*", "\\1",.)
@@ -98,5 +93,4 @@ for (setting in settings) {
   )
 
   save_dataset(dataset)
-
 }

@@ -4,12 +4,10 @@ library(dynalysis)
 
 dataset_preprocessing("real", "hepatoblast_differentiation_yang")
 
-txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE90047&format=file&file=GSE90047%5FSingle%2Dcell%5FRNA%2Dseq%5FTPM%2Etxt%2Egz"
-txt_location <- dataset_preproc_file("GSE90047_Single-cell_RNA-seq_TPM.txt.gz")
-
-if (!file.exists(txt_location)) {
-  download.file(txt_web_location, txt_location, method = "libcurl")
-}
+txt_location <- download_dataset_file(
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE90047&format=file&file=GSE90047%5FSingle%2Dcell%5FRNA%2Dseq%5FTPM%2Etxt%2Egz",
+  "GSE90047_Single-cell_RNA-seq_TPM.txt.gz"
+)
 
 counts <- read_tsv(txt_location, col_types = cols(ID = "c", Symbol = "c", .default = "d")) %>%
   as.data.frame() %>%

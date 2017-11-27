@@ -11,16 +11,12 @@ files_df <- tribble(
   "GSE70243_LK.CD34+.txt.gz", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE70243&format=file&file=GSE70243%5FLK%2ECD34%2B%2Etxt%2Egz",
   "GSE70244_Lsk.txt.gz", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE70244&format=file&file=GSE70244%5FLsk%2Etxt%2Egz",
   "GSE70236_Cmp.txt.gz", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE70236&format=file&file=GSE70236%5FCmp%2Etxt%2Egz"
-) %>% mutate(
-  preproc_loc = map(location, dataset_preproc_file)
-)
-
-for (i in seq_len(nrow(files_df))) {
-  location <- files_df$preproc_loc[[i]]
-  if (!file.exists(location)) {
-    download.file(files_df$url[[i]], location, method = "libcurl")
-  }
-}
+) %>%
+  rowwise() %>%
+  mutate(
+    preproc_loc = download_dataset_file(url, location)
+  ) %>%
+  ungroup()
 
 allexpression <- files_df$preproc_loc %>%
   map(~ read_tsv(., col_types = cols(uid = "c", .default = "d")) %>% gather(feature, expression, -uid)) %>%
@@ -32,13 +28,10 @@ allexpression <- files_df$preproc_loc %>%
   as.matrix %>%
   t
 
-
-txt_web_location <- "https://images.nature.com/original/nature-assets/nature/journal/v537/n7622/source_data/nature19348-f1.xlsx"
-txt_location <- dataset_preproc_file("nature19348-f1.xlsx")
-
-if (!file.exists(txt_location)) {
-  download.file(txt_web_location, txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
-}
+txt_location <- download_dataset_file(
+  "https://images.nature.com/original/nature-assets/nature/journal/v537/n7622/source_data/nature19348-f1.xlsx",
+  "nature19348-f1.xlsx"
+)
 
 small_expression <- readxl::read_xlsx(txt_location, 1)
 subclusters <- small_expression[1, -c(1, 2)] %>% as.list() %>% unlist()
@@ -101,7 +94,7 @@ for (setting in settings) {
 
   dataset <- wrap_ti_task_data(
     ti_type = "real",
-    id = setting$id,
+    id = datasetpreproc_getid(),
     counts = counts,
     expression = expression,
     cell_ids = cell_ids,
