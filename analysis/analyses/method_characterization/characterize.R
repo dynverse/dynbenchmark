@@ -282,6 +282,8 @@ empty_left_theme <- theme(
   axis.line.y = element_blank(),
   axis.ticks.y = element_blank()
 )
+base_scale_y <- scale_y_discrete(drop=FALSE, expand=c(0, 0))
+base_scale_x <- scale_x_discrete(drop=FALSE, expand=c(0, 0))
 
 
 
@@ -306,7 +308,9 @@ method_qc_individual <- method_df_evaluated %>%
     geom_text(aes(label = score_text), color="white", size=8, fontface = "bold") +
     theme(axis.text.x=rotated_axis_text_x) +
     base_theme +
-    horizontal_lines
+    horizontal_lines +
+    base_scale_y + base_scale_x +
+    ggtitle("Implementation quality control")
 method_qc_individual
 method_qc_individual_width <- length(qcs)
 
@@ -320,6 +324,7 @@ method_qc_overall <- method_df_evaluated %>%
     base_theme +
     empty_left_theme +
     horizontal_lines +
+    base_scale_y + base_scale_x +
     theme(legend.position = "none")
 method_qc_overall
 method_qc_overall_width <- 1
@@ -339,12 +344,14 @@ prior_information <- method_df_evaluated %>%
     base_theme +
     empty_left_theme +
     horizontal_lines +
-    theme(legend.position = "none")
+    base_scale_y + base_scale_x +
+    theme(legend.position = "none") +
+    ggtitle("Prior information")
 prior_information
 
 
 prior_usages <- c("CanRoot", "CanUse", "Required")
-prior_usages_text <- c(CanRoot = "✓", CanUse = "✓", Required = "!")
+prior_usages_text <- c(CanRoot = "✓", CanUse = "✓", Required = "!", No = "")
 prior_usage <- method_df_evaluated %>%
   gather(prior_id, prior_usage, !!priors, factor_key=TRUE) %>%
   select(prior_id, prior_usage, name) %>%
@@ -356,15 +363,20 @@ prior_usage <- method_df_evaluated %>%
     name = factor(name, levels=method_order)
   ) %>%
   drop_na() %>%
+  mutate(really = TRUE) %>%
+  complete(name, prior_usage) %>%
+  mutate(really = ifelse(is.na(really), "no", "yes")) %>%
   ggplot(aes(prior_usage, name)) +
-    geom_raster(aes(fill = prior_usage)) +
+    geom_raster(aes(fill = prior_usage, alpha=really)) +
     geom_text(aes(label = prior_usages_text[prior_usage]), color="white", fontface="bold", size=8) +
     scale_fill_manual(values=prior_usage_colors) +
-    scale_y_discrete(drop=FALSE) +
+    scale_alpha_manual(values=c(no=0, yes=1)) +
     base_theme +
     empty_left_theme +
+    base_scale_y + base_scale_x +
     horizontal_lines +
-    theme(legend.position = "none")
+    theme(legend.position = "none") +
+    ggtitle("Prior information")
 prior_usage
 prior_usage_width <- length(prior_usages)
 
@@ -379,10 +391,11 @@ trajectory_components_plot <- trajectory_components %>%
   ggplot() +
     geom_raster(aes(trajectory_type, name, fill = factor(can * as.numeric(trajectory_type)))) +
     scale_fill_manual(values = c("white", RColorBrewer::brewer.pal(8, name="Set2")), guide=FALSE) +
-    empty_left_theme +
     base_theme +
     empty_left_theme +
-    horizontal_lines
+    base_scale_y + base_scale_x +
+    horizontal_lines +
+    ggtitle("Detectable trajectory types")
 trajectory_components_plot
 trajectory_components_width <- length(trajectory_types)
 
