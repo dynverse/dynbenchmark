@@ -6,15 +6,6 @@ requireNamespace("MultiAssayExperiment")
 
 addcols <- function(x) x %>% mutate(length = 1, directed = TRUE)
 
-get_rds <- function(rds_name) {
-  rds_location <- dataset_preproc_file(pritt("{rds_name}.rds"))
-  if (!file.exists(rds_location)) {
-    rds_remote_location <- pritt("http://imlspenticton.uzh.ch/robinson_lab/conquer/data-mae/{rds_name}.rds")
-    download.file(rds_remote_location, rds_location, method = "libcurl")
-  }
-  read_rds(rds_location)
-}
-
 conquer_infos <- list(
   list(
     id = "cell_cycle_buettner",
@@ -148,7 +139,12 @@ for (id in names(conquer_infos)) {
 
   dataset_preprocessing("real", id)
 
-  datas <- lapply(source_info$rds_name, get_rds)
+  datas <- lapply(source_info$rds_name, function(rds_name) {
+    read_rds(download_dataset_file(
+      pritt("http://imlspenticton.uzh.ch/robinson_lab/conquer/data-mae/{rds_name}.rds"),
+      pritt("{rds_name}.rds")
+    ))
+  })
 
   tran_counts <- do.call(rbind, lapply(datas, function(data) SummarizedExperiment::assay(data[["gene"]], "count") %>% t))
 
@@ -200,7 +196,7 @@ for (id in names(conquer_infos)) {
 
   dataset <- wrap_ti_task_data(
     ti_type = "real",
-    id = id,
+    id = datasetpreproc_getid(),
     counts = counts,
     expression = expression,
     cell_ids = cell_ids,
@@ -212,5 +208,5 @@ for (id in names(conquer_infos)) {
     feature_info = feature_info
   )
 
-  save_dataset(dataset, real, id)
+  save_dataset(dataset)
 }

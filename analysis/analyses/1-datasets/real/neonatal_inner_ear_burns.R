@@ -1,20 +1,20 @@
 rm(list=ls())
+library(tidyverse)
+library(dynalysis)
 
-txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE71982&format=file&file=GSE71982%5FRSEM%5FCounts%5FMatrix%2Etxt%2Egz"
-count_location <- "analysis/data/datasets_preproc/GSE71982_RSEM_Counts_Matrix.txt.gz"
+dataset_preprocessing("real", "neonatal_inner_ear_burns")
 
-if (!file.exists(count_location)) {
-  download.file(paste0(txt_web_location), count_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
-}
+count_location <- download_dataset_file(
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE71982&format=file&file=GSE71982%5FRSEM%5FCounts%5FMatrix%2Etxt%2Egz",
+  "GSE71982_RSEM_Counts_Matrix.txt.gz"
+)
 
-txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE71982&format=file&file=GSE71982%5FP1%5FUtricle%5FPhenoData%2Etxt%2Egz"
-phenodata_location <- "analysis/data/datasets_preproc/GSE71982_P1_Utricle_PhenoData.txt.gz"
+phenodata_location <- download_dataset_file(
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE71982&format=file&file=GSE71982%5FP1%5FUtricle%5FPhenoData%2Etxt%2Egz",
+  "GSE71982_P1_Utricle_PhenoData.txt.gz"
+)
 
-if (!file.exists(phenodata_location)) {
-  download.file(paste0(txt_web_location), phenodata_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
-}
-
-counts_all <- read_tsv(count_location)[-c(1, 2),] %>% column_to_rownames("X1") %>% as.matrix() %>% t
+counts_all <- read_tsv(count_location)[-c(1, 2),] %>% as.data.frame %>%  column_to_rownames("X1") %>% as.matrix() %>% t
 colnames(counts_all) <- colnames(counts_all) %>% gsub("[\\\\\"]*([^\\\\\"]*)[\\\\\"]*", "\\1",.)
 cell_info_all <- read_tsv(phenodata_location) %>% rename(cell_id=Short_Name, milestone_id=GroupID)
 
@@ -28,7 +28,7 @@ settings <- list(
       "HC (ii)", "HC (iii-iv)",
       "TEC", "HC (i)",
       "HC (i)", "HC (iii-iv)"
-    ),
+    ) %>% mutate(length = 1, directed = TRUE),
     id = "neonatal_inner_ear_all_burns"
   ),
   list(
@@ -37,7 +37,7 @@ settings <- list(
       "SC (i)", "SC (ii)",
       "SC (ii)", "HC (ii)",
       "HC (ii)", "HC (iii-iv)"
-    ),
+    ) %>% mutate(length = 1, directed = TRUE),
     id = "neonatal_inner_ear_SC_HC_burns"
   ),
   list(
@@ -45,7 +45,7 @@ settings <- list(
       ~from, ~to,
       "TEC", "SC (i)",
       "SC (i)", "SC (ii)"
-    ),
+    ) %>% mutate(length = 1, directed = TRUE),
     id = "neonatal_inner_ear_TEC_SC_burns"
   ),
   list(
@@ -53,13 +53,13 @@ settings <- list(
       ~from, ~to,
       "TEC", "HC (i)",
       "HC (i)", "HC (iii-iv)"
-    ),
+    ) %>% mutate(length = 1, directed = TRUE),
     id = "neonatal_inner_ear_TEC_HSC_burns"
   )
 )
 
 for (setting in settings) {
-  info <- list(id=setting$id)
+  dataset_preprocessing("real", setting$id)
 
   milestone_network <- setting$milestone_network
 
@@ -73,12 +73,24 @@ for (setting in settings) {
   cell_grouping <- cell_info %>% select(cell_id, milestone_id) %>% rename(group_id = milestone_id)
   milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mutate(percentage=1)
 
-  gene_info <- tibble(id=colnames(counts))
-  gene_ids <- gene_info$id
+  feature_info <- tibble(feature_id = colnames(counts))
 
+  # todo: use dynutils normalisation
   expression <- log2(counts + 1)
 
-  dataset <- lst(gene_info, cell_info, cell_grouping, cell_ids, gene_ids, counts, expression, milestone_network, milestone_ids, milestone_percentages, info)
+  dataset <- wrap_ti_task_data(
+    ti_type = "real",
+    id = datasetpreproc_getid(),
+    counts = counts,
+    expression = expression,
+    cell_ids = cell_ids,
+    milestone_ids = milestone_ids,
+    milestone_network = milestone_network,
+    milestone_percentages = milestone_percentages,
+    cell_grouping = cell_grouping,
+    cell_info = cell_info,
+    feature_info = feature_info
+  )
 
-  dynalysis:::save_dataset(dataset)
+  save_dataset(dataset)
 }

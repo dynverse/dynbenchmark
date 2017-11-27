@@ -1,15 +1,39 @@
 rm(list=ls())
 library(tidyverse)
+library(dynalysis)
 
-txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE99951&format=file&file=GSE99951%5Fall%5Fdata%5Fhtseq%5Fout%2Ecsv%2Egz"
-txt_location <- "analysis/data/datasets_preproc/GSE99951_all_data_htseq_out.csv"
+dataset_preprocessing("real", "pancreatic_cell_maturation_zhang")
 
-if (!file.exists(txt_location)) {
-  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
-}
+txt_location <- download_dataset_file(
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE99951&format=file&file=GSE99951%5Fall%5Fdata%5Fhtseq%5Fout%2Ecsv%2Egz",
+  "GSE99951_all_data_htseq_out.csv"
+)
 
-geo <- GEOquery::getGEO("GSE99951", destdir="analysis/data/datasets_preproc/")
-cell_info_all <- geo[[1]] %>% Biobase::phenoData() %>% as("data.frame") %>% rename(cell_id=title, milestone_id=characteristics_ch1.3, group=characteristics_ch1.5) %>% mutate(cell_id=gsub("([^ ]*).*", "X\\1", cell_id)) %>% mutate_all(funs(as.character))
+# geo <- GEOquery::getGEO("GSE99951", destdir = dataset_preproc_file())
+# cell_info_all <- geo[[1]] %>%
+#   Biobase::phenoData() %>%
+#   as("data.frame") %>%
+#   rename(cell_id=title, milestone_id=characteristics_ch1.3, group=characteristics_ch1.5) %>%
+#   mutate(cell_id=gsub("([^ ]*).*", "X\\1", cell_id)) %>%
+#   mutate_all(funs(as.character))
+
+
+# temporary workaround because the above does not seem to be working
+geo <- GEOquery::getGEO("GSE99951", destdir = dataset_preproc_file(), GSElimits = c(1,1), GSEMatrix = FALSE, getGPL = FALSE, AnnotGPL = FALSE)
+
+
+cell_info_all <- dynutils::list_as_tibble(geo@gsms %>% map(~.@header)) %>%
+  rowwise() %>%
+  filter(length(characteristics_ch1) >= 7) %>%
+  mutate(
+    cell_id = gsub("([^ ]*).*", "X\\1", title),
+    milestone_id = characteristics_ch1[[4]],
+    group = characteristics_ch1[[6]]
+  ) %>%
+  ungroup() %>%
+  select(cell_id, milestone_id, group) %>%
+  mutate_all(funs(as.character))
+# end temporary workaround
 
 counts_all <- read.table(txt_location, TRUE, " ", stringsAsFactors = FALSE) %>% as.matrix() %>% t
 
@@ -25,35 +49,46 @@ settings <- list(
   )
 )
 
+milestone_network <- tribble(
+  ~from, ~to, ~length, ~directed,
+  "age: Day 100", "age: Day 130", 30, TRUE,
+  "age: Day 130", "age: Day 175", 45, TRUE,
+  "age: Day 175", "age: Day 450", 275, TRUE
+)
+
+milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
+
 for (setting in settings) {
-  info <- list(technology = "smart_seq2", id=setting$id)
+  dataset_preprocessing("real", setting$id)
 
-  milestone_network <- tribble(
-    ~from, ~to,
-    "age: Day 100", "age: Day 130",
-    "age: Day 130", "age: Day 175",
-    "age: Day 175", "age: Day 450"
-  )
+  cell_info <- cell_info_all %>% slice(match(rownames(counts_all), cell_id)) %>%
+    filter(group == setting$group_id, milestone_id %in% milestone_ids)
 
-  milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
-
-  cell_info <- slice(cell_info_all, match(rownames(counts_all), cell_id))
-  cell_info <- cell_info %>% filter(group == setting$group)
-  cell_info <- cell_info %>% filter(milestone_id %in% milestone_ids)
   counts <- counts_all[cell_info$cell_id, ]
   cell_ids <- cell_info$cell_id
 
   cell_grouping <- cell_info %>% select(cell_id, milestone_id) %>% rename(group_id = milestone_id)
   milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mutate(percentage=1)
 
-  gene_info <- tibble(id=colnames(counts))
-  gene_ids <- gene_info$id
+  feature_info <- tibble(feature_id = colnames(counts))
 
+  # todo: use dynutils normalisation
   expression <- log2(counts + 1)
 
+  dataset <- wrap_ti_task_data(
+    ti_type = "real",
+    id = datasetpreproc_getid(),
+    counts = counts,
+    expression = expression,
+    cell_ids = cell_ids,
+    milestone_ids = milestone_ids,
+    milestone_network = milestone_network,
+    milestone_percentages = milestone_percentages,
+    cell_grouping = cell_grouping,
+    cell_info = cell_info,
+    feature_info = feature_info
+  )
 
-  dataset <- lst(gene_info, cell_info, cell_grouping, cell_ids, gene_ids, counts, expression, milestone_network, milestone_ids, milestone_percentages, info)
-
-  dynalysis:::save_dataset(dataset)
+  save_dataset(dataset)
 }
 
