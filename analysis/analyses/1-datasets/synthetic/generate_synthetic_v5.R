@@ -63,13 +63,16 @@ gs_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_gs.rds
 gs_plot_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_gs_plot.pdf")
 experiment_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_experiment.rds")
 experiment_plot_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_experiment_plot.pdf")
+normalization_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_normalization.rds")
+normalization_plot_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_normalization_plot.pdf")
 
 # remote preparation
 ncores <- 3
 qsub_config <- override_qsub_config(num_cores = ncores, memory = paste0("4G"), wait=FALSE)
 qsub_environment <- list2env(lst(paramsets, ncores, folder=remote_folder, model_location, simulation_location, gs_location, experiment_location))
 
-#####################################"
+#####################################
+## Generate MODELS ------------------------
 models <- pbapply::pblapply(cl = 8, seq_along(paramsets), function(params_i) {
   print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
   params <- paramsets[[params_i]]
@@ -80,6 +83,7 @@ models <- pbapply::pblapply(cl = 8, seq_along(paramsets), function(params_i) {
 })
 PRISM:::rsync_remote("", folder, "prism", remote_folder)
 
+## SIMULATE CELLS ---------------------------
 # walk(seq_along(paramsets), function(params_i) {
 handle <- qsub_lapply(qsub_config = qsub_config, qsub_environment=qsub_environment, qsub_packages = c("tidyverse"), seq_along(paramsets), function(params_i) {
   print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
@@ -92,6 +96,7 @@ handle <- qsub_lapply(qsub_config = qsub_config, qsub_environment=qsub_environme
   TRUE
 })
 
+# GOLD STANDARD ----------------------
 # walk(seq_along(paramsets), function(params_i) {
 handle <- qsub_lapply(qsub_config = qsub_config, qsub_environment=qsub_environment, qsub_packages = c("tidyverse"), seq_along(paramsets), function(params_i) {
   print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
@@ -109,6 +114,7 @@ handle <- qsub_lapply(qsub_config = qsub_config, qsub_environment=qsub_environme
 })
 PRISM:::rsync_remote("prism", remote_folder, "", folder)
 
+# EXPERIMENT ----------------------------------
 walk(seq_along(paramsets), function(params_i) {
   print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
   params <- paramsets[[params_i]]
@@ -121,6 +127,18 @@ walk(seq_along(paramsets), function(params_i) {
   TRUE
 })
 filter <- dplyr::filter;mutate <- dplyr::mutate;arrange <- dplyr::arrange # stupid scater ruining our R environments -_-
+
+# NORMALIZE ----------------------------
+walk(seq_along(paramsets), function(params_i) {
+  print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
+  params <- paramsets[[params_i]]
+  experiment <- readRDS(experiment_location(folder, params_i))
+  options(ncores = ncores)
+
+  normalization <- invoke(dynutils::normalize_filter_counts, params$normalization, experiment$counts)
+  saveRDS(normalization, normalization_location(folder, params_i))
+  TRUE
+})
 
 # Plot GOLD STANDARD ----------------------------------------
 options(ncores = 8)
@@ -144,7 +162,6 @@ walk(seq_along(paramsets), function(params_i) {
 
 
 # Plot EXPERIMENT ----------------------------------------
-options(ncores = 8)
 params_i <- 3
 walk(seq_along(paramsets), function(params_i) {
   print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
@@ -160,6 +177,23 @@ walk(seq_along(paramsets), function(params_i) {
 })
 
 
+# Plot NORMALIZATION ----------------------------------------
+params_i <- 3
+walk(seq_along(paramsets), function(params_i) {
+  print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
+  tryCatch({
+    params <- paramsets[[params_i]]
+    experiment <- readRDS(experiment_location(folder, params_i))
+    normalization <- readRDS(normalization_location(folder, params_i))
+
+    graphics.off()
+    pdf(normalization_plot_location(folder, params_i), width=12, height=12)
+    dyngen:::plot_normalization(experiment, normalization)
+    graphics.off()
+  }, error=function(e) {print(glue::glue("error: {params_i}, {e}"))}, finally={graphics.off()})
+})
+
+
 
 # Wrap into tasks ----------------------------
 tasks <- map(seq_along(paramsets), function(params_i) {
@@ -169,8 +203,9 @@ tasks <- map(seq_along(paramsets), function(params_i) {
   simulation <- readRDS(simulation_location(folder, params_i))
   gs <- readRDS(gs_location(folder, params_i))
   experiment <- readRDS(experiment_location(folder, params_i))
+  normalization <- readRDS(normalization_location(folder, params_i))
 
-  wrap_task(params, model, simulation, gs, experiment)
+  wrap_task(params, model, simulation, gs, experiment, normalization)
 })
 
 tasks <- dynutils::list_as_tibble(tasks)
