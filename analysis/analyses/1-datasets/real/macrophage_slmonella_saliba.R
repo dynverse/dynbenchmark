@@ -4,12 +4,10 @@ library(dynalysis)
 
 dataset_preprocessing("real", "macrophage_salmonella_saliba")
 
-txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE79363&format=file&file=GSE79363%5Ffirst%5Fdataset%5Fread%5Fcount%2Etxt%2Egz"
-txt_location <- dataset_preproc_file("GSE79363_first_dataset_read_count.txt.gz")
-
-if (!file.exists(txt_location)) {
-  download.file(txt_web_location, txt_location, method="libcurl")
-}
+txt_location <- download_dataset_file(
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE79363&format=file&file=GSE79363%5Ffirst%5Fdataset%5Fread%5Fcount%2Etxt%2Egz",
+  "GSE79363_first_dataset_read_count.txt.gz"
+)
 
 counts <- read_tsv(txt_location) %>% as.data.frame() %>% tibble::column_to_rownames("X1") %>% as.matrix() %>% t
 cell_info <- tibble(cell_id = rownames(counts), milestone_id = gsub(".*_([A-Za-z]*)$", "\\1", rownames(counts)))
