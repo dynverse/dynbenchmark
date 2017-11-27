@@ -226,28 +226,6 @@ saveRDS(n_methods_over_time, figure_file("platforms.rds"))
 
 # ggsave(figure_file("platforms.png"), platforms, width = 5, height = 5)
 
-#
-# prior_plots <- map(c("start", "cell_grouping", "timecourse", "end", "number of branches", "marker genes"), function(prior) {
-#   levels <- c("No", "CanRoot", "CanUse", "Yes", "?")
-#   method_df %>%
-#     rename(prior = !!prior) %>%
-#     drop_na(prior) %>%
-#     group_by(prior) %>%
-#     summarise(quantity = n()) %>%
-#     mutate(prior = factor(prior, levels=levels)) %>%
-#     ungroup() %>%
-#     arrange(-as.numeric(prior)) %>%
-#     mutate(pos = cumsum(quantity) - quantity/2) %>%
-#     ggplot(aes(1, quantity)) +
-#     geom_bar(aes(fill=prior), width = 1, stat="identity") +
-#     geom_label(aes(1, pos, label=pritt("{prior}: {quantity}"), fill=prior), color="white", fontface = "bold") +
-#     theme_void() +
-#     theme(legend.position="none") +
-#     ggtitle(prior)
-# })
-#
-# cowplot::plot_grid(plotlist = prior_plots, nrow=1)
-
 
 # Trajectory components over time -------------------------------------------
 trajectory_components <- read_rds(derived_file("trajectory_components.rds"))
@@ -287,8 +265,8 @@ saveRDS(trajectory_components_over_time, figure_file("trajectory_components_over
 
 
 # Method aspects -------------------------------------------
-horizontal_lines <- geom_hline(aes(yintercept = seq_along(name)-0.5), alpha=0.2)
 method_order <- method_df_evaluated %>% arrange(qc_score) %>% pull(name)
+horizontal_lines <- geom_hline(aes(yintercept = y+0.5), alpha=0.2, data=tibble(y=seq_along(method_order)))
 
 rotated_axis_text_x <- element_text(angle=45, hjust=1)
 
@@ -304,9 +282,13 @@ empty_left_theme <- theme(
   axis.line.y = element_blank(),
   axis.ticks.y = element_blank()
 )
-# QC
 
+
+
+# QC
 qcs <- c("code_availability", "documentation", "examples", "unit_tests", "behaviour", "code_quality", "support")
+
+traffic_light <- list(low = "#FF4136", mid = "#FF851B", high = "#2ECC40")
 
 score_max <- set_names(rep(1, length(qcs)), qcs)
 score_max[c("behaviour", "code_quality")] <- 0.5
@@ -315,7 +297,7 @@ method_qc_individual <- method_df_evaluated %>%
   gather(score_id, score, !!qcs, factor_key=TRUE) %>%
   mutate(
     score_text = ifelse(score == 0, "-", ifelse(score == score_max[score_id], "+", "~")),
-    score_fill = ifelse(score == 0, "#FF4136", ifelse(score == score_max[score_id], "#2ECC40", "#FF851B")),
+    score_fill = ifelse(score == 0, traffic_light$low, ifelse(score == score_max[score_id], traffic_light$high, traffic_light$mid)),
     name = factor(name, levels=method_order)
   ) %>%
   ggplot(aes(score_id, name)) +
@@ -326,36 +308,65 @@ method_qc_individual <- method_df_evaluated %>%
     base_theme +
     horizontal_lines
 method_qc_individual
+method_qc_individual_width <- length(qcs)
 
 method_qc_overall <- method_df_evaluated %>%
   select(name, qc_score) %>%
   mutate(name = factor(name, levels=method_order)) %>%
   ggplot(aes("qc_score", name)) +
     geom_raster(aes(fill = qc_score)) +
-    viridis::scale_fill_viridis(option="A", guide=guide_colorbar(direction = "horizontal")) +
+    scale_fill_gradientn(colours=traffic_light) +
+    #viridis::scale_fill_viridis(option="A", guide=guide_colorbar(direction = "horizontal")) +
     base_theme +
     empty_left_theme +
     horizontal_lines +
     theme(legend.position = "none")
 method_qc_overall
+method_qc_overall_width <- 1
 
 # Prior information
+priors <- c("start_cell_ids", "grouping_assignment", "time", "timecourse",	"end_cell_ids",	"n_end_states","n_branches", "marker_gene_ids")
+prior_usage_colors <- c("?" = "#AAAAAA", "No" = "#EEEEEE", "Required" = "#FF4136", "CanUse" = "#0074D9", "CanRoot" = "#39CCCC", "CanUseSingle" = "#c5e4ff")
 prior_information <- method_df_evaluated %>%
-  gather(prior_id, prior, c(start, cell_grouping, timecourse, end, `number of branches`, `marker genes`), factor_key=TRUE) %>%
-  select(prior_id, prior, name) %>%
+  gather(prior_id, prior_usage, !!priors, factor_key=TRUE) %>%
+  select(prior_id, prior_usage, name) %>%
   mutate(name = factor(name, levels=method_order)) %>%
   drop_na() %>%
   ggplot() +
-    geom_raster(aes(prior_id, name, fill = prior)) +
-  geom_text(aes(prior_id, name, label=ifelse(prior == "No", "-", prior))) +
-    scale_fill_manual(values=c("?" = "#AAAAAA", "No" = "#EEEEEE", "Yes" = "#FF4136", "CanUse" = "#0074D9", "CanRoot" = "#39CCCC")) +
+    geom_raster(aes(prior_id, name, fill = prior_usage)) +
+  geom_text(aes(prior_id, name, label=ifelse(prior_usage == "No", "-", prior_usage))) +
+    scale_fill_manual(values=prior_usage_colors) +
     base_theme +
     empty_left_theme +
     horizontal_lines +
     theme(legend.position = "none")
 prior_information
 
-saveRDS(n_methods_over_time, figure_file("n_methods_over_time.rds"))
+
+prior_usages <- c("CanRoot", "CanUse", "Required")
+prior_usages_text <- c(CanRoot = "✓", CanUse = "✓", Required = "!")
+prior_usage <- method_df_evaluated %>%
+  gather(prior_id, prior_usage, !!priors, factor_key=TRUE) %>%
+  select(prior_id, prior_usage, name) %>%
+  group_by(name, prior_usage) %>%
+  summarise() %>%
+  ungroup() %>%
+  mutate(
+    prior_usage = factor(prior_usage, levels=prior_usages),
+    name = factor(name, levels=method_order)
+  ) %>%
+  drop_na() %>%
+  ggplot(aes(prior_usage, name)) +
+    geom_raster(aes(fill = prior_usage)) +
+    geom_text(aes(label = prior_usages_text[prior_usage]), color="white", fontface="bold", size=8) +
+    scale_fill_manual(values=prior_usage_colors) +
+    scale_y_discrete(drop=FALSE) +
+    base_theme +
+    empty_left_theme +
+    horizontal_lines +
+    theme(legend.position = "none")
+prior_usage
+prior_usage_width <- length(prior_usages)
 
 # Trajectory components
 trajectory_components <- readRDS(derived_file("trajectory_components.rds"))
@@ -373,9 +384,9 @@ trajectory_components_plot <- trajectory_components %>%
     empty_left_theme +
     horizontal_lines
 trajectory_components_plot
+trajectory_components_width <- length(trajectory_types)
 
-
-method_characteristics <- plot_grid(method_qc_individual, method_qc_overall, prior_information, trajectory_components_plot, nrow=1, align="h", rel_widths = c(0.8, 0.2, 0.8, 0.4), axis="bt", labels="auto")
+method_characteristics <- plot_grid(method_qc_individual, method_qc_overall, prior_usage, trajectory_components_plot, nrow=1, align="h", rel_widths = c(method_qc_individual_width+4, method_qc_overall_width, prior_usage_width, trajectory_components_width), axis="bt", labels="auto")
 method_characteristics
 
 saveRDS(method_characteristics, figure_file("method_characteristics.rds"))
