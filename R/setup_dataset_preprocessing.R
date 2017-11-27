@@ -99,3 +99,46 @@ download_dataset_file <- function(url, filename) {
 
   loc
 }
+
+#' @export
+datasetpreproc_normalise_filter_wrap_and_save <- function(
+  dataset_prefix,
+  dataset_id,
+  ti_type,
+  counts,
+  cell_ids,
+  milestone_ids,
+  milestone_network,
+  milestone_percentages,
+  cell_grouping,
+  cell_info,
+  feature_info
+) {
+  expression <- log2(counts + 1)
+  # norm_out <- normalize_filter_counts(counts)
+  #
+  # expression <- norm_out$expression
+  # counts <- norm_out$counts
+  #
+  # cell_ids <- rownames(counts)
+  # cell_info <- cell_info %>% slice(match(cell_ids, cell_id))
+  # cell_grouping <- cell_grouping %>% filter(cell_id %in% cell_ids)
+  # feature_info <- feature_info %>% slice(match(colnames(counts), feature_id))
+  # milestone_percentages <- milestone_percentages %>% filter(cell_id %in% cell_ids)
+
+  dataset <- wrap_ti_task_data(
+    ti_type = ti_type,
+    id = dataset_id,
+    counts = counts,
+    expression = expression,
+    cell_ids = cell_ids,
+    milestone_ids = milestone_ids,
+    milestone_network = milestone_network,
+    milestone_percentages = milestone_percentages,
+    cell_grouping = cell_grouping,
+    cell_info = cell_info,
+    feature_info = feature_info
+  )
+
+  save_dataset(dataset, dataset_prefix, dataset_id)
+}
