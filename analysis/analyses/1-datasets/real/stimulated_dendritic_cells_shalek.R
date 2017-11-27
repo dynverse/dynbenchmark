@@ -52,7 +52,7 @@ for (setting in settings) {
     dataset_prefix = datasetpreproc_getprefix(),
     dataset_id = datasetpreproc_getid(),
     ti_type = setting$ti_type,
-    counts = counts, # todo: fix this
+    counts = counts,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,
     milestone_network = milestone_network,
