@@ -205,7 +205,7 @@ tasks <- map(seq_along(paramsets), function(params_i) {
   experiment <- readRDS(experiment_location(folder, params_i))
   normalization <- readRDS(normalization_location(folder, params_i))
 
-  wrap_task(params, model, simulation, gs, experiment, normalization)
+  dyngen::wrap_task(params, model, simulation, gs, experiment, normalization)
 })
 
 tasks <- dynutils::list_as_tibble(tasks)
