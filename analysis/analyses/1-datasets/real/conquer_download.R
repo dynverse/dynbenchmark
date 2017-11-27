@@ -200,7 +200,7 @@ for (id in names(conquer_infos)) {
 
   dataset <- wrap_ti_task_data(
     ti_type = "real",
-    id = id,
+    id = datasetpreproc_getid(),
     counts = counts,
     expression = expression,
     cell_ids = cell_ids,
@@ -212,5 +212,5 @@ for (id in names(conquer_infos)) {
     feature_info = feature_info
   )
 
-  save_dataset(dataset, real, id)
+  save_dataset(dataset)
 }

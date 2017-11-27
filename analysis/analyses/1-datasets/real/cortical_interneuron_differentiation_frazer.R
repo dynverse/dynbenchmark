@@ -3,8 +3,7 @@ library(dynalysis)
 library(tidyverse)
 options('download.file.method.GEOquery'='curl')
 
-id <- "cortical_interneuron_differentiation_frazer"
-dataset_preprocessing("real", id)
+dataset_preprocessing("real", "cortical_interneuron_differentiation_frazer")
 
 txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE90860&format=file&file=GSE90860%5FSupplementaryData1%5Frevised%5Fjulien%2Etsv%2Egz"
 txt_location <- dataset_preproc_file("GSE90860_SupplementaryData1_revised_julien.tsv.gz")
@@ -48,7 +47,7 @@ expression <- log2(counts + 1)
 
 dataset <- wrap_ti_task_data(
   ti_type = "real",
-  id = id,
+  id = datasetpreproc_getid(),
   counts = counts,
   expression = expression,
   cell_ids = cell_ids,
