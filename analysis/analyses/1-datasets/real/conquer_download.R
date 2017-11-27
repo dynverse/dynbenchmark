@@ -2,6 +2,8 @@ rm(list=ls())
 library(tidyverse)
 library(dynalysis)
 
+dataset_preprocessing("real", "conquer_downloads")
+
 requireNamespace("MultiAssayExperiment")
 
 addcols <- function(x) x %>% mutate(length = 1, directed = TRUE)
@@ -130,14 +132,12 @@ conquer_infos <- list(
       ifelse(src %in% c("F17W", "M19W"), src, gsub("[FM]", "", src))
     }
   )
-)  %>% {set_names(., map(., "id"))}
+)
 
 
-for (id in names(conquer_infos)) {
+for (source_info in conquer_infos) {
+  id <- source_info$id
   cat(pritt("Processing {id}"), sep = "\n")
-  source_info <- conquer_infos[[id]]
-
-  dataset_preprocessing("real", id)
 
   datas <- lapply(source_info$rds_name, function(rds_name) {
     read_rds(download_dataset_file(
@@ -192,11 +192,12 @@ for (id in names(conquer_infos)) {
   cell_ids <- rownames(counts)
 
   # TODO: use dynutils normalisation
+  # expression <- normalize_filter_counts(counts)
   expression <- log2(counts + 1)
 
   dataset <- wrap_ti_task_data(
     ti_type = "real",
-    id = datasetpreproc_getid(),
+    id = source_info$id,
     counts = counts,
     expression = expression,
     cell_ids = cell_ids,
@@ -208,5 +209,5 @@ for (id in names(conquer_infos)) {
     feature_info = feature_info
   )
 
-  save_dataset(dataset)
+  save_dataset(dataset, "real", source_info$id)
 }
