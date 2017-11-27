@@ -2,15 +2,14 @@ rm(list=ls())
 library(tidyverse)
 library(dynalysis)
 
-id <- "germline_human_li"
-dataset_preprocessing("real", id)
+dataset_preprocessing("real", "germline_human_li")
 
-tar_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE86146&format=file"
-tar_location <- dataset_preproc_file("GSE86146_RAW.tar")
-if (!file.exists(tar_location)) {
-  download.file(tar_web_location, tar_location, method = "libcurl")
-  utils::untar(tar_location, exdir = dataset_preproc_file())
-}
+tar_location <- download_dataset_file(
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE86146&format=file",
+  "GSE86146_RAW.tar"
+)
+
+utils::untar(tar_location, exdir = dataset_preproc_file())
 
 allcounts <- list.files(dataset_preproc_file()) %>%
   keep(~ startsWith(., "GSM")) %>%
@@ -22,11 +21,10 @@ allcounts <- list.files(dataset_preproc_file()) %>%
   select(-Sample) %>%
   as.matrix
 
-mmc2_web_location <- "http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S1934590917300784/1-s2.0-S1934590917300784-mmc2.xlsx/274143/html/S1934590917300784/139b580f8ca22e965c646ac00b373e93/mmc2.xlsx"
-mmc2_location <- dataset_preproc_file("mmc2.xlsx")
-if (!file.exists(mmc2_location)) {
-  download.file(mmc2_web_location, mmc2_location, method = "libcurl")
-}
+mmc2_location <- download_dataset_file(
+  "http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S1934590917300784/1-s2.0-S1934590917300784-mmc2.xlsx/274143/html/S1934590917300784/139b580f8ca22e965c646ac00b373e93/mmc2.xlsx",
+  "mmc2.xlsx"
+)
 
 allcell_info <- readxl::read_xlsx(mmc2_location, sheet = 3) %>%
   rename(cell_id = Cell, cluster=Cluster) %>%
@@ -69,6 +67,8 @@ settings <- list(
 })
 
 for (setting in settings) {
+  dataset_preprocessing("real", setting$id)
+
   milestone_network <- setting$milestone_network
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
@@ -88,7 +88,7 @@ for (setting in settings) {
 
   dataset <- wrap_ti_task_data(
     ti_type = "real",
-    id = setting$id,
+    id = datasetpreproc_getid(),
     counts = counts,
     expression = expression,
     cell_ids = cell_ids,
@@ -100,5 +100,6 @@ for (setting in settings) {
     feature_info = feature_info
   )
 
-  save_dataset(dataset, real, setting$id)
+  save_dataset(dataset)
 }
+

@@ -4,12 +4,10 @@ library(dynalysis)
 
 dataset_preprocessing("real", "fibroblast_reprogramming_treutlein")
 
-txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE67310&format=file&file=GSE67310%5FiN%5Fdata%5Flog2FPKM%5Fannotated%2Etxt%2Egz"
-txt_location <- dataset_preproc_file("GSE67310_iN_data_log2FPKM_annotated.txt.gz")
-
-if (!file.exists(txt_location)) {
-  download.file(txt_web_location, txt_location, method = "libcurl")
-}
+txt_location <- download_dataset_file(
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE67310&format=file&file=GSE67310%5FiN%5Fdata%5Flog2FPKM%5Fannotated%2Etxt%2Egz",
+  "GSE67310_iN_data_log2FPKM_annotated.txt.gz"
+)
 
 df <- read_tsv(txt_location, col_types = cols(cell_name = "c", assignment = "c", experiment = "c", time_point = "c", .default = "d"))
 expression <- df[, -c(1:5)] %>% as.matrix() %>% magrittr::set_rownames(df$cell_name)

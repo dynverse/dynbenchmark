@@ -5,12 +5,10 @@ options('download.file.method.GEOquery'='curl')
 
 dataset_preprocessing("real", "cortical_interneuron_differentiation_frazer")
 
-txt_web_location <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE90860&format=file&file=GSE90860%5FSupplementaryData1%5Frevised%5Fjulien%2Etsv%2Egz"
-txt_location <- dataset_preproc_file("GSE90860_SupplementaryData1_revised_julien.tsv.gz")
-
-if (!file.exists(txt_location)) {
-  download.file(txt_web_location, txt_location, method="libcurl")
-}
+txt_location <- download_dataset_file(
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE90860&format=file&file=GSE90860%5FSupplementaryData1%5Frevised%5Fjulien%2Etsv%2Egz",
+  "GSE90860_SupplementaryData1_revised_julien.tsv.gz"
+)
 
 counts_df <- read_tsv(txt_location)
 counts <- counts_df %>% select(-X1) %>% as.matrix %>% t %>% magrittr::set_colnames(counts_df$X1)
