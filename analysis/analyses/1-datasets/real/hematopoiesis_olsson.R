@@ -1,25 +1,43 @@
 rm(list=ls())
+library(tidyverse)
+library(dynalysis)
+options('download.file.method.GEOquery'='curl')
 
-files <- c(
-  "analysis/data/datasets_preproc/GSE70240_Gmp.txt.gz" = "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE70240&format=file&file=GSE70240%5FGmp%2Etxt%2Egz",
-  "analysis/data/datasets_preproc/GSE70243_LK.CD34+.txt.gz" = "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE70243&format=file&file=GSE70243%5FLK%2ECD34%2B%2Etxt%2Egz",
-  "analysis/data/datasets_preproc/GSE70244_Lsk.txt.gz" = "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE70244&format=file&file=GSE70244%5FLsk%2Etxt%2Egz",
-  "analysis/data/datasets_preproc/GSE70236_Cmp.txt.gz" = "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE70236&format=file&file=GSE70236%5FCmp%2Etxt%2Egz"
+dataset_preprocessing("real", "hematopoiesis_olsson")
+
+files_df <- tribble(
+  ~location, ~url,
+  "GSE70240_Gmp.txt.gz", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE70240&format=file&file=GSE70240%5FGmp%2Etxt%2Egz",
+  "GSE70243_LK.CD34+.txt.gz", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE70243&format=file&file=GSE70243%5FLK%2ECD34%2B%2Etxt%2Egz",
+  "GSE70244_Lsk.txt.gz", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE70244&format=file&file=GSE70244%5FLsk%2Etxt%2Egz",
+  "GSE70236_Cmp.txt.gz", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE70236&format=file&file=GSE70236%5FCmp%2Etxt%2Egz"
+) %>% mutate(
+  preproc_loc = map(location, dataset_preproc_file)
 )
 
-walk2(files, names(files), function(txt_web_location, txt_location) {
-  if (!file.exists(txt_location)) {
-    download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
+for (i in seq_len(nrow(files_df))) {
+  location <- files_df$preproc_loc[[i]]
+  if (!file.exists(location)) {
+    download.file(files_df$url[[i]], location, method = "libcurl")
   }
-})
+}
 
-allexpression <- map(names(files), ~read_tsv(.) %>% tibble::column_to_rownames("uid") %>% as.matrix) %>% do.call(cbind, .) %>% t
+allexpression <- files_df$preproc_loc %>%
+  map(~ read_tsv(., col_types = cols(uid = "c", .default = "d")) %>% gather(feature, expression, -uid)) %>%
+  bind_rows() %>%
+  spread(feature, expression) %>%
+  as.data.frame() %>%
+  magrittr::set_rownames(NULL) %>%
+  column_to_rownames("uid") %>%
+  as.matrix %>%
+  t
 
-txt_web_location <- "https://www.nature.com/nature/journal/v537/n7622/source_data/nature19348-f1.xlsx"
-txt_location <- "analysis/data/datasets_preproc/nature19348-f1.xlsx"
+
+txt_web_location <- "https://images.nature.com/original/nature-assets/nature/journal/v537/n7622/source_data/nature19348-f1.xlsx"
+txt_location <- dataset_preproc_file("nature19348-f1.xlsx")
 
 if (!file.exists(txt_location)) {
-  download.file(paste0(txt_web_location), txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
+  download.file(txt_web_location, txt_location, method="libcurl") # libcurl muuuuuuuuuch faster, usually
 }
 
 small_expression <- readxl::read_xlsx(txt_location, 1)
@@ -28,7 +46,7 @@ subclusters_mapper <- c("HSCP-1", "HSCP-2", "Meg", "Eryth", "Multi-Lin", "MDP", 
 subclusters <- subclusters_mapper[subclusters] %>% set_names(names(subclusters))
 
 allcell_info <- tibble(
-  cell_id=names(subclusters) %>% gsub(".*:(.*)", "\\1", .),
+  cell_id = names(subclusters) %>% gsub(".*:(.*)", "\\1", .),
   cluster = subclusters,
   gate = names(subclusters) %>% gsub("(.*):.*", "\\1", .)
 )
@@ -47,7 +65,7 @@ settings <- list(
       "MDP", "Gran",
       "MDP", "Mono",
       "Gran", "Myelocyte"
-    )
+    ) %>% mutate(length = 1, directed = TRUE)
   ),
   list(
     id = "hematopoiesis_olsson_gates",
@@ -56,12 +74,13 @@ settings <- list(
       ~from, ~to,
       "Lsk", "Cmp",
       "Cmp", "Gmp"
-    )
+    ) %>% mutate(length = 1, directed = TRUE)
   )
 )
 
 for (setting in settings) {
-  info <- list(id=setting$id)
+  dataset_preprocessing("real", setting$id)
+
   milestone_network <- setting$milestone_network
   cell_info <- allcell_info
   cell_info$milestone_id <- cell_info[[setting$milestone_source]]
@@ -75,10 +94,24 @@ for (setting in settings) {
   cell_grouping <- cell_info %>% select(cell_id, milestone_id) %>% rename(group_id = milestone_id)
   milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mutate(percentage=1)
 
-  gene_info <- tibble(id=colnames(expression))
-  gene_ids <- gene_info$id
+  feature_info <- tibble(feature_id = colnames(expression))
 
-  dataset <- lst(gene_info, cell_info, cell_grouping, cell_ids, gene_ids, expression, milestone_network, milestone_ids, milestone_percentages, info)
+  # TODO: check whether the original counts exist
+  counts <- round(2^expression - 1)
 
-  dynalysis:::save_dataset(dataset)
+  dataset <- wrap_ti_task_data(
+    ti_type = "real",
+    id = setting$id,
+    counts = counts,
+    expression = expression,
+    cell_ids = cell_ids,
+    milestone_ids = milestone_ids,
+    milestone_network = milestone_network,
+    milestone_percentages = milestone_percentages,
+    cell_grouping = cell_grouping,
+    cell_info = cell_info,
+    feature_info = feature_info
+  )
+
+  save_dataset(dataset)
 }
