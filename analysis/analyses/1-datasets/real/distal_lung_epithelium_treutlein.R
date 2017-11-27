@@ -2,8 +2,7 @@ rm(list=ls())
 library(dynalysis)
 library(tidyverse)
 
-id <- "distal_lung_epithelium_treutlein"
-dataset_preprocessing("real", id)
+dataset_preprocessing("real", "distal_lung_epithelium_treutlein")
 
 txt_web_location <- "http://www.nature.com/nature/journal/v509/n7500/extref/nature13173-s4.txt"
 txt_location <- dataset_preproc_file("nature13173-s4.txt")
@@ -42,7 +41,7 @@ counts <- round(2^expression - 1)
 
 dataset <- wrap_ti_task_data(
   ti_type = "real",
-  id = id,
+  id = datasetpreproc_getid(),
   counts = counts,
   expression = expression,
   cell_ids = cell_ids,
