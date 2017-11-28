@@ -2,7 +2,7 @@ rm(list=ls())
 library(tidyverse)
 library(dynalysis)
 
-dataset_preprocessing("real/neonatal_inner_ear_burns")
+dataset_preprocessing("real/neonatal-inner-ear_burns")
 
 count_location <- download_dataset_file(
   "GSE71982_RSEM_Counts_Matrix.txt.gz",
@@ -29,7 +29,7 @@ settings <- list(
       "TEC", "HC (i)",
       "HC (i)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/neonatal_inner_ear_all_burns",
+    id = "real/neonatal-inner-ear-all_burns",
     ti_type = "bifurcating_convergence"
   ),
   list(
@@ -39,7 +39,7 @@ settings <- list(
       "SC (ii)", "HC (ii)",
       "HC (ii)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/neonatal_inner_ear_SC_HC_burns",
+    id = "real/neonatal-inner-ear-SC-HC_burns",
     ti_type = "linear"
   ),
   list(
@@ -48,7 +48,7 @@ settings <- list(
       "TEC", "SC (i)",
       "SC (i)", "SC (ii)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/neonatal_inner_ear_TEC_SC_burns",
+    id = "real/neonatal-inner-ear-TEC-SC_burns",
     ti_type = "linear"
   ),
   list(
@@ -57,7 +57,7 @@ settings <- list(
       "TEC", "HC (i)",
       "HC (i)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/neonatal_inner_ear_TEC_HSC_burns",
+    id = "real/neonatal-inner-ear-TEC-HSC_burns",
     ti_type = "linear"
   )
 )
