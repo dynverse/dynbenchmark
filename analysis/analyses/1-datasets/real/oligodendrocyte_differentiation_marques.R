@@ -12,7 +12,7 @@ txt_location <- download_dataset_file(
 
 allcounts <- read_tsv(txt_location) %>% as.data.frame %>% tibble::column_to_rownames("cellid") %>% as.matrix() %>% t
 
-geo <- GEOquery::getGEO("GSE75330", destdir=dataset_preproc_file())
+geo <- GEOquery::getGEO("GSE75330", destdir=dataset_preproc_file(""))
 allcell_info <- geo[[1]] %>%
   Biobase::phenoData() %>%
   as("data.frame") %>%

@@ -8,10 +8,10 @@ dataset_preprocessing("real/developing_dendritic_cells_schlitzer")
 # download and untar files
 file <- download_dataset_file("GSE60781_RAW.tar", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE60781&format=file")
 
-untar(file, exdir = dataset_preproc_file())
+untar(file, exdir = dataset_preproc_file(""))
 
 # read counts
-counts <- map_df(list.files(dataset_preproc_file(), ".*read[cC]ount"), function(filename) {
+counts <- map_df(list.files(dataset_preproc_file(""), ".*read[cC]ount"), function(filename) {
   read_tsv(dataset_preproc_file(filename), col_names = c("gene", "count"), col_types = cols(gene = "c", count = "i")) %>%
     mutate(sample = gsub("_.*", "", filename))
 }) %>%
@@ -22,7 +22,7 @@ counts <- map_df(list.files(dataset_preproc_file(), ".*read[cC]ount"), function(
   as.matrix
 
 # download cell info
-geo <- GEOquery::getGEO("GSE60781", destdir = dataset_preproc_file())
+geo <- GEOquery::getGEO("GSE60781", destdir = dataset_preproc_file(""))
 cell_info <- geo[[1]] %>%
   Biobase::phenoData() %>%
   as("data.frame") %>%
