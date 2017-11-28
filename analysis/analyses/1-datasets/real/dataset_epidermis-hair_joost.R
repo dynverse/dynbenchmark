@@ -62,6 +62,8 @@ settings <- list(
 )
 
 for (setting in settings) {
+  dataset_preprocessing(setting$id)
+
   milestone_network <- setting$milestone_network
 
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
