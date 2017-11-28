@@ -2,11 +2,11 @@ rm(list=ls())
 library(tidyverse)
 library(dynalysis)
 
-dataset_preprocessing("real", "germline_human_li")
+dataset_preprocessing("real/germline_human_li")
 
 tar_location <- download_dataset_file(
-  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE86146&format=file",
-  "GSE86146_RAW.tar"
+  "GSE86146_RAW.tar",
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE86146&format=file"
 )
 
 utils::untar(tar_location, exdir = dataset_preproc_file())
@@ -22,8 +22,8 @@ allcounts <- list.files(dataset_preproc_file()) %>%
   as.matrix
 
 mmc2_location <- download_dataset_file(
-  "http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S1934590917300784/1-s2.0-S1934590917300784-mmc2.xlsx/274143/html/S1934590917300784/139b580f8ca22e965c646ac00b373e93/mmc2.xlsx",
-  "mmc2.xlsx"
+  "mmc2.xlsx",
+  "http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S1934590917300784/1-s2.0-S1934590917300784-mmc2.xlsx/274143/html/S1934590917300784/139b580f8ca22e965c646ac00b373e93/mmc2.xlsx"
 )
 
 allcell_info <- readxl::read_xlsx(mmc2_location, sheet = 3) %>%
@@ -42,7 +42,7 @@ milestone_order_to_network <- function(order) {
 
 settings <- list(
   list(
-    id = "germline_human_male_li",
+    id = "real/germline_human_male_li",
     milestone_network = tribble(
       ~from, ~to,
       "Male_FGC#1", "Male_FGC#2",
@@ -52,7 +52,7 @@ settings <- list(
     ti_type = "linear"
   ),
   list(
-    id="germline_human_female_li",
+    id = "real/germline_human_female_li",
     milestone_network = tribble(
       ~from, ~to,
       "Female_FGC#1", "Female_FGC#2",
@@ -62,7 +62,7 @@ settings <- list(
     ti_type = "linear"
   ),
   list(
-    id="germline_human_male_weeks_li",
+    id = "real/germline_human_male_weeks_li",
     milestone_network = tribble(
       ~from, ~to,
       "M#4#FGC", "M#9#FGC",
@@ -76,7 +76,7 @@ settings <- list(
     ti_type = "linear"
   ),
   list(
-    id="germline_human_female_weeks_li",
+    id = "real/germline_human_female_weeks_li",
     milestone_network = tribble(
       ~from, ~to,
       "F#5#FGC", "F#7#FGC",
@@ -100,7 +100,7 @@ settings <- list(
 })
 
 for (setting in settings) {
-  dataset_preprocessing("real", setting$id)
+  dataset_preprocessing(setting$id)
 
   milestone_network <- setting$milestone_network
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
@@ -117,8 +117,6 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(counts))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    dataset_prefix = datasetpreproc_getprefix(),
-    dataset_id = setting$id,
     ti_type = setting$ti_type,
     counts = counts,
     cell_ids = cell_ids,
