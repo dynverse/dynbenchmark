@@ -58,7 +58,8 @@ settings <- list(
       "MDP", "Gran",
       "MDP", "Mono",
       "Gran", "Myelocyte"
-    ) %>% mutate(length = 1, directed = TRUE)
+    ) %>% mutate(length = 1, directed = TRUE),
+    ti_type = "tree"
   ),
   list(
     id = "hematopoiesis_olsson_gates",
@@ -67,7 +68,8 @@ settings <- list(
       ~from, ~to,
       "Lsk", "Cmp",
       "Cmp", "Gmp"
-    ) %>% mutate(length = 1, directed = TRUE)
+    ) %>% mutate(length = 1, directed = TRUE),
+    ti_type = "linear"
   )
 )
 
@@ -89,14 +91,11 @@ for (setting in settings) {
 
   feature_info <- tibble(feature_id = colnames(expression))
 
-  # TODO: check whether the original counts exist
-  counts <- round(2^expression - 1)
-
-  dataset <- wrap_ti_task_data(
-    ti_type = "real",
-    id = datasetpreproc_getid(),
-    counts = counts,
-    expression = expression,
+  datasetpreproc_normalise_filter_wrap_and_save(
+    dataset_prefix = datasetpreproc_getprefix(),
+    dataset_id = datasetpreproc_getid(),
+    ti_type = setting$ti_type,
+    counts = 2^expression-1, # todo: fix this
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,
     milestone_network = milestone_network,
@@ -105,6 +104,4 @@ for (setting in settings) {
     cell_info = cell_info,
     feature_info = feature_info
   )
-
-  save_dataset(dataset)
 }

@@ -37,14 +37,11 @@ milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mut
 
 feature_info <- tibble(feature_id = colnames(expression))
 
-# TODO: check whether the original counts exist
-counts <- round(2^expression - 1)
-
-dataset <- wrap_ti_task_data(
-  ti_type = "real",
-  id = datasetpreproc_getid(),
-  counts = counts,
-  expression = expression,
+datasetpreproc_normalise_filter_wrap_and_save(
+  dataset_prefix = datasetpreproc_getprefix(),
+  dataset_id = datasetpreproc_getid(),
+  ti_type = "linear",
+  counts = 2^expression-1, # todo: fix this
   cell_ids = cell_ids,
   milestone_ids = milestone_ids,
   milestone_network = milestone_network,
@@ -53,5 +50,3 @@ dataset <- wrap_ti_task_data(
   cell_info = cell_info,
   feature_info = feature_info
 )
-
-save_dataset(dataset)

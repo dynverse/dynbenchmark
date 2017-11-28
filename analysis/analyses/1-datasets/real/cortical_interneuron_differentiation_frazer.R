@@ -14,9 +14,13 @@ counts_df <- read_tsv(txt_location)
 counts <- counts_df %>% select(-X1) %>% as.matrix %>% t %>% magrittr::set_colnames(counts_df$X1)
 
 geo <- GEOquery::getGEO(GEO = "GSE90860", destdir = dataset_preproc_file())
-cell_info <- geo[[1]] %>% Biobase::phenoData() %>% as("data.frame") %>% mutate(cell_id=rownames(counts))
-cell_info <- cell_info %>%
-  mutate(milestone_id = paste0(gsub("age: (.*)", "\\1", characteristics_ch1), "#", gsub("assigned_subgroup: (.*)", "\\1", characteristics_ch1.1))) %>%
+cell_info <- geo[[1]] %>%
+  Biobase::phenoData() %>%
+  as("data.frame") %>%
+  mutate(
+    cell_id = rownames(counts),
+    milestone_id = paste0(gsub("age: (.*)", "\\1", characteristics_ch1), "#", gsub("assigned_subgroup: (.*)", "\\1", characteristics_ch1.1))
+  ) %>%
   select(cell_id, milestone_id) %>%
   mutate_all(funs(as.character))
 
@@ -40,14 +44,11 @@ milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mut
 
 feature_info <- tibble(feature_id = colnames(counts))
 
-# todo: use dynutils normalisation
-expression <- log2(counts + 1)
-
-dataset <- wrap_ti_task_data(
-  ti_type = "real",
-  id = datasetpreproc_getid(),
+datasetpreproc_normalise_filter_wrap_and_save(
+  dataset_prefix = datasetpreproc_getprefix(),
+  dataset_id = datasetpreproc_getid(),
+  ti_type = "trifurcating",
   counts = counts,
-  expression = expression,
   cell_ids = cell_ids,
   milestone_ids = milestone_ids,
   milestone_network = milestone_network,
@@ -56,5 +57,3 @@ dataset <- wrap_ti_task_data(
   cell_info = cell_info,
   feature_info = feature_info
 )
-
-save_dataset(dataset)
