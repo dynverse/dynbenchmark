@@ -2,11 +2,11 @@ rm(list=ls())
 library(tidyverse)
 library(dynalysis)
 
-dataset_preprocessing("real", "pancreatic_cell_maturation_zhang")
+dataset_preprocessing("real/pancreatic_cell_maturation_zhang")
 
 txt_location <- download_dataset_file(
-  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE87375&format=file&file=GSE87375%5FSingle%5FCell%5FRNA%2Dseq%5FGene%5FRead%5FCount%2Etxt%2Egz",
-  "GSE87375_Single_Cell_RNA-seq_Gene_Read_Count.txt.gz"
+  "GSE87375_Single_Cell_RNA-seq_Gene_Read_Count.txt.gz",
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE87375&format=file&file=GSE87375%5FSingle%5FCell%5FRNA%2Dseq%5FGene%5FRead%5FCount%2Etxt%2Egz"
 )
 
 allcounts <- read_tsv(txt_location) %>%
@@ -50,7 +50,7 @@ allcell_info <- dynutils::list_as_tibble(geo@gsms %>% map(~.@header)) %>%
 
 settings <- list(
   list(
-    id = "pancreatic_alpha_cell_maturation_zhang",
+    id = "real/pancreatic_alpha_cell_maturation_zhang",
     milestone_network = tribble(
       ~from, ~to, ~length,
       "α-cell E17.5", "α-cell P0", 2.5,
@@ -62,7 +62,7 @@ settings <- list(
     ti_type = "linear"
   ),
   list(
-    id = "pancreatic_beta_cell_maturation_zhang",
+    id = "real/pancreatic_beta_cell_maturation_zhang",
     milestone_network = tribble(
       ~from, ~to, ~length,
       "β-cell E17.5", "β-cell P0", 2.5,
@@ -77,7 +77,7 @@ settings <- list(
 )
 
 for (setting in settings) {
-  dataset_preprocessing("real", setting$id)
+  dataset_preprocessing(setting$id)
 
   milestone_network <- setting$milestone_network
 
@@ -93,8 +93,6 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(counts))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    dataset_prefix = datasetpreproc_getprefix(),
-    dataset_id = setting$id,
     ti_type = setting$ti_type,
     counts = counts,
     cell_ids = cell_ids,

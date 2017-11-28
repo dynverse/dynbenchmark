@@ -4,11 +4,9 @@
 \alias{load_dataset}
 \title{Loading a dataset after it has been preprocessed}
 \usage{
-load_dataset(prefix, dataset_id)
+load_dataset(dataset_id = NULL)
 }
 \arguments{
-\item{prefix}{Dataset prefix}
-
 \item{dataset_id}{Dataset id}
 }
 \description{

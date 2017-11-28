@@ -2,11 +2,11 @@ rm(list=ls())
 library(tidyverse)
 library(dynalysis)
 
-dataset_preprocessing("real", "macrophage_salmonella_saliba")
+dataset_preprocessing("real/macrophage_salmonella_saliba")
 
 txt_location <- download_dataset_file(
-  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE79363&format=file&file=GSE79363%5Ffirst%5Fdataset%5Fread%5Fcount%2Etxt%2Egz",
-  "GSE79363_first_dataset_read_count.txt.gz"
+  "GSE79363_first_dataset_read_count.txt.gz",
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE79363&format=file&file=GSE79363%5Ffirst%5Fdataset%5Fread%5Fcount%2Etxt%2Egz"
 )
 
 counts <- read_tsv(txt_location) %>% as.data.frame() %>% tibble::column_to_rownames("X1") %>% as.matrix() %>% t
@@ -14,7 +14,6 @@ cell_info <- tibble(cell_id = rownames(counts), milestone_id = gsub(".*_([A-Za-z
 
 counts <- counts[cell_info$cell_id, ]
 
-# milestone_network <- tibble(from=cell_info$milestone_id, to=cell_info$milestone_id)
 milestone_network = tribble(
   ~from, ~to,
   "NNI", "MNGB",
@@ -33,8 +32,6 @@ milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mut
 feature_info <- tibble(feature_id = colnames(counts))
 
 datasetpreproc_normalise_filter_wrap_and_save(
-  dataset_prefix = datasetpreproc_getprefix(),
-  dataset_id = datasetpreproc_getid(),
   ti_type = "trifurcating",
   counts = counts,
   cell_ids = cell_ids,
