@@ -47,7 +47,8 @@ conquer_infos <- list(
       "vα14 inkt thymocyte subset: NKT0", "vα14 inkt thymocyte subset: NKT2"
     ) %>% addcols,
     ti_type = "trifurcating",
-    source_id = "conquer"
+    source_id = "conquer",
+    remove_spike_ins = TRUE
   ),
   list(
     id = "real/cell-cycle_leng",
@@ -59,7 +60,8 @@ conquer_infos <- list(
       "S", "G2",
       "G2", "G1"
     ) %>% addcols,
-    ti_type = "cyclical"
+    ti_type = "cyclical",
+    remove_spike_ins = TRUE
   ),
   list(
     id = "real/mesoderm-development_loh",
@@ -155,8 +157,13 @@ for (source_info in conquer_infos) {
   # filter genes
   transcript_info <- datas %>%
     map_df(~ SummarizedExperiment::rowData(.[["gene"]]) %>% as.data.frame) %>%
-    unique() %>%
-    filter(genome != "ERCC")
+    unique()
+
+  if(!is.null(source_info$remove_spike_ins) && source_info$remove_spike_ins) {
+    transcript_info <- transcript_info %>%
+      filter(genome != "ERCC")
+  }
+
   counts <- tran_counts[, transcript_info$gene] %>% t %>% rowsum(transcript_info$symbol) %>% t
   feature_info <- transcript_info %>%
     group_by(symbol) %>%
