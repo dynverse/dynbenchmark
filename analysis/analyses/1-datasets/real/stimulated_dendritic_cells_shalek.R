@@ -32,6 +32,8 @@ settings <- lapply(c("LPS", "PAM", "PIC"), function(stim) {
   )
 })
 
+tab <- tab[, !grepl("^ERCC", colnames(tab))] # remove spike-ins, are not present in every cell
+
 for (setting in settings) {
   dataset_preprocessing("real", setting$id)
 
