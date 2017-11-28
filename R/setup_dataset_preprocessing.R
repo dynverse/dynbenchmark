@@ -103,8 +103,10 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     dataset_id <- datasetpreproc_getid()
   }
 
-  counts <- convert_to_symbol(counts)
-  feature_info$feature_id <- colnames(counts)
+  conversion_out <- convert_to_symbol(counts)
+  counts <- conversion_out$counts
+  feature_info <- feature_info[conversion_out$filtered, ] %>% mutate(feature_id = colnames(counts))
+
   norm_out <- normalize_filter_counts(counts, verbose = TRUE)
 
   pdf(dataset_file(dataset_id = dataset_id, "normalization.pdf"));walk(norm_out$normalization_plots, print);graphics.off()
@@ -145,5 +147,8 @@ convert_to_symbol <- function(counts) {
     mutate(gene_id = ifelse(is.na(symbol), gene_id, symbol)) %>%
     pull(gene_id)
 
-  counts
+  filtered <- names(which(table(colnames(counts)) == 1))
+  counts <- counts[, filtered] # remove duplicates
+
+  lst(counts, filtered)
 }
