@@ -2,7 +2,7 @@ rm(list=ls())
 library(tidyverse)
 library(dynalysis)
 
-dataset_preprocessing("real/germline_human_li")
+dataset_preprocessing("real/germline-human_li")
 
 tar_location <- download_dataset_file(
   "GSE86146_RAW.tar",
@@ -42,7 +42,7 @@ milestone_order_to_network <- function(order) {
 
 settings <- list(
   list(
-    id = "real/germline_human_male_li",
+    id = "real/germline-human-male_li",
     milestone_network = tribble(
       ~from, ~to,
       "Male_FGC#1", "Male_FGC#2",
@@ -52,7 +52,7 @@ settings <- list(
     ti_type = "linear"
   ),
   list(
-    id = "real/germline_human_female_li",
+    id = "real/germline-human-female_li",
     milestone_network = tribble(
       ~from, ~to,
       "Female_FGC#1", "Female_FGC#2",
@@ -62,7 +62,7 @@ settings <- list(
     ti_type = "linear"
   ),
   list(
-    id = "real/germline_human_male_weeks_li",
+    id = "real/germline-human-male-weeks_li",
     milestone_network = tribble(
       ~from, ~to,
       "M#4#FGC", "M#9#FGC",
@@ -76,7 +76,7 @@ settings <- list(
     ti_type = "linear"
   ),
   list(
-    id = "real/germline_human_female_weeks_li",
+    id = "real/germline-human-female-weeks_li",
     milestone_network = tribble(
       ~from, ~to,
       "F#5#FGC", "F#7#FGC",

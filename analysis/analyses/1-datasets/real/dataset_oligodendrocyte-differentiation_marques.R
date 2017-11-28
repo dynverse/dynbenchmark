@@ -3,7 +3,7 @@ library(dynalysis)
 library(tidyverse)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real/oligodendrocyte_differentiation_marques")
+dataset_preprocessing("real/oligodendrocyte-differentiation_marques")
 
 txt_location <- download_dataset_file(
   "Marques_mol_counts.tab.gz",
@@ -26,7 +26,7 @@ allcell_info <- geo[[1]] %>%
 
 settings <- list(
   list(
-    id = "real/oligodendrocyte_differentiation_subclusters_marques",
+    id = "real/oligodendrocyte-differentiation-subclusters_marques",
     milestone_source = "subcluster",
     milestone_network = tribble(
       ~from, ~to,
@@ -45,7 +45,7 @@ settings <- list(
     ti_type = "tree"
   ),
   list(
-    id = "real/oligodendrocyte_differentiation_clusters_marques",
+    id = "real/oligodendrocyte-differentiation-clusters_marques",
     milestone_source = "cluster",
     milestone_network = tribble(
       ~from, ~to,

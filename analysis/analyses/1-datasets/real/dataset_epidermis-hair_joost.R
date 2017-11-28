@@ -3,7 +3,7 @@ library(tidyverse)
 library(dynalysis)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real/epidermis_hair_joost")
+dataset_preprocessing("real/epidermis-hair_joost")
 
 txt_location <- download_dataset_file(
   "GSE67602_Joost_et_al_expression.txt.gz",
@@ -36,7 +36,7 @@ settings <- list(
       "IB", "uHF-I",
       "uHF-I", "IFE-B"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/epidermis_hair_spatial_joost",
+    id = "real/epidermis-hair-spatial_joost",
     ti_type = "linear"
   ),
   list(
@@ -47,7 +47,7 @@ settings <- list(
       "IFE-DII", "IFE-KI",
       "IFE-KI", "IFE-KII"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/epidermis_hair_IFE_joost",
+    id = "real/epidermis-hair-IFE_joost",
     ti_type = "linear"
   ),
   list(
@@ -56,7 +56,7 @@ settings <- list(
       "uHF-I", "uHF-II",
       "uHF-II", "uHF-III"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/epidermis_hair_uHF_joost",
+    id = "real/epidermis-hair-uHF_joost",
     ti_type = "linear"
   )
 )
