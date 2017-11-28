@@ -3,7 +3,7 @@ library(tidyverse)
 library(dynalysis)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real/aging_hsc_kowalczyk")
+dataset_preprocessing("real/aging-hsc_kowalczyk")
 
 # download
 file1 <- download_dataset_file("GSE59114_C57BL6_GEO_all.xlsx", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE59114&format=file&file=GSE59114%5FC57BL6%5FGEO%5Fall%2Exlsx")
@@ -40,7 +40,7 @@ allcell_info <- data_frame(
 
 settings <- lapply(c("old", "young"), function(age) {
   list(
-    id = pritt("real/aging_hsc_{age}_kowalczyk"),
+    id = pritt("real/aging-hsc-{age}_kowalczyk"),
     milestone_network = tribble(
       ~from, ~to,
       "LT-HSC", "ST-HSC",

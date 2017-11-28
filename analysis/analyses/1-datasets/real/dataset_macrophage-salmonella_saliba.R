@@ -2,7 +2,7 @@ rm(list=ls())
 library(tidyverse)
 library(dynalysis)
 
-dataset_preprocessing("real/macrophage_salmonella_saliba")
+dataset_preprocessing("real/macrophage-salmonella_saliba")
 
 txt_location <- download_dataset_file(
   "GSE79363_first_dataset_read_count.txt.gz",
