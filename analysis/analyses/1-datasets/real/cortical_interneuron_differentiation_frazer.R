@@ -13,7 +13,7 @@ txt_location <- download_dataset_file(
 counts_df <- read_tsv(txt_location)
 counts <- counts_df %>% select(-X1) %>% as.matrix %>% t %>% magrittr::set_colnames(counts_df$X1)
 
-geo <- GEOquery::getGEO(GEO = "GSE90860", destdir = dataset_preproc_file())
+geo <- GEOquery::getGEO(GEO = "GSE90860", destdir = dataset_preproc_file(""))
 cell_info <- geo[[1]] %>%
   Biobase::phenoData() %>%
   as("data.frame") %>%
