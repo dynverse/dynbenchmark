@@ -3,10 +3,10 @@ library(tidyverse)
 library(dynalysis)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real", "developing_dendritic_cells_schlitzer")
+dataset_preprocessing("real/developing_dendritic_cells_schlitzer")
 
 # download and untar files
-file <- download_dataset_file("https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE60781&format=file", "GSE60781_RAW.tar")
+file <- download_dataset_file("GSE60781_RAW.tar", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE60781&format=file")
 
 untar(file, exdir = dataset_preproc_file())
 
@@ -46,8 +46,6 @@ milestone_percentages <- cell_info %>% select(cell_id, milestone_id) %>% mutate(
 feature_info <- tibble(feature_id = colnames(counts))
 
 datasetpreproc_normalise_filter_wrap_and_save(
-  dataset_prefix = datasetpreproc_getprefix(),
-  dataset_id = datasetpreproc_getid(),
   ti_type = "linear",
   counts = counts,
   cell_ids = cell_ids,

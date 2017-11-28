@@ -2,11 +2,11 @@ rm(list=ls())
 library(tidyverse)
 library(dynalysis)
 
-dataset_preprocessing("real", "hepatoblast_differentiation_yang")
+dataset_preprocessing("real/hepatoblast_differentiation_yang")
 
 txt_location <- download_dataset_file(
-  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE90047&format=file&file=GSE90047%5FSingle%2Dcell%5FRNA%2Dseq%5FTPM%2Etxt%2Egz",
-  "GSE90047_Single-cell_RNA-seq_TPM.txt.gz"
+  "GSE90047_Single-cell_RNA-seq_TPM.txt.gz",
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE90047&format=file&file=GSE90047%5FSingle%2Dcell%5FRNA%2Dseq%5FTPM%2Etxt%2Egz"
 )
 
 counts <- read_tsv(txt_location, col_types = cols(ID = "c", Symbol = "c", .default = "d")) %>%
@@ -29,7 +29,6 @@ cell_info <- geo[[2]] %>%
   mutate(
     milestone_id = ifelse(day %in% c("E10.5", "E11.5", "E12.5"), day, paste0(day, "#", putative_cell_type))
   )
-
 
 milestone_network <- tribble(
   ~from, ~to, ~length, ~directed,
@@ -61,8 +60,6 @@ milestone_percentages <- cell_grouping %>%
 feature_info <- tibble(feature_id = colnames(counts))
 
 datasetpreproc_normalise_filter_wrap_and_save(
-  dataset_prefix = datasetpreproc_getprefix(),
-  dataset_id = datasetpreproc_getid(),
   ti_type = "bifurcating",
   counts = counts,
   cell_ids = cell_ids,

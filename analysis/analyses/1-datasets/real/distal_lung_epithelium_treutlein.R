@@ -2,11 +2,11 @@ rm(list=ls())
 library(dynalysis)
 library(tidyverse)
 
-dataset_preprocessing("real", "distal_lung_epithelium_treutlein")
+dataset_preprocessing("real/distal_lung_epithelium_treutlein")
 
 txt_location <- download_dataset_file(
-  "http://www.nature.com/nature/journal/v509/n7500/extref/nature13173-s4.txt",
-  "nature13173-s4.txt"
+  "nature13173-s4.txt",
+  "http://www.nature.com/nature/journal/v509/n7500/extref/nature13173-s4.txt"
 )
 
 df <- read_tsv(txt_location, col_types = cols(cell_name = "c", time_point = "c", sample = "c", putative_cell_type = "c", .default = "d"))
@@ -35,8 +35,6 @@ milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mut
 feature_info <- tibble(feature_id = colnames(expression))
 
 datasetpreproc_normalise_filter_wrap_and_save(
-  dataset_prefix = datasetpreproc_getprefix(),
-  dataset_id = datasetpreproc_getid(),
   ti_type = "bifurcating",
   counts = 2^expression-1, # TODO: fix this
   cell_ids = cell_ids,
