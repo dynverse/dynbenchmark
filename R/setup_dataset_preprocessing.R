@@ -33,7 +33,7 @@ datasetpreproc_getid <- function() {
 
 # create a helper function
 datasetpreproc_subfolder <- function(path) {
-  function(filename, dataset_id = NULL) {
+  function(filename = "", dataset_id = NULL) {
     dyn_fold <- get_dynalysis_folder()
 
     if (is.null(dataset_id)) {
@@ -104,9 +104,12 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   }
 
   counts <- convert_to_symbol(counts)
-  norm_out <- normalize_filter_counts(counts)
+  feature_info$feature_id <- colnames(counts)
+  norm_out <- normalize_filter_counts(counts, verbose = TRUE)
 
-  pdf(dataset_file("normalization.pdf"));walk(norm_out$normalization_plots, print);graphics.off()
+  pdf(dataset_file(dataset_id = dataset_id, "normalization.pdf"));walk(norm_out$normalization_plots, print);graphics.off()
+
+  normalization_info <- norm_out$info
 
   expression <- norm_out$expression
   counts <- norm_out$counts
