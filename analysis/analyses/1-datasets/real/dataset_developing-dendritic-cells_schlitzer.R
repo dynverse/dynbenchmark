@@ -21,6 +21,8 @@ counts <- map_df(list.files(dataset_preproc_file(""), ".*read[cC]ount"), functio
   column_to_rownames("sample") %>%
   as.matrix
 
+counts <- counts[, !(colnames(counts) %in% c("alignment_not_unique", "no_feature", "ambiguous"))]
+
 # download cell info
 geo <- GEOquery::getGEO("GSE60781", destdir = dataset_preproc_file(""))
 cell_info <- geo[[1]] %>%
