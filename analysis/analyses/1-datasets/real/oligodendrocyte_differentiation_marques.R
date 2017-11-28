@@ -3,11 +3,11 @@ library(dynalysis)
 library(tidyverse)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real", "oligodendrocyte_differentiation_marques")
+dataset_preprocessing("real/oligodendrocyte_differentiation_marques")
 
 txt_location <- download_dataset_file(
-  "http://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE75330&format=file&file=GSE75330%5FMarques%5Fet%5Fal%5Fmol%5Fcounts2%2Etab%2Egz",
-  "Marques_mol_counts.tab.gz"
+  "Marques_mol_counts.tab.gz",
+  "http://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE75330&format=file&file=GSE75330%5FMarques%5Fet%5Fal%5Fmol%5Fcounts2%2Etab%2Egz"
 )
 
 allcounts <- read_tsv(txt_location) %>% as.data.frame %>% tibble::column_to_rownames("cellid") %>% as.matrix() %>% t
@@ -26,7 +26,7 @@ allcell_info <- geo[[1]] %>%
 
 settings <- list(
   list(
-    id = "oligodendrocyte_differentiation_subclusters_marques",
+    id = "real/oligodendrocyte_differentiation_subclusters_marques",
     milestone_source = "subcluster",
     milestone_network = tribble(
       ~from, ~to,
@@ -45,7 +45,7 @@ settings <- list(
     ti_type = "tree"
   ),
   list(
-    id = "oligodendrocyte_differentiation_clusters_marques",
+    id = "real/oligodendrocyte_differentiation_clusters_marques",
     milestone_source = "cluster",
     milestone_network = tribble(
       ~from, ~to,
@@ -58,7 +58,7 @@ settings <- list(
 )
 
 for (setting in settings) {
-  dataset_preprocessing("real", setting$id)
+  dataset_preprocessing(setting$id)
 
   milestone_network <- setting$milestone_network
   cell_info <- allcell_info
@@ -76,8 +76,6 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(counts))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    dataset_prefix = datasetpreproc_getprefix(),
-    dataset_id = setting$id,
     ti_type = setting$ti_type,
     counts = counts,
     cell_ids = cell_ids,

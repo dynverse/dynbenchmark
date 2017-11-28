@@ -3,7 +3,7 @@ library(tidyverse)
 library(dynalysis)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real", "hematopoiesis_olsson")
+dataset_preprocessing("real/hematopoiesis_olsson")
 
 files_df <- tribble(
   ~location, ~url,
@@ -14,7 +14,7 @@ files_df <- tribble(
 ) %>%
   rowwise() %>%
   mutate(
-    preproc_loc = download_dataset_file(url, location)
+    preproc_loc = download_dataset_file(location, url)
   ) %>%
   ungroup()
 
@@ -29,8 +29,8 @@ allexpression <- files_df$preproc_loc %>%
   t
 
 txt_location <- download_dataset_file(
-  "https://images.nature.com/original/nature-assets/nature/journal/v537/n7622/source_data/nature19348-f1.xlsx",
-  "nature19348-f1.xlsx"
+  "nature19348-f1.xlsx",
+  "https://images.nature.com/original/nature-assets/nature/journal/v537/n7622/source_data/nature19348-f1.xlsx"
 )
 
 small_expression <- readxl::read_xlsx(txt_location, 1)
@@ -46,7 +46,7 @@ allcell_info <- tibble(
 
 settings <- list(
   list(
-    id = "hematopoiesis_olsson_clusters",
+    id = "real/hematopoiesis_olsson_clusters",
     milestone_source = "cluster",
     milestone_network = tribble(
       ~from, ~to,
@@ -62,7 +62,7 @@ settings <- list(
     ti_type = "tree"
   ),
   list(
-    id = "hematopoiesis_olsson_gates",
+    id = "real/hematopoiesis_olsson_gates",
     milestone_source = "gate",
     milestone_network = tribble(
       ~from, ~to,
@@ -74,7 +74,7 @@ settings <- list(
 )
 
 for (setting in settings) {
-  dataset_preprocessing("real", setting$id)
+  dataset_preprocessing(setting$id)
 
   milestone_network <- setting$milestone_network
   cell_info <- allcell_info
@@ -92,8 +92,6 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(expression))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    dataset_prefix = datasetpreproc_getprefix(),
-    dataset_id = datasetpreproc_getid(),
     ti_type = setting$ti_type,
     counts = 2^expression-1, # todo: fix this
     cell_ids = cell_ids,
