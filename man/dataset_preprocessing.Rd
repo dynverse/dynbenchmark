@@ -2,33 +2,30 @@
 % Please edit documentation in R/setup_dataset_preprocessing.R
 \name{dataset_preprocessing}
 \alias{dataset_preprocessing}
-\alias{datasetpreproc_getprefix}
 \alias{datasetpreproc_getid}
 \alias{dataset_preproc_file}
 \alias{dataset_file}
 \alias{save_dataset}
 \title{Helper functions for creating new datasets}
 \usage{
-dataset_preprocessing(prefix, dataset_id)
-
-datasetpreproc_getprefix()
+dataset_preprocessing(dataset_id)
 
 datasetpreproc_getid()
 
-dataset_preproc_file(..., prefix = NULL, dataset_id = NULL)
+dataset_preproc_file(filename, dataset_id = NULL)
 
-dataset_file(..., prefix = NULL, dataset_id = NULL)
+dataset_file(filename, dataset_id = NULL)
 
-save_dataset(dataset, prefix = NULL, dataset_id = NULL)
+save_dataset(dataset, dataset_id = NULL)
 }
 \arguments{
-\item{prefix}{Dataset prefix}
-
 \item{dataset_id}{Dataset id}
 
-\item{...}{filenames}
+\item{filename}{filename}
 
 \item{dataset}{Dataset object to save}
+
+\item{prefix}{Dataset prefix}
 }
 \description{
 Helper functions for creating new datasets

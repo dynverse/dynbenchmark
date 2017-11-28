@@ -3,9 +3,12 @@ library(tidyverse)
 library(dynalysis)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real", "stimulated_dendritic_cells_shalek")
+dataset_preprocessing("real/stimulated_dendritic_cells_shalek")
 
-file <- download_dataset_file("https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE48968&format=file&file=GSE48968%5FallgenesTPM%5FGSM1189042%5FGSM1190902%2Etxt%2Egz", "GSM1406531_GSM1407094.txt.gz")
+file <- download_dataset_file(
+  "GSM1406531_GSM1407094.txt.gz",
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE48968&format=file&file=GSE48968%5FallgenesTPM%5FGSM1189042%5FGSM1190902%2Etxt%2Egz"
+)
 tab <- read.table(gzfile(file), header = TRUE, sep = "\t") %>% as.matrix %>% t
 
 allcell_info <- data_frame(
@@ -20,7 +23,7 @@ allcell_info <- data_frame(
 
 settings <- lapply(c("LPS", "PAM", "PIC"), function(stim) {
   list(
-    id = pritt("stimulated_dendritic_cells_{stim}_shalek"),
+    id = pritt("real/stimulated_dendritic_cells_{stim}_shalek"),
     milestone_network = tribble(
       ~from, ~to, ~length,
       "Unstimulated#0h", pritt("{stim}#1h"), 1,
@@ -35,7 +38,7 @@ settings <- lapply(c("LPS", "PAM", "PIC"), function(stim) {
 tab <- tab[, !grepl("^ERCC", colnames(tab))] # remove spike-ins, are not present in every cell
 
 for (setting in settings) {
-  dataset_preprocessing("real", setting$id)
+  dataset_preprocessing(setting$id)
 
   milestone_network <- setting$milestone_network
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
@@ -51,8 +54,6 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(counts))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    dataset_prefix = datasetpreproc_getprefix(),
-    dataset_id = datasetpreproc_getid(),
     ti_type = setting$ti_type,
     counts = counts,
     cell_ids = cell_ids,

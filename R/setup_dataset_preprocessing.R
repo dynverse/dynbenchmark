@@ -3,32 +3,21 @@
 #' @param prefix Dataset prefix
 #' @param dataset_id Dataset id
 #' @param dataset Dataset object to save
-#' @param ... filenames
+#' @param filename filename
 #'
 #' @importFrom lazyeval lazy_eval
 #' @importFrom testthat expect_match
 #' @export
 #'
 #' @rdname dataset_preprocessing
-dataset_preprocessing <- function(prefix, dataset_id) {
+dataset_preprocessing <- function(dataset_id) {
   # check whether the working directory is indeed the dynalysis folder
   dynalysis_folder <- get_dynalysis_folder()
 
   # set option
   options(
-    dynalysis_datasetpreproc_prefix = prefix,
     dynalysis_datasetpreproc_id = dataset_id
   )
-}
-
-#' @rdname dataset_preprocessing
-#' @export
-datasetpreproc_getprefix <- function() {
-  prefix <- getOption("dynalysis_datasetpreproc_prefix")
-  if (is.null(prefix)) {
-    stop("No prefix found. Did you run dataset_preprocessing(...)?")
-  }
-  prefix
 }
 
 #' @rdname dataset_preprocessing
@@ -44,24 +33,21 @@ datasetpreproc_getid <- function() {
 
 # create a helper function
 datasetpreproc_subfolder <- function(path) {
-  function(..., prefix = NULL, dataset_id = NULL) {
+  function(filename, dataset_id = NULL) {
     dyn_fold <- get_dynalysis_folder()
 
-    if (is.null(prefix)) {
-      prefix <- datasetpreproc_getprefix()
-    }
     if (is.null(dataset_id)) {
       dataset_id <- datasetpreproc_getid()
     }
 
     # determine the full path
-    full_path <- paste0(dyn_fold, "/", path, "/", prefix, "/", dataset_id, "/")
+    full_path <- paste0(dyn_fold, "/", path, "/", dataset_id, "/")
 
     # create if necessary
     dir.create(full_path, recursive = TRUE, showWarnings = FALSE)
 
     # get complete filename
-    paste(full_path, ..., collapse = "", sep = "")
+    paste0(full_path, filename)
   }
 }
 
@@ -75,23 +61,23 @@ dataset_file <- datasetpreproc_subfolder("analysis/data/derived_data/datasets")
 
 #' @rdname dataset_preprocessing
 #' @export
-save_dataset <- function(dataset, prefix = NULL, dataset_id = NULL) {
-  write_rds(dataset, dataset_file("dataset.rds", prefix = prefix, dataset_id = dataset_id))
+save_dataset <- function(dataset, dataset_id = NULL) {
+  write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
 }
 
 #' Loading a dataset after it has been preprocessed
 #' @export
 #' @inheritParams dataset_preprocessing
-load_dataset <- function(prefix, dataset_id) {
-  read_rds(dataset_file("dataset.rds", prefix=prefix, dataset_id=dataset_id))
+load_dataset <- function(dataset_id = NULL) {
+  read_rds(dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
 }
 
 #' Download a file and return its location path
 #' @param url The url of the file to download
 #' @param filename What name to give to the file
 #' @export
-download_dataset_file <- function(url, filename) {
-  loc <- dataset_preproc_file(filename)
+download_dataset_file <- function(filename, url, dataset_id = NULL) {
+  loc <- dataset_preproc_file(dataset_id = dataset_id, filename = filename)
 
   if (!file.exists(loc)) {
     download.file(url, loc, method="libcurl")
@@ -102,8 +88,6 @@ download_dataset_file <- function(url, filename) {
 
 #' @export
 datasetpreproc_normalise_filter_wrap_and_save <- function(
-  dataset_prefix,
-  dataset_id,
   ti_type,
   counts,
   cell_ids,
@@ -112,11 +96,15 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   milestone_percentages,
   cell_grouping,
   cell_info,
-  feature_info
+  feature_info,
+  dataset_id = NULL
 ) {
-  counts <- convert_to_symbol(counts)
+  if (is.null(dataset_id)) {
+    dataset_id <- datasetpreproc_getid()
+  }
 
-  norm_out <- normalize_filter_counts(counts, verbose=TRUE)
+  counts <- convert_to_symbol(counts)
+  norm_out <- normalize_filter_counts(counts)
 
   pdf(dataset_file("normalization.pdf"));walk(norm_out$normalization_plots, print);graphics.off()
 
@@ -143,7 +131,7 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     feature_info = feature_info
   )
 
-  save_dataset(dataset, dataset_prefix, dataset_id)
+  save_dataset(dataset = dataset, dataset_id = dataset_id)
 }
 
 convert_to_symbol <- function(counts) {

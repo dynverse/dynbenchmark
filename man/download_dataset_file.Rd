@@ -4,12 +4,12 @@
 \alias{download_dataset_file}
 \title{Download a file and return its location path}
 \usage{
-download_dataset_file(url, filename)
+download_dataset_file(filename, url, dataset_id = NULL)
 }
 \arguments{
-\item{url}{The url of the file to download}
-
 \item{filename}{What name to give to the file}
+
+\item{url}{The url of the file to download}
 }
 \description{
 Download a file and return its location path
