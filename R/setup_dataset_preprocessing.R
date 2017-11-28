@@ -83,7 +83,7 @@ save_dataset <- function(dataset, prefix = NULL, dataset_id = NULL) {
 #' @export
 #' @inheritParams dataset_preprocessing
 load_dataset <- function(prefix, dataset_id) {
-  read_rds(dataset_file("dataset.rds", prefix, dataset_id))
+  read_rds(dataset_file("dataset.rds", prefix=prefix, dataset_id=dataset_id))
 }
 
 #' Download a file and return its location path
@@ -114,17 +114,20 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   cell_info,
   feature_info
 ) {
-  expression <- log2(counts + 1)
-  # norm_out <- normalize_filter_counts(counts)
-  #
-  # expression <- norm_out$expression
-  # counts <- norm_out$counts
-  #
-  # cell_ids <- rownames(counts)
-  # cell_info <- cell_info %>% slice(match(cell_ids, cell_id))
-  # cell_grouping <- cell_grouping %>% filter(cell_id %in% cell_ids)
-  # feature_info <- feature_info %>% slice(match(colnames(counts), feature_id))
-  # milestone_percentages <- milestone_percentages %>% filter(cell_id %in% cell_ids)
+  counts <- convert_to_symbol(counts)
+
+  norm_out <- normalize_filter_counts(counts, verbose=TRUE)
+
+  pdf(dataset_file("normalization.pdf"));walk(norm_out$normalization_plots, print);graphics.off()
+
+  expression <- norm_out$expression
+  counts <- norm_out$counts
+
+  cell_ids <- rownames(counts)
+  cell_info <- cell_info %>% slice(match(cell_ids, cell_id))
+  cell_grouping <- cell_grouping %>% filter(cell_id %in% cell_ids)
+  feature_info <- feature_info %>% slice(match(colnames(counts), feature_id))
+  milestone_percentages <- milestone_percentages %>% filter(cell_id %in% cell_ids)
 
   dataset <- wrap_ti_task_data(
     ti_type = ti_type,
@@ -141,4 +144,15 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   )
 
   save_dataset(dataset, dataset_prefix, dataset_id)
+}
+
+convert_to_symbol <- function(counts) {
+  id_mapper <- readRDS(derived_file("id_mapper.rds", experiment_id = "normalization"))
+
+  colnames(counts) <- tibble(gene_id = colnames(counts)) %>%
+    left_join(id_mapper, by=c("gene_id"="ensembl")) %>%
+    mutate(gene_id = ifelse(is.na(symbol), gene_id, symbol)) %>%
+    pull(gene_id)
+
+  counts
 }
