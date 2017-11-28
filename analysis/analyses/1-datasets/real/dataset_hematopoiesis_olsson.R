@@ -46,7 +46,7 @@ allcell_info <- tibble(
 
 settings <- list(
   list(
-    id = "real/hematopoiesis_olsson_clusters",
+    id = "real/hematopoiesis-clusters_olsson",
     milestone_source = "cluster",
     milestone_network = tribble(
       ~from, ~to,
@@ -62,7 +62,7 @@ settings <- list(
     ti_type = "tree"
   ),
   list(
-    id = "real/hematopoiesis_olsson_gates",
+    id = "real/hematopoiesis-gates_olsson",
     milestone_source = "gate",
     milestone_network = tribble(
       ~from, ~to,
