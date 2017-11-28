@@ -37,29 +37,62 @@ allcell_info <- readxl::read_xlsx(mmc2_location, sheet = 3) %>%
   )
 
 milestone_order_to_network <- function(order) {
-  tibble(from=order[-length(order)], to=order[-1])
+  tibble(from = order[-length(order)], to = order[-1])
 }
 
 settings <- list(
   list(
-    id="germline_human_male_li",
-    milestone_network = tibble(from = c("Male_FGC#1", "Male_FGC#2"), to = c("Male_FGC#2", "Male_FGC#3")),
-    milestone_source = "cluster"
+    id = "germline_human_male_li",
+    milestone_network = tribble(
+      ~from, ~to,
+      "Male_FGC#1", "Male_FGC#2",
+      "Male_FGC#2", "Male_FGC#3"
+    ),
+    milestone_source = "cluster",
+    ti_type = "linear"
   ),
   list(
     id="germline_human_female_li",
-    milestone_network = tibble(from=c("Female_FGC#1", "Female_FGC#2", "Female_FGC#3"), to=c("Female_FGC#2", "Female_FGC#3", "Female_FGC#4")),
-    milestone_source = "cluster"
+    milestone_network = tribble(
+      ~from, ~to,
+      "Female_FGC#1", "Female_FGC#2",
+      "Female_FGC#2", "Female_FGC#3"
+    ),
+    milestone_source = "cluster",
+    ti_type = "linear"
   ),
   list(
     id="germline_human_male_weeks_li",
-    milestone_network = milestone_order_to_network(allcell_info %>% filter(gender == "M" & type == "FGC") %>% arrange(week) %>% pull(weekgendertype) %>% unique()),
-    milestone_source = "weekgendertype"
+    milestone_network = tribble(
+      ~from, ~to,
+      "M#4#FGC", "M#9#FGC",
+      "M#9#FGC", "M#10#FGC",
+      "M#10#FGC", "M#19#FGC",
+      "M#19#FGC", "M#20#FGC",
+      "M#20#FGC", "M#21#FGC",
+      "M#21#FGC", "M#25#FGC"
+    ),
+    milestone_source = "weekgendertype",
+    ti_type = "linear"
   ),
   list(
     id="germline_human_female_weeks_li",
-    milestone_network = milestone_order_to_network(allcell_info %>% filter(gender == "F" & type == "FGC") %>% arrange(week) %>% pull(weekgendertype) %>% unique()),
-    milestone_source = "weekgendertype"
+    milestone_network = tribble(
+      ~from, ~to,
+      "F#5#FGC", "F#7#FGC",
+      "F#7#FGC", "F#8#FGC",
+      "F#8#FGC", "F#10#FGC",
+      "F#10#FGC", "F#11#FGC",
+      "F#11#FGC", "F#12#FGC",
+      "F#12#FGC", "F#14#FGC",
+      "F#14#FGC", "F#18#FGC",
+      "F#18#FGC", "F#20#FGC",
+      "F#20#FGC", "F#23#FGC",
+      "F#23#FGC", "F#24#FGC",
+      "F#24#FGC", "F#26#FGC"
+    ),
+    milestone_source = "weekgendertype",
+    ti_type = "linear"
   )
 ) %>% lapply(function(l) {
   l$milestone_network <- l$milestone_network %>% mutate(length = 1, directed = TRUE)
@@ -83,14 +116,11 @@ for (setting in settings) {
 
   feature_info <- tibble(feature_id = colnames(counts))
 
-  # TODO: normalise using dynutils
-  expression <- log2(counts + 1)
-
-  dataset <- wrap_ti_task_data(
-    ti_type = "real",
-    id = datasetpreproc_getid(),
+  datasetpreproc_normalise_filter_wrap_and_save(
+    dataset_prefix = datasetpreproc_getprefix(),
+    dataset_id = setting$id,
+    ti_type = setting$ti_type,
     counts = counts,
-    expression = expression,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,
     milestone_network = milestone_network,
@@ -99,7 +129,5 @@ for (setting in settings) {
     cell_info = cell_info,
     feature_info = feature_info
   )
-
-  save_dataset(dataset)
 }
 

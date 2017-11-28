@@ -26,7 +26,7 @@ allcell_info <- geo[[1]] %>%
 
 settings <- list(
   list(
-    id = "oligodendrocyte_differentiation_marques_subclusters",
+    id = "oligodendrocyte_differentiation_subclusters_marques",
     milestone_source = "subcluster",
     milestone_network = tribble(
       ~from, ~to,
@@ -41,17 +41,19 @@ settings <- list(
       "MFOL2", "MOL4",
       "MFOL2", "MOL5",
       "MFOL2", "MOL6"
-    ) %>% mutate(length = 1, directed = TRUE)
+    ) %>% mutate(length = 1, directed = TRUE),
+    ti_type = "tree"
   ),
   list(
-    id = "oligodendrocyte_differentiation_marques_clusters",
+    id = "oligodendrocyte_differentiation_clusters_marques",
     milestone_source = "cluster",
     milestone_network = tribble(
       ~from, ~to,
       "OPC", "COP",
       "COP", "NFOL",
       "NFOL", "MOL"
-    ) %>% mutate(length = 1, directed = TRUE)
+    ) %>% mutate(length = 1, directed = TRUE),
+    ti_tpye = "linear"
   )
 )
 
@@ -73,14 +75,11 @@ for (setting in settings) {
 
   feature_info <- tibble(feature_id = colnames(counts))
 
-  # todo: use dynutils normalisation
-  expression <- log2(counts + 1)
-
-  dataset <- wrap_ti_task_data(
-    ti_type = "real",
-    id = datasetpreproc_getid(),
+  datasetpreproc_normalise_filter_wrap_and_save(
+    dataset_prefix = datasetpreproc_getprefix(),
+    dataset_id = setting$id,
+    ti_type = setting$ti_type,
     counts = counts,
-    expression = expression,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,
     milestone_network = milestone_network,
@@ -89,6 +88,4 @@ for (setting in settings) {
     cell_info = cell_info,
     feature_info = feature_info
   )
-
-  save_dataset(dataset)
 }
