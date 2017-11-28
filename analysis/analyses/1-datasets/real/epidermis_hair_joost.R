@@ -3,11 +3,11 @@ library(tidyverse)
 library(dynalysis)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real", "epidermis_hair_joost")
+dataset_preprocessing("real/epidermis_hair_joost")
 
 txt_location <- download_dataset_file(
-  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE67602&format=file&file=GSE67602%5FJoost%5Fet%5Fal%5Fexpression%2Etxt%2Egz",
-  "GSE67602_Joost_et_al_expression.txt.gz"
+  "GSE67602_Joost_et_al_expression.txt.gz",
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE67602&format=file&file=GSE67602%5FJoost%5Fet%5Fal%5Fexpression%2Etxt%2Egz"
 )
 
 counts_all <- read_tsv(txt_location) %>%
@@ -36,7 +36,7 @@ settings <- list(
       "IB", "uHF-I",
       "uHF-I", "IFE-B"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "epidermis_hair_spatial_joost",
+    id = "real/epidermis_hair_spatial_joost",
     ti_type = "linear"
   ),
   list(
@@ -47,7 +47,7 @@ settings <- list(
       "IFE-DII", "IFE-KI",
       "IFE-KI", "IFE-KII"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "epidermis_hair_IFE_joost",
+    id = "real/epidermis_hair_IFE_joost",
     ti_type = "linear"
   ),
   list(
@@ -56,7 +56,7 @@ settings <- list(
       "uHF-I", "uHF-II",
       "uHF-II", "uHF-III"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "epidermis_hair_uHF_joost",
+    id = "real/epidermis_hair_uHF_joost",
     ti_type = "linear"
   )
 )
@@ -77,8 +77,6 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(counts))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    dataset_prefix = datasetpreproc_getprefix(),
-    dataset_id = setting$id,
     ti_type = setting$ti_type,
     counts = counts,
     cell_ids = cell_ids,

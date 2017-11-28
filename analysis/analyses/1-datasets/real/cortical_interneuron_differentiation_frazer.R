@@ -3,11 +3,11 @@ library(dynalysis)
 library(tidyverse)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real", "cortical_interneuron_differentiation_frazer")
+dataset_preprocessing("real/cortical_interneuron_differentiation_frazer")
 
 txt_location <- download_dataset_file(
-  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE90860&format=file&file=GSE90860%5FSupplementaryData1%5Frevised%5Fjulien%2Etsv%2Egz",
-  "GSE90860_SupplementaryData1_revised_julien.tsv.gz"
+  "GSE90860_SupplementaryData1_revised_julien.tsv.gz",
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE90860&format=file&file=GSE90860%5FSupplementaryData1%5Frevised%5Fjulien%2Etsv%2Egz"
 )
 
 counts_df <- read_tsv(txt_location)
@@ -45,8 +45,6 @@ milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mut
 feature_info <- tibble(feature_id = colnames(counts))
 
 datasetpreproc_normalise_filter_wrap_and_save(
-  dataset_prefix = datasetpreproc_getprefix(),
-  dataset_id = datasetpreproc_getid(),
   ti_type = "trifurcating",
   counts = counts,
   cell_ids = cell_ids,

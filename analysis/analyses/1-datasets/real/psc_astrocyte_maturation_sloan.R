@@ -2,11 +2,11 @@ rm(list=ls())
 library(tidyverse)
 library(dynalysis)
 
-dataset_preprocessing("real", "pancreatic_cell_maturation_zhang")
+dataset_preprocessing("real/pancreatic_cell_maturation_zhang")
 
 txt_location <- download_dataset_file(
-  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE99951&format=file&file=GSE99951%5Fall%5Fdata%5Fhtseq%5Fout%2Ecsv%2Egz",
-  "GSE99951_all_data_htseq_out.csv"
+  "GSE99951_all_data_htseq_out.csv",
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE99951&format=file&file=GSE99951%5Fall%5Fdata%5Fhtseq%5Fout%2Ecsv%2Egz"
 )
 
 # geo <- GEOquery::getGEO("GSE99951", destdir = dataset_preproc_file())
@@ -40,11 +40,11 @@ counts_all <- read.table(txt_location, TRUE, " ", stringsAsFactors = FALSE) %>% 
 
 settings <- list(
   list(
-    id = "psc_astrocyte_maturation_neuron_sloan",
+    id = "real/psc_astrocyte_maturation_neuron_sloan",
     group_id = "cell type: neuron"
   ),
   list(
-    id = "psc_astrocyte_maturation_glia_sloan",
+    id = "real/psc_astrocyte_maturation_glia_sloan",
     group_id = "cell type: glia"
   )
 )
@@ -59,7 +59,7 @@ milestone_network <- tribble(
 milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
 for (setting in settings) {
-  dataset_preprocessing("real", setting$id)
+  dataset_preprocessing(setting$id)
 
   cell_info <- cell_info_all %>% slice(match(rownames(counts_all), cell_id)) %>%
     filter(group == setting$group_id, milestone_id %in% milestone_ids)
@@ -73,8 +73,6 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(counts))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    dataset_prefix = datasetpreproc_getprefix(),
-    dataset_id = setting$id,
     ti_type = "linear",
     counts = counts,
     cell_ids = cell_ids,
