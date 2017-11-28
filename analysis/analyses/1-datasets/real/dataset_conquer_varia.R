@@ -144,10 +144,11 @@ for (source_info in conquer_infos) {
   cat(pritt("Processing {id}"), sep = "\n")
 
   datas <- lapply(source_info$rds_name, function(rds_name) {
-    read_rds(download_dataset_file(
+    rds_file <- download_dataset_file(
       pritt("{rds_name}.rds"),
       pritt("http://imlspenticton.uzh.ch/robinson_lab/conquer/data-mae/{rds_name}.rds")
-    ))
+    )
+    read_rds(rds_file)
   })
 
   tran_counts <- do.call(rbind, lapply(datas, function(data) SummarizedExperiment::assay(data[["gene"]], "count") %>% t))
