@@ -2,16 +2,16 @@ rm(list=ls())
 library(tidyverse)
 library(dynalysis)
 
-dataset_preprocessing("real", "neonatal_inner_ear_burns")
+dataset_preprocessing("real/neonatal_inner_ear_burns")
 
 count_location <- download_dataset_file(
-  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE71982&format=file&file=GSE71982%5FRSEM%5FCounts%5FMatrix%2Etxt%2Egz",
-  "GSE71982_RSEM_Counts_Matrix.txt.gz"
+  "GSE71982_RSEM_Counts_Matrix.txt.gz",
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE71982&format=file&file=GSE71982%5FRSEM%5FCounts%5FMatrix%2Etxt%2Egz"
 )
 
 phenodata_location <- download_dataset_file(
-  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE71982&format=file&file=GSE71982%5FP1%5FUtricle%5FPhenoData%2Etxt%2Egz",
-  "GSE71982_P1_Utricle_PhenoData.txt.gz"
+  "GSE71982_P1_Utricle_PhenoData.txt.gz",
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE71982&format=file&file=GSE71982%5FP1%5FUtricle%5FPhenoData%2Etxt%2Egz"
 )
 
 counts_all <- read_tsv(count_location)[-c(1, 2),] %>% as.data.frame %>%  column_to_rownames("X1") %>% as.matrix() %>% t
@@ -29,7 +29,7 @@ settings <- list(
       "TEC", "HC (i)",
       "HC (i)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "neonatal_inner_ear_all_burns",
+    id = "real/neonatal_inner_ear_all_burns",
     ti_type = "bifurcating_convergence"
   ),
   list(
@@ -39,7 +39,7 @@ settings <- list(
       "SC (ii)", "HC (ii)",
       "HC (ii)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "neonatal_inner_ear_SC_HC_burns",
+    id = "real/neonatal_inner_ear_SC_HC_burns",
     ti_type = "linear"
   ),
   list(
@@ -48,7 +48,7 @@ settings <- list(
       "TEC", "SC (i)",
       "SC (i)", "SC (ii)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "neonatal_inner_ear_TEC_SC_burns",
+    id = "real/neonatal_inner_ear_TEC_SC_burns",
     ti_type = "linear"
   ),
   list(
@@ -57,13 +57,13 @@ settings <- list(
       "TEC", "HC (i)",
       "HC (i)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "neonatal_inner_ear_TEC_HSC_burns",
+    id = "real/neonatal_inner_ear_TEC_HSC_burns",
     ti_type = "linear"
   )
 )
 
 for (setting in settings) {
-  dataset_preprocessing("real", setting$id)
+  dataset_preprocessing(setting$id)
 
   milestone_network <- setting$milestone_network
 
@@ -80,8 +80,6 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(counts))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    dataset_prefix = datasetpreproc_getprefix(),
-    dataset_id = setting$id,
     ti_type = setting$ti_type,
     counts = counts,
     cell_ids = cell_ids,
