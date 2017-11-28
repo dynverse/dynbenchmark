@@ -3,7 +3,7 @@ library(tidyverse)
 library(dynalysis)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real/stimulated_dendritic_cells_shalek")
+dataset_preprocessing("real/stimulated-dendritic-cells_shalek")
 
 file <- download_dataset_file(
   "GSM1406531_GSM1407094.txt.gz",
@@ -23,7 +23,7 @@ allcell_info <- data_frame(
 
 settings <- lapply(c("LPS", "PAM", "PIC"), function(stim) {
   list(
-    id = pritt("real/stimulated_dendritic_cells_{stim}_shalek"),
+    id = pritt("real/stimulated-dendritic-cells-{stim}_shalek"),
     milestone_network = tribble(
       ~from, ~to, ~length,
       "Unstimulated#0h", pritt("{stim}#1h"), 1,

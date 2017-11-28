@@ -2,7 +2,7 @@ rm(list=ls())
 library(tidyverse)
 library(dynalysis)
 
-dataset_preprocessing("real/hepatoblast_differentiation_yang")
+dataset_preprocessing("real/hepatoblast-differentiation_yang")
 
 txt_location <- download_dataset_file(
   "GSE90047_Single-cell_RNA-seq_TPM.txt.gz",

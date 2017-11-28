@@ -2,7 +2,7 @@ rm(list=ls())
 library(tidyverse)
 library(dynalysis)
 
-dataset_preprocessing("real/conquer_downloads")
+dataset_preprocessing("real/conquer_varia")
 
 requireNamespace("MultiAssayExperiment")
 
@@ -10,7 +10,7 @@ addcols <- function(x) x %>% mutate(length = 1, directed = TRUE)
 
 conquer_infos <- list(
   list(
-    id = "real/cell_cycle_buettner",
+    id = "real/cell-cycle_buettner",
     rds_name = "EMTAB2805",
     milestone_source = "cell_cycle_stage",
     milestone_network = tribble(
@@ -23,7 +23,7 @@ conquer_infos <- list(
     source_id = "conquer"
   ),
   list(
-    id = "real/human_embryos_petropoulos",
+    id = "real/human-embryos_petropoulos",
     rds_name = "EMTAB3929",
     milestone_source = "Characteristics.developmental.stage.",
     milestone_network = tribble(
@@ -37,7 +37,7 @@ conquer_infos <- list(
     source_id = "conquer"
   ),
   list(
-    id = "real/NKT_differentiation_engel",
+    id = "real/NKT-differentiation_engel",
     rds_name = "GSE74596",
     milestone_source = "characteristics_ch1.5",
     milestone_network = tribble(
@@ -50,7 +50,7 @@ conquer_infos <- list(
     source_id = "conquer"
   ),
   list(
-    id = "real/cell_cycle_leng",
+    id = "real/cell-cycle_leng",
     rds_name = "GSE64016",
     milestone_source = function(cell_info) gsub("(.*)_.*", "\\1", as.character(cell_info$title)),
     milestone_network = tribble(
@@ -62,7 +62,7 @@ conquer_infos <- list(
     ti_type = "cyclical"
   ),
   list(
-    id = "real/mesoderm_development_loh",
+    id = "real/mesoderm-development_loh",
     rds_name = "SRP073808",
     milestone_source = "LibraryName",
     milestone_network = tribble( # see http://ars.els-cdn.com/content/image/1-s2.0-S0092867416307401-fx1_lrg.jpg
@@ -80,7 +80,7 @@ conquer_infos <- list(
     ti_type = "consecutive_bifurcating"
   ),
   list(
-    id = "real/myoblast_differentiation_trapnell",
+    id = "real/myoblast-differentiation_trapnell",
     rds_name = c("GSE52529-GPL11154", "GSE52529-GPL16791"),
     milestone_source = function(cell_info) gsub("Cell (T\\d*)_.*", "\\1", as.character(cell_info$title)),
     milestone_network = tribble(
@@ -93,7 +93,7 @@ conquer_infos <- list(
     ti_type = "linear"
   ),
   list(
-    id = "real/germline_human_female_guo",
+    id = "real/germline-human-female_guo",
     rds_name = "GSE63818-GPL16791",
     milestone_network = tribble(
       ~from, ~to, ~length, ~directed,
@@ -106,7 +106,7 @@ conquer_infos <- list(
     ti_type = "linear"
   ),
   list(
-    id = "real/germline_human_male_guo",
+    id = "real/germline-human-male_guo",
     rds_name = "GSE63818-GPL16791",
     milestone_network = tribble(
       ~from, ~to, ~length, ~directed,
@@ -119,7 +119,7 @@ conquer_infos <- list(
     ti_type = "linear"
   ),
   list(
-    id = "real/germline_human_both_guo",
+    id = "real/germline-human-both_guo",
     rds_name = "GSE63818-GPL16791",
     milestone_network = tribble(
       ~from, ~to, ~length, ~directed,

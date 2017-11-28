@@ -1,27 +1,30 @@
 rm(list=ls())
-library(dynalysis)
 library(tidyverse)
+library(dynalysis)
 
-dataset_preprocessing("real/distal_lung_epithelium_treutlein")
+dataset_preprocessing("real/fibroblast-reprogramming_treutlein")
 
 txt_location <- download_dataset_file(
-  "nature13173-s4.txt",
-  "http://www.nature.com/nature/journal/v509/n7500/extref/nature13173-s4.txt"
+  "GSE67310_iN_data_log2FPKM_annotated.txt.gz",
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE67310&format=file&file=GSE67310%5FiN%5Fdata%5Flog2FPKM%5Fannotated%2Etxt%2Egz"
 )
 
-df <- read_tsv(txt_location, col_types = cols(cell_name = "c", time_point = "c", sample = "c", putative_cell_type = "c", .default = "d"))
-expression <- df[, -c(1:4)] %>% as.matrix() %>% magrittr::set_rownames(df$cell_name)
-cell_info <- df[, c(1:4)] %>% as.data.frame() %>% magrittr::set_rownames(df$cell_name) %>%
+df <- read_tsv(txt_location, col_types = cols(cell_name = "c", assignment = "c", experiment = "c", time_point = "c", .default = "d"))
+expression <- df[, -c(1:5)] %>% as.matrix() %>% magrittr::set_rownames(df$cell_name)
+cell_info <- df[, c(1:5)] %>% as.data.frame() %>% magrittr::set_rownames(df$cell_name) %>%
   rename(
     cell_id = cell_name,
-    milestone_id = putative_cell_type
-  ) %>% filter(sample == "singleCell")
-expression <- expression[cell_info$cell_id, ]
+    milestone_id = assignment
+  )
 
 milestone_network = tribble(
   ~from, ~to,
-  "BP", "AT1",
-  "BP", "AT2"
+  "MEF", "d2_intermediate",
+  "d2_intermediate", "d2_induced",
+  "d2_induced", "d5_intermediate",
+  "d5_intermediate", "d5_earlyiN",
+  "d5_earlyiN", "Neuron",
+  "d5_earlyiN", "Myocyte"
 ) %>% mutate(length = 1, directed = TRUE)
 milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
@@ -35,8 +38,8 @@ milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mut
 feature_info <- tibble(feature_id = colnames(expression))
 
 datasetpreproc_normalise_filter_wrap_and_save(
-  ti_type = "bifurcating",
-  counts = 2^expression-1, # TODO: fix this
+  ti_type = "linear",
+  counts = 2^expression-1, # todo: fix this
   cell_ids = cell_ids,
   milestone_ids = milestone_ids,
   milestone_network = milestone_network,
