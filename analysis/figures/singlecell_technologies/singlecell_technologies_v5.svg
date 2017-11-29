@@ -2016,7 +2016,7 @@
        inkscape:collect="always"
        xlink:href="#linearGradient12464"
        id="linearGradient14378"
-       gradientTransform="translate(2.6648442e-6,-100)"
+       gradientTransform="translate(2.6648397e-6,-3.8486276e-6)"
        gradientUnits="userSpaceOnUse" />
     <linearGradient
        inkscape:collect="always"
@@ -2053,9 +2053,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.0000001"
-     inkscape:cx="547.70211"
-     inkscape:cy="407.01305"
+     inkscape:zoom="5.6568545"
+     inkscape:cx="760.81123"
+     inkscape:cy="498.61398"
      inkscape:document-units="px"
      inkscape:current-layer="layer3"
      showgrid="true"
@@ -2550,12 +2550,12 @@
        x="820.00006"
        y="743.65619" />
     <rect
-       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:url(#linearGradient14378);stroke-width:1.99968756;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:url(#linearGradient14378);stroke-width:1.99968755;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        id="rect4154"
        width="120.00001"
        height="60"
        x="660.00006"
-       y="143.65625" />
+       y="243.65625" />
     <rect
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:url(#linearGradient41034);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        id="rect482"
@@ -2806,8 +2806,9 @@
     <path
        inkscape:connector-curvature="0"
        id="path14386"
-       d="m 560.00005,220.00003 c 0,0 0,-89.99999 0,-99.99999 0,-10.00001 0,-10.00001 10,-10.00001 10,0 130.00001,0 140.00001,0 10.00001,0 10.00001,0 10.00001,-9.99999 0,-10 0,-20 0,-20"
-       style="display:inline;fill:none;stroke:url(#linearGradient12464);stroke-width:1.87500012;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker14390)" />
+       d="m 560.00005,160.00004 v 0 c 0,0 0,-10.00001 10,-10.00001 l 90.00001,1e-5"
+       style="display:inline;fill:none;stroke:url(#linearGradient12464);stroke-width:1.87500012;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker14390)"
+       sodipodi:nodetypes="cscc" />
     <path
        inkscape:connector-curvature="0"
        id="path15304"
@@ -3279,22 +3280,22 @@
          id="tspan7900">decision-making</tspan></text>
     <text
        id="text4158"
-       y="23.767002"
+       y="123.767"
        x="585.21362"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Open Sans';-inkscape-font-specification:'Open Sans';text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.99842525;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        xml:space="preserve"><tspan
          style="font-size:15px;line-height:1.25"
          id="tspan4156"
-         y="23.767002"
+         y="123.767"
          x="585.21362"
          sodipodi:role="line">Biological</tspan><tspan
          style="font-size:15px;line-height:1.25"
-         y="42.516994"
+         y="142.517"
          x="585.21362"
          sodipodi:role="line"
          id="tspan4160">process</tspan><tspan
          style="font-size:15px;line-height:1.25"
-         y="61.266994"
+         y="161.267"
          x="585.21362"
          sodipodi:role="line"
          id="tspan4162">extraction</tspan></text>
