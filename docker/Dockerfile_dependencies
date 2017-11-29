@@ -21,7 +21,7 @@ RUN python3 -m pip install numpy matplotlib pandas six jinja2 python-dateutil py
 COPY . dynalysis
 
 # build package
-RUN . /etc/environment && R -e 'devtools::install_github("dynverse/devtools")'
+RUN . /etc/environment && R -e 'devtools::install_github("dynverse/devtools", ref = "1.13.0")'
 RUN . /etc/environment && R -e "devtools::install_github('rcannood/dyneval', dependencies=TRUE, upgrade_dependencies=TRUE)"
 RUN . /etc/environment && R -e "devtools::install_github('rcannood/dynmethods', dependencies=TRUE, upgrade_dependencies=TRUE)"
 RUN . /etc/environment && R -e "devtools::install_github('Zouter/dyngen', dependencies=TRUE, upgrade_dependencies=TRUE)"
