@@ -2507,11 +2507,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.70710681"
-     inkscape:cx="628.01535"
-     inkscape:cy="263.38935"
+     inkscape:zoom="0.50000002"
+     inkscape:cx="753.94369"
+     inkscape:cy="118.75401"
      inkscape:document-units="px"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:window-width="1600"
      inkscape:window-height="1173"
@@ -2849,7 +2849,7 @@
      transform="translate(135.23713,14.075077)"
      style="display:inline">
     <g
-       id="technologies">
+       id="normalized">
       <rect
          y="443.65619"
          x="500"
@@ -2865,15 +2865,15 @@
          style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Open Sans';-inkscape-font-specification:'Open Sans';text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:middle;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.99842525;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          xml:space="preserve"><tspan
            style="font-size:15px;line-height:1.25"
+           id="tspan4354-2"
            y="331.44638"
            x="425.98993"
-           id="tspan4352-0"
-           sodipodi:role="line">Single cell</tspan><tspan
+           sodipodi:role="line">Normalized</tspan><tspan
            style="font-size:15px;line-height:1.25"
-           id="tspan4354-2"
            y="350.19638"
            x="425.98993"
-           sodipodi:role="line">technologies</tspan></text>
+           sodipodi:role="line"
+           id="tspan41076">single-cell data</tspan></text>
     </g>
     <g
        id="differential">
