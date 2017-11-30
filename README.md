@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-dynalysis
-=========
+An evaluation framework for trajectory inference methods
+========================================================
 
 ![travis](https://travis-ci.com/Zouter/dynalysis.svg?token=pzNqJjk3yapU1Hk7sDg8&branch=master)
 
@@ -13,15 +13,15 @@ The goal of dynalysis is to ...
 
 Please cite this compendium as:
 
-> Authors, (2017). *Title of compendium*. Accessed 21 Nov 2017. Online at <https://doi.org/xxx/xxx>
+> Authors, (2017). *Title of compendium*. Accessed 30 Nov 2017. Online at <https://doi.org/xxx/xxx>
 
 ### Installation
 
 You can install dynalysis from github with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("Zouter/dynalysis")
+# install.packages("remotes")
+remotes::install_github("Zouter/dynalysis", dependencies = TRUE)
 ```
 
 ### Running
