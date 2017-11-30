@@ -21,7 +21,7 @@ You can install dynalysis from github with:
 
 ``` r
 # install.packages("remotes")
-remotes::install_github("Zouter/dynalysis", dependencies = TRUE, upgrade_dependencies = TRUE)
+remotes::install_github("Zouter/dynalysis", dependencies = TRUE)
 ```
 
 ### Running
