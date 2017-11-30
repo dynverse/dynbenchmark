@@ -135,7 +135,7 @@ walk(seq_along(paramsets), function(params_i) {
   experiment <- readRDS(experiment_location(folder, params_i))
   options(ncores = ncores)
 
-  normalization <- invoke(dynutils::normalize_filter_counts, params$normalization, experiment$counts)
+  normalization <- invoke(dynutils::normalise_filter_counts, params$normalization, experiment$counts)
   saveRDS(normalization, normalization_location(folder, params_i))
   TRUE
 })
