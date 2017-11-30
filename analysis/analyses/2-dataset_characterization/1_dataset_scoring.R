@@ -1,267 +1,213 @@
 library(tidyverse)
-library(cowplot)
-library(googlesheets)
-library(dynalysis)
-# devtools::load_all()
+library(dynutils)
+library(PRISM)
+#library(dyngen)
 
-dataset_infos <- gs_title("Real datasets") %>%
-  gs_read(ws = "datasets", col_types = cols(date = col_date())) %>%
-  separate_rows(id, sep=",\n") %>%
-  mutate(id = paste0("real/", id))
-
-dataset_ids <- dataset_infos$id
-
-map_prism <- function (x, f) PRISM::qsub_lapply(x, f, qsub_environment = list2env(list()), qsub_config = PRISM::override_qsub_config(memory="4G"))
-map_local <- function(x, f) pbapply::pblapply(x, f, cl=1)
-map_local_parallel <- function(x, f) pbapply::pblapply(x, f, cl=8)
-
-
-paste0("real/", list.files("analysis/data/derived_data/datasets/real/"))[!(paste0("real/", list.files("analysis/data/derived_data/datasets/real/")) %in% dataset_ids)]
-
-
-# Check the datasets ------------------------------------
-# dataset_checks <- map_prism(dataset_ids, function(dataset_id) {
-dataset_checks <- map_local(dataset_ids, function(dataset_id) {
-  library(tidyverse)
-# dataset_checks <- parallel::mclapply(mc.cores=1, dataset_ids, function(dataset_id) {
-  print(paste0("-------------", dataset_id))
-  print("loading")
-
-  if (!file.exists(dataset_file("dataset.rds", dataset_id = dataset_id))) {
-    return(list(id = dataset_id, found = FALSE))
-  }
-
-  #stop("The function below does not exist anymore, use ")
-  dataset <- readRDS(dataset_file("dataset.rds", dataset_id = dataset_id))
-
-  all_milestones_represented <- all(dataset$milestone_ids %in% dataset$cell_grouping$group_id)
-
-  lst(all_milestones_represented, id=dataset_id, n_cells = nrow(dataset$cell_info), n_genes = nrow(dataset$feature_info)) %>% as_tibble()
-})
-dataset_checks <- dataset_checks %>% bind_rows()
-dataset_checks
-
-dataset_ids_filtered <- dataset_checks %>% filter(all_milestones_represented) %>% pull(id)
-
-# Score the datasets ---------------------------------
-dataset_scores <- map_local(dataset_ids_filtered, function(dataset_id) {
-# dataset_scores <- map_prism(dataset_ids, function(dataset_id) {
-  library(tidyverse)
-  library(dynalysis)
-  print(paste0("-------------", dataset_id))
-  print("loading")
-  dataset <- readRDS(dataset_file("dataset.rds", dataset_id = dataset_id))
-  dataset %>% list2env(.GlobalEnv)
-
-  Coi <- rowMeans(dataset$expression) %>% {(. > (median(.) - IQR(., 0.5)*2)) & (. < (median(.) + IQR(., 0.5)*2))} %>% keep(~.) %>% names
-
-  gene_sds <- apply(dataset$expression[Coi, ], 2, sd) %>% sort(decreasing = TRUE)
-  Goi <- gene_sds %>% names %>% head(5000)
-
-  if(length(Goi) == 0) {stop("No genes selected")}
-  if(length(Coi) == 0) {stop("No cells selected")}
-  if(length(Coi) > 500) {Coi=sample(Coi, 500)}
-
-  Coi <- Coi[dataset$expression[Coi, Goi] %>% apply(1, sd) %>% {. > 0}]
-
-  # make sure we select for every group at least one cell
-  Coi2 <- dataset$cell_grouping %>% group_by(group_id) %>% filter(row_number() == 1) %>% pull(cell_id)
-  Coi <- union(Coi, Coi2)
-
-  expression_grouped <- dataset$expression[Coi, Goi] %>% dynutils::group_counts(dataset$cell_grouping)
-  scores <- list()
-
-  print("transitions")
-  scores <- bind_cols(
-    scores,
-    score_milestone_transitions(expression_grouped, dataset$milestone_ids, dataset$milestone_network)
-  )
-  print("grouping")
-  scores <- bind_cols(
-    scores,
-    score_milestone_grouping(dataset$expression[Coi, Goi], dataset$cell_grouping)
-  )
-  print("connectivity")
-  scores <- bind_cols(
-    scores,
-    score_milestone_connectivity(dataset$expression[Coi, Goi], dataset$cell_grouping, dataset$milestone_ids, dataset$milestone_network)
-  )
-  print("aggregation")
-  scores <- bind_cols(
-    scores,
-    score_aggregation(dataset$expression[Coi, Goi], dataset$cell_grouping)
-  )
-
-  scores$dataset_id <- dataset_id
-
-  scores
-})
-dataset_scores <- dataset_scores %>% bind_rows()
-
-score_ids <- c("aggregation_sd_frac", "transition_pval", "transition_frac", "grouping_asw", "connectivity")
-score_baselines <- tribble(
-  ~score_id, ~baseline, ~type,
-  "aggregation_sd_frac", 0.8, "hard",
-  "transition_pval", -log10(0.1), "hard",
-  "transition_frac", 1.5, "soft",
-  "transition_frac", 1, "hard",
-  "grouping_asw", 0, "hard",
-  "connectivity", 0.2, "soft"
+updates_model <- tribble(
+  ~modulenet_name, ~totaltime,
+  "linear", 5,
+  "bifurcating", 5,
+  "linear_long", 30,
+  "cycle", 30,
+  "consecutive_bifurcating", 10,
+  "bifurcating_converging", 15,
+  "trifurcating", 10,
+  "converging", 10,
+  "bifurcating_loop", 30
 )
-dataset_scores %>% .[c(score_ids[score_ids %in% colnames(dataset_scores)], "dataset_id")] %>% gather("score_id", "score", -dataset_id) %>%
-  ggplot() +
-  geom_bar(aes(dataset_id, score), stat="identity") +
-  facet_wrap(~score_id, scales = "free_x", ncol=10) +
-  geom_point(aes(dataset_id, 0, alpha=is.na(score))) +
-  geom_hline(aes(yintercept=baseline, color=type), data=score_baselines) +
-  coord_flip()
+updates_platform <- tribble(
+  ~platform_name,
+  "cell_cycle_leng",
+  "psc_astrocyte_maturation_glia_sloan"
+)
+updates_replicates <- tibble(replicate_id = 1)
+updates <- tidyr::crossing(updates_model, updates_platform, updates_replicates)
+updates <- updates %>%
+  group_by(modulenet_name) %>%
+  mutate(dataset_id = paste0(modulenet_name, "_", seq_len(n()))) %>%
+  ungroup()
 
+update_params <- function(base_params=dyngen:::base_params, ...) {
+  dots <- list(...)
 
+  if("modulenet_name" %in% names(dots)) base_params$model$modulenet_name <- dots$modulenet_name
+  if("totaltime" %in% names(dots)) base_params$simulation$totaltime <- dots$totaltime
+  if("platform_name" %in% names(dots)) base_params$experiment$platform <- readRDS(paste0(find.package("dyngen"), "/ext_data/platforms/", dots$platform_name, ".rds"))
 
-### Cell plotting ----------------
-# cell_plots <- map_prism(dataset_ids, function(dataset_id) {
-cell_plots <- map_local(dataset_ids, function(dataset_id) {
-  library(tidyverse)
-  plots <- list()
+  base_params$updates <- dots
 
-  dataset <- readRDS(dataset_file("dataset.rds", dataset_id = dataset_id))
+  base_params
+}
 
-  source("../dynmodular/dimred_wrappers.R")
-
-  space <- dimred_mds(dataset$expression)
-
-  plotdata_cells <- bind_cols(space %>% as.data.frame() %>% tibble::rownames_to_column("cell_id")) %>% left_join(dataset$cell_info, by="cell_id") %>% left_join(dataset$cell_grouping, by="cell_id")
-  plotdata_cells$libsize <- rowMeans(dataset$expression)
-
-  plotdata_groups <- plotdata_cells %>% group_by(group_id) %>% summarise(Comp1=mean(Comp1), Comp2=mean(Comp2))
-
-  plotdata_network <- dataset$milestone_network %>%
-    left_join(plotdata_groups %>% rename_at(vars(starts_with("Comp")), list(~paste0("from_", .))), by=c("from"="group_id")) %>%
-    left_join(plotdata_groups %>% rename_at(vars(starts_with("Comp")), list(~paste0("to_", .))), by=c("to"="group_id"))
-
-  base_scater <- ggplot(plotdata_groups, aes(Comp1, Comp2)) +
-    geom_point(aes(Comp1, Comp2), shape=21, stroke=4, size=3, alpha=0.3) +
-    geom_segment(aes(from_Comp1, from_Comp2, xend=to_Comp1, yend=to_Comp2), data=plotdata_network, arrow=arrow(), size=2, alpha=0.2) +
-    geom_point(aes(Comp1, Comp2, fill=group_id), shape=23, stroke=1, data=plotdata_groups, size=3, color="black") +
-    theme(legend.position="bottom")
-
-  plots$plot_cells <- list(
-    base_scater + geom_point(aes(Comp1, Comp2, color=group_id), data=plotdata_cells)
-  )
-  plots$plot_libsize <- list(
-    base_scater +
-      geom_point(aes(Comp1, Comp2, color=libsize), data=plotdata_cells) +
-      viridis::scale_color_viridis(option="A")
-  )
-
-  rm(dataset)
-
-  plots
+paramsets <- map(seq_len(nrow(updates)), function(row_id) {
+  row <- dynutils::extract_row_to_list(updates, row_id)
+  invoke(update_params, row)
 })
-cell_plots <- cell_plots %>% bind_rows()
+# mutate <<- dplyr::mutate;filter <<- dplyr::filter
 
-grid <- cowplot::plot_grid(plotlist=cell_plots %>% pull(plot_cells))
-grid
+params <- paramsets[[1]]
+params$experiment %>% list2env(.GlobalEnv)
 
-save_plot("grid.pdf", grid, base_height=20, base_width=20)
+# creating folder structure locally and remote
+folder <- "~/thesis/projects/dynverse/dynalysis/analysis/data/datasets/synthetic/v5/"
+remote_folder <- "/group/irc/personal/wouters/projects/dynverse/dynalysis/analysis/data/datasets/synthetic/v5/"
+# unlink(folder);dir.create(folder, recursive=TRUE, showWarnings = FALSE)
+# qsub_run(function(i) {unlink(remote_folder, recursive=TRUE);dir.create(remote_folder, recursive=TRUE, showWarnings = FALSE)}, qsub_environment=list2env(lst(remote_folder)))
 
+saveRDS(paramsets, paste0(folder, "paramsets.rds"))
 
-grid <- cowplot::plot_grid(plotlist=cell_plots %>% pull(plot_libsize))
-save_plot("grid2.pdf", grid, base_height=30, base_width=30)
+# functions for get the folder for saving
+model_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_model.rds")
+simulation_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_simulation.rds")
+gs_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_gs.rds")
+gs_plot_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_gs_plot.pdf")
+experiment_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_experiment.rds")
+experiment_plot_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_experiment_plot.pdf")
+normalization_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_normalization.rds")
+normalization_plot_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_normalization_plot.pdf")
 
+# remote preparation
+ncores <- 3
+qsub_config <- override_qsub_config(num_cores = ncores, memory = paste0("4G"), wait=FALSE)
+qsub_environment <- list2env(lst(paramsets, ncores, folder=remote_folder, model_location, simulation_location, gs_location, experiment_location))
 
-### Network plotting --------------------------
-library(ggnetwork)
-network_plots <- map_local(dataset_ids_filtered, function(dataset_id) {
-  library(tidyverse)
-  print(paste0("-------------", dataset_id))
-  print("loading")
-  dataset <- readRDS(dataset_file("dataset.rds", dataset_id = dataset_id))
+#####################################
+## Generate MODELS ------------------------
+models <- pbapply::pblapply(cl = 8, seq_along(paramsets), function(params_i) {
+  print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
+  params <- paramsets[[params_i]]
+  options(ncores = ncores)
 
-  milestone_network <- dataset$milestone_network
-  milestone_nodes <- dataset$cell_info %>% group_by(milestone_id) %>% summarise(n=n())
-
-  end_nodes <- (milestone_nodes$milestone_id %in% milestone_network$to) & !(milestone_nodes$milestone_id %in% milestone_network$from)
-  start_nodes <- !(milestone_nodes$milestone_id %in% milestone_network$to) & (milestone_nodes$milestone_id %in% milestone_network$from)
-  milestone_nodes$type <- ifelse(start_nodes, "start", ifelse(end_nodes, "end", "inner"))
-  type_shapes <- c("start"=17, "inner"=16, "end"=15)
-  type_colors <- c("start"="#0074D9", "inner"="#FF851B", "end"="#FF4136")
-
-  graph <- igraph::graph_from_data_frame(milestone_network, TRUE, milestone_nodes)
-
-  fortified <- fortify(graph, arrow.gap=0)
-
-  base_plot <- fortified %>%
-    ggplot(aes(x = x, y = y, xend = xend, yend = yend)) +
-    theme_blank() +
-    scale_x_continuous(expand=c(0.2, 0)) +
-    scale_y_continuous(expand=c(0.2, 0)) +
-    theme(legend.position="none") +
-    geom_edges() +
-    geom_edges(aes(x=x, y=y, xend=xend - (xend - x)/3, yend = yend - (yend - y)/3), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
-    geom_edges(aes(x=x, y=y, xend=xend - (xend - x)/3*2, yend = yend - (yend - y)/3*2), arrow=arrow(type="closed", length=unit(0.1, "inches")))
-
-  network_plot_labeled <- list(
-    base_plot +
-      geom_nodelabel(aes(label=vertex.names, fill=vertex.names), color="white")
-  )
-
-  network_plot = list(
-    base_plot +
-      geom_nodes(aes(color=vertex.names, shape = type), size=10) + scale_shape_manual(values=type_shapes)
-  )
-
-  network_plot_startstop = list(
-    base_plot +
-      geom_nodes(aes(color=type, shape = type), size=10) +
-      scale_shape_manual(values=type_shapes) +
-      scale_color_manual(values=type_colors)
-  )
-
-  network_plot_sizes = list(
-    base_plot +
-      geom_nodes(aes(color=vertex.names, size=n)) +
-      scale_size_continuous(range=c(3, 20), trans="log10", limits=c(1, 100000))
-  )
-
-  lst(
-    id = dataset_id,
-    network_plot_labeled,
-    network_plot,
-    network_plot_sizes,
-    network_plot_startstop
-  ) %>% as_tibble()
+  model <- invoke(dyngen:::generate_model_from_modulenet, params$model)
+  saveRDS(model, model_location(folder, params_i))
 })
-network_plots <- network_plots %>% bind_rows()
+PRISM:::rsync_remote("", folder, "prism", remote_folder)
 
-library(ggnetwork)
-network_characteristics <- parallel::mclapply(dataset_ids, function(dataset_id) {
-  library(tidyverse)
-  print(paste0("-------------", dataset_id))
-  print("loading")
-  dataset <- readRDS(dataset_file("dataset.rds", dataset_id = dataset_id))
+## SIMULATE CELLS ---------------------------
+# walk(seq_along(paramsets), function(params_i) {
+handle <- qsub_lapply(qsub_config = qsub_config, qsub_environment=qsub_environment, qsub_packages = c("tidyverse"), seq_along(paramsets), function(params_i) {
+  print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
+  params <- paramsets[[params_i]]
+  model <- readRDS(model_location(folder, params_i))
+  options(ncores = ncores)
 
-  contains_cycle <- FALSE
-  tryCatch(
-    {igraph::graph_from_data_frame(dataset$milestone_network) %>% igraph::topo_sort()}
-    , warning=function(w) contains_cycle <<- TRUE
-  )
+  simulation <- invoke(dyngen:::simulate_multiple, params$simulation, model$system)
+  saveRDS(simulation, simulation_location(folder, params_i))
+  TRUE
+})
 
-  contains_bifurcating <- dataset$milestone_network$from %>% table %>% {any(.>1)}
-  contains_convergence <- dataset$milestone_network$to %>% table %>% {any(.>1)}
+# GOLD STANDARD ----------------------
+# walk(seq_along(paramsets), function(params_i) {
+handle <- qsub_lapply(qsub_config = qsub_config, qsub_environment=qsub_environment, qsub_packages = c("tidyverse"), seq_along(paramsets), function(params_i) {
+  print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
+  params <- paramsets[[params_i]]
+  model <- readRDS(model_location(folder, params_i))
+  simulation <- readRDS(simulation_location(folder, params_i))
+  options(ncores = ncores)
 
-  lst(contains_cycle, contains_bifurcating, contains_convergence, id=dataset_id)
-}, mc.cores=8) %>% bind_rows()
-network_characteristics$topology_id <- network_characteristics %>% select_if(is.logical) %>% apply(1, function(x) sum((2^seq_along(x))[x]))
+  print("Preprocessing")
+  simulation <- dyngen:::preprocess_simulation_for_gs(simulation, model, params$gs$smooth_window) # do preprocessing separate, otherwise zoo will stay in an infinite loop in case of later error
+  gs <- invoke(dyngen:::extract_goldstandard, params$gs, simulation, model, preprocess=FALSE)
+  gs$checks <- dyngen:::check_goldstandard(gs)
+  saveRDS(gs, gs_location(folder, params_i))
+  TRUE
+})
+PRISM:::rsync_remote("prism", remote_folder, "", folder)
+
+# EXPERIMENT ----------------------------------
+walk(seq_along(paramsets), function(params_i) {
+  print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
+  params <- paramsets[[params_i]]
+  simulation <- readRDS(simulation_location(folder, params_i))
+  gs <- readRDS(gs_location(folder, params_i))
+  options(ncores = ncores)
+
+  experiment <- invoke(run_experiment, params$experiment, simulation, gs)
+  saveRDS(experiment, experiment_location(folder, params_i))
+  TRUE
+})
+filter <- dplyr::filter;mutate <- dplyr::mutate;arrange <- dplyr::arrange # stupid scater ruining our R environments -_-
+
+# NORMALIZE ----------------------------
+walk(seq_along(paramsets), function(params_i) {
+  print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
+  params <- paramsets[[params_i]]
+  experiment <- readRDS(experiment_location(folder, params_i))
+  options(ncores = ncores)
+
+  normalization <- invoke(dynutils::normalize_filter_counts, params$normalization, experiment$counts, verbose=TRUE)
+  saveRDS(normalization, normalization_location(folder, params_i))
+  TRUE
+})
+
+# Plot GOLD STANDARD ----------------------------------------
+options(ncores = 8)
+params_i <- 3
+walk(seq_along(paramsets), function(params_i) {
+  print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
+  tryCatch({
+    params <- paramsets[[params_i]]
+    model <- readRDS(model_location(folder, params_i))
+    simulation <- readRDS(simulation_location(folder, params_i))
+    gs <- readRDS(gs_location(folder, params_i))
+
+    graphics.off()
+    pdf(gs_plot_location(folder, params_i), width=12, height=12)
+    dyngen:::plot_net(model, label=FALSE, main_only = FALSE)
+    dyngen:::plot_modulenet(model)
+    dyngen:::plot_goldstandard(simulation, model, gs)
+    graphics.off()
+  }, error=function(e) {print(params_i)}, finally={graphics.off()})
+})
 
 
-datasets <- dataset_infos %>% left_join(network_characteristics, "id") %>% left_join(network_plots, "id")
+# Plot EXPERIMENT ----------------------------------------
+params_i <- 3
+walk(seq_along(paramsets), function(params_i) {
+  print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
+  tryCatch({
+    params <- paramsets[[params_i]]
+    experiment <- readRDS(experiment_location(folder, params_i))
 
-grid <- cowplot::plot_grid(plotlist=datasets %>% arrange(topology_id) %>% filter(standard=="gold") %>% pull(network_plot_startstop))
-title <- ggdraw() + draw_label("Gold standard networks", fontface='bold')
-plot_grid(title, grid, ncol=1, rel_heights=c(0.1, 1)) # rel_heights values control title margins
+    graphics.off()
+    pdf(experiment_plot_location(folder, params_i), width=12, height=12)
+    dyngen:::plot_experiment(experiment)
+    graphics.off()
+  }, error=function(e) {print(params_i)}, finally={graphics.off()})
+})
 
 
-grid <- cowplot::plot_grid(plotlist=datasets %>% arrange(topology_id) %>% filter(standard=="silver") %>% pull(network_plot))
-title <- ggdraw() + draw_label("Silver standard networks", fontface='bold')
-plot_grid(title, grid, ncol=1, rel_heights=c(0.1, 1)) # rel_heights values control title margins
+# Plot NORMALIZATION ----------------------------------------
+params_i <- 3
+walk(seq_along(paramsets), function(params_i) {
+  print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
+  tryCatch({
+    params <- paramsets[[params_i]]
+    experiment <- readRDS(experiment_location(folder, params_i))
+    normalization <- readRDS(normalization_location(folder, params_i))
+
+    graphics.off()
+    pdf(normalization_plot_location(folder, params_i), width=12, height=12)
+    dyngen:::plot_normalization(experiment, normalization)
+    graphics.off()
+  }, error=function(e) {print(glue::glue("error: {params_i}, {e}"))}, finally={graphics.off()})
+})
+
+
+
+# Wrap into tasks ----------------------------
+tasks <- map(seq_along(paramsets), function(params_i) {
+  print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
+  params <- paramsets[[params_i]]
+  model <- readRDS(model_location(folder, params_i))
+  simulation <- readRDS(simulation_location(folder, params_i))
+  gs <- readRDS(gs_location(folder, params_i))
+  experiment <- readRDS(experiment_location(folder, params_i))
+  normalization <- readRDS(normalization_location(folder, params_i))
+
+  dyngen::wrap_task(params, model, simulation, gs, experiment, normalization)
+})
+
+tasks <- dynutils::list_as_tibble(tasks)
+
+write_rds(tasks, "../dynalysis/analysis/data/datasets/synthetic/v5.rds")
