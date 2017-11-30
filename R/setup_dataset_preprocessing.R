@@ -107,7 +107,7 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   counts <- conversion_out$counts
   feature_info <- feature_info[conversion_out$filtered, ] %>% mutate(feature_id = colnames(counts))
 
-  norm_out <- normalize_filter_counts(counts, verbose = TRUE)
+  norm_out <- normalise_filter_counts(counts, verbose = TRUE)
 
   pdf(dataset_file(dataset_id = dataset_id, "normalization.pdf"));walk(norm_out$normalization_plots, print);graphics.off()
 
