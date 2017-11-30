@@ -31,8 +31,8 @@ Please cite this compendium as:
 You can install dynalysis from github with:
 
 ```{r gh-installation, eval = FALSE}
-# install.packages("devtools")
-devtools::install_github("Zouter/dynalysis")
+# install.packages("remotes")
+remotes::install_github("Zouter/dynalysis", dependencies = TRUE)
 ```
 
 ### Running
