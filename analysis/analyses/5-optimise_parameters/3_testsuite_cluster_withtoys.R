@@ -7,7 +7,7 @@ experiment("dyneval/3_testsuite_cluster_withtoys")
 # unlink(derived_file("suite/"), recursive = T, force = T)
 
 # trying all methods
-methods <- dyneval::get_descriptions() #%>% filter(name == "shuffle")
+methods <- dynmethods::get_descriptions() #%>% filter(name == "shuffle")
 
 # toys
 tasks <- dyntoy::toy_tasks[c(2,5),]
