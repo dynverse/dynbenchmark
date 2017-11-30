@@ -82,13 +82,21 @@ cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over
 Dozens[b] of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially, most trajectory inference was focused on linear trajectories, with one start and one end point. However, the prospect of branching trajectories was already described early [@trapnell_dynamics_2014], and about half of the current methods can handle one or more bifurcations in the trajectory (`r ref("sfig", "methods_over_time", "b")`). Some methods can already handle more complex, cyclical and branching behaviour, and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes happening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
 
 
-Although[c] trajectory inference methods use a variety of algorithms and subcomponents to reach a final ordering, most consist of the following three steps: (i) preprocessing (filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction or clustering and (iii) ordering the cells along the simplified representation. These components are frequently interchangeable. Depending on the way the cells are ordered, some prior information about the dynamic process can also be required, or optional. 
+Although[c] trajectory inference methods use a variety of algorithms and subcomponents to reach a final ordering, most consist of the following three steps: (i) preprocessing (normalization, filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction or clustering and (iii) ordering the cells along the simplified representation. These components are frequently interchangeable. Depending on the way the cells are ordered, some prior information about the dynamic process can be optionally used or required by the method 
 
 
 Given[d] this plethora of available trajectory inference methods, it is important that methods are compared, so that users can use the most optimal method available for their problem. Moreover, new methods need to be rigorously tested, so that development can focus on improving the current state-of-the-art. In this study, we therefore for the first time developed a comprehensive evaluation framework for trajectory inference methods. We test both on synthetic data, for which the gold standard is known, and real data, for which in some cases the gold standard can be extracted from expert knowledge. We include a rigorous parameter optimisation, making sure that parameters are optimized while avoiding overfitting on characteristics of specific datasets. To make our framework reusable and extendable, we make use of continuous analysis [@beaulieu-jones_reproducibility_2017], which allows the developers of new methods to easily test their methods and compare them against the state-of-the-art.
+
+
 # Results
+
+
 ## Evaluation workflow
+
+
 ### Method characterization
+
+
 ```{r}
 # Load method characteristics
 method_df <- readRDS(derived_file("method_df.rds", experiment_id="method_characteristics"))
@@ -119,7 +127,6 @@ Our evaluation was structured in three main phases. In the first phase, we used 
 
 
 ## Overall method comparison
-- Some methods can handle different trajectories which are not directly described in the main paper: eg. circular trajectories (for a lot of principal curves algorithms using `periodic.lowess`), trees (for a lot of bifurcation methods)
 
 
 ## Evaluation on synthetic data
@@ -143,7 +150,9 @@ Echte data. Evaluatie (biologische relevantie van de methode)
 ## Trajectory inference methods
 ## Toy data generation
 ## Synthetic data generation
-Our workflow to generate synthetic data is based on the well established workflow used in the evaluation of network inference methods [@marbach_wisdom_2012], but required several additions 
+Our workflow to generate synthetic data is based on the well established workflow used in the evaluation of network inference methods [@marbach_wisdom_2012], but required several additions. 
+
+
 ## Real data processing
 ## Normalization
 ## Evaluation metrics
