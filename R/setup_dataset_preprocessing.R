@@ -104,10 +104,10 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   }
 
   conversion_out <- convert_to_symbol(counts)
-  counts <- conversion_out$counts
-  feature_info <- feature_info[conversion_out$filtered, ] %>% mutate(feature_id = colnames(counts))
+  original_counts <- conversion_out$counts
+  feature_info <- feature_info[conversion_out$filtered, ] %>% mutate(feature_id = colnames(original_counts))
 
-  norm_out <- normalize_filter_counts(counts, verbose = TRUE)
+  norm_out <- normalize_filter_counts(original_counts, verbose = TRUE)
 
   pdf(dataset_file(dataset_id = dataset_id, "normalization.pdf"));walk(norm_out$normalization_plots, print);graphics.off()
 
@@ -136,7 +136,8 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     feature_info = feature_info
   )
 
-  save_dataset(dataset = dataset, dataset_id = dataset_id)
+  write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
+  write_rds(original_counts, dataset_file(dataset_id = dataset_id, filename = "original_counts.rds"))
 }
 
 convert_to_symbol <- function(counts) {
