@@ -10,18 +10,18 @@
 \usage{
 experiment(experiment_id)
 
-derived_file(..., experiment_id = NULL)
+derived_file(filename = "", experiment_id = NULL)
 
-raw_file(..., experiment_id = NULL)
+raw_file(filename = "", experiment_id = NULL)
 
-figure_file(..., experiment_id = NULL)
+figure_file(filename = "", experiment_id = NULL)
 
-result_file(..., experiment_id = NULL)
+result_file(filename = "", experiment_id = NULL)
 }
 \arguments{
 \item{experiment_id}{id for the experiment}
 
-\item{...}{filenames}
+\item{filename}{the filename}
 }
 \description{
 Helper function for controlling experiments
