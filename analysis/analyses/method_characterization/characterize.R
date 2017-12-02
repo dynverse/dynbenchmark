@@ -39,6 +39,13 @@ method_df_evaluated <- method_df %>%
 write_rds(method_df, derived_file("method_df.rds"))
 write_rds(method_df_evaluated, derived_file("method_df_evaluated.rds"))
 
+
+# --------------------------------------
+
+method_df <- read_rds(derived_file("method_df.rds"))
+method_df_evaluated <- read_rds(derived_file("method_df_evaluated.rds"))
+
+
 # Trajectory components --------------------------
 trajectory_components <- method_df_evaluated %>%
   select(name, trajectory_components, date) %>%
@@ -219,12 +226,12 @@ platforms <- method_df %>% separate_rows(platform=platforms, sep=", ") %>%
   ggplot(aes(1, quantity)) +
     geom_bar(aes(fill=platform), width = 1, stat="identity") +
     ggrepel::geom_label_repel(aes(1, pos, label=pritt("{platform}: {quantity}"), fill=platform), color="white", fontface = "bold", direction = "y", segment.alpha=0) +
-    coord_polar("y") +
     theme_void() +
-    theme(legend.position="none")
-saveRDS(n_methods_over_time, figure_file("platforms.rds"))
+    theme(legend.position="none") +
+    coord_flip()
+saveRDS(platforms, figure_file("platforms.rds"))
 
-# ggsave(figure_file("platforms.png"), platforms, width = 5, height = 5)
+ggsave("../../dyndocs/20171201_presentation_dambi/img/platforms.svg", platforms, width = 10, height = 2)
 
 
 # Trajectory components over time -------------------------------------------
