@@ -1,7 +1,7 @@
 #' Helper function for controlling experiments
 #'
 #' @param experiment_id id for the experiment
-#' @param ... filenames
+#' @param filename the filename
 #'
 #' @importFrom lazyeval lazy_eval
 #' @importFrom testthat expect_match
@@ -28,7 +28,7 @@ experiment <- function(experiment_id) {
 
 # create a helper function
 experiment_subfolder <- function(path) {
-  function(..., experiment_id = NULL) {
+  function(filename = "", experiment_id = NULL) {
     dyn_fold <- get_dynalysis_folder()
 
     # check whether exp_id is given
@@ -48,7 +48,7 @@ experiment_subfolder <- function(path) {
     dir.create(full_path, recursive = TRUE, showWarnings = FALSE)
 
     # get complete filename
-    paste(full_path, ..., collapse = "", sep = "")
+    paste(full_path, filename, sep = "")
   }
 }
 
