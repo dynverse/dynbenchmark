@@ -5,39 +5,44 @@ library(dynplot)
 experiment("dyneval/7_testsuite_cluster_alltasks")
 
 # trying all methods
-methods <- dyneval::get_descriptions(F)
+methods <- dynmethods::get_descriptions(F)
 
 # tasks
-tasks <- readRDS("analysis/data/derived_data/dyngen/tasks_v4.rds") %>%
-  filter(
-    platform_id == "fluidigm_c1",
-    takesetting_type == "snapshot")
+tasks <- readRDS(derived_file("v5.rds", experiment_id = "datasets/synthetic"))
+tasks_info <- tasks$info %>% map_df(as_data_frame) %>% mutate(task_id = tasks$id)
+# tasks_info <- tasks_info %>% group_by(modulenet_name) %>% mutate(fold = sample.int(n())) %>% ungroup()
 
 # configure run
 task_group <- rep("group", nrow(tasks))
-task_fold <- tasks$model_replicate
-methods <- get_descriptions(as_tibble = T) %>% arrange(desc(name == "shuffle"), name)
+task_fold <- tasks_info$fold
+method_order <- c("random", "shuffle", "identity", "slgnsht", "SCORPIUS", "embeddr", "waterfll", "DPT", "mnclDDR", "mnclICA", "CTmaptpx", "CTVEM", "CTGibbs", "SLICER")
+methods <- get_descriptions(as_tibble = T) %>% slice(match(method_order, short_name))
 
 #metrics <- c("auc_R_nx", "correlation")
 metrics <- "auc_R_nx"
 timeout <- 120
 
 # start benchmark suite
-# benchmark_suite_submit(
-#   tasks,
-#   task_group,
-#   task_fold,
-#   out_dir = derived_file("suite/"),
-#   save_r2g_to_outdir = TRUE,
-#   methods = methods,
-#   metrics = metrics,
-#   timeout = timeout,
-#   memory = "16G",
-#   num_cores = 4,
-#   num_iterations =  100,
-#   num_repeats = 1,
-#   num_init_params = 100
-# )
+benchmark_suite_submit(
+  tasks,
+  task_group,
+  task_fold,
+  out_dir = derived_file("suite/"),
+  save_r2g_to_outdir = TRUE,
+  methods = methods,
+  metrics = metrics,
+  timeout = timeout,
+  memory = "16G",
+  num_cores = 4,
+  num_iterations =  100,
+  num_repeats = 1,
+  num_init_params = 100,
+  execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500",
+  r_module = NULL
+)
+
+# save(task_info, method_order, file = result_file("settings.RData"))
+load(result_file("settings.RData"))
 
 outputs <- benchmark_suite_retrieve(derived_file("suite/"))
 
@@ -54,13 +59,14 @@ outputs2 <- outputs %>%
 
 
 # select only the runs that succeeded
-succeeded <- outputs2 %>% filter(!any_errored) %>% group_by(method_name) %>% filter(n() == 4) %>% ungroup()
+succeeded <- outputs2 %>% filter(!any_errored) %>% group_by(method_name) %>% filter(n() == 2) %>% ungroup()
 
 # bind the metrics of the individual runs
 eval_ind <-
   bind_rows(succeeded$individual_scores) %>%
-  left_join(tasks %>% select(task_id = id, ti_type), by = "task_id") %>%
-  filter(!method_short_name %in% c("identity", "shuffle", "random"))
+  left_join(tasks_info %>% select(task_id, ti_type = modulenet_name, platform_name), by = "task_id") %>%
+  mutate(pct_errored = 1 - sapply(error, is.null)) #%>%
+  # filter(!method_short_name %in% c("identity", "shuffle", "random"))
 
 # summarising at a global level
 summ <- eval_ind %>%
