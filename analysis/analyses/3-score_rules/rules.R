@@ -86,7 +86,7 @@ check_switch_cells <- function(scores_summary) {
 # switch_two_vs_switch_all --------------------
 check_switch_two_vs_switch_all <- function(scores_summary) {
   scores_summary_largevssmall <- scores_summary %>%
-    group_by(generator_id) %>%
+    group_by(trajectory_type) %>%
     filter(perturbator_id %in% c("switch_two_cells", "switch_all_cells")) %>%
     filter(length(unique(perturbator_id)) == 2) %>%
     ungroup() %>%
@@ -118,7 +118,7 @@ check_hairy <- function(scores_summary) {
 # hairy_small_vs_hairy_large --------------------------
 check_hairy_small_vs_hairy_large <- function(scores_summary) {
   scores_summary_largevssmall <- scores_summary %>%
-    group_by(generator_id) %>%
+    group_by(trajectory_type) %>%
     filter(perturbator_id %in% c("hairy_small", "hairy_large")) %>%
     filter(length(unique(perturbator_id)) == 2) %>%
     ungroup() %>%
@@ -158,7 +158,7 @@ plot_warping <- function(scores_summary) {
   scores_summary %>%
     filter(perturbator_id == "warp") %>%
     ggplot() +
-    ggbeeswarm::geom_beeswarm(aes(score_id, diff, color=generator_id))
+    ggbeeswarm::geom_beeswarm(aes(score_id, diff, color=trajectory_type))
 }
 
 
@@ -234,7 +234,7 @@ check_different_terminal_lengths <- function(scores_summary) {
 check_structure_and_position <- function(scores_summary) {
   scores_summary_both <- scores_summary %>%
     filter(perturbator_id %in% c("structure_and_position", "add_distant_edge", "switch_all_cells")) %>%
-    group_by(generator_id) %>%
+    group_by(trajectory_type) %>%
     filter(length(unique(perturbator_id)) == 3) %>%
     ungroup() %>%
     mutate(is_both = (perturbator_id == "structure_and_position"))
@@ -242,17 +242,15 @@ check_structure_and_position <- function(scores_summary) {
   scores_summary_both %>%
     group_by(score_id) %>%
     summarise(
-      meandiff = mean(diff),
-      maxdiff = max(score[is_both]) - min(score[!is_both]),
-      rule = all(maxdiff <= meandiff/10)
-    ) %>%
-    select(-meandiff, -maxdiff)
+      rule = all(max(score[is_both]) < min(score[!is_both]))
+    )
 }
 
 
 # grouping -----------------------------
 check_grouping <- function(scores_summary) {
-  scores_summary %>% group_by(score_id) %>% summarise(
+  scores_summary %>%
+    group_by(score_id) %>% summarise(
     cor = cor(score, score_grouped),
     rms = sqrt(sum((score - score_grouped)^2)),
     cosine = sum(score*score_grouped)/sqrt(sum(score^2)*sum(score_grouped^2)),
@@ -260,13 +258,15 @@ check_grouping <- function(scores_summary) {
   ) %>% mutate(rule = cor > 0.9)
 }
 
+
+plot_grouping <- function(scores_summary) {
+  scores_summary %>%
+    ggplot() + geom_point(aes(score, score_grouped, color=perturbator_id, shape=trajectory_type)) + facet_wrap(~score_id)
+}
+
 # equivalence relation ---------------------
 check_reflexivity <- function(scores_summary) {
   scores_summary %>% group_by(score_id) %>% summarise(
     rule = all(score == score_same)
   )
-}
-
-plot_grouping <- function(scores_summary) {
-  scores_summary %>% ggplot() + geom_point(aes(score, score_grouped, color=perturbator_id, shape=generator_id)) + facet_wrap(~score_id)
 }
