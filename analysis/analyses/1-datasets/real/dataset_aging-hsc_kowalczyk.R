@@ -46,7 +46,7 @@ settings <- lapply(c("old", "young"), function(age) {
       "LT-HSC", "ST-HSC",
       "ST-HSC", "MPP"
     ) %>% mutate(length = 1, directed = TRUE),
-    ti_type = "linear",
+    trajectory_type = "linear",
     age = age
   )
 })
@@ -68,7 +68,7 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(expression))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    ti_type = setting$ti_type,
+    trajectory_type = setting$trajectory_type,
     counts = 2^expression - 1, # todo: fix this
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,

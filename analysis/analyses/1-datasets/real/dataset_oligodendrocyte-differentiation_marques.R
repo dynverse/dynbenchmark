@@ -42,7 +42,7 @@ settings <- list(
       "MFOL2", "MOL5",
       "MFOL2", "MOL6"
     ) %>% mutate(length = 1, directed = TRUE),
-    ti_type = "tree"
+    trajectory_type = "tree"
   ),
   list(
     id = "real/oligodendrocyte-differentiation-clusters_marques",
@@ -76,7 +76,7 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(counts))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    ti_type = setting$ti_type,
+    trajectory_type = setting$trajectory_type,
     counts = counts,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,

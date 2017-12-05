@@ -88,7 +88,7 @@ download_dataset_file <- function(filename, url, dataset_id = NULL) {
 
 #' @export
 datasetpreproc_normalise_filter_wrap_and_save <- function(
-  ti_type,
+  trajectory_type,
   counts,
   cell_ids,
   milestone_ids,
@@ -123,7 +123,7 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   milestone_percentages <- milestone_percentages %>% filter(cell_id %in% cell_ids)
 
   dataset <- wrap_ti_task_data(
-    ti_type = ti_type,
+    trajectory_type = trajectory_type,
     id = dataset_id,
     counts = counts,
     expression = expression,

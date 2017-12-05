@@ -12,7 +12,7 @@ tasks <- readRDS("analysis/data/derived_data/dyngen/tasks_v4.rds") %>%
   filter(
     platform_id == "fluidigm_c1",
     takesetting_type == "snapshot",
-    ti_type == "consecutive_bifurcating",
+    trajectory_type == "consecutive_bifurcating",
     model_replicate %in% c(1,2))
 
 task <- extract_row_to_list(tasks, 1)

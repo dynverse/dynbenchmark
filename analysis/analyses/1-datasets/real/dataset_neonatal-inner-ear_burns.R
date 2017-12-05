@@ -30,7 +30,7 @@ settings <- list(
       "HC (i)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
     id = "real/neonatal-inner-ear-all_burns",
-    ti_type = "bifurcating_convergence"
+    trajectory_type = "bifurcating_convergence"
   ),
   list(
     milestone_network = tribble(
@@ -40,7 +40,7 @@ settings <- list(
       "HC (ii)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
     id = "real/neonatal-inner-ear-SC-HC_burns",
-    ti_type = "linear"
+    trajectory_type = "linear"
   ),
   list(
     milestone_network = tribble(
@@ -49,7 +49,7 @@ settings <- list(
       "SC (i)", "SC (ii)"
     ) %>% mutate(length = 1, directed = TRUE),
     id = "real/neonatal-inner-ear-TEC-SC_burns",
-    ti_type = "linear"
+    trajectory_type = "linear"
   ),
   list(
     milestone_network = tribble(
@@ -58,7 +58,7 @@ settings <- list(
       "HC (i)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
     id = "real/neonatal-inner-ear-TEC-HSC_burns",
-    ti_type = "linear"
+    trajectory_type = "linear"
   )
 )
 
@@ -80,7 +80,7 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(counts))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    ti_type = setting$ti_type,
+    trajectory_type = setting$trajectory_type,
     counts = counts,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,

@@ -49,7 +49,7 @@ settings <- list(
       "Male_FGC#2", "Male_FGC#3"
     ),
     milestone_source = "cluster",
-    ti_type = "linear"
+    trajectory_type = "linear"
   ),
   list(
     id = "real/germline-human-female_li",
@@ -59,7 +59,7 @@ settings <- list(
       "Female_FGC#2", "Female_FGC#3"
     ),
     milestone_source = "cluster",
-    ti_type = "linear"
+    trajectory_type = "linear"
   ),
   list(
     id = "real/germline-human-male-weeks_li",
@@ -73,7 +73,7 @@ settings <- list(
       "M#21#FGC", "M#25#FGC"
     ),
     milestone_source = "weekgendertype",
-    ti_type = "linear"
+    trajectory_type = "linear"
   ),
   list(
     id = "real/germline-human-female-weeks_li",
@@ -92,7 +92,7 @@ settings <- list(
       "F#24#FGC", "F#26#FGC"
     ),
     milestone_source = "weekgendertype",
-    ti_type = "linear"
+    trajectory_type = "linear"
   )
 ) %>% lapply(function(l) {
   l$milestone_network <- l$milestone_network %>% mutate(length = 1, directed = TRUE)
@@ -117,7 +117,7 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(counts))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    ti_type = setting$ti_type,
+    trajectory_type = setting$trajectory_type,
     counts = counts,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,
