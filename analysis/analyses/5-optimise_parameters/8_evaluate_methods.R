@@ -70,16 +70,16 @@ dev.off()
 eval_grp <- bind_rows(succeeded$eval_grp) %>% mutate(harmonicmean = 2 * correlation * robbie_network_score / (correlation + robbie_network_score))
 param_sels <- eval_grp %>%
   filter(fold_type == "train") %>%
-  group_by(ti_type, task_group, method_name, fold_i) %>%
+  group_by(trajectory_type, task_group, method_name, fold_i) %>%
   arrange(desc(harmonicmean)) %>%
   slice(1) %>%
   ungroup() %>%
-  select(ti_type, task_group, method_name, fold_i, param_i)
+  select(trajectory_type, task_group, method_name, fold_i, param_i)
 train_eval_grp <- eval_grp %>% filter(fold_type == "train") %>% inner_join(param_sels, by = colnames(param_sels))
 test_eval_grp <- eval_grp %>% filter(fold_type == "test") %>% inner_join(param_sels, by = colnames(param_sels))
 
-train_eval_grp_summ <- train_eval_grp %>% group_by(ti_type, task_group, method_name) %>% summarise_if(is.numeric, mean) %>% ungroup
-test_eval_grp_summ <- test_eval_grp %>% group_by(ti_type, task_group, method_name) %>% summarise_if(is.numeric, mean) %>% ungroup
+train_eval_grp_summ <- train_eval_grp %>% group_by(trajectory_type, task_group, method_name) %>% summarise_if(is.numeric, mean) %>% ungroup
+test_eval_grp_summ <- test_eval_grp %>% group_by(trajectory_type, task_group, method_name) %>% summarise_if(is.numeric, mean) %>% ungroup
 
 ordered_names <- test_eval_grp_summ %>% group_by(method_name) %>% summarise_if(is.numeric, mean) %>% ungroup() %>% arrange(harmonicmean) %>% .$method_name
 train_eval_grp_summ <- train_eval_grp_summ %>% mutate(method_name_f = factor(method_name, levels = ordered_names))
@@ -88,17 +88,17 @@ test_eval_grp_summ <- test_eval_grp_summ %>% mutate(method_name_f = factor(metho
 g <- cowplot::plot_grid(
   ggplot(test_eval_grp_summ) +
     geom_bar(aes(method_name_f, correlation, fill = method_name_f), stat = "identity") +
-    facet_wrap(~ti_type, ncol = 1) +
+    facet_wrap(~trajectory_type, ncol = 1) +
     coord_flip() +
     theme(legend.position = "none"),
   ggplot(test_eval_grp_summ) +
     geom_bar(aes(method_name_f, robbie_network_score, fill = method_name_f), stat = "identity") +
-    facet_wrap(~ti_type, ncol = 1) +
+    facet_wrap(~trajectory_type, ncol = 1) +
     coord_flip() +
     theme(legend.position = "none"),
   ggplot(test_eval_grp_summ) +
     geom_bar(aes(method_name_f, harmonicmean, fill = method_name_f), stat = "identity") +
-    facet_wrap(~ti_type, ncol = 1) +
+    facet_wrap(~trajectory_type, ncol = 1) +
     coord_flip() +
     theme(legend.position = "none"),
   nrow = 1
@@ -111,17 +111,17 @@ dev.off()
 g <- cowplot::plot_grid(
   ggplot(train_eval_grp_summ) +
     geom_bar(aes(method_name_f, correlation, fill = method_name_f), stat = "identity") +
-    facet_wrap(~ti_type, ncol = 1) +
+    facet_wrap(~trajectory_type, ncol = 1) +
     coord_flip() +
     theme(legend.position = "none"),
   ggplot(train_eval_grp_summ) +
     geom_bar(aes(method_name_f, robbie_network_score, fill = method_name_f), stat = "identity") +
-    facet_wrap(~ti_type, ncol = 1) +
+    facet_wrap(~trajectory_type, ncol = 1) +
     coord_flip() +
     theme(legend.position = "none"),
   ggplot(train_eval_grp_summ) +
     geom_bar(aes(method_name_f, harmonicmean, fill = method_name_f), stat = "identity") +
-    facet_wrap(~ti_type, ncol = 1) +
+    facet_wrap(~trajectory_type, ncol = 1) +
     coord_flip() +
     theme(legend.position = "none"),
   nrow = 1

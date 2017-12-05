@@ -59,7 +59,7 @@ settings <- list(
       "α-cell P15", "α-cell P18", 3,
       "α-cell P18", "α-cell P60", 42
     ) %>% mutate(directed = TRUE),
-    ti_type = "linear"
+    trajectory_type = "linear"
   ),
   list(
     id = "real/pancreatic-beta-cell-maturation_zhang",
@@ -72,7 +72,7 @@ settings <- list(
       "β-cell P15", "β-cell P18", 3,
       "β-cell P18", "β-cell P60", 42
     ) %>% mutate(directed = TRUE),
-    ti_type = "linear"
+    trajectory_type = "linear"
   )
 )
 
@@ -93,7 +93,7 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(counts))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    ti_type = setting$ti_type,
+    trajectory_type = setting$trajectory_type,
     counts = counts,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,
