@@ -35,7 +35,7 @@ milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mut
 feature_info <- tibble(feature_id = colnames(expression))
 
 datasetpreproc_normalise_filter_wrap_and_save(
-  ti_type = "bifurcating",
+  trajectory_type = "bifurcating",
   counts = 2^expression-1, # TODO: fix this
   cell_ids = cell_ids,
   milestone_ids = milestone_ids,

@@ -56,7 +56,7 @@ succeeded <- outputs2 %>% filter(!any_errored) %>% group_by(method_name) %>% fil
 # bind the metrics of the individual runs
 eval_ind <-
   bind_rows(succeeded$individual_scores) %>%
-  left_join(tasks %>% select(task_id = id, ti_type), by = "task_id")
+  left_join(tasks %>% select(task_id = id, trajectory_type), by = "task_id")
 
 # summarising at a global level
 summ <- eval_ind %>%
@@ -111,21 +111,21 @@ dev.off()
 
 # by group
 grp <- eval_ind %>%
-  group_by(method_name, ti_type, fold_type, grid_i, repeat_i, fold_i, group_sel, param_i, iteration_i) %>%
+  group_by(method_name, trajectory_type, fold_type, grid_i, repeat_i, fold_i, group_sel, param_i, iteration_i) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
   right_join(best_parm2, by = colnames(best_parm2)) %>%
-  group_by(method_name, fold_type, repeat_i, group_sel, ti_type) %>%
+  group_by(method_name, fold_type, repeat_i, group_sel, trajectory_type) %>%
   summarise_if(is.numeric, mean, na.rm = T) %>%
   ungroup() %>%
   select(-grid_i, -fold_i, -param_i, -iteration_i) %>%
-  gather(metric, value, -method_name:-group_sel, -ti_type)
+  gather(metric, value, -method_name:-group_sel, -trajectory_type)
 
 pdf(figure_file("by-ti-type_auc-R-nx.pdf"), 20, 15)
-ggplot(mapping = aes(factor(method_name, levels = rev(meth_ord)), value, fill = ti_type)) +
+ggplot(mapping = aes(factor(method_name, levels = rev(meth_ord)), value, fill = trajectory_type)) +
   geom_bar(stat = "identity", data = grp %>% filter(fold_type == "test", metric == "auc_R_nx")) +
   geom_point(data = grp %>% filter(fold_type == "train", metric == "auc_R_nx")) +
-  facet_wrap(~ti_type, scales = "free") +
+  facet_wrap(~trajectory_type, scales = "free") +
   cowplot::theme_cowplot() +
   coord_flip() +
   labs(
