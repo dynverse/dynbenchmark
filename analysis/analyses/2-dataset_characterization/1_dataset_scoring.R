@@ -15,8 +15,19 @@ map_prism <- function (x, f) PRISM::qsub_lapply(x, f, qsub_environment = list2en
 map_local <- function(x, f) pbapply::pblapply(x, f, cl=1)
 map_local_parallel <- function(x, f) pbapply::pblapply(x, f, cl=8)
 
-
+# datasets not online but found physically
 paste0("real/", list.files("analysis/data/derived_data/datasets/real/"))[!(paste0("real/", list.files("analysis/data/derived_data/datasets/real/")) %in% dataset_ids)]
+
+
+tasks_synthetic <- read_rds("analysis/data/derived_data/datasets/synthetic/v5.rds")
+tasks_real <- map_local(dataset_ids, function(dataset_id) {
+  dataset <- readRDS(dataset_file("dataset.rds", dataset_id = dataset_id))
+
+  dataset$expression <- function() {dataset_file("dataset.rds", dataset_id = dataset_id)$expression}
+  dataset$counts <- function() {dataset_file("dataset.rds", dataset_id = dataset_id)$counts}
+
+  dynutils::list_as_tibble(list(dataset))
+})
 
 
 # Check the datasets ------------------------------------
@@ -31,7 +42,6 @@ dataset_checks <- map_local(dataset_ids, function(dataset_id) {
     return(list(id = dataset_id, found = FALSE))
   }
 
-  #stop("The function below does not exist anymore, use ")
   dataset <- readRDS(dataset_file("dataset.rds", dataset_id = dataset_id))
 
   all_milestones_represented <- all(dataset$milestone_ids %in% dataset$cell_grouping$group_id)
