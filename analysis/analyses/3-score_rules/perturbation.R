@@ -270,6 +270,19 @@ perturb_structure_and_position <- function(task) {
   task
 }
 
+## Change milestone network
+change_network <- function(task, trajectory_type = "linear") {
+  task$milestone_network <- dyntoy:::generate_toy_milestone_network(trajectory_type)
+  task$progressions <- dyntoy:::random_progressions(task$milestone_network, ncells = length(task$cell_ids))
+  task$milestone_ids <- unique(c(task$milestone_network$from, task$milestone_network$to))
+
+  recreate_task(task)
+}
+
+trajectory_types <- eval(formals(dyntoy:::generate_toy_milestone_network)$trajectory_type)
+
+map(trajectory_types, function(x) function(task) change_network(task, x)) %>% setNames(paste0("perturb_change_network_", trajectory_types)) %>% list2env(.GlobalEnv)
+
 
 ### Some helper functions-------------------
 # Recreate task, forcing a reculaculation of geodesic distances
@@ -294,9 +307,7 @@ rename_toy <- function(task, toy_id) {task$id<-toy_id;task}
 group_task <- function(task) {
   task$milestone_percentages <- task$milestone_percentages %>%
     group_by(cell_id) %>%
-    arrange(-percentage) %>%
-    filter(row_number() == 1) %>%
-    mutate(percentage = 1) %>%
+    mutate(percentage = ifelse(percentage == max(percentage), 1, 0)) %>%
     ungroup()
 
   task <- dynutils::wrap_ti_prediction(

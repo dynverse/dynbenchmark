@@ -3,16 +3,19 @@ title: "2-rules"
 output: html_document
 ---
 
-```{r}
+```{r setup}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+library(dynalysis)
 library(tidyverse)
 library(dyneval)
 ```
 
-
 ```{r}
-scores <- read_rds("scores.rds")
-toys <- read_rds("toys.rds")
-timings <- read_rds("timings.rds")
+experiment("score_rules")
+
+scores <- read_rds(result_file("scores.rds"))
+toys <- read_rds(derived_file("toys.rds"))
+timings <- read_rds(result_file("timings.rds"))
 
 # summarise the scores
 # get gs-toy score
@@ -42,7 +45,7 @@ scores_summary %>%
 library(googlesheets)
 rules_info <- gs_title("Metrics rules") %>% gs_read("rules") %>% mutate(id=factor(id, levels=id))
 
-source("rules.R")
+source("analysis/analyses/3-score_rules/rules.R")
 rules_info$check_func <- map(paste0("check_", rules_info$id), get)
 
 rules <- map2(
@@ -53,7 +56,7 @@ rules <- map2(
   ) %>% bind_rows() %>% left_join(rules_info, by=c("rule_id"="id"))
 
 metric_types <- rep("positional", length(unique(scores_summary$score_id))) %>% setNames(unique(scores_summary$score_id))
-metric_types[c("ged", "robbie_network_score", "isomorphic")] <- "structural"
+metric_types[c("ged", "robbie_network_score", "lies_network_score", "isomorphic")] <- "structural"
 
 rules$metric_type <- metric_types[rules$score_id]
 rules$rule_type <- rules$type

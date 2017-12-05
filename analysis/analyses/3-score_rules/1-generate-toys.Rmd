@@ -3,31 +3,37 @@ title: "1-generate-toys"
 output: html_document
 ---
 
-## Generate toy datasets for comparing scores
-```{r}
+```{r setup}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+library(dynalysis)
 library(tidyverse)
 library(dyneval)
+```
 
-source("generation.R")
-source("perturbation.R")
+## Generate toy datasets for comparing scores
+```{r}
+source("analysis/analyses/3-score_rules/generation.R")
+source("analysis/analyses/3-score_rules/perturbation.R")
+
+experiment("score_rules")
 ```
 
 
 ```{r}
 toys_blueprint <- tribble(
-  ~generator_id, ~perturbator_id,
-  "linear", "gs",
-  "linear", "switch_two_cells",
-  "linear", "switch_all_cells",
-  "linear", "join_linear",
-  "linear", "split_linear",
-  "linear", "warp",
-  "linear", "hairy",
-  "linear", "hairy_small",
-  "linear", "hairy_large",
-  "linear", "remove_cells",
-  "linear", "add_distant_edge",
-  "linear", "structure_and_position",
+  ~trajectory_type, ~perturbator_id,
+  "simple_linear", "gs",
+  "simple_linear", "switch_two_cells",
+  "simple_linear", "switch_all_cells",
+  "simple_linear", "join_linear",
+  "simple_linear", "split_linear",
+  "simple_linear", "warp",
+  "simple_linear", "hairy",
+  "simple_linear", "hairy_small",
+  "simple_linear", "hairy_large",
+  "simple_linear", "remove_cells",
+  "simple_linear", "add_distant_edge",
+  "simple_linear", "structure_and_position",
   "bifurcating", "gs",
   "bifurcating", "change_lengths",
   "bifurcating", "change_terminal_lengths",
@@ -46,10 +52,10 @@ toys_blueprint <- tribble(
   "cycle", "remove_cells",
   "cycle", "add_distant_edge"
 ) %>% 
-  bind_rows(tibble(generator_id="linear", perturbator_id=paste0("switch_", percs * 100))) %>%
+  bind_rows(tibble(trajectory_type="simple_linear", perturbator_id=paste0("switch_", percs * 100))) %>%
+  bind_rows(crossing(trajectory_type=trajectory_types, perturbator_id=paste0("change_network_", trajectory_types)) %>% mutate(ncells = 5)) %>% 
   rowwise() %>% 
   mutate(
-  generator=list(get(paste0("generate_", generator_id))),
   perturbator=list(get(paste0("perturb_", perturbator_id)))
 )
 
@@ -57,7 +63,7 @@ toys_blueprint <- tribble(
 nreplicates <- 1
 toys <- toys_blueprint %>% slice(rep(1:n(), each=nreplicates)) %>% mutate(
   replicate=seq_len(nrow(.))%%nreplicates,
-  toy_category=paste0(generator_id, "-", perturbator_id),
+  toy_category=paste0(trajectory_type, "-", perturbator_id),
   toy_id=paste0(toy_category, "-", replicate)
 ) %>%
   mutate(ncells=sample(50:500, n(), replace=TRUE))
@@ -65,7 +71,7 @@ toys <- toys_blueprint %>% slice(rep(1:n(), each=nreplicates)) %>% mutate(
 # generate gold standards and toys, can take some time (for computing the geodesic distances I presume)
 # I choose to not do this using mutate because it is much easier to debug using loops
 toys$gs <- toys %>% split(seq_len(nrow(toys))) %>% parallel::mclapply(function(row) {
-  row$generator[[1]](row$ncells)
+  generate_dataset(row$trajectory_type, row$ncells)
 }, mc.cores=8)
 #toys$gs <- map2(toys$generator, toys$ncells, ~.x(.y))
 
@@ -81,11 +87,11 @@ toys$gs_grouped <- parallel::mclapply(toys$gs, group_task, mc.cores=8)
 toyplots <- toys %>% group_by(toy_category) %>% filter(row_number()==1) %>%
   {split(., seq_len(nrow(.)))} %>% parallel::mclapply(function(row) dynplot::plot_strip_connections(row$gs[[1]], row$toy[[1]]), mc.cores = 8)
 
-write_rds(toys, "toys.rds")
+write_rds(toys, derived_file("toys.rds"))
 ```
 
 ```{r}
-toys <- read_rds("toys.rds")
+toys <- read_rds(derived_file("toys.rds"))
 
 # get the scores when comparing the gs to toy
 compare_toy <- function(gs, toy, id=toy$id) {
@@ -102,12 +108,26 @@ compare_gs_toy <- function(gs, toy, gs_grouped) {
   )
 }
 
-metrics <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation", "isomorphic", "robbie_network_score", "mantel_pval", "ged")
+metrics <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation", "isomorphic", "node_edit_score", "node_edge_edit_score", "mantel_pval", "ged")
 
-results <- toys %>% rowwise() %>% do(compare_gs_toy(.$gs, .$toy, .$gs_grouped))# %>% select(-starts_with("time"))
+library(PRISM)
+
+qsub_run(
+  function(x) {
+    library(tidyverse)
+    parallel::mclapply(seq_len(nrow(toys)), function(row_id) {
+      row <- dynutils::extract_row_to_list(toys, row_id)
+      compare_gs_toy(.$gs, .$toy, .$gs_grouped)
+    })
+  },
+  qsub_config = override_qsub_config(num_cores = 24),
+  qsub_environment = list2env(list(compare_toy, compare_gs_toy, toys)
+)
+
+
 scores <- results %>% select(-starts_with("time"))
 
-write_rds(scores, "scores.rds")
+write_rds(scores, result_file("scores.rds"))
 ```
 
 ```{r}
@@ -123,7 +143,7 @@ metric_groups <- c("mean_R_nx"="coranking", "auc_R_nx"="coranking", "Q_local"="c
 
 timings %>% 
   left_join(metric_groups, by="metric_group_id") %>% 
-  write_rds("timings.rds")
+  write_rds(result_file("timings.rds"))
 ```
 
 
