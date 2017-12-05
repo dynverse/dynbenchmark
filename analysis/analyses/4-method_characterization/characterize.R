@@ -10,7 +10,7 @@ experiment("method_characteristics")
 # # If it's your first time running this script, run this:
 # gs_auth()
 
-script_file <- "analysis/analyses/method_characterization/scholar.py"
+script_file <- "analysis/analyses/4-method_characterization/scholar.py"
 if (!file.exists(script_file)) {
   download.file("https://raw.githubusercontent.com/ckreibich/scholar.py/master/scholar.py", destfile = script_file)
 }
@@ -62,11 +62,11 @@ trajectory_components <- method_df_evaluated %>%
   mutate(
     linear = segment,
     single_bifurcation = fork,
-    multiple_bifurcations = fork & n_forks > 1,
+    binary_tree = fork & n_forks > 1,
     single_multifurcation = fork & n_fork_paths > 2,
-    multiple_multifurcations = multiple_bifurcations & single_multifurcation,
-    cyclic = loop,
-    multiple_multifurcations_convergence =multiple_bifurcations & single_multifurcation & convergence
+    non_binary_tree = binary_tree & single_multifurcation,
+    cycle = loop,
+    simple_graph = binary_tree & single_multifurcation & convergence
   )
 
 write_rds(trajectory_components, derived_file("trajectory_components.rds"))
@@ -231,9 +231,6 @@ platforms <- method_df %>% separate_rows(platform=platforms, sep=", ") %>%
     coord_flip()
 saveRDS(platforms, figure_file("platforms.rds"))
 
-ggsave("../../dyndocs/20171201_presentation_dambi/img/platforms.svg", platforms, width = 10, height = 2)
-
-
 # Trajectory components over time -------------------------------------------
 trajectory_components <- read_rds(derived_file("trajectory_components.rds"))
 
@@ -249,7 +246,7 @@ add_step <- function(df) {
 }
 
 trajectory_components_step <- add_step(arrange(trajectory_components, date))
-trajectory_types <- c("linear", "single_bifurcation", "multiple_bifurcations", "single_multifurcation", "multiple_multifurcations", "cyclic", "multiple_multifurcations_convergence")
+trajectory_types <- c("linear", "single_bifurcation", "binary_tree", "single_multifurcation", "non_binary_tree", "cycle", "simple_graph")
 
 trajectory_components_gathered <- trajectory_components_step %>%
   gather(trajectory_type, can_trajectory_type, !!trajectory_types) %>%
@@ -389,7 +386,7 @@ prior_usage_width <- length(prior_usages)
 
 # Trajectory components
 trajectory_components <- readRDS(derived_file("trajectory_components.rds"))
-trajectory_types <- c("linear", "single_bifurcation", "multiple_bifurcations", "single_multifurcation", "multiple_multifurcations", "cyclic", "multiple_multifurcations_convergence")
+trajectory_types <- c("linear", "single_bifurcation", "binary_tree", "single_multifurcation", "non_binary_tree", "cycle", "simple_graph")
 trajectory_components_plot <- trajectory_components %>%
   gather(trajectory_type, can, !!trajectory_types, factor_key=TRUE) %>%
   select(trajectory_type, can, name) %>%
@@ -411,3 +408,28 @@ method_characteristics
 
 saveRDS(method_characteristics, figure_file("method_characteristics.rds"))
 
+
+
+
+# Maximal trajectory
+trajectory_components %>%
+  gather(trajectory_type, can, !!trajectory_types, factor_key=TRUE) %>%
+  group_by(name) %>%
+  filter(can) %>%
+  filter(row_number() == n()) %>%
+  select(name, trajectory_type) %>%
+  ungroup() %>%
+  mutate(image_location = glue::glue("analysis/figures/trajectory_types/mini/{trajectory_type}.png")) %>%
+  ggplot(aes(1, name)) +
+    #ggimage::geom_image(aes(image=image_location), size=0.05) +
+    geom_text(aes(label=trajectory_type))
+
+ggsave("test.pdf")
+
+
+command <- glue::glue("inkscape test.pdf --export-plain-svg=test.svg")
+system(command)
+
+svg_location <- "test.svg"
+xml <- read_xml(svg_location)
+xml_find_all(xml, "//svg:tspan[text()='linear']") %>% xml_parent() %>% xml_replace(glue::glue("<image xlink:href='analysis/figures/trajectory_types/mini/linear.svg' />"))
