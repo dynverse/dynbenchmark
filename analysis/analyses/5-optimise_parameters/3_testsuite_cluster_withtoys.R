@@ -103,17 +103,17 @@ ggplot(score_df %>% mutate(method_name = factor(method_name, levels = method_nam
 #     theme(legend.position = "none"),
 #   # ggplot(test_eval_grp_summ) +
 #   #   geom_bar(aes(method_name_f, correlation, fill = method_name_f), stat = "identity") +
-#   #   facet_wrap(~ti_type, ncol = 1) +
+#   #   facet_wrap(~trajectory_type, ncol = 1) +
 #   #   coord_flip() +
 #   #   theme(legend.position = "none"),
 #   # ggplot(test_eval_grp_summ) +
 #   #   geom_bar(aes(method_name_f, robbie_network_score, fill = method_name_f), stat = "identity") +
-#   #   facet_wrap(~ti_type, ncol = 1) +
+#   #   facet_wrap(~trajectory_type, ncol = 1) +
 #   #   coord_flip() +
 #   #   theme(legend.position = "none"),
 #   # ggplot(test_eval_grp_summ) +
 #   #   geom_bar(aes(method_name_f, harmonicmean, fill = method_name_f), stat = "identity") +
-#   #   facet_wrap(~ti_type, ncol = 1) +
+#   #   facet_wrap(~trajectory_type, ncol = 1) +
 #   #   coord_flip() +
 #   #   theme(legend.position = "none"),
 #   nrow = 1

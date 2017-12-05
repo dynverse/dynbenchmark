@@ -193,7 +193,7 @@ perturb_hairy <- function(task, nhairs=10, overall_hair_length=1) {
   }
 
   newtask <- dynutils::wrap_ti_prediction(
-    task$ti_type,
+    task$trajectory_type,
     task$id,
     task$cell_ids,
     unique(c(newmilestone_network$from, newmilestone_network$to)),
@@ -275,7 +275,7 @@ perturb_structure_and_position <- function(task) {
 # Recreate task, forcing a reculaculation of geodesic distances
 recreate_task <- function(task) {
   task <- dynutils::wrap_ti_prediction(
-    task$ti_type,
+    task$trajectory_type,
     task$id,
     task$cell_ids,
     task$milestone_ids,
@@ -300,7 +300,7 @@ group_task <- function(task) {
     ungroup()
 
   task <- dynutils::wrap_ti_prediction(
-    task$ti_type,
+    task$trajectory_type,
     task$id,
     task$cell_ids,
     task$milestone_ids,
