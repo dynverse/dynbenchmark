@@ -13,24 +13,26 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(dyntoy)
 library(dyneval)
+library(dynmethods)
 
 set.seed(1)
 
-tasks <- generate_toy_datasets(num_replicates = 1, num_cells=300)
+data("toy_tasks")
+tasks <- toy_tasks
 ```
 
 ```{r}
 tasks$counts <- map(tasks$counts, function(counts) {
   cbind2(counts, matrix(sample(1:100, nrow(counts)*100, replace=TRUE), nrow=nrow(counts))) %>% {magrittr::set_colnames(., paste0("G", 1:ncol(.)))}
 })
-task <- dynutils::extract_row_to_list(tasks, 2)
+task <- dynutils::extract_row_to_list(tasks, 3)
 pheatmap::pheatmap(task$counts)
 
 source("~/thesis/projects/dynverse/dynmodular/dimred_wrappers.R")
-space <- task$counts %>% dimred_dp(2, neigen=2) %>% as.data.frame
-# space <- task$counts %>% dimred_mds(2) %>% as.data.frame
+# space <- task$counts %>% dimred_dp(2, neigen=2) %>% as.data.frame
+space <- task$counts %>% dimred_mds(2) %>% as.data.frame
 # space <- task$counts %>% dimred_lle(2) %>% as.data.frame
-space <- space %>% bind_cols(task$cell_grouping %>% slice(match(rownames(task$counts), cell_id)))
+space <- space %>% bind_cols(task$prior_information$grouping_assignment %>% slice(match(rownames(task$counts), cell_id)))
 space %>%  ggplot() + geom_point(aes(Comp1, Comp2, color=group_id))
 ```
 
@@ -42,9 +44,9 @@ method_names <- names(method_params)
 
 method_descriptions <- map(method_names, ~get(paste0("description_", .))()) %>% set_names(method_names)
 
-metric_names <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation", "isomorphic", "robbie_network_score")
+metric_names <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation")
 
-method_names <- c("monocle_ddrtree", "scorpius")
+method_names <- c("scorpius")
 ```
 
 ```{r}
@@ -71,27 +73,24 @@ results <- purrr::map(method_names, function(method_name) {
     }
   }
 
-  factory(function() {
-    dyneval:::execute_evaluation(tasks, method, params, metrics = metric_names, timeout = 99999999999999)
-  }
-  )()
+  # factory(function() {
+    dyneval:::execute_evaluation(tasks, method, params, metrics = metric_names, timeout = 100)
+  # }
+  # )()
 })
 # }, qsub_environment = list2env(lst(method_descriptions, tasks, metric_names, method_params)), qsub_config = PRISM::override_qsub_config(memory = "10G", execute_before=c("module load python/x86_64/3.5.1"), wait=F))
 ```
 
 Gather the output of the different methods, and check whether there were any errors
 ```{r}
-# results <- PRISM::qsub_retrieve(results)
-scores <- purrr::map(results, function(.) {
+scores <- purrr::map(results, function(result) {
   bind_cols(
     tibble(
-      error=list(.$err), 
-      warning=list(.$warning), 
-      model=attr(.[[1]], "extras")$.models
+      model = attr(result, "extras")$.models
     ),
-    attr(.[[1]], "extras")$.summary
-  ) %>% mutate(method_name=.$method_name)
-}) %>% bind_rows() %>% mutate(errored = !map_lgl(error, is.null), method_id=rep(method_names, each=nrow(tasks))) %>% dplyr::select(-contains("method_name1"))
+    attr(result, "extras")$.summary
+  )
+}) %>% bind_rows()
 
 # scores %>% saveRDS("results/toy_method_scores.rds")
 ```

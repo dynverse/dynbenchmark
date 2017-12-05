@@ -25,9 +25,9 @@ linear:
   scuba:
   slicer:
     min_branch_len: 50
-  monocle_ddrtree:
+  monocle2_ddrtree:
     reduction_method: DDRTree
-  monocle_pqtree:
+  monocle1_ica:
     reduction_method: ICA
   wishbone:
     branch: FALSE
@@ -46,4 +46,4 @@ linear:
     b: 1
   dpt:
   topslam:
-  shuffled:
+  random:
