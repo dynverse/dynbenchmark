@@ -171,16 +171,7 @@ ggplot(mapping = aes(factor(method_name, levels = rev(meth_ord)), value, fill = 
   )
 dev.off()
 
-
-errored <- outputs2 %>% filter(any_errored)
-errored$method_name %>% unique
-
-err_spec <- errored %>% filter(method_name == "DPT")
-err_spec$qsub_error[[1]]
-err_spec$individual_scores[[1]]$error[[2]]
-
-
-
+# see performance over iterations
 compare <- summ %>%
   gather(metric, score, -method_name:-iteration_i) %>%
   mutate(combine = paste0(fold_type, ".", metric)) %>%
@@ -212,3 +203,11 @@ for (fi in seq_len(num_folds)) {
 }
 dev.off()
 
+
+# check errored methods
+errored <- outputs2 %>% filter(any_errored)
+errored$method_name %>% unique
+
+err_spec <- errored %>% filter(method_name == "topslam")
+err_spec$qsub_error[[1]]
+err_spec$individual_scores[[1]]$error[[2]]
