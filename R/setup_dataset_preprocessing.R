@@ -107,11 +107,11 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   original_counts <- conversion_out$counts
   feature_info <- feature_info[conversion_out$filtered, ] %>% mutate(feature_id = colnames(original_counts))
 
-  norm_out <- normalize_filter_counts(original_counts, verbose = TRUE)
+  norm_out <- normalise_filter_counts(original_counts, verbose = TRUE)
 
-  pdf(dataset_file(dataset_id = dataset_id, "normalization.pdf"));walk(norm_out$normalization_plots, print);graphics.off()
+  pdf(dataset_file(dataset_id = dataset_id, "normalisation.pdf"));walk(norm_out$normalisation_plots, print);graphics.off()
 
-  normalization_info <- norm_out$info
+  normalisation_info <- norm_out$info
 
   expression <- norm_out$expression
   counts <- norm_out$counts
@@ -133,15 +133,18 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     milestone_percentages = milestone_percentages,
     cell_grouping = cell_grouping,
     cell_info = cell_info,
-    feature_info = feature_info
+    feature_info = feature_info,
+    normalisation_info = normalisation_info
   )
+
+  prior_information <- dynutils::generate_prior_information(milestone_ids, milestone_network, dataset$progressions, milestone_percentages, counts, feature_info, cell_info)
 
   write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
   write_rds(original_counts, dataset_file(dataset_id = dataset_id, filename = "original_counts.rds"))
 }
 
 convert_to_symbol <- function(counts) {
-  id_mapper <- readRDS(derived_file("id_mapper.rds", experiment_id = "normalization"))
+  id_mapper <- readRDS(derived_file("id_mapper.rds", experiment_id = "normalisation"))
 
   colnames(counts) <- tibble(gene_id = colnames(counts)) %>%
     left_join(id_mapper, by=c("gene_id"="ensembl")) %>%
