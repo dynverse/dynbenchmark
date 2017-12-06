@@ -4,6 +4,7 @@
 #' Either set the working directory to the repository, or define the DYNALYSIS_PATH variable.
 #'
 #' @export
+#' @importFrom dynutils pritt
 get_dynalysis_folder <- function() {
   pwd <- Sys.getenv("DYNALYSIS_PATH")
 
