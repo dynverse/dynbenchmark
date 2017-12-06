@@ -1,6 +1,4 @@
-wrap <- function(milestone_network, ncells=100) {
-  progressions <- dyntoy:::random_progressions(milestone_network, ncells)
-
+wrap <- function(milestone_network, progressions) {
   task <- dynutils::wrap_ti_prediction(
     "toy",
     "toy",
@@ -15,7 +13,24 @@ wrap <- function(milestone_network, ncells=100) {
   task
 }
 
-generate_dataset <- function(trajectory_type="linear", ncells=100) {
-  milestone_network <- dyntoy:::generate_toy_milestone_network(trajectory_type)
-  wrap(milestone_network, ncells)
+
+generate_linear <- function(ncells=100) {
+  milestone_network <- dyngen::generate_toy_milestone_network("linear")
+  progressions <- dyngen::random_progressions(milestone_network, ncells)
+
+  wrap(milestone_network, progressions)
+}
+
+generate_bifurcating <- function(ncells=100) {
+  milestone_network <- dyngen::generate_toy_milestone_network("bifurcating")
+  progressions <- dyngen::random_progressions(milestone_network, ncells)
+
+  wrap(milestone_network, progressions)
+}
+
+generate_cycle <- function(ncells=100) {
+  milestone_network <- dyngen::generate_toy_milestone_network("cycle")
+  progressions <- dyngen::random_progressions(milestone_network, ncells)
+
+  wrap(milestone_network, progressions)
 }

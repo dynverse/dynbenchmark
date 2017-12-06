@@ -84,6 +84,7 @@ g1 <- ggplot(method_df_evaluated, aes(date, qc_score)) +
   scale_y_continuous(breaks = c(0, 2, 4, 6, 8), limits = c(0, 8)) +
   labs(x = "Time", y = "QC score", title = "Code quality score over time")
 g1
+
 write_rds(g1, figure_file("ncitations_over_time.rds"))
 ggsave(figure_file("time_vs_qcscore.png"), g1, width = 16, height = 8)
 
@@ -499,4 +500,3 @@ map(trajectory_types, function(trajectory_type) {
 xml_root(xml) %>% xml_set_attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
 
 write(as.character(xml), file=figure_file('figure_methods.svg')); xml <- NULL
-

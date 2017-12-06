@@ -133,18 +133,28 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     milestone_percentages = milestone_percentages,
     cell_grouping = cell_grouping,
     cell_info = cell_info,
+<<<<<<< HEAD
     feature_info = feature_info,
     normalisation_info = normalisation_info
   )
 
   prior_information <- dynutils::generate_prior_information(milestone_ids, milestone_network, dataset$progressions, milestone_percentages, counts, feature_info, cell_info)
 
+=======
+    feature_info = feature_info
+  )
+
+>>>>>>> 30d59a54dbcf468277ff7d8de13a110824a7cc32
   write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
   write_rds(original_counts, dataset_file(dataset_id = dataset_id, filename = "original_counts.rds"))
 }
 
 convert_to_symbol <- function(counts) {
+<<<<<<< HEAD
   id_mapper <- readRDS(derived_file("id_mapper.rds", experiment_id = "normalisation"))
+=======
+  id_mapper <- readRDS(derived_file("id_mapper.rds", experiment_id = "normalization"))
+>>>>>>> 30d59a54dbcf468277ff7d8de13a110824a7cc32
 
   colnames(counts) <- tibble(gene_id = colnames(counts)) %>%
     left_join(id_mapper, by=c("gene_id"="ensembl")) %>%
