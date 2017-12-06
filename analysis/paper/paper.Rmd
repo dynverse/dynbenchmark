@@ -79,10 +79,10 @@ cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over
 `r ref("sfig", "methods_over_time", anchor=TRUE)` New TI methods over time. **a** Number of methods published or in preprint. **b** Number of methods which can handle a particular type of trajectory.
 
 
-Dozens[b] of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially, most trajectory inference was focused on linear trajectories, with one start and one end point. However, the prospect of branching trajectories was already described early [@trapnell_dynamics_2014], and about half of the current methods can handle one or more bifurcations in the trajectory (`r ref("sfig", "methods_over_time", "b")`). Some methods can already handle more complex, cyclical and branching behaviour, and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes happening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
+Dozens[b] of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially, most trajectory inference was focused on linear trajectories, with one start and one end point. However, the prospect of branching trajectories was already described early [@trapnell_dynamics_2014], and about half of the current methods can handle one or more bifurcations in the trajectory (`r ref("sfig", "methods_over_time", "b")`). Some methods can already handle more complex, cyclical and branching behaviour [@welch_slicer:_2016; @wolf_graph_2017], and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes happening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
 
 
-Although[c] trajectory inference methods use a variety of algorithms and subcomponents to reach a final ordering, most consist of the following three steps: (i) preprocessing (normalization, filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction or clustering and (iii) ordering the cells along the simplified representation. These components are frequently interchangeable. Depending on the way the cells are ordered, some prior information about the dynamic process can be optionally used or required by the method 
+Although[c] trajectory inference methods use a variety of algorithms and subcomponents to reach a final ordering, most consist of the following three steps: (i) preprocessing (normalization, filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction or clustering and (iii) ordering the cells along the simplified representation [@cannoodt_computational_2016]. Depending on the way the cells are ordered, some prior information about the dynamic process can be optionally used or required by the method, which can both bias the trajectory to current knowledge but also guide the method towards choosing the right trajectory among many others. Furthermore, with the ongoing strong decreases in single-cell -omics technologies, it becomes
 
 
 Given[d] this plethora of available trajectory inference methods, it is important that methods are compared, so that users can use the most optimal method available for their problem. Moreover, new methods need to be rigorously tested, so that development can focus on improving the current state-of-the-art. In this study, we therefore for the first time developed a comprehensive evaluation framework for trajectory inference methods. We test both on synthetic data, for which the gold standard is known, and real data, for which in some cases the gold standard can be extracted from expert knowledge. We include a rigorous parameter optimisation, making sure that parameters are optimized while avoiding overfitting on characteristics of specific datasets. To make our framework reusable and extendable, we make use of continuous analysis [@beaulieu-jones_reproducibility_2017], which allows the developers of new methods to easily test their methods and compare them against the state-of-the-art.
@@ -106,23 +106,20 @@ method_df <- readRDS(derived_file("method_df.rds", experiment_id="method_charact
 We gathered a list of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(!is.na(method_df$qc_score))` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized all methods in four different ways: underlying algorithm(s), implementation quality, prior information and possible trajectory structures (`r ref("fig", "method_characteristics")`). The underlying algorithms can be divided into several subcomponents, and these components are frequently shared between different algorithms. Some components, such as a minimal spanning tree or principal curves for cellular ordering, or PCA or diffusion map for dimensionality reduction are shared by more than 5 methods sFIG?. While not directly related to the quality of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme sNOTE. After initial scoring we contacted all the authors, to allow them to improve their method before publishing. While most methods lack at several metrics (`r ref("fig", "method_characteristics", "a")`), recent methods tend to have higher code quality sFIG. However, some implementation details are lacking for the majority of the methods and should receive extra attention from developers: code availability, documentation and unit testing (`r ref("fig", "method_characteristics", "a")`).
 
 
-```{r, fig.width = 12, fig.height = 9}
-method_characteristics <- readRDS(figure_file("method_characteristics.rds", experiment_id="method_characteristics"))
-
-
-print(method_characteristics)
-```
+![](`r figure_file("figure_methods.svg", experiment_id="method_characteristics")`)
 
 
 `r ref("fig", "method_characteristics", anchor=TRUE)` FIrst characterization of each method.
 
 
 ### Evaluation overview
+
+
 ![evaluation_overview](../../analysis/figures/evaluation_overview.png)
 `r ref("fig", "evaluation_overview", anchor=TRUE)` Overview of the evaluation
 
 
-Our evaluation was structured in three main phases. In the first phase, we used toy data as a positive control for each method, assessing whether it can detect the correct trajectories in very simplistic data. Next, we generated synthetic data from a realistic model of gene regulation, combined with a simulation of the technical variation induced by single-cell RNA sequencing. We used this synthetic data in a parameter optimization procedure, where we used cross-validation between datasets to avoid overfitting on particular data set structures. Finally, in the third phase, we used the optimized parameters to score the performance of each method on real data. 
+Our evaluation was structured in three main phases. In the first phase, we used toy data as a positive control for each method, assessing whether it can detect the correct trajectories in very simplistic data. Next, we generated synthetic data from a realistic model of gene regulation, combined with a simulation of the technical variation induced by single-cell RNA sequencing. We used this synthetic data in a parameter optimization procedure, where we used cross-validation between datasets to avoid overfitting on particular data set structures. Finally, in the third phase, we used the optimized parameters to score the performance of each method on real data. We split the real datasets in two groups based on the type of reference trajectory available. The reference in datasets with a silver standard were defined by the author’s based on the expression data itself, while the reference for gold standard was defined using external information, such as fluorescent sorting or time series.
 ### Score metrics and parameter optimisation
 
 
@@ -150,7 +147,15 @@ Echte data. Evaluatie (biologische relevantie van de methode)
 ## Trajectory inference methods
 ## Toy data generation
 ## Synthetic data generation
-Our workflow to generate synthetic data is based on the well established workflow used in the evaluation of network inference methods [@marbach_wisdom_2012], but required several additions. 
+
+
+Our workflow to generate synthetic data is based on the well established workflow used in the evaluation of network inference methods [@marbach_wisdom_2012] and consists of four main steps: network generation, simulation, gold standard extraction and simulation of the scRNA-seq experiment. At every step, great care was taking to mimic real cellular regulatory networks as best as possible, while keeping the model simple and easily extendable.
+
+
+### Network generation
+
+
+One of the main process involved in cellular dynamic processes is through gene regulation, where regulatory cascades and feedback loops lead to . The exact way a cell chooses a certain path during its differentiation is still an active research field, although certain models have already emerged and been tested in vivo. One driver of bifurcations seem to be mutual antognism, where two genes  or gene modules strongly inhibit eachother, forcing one of the two to become inactive. The choice of which gene(s) survive can be both due to stochasticity [ref] or driven by environmental cues.Of Modules? [Th17]
 
 
 ## Real data processing
