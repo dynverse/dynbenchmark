@@ -77,7 +77,7 @@ method_df_evaluated <- read_rds(derived_file("method_df_evaluated.rds"))
 
 # Comparing number of citations, qc score, and time -------------------------------------
 g1 <- ggplot(method_df_evaluated, aes(date, qc_score)) +
-  geom_smooth(method="lm") +
+  geom_smooth(span=2) +
   geom_point() +
   ggrepel::geom_label_repel(aes(label = name)) +
   cowplot::theme_cowplot() +
