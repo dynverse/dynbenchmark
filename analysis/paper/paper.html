@@ -136,7 +136,7 @@ $(document).ready(function () {
 <h4 class="author"><em>Wouter Saelens* ¹ ²</em></h4>
 <h4 class="author"><em>Helena Todorov¹ ²</em></h4>
 <h4 class="author"><em>Yvan Saeys¹ ²</em></h4>
-<h4 class="date"><em>05 December, 2017</em></h4>
+<h4 class="date"><em>06 December, 2017</em></h4>
 <div class="abstract">
 <p class="abstract">Abstract</p>
 <p>Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Dozens of trajectory inference methods have been developed, early methods mostly focussing on linear trajectories, while recently methods also model more complex branching trajectories. However, the performance of these methods have not yet been comprehensively evaluated. Here, we compare a total of 22 trajectory inference methods, on both realistic synthetic datasets and a large set is real datasets. We employ a novel parameter optimisation procedure, and compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended and is available at www.github.com/dynverse.</p>
@@ -229,7 +229,7 @@ $(document).ready(function () {
 </div>
 <div id="colophon" class="section level1">
 <h1>Colophon</h1>
-<p>This report was generated on 2017-12-05 14:28:02 using the following computational environment and dependencies:</p>
+<p>This report was generated on 2017-12-06 14:06:35 using the following computational environment and dependencies:</p>
 <pre><code>#&gt;  setting  value                       
 #&gt;  version  R version 3.4.2 (2017-09-28)
 #&gt;  system   x86_64, linux-gnu           
@@ -237,12 +237,13 @@ $(document).ready(function () {
 #&gt;  language (EN)                        
 #&gt;  collate  en_US.UTF-8                 
 #&gt;  tz       Europe/Brussels             
-#&gt;  date     2017-12-05                  
+#&gt;  date     2017-12-06                  
 #&gt; 
 #&gt;  package              * version    date      
 #&gt;  acepack                1.4.1      2016-10-29
 #&gt;  AnnotationDbi          1.40.0     2017-11-25
 #&gt;  ape                    5.0        2017-10-30
+#&gt;  aroma.light            3.8.0      2017-11-28
 #&gt;  assertthat             0.2.0      2017-04-11
 #&gt;  backports              1.1.1      2017-09-25
 #&gt;  base                 * 3.4.2      2017-10-27
@@ -261,7 +262,6 @@ $(document).ready(function () {
 #&gt;  bit64                  0.9-7      2017-05-08
 #&gt;  bitops                 1.0-6      2013-08-17
 #&gt;  blob                   1.1.0      2017-06-17
-#&gt;  bookdown               0.5        2017-08-20
 #&gt;  broom                  0.4.3      2017-11-20
 #&gt;  caret                  6.0-77     2017-09-07
 #&gt;  caTools                1.17.1     2014-09-10
@@ -294,14 +294,14 @@ $(document).ready(function () {
 #&gt;  DRR                    0.0.2      2016-09-15
 #&gt;  DT                     0.2        2016-08-09
 #&gt;  dtw                    1.18-1     2015-09-01
-#&gt;  dynalysis            * 0.0.0.9000 2017-11-30
+#&gt;  dynalysis            * 0.0.0.9000 2017-12-06
 #&gt;  dynamicTreeCut         1.63-1     2016-03-11
-#&gt;  dyneval              * 0.1.0      2017-11-30
+#&gt;  dyneval              * 0.1.0      2017-12-06
 #&gt;  dyngen               * 0.1        2017-12-05
 #&gt;  dynmethods           * 0.1.0      2017-12-04
 #&gt;  dynplot                0.1.0      2017-12-04
 #&gt;  dyntoy               * 0.1.0      2017-12-05
-#&gt;  dynutils             * 0.1.0      2017-12-05
+#&gt;  dynutils             * 0.1.0      2017-12-06
 #&gt;  edgeR                  3.20.1     2017-11-25
 #&gt;  evaluate               0.10.1     2017-06-24
 #&gt;  fastgssa               0.6-0      2017-11-16
@@ -323,12 +323,9 @@ $(document).ready(function () {
 #&gt;  ggforce                0.1.1      2016-11-28
 #&gt;  ggjoy                  0.4.0      2017-09-15
 #&gt;  ggplot2              * 2.2.1      2016-12-30
-#&gt;  ggrepel                0.7.0      2017-09-29
 #&gt;  ggridges               0.4.1      2017-09-15
-#&gt;  git2r                  0.19.0     2017-07-19
 #&gt;  glue                   1.2.0      2017-10-29
 #&gt;  googledrive          * 0.1.1      2017-08-28
-#&gt;  googlesheets         * 0.2.2      2017-05-07
 #&gt;  gower                  0.1.2      2017-02-23
 #&gt;  gplots                 3.0.1      2016-03-30
 #&gt;  graphics             * 3.4.2      2017-10-27
@@ -440,10 +437,14 @@ $(document).ready(function () {
 #&gt;  ROCR                   1.0-7      2015-03-26
 #&gt;  rpart                  4.1-11     2017-04-21
 #&gt;  rprojroot              1.2        2017-01-16
+#&gt;  RSQLite                2.0        2017-06-19
+#&gt;  rstudioapi             0.7.0-9000 2017-11-28
+#&gt;  Rtsne                  0.13       2017-04-14
 #&gt;  source                                                   
 #&gt;  CRAN (R 3.4.0)                                           
 #&gt;  Bioconductor                                             
 #&gt;  cran (@5.0)                                              
+#&gt;  Bioconductor                                             
 #&gt;  CRAN (R 3.4.0)                                           
 #&gt;  CRAN (R 3.4.1)                                           
 #&gt;  local                                                    
@@ -462,7 +463,6 @@ $(document).ready(function () {
 #&gt;  CRAN (R 3.4.0)                                           
 #&gt;  CRAN (R 3.4.0)                                           
 #&gt;  CRAN (R 3.4.0)                                           
-#&gt;  CRAN (R 3.4.1)                                           
 #&gt;  CRAN (R 3.4.2)                                           
 #&gt;  CRAN (R 3.4.1)                                           
 #&gt;  CRAN (R 3.4.0)                                           
@@ -525,10 +525,7 @@ $(document).ready(function () {
 #&gt;  CRAN (R 3.4.2)                                           
 #&gt;  CRAN (R 3.4.1)                                           
 #&gt;  CRAN (R 3.4.2)                                           
-#&gt;  CRAN (R 3.4.2)                                           
-#&gt;  CRAN (R 3.4.1)                                           
 #&gt;  cran (@1.2.0)                                            
-#&gt;  CRAN (R 3.4.1)                                           
 #&gt;  CRAN (R 3.4.1)                                           
 #&gt;  CRAN (R 3.4.1)                                           
 #&gt;  CRAN (R 3.4.0)                                           
@@ -641,11 +638,14 @@ $(document).ready(function () {
 #&gt;  cran (@1.0-7)                                            
 #&gt;  CRAN (R 3.4.0)                                           
 #&gt;  CRAN (R 3.4.0)                                           
-#&gt;  [ reached getOption(&quot;max.print&quot;) -- omitted 56 rows ]</code></pre>
+#&gt;  CRAN (R 3.4.0)                                           
+#&gt;  Github (rstudio/rstudioapi@335f257)                      
+#&gt;  CRAN (R 3.4.0)                                           
+#&gt;  [ reached getOption(&quot;max.print&quot;) -- omitted 53 rows ]</code></pre>
 <p>The current Git commit details are:</p>
 <pre><code>#&gt; Local:    master /home/wouters/thesis/projects/dynverse/dynalysis/
 #&gt; Remote:   master @ origin (git@github.com:Zouter/dynalysis.git)
-#&gt; Head:     [db7105e] 2017-12-05: rename ti_type to trajectory type</code></pre>
+#&gt; Head:     [4d4f24f] 2017-12-06: fix dataset preproc</code></pre>
 </div>
 <div id="references" class="section level1">
 <h1>References</h1>
