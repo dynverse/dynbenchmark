@@ -7,7 +7,7 @@ experiment("dyneval/7_testsuite_cluster_alltasks")
 # tasks
 tasks <- readRDS(derived_file("v5.rds", experiment_id = "datasets/synthetic"))
 tasks_info <- tasks$info %>% map_df(as_data_frame) %>% mutate(task_id = tasks$id)
-# tasks_info <- tasks_info %>% group_by(modulenet_name) %>% mutate(fold = sample.int(n())) %>% ungroup()
+# tasks_info <- tasks_info %>%s group_by(modulenet_name) %>% mutate(fold = sample.int(n())) %>% ungroup()
 
 # save(tasks_info, file = derived_file("tasks_info.RData"))
 load(derived_file("tasks_info.RData"))
@@ -26,7 +26,7 @@ methods <- methods %>% slice(match(all_method_orders, short_name))
 
 #metrics <- c("auc_R_nx", "correlation")
 metrics <- "auc_R_nx"
-timeout <- 120
+timeout <- 300
 
 # start benchmark suite
 benchmark_suite_submit(
@@ -40,7 +40,7 @@ benchmark_suite_submit(
   timeout = timeout,
   memory = "16G",
   num_cores = 4,
-  num_iterations =  100,
+  num_iterations = 100,
   num_repeats = 1,
   num_init_params = 100,
   execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500",
@@ -62,20 +62,46 @@ outputs2 <- outputs %>%
   ungroup()
 
 num_folds <- 2
+num_iterations <- 100
+num_cores <- 4
+num_init_params <- 100
 
 # select only the runs that succeeded
 succeeded <- outputs2 %>% filter(!any_errored) %>% group_by(method_name) %>% filter(n() == num_folds) %>% ungroup()
 
 # bind the metrics of the individual runs
+
+new_param_i_fun <- function(iteration_i, param_i) {
+  ifelse(
+    param_i == 1,
+    0,
+    ifelse(
+      iteration_i == 0,
+      sample.int(num_init_params)[seq_along(param_i)],
+      sample.int(num_cores)[seq_along(param_i)] + ((iteration_i-1) * num_cores) + num_init_params
+    )
+  )
+}
+
 eval_ind <-
   bind_rows(succeeded$individual_scores) %>%
   left_join(tasks_info %>% select(task_id, trajectory_type = modulenet_name, platform_name), by = "task_id") %>%
-  mutate(pct_errored = 1 - sapply(error, is.null)) #%>%
-# filter(!method_short_name %in% c("identity", "shuffle", "random"))
+  mutate(pct_errored = 1 - sapply(error, is.null))
+
+param_i_map <- eval_ind %>%
+  mutate(is_default = param_i == 1) %>%
+  group_by(grid_i, fold_i, iteration_i, param_i, is_default) %>%
+  summarise() %>%
+  mutate(newparam_i = new_param_i_fun(iteration_i, param_i)) %>%
+  ungroup()
+
+eval_ind <- eval_ind %>% left_join(param_i_map, by = c("grid_i", "fold_i", "iteration_i", "param_i"))
+
+# ggplot(eval_ind) + geom_point(aes(newparam_i, iteration_i, colour = method_name))
 
 # summarising at a global level
 summ <- eval_ind %>%
-  group_by(method_name, fold_type, grid_i, repeat_i, fold_i, group_sel, param_i, iteration_i) %>%
+  group_by(method_name, fold_type, grid_i, repeat_i, fold_i, group_sel, param_i, newparam_i, iteration_i) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup()
 
@@ -90,7 +116,7 @@ best_parm2 <- summ %>%
   arrange(desc(auc_R_nx)) %>%
   slice(1) %>%
   ungroup() %>%
-  select(method_name, grid_i, repeat_i, fold_i, group_sel, param_i)
+  select(method_name, grid_i, repeat_i, fold_i, group_sel, param_i, newparam_i)
 
 # filtering the summary for the best parms
 best_summ <- summ %>%
@@ -102,12 +128,12 @@ best_summ_agg <- best_summ %>%
   group_by(method_name, fold_type, repeat_i, group_sel) %>%
   summarise_if(is.numeric, mean, na.rm = T) %>%
   ungroup() %>%
-  select(-grid_i, -fold_i, -param_i, -iteration_i)
+  select(-grid_i, -fold_i, -param_i, -newparam_i, -iteration_i)
 default_summ_agg <- default_summ %>%
   group_by(method_name, fold_type, repeat_i, group_sel) %>%
   summarise_if(is.numeric, mean, na.rm = T) %>%
   ungroup() %>%
-  select(-grid_i, -fold_i, -param_i, -iteration_i)
+  select(-grid_i, -fold_i, -param_i, -newparam_i, -iteration_i)
 
 # gathering the different metrics
 best_summ_agg_spr <- best_summ_agg %>% gather(metric, value, -method_name:-group_sel)
@@ -135,24 +161,24 @@ dev.off()
 
 # by group
 best_grp <- eval_ind %>%
-  group_by(method_name, trajectory_type, fold_type, grid_i, repeat_i, fold_i, group_sel, param_i, iteration_i) %>%
+  group_by(method_name, trajectory_type, fold_type, grid_i, repeat_i, fold_i, group_sel, param_i, newparam_i, iteration_i) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
   right_join(best_parm2, by = colnames(best_parm2)) %>%
   group_by(method_name, fold_type, repeat_i, group_sel, trajectory_type) %>%
   summarise_if(is.numeric, mean, na.rm = T) %>%
   ungroup() %>%
-  select(-grid_i, -fold_i, -param_i, -iteration_i) %>%
+  select(-grid_i, -fold_i, -param_i, -newparam_i, -iteration_i) %>%
   gather(metric, value, -method_name:-group_sel, -trajectory_type)
 default_grp <- eval_ind %>%
-  group_by(method_name, trajectory_type, fold_type, grid_i, repeat_i, fold_i, group_sel, param_i, iteration_i) %>%
+  group_by(method_name, trajectory_type, fold_type, grid_i, repeat_i, fold_i, group_sel, param_i, newparam_i, iteration_i) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
   filter(param_i == 1) %>%
   group_by(method_name, fold_type, repeat_i, group_sel, trajectory_type) %>%
   summarise_if(is.numeric, mean, na.rm = T) %>%
   ungroup() %>%
-  select(-grid_i, -fold_i, -param_i, -iteration_i) %>%
+  select(-grid_i, -fold_i, -param_i, -newparam_i, -iteration_i) %>%
   gather(metric, value, -method_name:-group_sel, -trajectory_type)
 
 
@@ -190,6 +216,19 @@ for (fi in seq_len(num_folds)) {
 }
 dev.off()
 
+pdf(figure_file("paramoptim-auc_R_nx-xparami.pdf"), 20, 15)
+for (fi in seq_len(num_folds)) {
+  g <- ggplot(summ %>% filter(fold_i == fi)) +
+    geom_point(aes(newparam_i, auc_R_nx, colour = fold_type)) +
+    geom_vline(xintercept = num_init_params) +
+    facet_wrap(~method_name, scales = "free") +
+    cowplot::theme_cowplot() +
+    labs(title = pritt("Comparing train and test auc_R_nx scores over training iterations\nFold {fi} / {num_folds}"))
+  print(g)
+}
+dev.off()
+
+
 
 pdf(figure_file("paramoptim-correlation.pdf"), 20, 15)
 for (fi in seq_len(num_folds)) {
@@ -208,6 +247,6 @@ dev.off()
 errored <- outputs2 %>% filter(any_errored)
 errored$method_name %>% unique
 
-err_spec <- errored %>% filter(method_name == "embeddr")
+err_spec <- errored %>% filter(method_name == "Mpath")
 err_spec$qsub_error[[1]]
 err_spec$individual_scores[[1]]$error[[2]]
