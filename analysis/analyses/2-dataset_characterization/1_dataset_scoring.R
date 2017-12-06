@@ -28,6 +28,7 @@ tasks_real <- map_local(dataset_ids, function(dataset_id) {
 
   dynutils::list_as_tibble(list(dataset))
 })
+tasks <- bind_rows(tasks_synthetic, tasks_real)
 
 
 # Check the datasets ------------------------------------

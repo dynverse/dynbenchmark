@@ -37,15 +37,19 @@ benchmark_suite_submit(
   r_module = NULL
 )
 
-outputs <- benchmark_suite_retrieve(derived_file("suite/"))
+# outputs <- benchmark_suite_retrieve(derived_file("suite/"))
 
-outputs %>% rowwise() %>% mutate(memory = qacct$maxvmem) %>% ungroup() %>% View
-outputs$qsub_error[[1]][[1]] %>% cat
+# save(outputs, file = result_file("outputs.RData"))
+outputs <- load(file = result_file("outputs.RData"))
+
+# outputs %>% rowwise() %>% mutate(memory = qacct$maxvmem) %>% ungroup() %>% View
+# outputs$qsub_error[[1]][[1]] %>% cat
 
 
 
-
-
+# out_sel <- outputs %>% filter(method_name == "shuffle")
+# out_sel$qsub_error
+# out_sel$individual_scores[[1]]$error[[1]]
 
 
 succeeded <- outputs %>% filter(!sapply(which_errored, function(x) any(unlist(x)))) %>% group_by(method_name) %>% filter(n() == 2) %>% ungroup()

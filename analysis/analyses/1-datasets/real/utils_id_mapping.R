@@ -1,5 +1,5 @@
 library(tidyverse)
-experiment("normalization")
+experiment("normalisation")
 
 ensembl_human <- org.Hs.eg.db::org.Hs.egENSEMBL2EG %>% as.list() %>% unlist() %>% {tibble(ensembl = names(.), entrez=.)}
 symbol_human <- org.Hs.eg.db::org.Hs.egSYMBOL %>% as.list() %>% unlist() %>% {tibble(entrez = names(.), symbol=.)}

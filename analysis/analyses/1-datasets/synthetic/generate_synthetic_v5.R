@@ -17,9 +17,10 @@ updates_model <- tribble(
 )
 updates_platform <- tribble(
   ~platform_name,
-  "cell_cycle_leng",
-  "psc_astrocyte_maturation_glia_sloan"
+  "psc-astrocyte-maturation-neuron_sloan",
+  "hematopoiesis-clusters_olsson"
 )
+
 updates_replicates <- tibble(replicate_id = 1)
 updates <- tidyr::crossing(updates_model, updates_platform, updates_replicates)
 updates <- updates %>%
@@ -49,8 +50,8 @@ params <- paramsets[[1]]
 params$experiment %>% list2env(.GlobalEnv)
 
 # creating folder structure locally and remote
-folder <- "~/thesis/projects/dynverse/dynalysis/analysis/data/datasets/synthetic/v5/"
-remote_folder <- "/group/irc/personal/wouters/projects/dynverse/dynalysis/analysis/data/datasets/synthetic/v5/"
+folder <- "~/thesis/projects/dynverse/dynalysis/analysis/data/derived_data/datasets/synthetic/v5/"
+remote_folder <- "/group/irc/personal/wouters/projects/dynverse/dynalysis/analysis/derived_data/datasets/datasets/synthetic/v5/"
 # unlink(folder);dir.create(folder, recursive=TRUE, showWarnings = FALSE)
 # qsub_run(function(i) {unlink(remote_folder, recursive=TRUE);dir.create(remote_folder, recursive=TRUE, showWarnings = FALSE)}, qsub_environment=list2env(lst(remote_folder)))
 
@@ -63,8 +64,8 @@ gs_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_gs.rds
 gs_plot_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_gs_plot.pdf")
 experiment_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_experiment.rds")
 experiment_plot_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_experiment_plot.pdf")
-normalization_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_normalization.rds")
-normalization_plot_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_normalization_plot.pdf")
+normalisation_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_normalisation.rds")
+normalisation_plot_location <- function(folder, params_i) glue::glue("{folder}/{params_i}_normalisation_plot.pdf")
 
 # remote preparation
 ncores <- 3
@@ -118,6 +119,8 @@ PRISM:::rsync_remote("prism", remote_folder, "", folder)
 walk(seq_along(paramsets), function(params_i) {
   print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
   params <- paramsets[[params_i]]
+  params$experiment %>% list2env(.GlobalEnv)
+
   simulation <- readRDS(simulation_location(folder, params_i))
   gs <- readRDS(gs_location(folder, params_i))
   options(ncores = ncores)
@@ -128,15 +131,17 @@ walk(seq_along(paramsets), function(params_i) {
 })
 filter <- dplyr::filter;mutate <- dplyr::mutate;arrange <- dplyr::arrange # stupid scater ruining our R environments -_-
 
-# NORMALIZE ----------------------------
+# NORMALISE ----------------------------
 walk(seq_along(paramsets), function(params_i) {
   print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
   params <- paramsets[[params_i]]
   experiment <- readRDS(experiment_location(folder, params_i))
   options(ncores = ncores)
 
-  normalization <- invoke(dynutils::normalise_filter_counts, params$normalization, experiment$counts)
-  saveRDS(normalization, normalization_location(folder, params_i))
+  experiment$counts %>% {log2(. + 1)} %>% apply(2, sd) %>% sort() %>% rev() %>% head(100) %>% names()
+
+  normalisation <- invoke(dynutils::normalise_filter_counts, params$normalisation, experiment$counts, verbose=TRUE)
+  saveRDS(normalisation, normalisation_location(folder, params_i))
   TRUE
 })
 
@@ -177,22 +182,21 @@ walk(seq_along(paramsets), function(params_i) {
 })
 
 
-# Plot NORMALIZATION ----------------------------------------
+# Plot NORMALISATION ----------------------------------------
 params_i <- 3
 walk(seq_along(paramsets), function(params_i) {
   print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
   tryCatch({
     params <- paramsets[[params_i]]
     experiment <- readRDS(experiment_location(folder, params_i))
-    normalization <- readRDS(normalization_location(folder, params_i))
+    normalisation <- readRDS(normalisation_location(folder, params_i))
 
     graphics.off()
-    pdf(normalization_plot_location(folder, params_i), width=12, height=12)
-    dyngen:::plot_normalization(experiment, normalization)
+    pdf(normalisation_plot_location(folder, params_i), width=12, height=12)
+    dyngen:::plot_normalisation(experiment, normalisation)
     graphics.off()
   }, error=function(e) {print(glue::glue("error: {params_i}, {e}"))}, finally={graphics.off()})
 })
-
 
 
 # Wrap into tasks ----------------------------
@@ -203,11 +207,12 @@ tasks <- map(seq_along(paramsets), function(params_i) {
   simulation <- readRDS(simulation_location(folder, params_i))
   gs <- readRDS(gs_location(folder, params_i))
   experiment <- readRDS(experiment_location(folder, params_i))
-  normalization <- readRDS(normalization_location(folder, params_i))
+  normalisation <- readRDS(normalisation_location(folder, params_i))
 
-  dyngen::wrap_task(params, model, simulation, gs, experiment, normalization)
+  dyngen::wrap_task(params, model, simulation, gs, experiment, normalisation)
 })
 
 tasks <- dynutils::list_as_tibble(tasks)
 
-write_rds(tasks, "../dynalysis/analysis/data/datasets/synthetic/v5.rds")
+write_rds(tasks, "../dynalysis/analysis/data/derived_data/datasets/synthetic/v5.rds")
+tasks <- read_rds("../dynalysis/analysis/data/derived_data/datasets/synthetic/v5.rds")

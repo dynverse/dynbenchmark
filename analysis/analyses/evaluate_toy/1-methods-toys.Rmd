@@ -103,10 +103,10 @@ print(scores$error)
 
 
 ```{r fig.height=10, fig.width=10}
-scores %>% left_join(tasks %>% select(id, ti_type), by=c("task_id"="id")) %>% 
+scores %>% left_join(tasks %>% select(id, trajectory_type), by=c("task_id"="id")) %>% 
   dplyr::select(-starts_with("time")) %>%
-  gather(score_id, score, -method_name, -method_short_name, -method_id, -task_id, -error, -warning, -model, -ti_type) %>%
+  gather(score_id, score, -method_name, -method_short_name, -method_id, -task_id, -error, -warning, -model, -trajectory_type) %>%
   filter(score_id %in% c("errored", "correlation", "robbie_network_score", "mean_R_nx")) %>% 
   ggplot() + geom_bar(aes(method_name, score, fill=score_id), stat="identity") + 
-  facet_grid(ti_type~score_id) + coord_flip()
+  facet_grid(trajectory_type~score_id) + coord_flip()
 ```

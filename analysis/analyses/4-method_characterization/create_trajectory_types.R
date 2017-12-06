@@ -1,3 +1,5 @@
+source("analysis/analyses/4-method_characterization/svg_helpers.R")
+
 boxes <- tibble(
   id = c("linear", "single_bifurcation", "binary_tree", "single_multifurcation", "non_binary_tree", "single_cycle", "simple_graph", "single_bifurcation_single_convergence"), opacity = 1
 )

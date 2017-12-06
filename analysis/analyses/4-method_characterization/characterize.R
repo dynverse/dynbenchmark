@@ -65,7 +65,7 @@ trajectory_components <- method_df_evaluated %>%
     binary_tree = fork & n_forks > 1,
     single_multifurcation = fork & n_fork_paths > 2,
     non_binary_tree = binary_tree & single_multifurcation,
-    cycle = loop,
+    single_cycle = loop,
     simple_graph = binary_tree & single_multifurcation & convergence
   )
 
@@ -77,17 +77,18 @@ method_df_evaluated <- read_rds(derived_file("method_df_evaluated.rds"))
 
 # Comparing number of citations, qc score, and time -------------------------------------
 g1 <- ggplot(method_df_evaluated, aes(date, qc_score)) +
-  geom_smooth() +
+  geom_smooth(method="lm") +
   geom_point() +
-  ggrepel::geom_label_repel(aes(label = name), nudge_y = .25) +
+  ggrepel::geom_label_repel(aes(label = name)) +
   cowplot::theme_cowplot() +
   scale_y_continuous(breaks = c(0, 2, 4, 6, 8), limits = c(0, 8)) +
   labs(x = "Time", y = "QC score", title = "Code quality score over time")
 g1
+write_rds(g1, figure_file("ncitations_over_time.rds"))
 ggsave(figure_file("time_vs_qcscore.png"), g1, width = 16, height = 8)
 
 g2 <- ggplot(method_df_evaluated, aes(date, Citations+1)) +
-  geom_smooth() +
+  geom_smooth(method="lm") +
   geom_point() +
   ggrepel::geom_label_repel(aes(label = name), nudge_y = .25) +
   cowplot::theme_cowplot() +
@@ -97,7 +98,7 @@ g2
 ggsave(figure_file("time_vs_citations.png"), g2, width = 16, height = 8)
 
 g3 <- ggplot(method_df_evaluated, aes(Citations+1, qc_score)) +
-  geom_smooth() +
+  geom_smooth(method="lm") +
   geom_point() +
   ggrepel::geom_label_repel(aes(label = name), nudge_y = .25) +
   cowplot::theme_cowplot() +
@@ -246,7 +247,7 @@ add_step <- function(df) {
 }
 
 trajectory_components_step <- add_step(arrange(trajectory_components, date))
-trajectory_types <- c("linear", "single_bifurcation", "binary_tree", "single_multifurcation", "non_binary_tree", "cycle", "simple_graph")
+trajectory_types <- c("linear", "single_bifurcation", "binary_tree", "single_multifurcation", "non_binary_tree", "single_cycle", "simple_graph")
 
 trajectory_components_gathered <- trajectory_components_step %>%
   gather(trajectory_type, can_trajectory_type, !!trajectory_types) %>%
@@ -307,11 +308,12 @@ method_qc_individual <- method_df_evaluated %>%
     name = factor(name, levels=method_order)
   ) %>%
   ggplot(aes(score_id, name)) +
-    geom_raster(aes(fill=score_fill)) +
+    geom_tile(aes(fill=score_fill)) +
     scale_fill_identity() +
     geom_text(aes(label = score_text), color="white", size=8, fontface = "bold") +
     theme(axis.text.x=rotated_axis_text_x) +
     base_theme +
+    empty_left_theme +
     horizontal_lines +
     base_scale_y + base_scale_x +
     ggtitle("Implementation quality control")
@@ -322,7 +324,7 @@ method_qc_overall <- method_df_evaluated %>%
   select(name, qc_score) %>%
   mutate(name = factor(name, levels=method_order)) %>%
   ggplot(aes("qc_score", name)) +
-    geom_raster(aes(fill = qc_score)) +
+    geom_tile(aes(fill = qc_score)) +
     scale_fill_gradientn(colours=traffic_light) +
     #viridis::scale_fill_viridis(option="A", guide=guide_colorbar(direction = "horizontal")) +
     base_theme +
@@ -342,7 +344,7 @@ prior_information <- method_df_evaluated %>%
   mutate(name = factor(name, levels=method_order)) %>%
   drop_na() %>%
   ggplot() +
-    geom_raster(aes(prior_id, name, fill = prior_usage)) +
+    geom_tile(aes(prior_id, name, fill = prior_usage)) +
   geom_text(aes(prior_id, name, label=ifelse(prior_usage == "No", "-", prior_usage))) +
     scale_fill_manual(values=prior_usage_colors) +
     base_theme +
@@ -355,7 +357,7 @@ prior_information
 
 
 prior_usages <- c("CanRoot", "CanUse", "Required")
-prior_usages_text <- c(CanRoot = "✓", CanUse = "✓", Required = "!", No = "")
+prior_usages_text <- c(CanRoot = "", CanUse = "", Required = "!", No = "")
 prior_usage <- method_df_evaluated %>%
   gather(prior_id, prior_usage, !!priors, factor_key=TRUE) %>%
   select(prior_id, prior_usage, name) %>%
@@ -371,7 +373,7 @@ prior_usage <- method_df_evaluated %>%
   complete(name, prior_usage) %>%
   mutate(really = ifelse(is.na(really), "no", "yes")) %>%
   ggplot(aes(prior_usage, name)) +
-    geom_raster(aes(fill = prior_usage, alpha=really)) +
+    geom_tile(aes(fill = prior_usage, alpha=really)) +
     geom_text(aes(label = prior_usages_text[prior_usage]), color="white", fontface="bold", size=8) +
     scale_fill_manual(values=prior_usage_colors) +
     scale_alpha_manual(values=c(no=0, yes=1)) +
@@ -380,20 +382,20 @@ prior_usage <- method_df_evaluated %>%
     base_scale_y + base_scale_x +
     horizontal_lines +
     theme(legend.position = "none") +
-    ggtitle("Prior information")
+    ggtitle("Prior\ninformation")
 prior_usage
-prior_usage_width <- length(prior_usages)
+prior_usage_width <- length(prior_usages)/2
 
 # Trajectory components
 trajectory_components <- readRDS(derived_file("trajectory_components.rds"))
-trajectory_types <- c("linear", "single_bifurcation", "binary_tree", "single_multifurcation", "non_binary_tree", "cycle", "simple_graph")
+trajectory_types <- c("linear", "single_bifurcation", "binary_tree", "single_multifurcation", "non_binary_tree", "single_cycle", "simple_graph")
 trajectory_components_plot <- trajectory_components %>%
   gather(trajectory_type, can, !!trajectory_types, factor_key=TRUE) %>%
   select(trajectory_type, can, name) %>%
   mutate(name = factor(name, levels=method_order)) %>%
   drop_na() %>%
   ggplot() +
-    geom_raster(aes(trajectory_type, name, fill = factor(can * as.numeric(trajectory_type)))) +
+    geom_tile(aes(trajectory_type, name, fill = factor(can * as.numeric(trajectory_type)))) +
     scale_fill_manual(values = c("white", RColorBrewer::brewer.pal(8, name="Set2")), guide=FALSE) +
     base_theme +
     empty_left_theme +
@@ -403,33 +405,98 @@ trajectory_components_plot <- trajectory_components %>%
 trajectory_components_plot
 trajectory_components_width <- length(trajectory_types)
 
-method_characteristics <- plot_grid(method_qc_individual, method_qc_overall, prior_usage, trajectory_components_plot, nrow=1, align="h", rel_widths = c(method_qc_individual_width+4, method_qc_overall_width, prior_usage_width, trajectory_components_width), axis="bt", labels="auto")
-method_characteristics
+# Maximal trajectory components
+trajectory_components <- readRDS(derived_file("trajectory_components.rds"))
+trajectory_types <- c("linear", "single_bifurcation", "binary_tree", "single_multifurcation", "non_binary_tree", "single_cycle", "simple_graph")
 
-saveRDS(method_characteristics, figure_file("method_characteristics.rds"))
+lighten <- function(color, factor=1.4){
+  map_chr(color, function(color) {
+    col <- col2rgb(color)
+    col <- do.call(rgb2hsv, as.list(col))
+    col[1] <- col[1] * 360
+    col[2] <- 0.3
+    col[3] <- 0.9
+    colorspace::hex(do.call(colorspace::HSV, as.list(col)))
+  })
+}
+colors <- c(linear="#004c8f", single_bifurcation="#00a0d9", binary_tree="#2eca40", single_multifurcation="#ffdc00", non_binary_tree="#ff871f", single_cycle="#85144b", single_bifurcation_single_convergence="#af0dc7", simple_graph="#ff4237")
+colors <- lighten(colors, 3)
 
-
-
-
-# Maximal trajectory
-trajectory_components %>%
+maximal_trajectory_components_plot <- trajectory_components %>%
   gather(trajectory_type, can, !!trajectory_types, factor_key=TRUE) %>%
   group_by(name) %>%
   filter(can) %>%
   filter(row_number() == n()) %>%
   select(name, trajectory_type) %>%
   ungroup() %>%
-  mutate(image_location = glue::glue("analysis/figures/trajectory_types/mini/{trajectory_type}.png")) %>%
-  ggplot(aes(1, name)) +
-    #ggimage::geom_image(aes(image=image_location), size=0.05) +
-    geom_text(aes(label=trajectory_type))
+  mutate(name = factor(name, levels=method_order)) %>%
+  ggplot(aes("trajectory_type", name)) +
+    geom_tile(aes(fill=as.character(trajectory_type))) +
+    geom_text(aes(label=trajectory_type), hjust=0, vjust=0) +
+    base_theme +
+    base_scale_y + base_scale_x +
+    horizontal_lines +
+    theme(legend.position="none") +
+    ggtitle("Trajectory\ntype") +
+    scale_fill_manual(values=colors)
+maximal_trajectory_components_plot
+maximal_trajectory_components_width <- 2
 
-ggsave("test.pdf")
+plotlist <- list(maximal_trajectory_components_plot, method_qc_individual, method_qc_overall, prior_usage)
+widths <- c(maximal_trajectory_components_width+2, method_qc_individual_width, method_qc_overall_width, prior_usage_width)
+
+method_characteristics <- plot_grid(plotlist=plotlist, nrow=1, align="h", rel_widths = widths, axis="bt", labels="auto")
+method_characteristics
+
+method_characteristics$width <- sum(widths)/2
+method_characteristics$height <- length(method_order)/2
+
+saveRDS(method_characteristics, figure_file("method_characteristics.rds"))
 
 
-command <- glue::glue("inkscape test.pdf --export-plain-svg=test.svg")
+
+
+## PLOT1
+method_characteristics <- read_rds(figure_file("method_characteristics.rds"))
+ncitations_over_time <- read_rds(figure_file("ncitations_over_time.rds"))
+
+figure <- plot_grid(method_characteristics, ncitations_over_time, rel_widths = c(method_characteristics$width, 3))
+figure
+save_plot(figure_file("figure_methods.pdf"), figure, base_width = method_characteristics$width + 3, base_height= method_characteristics$height)
+
+
+
+
+# replace trajectory types
+library(xml2)
+
+command <- glue::glue("inkscape {figure_file('figure_methods.pdf')} --export-plain-svg={figure_file('figure_methods.svg')}")
 system(command)
 
-svg_location <- "test.svg"
+svg_location <- figure_file('figure_methods.svg')
 xml <- read_xml(svg_location)
-xml_find_all(xml, "//svg:tspan[text()='linear']") %>% xml_parent() %>% xml_replace(glue::glue("<image xlink:href='analysis/figures/trajectory_types/mini/linear.svg' />"))
+
+aspect <- read_xml("analysis/figures/trajectory_types/mini/linear.svg") %>% xml_root() %>% xml_attr("viewBox") %>% str_split(" ") %>% unlist() %>% tail(2) %>% as.numeric() %>% {.[[1]]/.[[2]]}
+
+w <- 50
+h <- w / aspect
+
+map(trajectory_types, function(trajectory_type) {
+  to_replace <- xml_find_all(xml, glue::glue("//svg:tspan[text()='{trajectory_type}']")) %>% xml_parent()
+  transforms <- to_replace %>% xml_attr("transform")
+  images <- map(transforms, function(transform) {
+    node <- read_xml(glue::glue("<g><image /></g>"))
+    node %>% xml_set_attr("transform", transform)
+    node %>% xml_child() %>% xml_set_attrs(list(width=w, height=h, `xlink:href`=glue::glue(get_dynalysis_folder(), '/analysis/figures/trajectory_types/mini/{trajectory_type}.svg'), transform=glue::glue("translate(-{w/2} -{h/2})")))
+    node
+  })
+  replaced <- to_replace %>% xml_replace(images)
+  if (length(replaced) == 0) {
+    warning("STOOOOOOOOOOOOOOOOOOOOOOOOOOOPPP!!!")
+  }
+})
+
+xml_root(xml) %>% xml_set_attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
+
+write(as.character(xml), file=figure_file('figure_methods.svg')); xml <- NULL
+

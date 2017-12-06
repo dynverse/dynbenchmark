@@ -4,19 +4,25 @@ library(dynplot)
 
 experiment("dyneval/7_testsuite_cluster_alltasks")
 
-# trying all methods
-methods <- dynmethods::get_descriptions(F)
-
 # tasks
 tasks <- readRDS(derived_file("v5.rds", experiment_id = "datasets/synthetic"))
 tasks_info <- tasks$info %>% map_df(as_data_frame) %>% mutate(task_id = tasks$id)
 # tasks_info <- tasks_info %>% group_by(modulenet_name) %>% mutate(fold = sample.int(n())) %>% ungroup()
 
+# save(tasks_info, file = derived_file("tasks_info.RData"))
+load(derived_file("tasks_info.RData"))
+
 # configure run
 task_group <- rep("group", nrow(tasks))
 task_fold <- tasks_info$fold
-method_order <- c("random", "shuffle", "identity", "slgnsht", "SCORPIUS", "embeddr", "waterfll", "DPT", "mnclDDR", "mnclICA", "CTmaptpx", "CTVEM", "CTGibbs", "SLICER")
-methods <- get_descriptions(as_tibble = T) %>% slice(match(method_order, short_name))
+method_order <- c("random", "shuffle", "identity", "slgnsht", "SCORPIUS", "embeddr", "slngsht", "waterfll", "DPT", "mfa", "phenopat", "mnclDDR", "mnclICA", "Wishbone", "CTmaptpx", "CTVEM", "CTGibbs", "SLICER")
+methods <- get_descriptions(as_tibble = T)
+all_method_orders <- c(method_order, setdiff(methods$short_name, method_order))
+
+# save(all_method_orders, file = derived_file("all_method_orders.RData"))
+load(derived_file("all_method_orders.RData"))
+
+methods <- methods %>% slice(match(all_method_orders, short_name))
 
 #metrics <- c("auc_R_nx", "correlation")
 metrics <- "auc_R_nx"
@@ -41,12 +47,11 @@ benchmark_suite_submit(
   r_module = NULL
 )
 
-# save(task_info, method_order, file = result_file("settings.RData"))
-load(result_file("settings.RData"))
 
 outputs <- benchmark_suite_retrieve(derived_file("suite/"))
 
-save(outputs, file = result_file("outputs.RData"))
+# save(outputs, file = derived_file("outputs.RData"))
+# outputs <- load(file = derived_file("outputs.RData"))
 
 outputs2 <- outputs %>%
   rowwise() %>%
@@ -56,17 +61,17 @@ outputs2 <- outputs %>%
   ) %>%
   ungroup()
 
-
+num_folds <- 2
 
 # select only the runs that succeeded
-succeeded <- outputs2 %>% filter(!any_errored) %>% group_by(method_name) %>% filter(n() == 2) %>% ungroup()
+succeeded <- outputs2 %>% filter(!any_errored) %>% group_by(method_name) %>% filter(n() == num_folds) %>% ungroup()
 
 # bind the metrics of the individual runs
 eval_ind <-
   bind_rows(succeeded$individual_scores) %>%
   left_join(tasks_info %>% select(task_id, trajectory_type = modulenet_name, platform_name), by = "task_id") %>%
   mutate(pct_errored = 1 - sapply(error, is.null)) #%>%
-  # filter(!method_short_name %in% c("identity", "shuffle", "random"))
+# filter(!method_short_name %in% c("identity", "shuffle", "random"))
 
 # summarising at a global level
 summ <- eval_ind %>%
@@ -166,9 +171,43 @@ ggplot(mapping = aes(factor(method_name, levels = rev(meth_ord)), value, fill = 
   )
 dev.off()
 
+# see performance over iterations
+compare <- summ %>%
+  gather(metric, score, -method_name:-iteration_i) %>%
+  mutate(combine = paste0(fold_type, ".", metric)) %>%
+  select(-fold_type, -metric) %>%
+  spread(combine, score)
 
+pdf(figure_file("paramoptim-auc_R_nx.pdf"), 20, 15)
+for (fi in seq_len(num_folds)) {
+  g <- ggplot(compare %>% filter(fold_i == fi)) +
+    geom_point(aes(train.auc_R_nx, test.auc_R_nx, colour = iteration_i)) +
+    scale_colour_distiller(palette = "RdBu") +
+    facet_wrap(~method_name, scales = "free") +
+    cowplot::theme_cowplot() +
+    labs(title = pritt("Comparing train and test auc_R_nx scores over training iterations\nFold {fi} / {num_folds}"))
+  print(g)
+}
+dev.off()
+
+
+pdf(figure_file("paramoptim-correlation.pdf"), 20, 15)
+for (fi in seq_len(num_folds)) {
+  g <- ggplot(compare %>% filter(fold_i == fi)) +
+    geom_point(aes(train.correlation, test.correlation, colour = iteration_i)) +
+    scale_colour_distiller(palette = "RdBu") +
+    facet_wrap(~method_name, scales = "free") +
+    cowplot::theme_cowplot() +
+    labs(title = pritt("Comparing train and test correlation scores over training iterations\nFold {fi} / {num_folds}"))
+  print(g)
+}
+dev.off()
+
+
+# check errored methods
 errored <- outputs2 %>% filter(any_errored)
+errored$method_name %>% unique
 
-errored$qsub_error[[1]]
-
-error_summ <- errored %>% group_by(method_name) %>% summarise(n = n(), errors = paste0(unlist(qsub_error), collapse="\n\n"))
+err_spec <- errored %>% filter(method_name == "embeddr")
+err_spec$qsub_error[[1]]
+err_spec$individual_scores[[1]]$error[[2]]
