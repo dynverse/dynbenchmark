@@ -20,7 +20,6 @@ updates_platform <- tribble(
   "psc-astrocyte-maturation-neuron_sloan",
   "hematopoiesis-clusters_olsson"
 )
-
 updates_replicates <- tibble(replicate_id = 1)
 updates <- tidyr::crossing(updates_model, updates_platform, updates_replicates)
 updates <- updates %>%
@@ -119,6 +118,7 @@ PRISM:::rsync_remote("prism", remote_folder, "", folder)
 walk(seq_along(paramsets), function(params_i) {
   print(glue::glue("{params_i} / {length(paramsets)} ======================================"))
   params <- paramsets[[params_i]]
+
   params$experiment %>% list2env(.GlobalEnv)
 
   simulation <- readRDS(simulation_location(folder, params_i))
@@ -189,6 +189,7 @@ walk(seq_along(paramsets), function(params_i) {
   tryCatch({
     params <- paramsets[[params_i]]
     experiment <- readRDS(experiment_location(folder, params_i))
+
     normalisation <- readRDS(normalisation_location(folder, params_i))
 
     graphics.off()

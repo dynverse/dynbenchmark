@@ -122,7 +122,7 @@ qsub_run(
   },
   qsub_config = override_qsub_config(num_cores = 24),
   qsub_environment = list2env(list(compare_toy, compare_gs_toy, toys)
-)
+))
 
 
 scores <- results %>% select(-starts_with("time"))
