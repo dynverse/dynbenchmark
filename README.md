@@ -13,7 +13,7 @@ The goal of dynalysis is to ...
 
 Please cite this compendium as:
 
-> Authors, (2017). *Title of compendium*. Accessed 01 Dec 2017. Online at <https://doi.org/xxx/xxx>
+> Authors, (2017). *Title of compendium*. Accessed 07 Dec 2017. Online at <https://doi.org/xxx/xxx>
 
 ### Dependencies
 
@@ -27,7 +27,7 @@ Ubuntu/Debian:
 
 Fedora/CentOS:
 
-    sudo dnf install openssl-devel libcurl-devel udunits2-devel libxml2-devel gsl-devel SDL2-devel readline-devel ImageMagick-c++-devel SDL-devel python2-devel python3-devel python3-pip
+    sudo dnf install openssl-devel libcurl-devel udunits2-devel libxml2-devel gsl-devel SDL2-devel readline-devel ImageMagick-c++-devel SDL-devel python2-devel python3-devel python3-pip python3-matplotlib-tk openblas-devel lapack-devel
     pip3 install --user virtualenv numpy matplotlib pandas six jinja2 python-dateutil pytz pyparsing cycler tqdm python-igraph rpy2 Cython scipy statsmodels sklearn seaborn
     Rscript -e 'install.packages("udunits2", configure.args =  c(udunits2 = '--with-udunits2-include=/usr/include/udunits2'))'
 
