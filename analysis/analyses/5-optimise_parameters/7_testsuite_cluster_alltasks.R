@@ -68,7 +68,11 @@ num_cores <- 1
 num_init_params <- 200
 
 # select only the runs that succeeded
-succeeded <- outputs2 %>% filter(!any_errored) %>% group_by(method_name) %>% filter(n() == num_folds * num_repeats) %>% ungroup()
+succeeded <- outputs2 %>%
+  filter(!any_errored) %>%
+  group_by(method_name) %>%
+  filter(n() == num_folds * num_repeats) %>%
+  ungroup()
 
 # bind the metrics of the individual runs
 
@@ -88,6 +92,15 @@ eval_ind <-
   bind_rows(succeeded$individual_scores) %>%
   left_join(tasks_info %>% select(task_id, trajectory_type = modulenet_name, platform_name), by = "task_id") %>%
   mutate(pct_errored = 1 - sapply(error, is.null))
+
+priors <- eval_ind %>%
+  group_by(method_name) %>%
+  slice(1) %>%
+  rowwise() %>%
+  mutate(prior = ifelse(nrow(prior_df) == 0, "", paste(prior_df$prior_names, "--", prior_df$prior_type, sep = "", collapse = ";"))) %>%
+  ungroup() %>%
+  select(method_name, prior, prior_df)
+
 
 param_i_map <- eval_ind %>%
   mutate(is_default = param_i == 1) %>%
@@ -144,7 +157,9 @@ meth_ord <- best_summ_agg %>% filter(fold_type == "test") %>% group_by(method_na
 
 
 
-# plot
+####################
+## START PLOTTING ##
+###################3
 best_sel <- best_summ_agg_spr %>% group_by(method_name, fold_type, group_sel, metric) %>% summarise(value = mean(value)) %>% ungroup()
 default_sel <- default_summ_agg_spr %>% group_by(method_name, fold_type, group_sel, metric) %>% summarise(value = mean(value)) %>% ungroup()
 
