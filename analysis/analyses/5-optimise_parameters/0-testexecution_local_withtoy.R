@@ -2,7 +2,7 @@ library(dynalysis)
 library(tidyverse)
 library(dynplot)
 
-experiment("dyneval/0_testexecution_local_withtoy")
+experiment("5-optimize_parameters/0_testexecution_local_withtoy")
 
 # trying all methods
 methods <- dyneval::get_descriptions(F)
