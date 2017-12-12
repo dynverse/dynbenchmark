@@ -2,7 +2,7 @@ library(dynalysis)
 library(tidyverse)
 library(dynplot)
 
-experiment("5-optimize_parameters/7-train_params_with_synthetic_datasets")
+experiment("5-optimise_parameters/7-train_params_with_synthetic_datasets")
 
 # tasks
 tasks <- readRDS(derived_file("v5.rds", experiment_id = "datasets/synthetic"))
@@ -125,6 +125,8 @@ best_parm <-
   mutate(method_name = succeeded$method_name) %>%
   select(method_name, group_sel, fold_i, repeat_i, grid_i, param_index,
          params, y_names, train_score, test_score, .object_class)
+
+saveRDS(best_parm, result_file("best_params.rds"))
 
 best_parm2 <- summ %>%
   filter(fold_type == "train") %>%
