@@ -53,7 +53,7 @@ settings <- list(
       "COP", "NFOL",
       "NFOL", "MOL"
     ) %>% mutate(length = 1, directed = TRUE),
-    ti_tpye = "linear"
+    ti_type = "linear"
   )
 )
 
