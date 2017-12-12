@@ -3,7 +3,7 @@ library(tidyverse)
 library(mlr)
 library(mlrMBO)
 
-experiment("dyneval/1_testsuite_local_withtoys")
+experiment("5-optimize_parameters/1_testsuite_local_withtoys")
 
 # trying all methods
 methods <- dyneval::get_descriptions(T) %>% filter(name == "SCORPIUS")

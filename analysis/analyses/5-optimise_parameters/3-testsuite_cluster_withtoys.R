@@ -1,7 +1,7 @@
 library(dynalysis)
 library(tidyverse)
 
-experiment("dyneval/3_testsuite_cluster_withtoys")
+experiment("5-optimize_parameters/3_testsuite_cluster_withtoys")
 
 # # remove previous output
 # unlink(derived_file("suite/"), recursive = T, force = T)

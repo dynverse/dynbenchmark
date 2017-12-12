@@ -2,7 +2,7 @@ library(dynalysis)
 library(tidyverse)
 library(dynplot)
 
-experiment("dyneval/7_testsuite_cluster_alltasks")
+experiment("5-optimize_parameters/7-train_params_with_synthetic_datasets")
 
 # tasks
 tasks <- readRDS(derived_file("v5.rds", experiment_id = "datasets/synthetic"))
@@ -122,7 +122,9 @@ summ <- eval_ind %>%
 # finding the best parameters on the train
 best_parm <-
   bind_rows(succeeded$best) %>%
-  mutate(method_name = succeeded$method_name)
+  mutate(method_name = succeeded$method_name) %>%
+  select(method_name, group_sel, fold_i, repeat_i, grid_i, param_index,
+         params, y_names, train_score, test_score, .object_class)
 
 best_parm2 <- summ %>%
   filter(fold_type == "train") %>%

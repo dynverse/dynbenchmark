@@ -1,24 +1,18 @@
 library(dynalysis)
 library(tidyverse)
-library(dynplot)
 
-experiment("dyneval/6_testsuite_cluster_withfewtasks")
+experiment("5-optimize_parameters/4_testsuite_cluster_withmoretoys")
+
+# # remove previous output
+# unlink(derived_file("suite/"), recursive = T, force = T)
 
 # trying all methods
-methods <- dyneval::get_descriptions(F)
+methods <- dyneval::get_descriptions() #%>% filter(name == "shuffle")
 
-# tasks
-tasks <- readRDS("analysis/data/derived_data/dyngen/tasks_v4.rds") %>%
-  filter(
-    platform_id == "fluidigm_c1",
-    takesetting_type == "snapshot",
-    trajectory_type == "consecutive_bifurcating",
-    model_replicate %in% c(1,2))
-
-# configure run
+# toys
+tasks <- dyntoy::toy_tasks
 task_group <- rep("group", nrow(tasks))
-task_fold <- tasks$model_replicate
-methods <- get_descriptions(as_tibble = T)
+task_fold <- gsub(".*_([0-9]*)$", "\\1", tasks$id) %>% as.integer
 
 #metrics <- c("auc_R_nx", "correlation")
 metrics <- "auc_R_nx"
@@ -44,6 +38,7 @@ benchmark_suite_submit(
 outputs <- benchmark_suite_retrieve(derived_file("suite/"))
 
 save(outputs, file = result_file("outputs.RData"))
+load(file = result_file("outputs.RData"))
 
 outputs2 <- outputs %>%
   rowwise() %>%
@@ -85,7 +80,6 @@ best_parm2 <- summ %>%
 # filtering the summary for the best parms
 best_summ <- summ %>%
   right_join(best_parm2, by = colnames(best_parm2))
-default_summ <- summ %>% filter(param_i == 1)
 
 # aggregating the scores of the best configuration for each fold
 best_summ_agg <- best_summ %>%
@@ -93,15 +87,9 @@ best_summ_agg <- best_summ %>%
   summarise_if(is.numeric, mean, na.rm = T) %>%
   ungroup() %>%
   select(-grid_i, -fold_i, -param_i, -iteration_i)
-default_summ_agg <- default_summ %>%
-  group_by(method_name, fold_type, repeat_i, group_sel) %>%
-  summarise_if(is.numeric, mean, na.rm = T) %>%
-  ungroup() %>%
-  select(-grid_i, -fold_i, -param_i, -iteration_i)
 
 # gathering the different metrics
 best_summ_agg_spr <- best_summ_agg %>% gather(metric, value, -method_name:-group_sel)
-default_summ_agg_spr <- default_summ_agg %>% gather(metric, value, -method_name:-group_sel)
 
 meth_ord <- best_summ_agg %>% filter(fold_type == "test") %>% arrange(desc(auc_R_nx)) %>% .$method_name
 
@@ -109,22 +97,20 @@ meth_ord <- best_summ_agg %>% filter(fold_type == "test") %>% arrange(desc(auc_R
 pdf(figure_file("all_scores.pdf"), 20, 15)
 ggplot(mapping = aes(factor(method_name, levels = rev(meth_ord)), value, fill = metric)) +
   geom_bar(stat = "identity", data = best_summ_agg_spr %>% filter(fold_type == "test")) +
-  # geom_point(aes(shape = "test"), data = best_summ_agg_spr %>% filter(fold_type == "test")) +
-  geom_point(aes(shape = "train"), data = best_summ_agg_spr %>% filter(fold_type == "train")) +
-  geom_point(aes(shape = "default param"), data = default_summ_agg_spr %>% filter(fold_type == "test")) +
+  geom_point(data = best_summ_agg_spr %>% filter(fold_type == "train")) +
   facet_wrap(~metric, scales = "free") +
   cowplot::theme_cowplot() +
   coord_flip() +
   labs(
     x = NULL,
     y = "score",
-    title = paste0("Dyneval parameter optimisation on 2 in silico datasets\n100 initial, 100 iterations of 4 new parameters)\npoint = train score, bar = test score, cirle = score of default params on test data.")
+    title = paste0("Dyneval parameter optimisation on !TOYS! (100 initial, 100 iterations of 4 new parameters). point = train score, bar = test score.")
   )
 dev.off()
 
 
 # by group
-best_grp <- eval_ind %>%
+grp <- eval_ind %>%
   group_by(method_name, trajectory_type, fold_type, grid_i, repeat_i, fold_i, group_sel, param_i, iteration_i) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
@@ -134,29 +120,17 @@ best_grp <- eval_ind %>%
   ungroup() %>%
   select(-grid_i, -fold_i, -param_i, -iteration_i) %>%
   gather(metric, value, -method_name:-group_sel, -trajectory_type)
-default_grp <- eval_ind %>%
-  group_by(method_name, trajectory_type, fold_type, grid_i, repeat_i, fold_i, group_sel, param_i, iteration_i) %>%
-  summarise_if(is.numeric, mean) %>%
-  ungroup() %>%
-  filter(param_i == 1) %>%
-  group_by(method_name, fold_type, repeat_i, group_sel, trajectory_type) %>%
-  summarise_if(is.numeric, mean, na.rm = T) %>%
-  ungroup() %>%
-  select(-grid_i, -fold_i, -param_i, -iteration_i) %>%
-  gather(metric, value, -method_name:-group_sel, -trajectory_type)
-
 
 pdf(figure_file("by-ti-type_auc-R-nx.pdf"), 20, 15)
 ggplot(mapping = aes(factor(method_name, levels = rev(meth_ord)), value, fill = trajectory_type)) +
   geom_bar(stat = "identity", data = grp %>% filter(fold_type == "test", metric == "auc_R_nx")) +
-  geom_point(data = best_grp %>% filter(fold_type == "train", metric == "auc_R_nx")) +
-  geom_point(data = default_grp %>% filter(fold_type == "test", metric == "auc_R_nx")) +
+  geom_point(data = grp %>% filter(fold_type == "train", metric == "auc_R_nx")) +
   facet_wrap(~trajectory_type, scales = "free") +
   cowplot::theme_cowplot() +
   coord_flip() +
   labs(
     x = NULL,
     y = "auc_R_nx",
-    title = paste0("Dyneval parameter optimisation on 2 in silico datasets\n100 initial, 100 iterations of 4 new parameters)\npoint = train score, bar = test score, cirle = score of default params on test data.")
+    title = paste0("Dyneval parameter optimisation on !TOYS! (100 initial, 100 iterations of 4 new parameters). point = train score, bar = test score.")
   )
 dev.off()
