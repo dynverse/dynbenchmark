@@ -144,6 +144,7 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   )
 
   dataset$prior_information <- dynutils::generate_prior_information(milestone_ids, milestone_network, dataset$progressions, milestone_percentages, counts, feature_info, cell_info)
+  dataset$geodesic_dist <- dynutils::compute_emlike_dist(dataset)
 
   write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
   write_rds(original_counts, dataset_file(dataset_id = dataset_id, filename = "original_counts.rds"))
