@@ -58,8 +58,7 @@ settings <- list(
       "MDP", "Gran",
       "MDP", "Mono",
       "Gran", "Myelocyte"
-    ) %>% mutate(length = 1, directed = TRUE),
-    trajectory_type = "tree"
+    ) %>% mutate(length = 1, directed = TRUE)
   ),
   list(
     id = "real/hematopoiesis-gates_olsson",
@@ -68,8 +67,7 @@ settings <- list(
       ~from, ~to,
       "Lsk", "Cmp",
       "Cmp", "Gmp"
-    ) %>% mutate(length = 1, directed = TRUE),
-    trajectory_type = "linear"
+    ) %>% mutate(length = 1, directed = TRUE)
   )
 )
 
@@ -92,7 +90,6 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(expression))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    trajectory_type = setting$trajectory_type,
     counts = 2^expression-1, # todo: fix this
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,

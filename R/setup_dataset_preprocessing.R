@@ -94,7 +94,6 @@ download_dataset_file <- function(filename, url, dataset_id = NULL) {
 
 #' @export
 datasetpreproc_normalise_filter_wrap_and_save <- function(
-  trajectory_type,
   counts,
   cell_ids,
   milestone_ids,
@@ -129,7 +128,6 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   milestone_percentages <- milestone_percentages %>% filter(cell_id %in% cell_ids)
 
   dataset <- wrap_ti_task_data(
-    trajectory_type = trajectory_type,
     id = dataset_id,
     counts = counts,
     expression = expression,
@@ -143,7 +141,16 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     normalisation_info = normalisation_info
   )
 
-  dataset$prior_information <- dynutils::generate_prior_information(milestone_ids, milestone_network, dataset$progressions, milestone_percentages, counts, feature_info, cell_info)
+  dataset$prior_information <- dynutils::generate_prior_information(
+    milestone_ids,
+    milestone_network,
+    dataset$progressions,
+    milestone_percentages,
+    counts,
+    feature_info,
+    cell_info
+  )
+
   dataset$geodesic_dist <- dynutils::compute_emlike_dist(dataset)
 
   write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))

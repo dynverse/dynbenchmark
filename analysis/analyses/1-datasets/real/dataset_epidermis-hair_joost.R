@@ -36,8 +36,7 @@ settings <- list(
       "IB", "uHF-I",
       "uHF-I", "IFE-B"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/epidermis-hair-spatial_joost",
-    trajectory_type = "linear"
+    id = "real/epidermis-hair-spatial_joost"
   ),
   list(
     milestone_network = tribble(
@@ -47,8 +46,7 @@ settings <- list(
       "IFE-DII", "IFE-KI",
       "IFE-KI", "IFE-KII"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/epidermis-hair-IFE_joost",
-    trajectory_type = "linear"
+    id = "real/epidermis-hair-IFE_joost"
   ),
   list(
     milestone_network = tribble(
@@ -56,8 +54,7 @@ settings <- list(
       "uHF-I", "uHF-II",
       "uHF-II", "uHF-III"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/epidermis-hair-uHF_joost",
-    trajectory_type = "linear"
+    id = "real/epidermis-hair-uHF_joost"
   )
 )
 
@@ -79,7 +76,6 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(counts))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    trajectory_type = setting$trajectory_type,
     counts = counts,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,

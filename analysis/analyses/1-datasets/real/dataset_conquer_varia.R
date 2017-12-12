@@ -19,7 +19,6 @@ conquer_infos <- list(
       "S", "G2M",
       "G2M", "G1"
     ) %>% addcols,
-    trajectory_type = "cyclical",
     source_id = "conquer"
   ),
   list(
@@ -33,7 +32,6 @@ conquer_infos <- list(
       "embryonic day 5", "embryonic day 6",
       "embryonic day 6", "embryonic day 7"
     ) %>% addcols,
-    trajectory_type = "linear",
     source_id = "conquer"
   ),
   list(
@@ -46,7 +44,6 @@ conquer_infos <- list(
       "vα14 inkt thymocyte subset: NKT0", "vα14 inkt thymocyte subset: NKT17",
       "vα14 inkt thymocyte subset: NKT0", "vα14 inkt thymocyte subset: NKT2"
     ) %>% addcols,
-    trajectory_type = "trifurcating",
     source_id = "conquer",
     remove_spike_ins = TRUE
   ),
@@ -60,7 +57,6 @@ conquer_infos <- list(
       "S", "G2",
       "G2", "G1"
     ) %>% addcols,
-    trajectory_type = "cyclical",
     remove_spike_ins = TRUE
   ),
   list(
@@ -78,8 +74,7 @@ conquer_infos <- list(
       "H7_derived_MPS", "H7_derived_D2LtM",
       "H7_derived_D2LtM", "H7_derived_D3GARPpCrdcM",
       "H7_derived_D2LtM", "H7_dreived_D2.25_Smtmrs"
-    ) %>% addcols,
-    trajectory_type = "consecutive_bifurcating"
+    ) %>% addcols
   ),
   list(
     id = "real/myoblast-differentiation_trapnell",
@@ -91,8 +86,7 @@ conquer_infos <- list(
       "T24", "T48",
       "T48", "T72"
     ) %>% addcols,
-    source_id = "conquer",
-    trajectory_type = "linear"
+    source_id = "conquer"
   ),
   list(
     id = "real/germline-human-female_guo",
@@ -104,8 +98,7 @@ conquer_infos <- list(
       "F10W", "F11W", 1, TRUE,
       "F11W", "F17W", 6, TRUE
     ),
-    milestone_source = function(cell_info) gsub("(.).*_([0-9]*W)_.*", "\\1\\2", cell_info$title),
-    trajectory_type = "linear"
+    milestone_source = function(cell_info) gsub("(.).*_([0-9]*W)_.*", "\\1\\2", cell_info$title)
   ),
   list(
     id = "real/germline-human-male_guo",
@@ -117,8 +110,7 @@ conquer_infos <- list(
       "M10W", "M11W", 1, TRUE,
       "M11W", "M19W", 8, TRUE
     ),
-    milestone_source = function(cell_info) gsub("(.).*_([0-9]*W)_.*", "\\1\\2", cell_info$title),
-    trajectory_type = "linear"
+    milestone_source = function(cell_info) gsub("(.).*_([0-9]*W)_.*", "\\1\\2", cell_info$title)
   ),
   list(
     id = "real/germline-human-both_guo",
@@ -135,8 +127,7 @@ conquer_infos <- list(
     milestone_source = function(cell_info) {
       src <- gsub("(.).*_([0-9]*W)_.*", "\\1\\2", cell_info$title)
       ifelse(src %in% c("F17W", "M19W"), src, gsub("[FM]", "", src))
-    },
-    trajectory_type = "linear"
+    }
   )
 )
 
@@ -206,7 +197,6 @@ for (source_info in conquer_infos) {
 
   datasetpreproc_normalise_filter_wrap_and_save(
     dataset_id = source_info$id,
-    trajectory_type = source_info$trajectory_type,
     counts = counts,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,

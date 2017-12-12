@@ -30,8 +30,7 @@ settings <- lapply(c("LPS", "PAM", "PIC"), function(stim) {
       pritt("{stim}#1h"), pritt("{stim}#2h"), 1,
       pritt("{stim}#2h"), pritt("{stim}#4h"), 2,
       pritt("{stim}#4h"), pritt("{stim}#6h"), 2
-    ) %>% mutate(directed = TRUE),
-    trajectory_type = "linear"
+    ) %>% mutate(directed = TRUE)
   )
 })
 
@@ -54,7 +53,6 @@ for (setting in settings) {
   feature_info <- tibble(feature_id = colnames(counts))
 
   datasetpreproc_normalise_filter_wrap_and_save(
-    trajectory_type = setting$trajectory_type,
     counts = counts,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,
