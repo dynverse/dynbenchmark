@@ -72,6 +72,12 @@ load_dataset <- function(dataset_id = NULL) {
   read_rds(dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
 }
 
+#' List the names of all real datasets
+#' @export
+list_datasets <- function() {
+  paste0("real/", list.files(dataset_file(filename = "", dataset_id = "real")))
+}
+
 #' Download a file and return its location path
 #' @param url The url of the file to download
 #' @param filename What name to give to the file
