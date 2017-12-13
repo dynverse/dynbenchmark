@@ -1,6 +1,7 @@
 library(dynalysis)
 library(tidyverse)
 library(dynplot)
+library(PRISM)
 
 experiment("5-optimise_parameters/8-evaluate_with_real_datasets")
 
@@ -31,7 +32,7 @@ real_tasks <- real_tasks %>% filter(nrow < 2000)
 
 # settings
 methods <- get_descriptions(as_tibble = F)
-metrics <- "auc_R_nx"
+metrics <- c("auc_R_nx", "auc_R_nx")
 timeout <- 300
 
 # extract the best parameters
@@ -60,7 +61,9 @@ default_parms <- data_frame(method_name = names(methods), params = lapply(method
 parm_sets <- bind_rows(
   best_parms %>% select(method_name, params) %>% mutate(param_group = "best"),
   default_parms %>% select(method_name, params) %>% mutate(param_group = "default")
-) %>% mutate(output_file = pritt("{method_name}_{param_group}.rds"))
+) %>%
+  # mutate(output_file = pritt("{method_name}_{param_group}.rds")) %>%
+  crossing(replicate = seq_len(4))
 
 parm_sets <- parm_sets %>% filter(method_name %in% unique(best_parms$method_name))
 
@@ -71,15 +74,54 @@ tasks <- bind_rows(
 )
 tasks <- tasks %>% select(one_of(c("task_group", intersect(colnames(synthetic_tasks), colnames(real_tasks)))))
 
-# run everything
-for (i in seq_len(nrow(parm_sets))) {
-  output_file <- derived_file(parm_sets$output_file[[i]])
+# for (i in seq_len(nrow(tasks))) {
+#   cat(i, "/", nrow(tasks), "\n", sep="")
+#   expression <- tasks$expression[[i]]
+#   cell_ids <- rownames(expression)[apply(expression, 1, function(x) length(unique(x)) > 1)]
+#   tasks$cell_ids[[i]] <- cell_ids
+#   tasks$expression[[i]] <- tasks$expression[[i]][cell_ids,]
+#   tasks$counts[[i]] <- tasks$counts[[i]][cell_ids,]
+#   tasks$milestone_percentages[[i]] <- tasks$milestone_percentages[[i]] %>% filter(cell_id %in% cell_ids)
+#   tasks$progressions[[i]] <- tasks$progressions[[i]] %>% filter(cell_id %in% cell_ids)
+#   tasks$cell_info[[i]] <- tasks$cell_info[[i]] %>% filter(cell_id %in% cell_ids)
+#   tasks$geodesic_dist[[i]] <- tasks$geodesic_dist[[i]][cell_ids, cell_ids]
+#   tasks$prior_information[[i]] <- dynutils::generate_prior_information(
+#     milestone_ids = tasks$milestone_ids[[i]],
+#     milestone_network = tasks$milestone_network[[i]],
+#     progressions = tasks$progressions[[i]],
+#     milestone_percentages = tasks$milestone_percentages[[i]],
+#     counts = tasks$counts[[i]],
+#     feature_info = tasks$feature_info[[i]],
+#     cell_info = tasks$cell_info[[i]]
+#   )
+# }
+# write_rds(tasks, derived_file("tasks"))
+tasks <- read_rds(derived_file("tasks"))
 
-  if (!file.exists(output_file)) {
+# run everything
+qsub_handle <- qsub_lapply(
+  X = seq_len(nrow(parm_sets)),
+  qsub_config = override_qsub_config(
+    name = "dynreal",
+    num_cores = 8,
+    memory = "10G",
+    max_wall_time = NULL,
+    remove_tmp_folder = FALSE,
+    stop_on_error = FALSE,
+    verbose = FALSE,
+    execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500",
+    r_module = NULL,
+    wait = FALSE
+  ),
+  qsub_packages = c("dplyr", "purrr", "dynalysis", "mlrMBO", "parallelMap"),
+  qsub_environment = c("parm_sets", "tasks", "methods", "metrics", "timeout"),
+  FUN = function(i) {
     method_name <- parm_sets$method_name[[i]]
     param_group <- parm_sets$param_group[[i]]
     parameters <- parm_sets$params[[i]]
-    cat(pritt("Running {method_name}--{param_group}\n\n"))
+    replicate <- parm_sets$replicate[[i]]
+
+    cat(pritt("Running {method_name}--{param_group}--{replicate}\n\n"))
     method <- methods[[method_name]]
 
     score <- execute_evaluation(
@@ -97,28 +139,33 @@ for (i in seq_len(nrow(parm_sets))) {
     models <- extras$.models
     summary <- extras$.summary
     attr(score, "extras") <- NULL
-    write_rds(lst(method_name, param_group, parameters, score, models, summary), output_file)
+    lst(method_name, param_group, replicate, parameters, score, models, summary)
   }
-}
+)
+
+# write_rds(qsub_handle, derived_file("qsub_handle"))
+qsub_handle <- read_rds(derived_file("qsub_handle"))
+
+outs <- qsub_retrieve(qsub_handle)
 
 # process data
 trajtype_ord <- c("directed_linear", "directed_cycle", "bifurcation", "multifurcation", "rooted_tree", "directed_acyclic_graph", "directed_graph")
 
-eval_ind <- map_df(seq_len(nrow(parm_sets)), function(i) {
-  output_file <- derived_file(parm_sets$output_file[[i]])
-  output <- read_rds(output_file)
+eval_ind <- map_df(outs, function(output) {
   summary <- output$summary %>% left_join(tasks %>% select(task_id = id, task_group, trajectory_type), by = "task_id")
+  summary$replicate <- output$replicate
   summary$param_group <- output$param_group
   summary$parameters <- list(output$parameters)
   summary$model <- output$models
   summary %>%
-    select(method_name, method_short_name, task_id, task_group, param_group, parameters, model, auc_R_nx, everything()) %>%
+    select(method_name, method_short_name, task_id, task_group, param_group, parameters, model, auc_R_nx, auc_R_nx, everything()) %>%
     mutate(
       percentage_errored = 1 - is.null(error),
       prior_str = sapply(prior_df, function(prdf) ifelse(nrow(prdf) == 0, "", paste(prdf$prior_names, "--", prdf$prior_type, sep = "", collapse = ";"))),
       trajectory_type_f = factor(trajectory_type, levels = trajtype_ord)
     )
 }) %>% filter(!method_short_name %in% c("identity", "random", "shuffle"))
+
 
 eval_ind %>% group_by(method_short_name, prior_str) %>% summarise(n=n()) %>% ungroup
 

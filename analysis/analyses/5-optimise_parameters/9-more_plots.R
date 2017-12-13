@@ -181,7 +181,7 @@ ggplot(besttwo, aes(date, auc_R_nx)) +
   geom_text(aes(label = name), nudge_y = .005) +
   cowplot::theme_cowplot() +
   labs(x = "Time", y = "Performance (auc_R_nx)") +
-  scale_y_continuous(limits = c(0, max(besttwo$auc_R_nx)+.01), breaks = c(0, .05, .1, round(max(besttwo$auc_R_nx), 2)))
+  scale_y_continuous(limits = c(0, max(besttwo$auc_R_nx)+.01))
 dev.off()
 
 
