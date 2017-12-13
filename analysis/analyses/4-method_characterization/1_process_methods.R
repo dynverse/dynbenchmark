@@ -60,7 +60,13 @@ method_df_evaluated <- method_df_evaluated %>%
     undirected_cycle = loop,
     undirected_graph = unrooted_tree & complex_fork & convergence
   )
-
+method_df_evaluated <- method_df_evaluated %>%
+  gather("trajectory_type", "can_trajectory_type", !!trajectory_types) %>%
+  group_by(name) %>%
+  filter(can_trajectory_type) %>%
+  filter(row_number() == n()) %>%
+  select(name, trajectory_type) %>%
+  left_join(method_df_evaluated)
 
 # Saving -------------------------
 write_rds(method_df, derived_file("method_df.rds"))

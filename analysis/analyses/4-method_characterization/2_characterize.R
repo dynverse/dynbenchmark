@@ -402,7 +402,7 @@ figure <- plot_grid(
   ncol=1
 )
 figure
-save_plot(figure_file("figure_methods.pdf"), figure, base_width = method_characteristics$width + 3, base_height= method_characteristics$height)
+save_plot(figure_file("figure_methods.pdf"), figure, base_width = method_characteristics$width, base_height= method_characteristics$height)
 
 
 
