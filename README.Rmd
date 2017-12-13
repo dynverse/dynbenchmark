@@ -49,9 +49,9 @@ Rscript -e 'install.packages("udunits2", configure.args =  c(udunits2 = '--with-
 You can install dynalysis from github with:
 
 ```{r gh-installation, eval = FALSE}
-install.packages("remotes")
-options(repos = c("https://cran.rstudio.com/", "http://bioconductor.org/packages/release/bioc/", "http://bioconductor.org/packages/release/data/annotation", "http://bioconductor.org/packages/release/data/experiment", "http://bioconductor.org/packages/release/extra"))
-remotes::install_github("Zouter/dynalysis", dependencies = TRUE)
+install.packages("devtools")
+setRepositories(ind = 1:2)
+devtools::install_github("Zouter/dynalysis", dependencies = T, upgrade = T)
 ```
 
 ### Running
