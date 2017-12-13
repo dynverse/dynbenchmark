@@ -1,77 +1,9 @@
 library(tidyverse)
-library(googlesheets)
 library(dynalysis)
 library(cowplot)
 
-experiment("method_characteristics")
+source("analysis/analyses/4-method_characterization/0_common.R")
 
-# Preprocessing the method_df file ---------------------------
-
-# # If it's your first time running this script, run this:
-# gs_auth()
-
-script_file <- "analysis/analyses/4-method_characterization/scholar.py"
-if (!file.exists(script_file)) {
-  download.file("https://raw.githubusercontent.com/ckreibich/scholar.py/master/scholar.py", destfile = script_file)
-}
-
-num_citations_by_clusterid <- function(clusterid, scholar_file = script_file) {
-  tryCatch({
-    command <- paste0("python ", scholar_file, " -C ", clusterid, " --csv-header")
-    output <- system(command, intern = T)
-    tab <- readr::read_delim(paste(gsub("\n", " ", output), collapse = "\n"), delim = "|")
-    sum(tab$num_citations)
-  }, error = function(e) NA)
-}
-
-method_df <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
-  gs_read(ws = "Software", col_types = cols(GScholarClusterID = "c"), skip = 1)
-
-method_df$date <- method_df$Preprint
-method_df$date[is.na(method_df$date)] <- method_df$PubDate[is.na(method_df$date)]
-
-method_df <- method_df %>%
-  mutate(citations = pbapply::pbsapply(cl=4, GScholarClusterID, num_citations_by_clusterid))
-
-method_df_evaluated <- method_df %>%
-  filter(!is.na(qc_score))
-
-write_rds(method_df, derived_file("method_df.rds"))
-write_rds(method_df_evaluated, derived_file("method_df_evaluated.rds"))
-
-
-# --------------------------------------
-
-method_df <- read_rds(derived_file("method_df.rds"))
-method_df_evaluated <- read_rds(derived_file("method_df_evaluated.rds"))
-
-
-# Trajectory components --------------------------
-trajectory_components <- method_df_evaluated %>%
-  select(name, trajectory_components, date) %>%
-  mutate(
-    segment = stringr::str_detect(trajectory_components, "segment"),
-    fork = stringr::str_detect(trajectory_components, "fork"),
-    convergence = stringr::str_detect(trajectory_components, "convergence"),
-    loop = stringr::str_detect(trajectory_components, "loop"),
-    n_forks = as.numeric(ifelse(fork, gsub(".*fork\\(.*,([0-9]|inf)\\).*", "\\1", trajectory_components), NA)),
-    n_fork_paths = as.numeric(ifelse(fork, gsub(".*fork\\(([0-9]|inf),.*", "\\1", trajectory_components), NA)),
-    n_convergences = as.numeric(ifelse(convergence, gsub(".*convergence\\(.*,([0-9]|inf)\\).*", "\\1", trajectory_components), NA)),
-    n_convergence_paths = as.numeric(ifelse(convergence, gsub(".*convergence\\(([0-9]|inf),.*", "\\1", trajectory_components), NA))
-  ) %>%
-  mutate(
-    linear = segment,
-    single_bifurcation = fork,
-    binary_tree = fork & n_forks > 1,
-    single_multifurcation = fork & n_fork_paths > 2,
-    non_binary_tree = binary_tree & single_multifurcation,
-    single_cycle = loop,
-    simple_graph = binary_tree & single_multifurcation & convergence
-  )
-
-write_rds(trajectory_components, derived_file("trajectory_components.rds"))
-
-# Running the analyses ----------------------------
 method_df <- read_rds(derived_file("method_df.rds"))
 method_df_evaluated <- read_rds(derived_file("method_df_evaluated.rds"))
 
@@ -231,11 +163,11 @@ platforms <- method_df %>% separate_rows(platform=platforms, sep=", ") %>%
     theme_void() +
     theme(legend.position="none") +
     coord_flip()
+platforms
 saveRDS(platforms, figure_file("platforms.rds"))
 
 # Trajectory components over time -------------------------------------------
-trajectory_components <- read_rds(derived_file("trajectory_components.rds"))
-
+trajectory_components <- method_df_evaluated
 trajectory_components <- trajectory_components %>%
   arrange(date) %>%
   mutate(count = 1)
@@ -248,7 +180,6 @@ add_step <- function(df) {
 }
 
 trajectory_components_step <- add_step(arrange(trajectory_components, date))
-trajectory_types <- c("linear", "single_bifurcation", "binary_tree", "single_multifurcation", "non_binary_tree", "single_cycle", "simple_graph")
 
 trajectory_components_gathered <- trajectory_components_step %>%
   gather(trajectory_type, can_trajectory_type, !!trajectory_types) %>%
@@ -262,6 +193,7 @@ trajectory_components_over_time <- trajectory_components_gathered %>%
   ggplot() +
   geom_area(aes(date, n_methods), stat="identity") +
   geom_area(aes(date, n_methods_oi, fill=trajectory_type), stat="identity") +
+  scale_fill_manual(values=trajectory_type_colors) +
   facet_grid(.~trajectory_type) +
   theme(legend.position = "none")
 
@@ -388,9 +320,7 @@ prior_usage
 prior_usage_width <- length(prior_usages)/2
 
 # Trajectory components
-trajectory_components <- readRDS(derived_file("trajectory_components.rds"))
-trajectory_types <- c("linear", "single_bifurcation", "binary_tree", "single_multifurcation", "non_binary_tree", "single_cycle", "simple_graph")
-trajectory_components_plot <- trajectory_components %>%
+trajectory_components_plot <- method_df_evaluated %>%
   gather(trajectory_type, can, !!trajectory_types, factor_key=TRUE) %>%
   select(trajectory_type, can, name) %>%
   mutate(name = factor(name, levels=method_order)) %>%
@@ -407,9 +337,6 @@ trajectory_components_plot
 trajectory_components_width <- length(trajectory_types)
 
 # Maximal trajectory components
-trajectory_components <- readRDS(derived_file("trajectory_components.rds"))
-trajectory_types <- c("linear", "single_bifurcation", "binary_tree", "single_multifurcation", "non_binary_tree", "single_cycle", "simple_graph")
-
 lighten <- function(color, factor=1.4){
   map_chr(color, function(color) {
     col <- col2rgb(color)
@@ -420,10 +347,8 @@ lighten <- function(color, factor=1.4){
     colorspace::hex(do.call(colorspace::HSV, as.list(col)))
   })
 }
-colors <- c(linear="#004c8f", single_bifurcation="#00a0d9", binary_tree="#2eca40", single_multifurcation="#ffdc00", non_binary_tree="#ff871f", single_cycle="#85144b", single_bifurcation_single_convergence="#af0dc7", simple_graph="#ff4237")
-colors <- lighten(colors, 3)
 
-maximal_trajectory_components_plot <- trajectory_components %>%
+maximal_trajectory_components_plot <- method_df_evaluated %>%
   gather(trajectory_type, can, !!trajectory_types, factor_key=TRUE) %>%
   group_by(name) %>%
   filter(can) %>%
@@ -439,7 +364,7 @@ maximal_trajectory_components_plot <- trajectory_components %>%
     horizontal_lines +
     theme(legend.position="none") +
     ggtitle("Trajectory\ntype") +
-    scale_fill_manual(values=colors)
+    scale_fill_manual(values=trajectory_type_background_colors)
 maximal_trajectory_components_plot
 maximal_trajectory_components_width <- 2
 
@@ -477,10 +402,12 @@ system(command)
 svg_location <- figure_file('figure_methods.svg')
 xml <- read_xml(svg_location)
 
-aspect <- read_xml("analysis/figures/trajectory_types/mini/linear.svg") %>% xml_root() %>% xml_attr("viewBox") %>% str_split(" ") %>% unlist() %>% tail(2) %>% as.numeric() %>% {.[[1]]/.[[2]]}
+aspect <- read_xml("analysis/figures/trajectory_types/mini/complex_fork.svg") %>% xml_root() %>% xml_attr("viewBox") %>% str_split(" ") %>% unlist() %>% tail(2) %>% as.numeric() %>% {.[[1]]/.[[2]]}
 
 w <- 50
 h <- w / aspect
+
+trajectory_type_boxes <- readRDS(figure_file("trajectory_type_boxes.rds", "trajectory_types"))
 
 map(trajectory_types, function(trajectory_type) {
   to_replace <- xml_find_all(xml, glue::glue("//svg:tspan[text()='{trajectory_type}']")) %>% xml_parent()
@@ -488,7 +415,7 @@ map(trajectory_types, function(trajectory_type) {
   images <- map(transforms, function(transform) {
     node <- read_xml(glue::glue("<g><image /></g>"))
     node %>% xml_set_attr("transform", transform)
-    node %>% xml_child() %>% xml_set_attrs(list(width=w, height=h, `xlink:href`=glue::glue(get_dynalysis_folder(), '/analysis/figures/trajectory_types/mini/{trajectory_type}.svg'), transform=glue::glue("translate(-{w/2} -{h/2})")))
+    node %>% xml_child() %>% xml_set_attrs(list(width=w, height=h, `xlink:href`=paste0("data:image/svg+xml;base64,", trajectory_type_boxes %>% filter(id == trajectory_type) %>% pull(base64)), transform=glue::glue("translate(-{w/2} -{h/2})")))
     node
   })
   replaced <- to_replace %>% xml_replace(images)
