@@ -72,6 +72,12 @@ load_dataset <- function(dataset_id = NULL) {
   read_rds(dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
 }
 
+#' List the names of all real datasets
+#' @export
+list_datasets <- function() {
+  paste0("real/", list.files(dataset_file(filename = "", dataset_id = "real")))
+}
+
 #' Download a file and return its location path
 #' @param url The url of the file to download
 #' @param filename What name to give to the file
@@ -88,7 +94,6 @@ download_dataset_file <- function(filename, url, dataset_id = NULL) {
 
 #' @export
 datasetpreproc_normalise_filter_wrap_and_save <- function(
-  trajectory_type,
   counts,
   cell_ids,
   milestone_ids,
@@ -123,7 +128,6 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   milestone_percentages <- milestone_percentages %>% filter(cell_id %in% cell_ids)
 
   dataset <- wrap_ti_task_data(
-    trajectory_type = trajectory_type,
     id = dataset_id,
     counts = counts,
     expression = expression,
@@ -137,7 +141,17 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     normalisation_info = normalisation_info
   )
 
-  dataset$prior_information <- dynutils::generate_prior_information(milestone_ids, milestone_network, dataset$progressions, milestone_percentages, counts, feature_info, cell_info)
+  dataset$prior_information <- dynutils::generate_prior_information(
+    milestone_ids,
+    milestone_network,
+    dataset$progressions,
+    milestone_percentages,
+    counts,
+    feature_info,
+    cell_info
+  )
+
+  dataset$geodesic_dist <- dynutils::compute_emlike_dist(dataset)
 
   write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
   write_rds(original_counts, dataset_file(dataset_id = dataset_id, filename = "original_counts.rds"))
