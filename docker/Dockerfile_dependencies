@@ -21,6 +21,5 @@ RUN python3 -m pip install numpy matplotlib pandas six jinja2 python-dateutil py
 COPY . dynalysis
 
 # build package
-RUN . /etc/environment && R -e 'install.packages("remotes")'
-RUN . /etc/environment && R -e 'options(repos = c("https://cran.rstudio.com/", "http://bioconductor.org/packages/release/bioc/", "http://bioconductor.org/packages/release/data/annotation", "http://bioconductor.org/packages/release/data/experiment", "http://bioconductor.org/packages/release/extra"))
-; remotes::install_github("Zouter/dynalysis", dependencies = TRUE)'
+RUN . /etc/environment && R -e 'install.packages("devtools")'
+RUN . /etc/environment && R -e 'setRepositories(ind = 1:2); devtools::install_github("Zouter/dynalysis", dependencies = T, upgrade = T)'
