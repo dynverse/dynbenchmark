@@ -48,7 +48,6 @@ milestone_percentages <- cell_info %>% select(cell_id, milestone_id) %>% mutate(
 feature_info <- tibble(feature_id = colnames(counts))
 
 datasetpreproc_normalise_filter_wrap_and_save(
-  trajectory_type = "linear",
   counts = counts,
   cell_ids = cell_ids,
   milestone_ids = milestone_ids,

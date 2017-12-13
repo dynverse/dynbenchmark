@@ -60,7 +60,6 @@ milestone_percentages <- cell_grouping %>%
 feature_info <- tibble(feature_id = colnames(counts))
 
 datasetpreproc_normalise_filter_wrap_and_save(
-  trajectory_type = "bifurcating",
   counts = counts,
   cell_ids = cell_ids,
   milestone_ids = milestone_ids,
