@@ -152,7 +152,8 @@ saveRDS(n_methods_over_time, figure_file("n_methods_over_time.rds"))
 
 
 # Statistics -------------------------------------
-platforms <- method_df %>% separate_rows(platform=platforms, sep=", ") %>%
+# Platforms ------------------------------
+platforms <- method_df_evaluated %>% separate_rows(platform=platforms, sep=", ") %>%
   group_by(platforms) %>%
   summarise(quantity = n()) %>%
   arrange(quantity) %>%
@@ -162,12 +163,14 @@ platforms <- method_df %>% separate_rows(platform=platforms, sep=", ") %>%
   mutate(pos = cumsum(quantity) - quantity/2) %>%
   ggplot(aes(1, quantity)) +
     geom_bar(aes(fill=platform), width = 1, stat="identity") +
-    ggrepel::geom_label_repel(aes(1, pos, label=pritt("{platform}: {quantity}"), fill=platform), color="white", fontface = "bold", direction = "y", segment.alpha=0) +
+    geom_text(aes(1, pos, label=pritt("{platform} \n {quantity}"), fill=platform), color="white", fontface = "bold", direction = "y", segment.alpha=0) +
     theme_void() +
     theme(legend.position="none") +
-    coord_flip()
+    coord_flip() +
+    coord_polar("y")
 platforms
 saveRDS(platforms, figure_file("platforms.rds"))
+
 
 # Trajectory components over time -------------------------------------------
 trajectory_components <- method_df_evaluated
@@ -388,10 +391,19 @@ saveRDS(method_characteristics, figure_file("method_characteristics.rds"))
 ## PLOT1
 method_characteristics <- read_rds(figure_file("method_characteristics.rds"))
 ncitations_over_time <- read_rds(figure_file("ncitations_over_time.rds"))
+platforms <- read_rds(figure_file("platforms.rds"))
 
-figure <- plot_grid(method_characteristics, ncitations_over_time, rel_widths = c(method_characteristics$width, 3))
+bottom <- plot_grid(ncitations_over_time, platforms, nrow = 1, labels=c("e", "f"), rel_widths = c(2, 1))
+
+
+figure <- plot_grid(
+  method_characteristics,
+  bottom,
+  rel_heights = c(method_characteristics$width, 3),
+  ncol=1
+)
 figure
-save_plot(figure_file("figure_methods.pdf"), figure, base_width = method_characteristics$width + 3, base_height= method_characteristics$height)
+save_plot(figure_file("figure_methods.pdf"), figure, base_width = method_characteristics$width, base_height= method_characteristics$height)
 
 
 
@@ -401,6 +413,8 @@ library(xml2)
 
 command <- glue::glue("inkscape {figure_file('figure_methods.pdf')} --export-plain-svg={figure_file('figure_methods.svg')}")
 system(command)
+
+file.remove(figure_file('figure_methods.pdf'))
 
 svg_location <- figure_file('figure_methods.svg')
 xml <- read_xml(svg_location)
