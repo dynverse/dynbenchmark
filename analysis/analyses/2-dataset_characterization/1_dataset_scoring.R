@@ -21,7 +21,7 @@ map_prism <- function (x, f) PRISM::qsub_lapply(x, f, qsub_environment = list2en
 map_local <- function(x, f) pbapply::pblapply(x, f, cl=1)
 map_local_parallel <- function(x, f) pbapply::pblapply(x, f, cl=8)
 
-tasks_synthetic <- read_rds("analysis/data/derived_data/datasets/synthetic/v5.rds")
+tasks_synthetic <- read_rds("analysis/data/derived_data/datasets/synthetic/v6.rds")
 tasks_real <- map_local(task_ids, function(task_id) {
   print(task_id)
   task <- readRDS(dataset_file("dataset.rds", dataset_id = task_id))
