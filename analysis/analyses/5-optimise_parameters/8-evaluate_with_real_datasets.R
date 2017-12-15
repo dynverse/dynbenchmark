@@ -164,8 +164,9 @@ eval_ind <- map_df(outs, function(output) {
       prior_str = sapply(prior_df, function(prdf) ifelse(nrow(prdf) == 0, "", paste(prdf$prior_names, "--", prdf$prior_type, sep = "", collapse = ";"))),
       trajectory_type_f = factor(trajectory_type, levels = trajtype_ord)
     )
-}) %>% filter(!method_short_name %in% c("identity", "random", "shuffle"))
-
+}) %>%
+  filter(!method_short_name %in% c("identity", "random", "shuffle")) %>%
+  group_by(task_id) %>% mutate(rank_auc_R_nx = percent_rank(auc_R_nx)) %>% ungroup()
 
 eval_ind %>% group_by(method_short_name, prior_str) %>% summarise(n=n()) %>% ungroup
 
@@ -176,7 +177,14 @@ eval_overall <- eval_ind %>%
   summarise_if(is.numeric, mean) %>%
   ungroup()
 
-method_ord <- eval_overall %>% filter(task_group == "real", param_group == "best") %>% arrange(desc(auc_R_nx)) %>% .$method_name
+method_ord <- eval_overall %>%
+  filter(task_group == "real") %>%
+  group_by(method_name) %>%
+  arrange(desc(rank_auc_R_nx)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  arrange(desc(rank_auc_R_nx)) %>%
+  .$method_name
 
 eval_overall <- eval_overall %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
 
@@ -191,4 +199,14 @@ eval_trajtype <- eval_ind %>%
     method_name_f = factor(method_name, levels = rev(method_ord))
   )
 
-write_rds(lst(eval_ind, eval_overall, eval_trajtype), derived_file("eval_outputs.rds"))
+eval_repl <- eval_ind %>%
+  group_by(method_name, method_short_name, task_group, param_group, replicate) %>%
+  mutate(n = n()) %>%
+  summarise_if(is.numeric, mean) %>%
+  ungroup() %>%
+  mutate(
+    method_name_f = factor(method_name, levels = rev(method_ord))
+  )
+
+write_rds(lst(eval_ind, eval_overall, eval_trajtype, eval_repl), derived_file("eval_outputs.rds"))
+# list2env(read_rds(derived_file("eval_outputs.rds")), environment())

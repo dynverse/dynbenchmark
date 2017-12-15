@@ -152,7 +152,7 @@ saveRDS(best_parm, result_file("best_params.rds"))
 best_parm2 <- summ %>%
   filter(fold_type == "train") %>%
   group_by(method_name, grid_i, repeat_i, fold_i, group_sel) %>%
-  arrange(desc(auc_R_nx)) %>%
+  arrange(desc(correlation)) %>%
   slice(1) %>%
   ungroup() %>%
   select(method_name, grid_i, repeat_i, fold_i, group_sel, param_i, newparam_i)
@@ -178,7 +178,7 @@ default_summ_agg <- default_summ %>%
 best_summ_agg_spr <- best_summ_agg %>% gather(metric, value, -method_name:-group_sel)
 default_summ_agg_spr <- default_summ_agg %>% gather(metric, value, -method_name:-group_sel)
 
-meth_ord <- best_summ_agg %>% filter(fold_type == "test") %>% group_by(method_name) %>% summarise_if(is.numeric, mean) %>% arrange(desc(auc_R_nx)) %>% .$method_name
+meth_ord <- best_summ_agg %>% filter(fold_type == "test") %>% group_by(method_name) %>% summarise_if(is.numeric, mean) %>% arrange(desc(correlation)) %>% .$method_name
 
 
 
@@ -260,17 +260,17 @@ default_grp <- bind_rows(default_grp, default_summ_agg_spr %>% mutate(trajectory
 best_grp_sel <- best_grp %>% group_by(method_name, fold_type, group_sel, metric, trajectory_type) %>% summarise(value = mean(value)) %>% ungroup()
 default_grp_sel <- default_grp %>% group_by(method_name, fold_type, group_sel, metric, trajectory_type) %>% summarise(value = mean(value)) %>% ungroup()
 
-pdf(figure_file("by-ti-type_auc-R-nx.pdf"), 20, 15)
+pdf(figure_file("by-ti-type_correlation.pdf"), 20, 15)
 ggplot(mapping = aes(factor(method_name, levels = rev(meth_ord)), value, fill = trajectory_type)) +
-  geom_bar(stat = "identity", data = best_grp_sel %>% filter(fold_type == "test", metric == "auc_R_nx")) +
-  geom_point(aes(shape = "train"), data = best_grp_sel %>% filter(fold_type == "train", metric == "auc_R_nx")) +
-  geom_point(aes(shape = "default param"), data = default_grp_sel %>% filter(fold_type == "test", metric == "auc_R_nx")) +
+  geom_bar(stat = "identity", data = best_grp_sel %>% filter(fold_type == "test", metric == "correlation")) +
+  geom_point(aes(shape = "train"), data = best_grp_sel %>% filter(fold_type == "train", metric == "correlation")) +
+  geom_point(aes(shape = "default param"), data = default_grp_sel %>% filter(fold_type == "test", metric == "correlation")) +
   facet_wrap(~trajectory_type, scales = "free") +
   cowplot::theme_cowplot() +
   coord_flip() +
   labs(
     x = NULL,
-    y = "auc_R_nx",
+    y = "correlation",
     title = pritt(
       "Dyneval parameter optimisation on in silico datasets\n",
       "({num_init_params} initial, {num_iterations} iterations of {num_cores} new parameters, {num_repeats} repeats)\n",
@@ -279,21 +279,21 @@ ggplot(mapping = aes(factor(method_name, levels = rev(meth_ord)), value, fill = 
   )
 dev.off()
 
-pdf(figure_file("by-ti-type_auc-R-nx_per_repeat.pdf"), 20, 15)
+pdf(figure_file("by-ti-type_correlation_per_repeat.pdf"), 20, 15)
 for (repi in seq_len(num_repeats)) {
   best_grp_sel <- best_grp %>% filter(repeat_i == repi)
   default_grp_sel <- default_grp %>% filter(repeat_i == repi)
 
   g <- ggplot(mapping = aes(factor(method_name, levels = rev(meth_ord)), value, fill = trajectory_type)) +
-    geom_bar(stat = "identity", data = best_grp_sel %>% filter(fold_type == "test", metric == "auc_R_nx")) +
-    geom_point(aes(shape = "train"), data = best_grp_sel %>% filter(fold_type == "train", metric == "auc_R_nx")) +
-    geom_point(aes(shape = "default param"), data = default_grp_sel %>% filter(fold_type == "test", metric == "auc_R_nx")) +
+    geom_bar(stat = "identity", data = best_grp_sel %>% filter(fold_type == "test", metric == "correlation")) +
+    geom_point(aes(shape = "train"), data = best_grp_sel %>% filter(fold_type == "train", metric == "correlation")) +
+    geom_point(aes(shape = "default param"), data = default_grp_sel %>% filter(fold_type == "test", metric == "correlation")) +
     facet_wrap(~trajectory_type, scales = "free") +
     cowplot::theme_cowplot() +
     coord_flip() +
     labs(
       x = NULL,
-      y = "auc_R_nx",
+      y = "correlation",
       title = pritt(
         "Dyneval parameter optimisation on in silico datasets\n",
         "({num_init_params} initial, {num_iterations} iterations of {num_cores} new parameters, {num_repeats} repeats)\n",
@@ -303,17 +303,17 @@ for (repi in seq_len(num_repeats)) {
   print(g)
 }
 dev.off()
-pdf(figure_file("by-ti-type_auc-R-nx_per_repeat2.pdf"), 40, 15)
+pdf(figure_file("by-ti-type_correlation_per_repeat2.pdf"), 40, 15)
 ggplot(mapping = aes(factor(method_name, levels = rev(meth_ord)), value, fill = trajectory_type)) +
-  geom_bar(stat = "identity", data = best_grp %>% filter(fold_type == "test", metric == "auc_R_nx")) +
-  geom_point(aes(shape = "train"), data = best_grp %>% filter(fold_type == "train", metric == "auc_R_nx")) +
-  geom_point(aes(shape = "default param"), data = default_grp %>% filter(fold_type == "test", metric == "auc_R_nx")) +
+  geom_bar(stat = "identity", data = best_grp %>% filter(fold_type == "test", metric == "correlation")) +
+  geom_point(aes(shape = "train"), data = best_grp %>% filter(fold_type == "train", metric == "correlation")) +
+  geom_point(aes(shape = "default param"), data = default_grp %>% filter(fold_type == "test", metric == "correlation")) +
   facet_grid(repeat_i~trajectory_type, scales = "free") +
   cowplot::theme_cowplot() +
   coord_flip() +
   labs(
     x = NULL,
-    y = "auc_R_nx",
+    y = "correlation",
     title = pritt(
       "Dyneval parameter optimisation on in silico datasets\n",
       "({num_init_params} initial, {num_iterations} iterations of {num_cores} new parameters, {num_repeats} repeats)\n",
@@ -322,17 +322,17 @@ ggplot(mapping = aes(factor(method_name, levels = rev(meth_ord)), value, fill = 
   )
 dev.off()
 
-pdf(figure_file("by-ti-type_auc-R-nx_per_repeat3.pdf"), 30, 15)
+pdf(figure_file("by-ti-type_correlation_per_repeat3.pdf"), 30, 15)
 ggplot(mapping = aes(repeat_i, value, fill = trajectory_type)) +
-  geom_bar(stat = "identity", data = best_grp %>% filter(fold_type == "test", metric == "auc_R_nx")) +
-  geom_point(aes(shape = "train"), data = best_grp %>% filter(fold_type == "train", metric == "auc_R_nx")) +
-  geom_point(aes(shape = "default param"), data = default_grp %>% filter(fold_type == "test", metric == "auc_R_nx")) +
+  geom_bar(stat = "identity", data = best_grp %>% filter(fold_type == "test", metric == "correlation")) +
+  geom_point(aes(shape = "train"), data = best_grp %>% filter(fold_type == "train", metric == "correlation")) +
+  geom_point(aes(shape = "default param"), data = default_grp %>% filter(fold_type == "test", metric == "correlation")) +
   facet_grid(method_name~trajectory_type, scales = "free") +
   cowplot::theme_cowplot() +
   coord_flip() +
   labs(
     x = NULL,
-    y = "auc_R_nx",
+    y = "correlation",
     title = pritt(
       "Dyneval parameter optimisation on in silico datasets\n",
       "({num_init_params} initial, {num_iterations} iterations of {num_cores} new parameters, {num_repeats} repeats)\n",
@@ -349,31 +349,31 @@ compare <- summ %>%
   spread(combine, score)
 
 method_names <- unique(compare$method_name)
-pdf(figure_file("paramoptim-auc_R_nx.pdf"), 16, 8)
+pdf(figure_file("paramoptim-correlation.pdf"), 16, 8)
 for (mn in method_names) {
   g <- ggplot(compare %>% filter(method_name == mn)) +
-    geom_point(aes(train.auc_R_nx, test.auc_R_nx, colour = iteration_i)) +
+    geom_point(aes(train.correlation, test.correlation, colour = iteration_i)) +
     scale_colour_distiller(palette = "RdBu") +
     facet_grid(fold_i~repeat_i) +
     theme_bw() +
     labs(title = pritt(
-      "Comparing train and test auc_R_nx scores over training iterations\n",
+      "Comparing train and test correlation scores over training iterations\n",
       "Method {mn} -- repeats versus folds"
     ))
   print(g)
 }
 dev.off()
 
-pdf(figure_file("paramoptim-auc_R_nx-xparami.pdf"), 16, 8)
+pdf(figure_file("paramoptim-correlation-xparami.pdf"), 16, 8)
 for (mn in method_names) {
-  g <- ggplot(summ %>% filter(method_name == mn), aes(newparam_i, auc_R_nx, fill = fold_type, colour = fold_type)) +
+  g <- ggplot(summ %>% filter(method_name == mn), aes(newparam_i, correlation, fill = fold_type, colour = fold_type)) +
     geom_smooth(aes(colour = NA), span=.5) +
     geom_point() +
     geom_vline(xintercept = num_init_params) +
     facet_grid(fold_i~repeat_i) +
     cowplot::theme_cowplot() +
     labs(title = pritt(
-      "Comparing train and test auc_R_nx scores over training iterations\n",
+      "Comparing train and test correlation scores over training iterations\n",
       "Method {mn} -- repeats versus folds"
     )) +
     scale_colour_brewer(palette = "Dark2") +
@@ -383,16 +383,16 @@ for (mn in method_names) {
 dev.off()
 
 
-summ_best_periter <- summ %>% group_by(method_name, fold_type, grid_i, repeat_i, fold_i, group_sel, iteration_i) %>% arrange(desc(auc_R_nx)) %>% slice(1) %>% ungroup()
-pdf(figure_file("paramoptim-auc_R_nx-xiteri.pdf"), 16, 8)
+summ_best_periter <- summ %>% group_by(method_name, fold_type, grid_i, repeat_i, fold_i, group_sel, iteration_i) %>% arrange(desc(correlation)) %>% slice(1) %>% ungroup()
+pdf(figure_file("paramoptim-correlation-xiteri.pdf"), 16, 8)
 for (mn in method_names) {
-  g <- ggplot(summ_best_periter %>% filter(method_name == mn), aes(newparam_i, auc_R_nx, fill = fold_type, colour = fold_type)) +
+  g <- ggplot(summ_best_periter %>% filter(method_name == mn), aes(newparam_i, correlation, fill = fold_type, colour = fold_type)) +
     geom_smooth(aes(colour = NA), span=.5) +
     geom_point() +
     facet_grid(fold_i~repeat_i) +
     cowplot::theme_cowplot() +
     labs(title = pritt(
-      "Comparing train and test auc_R_nx scores over training iterations\n",
+      "Comparing train and test correlation scores over training iterations\n",
       "Method {mn} -- repeats versus folds"
     )) +
     scale_colour_brewer(palette = "Dark2") +
