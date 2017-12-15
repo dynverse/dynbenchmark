@@ -17,6 +17,13 @@ method_df_evaluated <- method_char %>%
     data.frame(df, method_short_name, stringsAsFactors = FALSE, check.names = FALSE)
   })
 
+num_reals <- eval_ind %>% filter(method_short_name == "CTmaptpx", task_group == "real", param_group == "best", replicate == 1) %>%
+  group_by(trajectory_type) %>% summarise(n = n())
+num_synths <- eval_ind %>% filter(method_short_name == "CTmaptpx", task_group == "synthetic", param_group == "best", replicate == 1) %>%
+  group_by(trajectory_type) %>% summarise(n = n())
+write_tsv(num_reals, figure_file("trajtypes_real.tsv"))
+write_tsv(num_synths, figure_file("trajtypes_synth.tsv"))
+
 ggplot(eval_repl) +
   geom_point(aes(method_name_f, rank_auc_R_nx, colour = param_group)) +
   facet_wrap(~task_group, nrow = 1) +
@@ -39,7 +46,7 @@ joined <- eval_overall %>% left_join(method_df_evaluated, by = "method_short_nam
 
 besttwo <- joined %>% group_by(method_short_name, task_group) %>% arrange(desc(rank_auc_R_nx)) %>% slice(1) %>% ungroup() %>% filter(task_group == "real")
 line <- besttwo %>%
-  filter(name %in% c("Monocle 1", "Waterfall", "embeddr", "TSCAN", "SCORPIUS", "slingshot")) %>%
+  filter(name %in% c("Monocle 1", "Waterfall", "embeddr", "SCORPIUS")) %>%
   add_row(date = Sys.time(), rank_auc_R_nx = max(besttwo$rank_auc_R_nx)) %>%
   add_row(date = "2014-01-01", rank_auc_R_nx = 0) %>%
   arrange(date)
@@ -81,6 +88,23 @@ g <- cowplot::plot_grid(plotlist = lapply(c("real", "synthetic"), function(tg) {
     labs(x = NULL, title = pritt("Scores on {tg} datasets"), colour = "Parameter\ngroup")
 }), nrow = 1)
 print(g)
+dev.off()
+
+
+pdf(figure_file("2_trajtype_comparison_best.pdf"), 12, 16)
+yy <- eval_trajtype %>%
+  filter(method_name %in% zmethord) %>%
+  group_by(method_short_name, task_group, trajectory_type_f) %>%
+  arrange(desc(rank_auc_R_nx)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  mutate(method_name_f = factor(method_name, levels = rev(zmethord)))
+ggplot(yy %>% filter(task_group == "real")) +
+  geom_point(aes(method_name_f, rank_auc_R_nx)) +
+  coord_flip() +
+  cowplot::theme_cowplot() +
+  facet_wrap(~trajectory_type_f, ncol = 3) +
+  labs(x = NULL, title = pritt("Scores on real datasets"), colour = "Parameter\ngroup")
 dev.off()
 #
 
@@ -195,10 +219,10 @@ ggplot(besttwo, aes(date, rank_auc_R_nx)) +
   geom_step(data = line, linetype = "dashed", colour = "gray") +
   geom_point() +
   # ggrepel::geom_label_repel(aes(label = name)) +
-  geom_text(aes(label = name), nudge_y = .005) +
+  geom_text(aes(label = name), nudge_y = .02) +
   cowplot::theme_cowplot() +
   labs(x = "Time", y = "Performance (rank_auc_R_nx)") +
-  scale_y_continuous(limits = c(0, max(besttwo$rank_auc_R_nx)+.01))
+  scale_y_continuous(limits = c(0, max(besttwo$rank_auc_R_nx)+.05))
 dev.off()
 
 

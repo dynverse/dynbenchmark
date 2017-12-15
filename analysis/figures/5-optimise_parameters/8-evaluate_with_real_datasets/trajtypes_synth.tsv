@@ -1,0 +1,8 @@
+trajectory_type	n
+bifurcation	2
+directed_acyclic_graph	4
+directed_cycle	2
+directed_graph	2
+directed_linear	4
+multifurcation	2
+rooted_tree	2
