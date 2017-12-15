@@ -1,41 +1,128 @@
 library(dynalysis)
 library(tidyverse)
 library(dynplot)
+library(PRISM)
 
 experiment("5-optimise_parameters/8-evaluate_with_real_datasets")
 
-dataset_names <- list_datasets()
-tasks <- pbapply::pblapply(dataset_names, load_dataset) %>% list_as_tibble() %>%
+# helper function for parameters
+trafo_params <- function(parameters, par_set) {
+  lapply(names(parameters), function(prnm) {
+    parset_par <- par_set$pars[[prnm]]
+    parv <- parameters[[prnm]]
+    if (!is.null(parset_par$trafo)) {
+      parv <- parset_par$trafo(parv)
+    }
+    parv
+  }) %>% setNames(names(parameters))
+}
+
+# get the synthetic data
+synthetic_tasks <- readRDS(derived_file("v5.rds", experiment_id = "datasets/synthetic"))
+for (i in seq_len(nrow(synthetic_tasks))) {
+  synthetic_tasks$trajectory_type[[i]] <- dynutils::classify_milestone_network(synthetic_tasks$milestone_network[[i]])$network_type
+}
+synthetic_tasks <- synthetic_tasks %>% left_join(synthetic_tasks$info %>% map_df(as_data_frame) %>% mutate(id = synthetic_tasks$id), by = "id")
+
+# get the real data
+real_names <- list_datasets()
+real_tasks <- pbapply::pblapply(real_names, load_dataset) %>% list_as_tibble() %>%
   mutate(nrow = map_int(expression, nrow), ncol = map_int(expression, ncol))
+real_tasks <- real_tasks %>% filter(nrow < 2000)
 
-tasks <- tasks %>% filter(nrow < 2000)
-
-best_parm <- read_rds(result_file("best_params.rds", "5-optimise_parameters/7-train_parameters_with_synthetic_datasets")) %>%
-  mutate(train_score = pmax(0, train_score), test_score = pmax(0, test_score))
-selected_parms <- best_parm  %>% group_by(method_name, fold_i) %>% mutate(norm_score = test_score / mean(test_score)) %>%
-  ungroup() %>% group_by(method_name) %>% arrange(desc(norm_score)) %>% slice(1) %>% ungroup() %>% arrange(method_name)
-
+# settings
 methods <- get_descriptions(as_tibble = F)
-metrics <- "auc_R_nx"
+metrics <- c("auc_R_nx", "auc_R_nx")
 timeout <- 300
 
-method_names <- unique(selected_parms$method_name)
+# extract the best parameters
+best_parms <- read_rds(result_file("best_params.rds", "5-optimise_parameters/7-train_parameters_with_synthetic_datasets")) %>%
+  mutate(
+    params = mapply(params, method_name, FUN = function(prm, mn) trafo_params(prm, methods[[mn]]$par_set)),
+    train_score = pmax(0, train_score),
+    test_score = pmax(0, test_score)
+  ) %>%
+  group_by(method_name, fold_i) %>%
+  mutate(norm_score = test_score / mean(test_score)) %>%
+  ungroup() %>%
+  group_by(method_name) %>%
+  arrange(desc(norm_score)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  arrange(method_name)
 
-for (mn in method_names) {
-  output_file <- derived_file(paste0(mn, ".rds"))
+# extract the default parameters
+default_parms <- data_frame(method_name = names(methods), params = lapply(method_name, function(mn) {
+  par_set <- methods[[mn]]$par_set
+  ParamHelpers::generateDesignOfDefaults(par_set, trafo = TRUE) %>% ParamHelpers::dfRowToList(par.set = par_set, i = 1)
+}))
 
-  if (!file.exists(output_file)) {
-    cat("Running ", mn, "\n", sep = "")
-    method <- methods[[mn]]
-    parameters <- selected_parms %>% filter(method_name == mn) %>% dynutils::extract_row_to_list(1) %>% .$params
-    parameters <- lapply(names(parameters), function(prnm) {
-      parset_par <- method$par_set$pars[[prnm]]
-      parv <- parameters[[prnm]]
-      if (!is.null(parset_par$trafo)) {
-        parv <- parset_par$trafo(parv)
-      }
-      parv
-    }) %>% setNames(names(parameters))
+# combine parameter sets
+parm_sets <- bind_rows(
+  best_parms %>% select(method_name, params) %>% mutate(param_group = "best"),
+  default_parms %>% select(method_name, params) %>% mutate(param_group = "default")
+) %>%
+  # mutate(output_file = pritt("{method_name}_{param_group}.rds")) %>%
+  crossing(replicate = seq_len(4))
+
+parm_sets <- parm_sets %>% filter(method_name %in% unique(best_parms$method_name))
+
+# combine tasks
+tasks <- bind_rows(
+  synthetic_tasks %>% mutate(task_group = "synthetic"),
+  real_tasks %>% mutate(task_group = "real")
+)
+tasks <- tasks %>% select(one_of(c("task_group", intersect(colnames(synthetic_tasks), colnames(real_tasks)))))
+
+# for (i in seq_len(nrow(tasks))) {
+#   cat(i, "/", nrow(tasks), "\n", sep="")
+#   expression <- tasks$expression[[i]]
+#   cell_ids <- rownames(expression)[apply(expression, 1, function(x) length(unique(x)) > 1)]
+#   tasks$cell_ids[[i]] <- cell_ids
+#   tasks$expression[[i]] <- tasks$expression[[i]][cell_ids,]
+#   tasks$counts[[i]] <- tasks$counts[[i]][cell_ids,]
+#   tasks$milestone_percentages[[i]] <- tasks$milestone_percentages[[i]] %>% filter(cell_id %in% cell_ids)
+#   tasks$progressions[[i]] <- tasks$progressions[[i]] %>% filter(cell_id %in% cell_ids)
+#   tasks$cell_info[[i]] <- tasks$cell_info[[i]] %>% filter(cell_id %in% cell_ids)
+#   tasks$geodesic_dist[[i]] <- tasks$geodesic_dist[[i]][cell_ids, cell_ids]
+#   tasks$prior_information[[i]] <- dynutils::generate_prior_information(
+#     milestone_ids = tasks$milestone_ids[[i]],
+#     milestone_network = tasks$milestone_network[[i]],
+#     progressions = tasks$progressions[[i]],
+#     milestone_percentages = tasks$milestone_percentages[[i]],
+#     counts = tasks$counts[[i]],
+#     feature_info = tasks$feature_info[[i]],
+#     cell_info = tasks$cell_info[[i]]
+#   )
+# }
+# write_rds(tasks, derived_file("tasks"))
+tasks <- read_rds(derived_file("tasks"))
+
+# run everything
+qsub_handle <- qsub_lapply(
+  X = seq_len(nrow(parm_sets)),
+  qsub_config = override_qsub_config(
+    name = "dynreal",
+    num_cores = 8,
+    memory = "10G",
+    max_wall_time = NULL,
+    remove_tmp_folder = FALSE,
+    stop_on_error = FALSE,
+    verbose = FALSE,
+    execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500",
+    r_module = NULL,
+    wait = FALSE
+  ),
+  qsub_packages = c("dplyr", "purrr", "dynalysis", "mlrMBO", "parallelMap"),
+  qsub_environment = c("parm_sets", "tasks", "methods", "metrics", "timeout"),
+  FUN = function(i) {
+    method_name <- parm_sets$method_name[[i]]
+    param_group <- parm_sets$param_group[[i]]
+    parameters <- parm_sets$params[[i]]
+    replicate <- parm_sets$replicate[[i]]
+
+    cat(pritt("Running {method_name}--{param_group}--{replicate}\n\n"))
+    method <- methods[[method_name]]
 
     score <- execute_evaluation(
       tasks = tasks,
@@ -44,57 +131,64 @@ for (mn in method_names) {
       metrics = metrics,
       timeout = timeout,
       output_model = T,
-      error_score = 0
+      error_score = 0,
+      mc_cores = 8
     )
 
     extras <- attr(score, "extras")
     models <- extras$.models
     summary <- extras$.summary
     attr(score, "extras") <- NULL
-    write_rds(lst(method_name = mn, parameters, score, models, summary), output_file)
+    lst(method_name, param_group, replicate, parameters, score, models, summary)
   }
-}
+)
 
-# reprocess files
-# for (mn in method_names) {
-#   cat("Reprocessing ", mn, "\n", sep = "")
-#   output_file <- derived_file(paste0(mn, ".rds"))
-#   out <- read_rds(output_file)
-#   score <- out$eval_out
-#   parameters <- out$parameters
-#   extras <- attr(score, "extras")
-#   models <- extras$.models
-#   summary <- extras$.summary
-#   attr(score, "extras") <- NULL
-#   write_rds(lst(method_name = mn, parameters, score, models, summary), output_file)
-# }
+# write_rds(qsub_handle, derived_file("qsub_handle"))
+qsub_handle <- read_rds(derived_file("qsub_handle"))
 
-eval_out_real <- lapply(method_names, function(mn) {
-  read_rds(derived_file(paste0(mn, ".rds")))
-}) %>% list_as_tibble()
+outs <- qsub_retrieve(qsub_handle)
 
-combined <- selected_parms %>% full_join(eval_out_real %>% rename(valid_score = score), by = "method_name")
+# process data
+trajtype_ord <- c("directed_linear", "directed_cycle", "bifurcation", "multifurcation", "rooted_tree", "directed_acyclic_graph", "directed_graph")
 
-ggplot(combined %>% filter(!method_name %in% c("shuffle", "identity", "random")), aes(test_score, valid_score)) +
-  geom_point(aes(colour = train_score)) +
-  geom_text(aes(label = method_name), nudge_y = .005) +
-  cowplot::theme_cowplot() +
-  scale_colour_distiller(palette = "RdBu")
+eval_ind <- map_df(outs, function(output) {
+  summary <- output$summary %>% left_join(tasks %>% select(task_id = id, task_group, trajectory_type), by = "task_id")
+  summary$replicate <- output$replicate
+  summary$param_group <- output$param_group
+  summary$parameters <- list(output$parameters)
+  summary$model <- output$models
+  summary %>%
+    select(method_name, method_short_name, task_id, task_group, param_group, parameters, model, auc_R_nx, auc_R_nx, everything()) %>%
+    mutate(
+      percentage_errored = 1 - is.null(error),
+      prior_str = sapply(prior_df, function(prdf) ifelse(nrow(prdf) == 0, "", paste(prdf$prior_names, "--", prdf$prior_type, sep = "", collapse = ";"))),
+      trajectory_type_f = factor(trajectory_type, levels = trajtype_ord)
+    )
+}) %>% filter(!method_short_name %in% c("identity", "random", "shuffle"))
 
-ggplot(combined, aes(train_score, valid_score)) + geom_point() + geom_text(aes(label = method_name), nudge_y = .02) + cowplot::theme_cowplot()
 
-meth_ord <- combined %>% arrange(desc(valid_score)) %>% .$method_name
-group_spread <- combined %>%
-  select(method_name, train_score, test_score, valid_score) %>%
-  gather(group, score, -method_name) %>%
-  mutate(group = gsub("_score", "", group), method_f = factor(method_name, levels = rev(meth_ord)))
+eval_ind %>% group_by(method_short_name, prior_str) %>% summarise(n=n()) %>% ungroup
 
-pdf(figure_file("real_data.pdf"), 6, 6)
-ggplot(group_spread) +
-  geom_bar(aes(method_f, score), fill = "lightgray", group_spread %>% filter(group == "valid"), stat = "identity") +
-  geom_point(aes(method_f, score, colour = group), group_spread %>% filter(group != "valid")) +
-  coord_flip() +
-  cowplot::theme_cowplot() +
-  scale_colour_brewer(palette = "Dark2")+
-  scale_fill_brewer(palette = "Dark2")
-dev.off()
+# process overal evaluation
+eval_overall <- eval_ind %>%
+  group_by(method_name, method_short_name, task_group, param_group) %>%
+  mutate(n = n()) %>%
+  summarise_if(is.numeric, mean) %>%
+  ungroup()
+
+method_ord <- eval_overall %>% filter(task_group == "real", param_group == "best") %>% arrange(desc(auc_R_nx)) %>% .$method_name
+
+eval_overall <- eval_overall %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
+
+
+# process trajtype grouped evaluation
+eval_trajtype <- eval_ind %>%
+  group_by(method_name, method_short_name, task_group, param_group, trajectory_type, trajectory_type_f) %>%
+  mutate(n = n()) %>%
+  summarise_if(is.numeric, mean) %>%
+  ungroup() %>%
+  mutate(
+    method_name_f = factor(method_name, levels = rev(method_ord))
+  )
+
+write_rds(lst(eval_ind, eval_overall, eval_trajtype), derived_file("eval_outputs.rds"))

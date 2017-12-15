@@ -13,7 +13,7 @@ The goal of dynalysis is to ...
 
 Please cite this compendium as:
 
-> Authors, (2017). *Title of compendium*. Accessed 07 Dec 2017. Online at <https://doi.org/xxx/xxx>
+> Authors, (2017). *Title of compendium*. Accessed 13 Dec 2017. Online at <https://doi.org/xxx/xxx>
 
 ### Dependencies
 
@@ -36,9 +36,9 @@ Fedora/CentOS:
 You can install dynalysis from github with:
 
 ``` r
-install.packages("remotes")
-options(repos = c("https://cran.rstudio.com/", "http://bioconductor.org/packages/release/bioc/", "http://bioconductor.org/packages/release/data/annotation", "http://bioconductor.org/packages/release/data/experiment", "http://bioconductor.org/packages/release/extra"))
-remotes::install_github("Zouter/dynalysis", dependencies = TRUE)
+install.packages("devtools")
+setRepositories(ind = 1:2)
+devtools::install_github("Zouter/dynalysis", dependencies = T, upgrade = T)
 ```
 
 ### Running
