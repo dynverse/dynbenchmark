@@ -145,7 +145,11 @@ Echte data. Evaluatie (biologische relevantie van de methode)
 
 
 ## Trajectory inference methods
+
+
 ## Toy data generation
+
+
 ## Synthetic data generation
 
 
@@ -155,7 +159,7 @@ Our workflow to generate synthetic data is based on the well established workflo
 ### Network generation
 
 
-One of the main process involved in cellular dynamic processes is through gene regulation, where regulatory cascades and feedback loops lead to . The exact way a cell chooses a certain path during its differentiation is still an active research field, although certain models have already emerged and been tested in vivo. One driver of bifurcations seem to be mutual antognism, where two genes  or gene modules strongly inhibit eachother, forcing one of the two to become inactive. The choice of which gene(s) survive can be both due to stochasticity [ref] or driven by environmental cues.Of Modules? [Th17]
+One of the main process involved in cellular dynamic processes is through gene regulation, where regulatory cascades and feedback loops lead to . The exact way a cell chooses a certain path during its differentiation is still an active research field, although certain models have already emerged and been tested in vivo. One driver of bifurcations seem to be mutual antagonism, where two genes [@XuRegulationbifurcatingcell2015] or gene modules strongly inhibit each other, forcing one of the two to become inactive [@GrafForcingcellschange2009]. Which of these two Of Modules? [Th17]
 
 
 ## Real data processing
