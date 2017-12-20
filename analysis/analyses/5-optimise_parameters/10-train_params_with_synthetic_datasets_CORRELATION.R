@@ -5,35 +5,16 @@ library(dynplot)
 experiment("5-optimise_parameters/10-train_params_with_synthetic_datasets_CORRELATION")
 
 # tasks
-tasks <- readRDS(derived_file("v5.rds", experiment_id = "datasets/synthetic"))
+tasks <- readRDS(derived_file("v6/tasks.rds", experiment_id = "datasets/synthetic"))
 
-# temporary fix for tasks
-for (i in seq_len(nrow(tasks))) {
-  cat(i, "/", nrow(tasks), "\n", sep="")
-  expression <- tasks$expression[[i]]
-  cell_ids <- rownames(expression)[apply(expression, 1, function(x) length(unique(x)) > 1)]
-  tasks$cell_ids[[i]] <- cell_ids
-  tasks$expression[[i]] <- tasks$expression[[i]][cell_ids,]
-  tasks$counts[[i]] <- tasks$counts[[i]][cell_ids,]
-  tasks$milestone_percentages[[i]] <- tasks$milestone_percentages[[i]] %>% filter(cell_id %in% cell_ids)
-  tasks$progressions[[i]] <- tasks$progressions[[i]] %>% filter(cell_id %in% cell_ids)
-  tasks$cell_info[[i]] <- tasks$cell_info[[i]] %>% filter(cell_id %in% cell_ids)
-  tasks$geodesic_dist[[i]] <- tasks$geodesic_dist[[i]][cell_ids, cell_ids]
-  tasks$prior_information[[i]] <- dynutils::generate_prior_information(
-    milestone_ids = tasks$milestone_ids[[i]],
-    milestone_network = tasks$milestone_network[[i]],
-    progressions = tasks$progressions[[i]],
-    milestone_percentages = tasks$milestone_percentages[[i]],
-    counts = tasks$counts[[i]],
-    feature_info = tasks$feature_info[[i]],
-    cell_info = tasks$cell_info[[i]]
-  )
-}
-
-tasks_info <- tasks$info %>% map_df(as_data_frame) %>% mutate(task_id = tasks$id)
-# tasks_info <- tasks_info %>% group_by(modulenet_name) %>% mutate(fold = sample.int(n())) %>% ungroup()
-
+num_folds <- 4
+# tasks_info <- tasks$info %>% map_df(as_data_frame) %>% mutate(task_id = tasks$id)
+# platform_folds <- sample(unique(tasks_info$platform_name))
+# platform_folds_map <- setNames(ceiling(seq(1e-10, num_folds, length = length(platform_folds))), platform_folds)
+# table(platform_folds_map)
+# tasks_info <- tasks_info %>% mutate(fold = platform_folds_map[platform_name])
 # write_rds(tasks_info, derived_file("tasks_info.rds"))
+
 tasks_info <- read_rds(derived_file("tasks_info.rds"))
 
 # configure run
@@ -50,10 +31,10 @@ methods <- methods %>% slice(match(all_method_orders, short_name))
 
 metrics <- "correlation"
 timeout <- 300
-num_repeats <- 4
-num_folds <- 2
-num_init_params <- 200
-num_iterations <- 400
+num_repeats <- 3
+
+num_init_params <- 100
+num_iterations <- 200
 num_cores <- 1
 
 # start benchmark suite
