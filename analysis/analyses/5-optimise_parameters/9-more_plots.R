@@ -91,7 +91,7 @@ print(g)
 dev.off()
 
 
-pdf(figure_file("2_trajtype_comparison_best.pdf"), 12, 16)
+pdf(figure_file("2_trajtype_comparison_best.pdf"), 12, 8)
 yy <- eval_trajtype %>%
   filter(method_name %in% zmethord) %>%
   group_by(method_short_name, task_group, trajectory_type_f) %>%
