@@ -107,7 +107,7 @@ run_fun <- function(i) {
   parameters <- parm_sets$params[[i]]
   replicate <- parm_sets$replicate[[i]]
 
-  cat(pritt("Running {i}/{nrow(parm_sets}: {method_name}--{param_group}--{replicate}\n\n"))
+  cat(pritt("Running {i}/{nrow(parm_sets)}: {method_name}--{param_group}--{replicate}\n\n"))
   method <- methods[[method_name]]
 
   score <- execute_evaluation(
@@ -130,8 +130,12 @@ run_fun <- function(i) {
 
 # run everything locally
 filenames <- lapply(seq_len(nrow(parm_sets)), function(i) {
+  method_name <- parm_sets$method_name[[i]]
+  param_group <- parm_sets$param_group[[i]]
+  replicate <- parm_sets$replicate[[i]]
+
   out <- run_fun(i)
-  filename <- derived_file(paste0("tmp_", i, ".rds"))
+  filename <- derived_file(pritt("out_rds_{method_name}_{param_group}_{replicate}.rds"))
   if (!file.exists(filename)) {
     write_rds(out, filename)
   }
