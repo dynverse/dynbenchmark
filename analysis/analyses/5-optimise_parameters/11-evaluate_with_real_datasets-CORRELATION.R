@@ -128,15 +128,17 @@ run_fun <- function(i) {
   lst(method_name, param_group, replicate, parameters, score, models, summary)
 }
 
+parm_sets <- parm_sets %>% filter(!method_name %in% c("GPfates"))
+
 # run everything locally
 filenames <- lapply(seq_len(nrow(parm_sets)), function(i) {
   method_name <- parm_sets$method_name[[i]]
   param_group <- parm_sets$param_group[[i]]
   replicate <- parm_sets$replicate[[i]]
 
-  out <- run_fun(i)
   filename <- derived_file(pritt("out_rds_{method_name}_{param_group}_{replicate}.rds"))
   if (!file.exists(filename)) {
+    out <- run_fun(i)
     write_rds(out, filename)
   }
   filename
