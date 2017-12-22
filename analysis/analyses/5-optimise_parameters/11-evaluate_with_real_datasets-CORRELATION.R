@@ -128,7 +128,7 @@ run_fun <- function(i) {
   lst(method_name, param_group, replicate, parameters, score, models, summary)
 }
 
-parm_sets <- parm_sets %>% filter(!method_name %in% c("GPfates"))
+parm_sets <- parm_sets %>% filter(!method_name %in% c("GPfates", "Mpath", "ouija"))
 
 # run everything locally
 filenames <- lapply(seq_len(nrow(parm_sets)), function(i) {
