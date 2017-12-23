@@ -29,7 +29,7 @@ real_tasks <- real_tasks %>% filter(nrow < 2000) %>% mutate(trajectory_type = un
 
 # settings
 methods <- get_descriptions(as_tibble = F)
-metrics <- c("correlation")
+metrics <- c("auc_R_nx", "correlation")
 timeout <- 300
 
 # extract the best parameters
@@ -98,8 +98,12 @@ parm_sets <- bind_rows(
 #     cell_info = tasks$cell_info[[i]]
 #   )
 # }
-# write_rds(tasks, derived_file("tasks"))
-tasks <- read_rds(derived_file("tasks"))
+# for (i in seq_len(nrow(tasks))) {
+#   tasks$trajectory_type[[i]] <- dynutils::classify_milestone_network(tasks$milestone_network[[i]])$network_type
+# }
+
+# write_rds(tasks, derived_file("tasks.rds"))
+tasks <- read_rds(derived_file("tasks.rds"))
 
 run_fun <- function(i) {
   method_name <- parm_sets$method_name[[i]]
@@ -128,7 +132,8 @@ run_fun <- function(i) {
   lst(method_name, param_group, replicate, parameters, score, models, summary)
 }
 
-parm_sets <- parm_sets %>% filter(!method_name %in% c("GPfates", "Mpath", "ouija"))
+parm_sets <- parm_sets %>% filter(!method_name %in% c("GPfates", "Mpath", "ouija", "pseudogp", "SCOUP"))
+# rerun pseudogp with fewer cores
 
 # run everything locally
 filenames <- lapply(seq_len(nrow(parm_sets)), function(i) {
@@ -144,7 +149,7 @@ filenames <- lapply(seq_len(nrow(parm_sets)), function(i) {
   filename
 })
 
-outs <- lapply(filenames, read_rds)
+outs <- pbapply::pblapply(filenames, read_rds)
 
 # # run everything on the cluster
 # qsub_handle <- qsub_lapply(
@@ -181,7 +186,7 @@ eval_ind <- map_df(outs, function(output) {
   summary$parameters <- list(output$parameters)
   summary$model <- output$models
   summary %>%
-    select(method_name, method_short_name, task_id, task_group, param_group, parameters, model, auc_R_nx, auc_R_nx, everything()) %>%
+    select(method_name, method_short_name, task_id, task_group, param_group, parameters, model, correlation, everything()) %>%
     mutate(
       percentage_errored = 1 - is.null(error),
       prior_str = sapply(prior_df, function(prdf) ifelse(nrow(prdf) == 0, "", paste(prdf$prior_names, "--", prdf$prior_type, sep = "", collapse = ";"))),
@@ -189,7 +194,7 @@ eval_ind <- map_df(outs, function(output) {
     )
 }) %>%
   filter(!method_short_name %in% c("identity", "random", "shuffle")) %>%
-  group_by(task_id) %>% mutate(rank_auc_R_nx = percent_rank(auc_R_nx)) %>% ungroup()
+  group_by(task_id) %>% mutate(rank_correlation = percent_rank(correlation)) %>% ungroup()
 
 eval_ind %>% group_by(method_short_name, prior_str) %>% summarise(n=n()) %>% ungroup
 
@@ -203,10 +208,10 @@ eval_overall <- eval_ind %>%
 method_ord <- eval_overall %>%
   filter(task_group == "real") %>%
   group_by(method_name) %>%
-  arrange(desc(rank_auc_R_nx)) %>%
+  arrange(desc(rank_correlation)) %>%
   slice(1) %>%
   ungroup() %>%
-  arrange(desc(rank_auc_R_nx)) %>%
+  arrange(desc(rank_correlation)) %>%
   .$method_name
 
 eval_overall <- eval_overall %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
