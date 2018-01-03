@@ -194,17 +194,25 @@ eval_ind <- map_df(outs, function(output) {
     )
 }) %>%
   filter(!method_short_name %in% c("identity", "random", "shuffle")) %>%
-  group_by(task_id) %>% mutate(rank_correlation = percent_rank(correlation)) %>% ungroup()
+  group_by(task_id) %>%
+  mutate(rank_correlation = percent_rank(correlation)) %>%
+  ungroup()
 
-eval_ind %>% group_by(method_short_name, prior_str) %>% summarise(n=n()) %>% ungroup
+# process trajtype grouped evaluation
+eval_trajtype <- eval_ind %>%
+  group_by(method_name, method_short_name, task_group, param_group, trajectory_type, trajectory_type_f) %>%
+  mutate(n = n()) %>%
+  summarise_if(is.numeric, mean) %>%
+  ungroup()
 
-# process overal evaluation
-eval_overall <- eval_ind %>%
+# process overall evaluation
+eval_overall <- eval_trajtype %>%
   group_by(method_name, method_short_name, task_group, param_group) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup()
 
+# get ordering of methods
 method_ord <- eval_overall %>%
   filter(task_group == "real") %>%
   group_by(method_name) %>%
@@ -215,26 +223,15 @@ method_ord <- eval_overall %>%
   .$method_name
 
 eval_overall <- eval_overall %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
+eval_ind <- eval_ind %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
+eval_trajtype <- eval_trajtype %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
 
-
-# process trajtype grouped evaluation
-eval_trajtype <- eval_ind %>%
-  group_by(method_name, method_short_name, task_group, param_group, trajectory_type, trajectory_type_f) %>%
-  mutate(n = n()) %>%
-  summarise_if(is.numeric, mean) %>%
-  ungroup() %>%
-  mutate(
-    method_name_f = factor(method_name, levels = rev(method_ord))
-  )
-
+# evaluate per replicate
 eval_repl <- eval_ind %>%
-  group_by(method_name, method_short_name, task_group, param_group, replicate) %>%
+  group_by(method_name, method_name_f, method_short_name, task_group, param_group, replicate) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
-  ungroup() %>%
-  mutate(
-    method_name_f = factor(method_name, levels = rev(method_ord))
-  )
+  ungroup()
 
 write_rds(lst(eval_ind, eval_overall, eval_trajtype, eval_repl), derived_file("eval_outputs.rds"))
 # list2env(read_rds(derived_file("eval_outputs.rds")), environment())
