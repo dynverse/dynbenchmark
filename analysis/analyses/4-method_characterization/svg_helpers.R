@@ -15,6 +15,7 @@ change_opacity <- function(
   export = "--export-area-page",
   trim = FALSE,
   size = "100%",
+  identifier = "g",
   png=TRUE,
   svg=FALSE
 ) {
@@ -26,7 +27,7 @@ change_opacity <- function(
 
   xml_find_multiple_ids <- function(xml, ids) {
     ids_txt <- paste0("@id = \'", ids, "\'", collapse=" or ")
-    xpath <- glue::glue("//svg:g[{ids_txt}]")
+    xpath <- glue::glue("//svg:{identifier}[{ids_txt}]")
     xml_find_all(xml, xpath)
   }
 
@@ -64,3 +65,6 @@ change_opacity <- function(
 
   #glue::glue("<img src='{folder}/{output}.png' style='max-width:{size};max-height:{size}' />")
 }
+
+
+
