@@ -1,9 +1,9 @@
 ---
 title: "An evaluation framework for trajectory inference methods"
 author:
-  - Robrecht Cannoodt* ¹ ² ³
   - Wouter Saelens* ¹ ²
-  - Helena Todorov¹ ²
+  - Robrecht Cannoodt* ¹ ² ³
+  - Helena Todorov¹ ² ⁴ ⁵
   - Yvan Saeys¹ ²
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
@@ -13,16 +13,18 @@ output:
 bibliography: references.bib
 csl: nature-biotechnology.csl
 abstract: |
-  Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Dozens of trajectory inference methods have been developed, early methods mostly focussing on linear trajectories, while recently methods also model more complex branching trajectories. However, the performance of these methods have not yet been comprehensively evaluated. Here, we compare a total of 22 trajectory inference methods, on both realistic synthetic datasets and a large set is real datasets. We employ a novel parameter optimisation procedure, and compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended and is available at www.github.com/dynverse.
+  Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Dozens of trajectory inference methods have been developed, early methods mostly focussing on linear trajectories, while recently methods also model more complex branching trajectories. However, the performance of these methods have not yet been comprehensively evaluated. Here, we compare a total of 22 trajectory inference methods, on both realistic synthetic datasets and a large set is real datasets. We employ a novel parameter optimisation procedure, and compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at www.github.com/dynverse.
 keywords: |
   trajectory inference; pseudotemporal ordering; single-cell transcriptomics
 highlights: |
   These are the highlights. 
 ---
 \* Equal contribution  
-¹ Data mining and modelling for biomedicine, VIB Center for Inflammation Research, Ghent, Belgium  
-² Department of ???, Ghent University, Ghent, Belgium  
-³ Center for Medical Genetics, Ghent University  
+¹ Data mining and modelling for biomedicine, VIB Center for Inflammation Research, Ghent, Belgium.  
+² Department of Applied Mathematics, Computer Science and Statistics, Ghent University, Ghent, Belgium.  
+³ Center for Medical Genetics, Ghent University Hospital, Ghent, Belgium.  
+⁴ CIRI, Centre International de Recherche en Infectiologie, Inserm, Lyon, France.  
+⁵ Université Claude Bernard Lyon 1, Lyon, France.  
 
 ```{r setup, include=FALSE}
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
