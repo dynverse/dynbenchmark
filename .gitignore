@@ -8,3 +8,4 @@
 analysis_output.tar
 .rds
 .httr-oauth
+*.html
