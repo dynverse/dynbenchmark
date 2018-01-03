@@ -24,64 +24,9 @@ num_synths <- eval_ind %>% filter(method_short_name == "CTmaptpx", task_group ==
 write_tsv(num_reals, figure_file("trajtypes_real.tsv"))
 write_tsv(num_synths, figure_file("trajtypes_synth.tsv"))
 
-ggplot(eval_repl) +
-  geom_point(aes(method_name_f, rank_correlation, colour = param_group)) +
-  facet_wrap(~task_group, nrow = 1) +
-  coord_flip() +
-  cowplot::theme_cowplot()
-
-pdf(figure_file("boxplot.pdf"), 12, 4)
-ggplot(eval_repl) +
-  geom_boxplot(aes(method_name_f, rank_correlation, colour = param_group)) +
-  facet_wrap(~task_group, nrow = 1) +
-  coord_flip() +
-  cowplot::theme_cowplot()
-dev.off()
-
-ggplot(eval_overall) +
-  geom_point(aes(method_name_f, rank_correlation, colour = param_group)) +
-  facet_wrap(~task_group, nrow = 1) +
-  coord_flip() +
-  cowplot::theme_cowplot()
-
-joined <- eval_overall %>% left_join(method_df_evaluated, by = "method_short_name") %>% filter(method_short_name != "ouija")
-
-besttwo <- joined %>% group_by(method_short_name, task_group) %>% arrange(desc(rank_correlation)) %>% slice(1) %>% ungroup() %>% filter(task_group == "real")
-line <- besttwo %>%
-  filter(name %in% c("Monocle 1", "Waterfall", "embeddr", "SCORPIUS")) %>%
-  add_row(date = Sys.time(), rank_correlation = max(besttwo$rank_correlation)) %>%
-  add_row(date = "2014-01-01", rank_correlation = 0) %>%
-  arrange(date)
-
-
-
-pdf(figure_file("1_overall_comparison.pdf"), 12, 4)
-g <- cowplot::plot_grid(plotlist = lapply(c("real", "synthetic"), function(tg) {
-  ggplot(eval_overall %>% filter(task_group == tg)) +
-    geom_point(aes(method_name_f, rank_correlation, colour = param_group)) +
-    coord_flip() +
-    cowplot::theme_cowplot() +
-    labs(x = NULL, title = pritt("Scores on {tg} datasets"), colour = "Parameter\ngroup")
-}), nrow = 1)
-print(g)
-dev.off()
-
-pdf(figure_file("1_overall_comparison_best.pdf"), 12, 4)
-z <- joined %>% group_by(method_short_name, task_group) %>% arrange(desc(rank_correlation)) %>% slice(1) %>% ungroup()
-zmethord <- z %>% filter(task_group == "real") %>% arrange(desc(rank_correlation)) %>% .$method_name
-z <- z %>% mutate(method_name_f = factor(method_name, levels = rev(zmethord)))
-g <- cowplot::plot_grid(plotlist = lapply(c("real", "synthetic"), function(tg) {
-  ggplot(z %>% filter(task_group == tg)) +
-    geom_point(aes(method_name_f, rank_correlation)) +
-    coord_flip() +
-    cowplot::theme_cowplot() +
-    labs(x = NULL, title = pritt("Scores on {tg} datasets"), colour = "Parameter\ngroup")
-}), nrow = 1)
-print(g)
-dev.off()
 
 pdf(figure_file("2_trajtype_comparison.pdf"), 12, 16)
-g <- cowplot::plot_grid(plotlist = lapply(c("real", "synthetic"), function(tg) {
+cowplot::plot_grid(plotlist = lapply(c("real", "synthetic"), function(tg) {
   ggplot(eval_trajtype %>% filter(task_group == tg)) +
     geom_point(aes(method_name_f, rank_correlation, colour = param_group)) +
     coord_flip() +
@@ -89,7 +34,6 @@ g <- cowplot::plot_grid(plotlist = lapply(c("real", "synthetic"), function(tg) {
     facet_wrap(~trajectory_type_f, ncol = 1) +
     labs(x = NULL, title = pritt("Scores on {tg} datasets"), colour = "Parameter\ngroup")
 }), nrow = 1)
-print(g)
 dev.off()
 
 
