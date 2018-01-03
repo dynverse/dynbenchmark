@@ -33,8 +33,9 @@ datasetpreproc_getid <- function() {
 
 # create a helper function
 datasetpreproc_subfolder <- function(path) {
-  function(filename = "", dataset_id = NULL) {
+  function(filename = "", dataset_id = NULL, relative=FALSE) {
     dyn_fold <- get_dynalysis_folder()
+    if(relative) {dyn_fold = ""}
 
     if (is.null(dataset_id)) {
       dataset_id <- datasetpreproc_getid()
