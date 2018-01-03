@@ -1,9 +1,9 @@
 ---
 title: "An evaluation framework for trajectory inference methods"
 author:
-  - Robrecht Cannoodt* ¹ ² ³
   - Wouter Saelens* ¹ ²
-  - Helena Todorov¹ ²
+  - Robrecht Cannoodt* ¹ ² ³
+  - Helena Todorov¹ ² ⁴ ⁵
   - Yvan Saeys¹ ²
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
@@ -20,9 +20,11 @@ highlights: |
   These are the highlights. 
 ---
 \* Equal contribution  
-¹ Data mining and modelling for biomedicine, VIB Center for Inflammation Research, Ghent, Belgium  
-² Department of ???, Ghent University, Ghent, Belgium  
-³ Center for Medical Genetics, Ghent University  
+¹ Data mining and modelling for biomedicine, VIB Center for Inflammation Research, Ghent, Belgium.  
+² Department of Applied Mathematics, Computer Science and Statistics, Ghent University, Ghent, Belgium.  
+³ Center for Medical Genetics, Ghent University Hospital, Ghent, Belgium.  
+⁴ CIRI, Centre International de Recherche en Infectiologie, Inserm, Lyon, France.
+⁵ Université Claude Bernard Lyon 1, Lyon, France.
 
 ```{r setup, include=FALSE}
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
@@ -61,6 +63,14 @@ create_names <- list(
   fig = function(i) {pritt("Figure {i}")}
 )
 ```
+# Title
+Not all trajectory inference methods are created equal
+Trajectory inference: work in progress
+Trajectory inference: we’re not quite there yet
+Paving the way for trajectories
+Benchmarking trajecotry inference methods
+
+
 # Introduction
 
 
@@ -119,7 +129,7 @@ We gathered a list of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods f
 `r ref("fig", "evaluation_overview", anchor=TRUE)` Overview of the evaluation
 
 
-Our evaluation was structured in three main phases. In the first phase, we used toy data as a positive control for each method, assessing whether it can detect the correct trajectories in very simplistic data. Next, we generated synthetic data from a realistic model of gene regulation, combined with a simulation of the technical variation induced by single-cell RNA sequencing. We used this synthetic data in a parameter optimization procedure, where we used cross-validation between datasets to avoid overfitting on particular data set structures. Finally, in the third phase, we used the optimized parameters to score the performance of each method on real data. We split the real datasets in two groups based on the type of reference trajectory available. The reference in datasets with a silver standard were defined by the author’s based on the expression data itself, while the reference for gold standard was defined using external information, such as fluorescent sorting or time series.
+Our evaluation was structured in three main phases. In the first phase, we used toy data as a positive control for each method, assessing whether it can detect the correct trajectories in very simplistic data. Next, we generated synthetic data from a model of gene regulation, combined with a simulation of the technical variation introduced by single-cell RNA sequencing. We used this synthetic data in a parameter optimization procedure, where we used cross-validation between datasets to avoid overfitting on particular data set structures. Finally, in the third phase, we used the optimized parameters to score the performance of each method on real data. We split the real datasets in two groups based on the type of reference trajectory available. The reference in datasets with a silver standard were defined by the author’s based on the expression data itself, while the reference for gold standard was defined using external information, such as fluorescent sorting or time series.
 ### Score metrics and parameter optimisation
 
 
@@ -163,6 +173,11 @@ One of the main process involved in cellular dynamic processes is through gene r
 
 
 ## Real data processing
+
+
+We gathered 
+
+
 ## Normalization
 ## Evaluation metrics
 ## Parameter optimization
