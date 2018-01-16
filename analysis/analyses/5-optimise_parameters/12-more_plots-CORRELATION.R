@@ -17,6 +17,8 @@ method_df_evaluated <- method_char %>%
     data.frame(df, method_short_name, stringsAsFactors = FALSE, check.names = FALSE)
   })
 
+eval_ind <- eval_ind %>% rowwise() %>% mutate(error_message = ifelse(is.null(error), "", error$message)) %>% ungroup()
+
 num_reals <- eval_ind %>% filter(method_short_name == "CTmaptpx", task_group == "real", param_group == "best", replicate == 1) %>%
   group_by(trajectory_type) %>% summarise(n = n())
 num_synths <- eval_ind %>% filter(method_short_name == "CTmaptpx", task_group == "synthetic", param_group == "best", replicate == 1) %>%
@@ -45,7 +47,7 @@ eval_trajtype_wa_wo <- eval_overall_wm %>%
   mutate(trajectory_type_f = factor(trajectory_type, levels = c("overall", trajtype_ord)))
 
 # plots
-pdf(figure_file("2_trajtype_comparison_correlation.pdf"), 20, 8)
+pdf(figure_file("2_trajtype_comparison.pdf"), 20, 8)
 ggplot(eval_trajtype_wa_wo) +
   geom_point(aes(method_name_f, rank_correlation)) +
   coord_flip() +
@@ -57,9 +59,30 @@ ggplot(eval_trajtype_wa_wo) +
     y = "Mean quantile score of correlation in pairwise tented geodesic distance between cells",
     title = "Evaluation of trajectory inference methods with default parameters"
   )
-dev.off()
 
-pdf(figure_file("2_trajtype_comparison_errorrates.pdf"), 20, 8)
+# ggplot(eval_trajtype_wa_wo) +
+#   geom_point(aes(method_name_f, rank_mrsq)) +
+#   coord_flip() +
+#   theme_bw() +
+#   facet_grid(task_group~trajectory_type_f) +
+#   labs(
+#     x = NULL,
+#     colour = "Parameter\ngroup",
+#     y = "Mean quantile score of OOB-MSE score when predicting gold milestone percentages",
+#     title = "Evaluation of trajectory inference methods with default parameters"
+#   )
+ggplot(eval_trajtype_wa_wo) +
+  geom_point(aes(method_name_f, rank_mmse)) +
+  coord_flip() +
+  theme_bw() +
+  facet_grid(task_group~trajectory_type_f) +
+  labs(
+    x = NULL,
+    colour = "Parameter\ngroup",
+    y = "Mean quantile score of OOB-MSE score when predicting gold milestone percentages",
+    title = "Evaluation of trajectory inference methods with default parameters"
+  )
+
 ggplot(eval_trajtype_wa_wo) +
   geom_point(aes(method_name_f, percentage_errored)) +
   coord_flip() +
@@ -268,4 +291,22 @@ ggplot(error_messages_overall) +
   scale_fill_brewer(palette = "Set1") +
   cowplot::theme_cowplot() +
   labs(x = NULL, y = "Percentage errored", fill = "Reason")
+dev.off()
+
+tasks <- read_rds(derived_file("tasks.rds"))
+tasks_dimensionality <- tasks %>% mutate(num_cells = sapply(cell_ids, length), num_genes = sapply(feature_info, nrow)) %>% select(id, num_cells, num_genes)
+
+timeout_rates <- eval_ind %>%
+  group_by(task_id, task_group) %>%
+  summarise(mean_timeout = mean(grepl("time limit", error_message))) %>%
+  arrange(desc(mean_timeout)) %>%
+  ungroup() %>%
+  left_join(tasks_dimensionality, by = c("task_id"="id"))
+
+g1 <- ggplot(timeout_rates) + geom_point(aes(num_cells, mean_timeout, colour = task_group)) + cowplot::theme_cowplot()
+g2 <- ggplot(timeout_rates) + geom_point(aes(num_genes, mean_timeout, colour = task_group)) + cowplot::theme_cowplot()
+g3 <- ggplot(timeout_rates) + geom_point(aes(sqrt(num_genes*num_cells), mean_timeout, colour = task_group)) + cowplot::theme_cowplot()
+
+pdf(figure_file("mean_timeout.pdf"), 20, 5)
+cowplot::plot_grid(g1, g2, g3, nrow = 1)
 dev.off()
