@@ -196,47 +196,10 @@ outs <- outs[!failed]
 # process data
 trajtype_ord <- c("directed_linear", "directed_cycle", "bifurcation", "multifurcation", "rooted_tree", "directed_acyclic_graph", "directed_graph")
 
-expand_mat <- function(mat, rownames) {
-  newmat <- matrix(0, nrow = length(rownames), ncol = ncol(mat), dimnames = list(rownames, colnames(mat)))
-  newmat[rownames(mat),] <- mat
-  newmat
-}
-rf_fun <- function(task_id, model) {
-  tryCatch({
-    if (!is.null(model)) {
-      task <- tasks %>% filter(id == task_id)
-      cell_ids <- task$cell_ids[[1]]
-      milenet_gold <- expand_mat(task$milenet_spr[[1]], cell_ids)
-      milenet_pred <- expand_mat(model$milenet_spr, cell_ids)
-
-      rfs <- lapply(seq_len(ncol(milenet_gold)), function(i) {
-        randomForest::randomForest(milenet_pred, milenet_gold[,i])
-      })
-
-      mses <- map_dbl(rfs, ~ mean(.$mse)) %>% setNames(colnames(milenet_gold))
-      mmse <- mean(mses)
-
-      rsqs <- map_dbl(rfs, ~ mean(.$rsq)) %>% setNames(colnames(milenet_gold))
-      mrsq <- mean(rsqs)
-      lst(mses, mmse, rsqs, mrsq)
-    } else {
-      lst(mses = NULL, mmse = Inf, rsqs = NULL, mrsq = 0)
-    }
-  }, error = function(e) {
-    lst(mses = NULL, mmse = Inf, rsqs = NULL, mrsq = 0)
-  })
-}
-
 eval_ind <- lapply(seq_along(outs), function(i) {
   cat(i, "/", length(outs), "\n", sep="")
   output <- outs[[i]]
 
-  output$models <- output$models %>% lapply(function(model) {
-    if (!is.null(model)) {
-      model$milenet_spr <- model$milestone_percentages %>% reshape2::acast(cell_id ~ milestone_id, value.var = "percentage", fill = 0)
-    }
-    model
-  })
   summary <- output$summary %>%
     left_join(tasks %>% select(task_id = id, task_group, trajectory_type), by = "task_id") %>%
     mutate(
@@ -245,14 +208,6 @@ eval_ind <- lapply(seq_along(outs), function(i) {
       parameters = list(output$parameters),
       model = output$models
     )
-
-  rfs <- mclapply(seq_len(nrow(summary)), mc.cores = 1, function(j) {
-    rf_fun(task_id = summary$task_id[[j]], model = summary$model[[j]])
-  })
-  for (j in seq_len(nrow(summary))) {
-    summary$mmse[[j]] <- rfs[[j]]$mmse
-    summary$mrsq[[j]] <- rfs[[j]]$mrsq
-  }
 
   summary <- summary %>%
     select(method_name, method_short_name, task_id, task_group, param_group, parameters, model, correlation, everything()) %>%
@@ -266,9 +221,7 @@ eval_ind <- lapply(seq_along(outs), function(i) {
   filter(!method_short_name %in% c("identity", "random", "shuffle")) %>%
   group_by(task_id) %>%
   mutate(
-    rank_correlation = percent_rank(correlation),
-    rank_mmse = percent_rank(-mmse),
-    rank_mrsq = percent_rank(mrsq)
+    rank_correlation = percent_rank(correlation)
   ) %>%
   ungroup()
 
@@ -290,7 +243,7 @@ eval_overall <- eval_trajtype %>%
 method_ord <- eval_overall %>%
   group_by(method_name) %>%
   summarise_if(is.numeric, mean) %>%
-  arrange(desc(rank_mmse)) %>%
+  arrange(desc(rank_correlation)) %>%
   .$method_name
 
 eval_overall <- eval_overall %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
