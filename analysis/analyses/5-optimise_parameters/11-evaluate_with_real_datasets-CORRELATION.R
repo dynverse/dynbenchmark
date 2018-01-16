@@ -17,20 +17,20 @@ trafo_params <- function(parameters, par_set) {
   }) %>% setNames(names(parameters))
 }
 
-# get the synthetic data
-synthetic_tasks <- readRDS(derived_file("v6/tasks.rds", experiment_id = "datasets/synthetic"))
-synthetic_tasks <- synthetic_tasks %>% left_join(synthetic_tasks$info %>% map_df(as_data_frame) %>% mutate(id = synthetic_tasks$id), by = "id")
-
-# get the real data
-real_names <- list_datasets()
-real_tasks <- pbapply::pblapply(real_names, load_dataset) %>% list_as_tibble() %>%
-  mutate(nrow = map_int(expression, nrow), ncol = map_int(expression, ncol))
-real_tasks <- real_tasks %>% filter(nrow < 2000) %>% mutate(trajectory_type = unlist(trajectory_type))
+# # get the synthetic data
+# synthetic_tasks <- readRDS(derived_file("v6/tasks.rds", experiment_id = "datasets/synthetic"))
+# synthetic_tasks <- synthetic_tasks %>% left_join(synthetic_tasks$info %>% map_df(as_data_frame) %>% mutate(id = synthetic_tasks$id), by = "id")
+#
+# # get the real data
+# real_names <- list_datasets()
+# real_tasks <- pbapply::pblapply(real_names, load_dataset) %>% list_as_tibble() %>%
+#   mutate(nrow = map_int(expression, nrow), ncol = map_int(expression, ncol))
+# real_tasks <- real_tasks %>% filter(nrow < 2000) %>% mutate(trajectory_type = unlist(trajectory_type))
 
 # settings
 methods <- get_descriptions(as_tibble = F)
 metrics <- c("auc_R_nx", "correlation")
-timeout <- 600
+timeout <- 60 * 60
 num_replicates <- 4
 
 # extract the best parameters
@@ -106,6 +106,12 @@ parm_sets <- bind_rows(
 # write_rds(tasks, derived_file("tasks.rds"))
 tasks <- read_rds(derived_file("tasks.rds"))
 
+tasks <- tasks %>% rowwise() %>% mutate(
+  milenet_spr = milestone_percentages %>% reshape2::acast(cell_id ~ milestone_id, value.var = "percentage", fill = 0) %>% list()
+) %>% ungroup()
+
+write_rds(lst(methods, parm_sets, metrics, num_replicates, timeout), derived_file("config.rds"))
+
 run_fun <- function(i) {
   method_name <- parm_sets$method_name[[i]]
   param_group <- parm_sets$param_group[[i]]
@@ -133,7 +139,7 @@ run_fun <- function(i) {
   lst(method_name, param_group, replicate, parameters, score, models, summary)
 }
 
-parm_sets <- parm_sets %>% filter(!method_name %in% c("GPfates", "Mpath", "ouija", "pseudogp", "SCOUP"))
+# parm_sets <- parm_sets %>% filter(!method_name %in% c("GPfates", "Mpath", "ouija", "pseudogp", "SCOUP"))
 # rerun pseudogp with fewer cores
 
 # run everything locally
@@ -171,22 +177,84 @@ parm_sets <- parm_sets %>% filter(!method_name %in% c("GPfates", "Mpath", "ouija
 #   qsub_environment = c("parm_sets", "tasks", "methods", "metrics", "timeout"),
 #   FUN = run_fun
 # )
-#
+
 # write_rds(qsub_handle, derived_file("qsub_handle"))
 qsub_handle <- read_rds(derived_file("qsub_handle"))
 
+fil <- grepl("20180109_161615_dynreal_BvDvSzbhOS", qsub_handle)
+qsub_handle[fil] <- gsub("20180109_161615_dynreal_BvDvSzbhOS", "20180110_140347_dynreal_RfsWONOJbf", qsub_handle[fil])
+
 outs <- qsub_retrieve(qsub_handle)
+
+failed <- sapply(outs, length) != 7
+parm_sets[failed,]
+
+parm_sets[failed,] %>% mutate(i = which(failed))
+parm_sets <- parm_sets[!failed,]
+outs <- outs[!failed]
 
 # process data
 trajtype_ord <- c("directed_linear", "directed_cycle", "bifurcation", "multifurcation", "rooted_tree", "directed_acyclic_graph", "directed_graph")
 
-eval_ind <- map_df(outs, function(output) {
-  summary <- output$summary %>% left_join(tasks %>% select(task_id = id, task_group, trajectory_type), by = "task_id")
-  summary$replicate <- output$replicate
-  summary$param_group <- output$param_group
-  summary$parameters <- list(output$parameters)
-  summary$model <- output$models
-  summary %>%
+expand_mat <- function(mat, rownames) {
+  newmat <- matrix(0, nrow = length(rownames), ncol = ncol(mat), dimnames = list(rownames, colnames(mat)))
+  newmat[rownames(mat),] <- mat
+  newmat
+}
+rf_fun <- function(task_id, model) {
+  tryCatch({
+    if (!is.null(model)) {
+      task <- tasks %>% filter(id == task_id)
+      cell_ids <- task$cell_ids[[1]]
+      milenet_gold <- expand_mat(task$milenet_spr[[1]], cell_ids)
+      milenet_pred <- expand_mat(model$milenet_spr, cell_ids)
+
+      rfs <- lapply(seq_len(ncol(milenet_gold)), function(i) {
+        randomForest::randomForest(milenet_pred, milenet_gold[,i])
+      })
+
+      mses <- map_dbl(rfs, ~ mean(.$mse)) %>% setNames(colnames(milenet_gold))
+      mmse <- mean(mses)
+
+      rsqs <- map_dbl(rfs, ~ mean(.$rsq)) %>% setNames(colnames(milenet_gold))
+      mrsq <- mean(rsqs)
+      lst(mses, mmse, rsqs, mrsq)
+    } else {
+      lst(mses = NULL, mmse = Inf, rsqs = NULL, mrsq = 0)
+    }
+  }, error = function(e) {
+    lst(mses = NULL, mmse = Inf, rsqs = NULL, mrsq = 0)
+  })
+}
+
+eval_ind <- lapply(seq_along(outs), function(i) {
+  cat(i, "/", length(outs), "\n", sep="")
+  output <- outs[[i]]
+
+  output$models <- output$models %>% lapply(function(model) {
+    if (!is.null(model)) {
+      model$milenet_spr <- model$milestone_percentages %>% reshape2::acast(cell_id ~ milestone_id, value.var = "percentage", fill = 0)
+    }
+    model
+  })
+  summary <- output$summary %>%
+    left_join(tasks %>% select(task_id = id, task_group, trajectory_type), by = "task_id") %>%
+    mutate(
+      replicate = output$replicate,
+      param_group = output$param_group,
+      parameters = list(output$parameters),
+      model = output$models
+    )
+
+  rfs <- mclapply(seq_len(nrow(summary)), mc.cores = 1, function(j) {
+    rf_fun(task_id = summary$task_id[[j]], model = summary$model[[j]])
+  })
+  for (j in seq_len(nrow(summary))) {
+    summary$mmse[[j]] <- rfs[[j]]$mmse
+    summary$mrsq[[j]] <- rfs[[j]]$mrsq
+  }
+
+  summary <- summary %>%
     select(method_name, method_short_name, task_id, task_group, param_group, parameters, model, correlation, everything()) %>%
     mutate(
       percentage_errored = 1 - sapply(error, is.null),
@@ -194,9 +262,14 @@ eval_ind <- map_df(outs, function(output) {
       trajectory_type_f = factor(trajectory_type, levels = trajtype_ord)
     )
 }) %>%
+  bind_rows %>%
   filter(!method_short_name %in% c("identity", "random", "shuffle")) %>%
   group_by(task_id) %>%
-  mutate(rank_correlation = percent_rank(correlation)) %>%
+  mutate(
+    rank_correlation = percent_rank(correlation),
+    rank_mmse = percent_rank(-mmse),
+    rank_mrsq = percent_rank(mrsq)
+  ) %>%
   ungroup()
 
 # process trajtype grouped evaluation
@@ -217,7 +290,7 @@ eval_overall <- eval_trajtype %>%
 method_ord <- eval_overall %>%
   group_by(method_name) %>%
   summarise_if(is.numeric, mean) %>%
-  arrange(desc(rank_correlation)) %>%
+  arrange(desc(rank_mmse)) %>%
   .$method_name
 
 eval_overall <- eval_overall %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
