@@ -60,8 +60,19 @@ ggplot(eval_trajtype_wa_wo) +
     title = "Evaluation of trajectory inference methods with default parameters"
   )
 
+# # ggplot(eval_trajtype_wa_wo) +
+# #   geom_point(aes(method_name_f, rank_mrsq)) +
+# #   coord_flip() +
+# #   theme_bw() +
+# #   facet_grid(task_group~trajectory_type_f) +
+# #   labs(
+# #     x = NULL,
+# #     colour = "Parameter\ngroup",
+# #     y = "Mean quantile score of OOB-MSE score when predicting gold milestone percentages",
+# #     title = "Evaluation of trajectory inference methods with default parameters"
+# #   )
 # ggplot(eval_trajtype_wa_wo) +
-#   geom_point(aes(method_name_f, rank_mrsq)) +
+#   geom_point(aes(method_name_f, rank_mmse)) +
 #   coord_flip() +
 #   theme_bw() +
 #   facet_grid(task_group~trajectory_type_f) +
@@ -71,17 +82,6 @@ ggplot(eval_trajtype_wa_wo) +
 #     y = "Mean quantile score of OOB-MSE score when predicting gold milestone percentages",
 #     title = "Evaluation of trajectory inference methods with default parameters"
 #   )
-ggplot(eval_trajtype_wa_wo) +
-  geom_point(aes(method_name_f, rank_mmse)) +
-  coord_flip() +
-  theme_bw() +
-  facet_grid(task_group~trajectory_type_f) +
-  labs(
-    x = NULL,
-    colour = "Parameter\ngroup",
-    y = "Mean quantile score of OOB-MSE score when predicting gold milestone percentages",
-    title = "Evaluation of trajectory inference methods with default parameters"
-  )
 
 ggplot(eval_trajtype_wa_wo) +
   geom_point(aes(method_name_f, percentage_errored)) +
