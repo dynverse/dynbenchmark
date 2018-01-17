@@ -44,6 +44,10 @@ pip3 install --user virtualenv numpy matplotlib pandas six jinja2 python-dateuti
 Rscript -e 'install.packages("udunits2", configure.args =  c(udunits2 = '--with-udunits2-include=/usr/include/udunits2'))'
 ```
 
+macOS:
+
+Install SDL2 and SDL1.2 manually.
+
 ### Installation
 
 You can install dynalysis from github with:
