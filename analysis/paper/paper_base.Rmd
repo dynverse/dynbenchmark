@@ -1,5 +1,5 @@
 ---
-title: "An evaluation framework for trajectory inference methods"
+title: "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
 author:
   - Wouter Saelens* ¹ ²
   - Robrecht Cannoodt* ¹ ² ³
