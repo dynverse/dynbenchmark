@@ -1,5 +1,5 @@
 ---
-title: "An evaluation framework for trajectory inference methods"
+title: "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
 author:
   - Wouter Saelens* ¹ ²
   - Robrecht Cannoodt* ¹ ² ³
@@ -13,7 +13,7 @@ output:
 bibliography: references.bib
 csl: nature-biotechnology.csl
 abstract: |
-  Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Dozens of trajectory inference methods have been developed, early methods mostly focussing on linear trajectories, while recently methods also model more complex branching trajectories. However, the performance of these methods have not yet been comprehensively evaluated. Here, we compare a total of 22 trajectory inference methods, on both realistic synthetic datasets and a large set is real datasets. We employ a novel parameter optimisation procedure, and compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended and is available at www.github.com/dynverse.
+  Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Dozens of trajectory inference methods have been developed, early methods mostly focussing on linear trajectories, while recently methods also model more complex branching trajectories. However, the performance of these methods have not yet been comprehensively evaluated. Here, we compare a total of 22 trajectory inference methods, on both realistic synthetic datasets and a large set is real datasets. We employ a novel parameter optimisation procedure, and compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at www.github.com/dynverse.
 keywords: |
   trajectory inference; pseudotemporal ordering; single-cell transcriptomics
 highlights: |
@@ -23,8 +23,8 @@ highlights: |
 ¹ Data mining and modelling for biomedicine, VIB Center for Inflammation Research, Ghent, Belgium.  
 ² Department of Applied Mathematics, Computer Science and Statistics, Ghent University, Ghent, Belgium.  
 ³ Center for Medical Genetics, Ghent University Hospital, Ghent, Belgium.  
-⁴ CIRI, Centre International de Recherche en Infectiologie, Inserm, Lyon, France.
-⁵ Université Claude Bernard Lyon 1, Lyon, France.
+⁴ CIRI, Centre International de Recherche en Infectiologie, Inserm, Lyon, France.  
+⁵ Université Claude Bernard Lyon 1, Lyon, France.  
 
 ```{r setup, include=FALSE}
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
@@ -63,12 +63,22 @@ create_names <- list(
   fig = function(i) {pritt("Figure {i}")}
 )
 ```
-# Title
+<!---
 Not all trajectory inference methods are created equal
 Trajectory inference: work in progress
 Trajectory inference: we’re not quite there yet
 Paving the way for trajectories
-Benchmarking trajecotry inference methods
+Benchmarking trajectory inference methods
+Bringing single-cell trajectory inference methods to the next level
+Resolving disarray amongst trajectory inference methods with a comprehensive evaluation
+A comparison of trajectory inference methods
+Trajectory inference 2.0
+We’re on the trajectory to better trajectory inference methods
+On the road to more accurate and robust single-cell trajectory inference methods
+Towards more accurate and robust single-cell trajectory inference methods
+On the trajectory to more accurate,robust and trajectory-like single-cell trajectory inference method trajectories
+A comparison of single-cell trajectory inference methods: towards more accurate and robust tools
+--->
 
 
 # Introduction
@@ -99,11 +109,7 @@ Given[d] this plethora of available trajectory inference methods, it is importan
 
 
 # Results
-
-
 ## Evaluation workflow
-
-
 ### Method characterization
 
 
