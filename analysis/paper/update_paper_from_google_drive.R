@@ -8,3 +8,4 @@ system(pritt("sed -i '1s/^.//' {drive$local_path}")) # remove first character, b
 system(pritt("cat analysis/paper/paper_base.Rmd {drive$local_path} > analysis/paper/paper.Rmd"))
 
 render("analysis/paper/paper.Rmd", "html_document")
+browseURL("analysis/paper/paper.html")
