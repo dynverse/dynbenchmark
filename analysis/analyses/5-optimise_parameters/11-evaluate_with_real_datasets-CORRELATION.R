@@ -17,20 +17,21 @@ trafo_params <- function(parameters, par_set) {
   }) %>% setNames(names(parameters))
 }
 
-# get the synthetic data
-synthetic_tasks <- readRDS(derived_file("v6/tasks.rds", experiment_id = "datasets/synthetic"))
-synthetic_tasks <- synthetic_tasks %>% left_join(synthetic_tasks$info %>% map_df(as_data_frame) %>% mutate(id = synthetic_tasks$id), by = "id")
-
-# get the real data
-real_names <- list_datasets()
-real_tasks <- pbapply::pblapply(real_names, load_dataset) %>% list_as_tibble() %>%
-  mutate(nrow = map_int(expression, nrow), ncol = map_int(expression, ncol))
-real_tasks <- real_tasks %>% filter(nrow < 2000) %>% mutate(trajectory_type = unlist(trajectory_type))
+# # get the synthetic data
+# synthetic_tasks <- readRDS(derived_file("v6/tasks.rds", experiment_id = "datasets/synthetic"))
+# synthetic_tasks <- synthetic_tasks %>% left_join(synthetic_tasks$info %>% map_df(as_data_frame) %>% mutate(id = synthetic_tasks$id), by = "id")
+#
+# # get the real data
+# real_names <- list_datasets()
+# real_tasks <- pbapply::pblapply(real_names, load_dataset) %>% list_as_tibble() %>%
+#   mutate(nrow = map_int(expression, nrow), ncol = map_int(expression, ncol))
+# real_tasks <- real_tasks %>% filter(nrow < 2000) %>% mutate(trajectory_type = unlist(trajectory_type))
 
 # settings
 methods <- get_descriptions(as_tibble = F)
 metrics <- c("auc_R_nx", "correlation")
-timeout <- 300
+timeout <- 60 * 60
+num_replicates <- 4
 
 # extract the best parameters
 # best_parms <- read_rds(result_file("best_params.rds", "5-optimise_parameters/7-train_parameters_with_synthetic_datasets")) %>%
@@ -60,7 +61,7 @@ parm_sets <- bind_rows(
   default_parms %>% select(method_name, params) %>% mutate(param_group = "default")
 ) %>%
   # mutate(output_file = pritt("{method_name}_{param_group}.rds")) %>%
-  crossing(replicate = seq_len(4))
+  crossing(replicate = seq_len(num_replicates))
 
 # parm_sets <- parm_sets %>% filter(method_name %in% unique(best_parms$method_name))
 
@@ -105,6 +106,12 @@ parm_sets <- bind_rows(
 # write_rds(tasks, derived_file("tasks.rds"))
 tasks <- read_rds(derived_file("tasks.rds"))
 
+tasks <- tasks %>% rowwise() %>% mutate(
+  milenet_spr = milestone_percentages %>% reshape2::acast(cell_id ~ milestone_id, value.var = "percentage", fill = 0) %>% list()
+) %>% ungroup()
+
+write_rds(lst(methods, parm_sets, metrics, num_replicates, timeout), derived_file("config.rds"))
+
 run_fun <- function(i) {
   method_name <- parm_sets$method_name[[i]]
   param_group <- parm_sets$param_group[[i]]
@@ -132,24 +139,24 @@ run_fun <- function(i) {
   lst(method_name, param_group, replicate, parameters, score, models, summary)
 }
 
-parm_sets <- parm_sets %>% filter(!method_name %in% c("GPfates", "Mpath", "ouija", "pseudogp", "SCOUP"))
+# parm_sets <- parm_sets %>% filter(!method_name %in% c("GPfates", "Mpath", "ouija", "pseudogp", "SCOUP"))
 # rerun pseudogp with fewer cores
 
 # run everything locally
-filenames <- lapply(seq_len(nrow(parm_sets)), function(i) {
-  method_name <- parm_sets$method_name[[i]]
-  param_group <- parm_sets$param_group[[i]]
-  replicate <- parm_sets$replicate[[i]]
-
-  filename <- derived_file(pritt("out_rds_{method_name}_{param_group}_{replicate}.rds"))
-  if (!file.exists(filename)) {
-    out <- run_fun(i)
-    write_rds(out, filename)
-  }
-  filename
-})
-
-outs <- pbapply::pblapply(filenames, read_rds)
+# filenames <- lapply(seq_len(nrow(parm_sets)), function(i) {
+#   method_name <- parm_sets$method_name[[i]]
+#   param_group <- parm_sets$param_group[[i]]
+#   replicate <- parm_sets$replicate[[i]]
+#
+#   filename <- derived_file(pritt("out_rds_{method_name}_{param_group}_{replicate}.rds"))
+#   if (!file.exists(filename)) {
+#     out <- run_fun(i)
+#     write_rds(out, filename)
+#   }
+#   filename
+# })
+#
+# outs <- pbapply::pblapply(filenames, read_rds)
 
 # # run everything on the cluster
 # qsub_handle <- qsub_lapply(
@@ -170,32 +177,52 @@ outs <- pbapply::pblapply(filenames, read_rds)
 #   qsub_environment = c("parm_sets", "tasks", "methods", "metrics", "timeout"),
 #   FUN = run_fun
 # )
-#
-# # write_rds(qsub_handle, derived_file("qsub_handle"))
-# qsub_handle <- read_rds(derived_file("qsub_handle"))
-#
-# outs <- qsub_retrieve(qsub_handle)
+
+# write_rds(qsub_handle, derived_file("qsub_handle"))
+qsub_handle <- read_rds(derived_file("qsub_handle"))
+
+fil <- grepl("20180109_161615_dynreal_BvDvSzbhOS", qsub_handle)
+qsub_handle[fil] <- gsub("20180109_161615_dynreal_BvDvSzbhOS", "20180110_140347_dynreal_RfsWONOJbf", qsub_handle[fil])
+
+outs <- qsub_retrieve(qsub_handle)
+
+failed <- sapply(outs, length) != 7
+parm_sets[failed,]
+
+parm_sets[failed,] %>% mutate(i = which(failed))
+parm_sets <- parm_sets[!failed,]
+outs <- outs[!failed]
 
 # process data
 trajtype_ord <- c("directed_linear", "directed_cycle", "bifurcation", "multifurcation", "rooted_tree", "directed_acyclic_graph", "directed_graph")
 
-eval_ind <- map_df(outs, function(output) {
-  summary <- output$summary %>% left_join(tasks %>% select(task_id = id, task_group, trajectory_type), by = "task_id")
-  summary$replicate <- output$replicate
-  summary$param_group <- output$param_group
-  summary$parameters <- list(output$parameters)
-  summary$model <- output$models
-  summary %>%
+eval_ind <- lapply(seq_along(outs), function(i) {
+  cat(i, "/", length(outs), "\n", sep="")
+  output <- outs[[i]]
+
+  summary <- output$summary %>%
+    left_join(tasks %>% select(task_id = id, task_group, trajectory_type), by = "task_id") %>%
+    mutate(
+      replicate = output$replicate,
+      param_group = output$param_group,
+      parameters = list(output$parameters),
+      model = output$models
+    )
+
+  summary <- summary %>%
     select(method_name, method_short_name, task_id, task_group, param_group, parameters, model, correlation, everything()) %>%
     mutate(
-      percentage_errored = 1 - is.null(error),
+      percentage_errored = 1 - sapply(error, is.null),
       prior_str = sapply(prior_df, function(prdf) ifelse(nrow(prdf) == 0, "", paste(prdf$prior_names, "--", prdf$prior_type, sep = "", collapse = ";"))),
       trajectory_type_f = factor(trajectory_type, levels = trajtype_ord)
     )
 }) %>%
+  bind_rows %>%
   filter(!method_short_name %in% c("identity", "random", "shuffle")) %>%
   group_by(task_id) %>%
-  mutate(rank_correlation = percent_rank(correlation)) %>%
+  mutate(
+    rank_correlation = percent_rank(correlation)
+  ) %>%
   ungroup()
 
 # process trajtype grouped evaluation
@@ -214,11 +241,8 @@ eval_overall <- eval_trajtype %>%
 
 # get ordering of methods
 method_ord <- eval_overall %>%
-  filter(task_group == "real") %>%
   group_by(method_name) %>%
-  arrange(desc(rank_correlation)) %>%
-  slice(1) %>%
-  ungroup() %>%
+  summarise_if(is.numeric, mean) %>%
   arrange(desc(rank_correlation)) %>%
   .$method_name
 
@@ -233,5 +257,79 @@ eval_repl <- eval_ind %>%
   summarise_if(is.numeric, mean) %>%
   ungroup()
 
-write_rds(lst(eval_ind, eval_overall, eval_trajtype, eval_repl), derived_file("eval_outputs.rds"))
+write_rds(lst(eval_ind, eval_overall, eval_trajtype, eval_repl, method_ord, trajtype_ord), derived_file("eval_outputs.rds"))
 # list2env(read_rds(derived_file("eval_outputs.rds")), environment())
+
+
+
+
+
+
+## debugging
+# parm_sets %>% filter(method_name == "mnclDDR")
+# which(parm_sets$method_name == "mnclDDR")
+# i <- 33
+# out <- outs[[i]]
+# out$summary %>% filter(!sapply(error, is.null)) %>% .$error %>% map(~.$message) %>% as.character %>% unlist %>% table
+# out$summary$error[[10]]
+
+
+error_messages_overall <-
+  eval_ind %>%
+  group_by(method_name) %>%
+  mutate(num_datasets = n()) %>%
+  ungroup() %>%
+  filter(!sapply(error, is.null)) %>%
+  rowwise() %>%
+  mutate(error_message = error$message) %>%
+  ungroup() %>%
+  group_by(method_name, error_message) %>%
+  summarise(num = n(), pct = num / num_datasets[[1]]) %>%
+  ungroup()
+
+error_reasons <- tribble(
+  ~partial_message, ~reason,
+  "reached elapsed time limit", "time limit",
+  "Cannot allocate memory", "memory limit",
+  "cannot open connection", "error inside python code",
+  "Column `cell_id` must be a 1d atomic vector or a list", "bug in wrapper"
+)
+error_reason_fun <- function(error_message) {
+  greps <- sapply(error_reasons$partial_message, function(part_mess) {
+    grepl(part_mess, error_message)
+  })
+  apply(greps, 1, function(bools) {
+    if (any(bools)) {
+      error_reasons$reason[bools]
+    } else {
+      "other"
+    }
+  })
+}
+
+error_messages_overall <- error_messages_overall %>%
+  mutate(error_reason = error_reason_fun(error_message))
+
+
+
+
+
+eval_ind %>%
+  filter(method_name == "SCORPIUS") %>%
+  filter(!sapply(error, is.null)) %>%
+  rowwise() %>%
+  mutate(error_message = error$message) %>%
+  ungroup() %>%
+  group_by(method_name, error_message) %>%
+  summarise(num = n(), pct = num / nrow(tasks) / num_replicates) %>%
+  ungroup()
+
+eval_ind %>%
+  rowwise() %>%
+  mutate(has_errored = !is.null(error), error_message = ifelse(is.null(error), "", error$message)) %>%
+  ungroup() %>%
+  group_by(task_id) %>%
+  summarise(num = sum(has_errored), pct = mean(has_errored)) %>%
+  ungroup() %>% arrange(desc(pct))
+
+eval_ind %>% filter(task_id == "real/epidermis-hair-spatial_joost") %>% select(method_name, replicate, error) %>% as.data.frame %>% View
