@@ -59,7 +59,8 @@ ref <- function(ref_type, ref_id, suffix="", anchor=FALSE) {
   ref
 }
 create_names <- list(
-  sfig = function(i) {pritt("Supplementary Figure {i}")},
-  fig = function(i) {pritt("Figure {i}")}
+  sfig = function(i) pritt("Supplementary Figure {i}"),
+  fig = function(i) pritt("Figure {i}"),
+  snote = function(i) pritt("Supplementary Note {i}")
 )
 ```

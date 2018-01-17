@@ -59,11 +59,18 @@ ref <- function(ref_type, ref_id, suffix="", anchor=FALSE) {
   ref
 }
 create_names <- list(
-  sfig = function(i) {pritt("Supplementary Figure {i}")},
-  fig = function(i) {pritt("Figure {i}")}
+  sfig = function(i) pritt("Supplementary Figure {i}"),
+  fig = function(i) pritt("Figure {i}"),
+  snote = function(i) pritt("Supplementary Note {i}")
 )
 ```
-<!---
+<!----
+Tips for working in this document:
+* Go to tools -> perferences and remove Use smart quotes
+* Add enters after every paragraph (this is markdown!)
+
+
+TITLES: 
 Not all trajectory inference methods are created equal
 Trajectory inference: work in progress
 Trajectory inference: we’re not quite there yet
@@ -102,15 +109,14 @@ cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over
 Dozens[b] of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially, most trajectory inference was focused on linear trajectories, with one start and one end point. However, the prospect of branching trajectories was already described early [@trapnell_dynamics_2014], and about half of the current methods can handle one or more bifurcations in the trajectory (`r ref("sfig", "methods_over_time", "b")`). Some methods can already handle more complex, cyclical and branching behaviour [@welch_slicer:_2016; @wolf_graph_2017], and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes happening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
 
 
-Although[c] trajectory inference methods use a variety of algorithms and subcomponents to reach a final ordering, most consist of the following three steps: (i) preprocessing (normalization, filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction or clustering and (iii) ordering the cells along the simplified representation [@cannoodt_computational_2016]. Depending on the way the cells are ordered, some prior information about the dynamic process can be optionally used or required by the method, which can both bias the trajectory to current knowledge but also guide the method towards choosing the right trajectory among many others. Furthermore, with the ongoing strong decreases in single-cell -omics technologies, it becomes
+Although[c] trajectory inference methods use a variety of algorithms and subcomponents to reach a final ordering, most consist of the following three steps: (i) preprocessing (normalization, filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction, clustering or graph building and (iii) ordering the cells along the simplified representation [@cannoodt_computational_2016]. Depending on the way the cells are ordered, some prior information about the dynamic process can be optionally used or required by the method, which can both bias the trajectory to current knowledge but also guide the method towards choosing the right trajectory among many others. Furthermore, with the ongoing strong decreases in single-cell -omics technologies, it becomes
 
 
 Given[d] this plethora of available trajectory inference methods, it is important that methods are compared, so that users can use the most optimal method available for their problem. Moreover, new methods need to be rigorously tested, so that development can focus on improving the current state-of-the-art. In this study, we therefore for the first time developed a comprehensive evaluation framework for trajectory inference methods. We test both on synthetic data, for which the gold standard is known, and real data, for which in some cases the gold standard can be extracted from expert knowledge. We include a rigorous parameter optimisation, making sure that parameters are optimized while avoiding overfitting on characteristics of specific datasets. To make our framework reusable and extendable, we make use of continuous analysis [@beaulieu-jones_reproducibility_2017], which allows the developers of new methods to easily test their methods and compare them against the state-of-the-art.
 
 
 # Results
-## Evaluation workflow
-### Method characterization
+## Method characterization
 
 
 ```{r}
@@ -119,13 +125,39 @@ method_df <- readRDS(derived_file("method_df.rds", experiment_id="method_charact
 ```
 
 
-We gathered a list of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(!is.na(method_df$qc_score))` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized all methods in four different ways: underlying algorithm(s), implementation quality, prior information and possible trajectory structures (`r ref("fig", "method_characteristics")`). The underlying algorithms can be divided into several subcomponents, and these components are frequently shared between different algorithms. Some components, such as a minimal spanning tree or principal curves for cellular ordering, or PCA or diffusion map for dimensionality reduction are shared by more than 5 methods sFIG?. While not directly related to the quality of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme sNOTE. After initial scoring we contacted all the authors, to allow them to improve their method before publishing. While most methods lack at several metrics (`r ref("fig", "method_characteristics", "a")`), recent methods tend to have higher code quality sFIG. However, some implementation details are lacking for the majority of the methods and should receive extra attention from developers: code availability, documentation and unit testing (`r ref("fig", "method_characteristics", "a")`).
+We gathered a list of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(method_df$wrapper == "Done")` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized all methods in four different ways: possible trajectory structures, implementation quality, prior information and underlying algorithm(s) (`r ref("fig", "method_characteristics")`).
+
+
+At the level of trajectory structures, most current methods can handle one or more splits in the trajectory (`r ref("fig", "method_characteristics", "a")`). However, only one method (SLICER) can currently handle more complex graph structures which can include loops.
+
+
+While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("snote", "qc_scoring")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or for which purpose(s) they are important (user friendliness, developer friendliness or good science).
+
+
+After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation. Most methods reach a decent score, fulfilling most of the quality criteria (`r ref("fig", "method_characteristics", "b")`) recent methods tend to have higher code quality sFIG. Several aspects are lacking for the majority of the methods (`r ref("fig", "method_characteristics", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation are problematic areas in particular (`r ref("sfig", "method_qc_check_plot")` and `r ref("fig", "method_characteristics", "c")`).
+
+
+
+
+The underlying algorithms can be divided into several subcomponents, and these components are frequently shared between different algorithms (`r ref("sfig", "method_components")`). 
 
 
 ![](`r figure_file("figure_methods.svg", experiment_id="method_characteristics")`)
 
 
-`r ref("fig", "method_characteristics", anchor=TRUE)` FIrst characterization of each method.
+`r ref("fig", "method_characteristics", anchor=TRUE)` First characterization of each method.
+
+
+```{r, fig.width = 10, fig.height = 13}
+readRDS(figure_file("method_qc_check_plot.rds"))
+```
+`r ref("sfig", "method_qc_check_plot", anchor=TRUE)` 
+
+
+```{r, fig.width = 15, fig.height = 7.5}
+readRDS(figure_file("method_components_plot.rds"))
+```
+`r ref("sfig", "method_components", anchor=TRUE)` TI methods frequently share steps
 
 
 ### Evaluation overview
