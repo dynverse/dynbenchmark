@@ -22,20 +22,32 @@ trajectory_type_background_colors <- set_names(rep("white", length(trajectory_ty
 
 
 
+applications <- c("developer_friendly", "user_friendly", "good_science")
+application_labels <- setNames(applications %>% gsub("_", " ", .) %>% Hmisc::capitalize(), applications)
+
 categories <- c("availability", "code_quality", "code_assurance", "documentation", "behaviour", "paper")
 category_colors <- c("#3498DB", "#E74C3C", "#A4CC2E", "#FEB308", "#B10DC9", "#85144b", "#EA8F10", "#2ECC49", "#CC2E63") %>% .[1:length(categories)] %>% setNames(categories)
 category_labels <- setNames(categories %>% gsub("_", " ", .) %>% Hmisc::capitalize(), categories)
 
+category_gradients_white <- map(category_colors, function(color) {
+  n <- 1000
+  ramp <- shades::gradient(c("white", color), n)
+
+  function(x, min=0, max=1) {
+    x[x == 0] <- 0.0000000001
+    ramp[round((x - min)/(max-min)*(n-1))+1]
+  }
+})
+
 global_labels <- c(
-  "trajectory_type" = "Trrajectory type",
-  "qc_score" = "QC score",
+  "trajectory_type" = "Trajectory structure",
+  "qc_score" = "Overall QC score",
   "CanRoot" = "Rootable",
   "CanUse" = "Useful",
   "Required" = "Required"
 )
 
-labels <- c(category_labels, global_labels)
-
+labels <- c(application_labels, category_labels, global_labels)
 
 label <- function(x, labels) {
   labels[x %in% names(labels)] <- labels[x]
