@@ -20,6 +20,12 @@ method_qc_category_scores <- method_qc %>%
   summarise(qc_score=sum(answer * score * weight)/sum(score * weight)) %>%
   ungroup()
 
+method_qc_application_scores <- method_qc %>%
+  gather(application, application_applicable, !!applications) %>%
+  filter(application_applicable) %>%
+  group_by(method_id, application) %>%
+  summarise(score=sum(answer * score * weight)/sum(score * weight))
+
 method_df <- method_df %>% left_join(method_qc_scores, c("name"="method_id"))
 method_df_evaluated <- method_df_evaluated %>% left_join(method_qc_scores, c("name"="method_id"))
 
@@ -245,7 +251,7 @@ base_scale_x <- scale_x_discrete(drop=FALSE, expand=c(0, 0), labels=labels, name
 
 
 # QC
-method_qc_individual <- method_qc_category_scores %>%
+method_qc_category <- method_qc_category_scores %>%
   mutate(name = factor(method_id, levels=method_order)) %>%
   ggplot(aes(category, name)) +
     geom_tile(aes(fill=qc_score)) +
@@ -255,16 +261,32 @@ method_qc_individual <- method_qc_category_scores %>%
     empty_left_theme +
     horizontal_lines +
     base_scale_y + base_scale_x +
-    ggtitle("Implementation quality control") +
+    ggtitle("Implementation\nquality control") +
     theme(legend.position = "none")
-method_qc_individual
-method_qc_individual_width <- length(unique(method_qc$category))
+method_qc_category
+method_qc_category_width <- length(categories)
+
+method_qc_application <- method_qc_application_scores %>%
+  mutate(name = factor(method_id, levels=method_order)) %>%
+  ggplot(aes(application, name)) +
+  geom_tile(aes(fill=score)) +
+  viridis::scale_fill_viridis(option="A", limits=c(0, 1)) +
+  theme(axis.text.x=rotated_axis_text_x) +
+  base_theme +
+  empty_left_theme +
+  horizontal_lines +
+  base_scale_y + base_scale_x +
+  theme(legend.position = "none")
+method_qc_application
+method_qc_application_width <- length(applications)
 
 method_qc_overall <- method_qc_scores %>%
   mutate(name = factor(method_id, levels=method_order)) %>%
   ggplot(aes("qc_score", name)) +
     geom_tile(aes(fill = qc_score)) +
+    geom_text(aes(label = round(qc_score*10, 1), color=ifelse(qc_score > 0.76, "black", "white"))) +
     viridis::scale_fill_viridis(option="A", limits=c(0, 1)) +
+    scale_color_identity() +
     base_theme +
     empty_left_theme +
     horizontal_lines +
@@ -319,7 +341,7 @@ prior_usage <- method_df_evaluated %>%
     empty_left_theme +
     base_scale_y + base_scale_x +
     horizontal_lines +
-    theme(legend.position = "none") +
+    theme(legend.position = "none", plot.margin = unit(c(2, 3, 0.5, 0), "lines")) +
     ggtitle("Prior\ninformation")
 prior_usage
 prior_usage_width <- length(prior_usages)/2
@@ -375,8 +397,8 @@ maximal_trajectory_components_plot <- method_df_evaluated %>%
 maximal_trajectory_components_plot
 maximal_trajectory_components_width <- 2
 
-plotlist <- list(maximal_trajectory_components_plot, method_qc_individual, method_qc_overall, prior_usage)
-widths <- c(maximal_trajectory_components_width+2, method_qc_individual_width, method_qc_overall_width, prior_usage_width)
+plotlist <- list(maximal_trajectory_components_plot, method_qc_overall, method_qc_category, method_qc_application, prior_usage)
+widths <- c(maximal_trajectory_components_width+2, method_qc_overall_width, method_qc_category_width/2, method_qc_application_width/2, prior_usage_width+2)
 
 method_characteristics <- plot_grid(plotlist=plotlist, nrow=1, align="h", rel_widths = widths, axis="bt", labels="auto")
 method_characteristics

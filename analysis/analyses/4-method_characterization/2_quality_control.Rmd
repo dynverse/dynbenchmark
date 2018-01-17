@@ -18,19 +18,6 @@ checks <- readRDS(derived_file("checks.rds"))
 source("0_common.R")
 ```
 
-```{r}
-category_gradients_white <- map(category_colors, function(color) {
-  n <- 1000
-  ramp <- shades::gradient(c("white", color), n)
-  
-  function(x, min=0, max=1) {
-    x[x == 0] <- 0.0000000001
-    ramp[round((x - min)/(max-min)*(n-1))+1]
-  }
-})
-applications <- c("developer_friendly", "user_friendly", "good_science")
-```
-
 Calculate the overall qc scores for each method
 ```{r}
 final_scores <- method_qc %>%
@@ -125,8 +112,9 @@ empty_x <- theme(
   axis.ticks.x=element_blank()
 )
 
-cowplot::plot_grid(method_ordering_plot + empty_x, check_heatmap_plot, nrow=2, align = "v", axis = "rl", rel_heights = c(0.2, 0.9))
+method_qc_check_plot <- cowplot::plot_grid(method_ordering_plot + empty_x, check_heatmap_plot, nrow=2, align = "v", axis = "rl", rel_heights = c(0.2, 0.9))
 
+method_qc_check_plot %>% saveRDS(figure_file("method_qc_check_plot.rds"))
 ```
 
 
@@ -218,7 +206,7 @@ question_ordering_plot2 <- question_ordering_plotdata2 %>%
     geom_bar(aes(question_id, n, fill=category_colors[category], alpha=qc_score), stat="identity") +
     geom_vline(aes(xintercept=start), data=question_ordering_plotdata2_category) +
     scale_fill_identity() +
-    scale_alpha_continuous(range=c(1, 0.05), name = "Quality control score", guide = guide_legend())
+    scale_alpha_continuous(range=c(1, 0.05), name = "Quality control score", guide = guide_legend(title.position = "top", title.hjust = 0.5,label.position = "bottom"))
 question_ordering_plot2
 
 category_legend <- question_ordering_plotdata2 %>% 
