@@ -38,7 +38,7 @@ method_df <- method_df %>%
 
 # --------------------
 method_df_evaluated <- method_df %>%
-  filter(!is.na(qc_score))
+  filter(wrapper == "Done")
 
 # Trajectory components --------------------------
 method_df_evaluated <- method_df_evaluated %>%

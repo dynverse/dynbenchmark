@@ -1,0 +1,252 @@
+---
+title: "Method quality control"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r message=F}
+library(tidyverse)
+library(dynalysis)
+library(cowplot)
+
+experiment("method_characteristics")
+
+method_qc <- readRDS(derived_file("method_qc.rds"))
+checks <- readRDS(derived_file("checks.rds"))
+
+source("0_common.R")
+```
+
+```{r}
+category_gradients_white <- map(category_colors, function(color) {
+  n <- 1000
+  ramp <- shades::gradient(c("white", color), n)
+  
+  function(x, min=0, max=1) {
+    x[x == 0] <- 0.0000000001
+    ramp[round((x - min)/(max-min)*(n-1))+1]
+  }
+})
+applications <- c("developer_friendly", "user_friendly", "good_science")
+```
+
+Calculate the overall qc scores for each method
+```{r}
+final_scores <- method_qc %>%
+  group_by(method_id) %>%
+  summarise(score=sum(answer * score * weight)/sum(score * weight)) %>%
+  arrange(-score)
+
+# set the ordering of method_ids to this ordering
+method_qc$method_id <- factor(method_qc$method_id, levels=final_scores$method_id)
+final_scores$method_id <- factor(final_scores$method_id, levels=final_scores$method_id)
+
+method_ordering_plot <- final_scores %>%
+  ggplot(aes(method_id, score)) +
+    geom_bar(aes(fill=score), stat="identity") +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    scale_y_continuous(expand=c(0, 0), limits=c(0, 1)) +
+    viridis::scale_fill_viridis(option="A", limits=c(0, 1))
+
+method_ordering_plot
+```
+
+Orderin by category or application
+```{r}
+method_qc %>%
+  group_by(method_id, category) %>%
+  summarise(score=sum(answer * score * weight)/sum(score * weight)) %>%
+  ggplot(aes(method_id, category)) + geom_raster(aes(fill=score))
+
+method_qc %>%
+  gather(application, application_applicable, !!applications) %>%
+  filter(application_applicable) %>%
+  group_by(method_id, application) %>%
+  summarise(score=sum(answer * score * weight)/sum(score * weight)) %>%
+  ggplot(aes(method_id, application)) + geom_raster(aes(fill=score))
+```
+
+
+
+```{r, fig.width=10, fig.height=12}
+question_position <- method_qc %>%
+  filter(method_id == "SCORPIUS") %>%
+  arrange(question_id) %>%
+  group_by(question_id) %>%
+  summarise(
+    question_width = sum(score * weight),
+    name = first(name)
+  ) %>%
+  mutate(
+    question_end = cumsum(question_width),
+    question_start = lag(question_end, 1, default=0),
+    question_mid = question_start + (question_end - question_start)/2
+  )
+
+check_position <- method_qc %>%
+  filter(method_id == "SCORPIUS") %>%
+  arrange(question_id, check_id) %>%
+  group_by(check_id) %>%
+  summarise(
+    check_width = score * weight,
+    question_id = first(question_id)
+  ) %>%
+  left_join(question_position, by="question_id") %>%
+  group_by(question_id) %>%
+  mutate(
+    check_start = question_start + lag(cumsum(check_width), default=0),
+    check_end = question_start + cumsum(check_width)
+  )
+
+
+check_heatmap_plot <- method_qc %>%
+  left_join(check_position, by="check_id") %>%
+  mutate(method_id = factor(method_id)) %>%
+  mutate(answer = ifelse(is.na(answer), 0, answer)) %>%
+  ggplot() +
+    geom_rect(aes(xmax=check_start, xmin=check_end, ymin=as.integer(method_id), ymax=as.integer(method_id) + 1, fill=category, alpha=answer)) +
+    geom_vline(aes(xintercept=check_end), data=check_position, color="#444444", alpha=0.25) +
+    geom_vline(aes(xintercept=question_end), data=question_position, color="#444444") +
+    scale_x_reverse("Check", breaks = question_position$question_mid, labels = question_position$name, expand = c(0, 0)) +
+    scale_y_continuous("Method", breaks = seq_along(levels(method_qc$method_id))+0.5, labels = levels(method_qc$method_id), expand = c(0, 0)) +
+    scale_fill_manual(values=category_colors) +
+    coord_flip() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+
+check_heatmap_plot
+```
+
+Combined plot
+```{r, fig.width=10, fig.height=12}
+empty_x <- theme(
+  axis.title.x=element_blank(),
+  axis.text.x=element_blank(),
+  axis.ticks.x=element_blank()
+)
+
+cowplot::plot_grid(method_ordering_plot + empty_x, check_heatmap_plot, nrow=2, align = "v", axis = "rl", rel_heights = c(0.2, 0.9))
+
+```
+
+
+## Order checks
+
+Order by breakpoint (when ordering all methods by score)
+```{r}
+breakpoint <- function(x) {
+  map_dbl(0:length(x), function(i) {
+    sum(1-x[seq(1, i, length.out=i)]) +
+      sum(x[seq(i, length(x), length.out=length(x)-i)])
+  }) %>% which.min()
+}
+check_breakpoints <- method_qc %>%
+  reshape2::acast(check_id~method_id, value.var="answer") %>%
+  {
+    tibble(
+      breakpoint=apply(., 1, breakpoint),
+      check_id = as.integer(rownames(.)),
+      n_bad_methods = apply(., 1, sum)
+    )
+  } %>% 
+  left_join(checks, by="check_id")
+```
+
+```{r fig.width=20}
+method_qc %>% 
+  mutate(answer = round(answer, 2)) %>% 
+  group_by(check_id) %>% 
+  count(answer) %>% 
+  mutate(check_score = sum(answer * n)) %>% 
+  ungroup() %>% 
+  left_join(checks, by="check_id") %>% 
+  arrange(-check_score) %>% 
+  mutate(check_id = factor(check_id, levels=unique(check_id))) %>% 
+  ggplot() +
+    geom_bar(aes(check_id, n, fill=answer), stat="identity") +
+    coord_flip() +
+    scale_y_reverse(expand=c(0, 0)) +
+    scale_x_discrete(labels=setNames(method_qc$scoring, method_qc$check_id)) +
+    scale_fill_distiller(palette="Blues", direction = 1)
+```
+
+```{r}
+question_info <- method_qc %>% 
+  group_by(question_id) %>% 
+  summarise(
+    name = first(name),
+    category = first(category)
+  )
+
+question_ordering_plotdata <- method_qc %>%
+  group_by(method_id, question_id) %>%
+  summarise(
+    qc_score=sum(answer * score * weight)/sum(score * weight)
+  ) %>%
+  ungroup() %>% 
+  group_by(question_id) %>% 
+  count(qc_score) %>% 
+  mutate(question_ordering = sum((qc_score < 1) * n)) %>% 
+  ungroup() %>% 
+  arrange(question_ordering) %>% 
+  left_join(question_info, by="question_id") %>% 
+  mutate(question_id = factor(question_id, levels=unique(question_id)))
+
+question_ordering_plot1 <- question_ordering_plotdata %>% 
+  ggplot() +
+    geom_bar(aes(question_id, n, fill=qc_score), stat="identity") +
+    scale_fill_distiller(palette="Blues", direction = -1)
+question_ordering_plot1
+
+
+question_ordering_plotdata2 <- question_ordering_plotdata %>% 
+  mutate(category = factor(category, levels=categories)) %>% 
+  arrange(-as.numeric(category), question_ordering) %>% 
+  mutate(question_id = factor(question_id, levels=as.character(unique(question_id))))
+
+question_ordering_plotdata2_category <- question_ordering_plotdata2 %>% 
+  group_by(category, question_id) %>% 
+  summarise() %>% 
+  ungroup() %>% 
+  mutate(position = n()-seq_len(n())) %>% 
+  group_by(category) %>% 
+  summarise(start = min(position)+0.5, end=max(position)+1.5)
+
+question_ordering_plot2 <- question_ordering_plotdata2 %>% 
+  arrange(qc_score) %>% 
+  ggplot() +
+    geom_bar(aes(question_id, n, fill=category_colors[category], alpha=qc_score), stat="identity") +
+    geom_vline(aes(xintercept=start), data=question_ordering_plotdata2_category) +
+    scale_fill_identity() +
+    scale_alpha_continuous(range=c(1, 0.05), name = "Quality control score", guide = guide_legend())
+question_ordering_plot2
+
+category_legend <- question_ordering_plotdata2 %>% 
+  group_by(category, question_id) %>% 
+  summarise() %>% 
+  ungroup() %>% 
+  mutate(position = seq_len(n())) %>% 
+  group_by(category) %>% 
+  summarise(start = -min(position), end=-max(position)-1) %>% 
+  ggplot() +
+    geom_rect(aes(xmin=0, xmax=1, ymin=start, ymax=end), fill="white") +
+    geom_text(aes(1, start + (end-start)/2, label=category_labels[category], color=category), hjust=1, size=5) +
+    geom_segment(aes(x=1.1, xend=1.1, y=start-0.2, yend=end+0.2, color=category)) +
+    scale_color_manual(values=category_colors) +
+    scale_y_continuous(expand=c(0, 0)) +
+    theme_void() +
+    theme(legend.position="none")
+category_legend
+
+n_methods <- length(unique(method_qc$method_id))
+
+question_ordering_plot2 <- question_ordering_plot2 +
+    coord_flip() +
+    scale_y_continuous(expand=c(0, 0), name = "# methods", c(seq(0, n_methods, 5), n_methods)) +
+    scale_x_discrete(labels=setNames(question_ordering_plotdata$name, question_ordering_plotdata$question_id), name="") +
+    theme(legend.position="top")
+
+method_qc_ordering_plot <- cowplot::plot_grid(category_legend, question_ordering_plot2, align = "h", rel_widths = c(0.2, 0.8), axis="tb")
+method_qc_ordering_plot
+saveRDS(method_qc_ordering_plot, figure_file("method_qc_ordering_plot.rds"))
+```
