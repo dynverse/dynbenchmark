@@ -18,4 +18,26 @@ lighten <- function(color, factor=1.4){
     colorspace::hex(do.call(colorspace::HSV, as.list(col)))
   })
 }
-trajectory_type_background_colors <- lighten(trajectory_type_colors, 3)
+trajectory_type_background_colors <- set_names(rep("white", length(trajectory_types)), trajectory_types)
+
+
+
+categories <- c("availability", "code_quality", "code_assurance", "documentation", "behaviour", "paper")
+category_colors <- c("#3498DB", "#E74C3C", "#A4CC2E", "#FEB308", "#B10DC9", "#85144b", "#EA8F10", "#2ECC49", "#CC2E63") %>% .[1:length(categories)] %>% setNames(categories)
+category_labels <- setNames(categories %>% gsub("_", " ", .) %>% Hmisc::capitalize(), categories)
+
+global_labels <- c(
+  "trajectory_type" = "Trrajectory type",
+  "qc_score" = "QC score",
+  "CanRoot" = "Rootable",
+  "CanUse" = "Useful",
+  "Required" = "Required"
+)
+
+labels <- c(category_labels, global_labels)
+
+
+label <- function(x, labels) {
+  labels[x %in% names(labels)] <- labels[x]
+  labels
+}

@@ -9,6 +9,19 @@ source("analysis/analyses/4-method_characterization/0_common.R")
 method_df <- read_rds(derived_file("method_df.rds"))
 method_df_evaluated <- read_rds(derived_file("method_df_evaluated.rds"))
 
+method_qc <- readRDS(derived_file("method_qc.rds"))
+method_qc_scores <- method_qc %>%
+  group_by(method_id) %>%
+  summarise(qc_score=sum(answer * score * weight)/sum(score * weight)) %>%
+  arrange(-qc_score)
+
+method_qc_category_scores <- method_qc %>%
+  group_by(method_id, category) %>%
+  summarise(qc_score=sum(answer * score * weight)/sum(score * weight)) %>%
+  ungroup()
+
+method_df <- method_df %>% left_join(method_qc_scores, c("name"="method_id"))
+method_df_evaluated <- method_df_evaluated %>% left_join(method_qc_scores, c("name"="method_id"))
 
 # Comparing number of citations, qc score, and time -------------------------------------
 g1 <- ggplot(method_df_evaluated, aes(date, qc_score)) +
@@ -16,7 +29,6 @@ g1 <- ggplot(method_df_evaluated, aes(date, qc_score)) +
   geom_point() +
   ggrepel::geom_label_repel(aes(label = name)) +
   cowplot::theme_cowplot() +
-  scale_y_continuous(breaks = c(0, 2, 4, 6, 8), limits = c(0, 8)) +
   labs(x = "Time", y = "QC score", title = "Code quality score over time")
 g1
 
@@ -36,7 +48,7 @@ ggsave(figure_file("time_vs_citations.png"), g2, width = 16, height = 8)
 g3 <- ggplot(method_df_evaluated, aes(Citations+1, qc_score)) +
   geom_smooth(method="lm") +
   geom_point() +
-  ggrepel::geom_label_repel(aes(label = name), nudge_y = .25) +
+  ggrepel::geom_label_repel(aes(label = name)) +
   cowplot::theme_cowplot() +
   scale_x_log10() +
   labs(x = "Citations", y = "QC score", title = "QC score over # citations")
@@ -188,6 +200,7 @@ add_step <- function(df) {
 trajectory_components_step <- add_step(arrange(trajectory_components, date))
 
 trajectory_components_gathered <- trajectory_components_step %>%
+  select(-trajectory_type) %>%
   gather(trajectory_type, can_trajectory_type, !!trajectory_types) %>%
   mutate(trajectory_type = factor(trajectory_type, levels=trajectory_types)) %>%
   group_by(trajectory_type) %>%
@@ -227,45 +240,31 @@ empty_left_theme <- theme(
   axis.ticks.y = element_blank()
 )
 base_scale_y <- scale_y_discrete(drop=FALSE, expand=c(0, 0))
-base_scale_x <- scale_x_discrete(drop=FALSE, expand=c(0, 0))
+base_scale_x <- scale_x_discrete(drop=FALSE, expand=c(0, 0), labels=labels, name="")
 
 
 
 # QC
-qcs <- c("code_availability", "documentation", "examples", "unit_tests", "behaviour", "code_quality", "support")
-
-traffic_light <- list(low = "#FF4136", mid = "#FF851B", high = "#2ECC40")
-
-score_max <- set_names(rep(1, length(qcs)), qcs)
-score_max[c("behaviour", "code_quality")] <- 0.5
-method_qc_individual <- method_df_evaluated %>%
-  select(name, !!qcs) %>%
-  gather(score_id, score, !!qcs, factor_key=TRUE) %>%
-  mutate(
-    score_text = ifelse(score == 0, "-", ifelse(score == score_max[score_id], "+", "~")),
-    score_fill = ifelse(score == 0, traffic_light$low, ifelse(score == score_max[score_id], traffic_light$high, traffic_light$mid)),
-    name = factor(name, levels=method_order)
-  ) %>%
-  ggplot(aes(score_id, name)) +
-    geom_tile(aes(fill=score_fill)) +
-    scale_fill_identity() +
-    geom_text(aes(label = score_text), color="white", size=8, fontface = "bold") +
+method_qc_individual <- method_qc_category_scores %>%
+  mutate(name = factor(method_id, levels=method_order)) %>%
+  ggplot(aes(category, name)) +
+    geom_tile(aes(fill=qc_score)) +
+    viridis::scale_fill_viridis(option="A", limits=c(0, 1)) +
     theme(axis.text.x=rotated_axis_text_x) +
     base_theme +
     empty_left_theme +
     horizontal_lines +
     base_scale_y + base_scale_x +
-    ggtitle("Implementation quality control")
+    ggtitle("Implementation quality control") +
+    theme(legend.position = "none")
 method_qc_individual
-method_qc_individual_width <- length(qcs)
+method_qc_individual_width <- length(unique(method_qc$category))
 
-method_qc_overall <- method_df_evaluated %>%
-  select(name, qc_score) %>%
-  mutate(name = factor(name, levels=method_order)) %>%
+method_qc_overall <- method_qc_scores %>%
+  mutate(name = factor(method_id, levels=method_order)) %>%
   ggplot(aes("qc_score", name)) +
     geom_tile(aes(fill = qc_score)) +
-    scale_fill_gradientn(colours=traffic_light) +
-    #viridis::scale_fill_viridis(option="A", guide=guide_colorbar(direction = "horizontal")) +
+    viridis::scale_fill_viridis(option="A", limits=c(0, 1)) +
     base_theme +
     empty_left_theme +
     horizontal_lines +
@@ -327,6 +326,7 @@ prior_usage_width <- length(prior_usages)/2
 
 # Trajectory components
 trajectory_components_plot <- method_df_evaluated %>%
+  select(-trajectory_type) %>%
   gather(trajectory_type, can, !!trajectory_types, factor_key=TRUE) %>%
   select(trajectory_type, can, name) %>%
   mutate(name = factor(name, levels=method_order)) %>%
@@ -355,6 +355,7 @@ lighten <- function(color, factor=1.4){
 }
 
 maximal_trajectory_components_plot <- method_df_evaluated %>%
+  select(-trajectory_type) %>%
   gather(trajectory_type, can, !!trajectory_types, factor_key=TRUE) %>%
   group_by(name) %>%
   filter(can) %>%
@@ -384,63 +385,3 @@ method_characteristics$width <- sum(widths)/2
 method_characteristics$height <- length(method_order)/2
 
 saveRDS(method_characteristics, figure_file("method_characteristics.rds"))
-
-
-
-
-## PLOT1
-method_characteristics <- read_rds(figure_file("method_characteristics.rds"))
-ncitations_over_time <- read_rds(figure_file("ncitations_over_time.rds"))
-platforms <- read_rds(figure_file("platforms.rds"))
-
-bottom <- plot_grid(ncitations_over_time, platforms, nrow = 1, labels=c("e", "f"), rel_widths = c(2, 1))
-
-
-figure <- plot_grid(
-  method_characteristics,
-  bottom,
-  rel_heights = c(method_characteristics$width, 3),
-  ncol=1
-)
-figure
-save_plot(figure_file("figure_methods.pdf"), figure, base_width = method_characteristics$width, base_height= method_characteristics$height)
-
-
-
-
-# replace trajectory types
-library(xml2)
-
-command <- glue::glue("inkscape {figure_file('figure_methods.pdf')} --export-plain-svg={figure_file('figure_methods.svg')}")
-system(command)
-
-file.remove(figure_file('figure_methods.pdf'))
-
-svg_location <- figure_file('figure_methods.svg')
-xml <- read_xml(svg_location)
-
-aspect <- read_xml("analysis/figures/trajectory_types/mini/complex_fork.svg") %>% xml_root() %>% xml_attr("viewBox") %>% str_split(" ") %>% unlist() %>% tail(2) %>% as.numeric() %>% {.[[1]]/.[[2]]}
-
-w <- 50
-h <- w / aspect
-
-trajectory_type_boxes <- readRDS(figure_file("trajectory_type_boxes.rds", "trajectory_types"))
-
-map(trajectory_types, function(trajectory_type) {
-  to_replace <- xml_find_all(xml, glue::glue("//svg:tspan[text()='{trajectory_type}']")) %>% xml_parent()
-  transforms <- to_replace %>% xml_attr("transform")
-  images <- map(transforms, function(transform) {
-    node <- read_xml(glue::glue("<g><image /></g>"))
-    node %>% xml_set_attr("transform", transform)
-    node %>% xml_child() %>% xml_set_attrs(list(width=w, height=h, `xlink:href`=paste0("data:image/svg+xml;base64,", trajectory_type_boxes %>% filter(id == trajectory_type) %>% pull(base64)), transform=glue::glue("translate(-{w/2} -{h/2})")))
-    node
-  })
-  replaced <- to_replace %>% xml_replace(images)
-  if (length(replaced) == 0) {
-    warning("STOOOOOOOOOOOOOOOOOOOOOOOOOOOPPP!!!")
-  }
-})
-
-xml_root(xml) %>% xml_set_attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
-
-write(as.character(xml), file=figure_file('figure_methods.svg')); xml <- NULL
