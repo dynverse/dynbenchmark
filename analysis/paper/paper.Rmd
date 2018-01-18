@@ -25,45 +25,6 @@ highlights: |
 ³ Center for Medical Genetics, Ghent University Hospital, Ghent, Belgium.  
 ⁴ CIRI, Centre International de Recherche en Infectiologie, Inserm, Lyon, France.  
 ⁵ Université Claude Bernard Lyon 1, Lyon, France.  
-
-```{r setup, include=FALSE}
-knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  warning = FALSE,
-  message = FALSE,
-  echo = FALSE,
-  comment = "#>",
-  fig.path = ".scratch/"
-)
-
-library(dynalysis)
-library(tidyverse)
-library(cowplot)
-
-# refering to figures & supplementary figures
-refs <- tibble(ref_id = character(), name = character(), ref_type = character())
-ref <- function(ref_type, ref_id, suffix="", anchor=FALSE) {
-  if(nrow(refs %>% filter(ref_id == !!ref_id)) == 0) {
-    refs <<- refs %>% bind_rows(tibble(
-      name = create_names[[ref_type]](sum(refs$ref_type == ref_type) + 1),
-      ref_type = ref_type,
-      ref_id = ref_id
-    ))
-  }
-  ref <- refs %>% filter(ref_id == !!ref_id) %>% 
-    pull(name) %>% 
-    {pritt("[**{.}{suffix}**](#{ref_type}_{ref_id})")}
-  
-  if (anchor) ref <- pritt("{ref}<a name='{ref_type}_{ref_id}'></a>")
-  ref
-}
-create_names <- list(
-  sfig = function(i) pritt("Supplementary Figure {i}"),
-  fig = function(i) pritt("Figure {i}"),
-  snote = function(i) pritt("Supplementary Note {i}")
-)
-```
 <!----
 Tips for working in this document:
 * Go to tools -> perferences and remove Use smart quotes
@@ -88,22 +49,86 @@ A comparison of single-cell trajectory inference methods: towards more accurate 
 --->
 
 
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  echo = FALSE,
+  comment = "#>",
+  fig.path = paste0(rprojroot::find_rstudio_root_file(), "/analysis/paper/.scratch/")
+)
+
+
+library(dynalysis)
+library(tidyverse)
+library(cowplot)
+
+
+# refering to figures & supplementary figures
+refs <- tibble(ref_id = character(), name = character(), ref_type = character())
+ref <- function(ref_type, ref_id, suffix="", anchor=FALSE) {
+  if(nrow(refs %>% filter(ref_id == !!ref_id)) == 0) {
+    refs <<- refs %>% bind_rows(tibble(
+      name = create_names[[ref_type]](sum(refs$ref_type == ref_type) + 1),
+      ref_type = ref_type,
+      ref_id = ref_id
+    ))
+  }
+  ref <- refs %>% filter(ref_id == !!ref_id) %>% 
+    pull(name) %>% 
+    {pritt("[**{.}{suffix}**](#{ref_type}_{ref_id})")}
+  
+  if (anchor)  ref <- pritt("{ref}{anchor(ref_type, ref_id)}")
+
+
+  ref
+}
+anchor <- function(ref_type, ref_id) {
+  pritt("<a name='{ref_type}_{ref_id}'></a>")
+}
+create_names <- list(
+  sfig = function(i) pritt("Supplementary Figure {i}"),
+  fig = function(i) pritt("Figure {i}"),
+  snote = function(i) pritt("Supplementary Note {i}")
+)
+
+
+sfigs <- tibble(ref_id = character(), fig = list(), caption = character(), width=numeric(), height=numeric())
+add_sfig <- function(fig, ref_id, caption, width=15, height=10) {
+  sfigs <<- sfigs %>% add_row(
+    fig = list(fig), 
+    ref_id = ref_id, 
+    caption=caption, 
+    width=width, 
+    height=height
+  )
+}
+```
+
+
 # Introduction
 
 
 Single-cell[a] -omics technologies now make it possible to more accurately model biological systems than ever before. One area where single-cell data can be particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation. When cells are sampled from a population in which cells are at different unknown points in the dynamic process, trajectory inference methods can be used to computationally order these cells along their dynamic process [@cannoodt_computational_2016]. Because they offer an unbiased and transcriptome-wide understanding of the dynamic process, trajectories then allow the identification new (primed) subsets of cells, delineation the exact wiring of a differentiation tree and inference of regulatory interaction responsible for a bifurcation refs.
 
 
-```{r, fig.width = 15, fig.height = 10}
+```{r}
+add_sfig({
 n_methods_over_time <- readRDS(figure_file("n_methods_over_time.rds", experiment_id="method_characteristics"))
 trajectory_components_over_time <- readRDS(figure_file("trajectory_components_over_time.rds", experiment_id="method_characteristics"))
 
 
 cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over_time), nrow=2, rel_heights = c(0.7, 0.3), labels="auto")
+}, 
+"methods_over_time", 
+"New TI methods over time. **a** Number of methods published or in preprint. **b** Number of methods which can handle a particular type of trajectory.
+", 
+15, 
+10
+)
 ```
-
-
-`r ref("sfig", "methods_over_time", anchor=TRUE)` New TI methods over time. **a** Number of methods published or in preprint. **b** Number of methods which can handle a particular type of trajectory.
 
 
 Dozens[b] of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially, most trajectory inference was focused on linear trajectories, with one start and one end point. However, the prospect of branching trajectories was already described early [@trapnell_dynamics_2014], and about half of the current methods can handle one or more bifurcations in the trajectory (`r ref("sfig", "methods_over_time", "b")`). Some methods can already handle more complex, cyclical and branching behaviour [@welch_slicer:_2016; @wolf_graph_2017], and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes happening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
@@ -125,16 +150,16 @@ method_df <- readRDS(derived_file("method_df.rds", experiment_id="method_charact
 ```
 
 
-We gathered a list of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(method_df$wrapper == "Done")` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized all methods in four different ways: possible trajectory structures, implementation quality, prior information and underlying algorithm(s) (`r ref("fig", "method_characteristics")`).
+We gathered a list of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(method_df$wrapper == "Done")` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized all methods in four different ways: possible trajectory structures, implementation quality, prior information and the underlying algorithm (`r ref("fig", "method_characteristics")`).
 
 
 At the level of trajectory structures, most current methods can handle one or more splits in the trajectory (`r ref("fig", "method_characteristics", "a")`). However, only one method (SLICER) can currently handle more complex graph structures which can include loops.
 
 
-While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("snote", "qc_scoring")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or for which purpose(s) they are important (user friendliness, developer friendliness or good science).
+While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("snote", "qc_scoring")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or for which purpose(s) they are important (user friendliness, developer friendliness or good science). After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
 
 
-After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation. Most methods reach a decent score, fulfilling most of the quality criteria (`r ref("fig", "method_characteristics", "b")`) recent methods tend to have higher code quality sFIG. Several aspects are lacking for the majority of the methods (`r ref("fig", "method_characteristics", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation are problematic areas in particular (`r ref("sfig", "method_qc_check_plot")` and `r ref("fig", "method_characteristics", "c")`).
+Most methods fulfilling most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "method_characteristics", "b")`). Recent methods tend to have higher code quality sFIG. However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "method_characteristics", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "method_qc_check")` and `r ref("fig", "method_characteristics", "c")`), notwithstanding several studies pinpointing these as good practices [@wilson_best_2014].
 
 
 
@@ -142,29 +167,41 @@ After publishing this preprint, we will contact the authors of each method, allo
 The underlying algorithms can be divided into several subcomponents, and these components are frequently shared between different algorithms (`r ref("sfig", "method_components")`). 
 
 
+`r anchor("fig", "method_characteristics")`
 ![](`r figure_file("figure_methods.svg", experiment_id="method_characteristics")`)
-
-
 `r ref("fig", "method_characteristics", anchor=TRUE)` First characterization of each method.
 
 
-```{r, fig.width = 10, fig.height = 13}
-readRDS(figure_file("method_qc_check_plot.rds"))
+
+
+
+
+```{r}
+add_sfig({
+readRDS(figure_file("method_qc_check_plot.rds", experiment_id="method_characteristics"))
+}, 
+"method_qc_check", 
+"Caption", 
+10, 
+13
+)
 ```
-`r ref("sfig", "method_qc_check_plot", anchor=TRUE)` 
 
 
-```{r, fig.width = 15, fig.height = 7.5}
-readRDS(figure_file("method_components_plot.rds"))
+```{r}
+add_sfig({
+readRDS(figure_file("method_components_plot.rds", experiment_id="method_characteristics"))
+}, 
+"method_components", 
+"TI methods frequently share steps", 
+15, 
+7.5
+)
 ```
-`r ref("sfig", "method_components", anchor=TRUE)` TI methods frequently share steps
-
-
 ### Evaluation overview
-
-
+`r anchor("fig", "evaluation_overview")`
 ![evaluation_overview](../../analysis/figures/evaluation_overview.png)
-`r ref("fig", "evaluation_overview", anchor=TRUE)` Overview of the evaluation
+`r ref("fig", "evaluation_overview")` Overview of the evaluation
 
 
 Our evaluation was structured in three main phases. In the first phase, we used toy data as a positive control for each method, assessing whether it can detect the correct trajectories in very simplistic data. Next, we generated synthetic data from a model of gene regulation, combined with a simulation of the technical variation introduced by single-cell RNA sequencing. We used this synthetic data in a parameter optimization procedure, where we used cross-validation between datasets to avoid overfitting on particular data set structures. Finally, in the third phase, we used the optimized parameters to score the performance of each method on real data. We split the real datasets in two groups based on the type of reference trajectory available. The reference in datasets with a silver standard were defined by the author’s based on the expression data itself, while the reference for gold standard was defined using external information, such as fluorescent sorting or time series.
@@ -222,6 +259,36 @@ We gathered
 
 
 # Acknowledgements
+
+
+# Supplementary Figures
+
+
+
+
+```{r, echo=FALSE, results='asis'}
+subchunkify <- function(ref_id, caption, width=5, height=7) {
+  subchunk <- glue::glue("",
+  "",
+  "`r anchor('sfig', '{ref_id}')`",
+  "```{{r {ref_id}, fig.height={height}, fig.width={width}, echo=FALSE}}",
+  "sfigs %>% filter(ref_id == !!ref_id) %>% pull(fig) %>% .[[1]]",
+  "```",
+  "`r ref('sfig', '{ref_id}')` {caption}",
+  "", .sep = "\n")
+  
+  cat(knitr::knit(text=subchunk, quiet=TRUE))
+}
+
+
+pwalk(sfigs, function(ref_id, fig, caption, width, height) {
+  subchunkify(ref_id, caption, width, height)
+})
+```
+
+
+
+
 
 
 # Colophon
