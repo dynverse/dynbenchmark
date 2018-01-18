@@ -1,57 +1,4 @@
 
-@article{wolf_graph_2017,
-  title = {Graph Abstraction Reconciles Clustering with Trajectory Inference through a Topology Preserving Map of Single Cells},
-  copyright = {\textcopyright{} 2017, Posted by Cold Spring Harbor Laboratory. This pre-print is available under a Creative Commons License (Attribution-NonCommercial-NoDerivs 4.0 International), CC BY-NC-ND 4.0, as described at http://creativecommons.org/licenses/by-nc-nd/4.0/},
-  doi = {10.1101/208819},
-  abstract = {Single-cell RNA-seq allows quantification of biological heterogeneity across both discrete cell types and continuous cell differentiation transitions. We present approximate graph abstraction (AGA), an algorithm that reconciles the computational analysis strategies of clustering and trajectory inference by explaining cell-to-cell variation both in terms of discrete and continuous latent variables (https://github.com/theislab/graph\_abstraction). This enables to generate cellular maps of differentiation manifolds with complex topologies --- efficiently and robustly across different datasets. Approximate graph abstraction quantifies the connectivity of partitions of a neighborhood graph of single cells, thereby generating a much simpler abstracted graph whose nodes label the partitions. Together with a random walk-based distance measure, this generates a topology preserving map of single cells --- a partial coordinatization of data useful for exploring and explaining its variation. We use the abstracted graph to assess which subsets of data are better explained by discrete clusters than by a continuous variable, to trace gene expression changes along aggregated single-cell paths through data and to infer abstracted trees that best explain the global topology of data. We demonstrate the power of the method by reconstructing differentiation processes with high numbers of branchings from single-cell gene expression datasets and by identifying biological trajectories from single-cell imaging data using a deep-learning based distance metric. Along with the method, we introduce measures for the connectivity of graph partitions, generalize random-walk based distance measures to disconnected graphs and introduce a path-based measure for topological similarity between graphs. Graph abstraction is computationally efficient and provides speedups of at least 30 times when compared to algorithms for the inference of lineage trees.},
-  language = {en},
-  timestamp = {2017-12-04T12:02:41Z},
-  urldate = {2017-12-04},
-  journal = {bioRxiv},
-  author = {Wolf, F. Alexander and Hamey, Fiona and Plass, Mireya and Solana, Jordi and Dahlin, Joakim S. and Gottgens, Berthold and Rajewsky, Nikolaus and Simon, Lukas and Theis, Fabian J.},
-  month = oct,
-  year = {2017},
-  pages = {208819},
-  file = {Full Text PDF:/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/CW2KRPXB/Wolf et al. - 2017 - Graph abstraction reconciles clustering with traje.pdf:application/pdf;Snapshot:/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/PFAN2KRR/208819.html:text/html}
-}
-
-@article{marbach_wisdom_2012,
-  title = {Wisdom of Crowds for Robust Gene Network Inference},
-  volume = {9},
-  issn = {1548-7091},
-  doi = {10.1038/nmeth.2016},
-  abstract = {Reconstructing gene regulatory networks from high-throughput data is a long-standing problem. Through the DREAM project (Dialogue on Reverse Engineering Assessment and Methods), we performed a comprehensive blind assessment of over thirty network inference methods on Escherichia coli, Staphylococcus aureus, Saccharomyces cerevisiae, and in silico microarray data. We characterize performance, data requirements, and inherent biases of different inference approaches offering guidelines for both algorithm application and development. We observe that no single inference method performs optimally across all datasets. In contrast, integration of predictions from multiple inference methods shows robust and high performance across diverse datasets. Thereby, we construct high-confidence networks for E. coli and S. aureus, each comprising \textasciitilde{}1700 transcriptional interactions at an estimated precision of 50\%. We experimentally test 53 novel interactions in E. coli, of which 23 were supported (43\%). Our results establish community-based methods as a powerful and robust tool for the inference of transcriptional gene regulatory networks.},
-  timestamp = {2017-11-27T11:28:12Z},
-  number = {8},
-  journal = {Nature methods},
-  author = {Marbach, Daniel and Costello, James C. and K{\"u}ffner, Robert and Vega, Nicci and Prill, Robert J. and Camacho, Diogo M. and Allison, Kyle R. and Kellis, Manolis and Collins, James J. and Stolovitzky, Gustavo},
-  month = jul,
-  year = {2012},
-  pages = {796--804},
-  file = {PubMed Central Full Text PDF:/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/PVWKRUMF/Marbach et al. - 2012 - Wisdom of crowds for robust gene network inference.pdf:application/pdf},
-  pmid = {22796662},
-  pmcid = {PMC3512113}
-}
-
-@article{trapnell_dynamics_2014,
-  title = {The Dynamics and Regulators of Cell Fate Decisions Are Revealed by Pseudotemporal Ordering of Single Cells},
-  volume = {32},
-  copyright = {2014 Nature Publishing Group},
-  issn = {1546-1696},
-  doi = {10.1038/nbt.2859},
-  abstract = {$<$p$>$An algorithm uncovers transcriptome dynamics during differentiation by ordering RNA-Seq data from single cells.$<$/p$>$},
-  language = {en},
-  timestamp = {2017-11-21T15:52:40Z},
-  number = {4},
-  urldate = {2017-11-21},
-  journal = {Nature Biotechnology},
-  author = {Trapnell, Cole and Cacchiarelli, Davide and Grimsby, Jonna and Pokharel, Prapti and Li, Shuqiang and Morse, Michael and Lennon, Niall J. and Livak, Kenneth J. and Mikkelsen, Tarjei S. and Rinn, John L.},
-  month = mar,
-  year = {2014},
-  pages = {nbt.2859},
-  file = {Full Text PDF:/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/V8KPBF3E/Trapnell et al. - 2014 - The dynamics and regulators of cell fate decisions.pdf:application/pdf;Snapshot:/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/DS5XD62I/nbt.html:text/html}
-}
-
 @article{cannoodt_computational_2016,
   title = {Computational Methods for Trajectory Inference from Single-Cell Transcriptomics},
   volume = {46},
@@ -59,33 +6,14 @@
   doi = {10.1002/eji.201646347},
   abstract = {Recent developments in single-cell transcriptomics have opened new opportunities for studying dynamic processes in immunology in a high throughput and unbiased manner. Starting from a mixture of cells in different stages of a developmental process, unsupervised trajectory inference algorithms aim to automatically reconstruct the underlying developmental path that cells are following. In this review, we break down the strategies used by this novel class of methods, and organize their components into a common framework, highlighting several practical advantages and disadvantages of the individual methods. We also give an overview of new insights these methods have already provided regarding the wiring and gene regulation of cell differentiation. As the trajectory inference field is still in its infancy, we propose several future developments that will ultimately lead to a global and data-driven way of studying immune cell differentiation.},
   language = {eng},
-  timestamp = {2017-11-21T13:24:42Z},
   number = {11},
   journal = {European Journal of Immunology},
   author = {Cannoodt, Robrecht and Saelens, Wouter and Saeys, Yvan},
   month = nov,
   year = {2016},
-  keywords = {Algorithms,Bioinformatics,Cell Differentiation,Computational Biology,Gene Expression Profiling,Humans,Single-Cell Analysis,Single-cell transcriptomics},
+  keywords = {Gene Expression Profiling,Algorithms,Computational Biology,Single-Cell Analysis,Bioinformatics,Humans,Cell Differentiation,Single-cell transcriptomics},
   pages = {2496--2506},
   pmid = {27682842}
-}
-
-@article{welch_slicer:_2016,
-  title = {{{SLICER}}: Inferring Branched, Nonlinear Cellular Trajectories from Single Cell {{RNA}}-Seq Data},
-  volume = {17},
-  issn = {1474-760X},
-  shorttitle = {{{SLICER}}},
-  doi = {10.1186/s13059-016-0975-3},
-  abstract = {Single cell experiments provide an unprecedented opportunity to reconstruct a sequence of changes in a biological process from individual ``snapshots'' of cells. However, nonlinear gene expression changes, genes unrelated to the process, and the possibility of branching trajectories make this a challenging problem. We develop SLICER (Selective Locally Linear Inference of Cellular Expression Relationships) to address these challenges. SLICER can infer highly nonlinear trajectories, select genes without prior knowledge of the process, and automatically determine the location and number of branches and loops. SLICER recovers the ordering of points along simulated trajectories more accurately than existing methods. We demonstrate the effectiveness of SLICER on previously published data from mouse lung cells and neural stem cells.},
-  timestamp = {2017-12-04T12:00:46Z},
-  journal = {Genome Biology},
-  author = {Welch, Joshua D. and Hartemink, Alexander J. and Prins, Jan F.},
-  month = may,
-  year = {2016},
-  keywords = {Manifold learning,Single cell RNA-seq,Time series},
-  pages = {106},
-  annote = {Pages 106 in PDF},
-  file = {Full Text PDF:/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/GXCXUFSZ/Welch et al. - 2016 - SLICER inferring branched, nonlinear cellular tra.pdf:application/pdf;Snapshot:/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/ZW86P5GC/s13059-016-0975-3.html:text/html}
 }
 
 @article{tanay_scaling_2017,
@@ -96,15 +24,30 @@
   doi = {10.1038/nature21350},
   abstract = {Review},
   language = {en},
-  timestamp = {2017-11-21T13:58:37Z},
   number = {7637},
-  urldate = {2017-11-21},
   journal = {Nature},
   author = {Tanay, Amos and Regev, Aviv},
   month = jan,
   year = {2017},
   pages = {nature21350},
-  file = {Full Text PDF:/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/2XXW3I4B/Tanay and Regev - 2017 - Scaling single-cell genomics from phenomenology to.pdf:application/pdf;Snapshot:/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/BEVH6XC8/nature21350.html:text/html}
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/2XXW3I4B/Tanay and Regev - 2017 - Scaling single-cell genomics from phenomenology to.pdf;/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/BEVH6XC8/nature21350.html}
+}
+
+@article{trapnell_dynamics_2014,
+  title = {The Dynamics and Regulators of Cell Fate Decisions Are Revealed by Pseudotemporal Ordering of Single Cells},
+  volume = {32},
+  copyright = {2014 Nature Publishing Group},
+  issn = {1546-1696},
+  doi = {10.1038/nbt.2859},
+  abstract = {An algorithm uncovers transcriptome dynamics during differentiation by ordering RNA-Seq data from single cells.$<$/p$>$},
+  language = {en},
+  number = {4},
+  journal = {Nature Biotechnology},
+  author = {Trapnell, Cole and Cacchiarelli, Davide and Grimsby, Jonna and Pokharel, Prapti and Li, Shuqiang and Morse, Michael and Lennon, Niall J. and Livak, Kenneth J. and Mikkelsen, Tarjei S. and Rinn, John L.},
+  month = mar,
+  year = {2014},
+  pages = {nbt.2859},
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/V8KPBF3E/Trapnell et al. - 2014 - The dynamics and regulators of cell fate decisions.pdf;/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/DS5XD62I/nbt.html}
 }
 
 @article{beaulieu-jones_reproducibility_2017,
@@ -113,17 +56,251 @@
   copyright = {2017 Nature Publishing Group},
   issn = {1546-1696},
   doi = {10.1038/nbt.3780},
-  abstract = {$<$p$>$The application of continuous integration, an approach common in software development, enables the automatic reproduction of computational analyses.$<$/p$>$},
+  abstract = {The application of continuous integration, an approach common in software development, enables the automatic reproduction of computational analyses.$<$/p$>$},
   language = {en},
-  timestamp = {2017-11-21T16:17:42Z},
   number = {4},
-  urldate = {2017-11-21},
   journal = {Nature Biotechnology},
   author = {Beaulieu-Jones, Brett K. and Greene, Casey S.},
   month = mar,
   year = {2017},
   pages = {nbt.3780},
-  file = {Full Text PDF:/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/AAW8C6EK/Beaulieu-Jones and Greene - 2017 - Reproducibility of computational workflows is auto.pdf:application/pdf;Snapshot:/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/4NEM2II9/nbt.html:text/html}
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/AAW8C6EK/Beaulieu-Jones and Greene - 2017 - Reproducibility of computational workflows is auto.pdf;/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/4NEM2II9/nbt.html}
+}
+
+@article{marbach_wisdom_2012,
+  title = {Wisdom of Crowds for Robust Gene Network Inference},
+  volume = {9},
+  issn = {1548-7091},
+  doi = {10.1038/nmeth.2016},
+  abstract = {Reconstructing gene regulatory networks from high-throughput data is a long-standing problem. Through the DREAM project (Dialogue on Reverse Engineering Assessment and Methods), we performed a comprehensive blind assessment of over thirty network inference methods on Escherichia coli, Staphylococcus aureus, Saccharomyces cerevisiae, and in silico microarray data. We characterize performance, data requirements, and inherent biases of different inference approaches offering guidelines for both algorithm application and development. We observe that no single inference method performs optimally across all datasets. In contrast, integration of predictions from multiple inference methods shows robust and high performance across diverse datasets. Thereby, we construct high-confidence networks for E. coli and S. aureus, each comprising \textasciitilde{}1700 transcriptional interactions at an estimated precision of 50\%. We experimentally test 53 novel interactions in E. coli, of which 23 were supported (43\%). Our results establish community-based methods as a powerful and robust tool for the inference of transcriptional gene regulatory networks.},
+  number = {8},
+  journal = {Nature methods},
+  author = {Marbach, Daniel and Costello, James C. and K{\"u}ffner, Robert and Vega, Nicci and Prill, Robert J. and Camacho, Diogo M. and Allison, Kyle R. and Kellis, Manolis and Collins, James J. and Stolovitzky, Gustavo},
+  month = jul,
+  year = {2012},
+  pages = {796--804},
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/PVWKRUMF/Marbach et al. - 2012 - Wisdom of crowds for robust gene network inference.pdf},
+  pmid = {22796662},
+  pmcid = {PMC3512113}
+}
+
+@article{welch_slicer:_2016,
+  title = {{{SLICER}}: Inferring Branched, Nonlinear Cellular Trajectories from Single Cell {{RNA}}-Seq Data},
+  volume = {17},
+  issn = {1474-760X},
+  shorttitle = {{{SLICER}}},
+  doi = {10.1186/s13059-016-0975-3},
+  abstract = {Single cell experiments provide an unprecedented opportunity to reconstruct a sequence of changes in a biological process from individual ``snapshots'' of cells. However, nonlinear gene expression changes, genes unrelated to the process, and the possibility of branching trajectories make this a challenging problem. We develop SLICER (Selective Locally Linear Inference of Cellular Expression Relationships) to address these challenges. SLICER can infer highly nonlinear trajectories, select genes without prior knowledge of the process, and automatically determine the location and number of branches and loops. SLICER recovers the ordering of points along simulated trajectories more accurately than existing methods. We demonstrate the effectiveness of SLICER on previously published data from mouse lung cells and neural stem cells.},
+  journal = {Genome Biology},
+  author = {Welch, Joshua D. and Hartemink, Alexander J. and Prins, Jan F.},
+  month = may,
+  year = {2016},
+  keywords = {Single cell RNA-seq,Time series,Manifold learning},
+  pages = {106},
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/GXCXUFSZ/Welch et al. - 2016 - SLICER inferring branched, nonlinear cellular tra.pdf;/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/ZW86P5GC/s13059-016-0975-3.html},
+  annote = {Pages 106 in PDF}
+}
+
+@article{wolf_graph_2017,
+  title = {Graph Abstraction Reconciles Clustering with Trajectory Inference through a Topology Preserving Map of Single Cells},
+  copyright = {\textcopyright{} 2017, Posted by Cold Spring Harbor Laboratory. This pre-print is available under a Creative Commons License (Attribution-NonCommercial-NoDerivs 4.0 International), CC BY-NC-ND 4.0, as described at http://creativecommons.org/licenses/by-nc-nd/4.0/},
+  doi = {10.1101/208819},
+  abstract = {Single-cell RNA-seq allows quantification of biological heterogeneity across both discrete cell types and continuous cell differentiation transitions. We present approximate graph abstraction (AGA), an algorithm that reconciles the computational analysis strategies of clustering and trajectory inference by explaining cell-to-cell variation both in terms of discrete and continuous latent variables (https://github.com/theislab/graph\_abstraction). This enables to generate cellular maps of differentiation manifolds with complex topologies --- efficiently and robustly across different datasets. Approximate graph abstraction quantifies the connectivity of partitions of a neighborhood graph of single cells, thereby generating a much simpler abstracted graph whose nodes label the partitions. Together with a random walk-based distance measure, this generates a topology preserving map of single cells --- a partial coordinatization of data useful for exploring and explaining its variation. We use the abstracted graph to assess which subsets of data are better explained by discrete clusters than by a continuous variable, to trace gene expression changes along aggregated single-cell paths through data and to infer abstracted trees that best explain the global topology of data. We demonstrate the power of the method by reconstructing differentiation processes with high numbers of branchings from single-cell gene expression datasets and by identifying biological trajectories from single-cell imaging data using a deep-learning based distance metric. Along with the method, we introduce measures for the connectivity of graph partitions, generalize random-walk based distance measures to disconnected graphs and introduce a path-based measure for topological similarity between graphs. Graph abstraction is computationally efficient and provides speedups of at least 30 times when compared to algorithms for the inference of lineage trees.},
+  language = {en},
+  journal = {bioRxiv},
+  author = {Wolf, F. Alexander and Hamey, Fiona and Plass, Mireya and Solana, Jordi and Dahlin, Joakim S. and Gottgens, Berthold and Rajewsky, Nikolaus and Simon, Lukas and Theis, Fabian J.},
+  month = oct,
+  year = {2017},
+  pages = {208819},
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/CW2KRPXB/Wolf et al. - 2017 - Graph abstraction reconciles clustering with traje.pdf;/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/PFAN2KRR/208819.html}
+}
+
+@article{YosefDynamicregulatorynetwork2013,
+  title = {Dynamic Regulatory Network Controlling {{T}}{{{\textsubscript{H}}}}17 Cell Differentiation},
+  volume = {496},
+  copyright = {2013 Nature Publishing Group},
+  issn = {1476-4687},
+  doi = {10.1038/nature11981},
+  abstract = {A global view of the genetic networks regulating the differentiation of T\textsubscript{H}17 cells is presented, based on temporal expression profiling, computational network reconstruction and validation of predicted interactions by nanowire-mediated siRNA perturbation.$<$/p$>$},
+  language = {En},
+  number = {7446},
+  journal = {Nature},
+  author = {Yosef, Nir and Shalek, Alex K. and Gaublomme, Jellert T. and Jin, Hulin and Lee, Youjin and Awasthi, Amit and Wu, Chuan and Karwacz, Katarzyna and Xiao, Sheng and Jorgolli, Marsela and Gennert, David and Satija, Rahul and Shakya, Arvind and Lu, Diana Y. and Trombetta, John J. and Pillai, Meenu R. and Ratcliffe, Peter J. and Coleman, Mathew L. and Bix, Mark and Tantin, Dean and Park, Hongkun and Kuchroo, Vijay K. and Regev, Aviv},
+  month = apr,
+  year = {2013},
+  pages = {461},
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/VGYGF9CI/Yosef et al. - 2013 - Dynamic regulatory network controlling TsubHsu.pdf;/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/QAF9RMQM/nature11981.html}
+}
+
+@article{XuRegulationbifurcatingcell2015,
+  title = {Regulation of Bifurcating {{B}} Cell Trajectories by Mutual Antagonism between Transcription Factors {{IRF4}} and {{IRF8}}},
+  volume = {16},
+  copyright = {2015 Nature Publishing Group},
+  issn = {1529-2916},
+  doi = {10.1038/ni.3287},
+  abstract = {Antigen-activated B cells differentiate into plasmablasts or germinal center B cells that undergo further affinity maturation. Singh and colleagues identify the antagonistic roles of transcription factors IRF4 and IRF8 that establish these opposing cell fates.$<$/p$>$},
+  language = {En},
+  number = {12},
+  journal = {Nature Immunology},
+  author = {Xu, Heping and Chaudhri, Virendra K. and Wu, Zhiguo and Biliouris, Konstantinos and Dienger-Stambaugh, Krista and Rochman, Yrina and Singh, Harinder},
+  month = dec,
+  year = {2015},
+  pages = {1274},
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/IZWZ3K26/ni.html}
+}
+
+@article{GrafForcingcellschange2009,
+  title = {Forcing Cells to Change Lineages},
+  volume = {462},
+  copyright = {2009 Nature Publishing Group},
+  issn = {1476-4687},
+  doi = {10.1038/nature08533},
+  abstract = {Though it is important for the success of multicellular organisms that their many different cell types remain stable once specified, advances in the production of induced pluripotent stem (iPS) cells from somatic cells by exposure to a transcription factor cocktail emphasize the potential of almost any cell to be reprogrammed. This raises the question of whether interconversion between cell types occurs physiologically or in the context of disease. Thomas Graf and Tariq Enver use examples from the blood cell system to illustrate the principles of transcription factor transdifferentiation, which they conclude is a process fundamentally similar to differentiation and different from iPS reprogramming. They postulate that conversions of one cell type to another can occur as a normal developmental process, and speculate on the prospects of forced lineage reprogramming in regenerative medicine.$<$/p$>$},
+  language = {En},
+  number = {7273},
+  journal = {Nature},
+  author = {Graf, Thomas and Enver, Tariq},
+  month = dec,
+  year = {2009},
+  pages = {587},
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/9NMNMA2Z/Graf and Enver - 2009 - Forcing cells to change lineages.pdf}
+}
+
+@misc{anderson_writing_2016,
+  title = {Writing {{Great Scientific Code}}},
+  howpublished = {http://alexanderganderson.github.io/code/2016/10/12/coding\_tips.html},
+  author = {Anderson, Alex},
+  month = oct,
+  year = {2016},
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/9CDKZ72F/coding_tips.html}
+}
+
+@misc{l_rpackages_2017,
+  title = {Rpackages: {{R}} Package Development - the {{Leek}} Group Way!},
+  shorttitle = {Rpackages},
+  author = {Lee, Jeff},
+  month = dec,
+  year = {2017},
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/MTVSYIIJ/rpackages.html}
+}
+
+@article{wilson_best_2014,
+  title = {Best {{Practices}} for {{Scientific Computing}}},
+  volume = {12},
+  issn = {1545-7885},
+  doi = {10.1371/journal.pbio.1001745},
+  abstract = {We describe a set of best practices for scientific software development, based on research and experience, that will improve scientists' productivity and the reliability of their software.},
+  language = {en},
+  number = {1},
+  journal = {PLOS Biology},
+  author = {Wilson, Greg and Aruliah, D. A. and Brown, C. Titus and Hong, Neil P. Chue and Davis, Matt and Guy, Richard T. and Haddock, Steven H. D. and Huff, Kathryn D. and Mitchell, Ian M. and Plumbley, Mark D. and Waugh, Ben and White, Ethan P. and Wilson, Paul},
+  month = jan,
+  year = {2014},
+  keywords = {Computer software,Computers,Open source software,Programming languages,Research validity,Scientists,Software development,Software tools},
+  pages = {e1001745},
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/TTEDE38C/Wilson et al. - 2014 - Best Practices for Scientific Computing.pdf;/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/JNAZ8BEB/article.html}
+}
+
+@article{wilson_good_2017,
+  title = {Good Enough Practices in Scientific Computing},
+  volume = {13},
+  issn = {1553-7358},
+  doi = {10.1371/journal.pcbi.1005510},
+  abstract = {Author summary Computers are now essential in all branches of science, but most researchers are never taught the equivalent of basic lab skills for research computing. As a result, data can get lost, analyses can take much longer than necessary, and researchers are limited in how effectively they can work with software and data. Computing workflows need to follow the same practices as lab projects and notebooks, with organized data, documented steps, and the project structured for reproducibility, but researchers new to computing often don't know where to start. This paper presents a set of good computing practices that every researcher can adopt, regardless of their current level of computational skill. These practices, which encompass data management, programming, collaborating with colleagues, organizing projects, tracking work, and writing manuscripts, are drawn from a wide variety of published sources from our daily lives and from our work with volunteer organizations that have delivered workshops to over 11,000 people since 2010.},
+  language = {en},
+  number = {6},
+  journal = {PLOS Computational Biology},
+  author = {Wilson, Greg and Bryan, Jennifer and Cranston, Karen and Kitzes, Justin and Nederbragt, Lex and Teal, Tracy K.},
+  month = jun,
+  year = {2017},
+  keywords = {Computer software,Programming languages,Software tools,Control systems,Data management,Data processing,Reproducibility,Source code},
+  pages = {e1005510},
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/6ZDPHT8M/Wilson et al. - 2017 - Good enough practices in scientific computing.pdf;/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/V6EHLZKZ/article.html}
+}
+
+@misc{dmckee_part_2014,
+  title = {Some Part of the Usual Industry Tool Kit We Use Enthusiastically},
+  author = {{dmckee}},
+  month = may,
+  year = {2014}
+}
+
+@article{taschuk_ten_2017,
+  title = {Ten Simple Rules for Making Research Software More Robust},
+  volume = {13},
+  issn = {1553-7358},
+  doi = {10.1371/journal.pcbi.1005412},
+  abstract = {Author summary Many researchers have found out the hard way that there's a world of difference between ``works for me on my machine'' and ``works for other people on theirs.'' Many common challenges can be avoided by following a few simple rules; doing so not only improves reproducibility but can accelerate research.},
+  language = {en},
+  number = {4},
+  journal = {PLOS Computational Biology},
+  author = {Taschuk, Morgan and Wilson, Greg},
+  month = apr,
+  year = {2017},
+  keywords = {Computer software,Bioinformatics,Software development,Software tools,Reproducibility,Operating systems,Sequence alignment,Software engineering},
+  pages = {e1005412},
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/N6LMW3W6/Taschuk and Wilson - 2017 - Ten simple rules for making research software more.pdf;/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/QJ95DFL8/article.html}
+}
+
+@article{huber_orchestrating_2015,
+  title = {Orchestrating High-Throughput Genomic Analysis with {{Bioconductor}}},
+  volume = {12},
+  copyright = {2015 Nature Publishing Group},
+  issn = {1548-7105},
+  doi = {10.1038/nmeth.3252},
+  abstract = {A Perspective on the open-source and open-development software project Bioconductor provides an overview for prospective users and developers dealing with high-throughput data in genomics and molecular biology.$<$/p$>$},
+  language = {En},
+  number = {2},
+  journal = {Nature Methods},
+  author = {Huber, Wolfgang and Carey, Vincent J. and Gentleman, Robert and Anders, Simon and Carlson, Marc and Carvalho, Benilton S. and Bravo, Hector Corrada and Davis, Sean and Gatto, Laurent and Girke, Thomas and Gottardo, Raphael and Hahne, Florian and Hansen, Kasper D. and Irizarry, Rafael A. and Lawrence, Michael and Love, Michael I. and MacDonald, James and Obenchain, Valerie and Ole{\'s}, Andrzej K. and Pag{\`e}s, Herv{\'e} and Reyes, Alejandro and Shannon, Paul and Smyth, Gordon K. and Tenenbaum, Dan and Waldron, Levi and Morgan, Martin},
+  month = feb,
+  year = {2015},
+  pages = {115},
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/SE6MXFGV/Huber et al. - 2015 - Orchestrating high-throughput genomic analysis wit.pdf;/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/5KDPCB9D/nmeth.html}
+}
+
+@article{GrunNovoPredictionStem2016,
+  title = {De {{Novo Prediction}} of {{Stem Cell Identity}} Using {{Single}}-{{Cell Transcriptome Data}}},
+  volume = {19},
+  issn = {1875-9777},
+  doi = {10.1016/j.stem.2016.05.010},
+  abstract = {Adult mitotic tissues like the intestine, skin, and blood undergo constant turnover throughout the life of an organism. Knowing the identity of the stem cell is crucial to understanding tissue homeostasis and its aberrations upon disease. Here we present a computational method for the derivation of a lineage tree from single-cell transcriptome data. By exploiting the tree topology and the transcriptome composition, we establish StemID, an algorithm for identifying stem cells among all detectable cell types within a population. We demonstrate that StemID recovers two known adult stem cell populations, Lgr5+ cells in the small intestine and hematopoietic stem cells in the bone marrow. We apply StemID to predict candidate multipotent cell populations in the human pancreas, a tissue with largely uncharacterized turnover dynamics. We hope that StemID will accelerate the search for novel stem cells by providing concrete markers for biological follow-up and validation.},
+  language = {eng},
+  number = {2},
+  journal = {Cell Stem Cell},
+  author = {Gr{\"u}n, Dominic and Muraro, Mauro J. and Boisset, Jean-Charles and Wiebrands, Kay and Lyubimova, Anna and Dharmadhikari, Gitanjali and {van den Born}, Maaike and {van Es}, Johan and Jansen, Erik and Clevers, Hans and {de Koning}, Eelco J. P. and {van Oudenaarden}, Alexander},
+  month = aug,
+  year = {2016},
+  keywords = {Animals,Mice; Inbred C57BL,Hematopoietic Stem Cells,Algorithms,Single-Cell Analysis,Humans,Adult,Bone Marrow Cells,Cell Lineage,Entropy,Intestines,Multipotent Stem Cells,Pancreatic Ducts,Pluripotent Stem Cells,Reproducibility of Results,Stem Cells,Transcriptome},
+  pages = {266--277},
+  pmid = {27345837},
+  pmcid = {PMC4985539}
+}
+
+@misc{jfp_greendiceare_2016,
+  type = {CT915},
+  title = {Green Dice Are Loaded (Welcome to p-Hacking) ({{IT Best Kept Secret Is Optimization}})},
+  copyright = {Copyright IBM Corporation 2012},
+  abstract = {Did you know green dice are loaded? I am not making it, I designed a rigorous scientific study that proves it. Let me repeat slowly: painting dice in green make them loaded . You don't believe me? Let me describe you the study and you'll be able to reproduce my scientific results. The study I made a hypothesis that green dice are loaded and that they will yield a six outcome more often than usual dice would. I then took 100 green dice, and rolled them 10 times each, then I counted how many times a six appears. A six appeared 188 times, which is rather high. Indeed, one would expect that the number...},
+  language = {en},
+  howpublished = {https://www.ibm.com/developerworks/community/blogs/jfp/entry/Green\_dice\_are\_loaded\_welcome\_to\_p\_hacking},
+  author = {{jfp}},
+  month = mar,
+  year = {2016},
+  file = {/home/wouters/.zotero/zotero/jtp9ziie.default/zotero/storage/BTRHPUKZ/Green_dice_are_loaded_welcome_to_p_hacking.html}
+}
+
+@book{wickham_packagesorganizetest_2015,
+  title = {R {{Packages}}: {{Organize}}, {{Test}}, {{Document}}, and {{Share Your Code}}},
+  isbn = {978-1-4919-1056-6},
+  shorttitle = {R {{Packages}}},
+  abstract = {Turn your R code into packages that others can easily download and use. This practical book shows you how to bundle reusable R functions, sample data, and documentation together by applying author Hadley Wickham's package development philosophy. In the process, you'll work with devtools, roxygen, and testthat, a set of R packages that automate common development tasks. Devtools encapsulates best practices that Hadley has learned from years of working with this programming language.Ideal for developers, data scientists, and programmers with various backgrounds, this book starts you with the basics and shows you how to improve your package writing over time. You'll learn to focus on what you want your package to do, rather than think about package structure.Learn about the most useful components of an R package, including vignettes and unit testsAutomate anything you can, taking advantage of the years of development experience embodied in devtoolsGet tips on good style, such as organizing functions into filesStreamline your development process with devtoolsLearn the best way to submit your package to the Comprehensive R Archive Network (CRAN)Learn from a well-respected member of the R community who created 30 R packages, including ggplot2, dplyr, and tidyr},
+  language = {en},
+  publisher = {{"O'Reilly Media, Inc."}},
+  author = {Wickham, Hadley},
+  month = mar,
+  year = {2015},
+  keywords = {Computers / Computer Science,Computers / Data Processing,Computers / Mathematical \& Statistical Software,Computers / Programming Languages / General}
 }
 
 
