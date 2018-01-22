@@ -29,7 +29,8 @@ trafo_params <- function(parameters, par_set) {
 
 # settings
 methods <- get_descriptions(as_tibble = F)
-metrics <- c("auc_R_nx", "correlation")
+metrics <- c("correlation")
+extra_metrics <- c("rf_mse", "edge_flip")
 timeout <- 60 * 60
 num_replicates <- 4
 
@@ -66,18 +67,21 @@ parm_sets <- bind_rows(
 # parm_sets <- parm_sets %>% filter(method_name %in% unique(best_parms$method_name))
 
 # combine tasks
-# tasks <- bind_rows(
-#   synthetic_tasks %>% mutate(task_group = "synthetic"),
-#   real_tasks %>% mutate(task_group = "real")
-# )
-# tasks <- tasks %>% select(one_of(c("task_group", intersect(colnames(synthetic_tasks), colnames(real_tasks)))))
-#
+tasks <- bind_rows(
+  synthetic_tasks %>% mutate(task_group = "synthetic"),
+  real_tasks %>% mutate(task_group = "real")
+)
+tasks <- tasks %>% select(one_of(c("task_group", intersect(colnames(synthetic_tasks), colnames(real_tasks)))))
+
+# # various fixes for the tasks
+# # fix 1: calculate the geodesic distances
 # tasks$geodesic_dist <- lapply(seq_len(nrow(tasks)), function(x) list())
 # for (i in seq_len(nrow(tasks))) {
 #   cat(i, "/", nrow(tasks), "\n", sep="")
 #   task <- extract_row_to_list(tasks, i)
 #   tasks$geodesic_dist[[i]] <- dynutils::compute_emlike_dist(task)
 # }
+# # fix 2 & 3: some cells were incorrenctly filtered, and recalculate prior informatiom
 # for (i in seq_len(nrow(tasks))) {
 #   cat(i, "/", nrow(tasks), "\n", sep="")
 #   expression <- tasks$expression[[i]]
@@ -99,18 +103,19 @@ parm_sets <- bind_rows(
 #     cell_info = tasks$cell_info[[i]]
 #   )
 # }
+# # fix 4: recalculate trajectory types
 # for (i in seq_len(nrow(tasks))) {
 #   tasks$trajectory_type[[i]] <- dynutils::classify_milestone_network(tasks$milestone_network[[i]])$network_type
 # }
-
 # write_rds(tasks, derived_file("tasks.rds"))
+
 tasks <- read_rds(derived_file("tasks.rds"))
 
 tasks <- tasks %>% rowwise() %>% mutate(
   milenet_spr = milestone_percentages %>% reshape2::acast(cell_id ~ milestone_id, value.var = "percentage", fill = 0) %>% list()
 ) %>% ungroup()
 
-write_rds(lst(methods, parm_sets, metrics, num_replicates, timeout), derived_file("config.rds"))
+write_rds(lst(methods, parm_sets, metrics, extra_metrics, num_replicates, timeout), derived_file("config.rds"))
 
 run_fun <- function(i) {
   method_name <- parm_sets$method_name[[i]]
@@ -126,10 +131,11 @@ run_fun <- function(i) {
     method = method,
     parameters = parameters,
     metrics = metrics,
+    # extra_metrics = extra_metrics,
     timeout = timeout,
     output_model = T,
     error_score = 0,
-    mc_cores = 8
+    mc_cores = 1
   )
 
   extras <- attr(score, "extras")
@@ -140,9 +146,9 @@ run_fun <- function(i) {
 }
 
 # parm_sets <- parm_sets %>% filter(!method_name %in% c("GPfates", "Mpath", "ouija", "pseudogp", "SCOUP"))
-# rerun pseudogp with fewer cores
-
-# run everything locally
+# # rerun pseudogp with fewer cores
+#
+# # run everything locally
 # filenames <- lapply(seq_len(nrow(parm_sets)), function(i) {
 #   method_name <- parm_sets$method_name[[i]]
 #   param_group <- parm_sets$param_group[[i]]
@@ -163,7 +169,7 @@ run_fun <- function(i) {
 #   X = seq_len(nrow(parm_sets)),
 #   qsub_config = override_qsub_config(
 #     name = "dynreal",
-#     num_cores = 8,
+#     num_cores = 1,
 #     memory = "10G",
 #     max_wall_time = NULL,
 #     remove_tmp_folder = FALSE,
@@ -174,17 +180,17 @@ run_fun <- function(i) {
 #     wait = FALSE
 #   ),
 #   qsub_packages = c("dplyr", "purrr", "dynalysis", "mlrMBO", "parallelMap"),
-#   qsub_environment = c("parm_sets", "tasks", "methods", "metrics", "timeout"),
+#   qsub_environment = c("parm_sets", "tasks", "methods", "metrics", "timeout", "extra_metrics"),
 #   FUN = run_fun
 # )
-
 # write_rds(qsub_handle, derived_file("qsub_handle"))
+
 qsub_handle <- read_rds(derived_file("qsub_handle"))
 
-fil <- grepl("20180109_161615_dynreal_BvDvSzbhOS", qsub_handle)
-qsub_handle[fil] <- gsub("20180109_161615_dynreal_BvDvSzbhOS", "20180110_140347_dynreal_RfsWONOJbf", qsub_handle[fil])
+# fil <- grepl("20180109_161615_dynreal_BvDvSzbhOS", qsub_handle)
+# qsub_handle[fil] <- gsub("20180109_161615_dynreal_BvDvSzbhOS", "20180110_140347_dynreal_RfsWONOJbf", qsub_handle[fil])
 
-outs <- qsub_retrieve(qsub_handle)
+outs <- qsub_retrieve(qsub_handle, wait = "just_do_it")
 
 failed <- sapply(outs, length) != 7
 parm_sets[failed,]
