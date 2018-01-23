@@ -2,42 +2,8 @@ library(tidyverse)
 library(cowplot)
 library(googlesheets)
 library(dynalysis)
-# devtools::load_all()
 
-task_infos <- gs_title("Real datasets") %>%
-  gs_read(ws = "datasets", col_types = cols(date = col_date())) %>%
-  separate_rows(id, sep=",\n") %>%
-  mutate(id = paste0("real/", id))
-
-task_ids <- task_infos$id
-
-# tasks not online but found physically
-paste0("real/", list.files("analysis/data/derived_data/datasets/real/"))[!(paste0("real/", list.files("analysis/data/derived_data/datasets/real/")) %in% task_ids)]
-
-task_ids[!(task_ids %in% paste0("real/", list.files("analysis/data/derived_data/datasets/real/")))]
-task_ids <- task_ids[(task_ids %in% paste0("real/", list.files("analysis/data/derived_data/datasets/real/")))]
-
-map_prism <- function (x, f) PRISM::qsub_lapply(x, f, qsub_environment = list2env(list()), qsub_config = PRISM::override_qsub_config(memory="4G"))
-map_local <- function(x, f) pbapply::pblapply(x, f, cl=1)
-map_local_parallel <- function(x, f) pbapply::pblapply(x, f, cl=8)
-
-tasks_synthetic <- read_rds("analysis/data/derived_data/datasets/synthetic/v6.rds")
-tasks_real <- map_local(task_ids, function(task_id) {
-  print(task_id)
-  task <- readRDS(dataset_file("dataset.rds", dataset_id = task_id))
-
-  print(task$trajectory_type)
-
-  task$expression <- function() {readRDS(dataset_file("dataset.rds", dataset_id = task_id))$expression}
-  task$counts <- function() {readRDS(dataset_file("dataset.rds", dataset_id = task_id))$counts}
-
-  dynutils::list_as_tibble(list(task))
-})
-tasks_toy <- dyntoy::toy_tasks
-tasks <- bind_rows(tasks_synthetic, tasks_real, toy_tasks)
-
-tasks$category <- ifelse(tasks$id %>% startsWith("real"), "real", ifelse(tasks$id %>% startsWith("toy"), "toy", "synthetic"))
-
+experiment("dataset_characterisation")
 
 # Check the tasks ------------------------------------
 # task_checks <- map_prism(task_ids, function(task_id) {
@@ -237,98 +203,99 @@ s <- pmap(as.list(tasks_filtered), function(...) {
   plots
 
 
-### Network plotting --------------------------
-library(ggnetwork)
-network_plots <- map_local(task_ids_filtered, function(task_id) {
-  library(tidyverse)
-  print(paste0("-------------", task_id))
-  print("loading")
-  task <- readRDS(dataset_file("dataset.rds", dataset_id = task_id))
+  ### Network plotting --------------------------
+  library(ggraph)
+  library(tidygraph)
+  network_plots <- pmap(as.list(tasks_filtered), function(...) {
+    # task <- extract_row_to_list(tasks, 20)
+    task <- list(...)
 
-  milestone_network <- task$milestone_network
-  milestone_nodes <- task$cell_info %>% group_by(milestone_id) %>% summarise(n=n())
+    milestone_network <- task$milestone_network
+    milestone_nodes <- task$prior_information$grouping_assignment %>% group_by(group_id) %>% summarise(n=n()) %>% rename(milestone_id=group_id)
 
-  end_nodes <- (milestone_nodes$milestone_id %in% milestone_network$to) & !(milestone_nodes$milestone_id %in% milestone_network$from)
-  start_nodes <- !(milestone_nodes$milestone_id %in% milestone_network$to) & (milestone_nodes$milestone_id %in% milestone_network$from)
-  milestone_nodes$type <- ifelse(start_nodes, "start", ifelse(end_nodes, "end", "inner"))
-  type_shapes <- c("start"=17, "inner"=16, "end"=15)
-  type_colors <- c("start"="#0074D9", "inner"="#FF851B", "end"="#FF4136")
+    end_nodes <- (milestone_nodes$milestone_id %in% milestone_network$to) & !(milestone_nodes$milestone_id %in% milestone_network$from)
+    start_nodes <- !(milestone_nodes$milestone_id %in% milestone_network$to) & (milestone_nodes$milestone_id %in% milestone_network$from)
+    milestone_nodes$type <- ifelse(start_nodes, "start", ifelse(end_nodes, "end", "inner"))
 
-  graph <- igraph::graph_from_data_frame(milestone_network, TRUE, milestone_nodes)
+    type_shapes <- c("start"=17, "inner"=16, "end"=15)
+    type_colors <- c("start"="#0074D9", "inner"="#FF851B", "end"="#FF4136")
 
-  fortified <- fortify(graph, arrow.gap=0)
+    graph <- tidygraph::tbl_graph(milestone_nodes, milestone_network, directed = TRUE)
 
-  base_plot <- fortified %>%
-    ggplot(aes(x = x, y = y, xend = xend, yend = yend)) +
-    theme_blank() +
-    scale_x_continuous(expand=c(0.2, 0)) +
-    scale_y_continuous(expand=c(0.2, 0)) +
-    theme(legend.position="none") +
-    geom_edges() +
-    geom_edges(aes(x=x, y=y, xend=xend - (xend - x)/3, yend = yend - (yend - y)/3), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
-    geom_edges(aes(x=x, y=y, xend=xend - (xend - x)/3*2, yend = yend - (yend - y)/3*2), arrow=arrow(type="closed", length=unit(0.1, "inches")))
+    base_plot <- graph %>%
+      ggraph(layout="nicely") +
+      scale_x_continuous(expand=c(0.2, 0)) +
+      scale_y_continuous(expand=c(0.2, 0)) +
+      theme_graph() +
+      theme(legend.position = "none") +
+      geom_edge_fan() +
+      geom_edge_fan(aes(x=x, y=y, xend=xend - (xend - x)/3, yend = yend - (yend - y)/3), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
+      geom_edge_fan(aes(x=x, y=y, xend=xend - (xend - x)/3*2, yend = yend - (yend - y)/3*2), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
+      ggtitle(task$id)
+    base_plot
 
-  network_plot_labeled <- list(
-    base_plot +
-      geom_nodelabel(aes(label=vertex.names, fill=vertex.names), color="white")
-  )
+    network_plot_labeled <- list(
+      base_plot +
+        geom_node_label(aes(label=milestone_id, fill=milestone_id), color="white")
+    )
 
-  network_plot = list(
-    base_plot +
-      geom_nodes(aes(color=vertex.names, shape = type), size=10) + scale_shape_manual(values=type_shapes)
-  )
+    network_plot = list(
+      base_plot +
+        geom_node_point(aes(color=milestone_id, shape = type), size=10) + scale_shape_manual(values=type_shapes)
+    )
 
-  network_plot_startstop = list(
-    base_plot +
-      geom_nodes(aes(color=type, shape = type), size=10) +
-      scale_shape_manual(values=type_shapes) +
-      scale_color_manual(values=type_colors)
-  )
+    network_plot_startstop = list(
+      base_plot +
+        geom_node_point(aes(color=type, shape = type), size=5) +
+        scale_shape_manual(values=type_shapes) +
+        scale_color_manual(values=type_colors)
+    )
 
-  network_plot_sizes = list(
-    base_plot +
-      geom_nodes(aes(color=vertex.names, size=n)) +
-      scale_size_continuous(range=c(3, 20), trans="log10", limits=c(1, 100000))
-  )
+    network_plot_sizes = list(
+      base_plot +
+        geom_node_point(aes(color=milestone_id, size=n)) +
+        scale_size_continuous(range=c(3, 20), trans="log10", limits=c(1, 100000))
+    )
 
-  lst(
-    id = task_id,
-    network_plot_labeled,
-    network_plot,
-    network_plot_sizes,
-    network_plot_startstop
-  ) %>% as_tibble()
-})
-network_plots <- network_plots %>% bind_rows()
+    lst(
+      id = task$id,
+      network_plot_labeled,
+      network_plot,
+      network_plot_sizes,
+      network_plot_startstop
+    ) %>% as_tibble()
+  }) %>% bind_rows()
 
-library(ggnetwork)
-network_characteristics <- parallel::mclapply(task_ids, function(task_id) {
-  library(tidyverse)
-  print(paste0("-------------", task_id))
-  print("loading")
-  task <- readRDS(dataset_file("dataset.rds", dataset_id = task_id))
+  library(ggnetwork)
+  network_characteristics <- parallel::mclapply(task_ids, function(task_id) {
+    library(tidyverse)
+    print(paste0("-------------", task_id))
+    print("loading")
+    task <- readRDS(dataset_file("dataset.rds", dataset_id = task_id))
 
-  contains_cycle <- FALSE
-  tryCatch(
-    {igraph::graph_from_data_frame(task$milestone_network) %>% igraph::topo_sort()}
-    , warning=function(w) contains_cycle <<- TRUE
-  )
+    contains_cycle <- FALSE
+    tryCatch(
+      {igraph::graph_from_data_frame(task$milestone_network) %>% igraph::topo_sort()}
+      , warning=function(w) contains_cycle <<- TRUE
+    )
 
-  contains_bifurcating <- task$milestone_network$from %>% table %>% {any(.>1)}
-  contains_convergence <- task$milestone_network$to %>% table %>% {any(.>1)}
+    contains_bifurcating <- task$milestone_network$from %>% table %>% {any(.>1)}
+    contains_convergence <- task$milestone_network$to %>% table %>% {any(.>1)}
 
-  lst(contains_cycle, contains_bifurcating, contains_convergence, id=task_id)
-}, mc.cores=8) %>% bind_rows()
-network_characteristics$topology_id <- network_characteristics %>% select_if(is.logical) %>% apply(1, function(x) sum((2^seq_along(x))[x]))
-
-
-tasks <- task_infos %>% left_join(network_characteristics, "id") %>% left_join(network_plots, "id")
-
-grid <- cowplot::plot_grid(plotlist=tasks %>% arrange(topology_id) %>% filter(standard=="gold") %>% pull(network_plot_startstop))
-title <- ggdraw() + draw_label("Gold standard networks", fontface='bold')
-plot_grid(title, grid, ncol=1, rel_heights=c(0.1, 1)) # rel_heights values control title margins
+    lst(contains_cycle, contains_bifurcating, contains_convergence, id=task_id)
+  }, mc.cores=8) %>% bind_rows()
+  network_characteristics$topology_id <- network_characteristics %>% select_if(is.logical) %>% apply(1, function(x) sum((2^seq_along(x))[x]))
 
 
-grid <- cowplot::plot_grid(plotlist=tasks %>% arrange(topology_id) %>% filter(standard=="silver") %>% pull(network_plot))
-title <- ggdraw() + draw_label("Silver standard networks", fontface='bold')
-plot_grid(title, grid, ncol=1, rel_heights=c(0.1, 1)) # rel_heights values control title margins
+  tasks_plots <- tasks %>% left_join(network_plots, "id")
+
+  tasks_plots %>% filter(category=="real") %>% pull(network_plot_startstop) %>% cowplot::plot_grid(plotlist = .)
+
+  grid <- cowplot::plot_grid(plotlist=tasks %>% arrange(topology_id) %>% filter(standard=="gold") %>% pull(network_plot_startstop))
+  title <- ggdraw() + draw_label("Gold standard networks", fontface='bold')
+  plot_grid(title, grid, ncol=1, rel_heights=c(0.1, 1)) # rel_heights values control title margins
+
+
+  grid <- cowplot::plot_grid(plotlist=tasks %>% arrange(topology_id) %>% filter(standard=="silver") %>% pull(network_plot))
+  title <- ggdraw() + draw_label("Silver standard networks", fontface='bold')
+  plot_grid(title, grid, ncol=1, rel_heights=c(0.1, 1)) # rel_heights values control title margins
