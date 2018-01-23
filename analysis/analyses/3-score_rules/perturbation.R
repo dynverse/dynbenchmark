@@ -279,9 +279,9 @@ change_network <- function(task, trajectory_type = "linear") {
   recreate_task(task)
 }
 
-trajectory_types <- eval(formals(dyntoy:::generate_toy_milestone_network)$trajectory_type)
+trajectory_models <- eval(formals(dyntoy:::generate_toy_milestone_network)$model)
 
-map(trajectory_types, function(x) function(task) change_network(task, x)) %>% setNames(paste0("perturb_change_network_", trajectory_types)) %>% list2env(.GlobalEnv)
+map(trajectory_models, function(x) function(task) change_network(task, x)) %>% setNames(paste0("perturb_change_network_", trajectory_models)) %>% list2env(.GlobalEnv)
 
 
 ### Some helper functions-------------------

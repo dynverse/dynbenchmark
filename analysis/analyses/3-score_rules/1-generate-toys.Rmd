@@ -21,7 +21,7 @@ experiment("score_rules")
 
 ```{r}
 toys_blueprint <- tribble(
-  ~trajectory_type, ~perturbator_id,
+  ~trajectory_model, ~perturbator_id,
   "simple_linear", "gs",
   "simple_linear", "switch_two_cells",
   "simple_linear", "switch_all_cells",
@@ -52,8 +52,8 @@ toys_blueprint <- tribble(
   "cycle", "remove_cells",
   "cycle", "add_distant_edge"
 ) %>% 
-  bind_rows(tibble(trajectory_type="simple_linear", perturbator_id=paste0("switch_", percs * 100))) %>%
-  bind_rows(crossing(trajectory_type=trajectory_types, perturbator_id=paste0("change_network_", trajectory_types)) %>% mutate(ncells = 5)) %>% 
+  bind_rows(tibble(trajectory_model="simple_linear", perturbator_id=paste0("switch_", percs * 100))) %>%
+  bind_rows(crossing(trajectory_model=trajectory_models, perturbator_id=paste0("change_network_", trajectory_models)) %>% mutate(ncells = 5)) %>% 
   rowwise() %>% 
   mutate(
   perturbator=list(get(paste0("perturb_", perturbator_id)))
@@ -63,7 +63,7 @@ toys_blueprint <- tribble(
 nreplicates <- 1
 toys <- toys_blueprint %>% slice(rep(1:n(), each=nreplicates)) %>% mutate(
   replicate=seq_len(nrow(.))%%nreplicates,
-  toy_category=paste0(trajectory_type, "-", perturbator_id),
+  toy_category=paste0(trajectory_model, "-", perturbator_id),
   toy_id=paste0(toy_category, "-", replicate)
 ) %>%
   mutate(ncells=sample(50:500, n(), replace=TRUE))
@@ -71,7 +71,7 @@ toys <- toys_blueprint %>% slice(rep(1:n(), each=nreplicates)) %>% mutate(
 # generate gold standards and toys, can take some time (for computing the geodesic distances I presume)
 # I choose to not do this using mutate because it is much easier to debug using loops
 toys$gs <- toys %>% split(seq_len(nrow(toys))) %>% parallel::mclapply(function(row) {
-  generate_dataset(row$trajectory_type, row$ncells)
+  dyntoy:::generate_dataset("why", row$trajectory_model, row$ncells)
 }, mc.cores=8)
 #toys$gs <- map2(toys$generator, toys$ncells, ~.x(.y))
 
