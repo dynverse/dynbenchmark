@@ -71,17 +71,17 @@ ggplot(eval_trajtype_wa_wo) +
 # #     y = "Mean quantile score of OOB-MSE score when predicting gold milestone percentages",
 # #     title = "Evaluation of trajectory inference methods with default parameters"
 # #   )
-# ggplot(eval_trajtype_wa_wo) +
-#   geom_point(aes(method_name_f, rank_mmse)) +
-#   coord_flip() +
-#   theme_bw() +
-#   facet_grid(task_group~trajectory_type_f) +
-#   labs(
-#     x = NULL,
-#     colour = "Parameter\ngroup",
-#     y = "Mean quantile score of OOB-MSE score when predicting gold milestone percentages",
-#     title = "Evaluation of trajectory inference methods with default parameters"
-#   )
+ggplot(eval_trajtype_wa_wo) +
+  geom_point(aes(method_name_f, rank_mmse)) +
+  coord_flip() +
+  theme_bw() +
+  facet_grid(task_group~trajectory_type_f) +
+  labs(
+    x = NULL,
+    colour = "Parameter\ngroup",
+    y = "Mean quantile score of OOB-MSE score when predicting gold milestone percentages",
+    title = "Evaluation of trajectory inference methods with default parameters"
+  )
 
 ggplot(eval_trajtype_wa_wo) +
   geom_point(aes(method_name_f, percentage_errored)) +
@@ -96,37 +96,37 @@ ggplot(eval_trajtype_wa_wo) +
   )
 dev.off()
 
-pdf(figure_file("2_trajtype_comparison_best.pdf"), 12, 8)
-yy <- eval_trajtype %>%
-  filter(method_name %in% zmethord) %>%
-  group_by(method_short_name, task_group, trajectory_type_f) %>%
-  arrange(desc(rank_correlation)) %>%
-  slice(1) %>%
-  ungroup() %>%
-  mutate(method_name_f = factor(method_name, levels = rev(zmethord)))
-ggplot(yy %>% filter(task_group == "real")) +
-  geom_point(aes(method_name_f, rank_correlation)) +
-  coord_flip() +
-  cowplot::theme_cowplot() +
-  facet_wrap(~trajectory_type_f, ncol = 3) +
-  labs(x = NULL, title = pritt("Scores on real datasets"), colour = "Parameter\ngroup")
-dev.off()
+# pdf(figure_file("2_trajtype_comparison_best.pdf"), 12, 8)
+# yy <- eval_trajtype %>%
+#   filter(method_name %in% zmethord) %>%
+#   group_by(method_short_name, task_group, trajectory_type_f) %>%
+#   arrange(desc(rank_correlation)) %>%
+#   slice(1) %>%
+#   ungroup() %>%
+#   mutate(method_name_f = factor(method_name, levels = rev(zmethord)))
+# ggplot(yy %>% filter(task_group == "real")) +
+#   geom_point(aes(method_name_f, rank_correlation)) +
+#   coord_flip() +
+#   cowplot::theme_cowplot() +
+#   facet_wrap(~trajectory_type_f, ncol = 3) +
+#   labs(x = NULL, title = pritt("Scores on real datasets"), colour = "Parameter\ngroup")
+# dev.off()
 #
 
 
-thewidth <- 8
-theheight <- 6
-
-# compare best vs. default
-pdf(figure_file("best_vs_default.pdf"), thewidth, theheight)
-ggplot(joined %>% filter(task_group == "real"), aes(date, rank_correlation)) +
-  geom_smooth(span=2) +
-  geom_path(aes(group = name), linetype = "dashed") +
-  geom_point(aes(colour = param_group)) +
-  ggrepel::geom_label_repel(aes(label = name, colour = param_group)) +
-  cowplot::theme_cowplot() +
-  labs(x = "Time", y = "rank_correlation score", title = "Overall performance with optimised parameters")
-dev.off()
+# thewidth <- 8
+# theheight <- 6
+#
+# # compare best vs. default
+# pdf(figure_file("best_vs_default.pdf"), thewidth, theheight)
+# ggplot(joined %>% filter(task_group == "real"), aes(date, rank_correlation)) +
+#   geom_smooth(span=2) +
+#   geom_path(aes(group = name), linetype = "dashed") +
+#   geom_point(aes(colour = param_group)) +
+#   ggrepel::geom_label_repel(aes(label = name, colour = param_group)) +
+#   cowplot::theme_cowplot() +
+#   labs(x = "Time", y = "rank_correlation score", title = "Overall performance with optimised parameters")
+# dev.off()
 
 
 # multiple plots
