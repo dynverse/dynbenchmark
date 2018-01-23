@@ -7,7 +7,6 @@ experiment("method_characteristics")
 source("analysis/analyses/4-method_characterization/0_common.R")
 
 method_df <- read_rds(derived_file("method_df.rds"))
-method_df_evaluated <- read_rds(derived_file("method_df_evaluated.rds"))
 
 method_qc <- readRDS(derived_file("method_qc.rds"))
 method_qc_scores <- method_qc %>%
@@ -27,7 +26,9 @@ method_qc_application_scores <- method_qc %>%
   summarise(score=sum(answer * score * weight)/sum(score * weight))
 
 method_df <- method_df %>% left_join(method_qc_scores, c("name"="method_id"))
-method_df_evaluated <- method_df_evaluated %>% left_join(method_qc_scores, c("name"="method_id"))
+
+method_df_evaluated <- method_df %>%
+  filter(wrapper == "Done")
 
 # Comparing number of citations, qc score, and time -------------------------------------
 g1 <- ggplot(method_df_evaluated, aes(date, qc_score)) +
@@ -206,7 +207,6 @@ add_step <- function(df) {
 trajectory_components_step <- add_step(arrange(trajectory_components, date))
 
 trajectory_components_gathered <- trajectory_components_step %>%
-  select(-trajectory_type) %>%
   gather(trajectory_type, can_trajectory_type, !!trajectory_types) %>%
   mutate(trajectory_type = factor(trajectory_type, levels=trajectory_types)) %>%
   group_by(trajectory_type) %>%
@@ -348,7 +348,6 @@ prior_usage_width <- length(prior_usages)/2
 
 # Trajectory components
 trajectory_components_plot <- method_df_evaluated %>%
-  select(-trajectory_type) %>%
   gather(trajectory_type, can, !!trajectory_types, factor_key=TRUE) %>%
   select(trajectory_type, can, name) %>%
   mutate(name = factor(name, levels=method_order)) %>%
@@ -377,7 +376,6 @@ lighten <- function(color, factor=1.4){
 }
 
 maximal_trajectory_components_plot <- method_df_evaluated %>%
-  select(-trajectory_type) %>%
   gather(trajectory_type, can, !!trajectory_types, factor_key=TRUE) %>%
   group_by(name) %>%
   filter(can) %>%
@@ -407,3 +405,17 @@ method_characteristics$width <- sum(widths)/2
 method_characteristics$height <- length(method_order)/2
 
 saveRDS(method_characteristics, figure_file("method_characteristics.rds"))
+
+
+
+
+## Small history
+method_df %>%
+  filter(is_ti == "Yup") %>%
+  mutate(maximal_trajectory_type = ifelse(is.na(maximal_trajectory_type), "unknown", as.character(maximal_trajectory_type))) %>%
+  ggplot(aes(date, fill=maximal_trajectory_type, color=maximal_trajectory_type)) +
+  geom_dotplot(binwidth=30, method = "histodot", binpositions="all", stackgroups=TRUE, stackratio=1.5, dotsize=0.7) +
+  scale_y_continuous(NULL, breaks=NULL, expand=c(0.02, 0)) +
+  scale_fill_manual(values=trajectory_type_colors) +
+  scale_color_manual(values=trajectory_type_colors) +
+  theme(legend.position="none")

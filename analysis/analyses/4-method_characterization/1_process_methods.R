@@ -36,41 +36,28 @@ num_citations_by_clusterid <- function(clusterid, scholar_file = script_file) {
 method_df <- method_df %>%
   mutate(citations = pbapply::pbsapply(cl=4, GScholarClusterID, num_citations_by_clusterid))
 
-# --------------------
-method_df_evaluated <- method_df %>%
-  filter(wrapper == "Done")
-
 # Trajectory components --------------------------
-method_df_evaluated <- method_df_evaluated %>%
+method_df <- method_df %>%
+  mutate(maximal_trajectory_type = factor(maximal_trajectory_type, levels = c("undirected_linear", "simple_fork", "complex_fork", "unrooted_tree", "undirected_graph", "disconnected_undirected_graph"))) %>%
   mutate(
-    segment = stringr::str_detect(trajectory_components, "segment"),
-    fork = stringr::str_detect(trajectory_components, "fork"),
-    convergence = stringr::str_detect(trajectory_components, "convergence"),
-    loop = stringr::str_detect(trajectory_components, "loop"),
-    n_forks = as.numeric(ifelse(fork, gsub(".*fork\\(.*,([0-9]|inf)\\).*", "\\1", trajectory_components), NA)),
-    n_fork_paths = as.numeric(ifelse(fork, gsub(".*fork\\(([0-9]|inf),.*", "\\1", trajectory_components), NA)),
-    n_convergences = as.numeric(ifelse(convergence, gsub(".*convergence\\(.*,([0-9]|inf)\\).*", "\\1", trajectory_components), NA)),
-    n_convergence_paths = as.numeric(ifelse(convergence, gsub(".*convergence\\(([0-9]|inf),.*", "\\1", trajectory_components), NA))
-  ) %>%
-  mutate(
-    undirected_linear = segment,
-    simple_fork = fork,
-    unrooted_tree = fork & n_forks > 1,
-    complex_fork = fork & n_fork_paths > 2,
-    undirected_cycle = loop,
-    undirected_graph = unrooted_tree & complex_fork & convergence
+    disconnected_undirected_graph = as.numeric(maximal_trajectory_type) >= 6 & !grepl("disconnected_undirected_graph", unable_trajectory_type),
+    undirected_graph = as.numeric(maximal_trajectory_type) >= 5 & !grepl("undirected_graph", unable_trajectory_type),
+    undirected_cycle = as.numeric(maximal_trajectory_type) >= 5 & !grepl("undirected_graph", unable_trajectory_type),
+    unrooted_tree = as.numeric(maximal_trajectory_type) >= 4 & !grepl("unrooted_tree", unable_trajectory_type),
+    complex_fork = as.numeric(maximal_trajectory_type) >= 3 & !grepl("complex_fork", unable_trajectory_type),
+    simple_fork = as.numeric(maximal_trajectory_type) >= 2 & !grepl("simple_fork", unable_trajectory_type),
+    undirected_linear = as.numeric(maximal_trajectory_type) >= 1 & !grepl("undirected_linear", unable_trajectory_type)
   )
 
-source("analysis/analyses/4-method_characterization/0_common.R")
-method_df_evaluated <- method_df_evaluated %>%
-  gather("trajectory_type", "can_trajectory_type", !!trajectory_types) %>%
-  group_by(name) %>%
-  filter(can_trajectory_type) %>%
-  filter(row_number() == n()) %>%
-  select(name, trajectory_type) %>%
-  ungroup() %>%
-  right_join(method_df_evaluated, by = "name")
+# source("analysis/analyses/4-method_characterization/0_common.R")
+# method_df_evaluated <- method_df_evaluated %>%
+#   gather("trajectory_type", "can_trajectory_type", !!trajectory_types) %>%
+#   group_by(name) %>%
+#   filter(can_trajectory_type) %>%
+#   filter(row_number() == n()) %>%
+#   select(name, trajectory_type) %>%
+#   ungroup() %>%
+#   right_join(method_df_evaluated, by = "name")
 
 # Saving -------------------------
 write_rds(method_df, derived_file("method_df.rds"))
-write_rds(method_df_evaluated, derived_file("method_df_evaluated.rds"))

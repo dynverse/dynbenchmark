@@ -1,11 +1,13 @@
-trajectory_types <- c("undirected_linear","simple_fork","complex_fork","unrooted_tree","undirected_cycle","undirected_graph")
+trajectory_types <- c("undirected_linear","simple_fork","complex_fork","unrooted_tree","undirected_cycle","undirected_graph", "disconnected_undirected_graph")
 trajectory_type_colors <- c(
-  "undirected_linear" = "#0073d7",
-  "simple_fork" = "#5ecd2e",
-  "unrooted_tree" = "#ffe900",
-  "complex_fork" = "#ff8821",
-  "undirected_cycle" = "#c90da9",
-  "undirected_graph" = "#ff4237"
+  "undirected_linear" = "#af0dc7",
+  "simple_fork" = "#0073d7",
+  "unrooted_tree" = "#5ecd2e",
+  "complex_fork" = "#ffe900",
+  "undirected_cycle" = "#39cccc",
+  "undirected_graph" = "#ff8821",
+  "disconnected_undirected_graph" = "#ff4237",
+  "unknown" = "#AAAAAA"
 )
 
 lighten <- function(color, factor=1.4){
