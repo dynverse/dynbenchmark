@@ -66,12 +66,12 @@ parm_sets <- bind_rows(
 
 # parm_sets <- parm_sets %>% filter(method_name %in% unique(best_parms$method_name))
 
-# combine tasks
-tasks <- bind_rows(
-  synthetic_tasks %>% mutate(task_group = "synthetic"),
-  real_tasks %>% mutate(task_group = "real")
-)
-tasks <- tasks %>% select(one_of(c("task_group", intersect(colnames(synthetic_tasks), colnames(real_tasks)))))
+# # combine tasks
+# tasks <- bind_rows(
+#   synthetic_tasks %>% mutate(task_group = "synthetic"),
+#   real_tasks %>% mutate(task_group = "real")
+# )
+# tasks <- tasks %>% select(one_of(c("task_group", intersect(colnames(synthetic_tasks), colnames(real_tasks)))))
 
 # # various fixes for the tasks
 # # fix 1: calculate the geodesic distances
@@ -193,7 +193,7 @@ qsub_handle <- read_rds(derived_file("qsub_handle"))
 outs <- qsub_retrieve(qsub_handle, wait = "just_do_it")
 
 failed <- sapply(outs, length) != 7
-parm_sets[failed,]
+parm_sets %>% mutate(i = seq_len(n())) %>% .[failed,]
 
 parm_sets[failed,] %>% mutate(i = which(failed))
 parm_sets <- parm_sets[!failed,]
@@ -270,72 +270,3 @@ write_rds(lst(eval_ind, eval_overall, eval_trajtype, eval_repl, method_ord, traj
 
 
 
-
-## debugging
-# parm_sets %>% filter(method_name == "mnclDDR")
-# which(parm_sets$method_name == "mnclDDR")
-# i <- 33
-# out <- outs[[i]]
-# out$summary %>% filter(!sapply(error, is.null)) %>% .$error %>% map(~.$message) %>% as.character %>% unlist %>% table
-# out$summary$error[[10]]
-
-
-error_messages_overall <-
-  eval_ind %>%
-  group_by(method_name) %>%
-  mutate(num_datasets = n()) %>%
-  ungroup() %>%
-  filter(!sapply(error, is.null)) %>%
-  rowwise() %>%
-  mutate(error_message = error$message) %>%
-  ungroup() %>%
-  group_by(method_name, error_message) %>%
-  summarise(num = n(), pct = num / num_datasets[[1]]) %>%
-  ungroup()
-
-error_reasons <- tribble(
-  ~partial_message, ~reason,
-  "reached elapsed time limit", "time limit",
-  "Cannot allocate memory", "memory limit",
-  "cannot open connection", "error inside python code",
-  "Column `cell_id` must be a 1d atomic vector or a list", "bug in wrapper"
-)
-error_reason_fun <- function(error_message) {
-  greps <- sapply(error_reasons$partial_message, function(part_mess) {
-    grepl(part_mess, error_message)
-  })
-  apply(greps, 1, function(bools) {
-    if (any(bools)) {
-      error_reasons$reason[bools]
-    } else {
-      "other"
-    }
-  })
-}
-
-error_messages_overall <- error_messages_overall %>%
-  mutate(error_reason = error_reason_fun(error_message))
-
-
-
-
-
-eval_ind %>%
-  filter(method_name == "SCORPIUS") %>%
-  filter(!sapply(error, is.null)) %>%
-  rowwise() %>%
-  mutate(error_message = error$message) %>%
-  ungroup() %>%
-  group_by(method_name, error_message) %>%
-  summarise(num = n(), pct = num / nrow(tasks) / num_replicates) %>%
-  ungroup()
-
-eval_ind %>%
-  rowwise() %>%
-  mutate(has_errored = !is.null(error), error_message = ifelse(is.null(error), "", error$message)) %>%
-  ungroup() %>%
-  group_by(task_id) %>%
-  summarise(num = sum(has_errored), pct = mean(has_errored)) %>%
-  ungroup() %>% arrange(desc(pct))
-
-eval_ind %>% filter(task_id == "real/epidermis-hair-spatial_joost") %>% select(method_name, replicate, error) %>% as.data.frame %>% View

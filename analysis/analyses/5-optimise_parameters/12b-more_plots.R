@@ -116,8 +116,7 @@ error_reasons <- tribble(
   ~partial_message, ~reason,
   "reached elapsed time limit", "time limit",
   "Cannot allocate memory", "memory limit",
-  "cannot open the connection", "error inside python code",
-  "Column `cell_id` must be a 1d atomic vector or a list", "bug in wrapper"
+  "cannot open the connection", "error inside python code"
 )
 error_reason_fun <- function(error_message) {
   greps <- sapply(error_reasons$partial_message, function(part_mess) {
@@ -225,3 +224,7 @@ g <- time_ind %>%
   coord_flip() +
   labs(x = NULL)
 ggsave(figure_file("timestep_permethod.pdf"), g, width = 10, height = 5)
+
+
+
+eval_ind %>% filter(method_name == "slingshot", percentage_errored == 1) %>% select(task_id, error_message)
