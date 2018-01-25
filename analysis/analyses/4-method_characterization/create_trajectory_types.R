@@ -4,7 +4,7 @@ library(tidyverse)
 library(dynalysis)
 
 boxes <- tibble(
-  id = c("undirected_linear", "simple_fork", "complex_fork", "undirected_cycle", "unrooted_tree", "undirected_graph"), opacity = 1
+  id = c("undirected_linear", "simple_fork", "complex_fork", "undirected_cycle", "unrooted_tree", "undirected_graph", "disconnected_undirected_graph"), opacity = 1
 )
 map(boxes$id, function(id) {
   boxes$opacity <- ifelse(boxes$id == id, 1, 0)
