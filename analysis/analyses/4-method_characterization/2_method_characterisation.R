@@ -8,6 +8,7 @@ source("analysis/analyses/4-method_characterization/0_common.R")
 
 method_df <- read_rds(derived_file("method_df.rds"))
 
+# combine with qc scores
 method_qc <- readRDS(derived_file("method_qc.rds"))
 method_qc_scores <- method_qc %>%
   group_by(method_id) %>%
@@ -25,10 +26,17 @@ method_qc_application_scores <- method_qc %>%
   group_by(method_id, application) %>%
   summarise(score=sum(answer * score * weight)/sum(score * weight))
 
-method_df <- method_df %>% left_join(method_qc_scores, c("name"="method_id"))
+method_df <- method_df %>%
+  left_join(method_qc_scores, c("name"="method_id"))
+
+method_df <- method_df %>%
+  mutate(evaluated = wrapper == "Done")
 
 method_df_evaluated <- method_df %>%
-  filter(wrapper == "Done")
+  filter(evaluated)
+
+
+#######################"
 
 # Comparing number of citations, qc score, and time -------------------------------------
 g1 <- ggplot(method_df_evaluated, aes(date, qc_score)) +
@@ -64,7 +72,7 @@ ggsave(figure_file("citations_vs_qcscore.png"), g3, width = 8, height = 8)
 
 
 # Publication timeline of methods -----------------
-method_publication_data <- method_df %>% filter(is_ti == "Yup") %>%
+method_publication_data <- method_df %>% filter(is_ti) %>%
   gather("publication_type", "publication_date", c(PubDate, Preprint)) %>%
   select(name, publication_type, publication_date) %>%
   drop_na() %>%
@@ -407,15 +415,79 @@ method_characteristics$height <- length(method_order)/2
 saveRDS(method_characteristics, figure_file("method_characteristics.rds"))
 
 
-
-
 ## Small history
 method_df %>%
-  filter(is_ti == "Yup") %>%
+  filter(is_ti ) %>%
   mutate(maximal_trajectory_type = ifelse(is.na(maximal_trajectory_type), "unknown", as.character(maximal_trajectory_type))) %>%
-  ggplot(aes(date, fill=maximal_trajectory_type, color=maximal_trajectory_type)) +
-  geom_dotplot(binwidth=30, method = "histodot", binpositions="all", stackgroups=TRUE, stackratio=1.5, dotsize=0.7) +
+  ggplot(aes(date)) +
+  geom_dotplot(aes(fill=maximal_trajectory_type, color=maximal_trajectory_type), binwidth=50, method = "histodot", binpositions="all", stackgroups=TRUE, stackratio=1.428571, dotsize=0.7) +
   scale_y_continuous(NULL, breaks=NULL, expand=c(0.02, 0)) +
   scale_fill_manual(values=trajectory_type_colors) +
   scale_color_manual(values=trajectory_type_colors) +
   theme(legend.position="none")
+
+method_small_history <- method_df %>%
+  filter(is_ti) %>%
+  mutate(
+    maximal_trajectory_type = ifelse(is.na(maximal_trajectory_type), "unknown", as.character(maximal_trajectory_type)),
+    y = runif(n(), 0, 0.0001),
+    fontface = ifelse(evaluated, "plain", "plain"),
+    size = ifelse(evaluated, 3.5, 3.5)
+  ) %>%
+  mutate() %>%
+  arrange(-y) %>%
+  ggplot(aes(date, y)) +
+  ggrepel::geom_label_repel(aes(color=maximal_trajectory_type, label=name, fontface=fontface, size=size), direction="y", max.iter=10000, ylim=c(0, NA), force=10) +
+  scale_color_manual(values=trajectory_type_colors) +
+  scale_fill_manual(values=trajectory_type_background_colors) +
+  scale_alpha_manual(values=c(`TRUE`=1, `FALSE`=0.6)) +
+  scale_x_date(label_long("publishing_date"), limits=c(as.Date("2014-01-01"), as.Date("2018-01-01")), date_breaks="1 year", date_labels="%Y") +
+  scale_y_continuous(NULL, breaks=NULL, limits=c(0, 1), expand=c(0, 0)) +
+  scale_size_identity() +
+  theme(legend.position="none")
+method_small_history
+
+ggsave(figure_file("method_small_history.svg"), method_small_history, height = 3.5, width = 10)
+
+# move lines to back
+library(xml2)
+svg <- xml2::read_xml(figure_file("method_small_history.svg"))
+
+children <- svg %>% xml_children()
+front <- xml_name(children) %in% c("line")
+new <- children[!front]
+for (node in children[front]) {
+  new %>% xml_add_sibling(node, .copy = FALSE, where=c("before"))
+}
+children[xml_name(children) == "rect"] %>% xml_remove()
+xml2::write_xml(svg, figure_file("method_small_history.svg"))
+
+###
+
+method_small_distribution <- method_df %>%
+  filter(is_ti) %>%
+  gather(trajectory_type, can_handle, !!trajectory_types) %>%
+  mutate(trajectory_type = factor(trajectory_type, levels=trajectory_types)) %>%
+  filter(can_handle) %>%
+  group_by(trajectory_type) %>%
+  count() %>%
+  ggplot(aes(trajectory_type, n)) +
+    geom_bar(aes(fill=trajectory_type, color=trajectory_type), stat="identity", width=0.95) +
+    geom_text(aes(label=n), vjust=0) +
+    # geom_hline(yintercept = sum(method_df$is_ti, na.rm=TRUE), line) +
+    scale_fill_manual(values=trajectory_type_background_colors) +
+    scale_color_manual(values=trajectory_type_colors) +
+    scale_y_continuous(expand=c(0, 2)) +
+    theme(legend.position = "None")
+method_small_distribution
+ggsave(figure_file("method_small_distribution.svg"), method_small_distribution, height = 2, width = 5)
+
+
+method_df %>%
+  filter(is_ti) %>%
+  gather(trajectory_type, can_handle, !!trajectory_types) %>%
+  mutate(trajectory_type = factor(trajectory_type, levels=trajectory_types)) %>%
+  filter(can_handle) %>%
+  group_by(trajectory_type, evaluated) %>%
+  count() %>%
+  arrange(trajectory_type, -evaluated)
