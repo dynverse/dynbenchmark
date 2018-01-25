@@ -5,17 +5,18 @@ labels <- tibble::tribble(
   "directed_acyclic_graph", "Directed acyclic graph", "DAG",
   "ngenes", "Number of genes", "# genes",
   "ncells", "Number of cells", "# cells",
-  "silver", "Silver standard", "Silver standard",
-  "gold", "Gold standard", "Gold standard"
+  "silver", "Silver standard", "Silver",
+  "gold", "Gold standard", "Gold"
 )
 
 #' Short labelling function
 #' @param x The text!
 #' @export
-label_short <- function(x) {
+label_short <- function(x, width=10) {
   tibble(id = as.character(x)) %>%
     left_join(labels, "id") %>%
     mutate(short=ifelse(is.na(short), label_capitalise(id), short)) %>%
+    mutate(short=map(strwrap(short, width, simplify=FALSE), paste0, collapse="\n")) %>%
     pull(short)
 }
 
