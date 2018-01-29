@@ -38,17 +38,23 @@ method_df <- method_df %>%
 # Trajectory components --------------------------
 # split maximal trajectory types
 method_df <- method_df %>%
-  mutate(maximal_trajectory_types_split = map(maximal_trajectory_types, ~stringr::str_split(., "[ ]?,[ ]?", simplify=TRUE))) %>%
+  mutate(maximal_trajectory_types_split = map(maximal_trajectory_types, ~as.character(stringr::str_split(., "[ ]?,[ ]?", simplify=TRUE)))) %>%
   mutate(maximal_trajectory_type = map_chr(maximal_trajectory_types_split, first))
 
 # now add for every trajectory type a column, whether it can handle such a trajectory or not
+trajectory_types <- read_rds(derived_file("trajectory_types.rds", "dataset_characterisation"))
+
 trajectory_type_capabilities <- map(
   method_df$maximal_trajectory_types_split,
   function(maximal_trajectory_types) {
-    trajectory_types %in%
-      unique(unlist(trajectory_type_ancestors[maximal_trajectory_types]))
+    ancestors <- trajectory_types %>%
+      filter(id %in% maximal_trajectory_types) %>%
+      pull(ancestors) %>%
+      unlist() %>%
+      unique()
+    trajectory_types$id %in% ancestors
   }) %>%
-  map(~as_tibble(as.list(setNames(., trajectory_types)))) %>%
+  map(~as_tibble(as.list(setNames(., trajectory_types$id)))) %>%
   bind_rows()
 
 method_df <- method_df %>% bind_cols(trajectory_type_capabilities)

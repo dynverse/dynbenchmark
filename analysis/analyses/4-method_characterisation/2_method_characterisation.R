@@ -184,6 +184,9 @@ saveRDS(platforms, figure_file("platforms.rds"))
 
 ##  ............................................................................
 ##  Trajectory types over time                                              ####
+trajectory_types <- read_rds(derived_file("trajectory_types.rds", "dataset_characterisation"))
+undirected_trajectory_type_order <- trajectory_types %>% filter(directedness == "undirected") %>% pull(id) %>% keep(~.!="unknown")
+
 trajectory_components <- methods %>% filter(is_ti)
 trajectory_components <- trajectory_components %>%
   arrange(date) %>%
@@ -210,7 +213,7 @@ trajectory_components_over_time <- trajectory_components_gathered %>%
   ggplot() +
   geom_area(aes(date, n_methods), stat="identity") +
   geom_area(aes(date, n_methods_oi, fill=trajectory_type), stat="identity") +
-  scale_fill_manual(values=trajectory_type_colors) +
+  scale_fill_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
   facet_grid(.~trajectory_type) +
   theme(legend.position = "none")
 
@@ -260,8 +263,8 @@ method_small_history <- methods %>%
   arrange(-y) %>%
   ggplot(aes(date, y)) +
   ggrepel::geom_label_repel(aes(color=maximal_trajectory_type, label=name, fontface=fontface, size=size), direction="y", max.iter=10000, ylim=c(0, NA), force=10, min.segment.length = 0) +
-  scale_color_manual(values=trajectory_type_colors) +
-  scale_fill_manual(values=trajectory_type_background_colors) +
+  scale_color_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
+  scale_fill_manual(values=setNames(trajectory_types$background_color, trajectory_types$id)) +
   scale_alpha_manual(values=c(`TRUE`=1, `FALSE`=0.6)) +
   scale_x_date(label_long("publishing_date"), limits=c(as.Date("2014-01-01"), as.Date("2018-01-01")), date_breaks="1 year", date_labels="%Y") +
   scale_y_continuous(NULL, breaks=NULL, limits=c(0, 1), expand=c(0, 0)) +
@@ -300,8 +303,8 @@ method_small_distribution <- methods %>%
   geom_bar(aes(fill=trajectory_type, color=trajectory_type), stat="identity", width=0.95) +
   geom_text(aes(label=n), vjust=0) +
   # geom_hline(yintercept = sum(methods$is_ti, na.rm=TRUE), line) +
-  scale_fill_manual(values=trajectory_type_background_colors) +
-  scale_color_manual(values=trajectory_type_colors) +
+  scale_fill_manual(values=setNames(trajectory_types$background_color, trajectory_types$id)) +
+  scale_color_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
   scale_y_continuous(expand=c(0, 2)) +
   theme(legend.position = "None")
 method_small_distribution
