@@ -70,7 +70,7 @@ method_components_ordering_plot <- method_component_counts %>%
     geom_bar(stat="identity") +
     geom_text(aes(y=0, label=component), stat="identity", hjust=0) +
     scale_x_discrete(breaks=c(), expand=c(0, 0), name="") +
-    scale_y_continuous(expand=c(0, 0), breaks=seq(0, 10), name="# methods") +
+    scale_y_continuous(expand=c(0, 0), name="# methods") +
     coord_flip() +
     theme(legend.position="top")
 method_components_ordering_plot
