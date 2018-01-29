@@ -4,7 +4,7 @@ library(cowplot)
 
 experiment("method_characteristics")
 
-source("analysis/analyses/4-method_characterization/0_common.R")
+source("analysis/analyses/4-method_characterisation/0_common.R")
 
 method_df <- read_rds(derived_file("method_df.rds"))
 

@@ -1,0 +1,105 @@
+library(tidygraph)
+library(ggraph)
+library(tidyverse)
+library(dynalysis)
+
+experiment("dataset_characterisation")
+
+
+##  ............................................................................
+##  Create adjacency network of trajectory types                            ####
+
+trajectory_type_undirected_to_directed<- c(
+  "undirected_linear"="directed_linear",
+  "simple_fork"="bifurcation",
+  "complex_fork"="multifurcation",
+  "unrooted_tree"="rooted_tree",
+  "undirected_cycle"="directed_cycle",
+  "undirected_graph"="directed_acyclic_graph",
+  "disconnected_undirected_graph"="disconnected_directed_graph",
+  "unknown"="unknown"
+)
+trajectory_type_edges_undirected <- tribble(
+  ~to, ~from,
+  "undirected_graph", "undirected_cycle",
+  "simple_fork", "undirected_linear",
+  "complex_fork", "simple_fork",
+  "unrooted_tree", "complex_fork",
+  "undirected_graph", "unrooted_tree",
+  "disconnected_undirected_graph", "undirected_graph"
+)
+trajectory_type_edges_undirected_to_directed <- tibble(from=names(trajectory_type_undirected_to_directed), to = trajectory_type_undirected_to_directed)
+trajectory_type_edges_directed <- tibble(
+  from = trajectory_type_undirected_to_directed[trajectory_type_edges_undirected$from], to=trajectory_type_undirected_to_directed[trajectory_type_edges_undirected$to]
+)
+
+trajectory_type_edges <- bind_rows(trajectory_type_edges_undirected, trajectory_type_edges_undirected_to_directed, trajectory_type_edges_directed)
+
+trajectory_types <- bind_rows(
+  tibble(
+    id = names(trajectory_type_undirected_to_directed),
+    directedness = "undirected"
+  ),
+  tibble(
+    id = trajectory_type_undirected_to_directed,
+    directedness = "directed"
+  )
+) %>% group_by(id) %>% filter(row_number() == 1) %>% ungroup()
+
+trajectory_type_dag <- trajectory_type_edges %>% igraph::graph_from_data_frame(vertices=trajectory_types) %>% as_tbl_graph()
+
+trajectory_type_dag %>% ggraph() +
+  geom_edge_link() +
+  geom_edge_link(aes(xend = x+(xend-x)/2, yend = y+(yend - y)/2), arrow=arrow()) +
+  geom_node_label(aes(label=name, fill=directedness)) +
+  theme_graph()
+
+
+##  ............................................................................
+##  Find ancestors of each trajectory type                                  ####
+# now find which trajectory types can also handle "lower" trajectory types
+trajectory_type_ancestors <- trajectory_type_dag %>% igraph::ego(99999999, mode="out") %>% map(names) %>% setNames(names(igraph::V(trajectory_type_dag)))
+
+trajectory_types$ancestors <- trajectory_type_ancestors[trajectory_types$id]
+
+##  ............................................................................
+##  Trajectory type colors                                                  ####
+trajectory_type_colors <- c(
+  "undirected_linear" = "#af0dc7",
+  "simple_fork" = "#0073d7",
+  "unrooted_tree" = "#5ecd2e",
+  "complex_fork" = "#cfbf00",
+  "undirected_cycle" = "#39cccc",
+  "undirected_graph" = "#ff8821",
+  "disconnected_undirected_graph" = "#ff4237",
+  "unknown" = "#AAAAAA"
+)
+trajectory_type_colors[trajectory_type_undirected_to_directed[names(trajectory_type_colors)]] <- trajectory_type_colors
+
+lighten <- function(color, factor=1.4){
+  map_chr(color, function(color) {
+    col <- col2rgb(color)
+    col <- do.call(rgb2hsv, as.list(col))
+    col[1] <- col[1] * 360
+    col[2] <- 0.3
+    col[3] <- 0.9
+    colorspace::hex(do.call(colorspace::HSV, as.list(col)))
+  })
+}
+trajectory_type_background_colors <- set_names(rep("white", length(trajectory_types)), trajectory_types)
+trajectory_type_background_colors <- lighten(trajectory_type_colors, 0.3)
+
+trajectory_types$color <- trajectory_type_colors[trajectory_types$id]
+trajectory_types$background_color <- trajectory_type_background_colors[trajectory_types$id]
+
+##  ............................................................................
+##  Orders                                                                  ####
+undirected_trajectory_type_order <- trajectory_types %>% filter(directedness == "undirected") %>% pull(id) %>% keep(~.!="unknown")
+directed_trajectory_type_order <- trajectory_types %>% filter(directedness == "directed") %>% pull(id) %>% keep(~.!="unknown")
+
+
+
+#   ____________________________________________________________________________
+#   Save                                                                    ####
+write_rds(trajectory_types, derived_file("trajectory_types.rds"))
+write_rds(trajectory_type_dag, derived_file("trajectory_type_dag.rds"))

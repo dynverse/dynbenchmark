@@ -5,7 +5,7 @@ library(tidytext)
 
 experiment("method_characteristics")
 
-source("analysis/analyses/4-method_characterization/0_common.R")
+source("analysis/analyses/4-method_characterisation/0_common.R")
 
 methods_evaluated <- read_rds(derived_file("methods_evaluated.rds"))
 

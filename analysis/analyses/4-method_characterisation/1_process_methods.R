@@ -1,6 +1,4 @@
 # This file will process the method characteristics google sheets
-
-source("analysis/analyses/4-method_characterization/0_common.R")
 library(tidyverse)
 library(googlesheets)
 library(dynalysis)
@@ -20,7 +18,7 @@ method_df$date <- method_df$Preprint
 method_df$date[is.na(method_df$date)] <- method_df$PubDate[is.na(method_df$date)]
 
 # Num citations ---------------------------------------
-script_file <- "analysis/analyses/4-method_characterization/scholar.py"
+script_file <- "analysis/analyses/4-method_characterisation/scholar.py"
 if (!file.exists(script_file)) {
   download.file("https://raw.githubusercontent.com/ckreibich/scholar.py/master/scholar.py", destfile = script_file)
 }

@@ -4,7 +4,7 @@ library(dynplot)
 
 experiment("5-optimise_parameters/8-evaluate_with_real_datasets")
 
-source("analysis/analyses/4-method_characterization/0_common.R")
+source("analysis/analyses/4-method_characterisation/0_common.R")
 
 evals <- read_rds(derived_file("eval_outputs.rds", "5-optimise_parameters/8-evaluate_with_real_datasets"))
 list2env(evals, environment())
