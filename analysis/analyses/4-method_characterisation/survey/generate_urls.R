@@ -4,7 +4,7 @@
 library(tidyverse)
 library(dynalysis)
 
-analysis_folder <- "analysis/analyses/4-method_characterization"
+analysis_folder <- "analysis/analyses/4-method_characterisation"
 people <- readr::read_csv(paste0(analysis_folder, "/survey/people.csv"))
 
 

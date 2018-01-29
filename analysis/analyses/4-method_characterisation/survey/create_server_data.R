@@ -3,7 +3,7 @@ library(googlesheets)
 library(dynalysis)
 
 experiment("method_characteristics")
-analysis_folder <- "analysis/analyses/4-method_characterization"
+analysis_folder <- "analysis/analyses/4-method_characterisation"
 
 checks <- readRDS(derived_file("checks.rds"))
 

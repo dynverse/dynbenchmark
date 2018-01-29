@@ -1,4 +1,4 @@
-source("analysis/analyses/4-method_characterization/svg_helpers.R")
+source("analysis/analyses/4-method_characterisation/svg_helpers.R")
 
 library(tidyverse)
 library(dynalysis)

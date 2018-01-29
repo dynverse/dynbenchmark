@@ -33,7 +33,9 @@ Imports:
   lazyeval,
   SCORPIUS,
   cluster,
-  reshape2
+  reshape2,
+  tidygraph,
+  ggraph
 Remotes:
   rcannood/dyneval,
   rcannood/dynmethods,
