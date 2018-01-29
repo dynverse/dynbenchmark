@@ -33,3 +33,9 @@ label_long <- function(x) {
 label_capitalise <- function(x) {
   x %>% gsub("_", " ", .) %>% Hmisc::capitalize()
 }
+
+
+#' Labeller for facets
+#' @param label_func Which function to use for facet labelling
+#' @export
+label_facet <- function(label_func = label_long) {function(df) {mutate_all(df, label_func)}}

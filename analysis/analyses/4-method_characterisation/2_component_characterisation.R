@@ -1,18 +1,16 @@
 library(tidyverse)
 library(dynalysis)
 library(cowplot)
+library(tidytext)
 
 experiment("method_characteristics")
 
 source("analysis/analyses/4-method_characterization/0_common.R")
 
-method_df_evaluated <- read_rds(derived_file("method_df_evaluated.rds"))
+methods_evaluated <- read_rds(derived_file("methods_evaluated.rds"))
 
-
-library(tidytext)
-library(wordcloud)
-method_components <- method_df_evaluated %>% select(name, components) %>%
-  mutate(components = gsub("\\(.*\\)", "", components)) %>%  # remove anything between ()
+method_components <- methods_evaluated %>% select(name, components) %>%
+  mutate(components = gsub("\\(.*?\\)", "", components)) %>%  # remove anything between ()
   unnest_tokens(component, components, "regex", pattern="[\\{\\}\\[\\]\\|\\+\\=]", to_lower=FALSE) %>%
   mutate(component = trimws(component)) %>%
   filter(nchar(component) > 0)
@@ -76,6 +74,28 @@ method_components_ordering_plot <- method_component_counts %>%
     coord_flip() +
     theme(legend.position="top")
 method_components_ordering_plot
+
+n_methods <- length(unique(method_components$name))
+category_counts <- method_components %>%
+  left_join(categories, "component") %>%
+  group_by(name, category) %>%
+  summarise() %>%
+  group_by(category) %>%
+  count() %>%
+  filter(!is.na(category))
+
+method_components_categories_plot <- bind_rows(
+  category_counts %>% mutate(included = category),
+  category_counts %>% mutate(included = "not", n = n_methods - n)
+) %>%
+  ggplot(aes(1, n, fill=included)) +
+    geom_bar(stat="identity") +
+    facet_wrap(~category, labeller=label_facet()) +
+    coord_polar("y")
+method_components_categories_plot
+
+
+
 
 method_components_plot <- cowplot::plot_grid(method_components_wordcloud_plot, method_components_ordering_plot)
 method_components_plot

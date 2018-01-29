@@ -3,43 +3,18 @@ library(dynalysis)
 library(cowplot)
 
 experiment("method_characteristics")
-
 source("analysis/analyses/4-method_characterization/0_common.R")
 
-method_df <- read_rds(derived_file("method_df.rds"))
+methods_evaluated <- read_rds(derived_file("methods_evaluated.rds"))
+methods <- read_rds(derived_file("methods.rds"))
+method_qc <- read_rds(derived_file("method_qc.rds"))
 
-# combine with qc scores
-method_qc <- readRDS(derived_file("method_qc.rds"))
-method_qc_scores <- method_qc %>%
-  group_by(method_id) %>%
-  summarise(qc_score=sum(answer * score * weight)/sum(score * weight)) %>%
-  arrange(-qc_score)
-
-method_qc_category_scores <- method_qc %>%
-  group_by(method_id, category) %>%
-  summarise(qc_score=sum(answer * score * weight)/sum(score * weight)) %>%
-  ungroup()
-
-method_qc_application_scores <- method_qc %>%
-  gather(application, application_applicable, !!applications) %>%
-  filter(application_applicable) %>%
-  group_by(method_id, application) %>%
-  summarise(score=sum(answer * score * weight)/sum(score * weight))
-
-method_df <- method_df %>%
-  left_join(method_qc_scores, c("name"="method_id"))
-
-method_df <- method_df %>%
-  mutate(evaluated = wrapper == "Done")
-
-method_df_evaluated <- method_df %>%
-  filter(evaluated)
-
+undirected_trajectory_type_order <- trajectory_type_nodes %>% filter(directedness == "undirected") %>% pull(id) %>% keep(~.!="unknown")
 
 #######################"
 
 # Comparing number of citations, qc score, and time -------------------------------------
-g1 <- ggplot(method_df_evaluated, aes(date, qc_score)) +
+g1 <- ggplot(methods_evaluated, aes(date, qc_score)) +
   geom_smooth(span=2) +
   geom_point() +
   ggrepel::geom_label_repel(aes(label = name)) +
@@ -50,7 +25,7 @@ g1
 write_rds(g1, figure_file("ncitations_over_time.rds"))
 ggsave(figure_file("time_vs_qcscore.png"), g1, width = 16, height = 8)
 
-g2 <- ggplot(method_df_evaluated, aes(date, Citations+1)) +
+g2 <- ggplot(methods_evaluated, aes(date, Citations+1)) +
   geom_smooth(method="lm") +
   geom_point() +
   ggrepel::geom_label_repel(aes(label = name), nudge_y = .25) +
@@ -60,7 +35,7 @@ g2 <- ggplot(method_df_evaluated, aes(date, Citations+1)) +
 g2
 ggsave(figure_file("time_vs_citations.png"), g2, width = 16, height = 8)
 
-g3 <- ggplot(method_df_evaluated, aes(Citations+1, qc_score)) +
+g3 <- ggplot(methods_evaluated, aes(Citations+1, qc_score)) +
   geom_smooth(method="lm") +
   geom_point() +
   ggrepel::geom_label_repel(aes(label = name)) +
@@ -72,7 +47,7 @@ ggsave(figure_file("citations_vs_qcscore.png"), g3, width = 8, height = 8)
 
 
 # Publication timeline of methods -----------------
-method_publication_data <- method_df %>% filter(is_ti) %>%
+method_publication_data <- methods %>% filter(is_ti) %>%
   gather("publication_type", "publication_date", c(PubDate, Preprint)) %>%
   select(name, publication_type, publication_date) %>%
   drop_na() %>%
@@ -180,7 +155,7 @@ saveRDS(n_methods_over_time, figure_file("n_methods_over_time.rds"))
 
 # Statistics -------------------------------------
 # Platforms ------------------------------
-platforms <- method_df_evaluated %>% separate_rows(platform=platforms, sep=", ") %>%
+platforms <- methods_evaluated %>% separate_rows(platform=platforms, sep=", ") %>%
   group_by(platforms) %>%
   summarise(quantity = n()) %>%
   arrange(quantity) %>%
@@ -200,7 +175,7 @@ saveRDS(platforms, figure_file("platforms.rds"))
 
 
 # Trajectory components over time -------------------------------------------
-trajectory_components <- method_df_evaluated
+trajectory_components <- methods %>% filter(is_ti)
 trajectory_components <- trajectory_components %>%
   arrange(date) %>%
   mutate(count = 1)
@@ -215,8 +190,8 @@ add_step <- function(df) {
 trajectory_components_step <- add_step(arrange(trajectory_components, date))
 
 trajectory_components_gathered <- trajectory_components_step %>%
-  gather(trajectory_type, can_trajectory_type, !!trajectory_types) %>%
-  mutate(trajectory_type = factor(trajectory_type, levels=trajectory_types)) %>%
+  gather(trajectory_type, can_trajectory_type, !!undirected_trajectory_type_order) %>%
+  mutate(trajectory_type = factor(trajectory_type, levels=undirected_trajectory_type_order)) %>%
   group_by(trajectory_type) %>%
   arrange(date) %>%
   mutate(n_methods = cumsum(count), n_methods_oi = cumsum(count * can_trajectory_type))
@@ -236,7 +211,7 @@ saveRDS(trajectory_components_over_time, figure_file("trajectory_components_over
 
 
 # Method aspects -------------------------------------------
-method_order <- method_df_evaluated %>% arrange(qc_score) %>% pull(name)
+method_order <- methods_evaluated %>% arrange(qc_score) %>% pull(name)
 horizontal_lines <- geom_hline(aes(yintercept = y+0.5), alpha=0.2, data=tibble(y=seq_along(method_order)))
 
 rotated_axis_text_x <- element_text(angle=45, hjust=1)
@@ -259,6 +234,9 @@ base_scale_x <- scale_x_discrete(drop=FALSE, expand=c(0, 0), labels=labels, name
 
 
 # QC
+method_qc_scores <- read_rds(derived_file("method_qc_scores.rds"))
+method_qc_category_scores <- read_rds(derived_file("method_qc_category_scores.rds"))
+method_qc_application_scores <- read_rds(derived_file("method_qc_application_scores.rds"))
 method_qc_category <- method_qc_category_scores %>%
   mutate(name = factor(method_id, levels=method_order)) %>%
   ggplot(aes(category, name)) +
@@ -305,8 +283,8 @@ method_qc_overall_width <- 1
 
 # Prior information
 priors <- c("start_cell_ids", "grouping_assignment", "time", "timecourse",	"end_cell_ids",	"n_end_states","n_branches", "marker_gene_ids")
-prior_usage_colors <- c("?" = "#AAAAAA", "No" = "#EEEEEE", "Required" = "#FF4136", "CanUse" = "#0074D9", "CanRoot" = "#39CCCC", "CanUseSingle" = "#c5e4ff")
-prior_information <- method_df_evaluated %>%
+prior_usage_colors <- c("?" = "#AAAAAA", "no" = "#EEEEEE", "required" = "#FF4136", "can_use" = "#0074D9", "can_root" = "#39CCCC")
+prior_information <- methods_evaluated %>%
   gather(prior_id, prior_usage, !!priors, factor_key=TRUE) %>%
   select(prior_id, prior_usage, name) %>%
   mutate(name = factor(name, levels=method_order)) %>%
@@ -324,9 +302,9 @@ prior_information <- method_df_evaluated %>%
 prior_information
 
 
-prior_usages <- c("CanRoot", "CanUse", "Required")
+prior_usages <- c("can_root", "can_use", "required")
 prior_usages_text <- c(CanRoot = "", CanUse = "", Required = "!", No = "")
-prior_usage <- method_df_evaluated %>%
+prior_usage <- methods_evaluated %>%
   gather(prior_id, prior_usage, !!priors, factor_key=TRUE) %>%
   select(prior_id, prior_usage, name) %>%
   group_by(name, prior_usage) %>%
@@ -355,8 +333,8 @@ prior_usage
 prior_usage_width <- length(prior_usages)/2
 
 # Trajectory components
-trajectory_components_plot <- method_df_evaluated %>%
-  gather(trajectory_type, can, !!trajectory_types, factor_key=TRUE) %>%
+trajectory_components_plot <- methods_evaluated %>%
+  gather(trajectory_type, can, !!undirected_trajectory_type_order, factor_key=TRUE) %>%
   select(trajectory_type, can, name) %>%
   mutate(name = factor(name, levels=method_order)) %>%
   drop_na() %>%
@@ -369,7 +347,7 @@ trajectory_components_plot <- method_df_evaluated %>%
     horizontal_lines +
     ggtitle("Detectable trajectory types")
 trajectory_components_plot
-trajectory_components_width <- length(trajectory_types)
+trajectory_components_width <- length(undirected_trajectory_type_order)
 
 # Maximal trajectory components
 lighten <- function(color, factor=1.4){
@@ -383,8 +361,8 @@ lighten <- function(color, factor=1.4){
   })
 }
 
-maximal_trajectory_components_plot <- method_df_evaluated %>%
-  gather(trajectory_type, can, !!trajectory_types, factor_key=TRUE) %>%
+maximal_trajectory_components_plot <- methods_evaluated %>%
+  gather(trajectory_type, can, !!undirected_trajectory_type_order, factor_key=TRUE) %>%
   group_by(name) %>%
   filter(can) %>%
   filter(row_number() == n()) %>%
@@ -392,14 +370,13 @@ maximal_trajectory_components_plot <- method_df_evaluated %>%
   ungroup() %>%
   mutate(name = factor(name, levels=method_order)) %>%
   ggplot(aes("trajectory_type", name)) +
-    geom_tile(aes(fill=as.character(trajectory_type))) +
+    geom_tile(fill="white") +
     geom_text(aes(label=trajectory_type), hjust=0, vjust=0) +
     base_theme +
     base_scale_y + base_scale_x +
     horizontal_lines +
     theme(legend.position="none") +
-    ggtitle("Trajectory\ntype") +
-    scale_fill_manual(values=trajectory_type_background_colors)
+    ggtitle("Trajectory\ntype")
 maximal_trajectory_components_plot
 maximal_trajectory_components_width <- 2
 
@@ -416,17 +393,7 @@ saveRDS(method_characteristics, figure_file("method_characteristics.rds"))
 
 
 ## Small history
-method_df %>%
-  filter(is_ti ) %>%
-  mutate(maximal_trajectory_type = ifelse(is.na(maximal_trajectory_type), "unknown", as.character(maximal_trajectory_type))) %>%
-  ggplot(aes(date)) +
-  geom_dotplot(aes(fill=maximal_trajectory_type, color=maximal_trajectory_type), binwidth=50, method = "histodot", binpositions="all", stackgroups=TRUE, stackratio=1.428571, dotsize=0.7) +
-  scale_y_continuous(NULL, breaks=NULL, expand=c(0.02, 0)) +
-  scale_fill_manual(values=trajectory_type_colors) +
-  scale_color_manual(values=trajectory_type_colors) +
-  theme(legend.position="none")
-
-method_small_history <- method_df %>%
+method_small_history <- methods %>%
   filter(is_ti) %>%
   mutate(
     maximal_trajectory_type = ifelse(is.na(maximal_trajectory_type), "unknown", as.character(maximal_trajectory_type)),
@@ -437,7 +404,7 @@ method_small_history <- method_df %>%
   mutate() %>%
   arrange(-y) %>%
   ggplot(aes(date, y)) +
-  ggrepel::geom_label_repel(aes(color=maximal_trajectory_type, label=name, fontface=fontface, size=size), direction="y", max.iter=10000, ylim=c(0, NA), force=10) +
+  ggrepel::geom_label_repel(aes(color=maximal_trajectory_type, label=name, fontface=fontface, size=size), direction="y", max.iter=10000, ylim=c(0, NA), force=10, min.segment.length = 0) +
   scale_color_manual(values=trajectory_type_colors) +
   scale_fill_manual(values=trajectory_type_background_colors) +
   scale_alpha_manual(values=c(`TRUE`=1, `FALSE`=0.6)) +
@@ -464,17 +431,17 @@ xml2::write_xml(svg, figure_file("method_small_history.svg"))
 
 ###
 
-method_small_distribution <- method_df %>%
+method_small_distribution <- methods %>%
   filter(is_ti) %>%
-  gather(trajectory_type, can_handle, !!trajectory_types) %>%
-  mutate(trajectory_type = factor(trajectory_type, levels=trajectory_types)) %>%
+  gather(trajectory_type, can_handle, !!undirected_trajectory_type_order) %>%
+  mutate(trajectory_type = factor(trajectory_type, levels=undirected_trajectory_type_order)) %>%
   filter(can_handle) %>%
   group_by(trajectory_type) %>%
   count() %>%
   ggplot(aes(trajectory_type, n)) +
     geom_bar(aes(fill=trajectory_type, color=trajectory_type), stat="identity", width=0.95) +
     geom_text(aes(label=n), vjust=0) +
-    # geom_hline(yintercept = sum(method_df$is_ti, na.rm=TRUE), line) +
+    # geom_hline(yintercept = sum(methods$is_ti, na.rm=TRUE), line) +
     scale_fill_manual(values=trajectory_type_background_colors) +
     scale_color_manual(values=trajectory_type_colors) +
     scale_y_continuous(expand=c(0, 2)) +
@@ -483,11 +450,33 @@ method_small_distribution
 ggsave(figure_file("method_small_distribution.svg"), method_small_distribution, height = 2, width = 5)
 
 
-method_df %>%
+methods %>%
   filter(is_ti) %>%
-  gather(trajectory_type, can_handle, !!trajectory_types) %>%
-  mutate(trajectory_type = factor(trajectory_type, levels=trajectory_types)) %>%
+  gather(trajectory_type, can_handle, !!undirected_trajectory_type_order) %>%
+  mutate(trajectory_type = factor(trajectory_type, levels=undirected_trajectory_type_order)) %>%
   filter(can_handle) %>%
-  group_by(trajectory_type, evaluated) %>%
-  count() %>%
-  arrange(trajectory_type, -evaluated)
+  group_by(trajectory_type) %>%
+  count()
+
+### Table
+date_cutoff <- as.Date("2017-05-01")
+date_filter <- methods$date > date_cutoff
+methods$non_inclusion_reasons_split[date_filter] <- map(methods$non_inclusion_reasons_split[date_filter], c, "date") %>% map(unique)
+
+methods$non_inclusion_reasons_footnotes <- methods$non_inclusion_reasons_split %>%
+  map(function(non_inclusion_reasons) {
+    slice(non_inclusion_reasons_footnotes, match(non_inclusion_reasons, id))$footnote
+  })
+
+methods %>%
+  filter(is_ti) %>%
+  arrange(date) %>%
+  mutate(
+    included = ifelse(evaluated, "✓", map(non_inclusion_reasons_footnotes, paste0, collapse=" ")),
+    date = strftime(date, "%d/%m/%Y"),
+    maximal_trajectory_type = label_long(maximal_trajectory_type)
+  ) %>%
+  select(name, date, maximal_trajectory_type, included) %>%
+  rename_all(label_long) %>%
+  saveRDS(figure_file("methods_table.rds"))
+

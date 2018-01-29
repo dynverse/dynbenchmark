@@ -1,5 +1,6 @@
 # This file will process the method characteristics google sheets
 
+source("analysis/analyses/4-method_characterization/0_common.R")
 library(tidyverse)
 library(googlesheets)
 library(dynalysis)
@@ -37,27 +38,25 @@ method_df <- method_df %>%
   mutate(citations = pbapply::pbsapply(cl=4, GScholarClusterID, num_citations_by_clusterid))
 
 # Trajectory components --------------------------
+# split maximal trajectory types
 method_df <- method_df %>%
-  mutate(maximal_trajectory_type = factor(maximal_trajectory_type, levels = c("undirected_linear", "simple_fork", "complex_fork", "unrooted_tree", "undirected_graph", "disconnected_undirected_graph"))) %>%
-  mutate(
-    disconnected_undirected_graph = as.numeric(maximal_trajectory_type) >= 6 & !grepl("disconnected_undirected_graph", unable_trajectory_type),
-    undirected_graph = as.numeric(maximal_trajectory_type) >= 5 & !grepl("undirected_graph", unable_trajectory_type),
-    undirected_cycle = as.numeric(maximal_trajectory_type) >= 5 & !grepl("undirected_graph", unable_trajectory_type),
-    unrooted_tree = as.numeric(maximal_trajectory_type) >= 4 & !grepl("unrooted_tree", unable_trajectory_type),
-    complex_fork = as.numeric(maximal_trajectory_type) >= 3 & !grepl("complex_fork", unable_trajectory_type),
-    simple_fork = as.numeric(maximal_trajectory_type) >= 2 & !grepl("simple_fork", unable_trajectory_type),
-    undirected_linear = as.numeric(maximal_trajectory_type) >= 1 & !grepl("undirected_linear", unable_trajectory_type)
-  )
+  mutate(maximal_trajectory_types_split = map(maximal_trajectory_types, ~stringr::str_split(., "[ ]?,[ ]?", simplify=TRUE))) %>%
+  mutate(maximal_trajectory_type = map_chr(maximal_trajectory_types_split, first))
 
-# source("analysis/analyses/4-method_characterization/0_common.R")
-# method_df_evaluated <- method_df_evaluated %>%
-#   gather("trajectory_type", "can_trajectory_type", !!trajectory_types) %>%
-#   group_by(name) %>%
-#   filter(can_trajectory_type) %>%
-#   filter(row_number() == n()) %>%
-#   select(name, trajectory_type) %>%
-#   ungroup() %>%
-#   right_join(method_df_evaluated, by = "name")
+# now add for every trajectory type a column, whether it can handle such a trajectory or not
+trajectory_type_capabilities <- map(
+  method_df$maximal_trajectory_types_split,
+  function(maximal_trajectory_types) {
+    trajectory_types %in%
+      unique(unlist(trajectory_type_ancestors[maximal_trajectory_types]))
+  }) %>%
+  map(~as_tibble(as.list(setNames(., trajectory_types)))) %>%
+  bind_rows()
+
+method_df <- method_df %>% bind_cols(trajectory_type_capabilities)
+
+## Non inclusion reasons
+method_df$non_inclusion_reasons_split <- method_df$non_inclusion_reasons %>% str_split("[ ]?,[ ]?")
 
 # Saving -------------------------
 write_rds(method_df, derived_file("method_df.rds"))
