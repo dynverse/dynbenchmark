@@ -13,7 +13,7 @@ output:
 bibliography: references.bib
 csl: nature-biotechnology.csl
 abstract: |
-  Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Dozens of trajectory inference methods have been developed, early methods mostly focussing on linear trajectories, while recently methods also model more complex branching trajectories. However, the performance of these methods have not yet been comprehensively evaluated. Here, we compare a total of 22 trajectory inference methods, on both realistic synthetic datasets and a large set is real datasets. We employ a novel parameter optimisation procedure, and compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at www.github.com/dynverse.
+  Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Since 2014, already dozens of trajectory inference methods have been developed, each with its own set of methodological characteristics. This makes a direct comparison between trajectory inference methods often difficult, and as a result a comprehensive assessment of the performance and robustness of each method is still lacking. We developed a framework of data structures for trajectory inference methods in order to make their results comparable to each other and to a gold standard, when available. In this work, we compare the results from a total of 22 trajectory inference methods, on a large collection of real datasets and realistic synthetic datasets. We employ a novel parameter optimisation procedure, and compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at www.github.com/dynverse.
 keywords: |
   trajectory inference; pseudotemporal ordering; single-cell transcriptomics
 highlights: |
@@ -28,7 +28,7 @@ highlights: |
 <!----
 Tips for working in this document:
 * Go to tools -> perferences and remove Use smart quotes
-* Add enters after every paragraph (this is markdown!)
+* Add extra enters after every paragraph (this is markdown!)
 
 
 TITLES: 
@@ -57,7 +57,7 @@ source("setup.R")
 # Introduction
 
 
-Single-cell -omics technologies now make it possible to more accurately model biological systems than ever before. One area where single-cell data can be particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation. When cells are sampled from a population in which cells are at different unknown points in the dynamic process, trajectory inference methods can be used to computationally order these cells along their dynamic process [@cannoodt_computational_2016]. Because they offer an unbiased and transcriptome-wide understanding of the dynamic process, trajectories then allow the identification new (primed) subsets of cells, delineation the exact wiring of a differentiation tree and inference of regulatory interaction responsible for a bifurcation refs.
+Single-cell -omics technologies now make it possible to more accurately model biological systems than ever before. One area where single-cell data can be particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation. When cells are sampled from a population in which cells are at different unknown points in the dynamic process, trajectory inference methods can be used to computationally order these cells along their dynamic process [@cannoodt_computational_2016]. Because they offer an unbiased and transcriptome-wide understanding of the dynamic process, trajectories then allow the identification of new (primed) subsets of cells, delineation the exact wiring of a differentiation tree and inference of regulatory interaction responsible for a bifurcation refs.
 
 
 ```{r}
@@ -86,7 +86,7 @@ Although trajectory inference methods use a variety of algorithms and subcompone
 
 
 <!--- Common framework of TI, different components, naturally progressing towards the need for an evaluation --->
-Given[a] this plethora of available trajectory inference methods, it is important that methods are compared, so that users can use the most optimal method available for their problem. Moreover, new methods need to be rigorously tested, so that development can focus on improving the current state-of-the-art. In this study, we therefore for the first time developed a comprehensive evaluation framework for trajectory inference methods. We test both on synthetic data, for which the gold standard is known, and real data, for which in some cases the gold standard can be extracted from expert knowledge. We include a rigorous parameter optimisation, making sure that parameters are optimized while avoiding overfitting on characteristics of specific datasets. To make our framework reusable and extendable, we make use of continuous analysis [@beaulieu-jones_reproducibility_2017], which allows the developers of new methods to easily test their methods and compare them against the state-of-the-art.
+Given this plethora of available trajectory inference methods, it is important that methods are compared, so that users can use the most optimal method available for their problem. Moreover, new methods need to be rigorously tested, so that development can focus on improving the current state-of-the-art. In this study, we therefore for the first time developed a comprehensive evaluation framework for trajectory inference methods. We test both on synthetic data, for which the gold standard is known, and real data, for which in some cases the gold standard can be extracted from expert knowledge. We include a rigorous parameter optimisation, making sure that parameters are optimized while avoiding overfitting on characteristics of specific datasets. To make our framework reusable and extendable, we make use of continuous analysis [@beaulieu-jones_reproducibility_2017], which allows the developers of new methods to easily test their methods and compare them against the state-of-the-art.
 
 
 # Results
@@ -95,11 +95,20 @@ Given[a] this plethora of available trajectory inference methods, it is importan
 
 ```{r}
 # Load method characteristics
-method_df <- readRDS(derived_file("method_df.rds", experiment_id="method_characteristics"))
+methods <- readRDS(derived_file("methods.rds", experiment_id="method_characteristics"))
 ```
 
 
-We gathered a list of `r sum(method_df$is_ti == "Yup", na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(method_df$wrapper == "Done")` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized all methods in four different ways: possible trajectory structures, implementation quality, prior information and the underlying algorithm (`r ref("fig", "method_characteristics")`).
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized all methods in four different ways: possible trajectory structures, implementation quality, prior information and the underlying algorithm (`r ref("fig", "method_characteristics")`).
+
+
+`r ref("table", "methods", anchor=TRUE)` Characterisation and quality control of the evaluated trajectory inference methods
+```{r}
+read_rds(figure_file("methods_table.rds", "method_characteristics")) %>%
+        knitr::kable()
+```
+
+
 
 
 At the level of trajectory structures, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "method_characteristics", "a")`). However, only one method (SLICER) can currently handle more complex graph structures which can include loops (`r ref("sfig", "methods_over_time", "b")`).
@@ -119,7 +128,7 @@ The underlying algorithms can be divided into several modules, and these frequen
 
 
 `r anchor("fig", "method_characteristics")`
-![](`r figure_file("figure_methods.svg", experiment_id="method_characteristics")`)
+![](`r figure_file("method_characteristics.svg", experiment_id="method_characteristics")`)
 `r ref("fig", "method_characteristics", anchor=TRUE)` First characterization of each method.
 
 
@@ -147,11 +156,11 @@ readRDS(figure_file("method_components_plot.rds", experiment_id="method_characte
 ```
 ### Evaluation overview
 `r anchor("fig", "evaluation_overview")`
-![evaluation_overview](../figures/ti_evaluation_overview_v1.svg)
+![](`r figure_file("ti_evaluation_overview_v1.svg", experiment_id="evaluation_overview")`)
 `r ref("fig", "evaluation_overview")` Overview of the evaluation
 
 
-Our evaluation was structured in three main phases. In the first phase, we used toy data as a positive control for each method, assessing whether it can detect the correct trajectories in very simplistic data. Next, we generated synthetic data from a model of gene regulation, combined with a simulation of the technical variation introduced by single-cell RNA sequencing. We used this synthetic data in a parameter optimization procedure, where we used cross-validation between datasets to avoid overfitting on particular data set structures. Finally, in the third phase, we used the optimized parameters to score the performance of each method on real data. We split the real datasets in two groups based on the type of reference trajectory available. The reference in datasets with a silver standard were defined by the author’s based on the expression data itself, while the reference for gold standard was defined using external information, such as fluorescent sorting or time series.[b]
+Our evaluation was structured in three main phases. In the first phase, we used toy data as a positive control for each method, assessing whether it can detect the correct trajectories in very simplistic data. Next, we generated synthetic data from a model of gene regulation, combined with a simulation of the technical variation introduced by single-cell RNA sequencing. We used this synthetic data in a parameter optimization procedure, where we used cross-validation between datasets to avoid overfitting on particular data set structures. Finally, in the third phase, we used the optimized parameters to score the performance of each method on real data. We split the real datasets in two groups based on the type of reference trajectory available. The reference in datasets with a silver standard were defined by the author’s based on the expression data itself, while the reference for gold standard was defined using external information, such as fluorescent sorting or time series.[a]
 ### Score metrics and parameter optimisation
 
 
@@ -263,5 +272,4 @@ git2r::repository(".")
 # References 
 
 
-[a]Context and general overview of our evaluation
-[b]Outdated
+[a]Outdated
