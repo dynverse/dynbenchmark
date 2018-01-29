@@ -18,22 +18,9 @@ method_df$date <- method_df$Preprint
 method_df$date[is.na(method_df$date)] <- method_df$PubDate[is.na(method_df$date)]
 
 # Num citations ---------------------------------------
-script_file <- "analysis/analyses/4-method_characterisation/scholar.py"
-if (!file.exists(script_file)) {
-  download.file("https://raw.githubusercontent.com/ckreibich/scholar.py/master/scholar.py", destfile = script_file)
-}
+library(rcrossref)
 
-num_citations_by_clusterid <- function(clusterid, scholar_file = script_file) {
-  tryCatch({
-    command <- paste0("python ", scholar_file, " -C ", clusterid, " --csv-header")
-    output <- system(command, intern = T)
-    tab <- readr::read_delim(paste(gsub("\n", " ", output), collapse = "\n"), delim = "|")
-    sum(tab$num_citations)
-  }, error = function(e) NA)
-}
-
-method_df <- method_df %>%
-  mutate(citations = pbapply::pbsapply(cl=4, GScholarClusterID, num_citations_by_clusterid))
+method_df$ncitations <- pbapply::pbsapply(cl=4, method_df$DOI, cr_citation_count)
 
 # Trajectory components --------------------------
 # split maximal trajectory types

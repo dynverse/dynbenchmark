@@ -30,8 +30,8 @@ g1
 write_rds(g1, figure_file("ncitations_over_time.rds"))
 ggsave(figure_file("time_vs_qcscore.png"), g1, width = 16, height = 8)
 
-g2 <- ggplot(methods_evaluated, aes(date, Citations+1)) +
-  geom_smooth(method="lm") +
+g2 <- ggplot(methods_evaluated, aes(date, ncitations+1)) +
+  geom_smooth(span=2) +
   geom_point() +
   ggrepel::geom_label_repel(aes(label = name), nudge_y = .25) +
   cowplot::theme_cowplot() +
@@ -40,8 +40,8 @@ g2 <- ggplot(methods_evaluated, aes(date, Citations+1)) +
 g2
 ggsave(figure_file("time_vs_citations.png"), g2, width = 16, height = 8)
 
-g3 <- ggplot(methods_evaluated, aes(Citations+1, qc_score)) +
-  geom_smooth(method="lm") +
+g3 <- ggplot(methods_evaluated, aes(ncitations+1, qc_score)) +
+  geom_smooth(span=2) +
   geom_point() +
   ggrepel::geom_label_repel(aes(label = name)) +
   cowplot::theme_cowplot() +
