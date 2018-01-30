@@ -16,7 +16,7 @@ PRISM:::rsync_remote(
 )
 
 
-# Download ---------------------
+# Upload ---------------------
 PRISM:::rsync_remote(
   remote_dest = "prism",
   path_dest = "/group/irc/shared/dynalysis/analysis/data/derived_data/datasets/real/",
