@@ -17,6 +17,46 @@ methods_evaluated <- readRDS(derived_file("methods_evaluated.rds"))
 checks <- readRDS(derived_file("checks.rds"))
 ```
 
+Table for the different checks
+```{r, results="asis"}
+library(kableExtra)
+table <- checks %>% 
+  mutate(
+    weight = cell_spec(
+      pritt("<span style='display: none;'>{question_id}</span> {weight}"), #add an invisible grouping indicator
+      background = spec_color(weight, end=0.9,option="A",direction=-1),
+      escape=FALSE,
+      color="white"
+    )
+  ) %>%
+  mutate(
+    references = ifelse(!is.na(references), pritt("[{references}]"), ""),
+    references = pritt("<span style='display: none;'>{question_id}</span> {references}")
+  ) %>% 
+  select(question, weight, references, score, scoring, !!qc_applications$application) %>% 
+  mutate_at(vars(!!qc_applications$application), ~ifelse(., "✓", "")) %>% 
+  rename_all(label_long) %>% 
+  knitr::kable("html", escape=FALSE) %>% 
+  kable_styling(bootstrap_options = "striped") %>% 
+  collapse_rows(columns=1:3)
+
+for (category in unique(checks$category)) {
+  color <- qc_categories %>% filter(category == !!category) %>% pull(color)
+  table <- table %>% 
+    group_rows(
+      label_long(category), 
+      min(which(checks$category == category)), 
+      max(which(checks$category == category)),
+      label_row_css = pritt("background-color: {color}; color: #fff;")
+  )
+}
+  
+table %>% write_rds(figure_file("qc_checks.rds"))
+
+table
+```
+
+
 Comparing qc and citations overtime     
 ```{r, fig.width=16, fig.height=8}
 g1 <- ggplot(methods_evaluated, aes(date, qc_score)) +

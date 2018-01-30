@@ -34,7 +34,8 @@ create_names <- list(
   sfig = function(i) pritt("Supplementary Figure {i}"),
   fig = function(i) pritt("Figure {i}"),
   snote = function(i) pritt("Supplementary Note {i}"),
-  table = function(i) pritt("Table {i}")
+  table = function(i) pritt("Table {i}"),
+  stable = function(i) pritt("Supplementary Table {i}")
 )
 sfigs <- tibble(ref_id = character(), fig = list(), caption = character(), width=numeric(), height=numeric())
 add_sfig <- function(fig, ref_id, caption, width=15, height=10) {
@@ -44,5 +45,14 @@ add_sfig <- function(fig, ref_id, caption, width=15, height=10) {
     caption=caption,
     width=width,
     height=height
+  )
+}
+
+stables <- tibble(ref_id = character(), table = list(), caption = character())
+add_stable <- function(table, ref_id, caption) {
+  stables <<- stables %>% add_row(
+    table = list(table),
+    ref_id = ref_id,
+    caption=caption
   )
 }
