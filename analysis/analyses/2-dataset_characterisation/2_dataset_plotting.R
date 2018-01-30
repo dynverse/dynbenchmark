@@ -5,18 +5,35 @@ library(dynalysis)
 
 experiment("dataset_characterisation")
 
+tasks <- read_rds(derived_file("tasks.rds"))
+
+
+load_expression <- function(expression) {
+  if(class(expression) == "matrix") {
+    expression
+  } else {
+    expression()
+  }
+}
+
 # Check the tasks ------------------------------------
 # task_checks <- map_prism(task_ids, function(task_id) {
-task_checks <- pmap(as.list(tasks), function(...) {
-  # task <- extract_row_to_list(tasks, 1)
-  task <- list(...)
-  library(tidyverse)
-  print(paste0("-------------", task$id))
-  print("loading")
+task_checks <- pbapply::pblapply(tasks$id, function(task_id) {
+  print(task_id)
+  task <- extract_row_to_list(tasks, which(tasks$id == task_id))
+  expression <- load_expression(task$expression)
+  counts <- load_expression(task$counts)
 
-  all_milestones_represented <- all(task$milestone_ids %in% task$prior_information$grouping_assignment$group_id)
+  checks <- list(id = task_id)
 
-  lst(all_milestones_represented, task_id = task$id, n_cells = nrow(task$cell_info), n_genes = nrow(task$feature_info)) %>% as_tibble()
+  checks$all_milestones_represented <- all(task$milestone_ids %in% task$prior_information$grouping_assignment$group_id)
+
+  checks$marker_feature_ids_in_expression <- all(task$prior_information$marker_feature_ids %in% colnames(expression))
+
+  checks$n_genes <- nrow(task$feature_info)
+  checks$n_cells <- nrow(task$cell_info)
+
+  checks
 }) %>% bind_rows()
 
 task_checks %>% bind_cols(tasks) %>% ggplot() + geom_point(aes(n_genes, n_cells, color=category))

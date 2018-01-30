@@ -23,15 +23,17 @@ library(kableExtra)
 table <- checks %>% 
   mutate(
     weight = cell_spec(
-      pritt("<span style='display: none;'>{question_id}</span> {weight}"), #add an invisible grouping indicator
+      pritt("<span style='display: none;'>{question_id}</span> {weight}"), # add an invisible grouping indicator
       background = spec_color(weight, end=0.9,option="A",direction=-1),
       escape=FALSE,
       color="white"
     )
   ) %>%
   mutate(
-    references = ifelse(!is.na(references), pritt("[{references}]"), ""),
-    references = pritt("<span style='display: none;'>{question_id}</span> {references}")
+    references = references %>% 
+      gsub(",", "; ", .) %>% 
+      {ifelse(!is.na(.), pritt("[{.}]"), "")} %>%
+      {pritt("<span style='display: none;'>{question_id}</span> {.}")} # add an invisible grouping indicator
   ) %>% 
   select(question, weight, references, score, scoring, !!qc_applications$application) %>% 
   mutate_at(vars(!!qc_applications$application), ~ifelse(., "✓", "")) %>% 
