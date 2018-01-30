@@ -8,12 +8,12 @@ experiment("dataset_characterisation")
 
 tasks <- readRDS(derived_file("tasks.rds"))
 trajectory_types <- readRDS(derived_file("trajectory_types.rds"))
-
-## Pie charts --------------------------------
 tasks_real <- tasks %>% filter(category == "real")
 
 technology_colors <- unique(tasks_real$technology) %>% {setNames(RColorBrewer::brewer.pal(length(.), "Set1"), .)}
 
+##  ............................................................................
+##  Pie charts                                                              ####
 pie <- function(tasks, what = "technology") {
   label <-"{label_short(variable_of_interest, 15)}: {n}"
   if (what == "standard") {
@@ -52,7 +52,9 @@ dataset_characterisation_pies
 
 
 
-## Distributions -------------------------------------
+
+##  ............................................................................
+##  Distributions                                                           ####
 tasks_real$ngenes <- map_int(tasks_real$normalisation_info, ~last(.$normalisation_steps[["ngenes"]]))
 tasks_real$ncells <- map_int(tasks_real$normalisation_info, ~last(.$normalisation_steps[["ncells"]]))
 dataset_characterisation_distributions <- c("ncells", "ngenes", "date") %>% map(function(what) {
@@ -80,7 +82,9 @@ dataset_characterisation_distributions <- c("ncells", "ngenes", "date") %>% map(
 dataset_characterisation_distributions
 
 
-## Final figure -----------------------
+
+##  ............................................................................
+##  Small characterisation figure                                           ####
 dataset_characterisation_plot <- cowplot::plot_grid(
   dataset_characterisation_distributions,
   dataset_characterisation_pies,
@@ -91,3 +95,38 @@ dataset_characterisation_plot
 
 
 cowplot::save_plot(figure_file("dataset_characterisation.svg"), dataset_characterisation_plot, base_height = 6, base_width = 9)
+
+
+
+##  ............................................................................
+##  Datasets table                                                          ####
+library(kableExtra)
+table <- tasks_real %>%
+  select(technology, gse, id, trajectory_type, organism, standard, ncells, ngenes) %>%
+  mutate(
+    technology = cell_spec(
+      glue::glue(paste0("<span style='display: none;'>{gse}</span> {technology}")),
+      background=technology_colors[technology],
+      color="white",
+      escape=FALSE,
+    ),
+    trajectory_type = kableExtra::cell_spec(label_long(trajectory_type), background=set_names(trajectory_types$color, trajectory_types$id)[trajectory_type], color="white"),
+    ncells = cell_spec(
+      formattable::color_tile("white", "orange")(ncells),
+      escape=FALSE,
+      color="black"
+    ),
+    ngenes = cell_spec(
+      formattable::color_tile("white", "green")(ngenes),
+      escape=FALSE,
+      color="black"
+    ),
+  ) %>%
+  knitr::kable("html", escape=FALSE) %>%
+  collapse_rows(1:2) %>%
+  kable_styling(bootstrap_options = c("hover", "striped"))
+table
+
+table %>%
+  write_rds(figure_file("datasets.rds"))
+
