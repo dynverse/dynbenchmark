@@ -11,7 +11,7 @@ file.remove("analysis/paper/paper.html")
 
 render(
   "analysis/paper/paper.Rmd",
-  output_format = bookdown::gitbook(split_by="none", number_sections=FALSE, config=list(toc=list(scroll_highlight = "yes")), css="style.css"),
+  output_format = bookdown::gitbook(split_by="none", number_sections=FALSE, config=list(toc=list(scroll_highlight = "yes")), css="style.css", lib_dir = ".scratch/"),
   output_dir = "analysis/paper/",
   output_file = "paper.html"
 )
