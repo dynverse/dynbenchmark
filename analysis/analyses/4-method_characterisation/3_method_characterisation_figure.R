@@ -4,10 +4,6 @@ library(cowplot)
 
 experiment("method_characteristics")
 
-source("analysis/analyses/4-method_characterisation/0_common.R")
-
-trajectory_types <- read_rds(derived_file("trajectory_types.rds", "dataset_characterisation"))
-
 
 #   ____________________________________________________________________________
 #   Create method aspects figure                                            ####
@@ -54,7 +50,7 @@ method_qc_category <- method_qc_category_scores %>%
   ggtitle("Implementation\nquality control") +
   theme(legend.position = "none")
 method_qc_category
-method_qc_category_width <- length(categories)
+method_qc_category_width <- nrow(qc_categories)
 
 method_qc_application <- method_qc_application_scores %>%
   mutate(name = factor(method_id, levels=method_order)) %>%
@@ -68,7 +64,7 @@ method_qc_application <- method_qc_application_scores %>%
   base_scale_y + base_scale_x +
   theme(legend.position = "none")
 method_qc_application
-method_qc_application_width <- length(applications)
+method_qc_application_width <- nrow(qc_applications)
 
 method_qc_overall <- method_qc_scores %>%
   mutate(name = factor(method_id, levels=method_order)) %>%
@@ -149,8 +145,8 @@ trajectory_components_plot <- methods_evaluated %>%
   mutate(name = factor(name, levels=method_order)) %>%
   drop_na() %>%
   ggplot() +
-  geom_tile(aes(trajectory_type, name, fill = factor(can * as.numeric(trajectory_type)))) +
-  scale_fill_manual(values = c("white", RColorBrewer::brewer.pal(8, name="Set2")), guide=FALSE) +
+  geom_tile(aes(trajectory_type, name, fill = ifelse(can, trajectory_type, ""))) +
+  scale_fill_manual(values = set_names(trajectory_types$color, trajectory_types$id), guide=FALSE) +
   base_theme +
   empty_left_theme +
   base_scale_y + base_scale_x +
@@ -250,10 +246,11 @@ map(unique(methods_evaluated$maximal_trajectory_type), function(trajectory_type)
   })
   replaced <- to_replace %>% xml_replace(images)
   if (length(replaced) == 0) {
-    warning("STOOOOOOOOOOOOOOOOOOOOOOOOOOOPPP!!!")
+    warning("STOOOOOOOOOOOOOOOOOOOOOOOOOOOPPP!!! This will crash your R session")
   }
 })
 
 xml_root(xml) %>% xml_set_attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
 
-write(as.character(xml), file=figure_file('figure_methods_overview.svg')); xml <- NULL
+write(as.character(xml), file=figure_file('method_characteristics.svg')); xml <- NULL
+

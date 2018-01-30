@@ -5,11 +5,9 @@ library(tidytext)
 
 experiment("method_characteristics")
 
-source("analysis/analyses/4-method_characterisation/0_common.R")
+methods <- read_rds(derived_file("methods.rds"))
 
-methods_evaluated <- read_rds(derived_file("methods_evaluated.rds"))
-
-method_components <- methods_evaluated %>% select(name, components) %>%
+method_components <- methods %>% select(name, components) %>%
   mutate(components = gsub("\\(.*?\\)", "", components)) %>%  # remove anything between ()
   unnest_tokens(component, components, "regex", pattern="[\\{\\}\\[\\]\\|\\+\\=]", to_lower=FALSE) %>%
   mutate(component = trimws(component)) %>%
@@ -97,8 +95,9 @@ method_components_categories_plot
 
 
 
+##  ............................................................................
+##  Method components plot                                                  ####
 method_components_plot <- cowplot::plot_grid(method_components_wordcloud_plot, method_components_ordering_plot)
 method_components_plot
 
-
-saveRDS(method_components_plot, figure_file("method_components_plot.rds"))
+saveRDS(method_components_plot, figure_file("method_components.rds"))

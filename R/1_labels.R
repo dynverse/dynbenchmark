@@ -10,7 +10,8 @@ labels <- tibble::tribble(
 )
 
 #' Short labelling function
-#' @param x The text!
+#' @param x The text
+#' @param width The width of the label
 #' @export
 label_short <- function(x, width=10) {
   tibble(id = as.character(x)) %>%
@@ -21,7 +22,7 @@ label_short <- function(x, width=10) {
 }
 
 #' Long labelling function
-#' @param x The text!
+#' @param x The text
 #' @export
 label_long <- function(x) {
   tibble(id = as.character(x)) %>%

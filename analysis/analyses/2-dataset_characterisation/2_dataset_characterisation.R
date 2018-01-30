@@ -56,7 +56,7 @@ dataset_characterisation_pies
 tasks_real$ngenes <- map_int(tasks_real$normalisation_info, ~last(.$normalisation_steps[["ngenes"]]))
 tasks_real$ncells <- map_int(tasks_real$normalisation_info, ~last(.$normalisation_steps[["ncells"]]))
 dataset_characterisation_distributions <- c("ncells", "ngenes", "date") %>% map(function(what) {
-  nbins <- 40
+  nbins <- 30
 
   if (what %in% c("ncells", "ngenes")) {
     limits <- c(10, 10000)
