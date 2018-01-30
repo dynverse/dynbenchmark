@@ -4,11 +4,11 @@ non_inclusion_reasons <- tribble(
   ~id, ~long,
   "not_free", "Not free",
   "unavailable", "Unavailable",
-  "superseded", "Superseded",
+  "superseded", "Superseded by another method",
   "not_expression_based", "Requires data types other than expression",
   "gui_only", "No programming interface",
   "unwrappable", "Unresolved errors during wrapping",
-  "speed", "Slow",
-  "date", "Too late to be included in current version of the evaluation",
-  "no_ordering", "Doesn't return an ordering"
+  "speed", "Too slow (requires more than one hour on a 100x100 dataset)",
+  "no_ordering", "Doesn't return an ordering",
+  "date", "Published later than 2017-05-01 to be included in the current version of the evaluation"
 ) %>% mutate(footnote = seq_along(id))
