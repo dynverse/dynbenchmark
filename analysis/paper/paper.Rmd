@@ -78,7 +78,8 @@ cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over
 
 
 <!--- history of Ti, different methods --->
-Dozens of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially, most trajectory inference was focused on linear trajectories, with one start and one end point. However, the prospect of branching trajectories was already described early [@trapnell_dynamics_2014], and about half of the current methods can handle one or more bifurcations in the trajectory (`r ref("sfig", "methods_over_time", "b")`). Some methods can already handle more complex, cyclical and branching behaviour [@welch_slicer:_2016; @wolf_graph_2017], and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes happening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
+
+
 
 
 <!--- Common framework of TI, different components, naturally progressing towards the need for an evaluation --->
@@ -99,32 +100,25 @@ methods <- readRDS(derived_file("methods.rds", experiment_id="method_characteris
 ```
 
 
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability and the presence of a programming interface. We characterized all methods in four different ways: possible trajectory structures, implementation quality, prior information and the underlying algorithm (`r ref("fig", "method_characteristics")`).
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability and the presence of a programming interface `r ref("table", "methods")`. We characterized all methods in four different ways: possible trajectory structures, implementation quality, prior information and the underlying algorithm (`r ref("fig", "method_characteristics")`).
 
 
-`r ref("table", "methods", anchor=TRUE)` Characterisation and quality control of the evaluated trajectory inference methods
+`r ref("table", "methods", anchor=TRUE)` Overview of current trajectory inference methods, and whether they were included in this current evaluation study
 ```{r}
-read_rds(figure_file("methods_table.rds", "method_characteristics")) %>%
-        knitr::kable()
+read_rds(figure_file("methods_table.rds", "method_characteristics"))
 ```
 
 
-
-
-At the level of trajectory structures, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "method_characteristics", "a")`). However, only one method (SLICER) can currently handle more complex graph structures which can include loops (`r ref("sfig", "methods_over_time", "b")`).
+At the level of trajectory structures, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "method_characteristics", "a")`). However, only a handful of more recent methods can currently handle more complex graph structures which can include loops (`r ref("sfig", "methods_over_time", "b")`), one of which is included in the current evaluation (SLICER).
 
 
 While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("snote", "qc_scoring")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or for which purpose(s) they are important (user friendliness, developer friendliness or good science). These categorisations can then be used to help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
 
 
-Most methods fulfilling most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "method_characteristics", "b")`). Recent methods tend to have higher code quality sFIG. However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "method_characteristics", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "method_qc_check")` and `r ref("fig", "method_characteristics", "c")`), notwithstanding studies pinpointing these as good practices [@wilson_best_2014].
+Most methods fulfilling most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "method_characteristics", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "method_characteristics", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "method_qc_check")` and `r ref("fig", "method_characteristics", "c")`), notwithstanding studies pinpointing these as good practices [@wilson_best_2014].
 
 
 The underlying algorithms can be divided into several modules, and these frequently contain soms clustering, dimensionality reduction and/or graph building steps. Interestingly, modules are frequently shared between different algorithms (`r ref("sfig", "method_components")`).
-
-
-
-
 
 
 `r anchor("fig", "method_characteristics")`
@@ -134,7 +128,7 @@ The underlying algorithms can be divided into several modules, and these frequen
 
 ```{r}
 add_sfig({
-readRDS(figure_file("method_qc_check_plot.rds", experiment_id="method_characteristics"))
+readRDS(figure_file("method_qc_check.rds", experiment_id="method_characteristics"))
 }, 
 "method_qc_check", 
 "Caption", 
@@ -146,12 +140,26 @@ readRDS(figure_file("method_qc_check_plot.rds", experiment_id="method_characteri
 
 ```{r}
 add_sfig({
-readRDS(figure_file("method_components_plot.rds", experiment_id="method_characteristics"))
+readRDS(figure_file("method_components.rds", experiment_id="method_characteristics"))
 }, 
 "method_components", 
 "TI methods frequently share steps", 
 15, 
 7.5
+)
+```
+
+
+
+
+```{r}
+add_sfig({
+readRDS(figure_file("qc_over_time.rds", experiment_id="method_characteristics"))
+}, 
+"qc_over_time", 
+"Quality control scores and number of citations over time", 
+10, 
+10
 )
 ```
 ### Evaluation overview
@@ -188,9 +196,7 @@ Echte data. Evaluatie (biologische relevantie van de methode)
 ## Trajectory inference methods
 
 
-## Toy data generation
-
-
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods `r ref("table", "methods", anchor=TRUE)`, based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018,@gitter_singlecellpseudotimeoverviewalgorithms_2018] and by searching in literature for "trajectory inference" and "pseudotemporal ordering". We believe this to be the most complete list to data, but are happy to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). For each method we investigated whether it was 
 ## Synthetic data generation
 
 
@@ -237,7 +243,7 @@ subchunkify <- function(ref_id, caption, width=5, height=7) {
 }
 
 
-pwalk(sfigs, function(ref_id, fig, caption, width, height) {
+pwalk(sfigs %>% arrange(match(ref_id, refs$ref_id)), function(ref_id, fig, caption, width, height) {
   subchunkify(ref_id, caption, width, height)
 })
 ```
@@ -250,12 +256,9 @@ pwalk(sfigs, function(ref_id, fig, caption, width, height) {
 # Colophon
 
 
-This report was generated on `r Sys.time()` using the following computational environment and dependencies: 
-
-
+This report was generated on `r Sys.time()` using `r devtools:::platform_info()$version` and the following packages:
 ```{r colophon, cache = FALSE}
-# which R packages and versions?
-devtools::session_info()
+devtools::session_info()$packages %>% knitr::kable()
 ```
 
 

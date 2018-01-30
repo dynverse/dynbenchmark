@@ -13,10 +13,42 @@ library(cowplot)
 experiment("method_characteristics")
 
 method_qc <- readRDS(derived_file("method_qc.rds"))
+methods_evaluated <- readRDS(derived_file("methods_evaluated.rds"))
 checks <- readRDS(derived_file("checks.rds"))
-
-source("0_common.R")
 ```
+
+Comparing qc and citations overtime     
+```{r, fig.width=16, fig.height=8}
+g1 <- ggplot(methods_evaluated, aes(date, qc_score)) +
+    geom_smooth(span=2) +
+    geom_point() +
+    ggrepel::geom_label_repel(aes(label = name)) +
+    cowplot::theme_cowplot() +
+    labs(x = "Time", y = "QC score", title = "Code quality score over time")
+g1
+
+g2 <- ggplot(methods_evaluated, aes(date, ncitations+1)) +
+    geom_smooth(span=2) +
+    geom_point() +
+    ggrepel::geom_label_repel(aes(label = name)) +
+    cowplot::theme_cowplot() +
+    scale_y_log10() +
+    labs(x = "Time", y = "Citations", title = "Citations over time")
+g2
+
+g3 <- ggplot(methods_evaluated, aes(ncitations+1, qc_score)) +
+    geom_smooth(span=2) +
+    geom_point() +
+    ggrepel::geom_label_repel(aes(label = name)) +
+    cowplot::theme_cowplot() +
+    scale_x_log10() +
+    labs(x = "Citations", y = "QC score", title = "QC score over # citations")
+g3
+
+cowplot::plot_grid(g1, g3, g2, ncol=2, nrow=2, labels = "auto") %>% 
+  write_rds(figure_file("qc_over_time.rds"))
+```
+
 
 Calculate the overall qc scores for each method
 ```{r}
@@ -39,7 +71,7 @@ method_ordering_plot <- final_scores %>%
 method_ordering_plot
 ```
 
-Orderin by category or application
+Ordering by category or application
 ```{r}
 method_qc %>%
   group_by(method_id, category) %>%
@@ -47,7 +79,7 @@ method_qc %>%
   ggplot(aes(method_id, category)) + geom_raster(aes(fill=score))
 
 method_qc %>%
-  gather(application, application_applicable, !!applications) %>%
+  gather(application, application_applicable, !!qc_applications$application) %>%
   filter(application_applicable) %>%
   group_by(method_id, application) %>%
   summarise(score=sum(answer * score * weight)/sum(score * weight)) %>%
@@ -97,7 +129,7 @@ check_heatmap_plot <- method_qc %>%
     geom_vline(aes(xintercept=question_end), data=question_position, color="#444444") +
     scale_x_reverse("Check", breaks = question_position$question_mid, labels = question_position$name, expand = c(0, 0)) +
     scale_y_continuous("Method", breaks = seq_along(levels(method_qc$method_id))+0.5, labels = levels(method_qc$method_id), expand = c(0, 0)) +
-    scale_fill_manual(values=category_colors) +
+    scale_fill_manual(values=set_names(qc_categories$color, qc_categories$category)) +
     coord_flip() +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 
@@ -114,7 +146,7 @@ empty_x <- theme(
 
 method_qc_check_plot <- cowplot::plot_grid(method_ordering_plot + empty_x, check_heatmap_plot, nrow=2, align = "v", axis = "rl", rel_heights = c(0.2, 0.9))
 
-method_qc_check_plot %>% saveRDS(figure_file("method_qc_check_plot.rds"))
+method_qc_check_plot %>% saveRDS(figure_file("method_qc_check.rds"))
 ```
 
 
@@ -180,15 +212,8 @@ question_ordering_plotdata <- method_qc %>%
   left_join(question_info, by="question_id") %>% 
   mutate(question_id = factor(question_id, levels=unique(question_id)))
 
-question_ordering_plot1 <- question_ordering_plotdata %>% 
-  ggplot() +
-    geom_bar(aes(question_id, n, fill=qc_score), stat="identity") +
-    scale_fill_distiller(palette="Blues", direction = -1)
-question_ordering_plot1
-
-
 question_ordering_plotdata2 <- question_ordering_plotdata %>% 
-  mutate(category = factor(category, levels=categories)) %>% 
+  mutate(category = factor(category, levels=qc_categories$category)) %>% 
   arrange(-as.numeric(category), question_ordering) %>% 
   mutate(question_id = factor(question_id, levels=as.character(unique(question_id))))
 
@@ -203,7 +228,7 @@ question_ordering_plotdata2_category <- question_ordering_plotdata2 %>%
 question_ordering_plot2 <- question_ordering_plotdata2 %>% 
   arrange(qc_score) %>% 
   ggplot() +
-    geom_bar(aes(question_id, n, fill=category_colors[category], alpha=qc_score), stat="identity") +
+    geom_bar(aes(question_id, n, fill=set_names(qc_categories$color, qc_categories$category)[category], alpha=qc_score), stat="identity") +
     geom_vline(aes(xintercept=start), data=question_ordering_plotdata2_category) +
     scale_fill_identity() +
     scale_alpha_continuous(range=c(1, 0.05), name = "Quality control score", guide = guide_legend(title.position = "top", title.hjust = 0.5,label.position = "bottom"))
@@ -218,9 +243,9 @@ category_legend <- question_ordering_plotdata2 %>%
   summarise(start = -min(position), end=-max(position)-1) %>% 
   ggplot() +
     geom_rect(aes(xmin=0, xmax=1, ymin=start, ymax=end), fill="white") +
-    geom_text(aes(1, start + (end-start)/2, label=category_labels[category], color=category), hjust=1, size=5) +
+    geom_text(aes(1, start + (end-start)/2, label=label_long(category), color=category), hjust=1, size=5) +
     geom_segment(aes(x=1.1, xend=1.1, y=start-0.2, yend=end+0.2, color=category)) +
-    scale_color_manual(values=category_colors) +
+    scale_color_manual(values=set_names(qc_categories$color, qc_categories$category)) +
     scale_y_continuous(expand=c(0, 0)) +
     theme_void() +
     theme(legend.position="none")
@@ -236,5 +261,5 @@ question_ordering_plot2 <- question_ordering_plot2 +
 
 method_qc_ordering_plot <- cowplot::plot_grid(category_legend, question_ordering_plot2, align = "h", rel_widths = c(0.2, 0.8), axis="tb")
 method_qc_ordering_plot
-saveRDS(method_qc_ordering_plot, figure_file("method_qc_ordering_plot.rds"))
+saveRDS(method_qc_ordering_plot, figure_file("method_qc_ordering.rds"))
 ```

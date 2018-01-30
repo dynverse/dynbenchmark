@@ -2,7 +2,6 @@
 library(tidyverse)
 library(googlesheets)
 library(dynalysis)
-library(cowplot)
 
 experiment("method_characteristics")
 
@@ -10,21 +9,20 @@ experiment("method_characteristics")
 # # If it's your first time running this script, run this:
 # gs_auth()
 
-method_df <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
+methods <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
   gs_read(ws = "Software", col_types = cols(GScholarClusterID = "c"), skip = 1)
 
 # Dates ------------------------------
-method_df$date <- method_df$Preprint
-method_df$date[is.na(method_df$date)] <- method_df$PubDate[is.na(method_df$date)]
+methods$date <- methods$Preprint
+methods$date[is.na(methods$date)] <- methods$PubDate[is.na(methods$date)]
 
 # Num citations ---------------------------------------
 library(rcrossref)
-
-method_df$ncitations <- pbapply::pbsapply(cl=4, method_df$DOI, cr_citation_count)
+methods$ncitations <- pbapply::pbsapply(cl=4, methods$DOI, cr_citation_count)
 
 # Trajectory components --------------------------
 # split maximal trajectory types
-method_df <- method_df %>%
+methods <- methods %>%
   mutate(maximal_trajectory_types_split = map(maximal_trajectory_types, ~as.character(stringr::str_split(., "[ ]?,[ ]?", simplify=TRUE)))) %>%
   mutate(maximal_trajectory_type = map_chr(maximal_trajectory_types_split, first))
 
@@ -32,7 +30,7 @@ method_df <- method_df %>%
 trajectory_types <- read_rds(derived_file("trajectory_types.rds", "dataset_characterisation"))
 
 trajectory_type_capabilities <- map(
-  method_df$maximal_trajectory_types_split,
+  methods$maximal_trajectory_types_split,
   function(maximal_trajectory_types) {
     ancestors <- trajectory_types %>%
       filter(id %in% maximal_trajectory_types) %>%
@@ -44,10 +42,15 @@ trajectory_type_capabilities <- map(
   map(~as_tibble(as.list(setNames(., trajectory_types$id)))) %>%
   bind_rows()
 
-method_df <- method_df %>% bind_cols(trajectory_type_capabilities)
+methods <- methods %>% bind_cols(trajectory_type_capabilities)
 
-## Non inclusion reasons
-method_df$non_inclusion_reasons_split <- method_df$non_inclusion_reasons %>% str_split("[ ]?,[ ]?")
+## Non inclusion reasons ------------------------
+methods$non_inclusion_reasons_split <- methods$non_inclusion_reasons %>% str_split("[ ]?,[ ]?")
+
+# add extra reason for date cutoff
+date_cutoff <- as.Date("2017-05-01")
+date_filter <- methods$date > date_cutoff
+methods$non_inclusion_reasons_split[date_filter] <- map(methods$non_inclusion_reasons_split[date_filter], c, "date") %>% map(unique)
 
 # Saving -------------------------
-write_rds(method_df, derived_file("method_df.rds"))
+write_rds(methods, derived_file("methods.rds"))

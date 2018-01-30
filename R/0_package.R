@@ -6,7 +6,8 @@
 #' The dynalysis package contains the code to generate/preprocess datasets, evaluate TI methods on these datasets, and finally wrap all results together in a scientific paper.
 #' The code within this package can be run locally, but can also be run within a docker environment, for which the scripts are contained in the `scripts` folder.
 #'
-#' @import tidyverse
+#' @import tibble
+#' @import dplyr
 #' @importFrom purrr %>% map set_names map_dbl map2_dbl
 #'
 #' @docType package
