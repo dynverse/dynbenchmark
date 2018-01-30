@@ -6,10 +6,6 @@ author:
   - Helena Todorov¹ ² ⁴ ⁵
   - Yvan Saeys¹ ²
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: 
-    bookdown::html_document2:
-    fig_caption: yes
-    reference_docx: templates/template.docx
 bibliography: references.bib
 csl: nature-biotechnology.csl
 abstract: |
@@ -112,7 +108,16 @@ read_rds(figure_file("methods_table.rds", "method_characteristics"))
 At the level of trajectory structures, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "method_characteristics", "a")`). However, only a handful of more recent methods can currently handle more complex graph structures which can include loops (`r ref("sfig", "methods_over_time", "b")`), one of which is included in the current evaluation (SLICER).
 
 
-While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("snote", "qc_scoring")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or for which purpose(s) they are important (user friendliness, developer friendliness or good science). These categorisations can then be used to help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
+While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or for which purpose(s) they are important (user friendliness, developer friendliness or good science). These categorisations can then be used to help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
+
+
+```{r}
+add_stable(
+read_rds(figure_file("qc_checks.rds","method_characteristics")), 
+"qc_checks", 
+""
+)
+```
 
 
 Most methods fulfilling most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "method_characteristics", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "method_characteristics", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "method_qc_check")` and `r ref("fig", "method_characteristics", "c")`), notwithstanding studies pinpointing these as good practices [@wilson_best_2014].
@@ -196,7 +201,15 @@ Echte data. Evaluatie (biologische relevantie van de methode)
 ## Trajectory inference methods
 
 
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods `r ref("table", "methods", anchor=TRUE)`, based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018,@gitter_singlecellpseudotimeoverviewalgorithms_2018] and by searching in literature for "trajectory inference" and "pseudotemporal ordering". We believe this to be the most complete list to data, but are happy to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). For each method we investigated whether it was 
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods `r ref("table", "methods", anchor=TRUE)`, based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018,@gitter_singlecellpseudotimeoverviewalgorithms_2018] and by searching in literature for "trajectory inference" and "pseudotemporal ordering". We believe this to be the most complete list to data, but are happy to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "methods")`).
+
+
+## Method quality control
+
+
+We created a transparent scoring scheme to check the quality of each method (`r ref("table", "methods")`) and used several references to weigh each quality check.
+
+
 ## Synthetic data generation
 
 
@@ -223,34 +236,12 @@ We gathered
 # Acknowledgements
 
 
-# Supplementary Figures
-
-
+# Supplementary
 
 
 ```{r, echo=FALSE, results='asis'}
-subchunkify <- function(ref_id, caption, width=5, height=7) {
-  subchunk <- glue::glue("",
-  "",
-  "`r anchor('sfig', '{ref_id}')`",
-  "```{{r {ref_id}, fig.height={height}, fig.width={width}, echo=FALSE}}",
-  "sfigs %>% filter(ref_id == !!ref_id) %>% pull(fig) %>% .[[1]]",
-  "```",
-  "`r ref('sfig', '{ref_id}')` {caption}",
-  "", .sep = "\n")
-  
-  cat(knitr::knit(text=subchunk, quiet=TRUE))
-}
-
-
-pwalk(sfigs %>% arrange(match(ref_id, refs$ref_id)), function(ref_id, fig, caption, width, height) {
-  subchunkify(ref_id, caption, width, height)
-})
+source("analysis/paper/sfigs_stables.R")
 ```
-
-
-
-
 
 
 # Colophon
