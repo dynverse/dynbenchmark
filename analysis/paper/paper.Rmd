@@ -192,22 +192,21 @@ Echte data. Evaluatie (biologische relevantie van de methode)
 
 
 # Discussion
-# Conclusion
 
 
-# Online Methods
+# Methods
 
 
 ## Trajectory inference methods
 
 
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods `r ref("table", "methods", anchor=TRUE)`, based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018,@gitter_singlecellpseudotimeoverviewalgorithms_2018] and by searching in literature for "trajectory inference" and "pseudotemporal ordering". We believe this to be the most complete list to data, but are happy to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "methods")`).
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods `r ref("table", "methods", anchor=TRUE)`, based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018,@gitter_singlecellpseudotimeoverviewalgorithms_2018] and by searching in literature for "trajectory inference" and "pseudotemporal ordering". We believe this to be the most complete list to data, but are welcome to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "methods")`).
 
 
 ## Method quality control
 
 
-We created a transparent scoring scheme to check the quality of each method (`r ref("table", "methods")`) and used several references to weigh each quality check.
+We created a transparent scoring scheme to check the quality of each method (`r ref("table", "methods")`) and weighed each quality check by the number of times it was found in a list of 
 
 
 ## Synthetic data generation
