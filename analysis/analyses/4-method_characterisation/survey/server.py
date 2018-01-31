@@ -23,7 +23,7 @@ def get(key):
   category = people.ix[people.key == key].category.tolist()[0]
 
   data = {
-    "questions":json.load(open("static/questions_" + category + ".json")),
+    "aspects":json.load(open("static/aspects_" + category + ".json")),
     "answers":{}
   }
 

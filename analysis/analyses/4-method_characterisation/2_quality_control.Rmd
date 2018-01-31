@@ -23,7 +23,7 @@ library(kableExtra)
 table <- checks %>% 
   mutate(
     weight = cell_spec(
-      pritt("<span style='display: none;'>{question_id}</span> {weight}"), # add an invisible grouping indicator
+      pritt("<span style='display: none;'>{aspect_id}</span> {weight}"), # add an invisible grouping indicator
       background = spec_color(weight, end=0.9,option="A",direction=-1),
       escape=FALSE,
       color="white"
@@ -33,9 +33,9 @@ table <- checks %>%
     references = references %>% 
       gsub(",", "; ", .) %>% 
       {ifelse(!is.na(.), pritt("[{.}]"), "")} %>%
-      {pritt("<span style='display: none;'>{question_id}</span> {.}")} # add an invisible grouping indicator
+      {pritt("<span style='display: none;'>{aspect_id}</span> {.}")} # add an invisible grouping indicator
   ) %>% 
-  select(question, weight, references, score, scoring, !!qc_applications$application) %>% 
+  select(aspect, weight, references, item, item_weight, !!qc_applications$application) %>% 
   mutate_at(vars(!!qc_applications$application), ~ifelse(., "✓", "")) %>% 
   rename_all(label_long) %>% 
   knitr::kable("html", escape=FALSE) %>% 
@@ -94,18 +94,12 @@ cowplot::plot_grid(g1, g3, g2, ncol=2, nrow=2, labels = "auto") %>%
 
 Calculate the overall qc scores for each method
 ```{r}
-final_scores <- method_qc %>%
-  group_by(method_id) %>%
-  summarise(score=sum(answer * score * weight)/sum(score * weight)) %>%
-  arrange(-score)
-
 # set the ordering of method_ids to this ordering
-method_qc$method_id <- factor(method_qc$method_id, levels=final_scores$method_id)
-final_scores$method_id <- factor(final_scores$method_id, levels=final_scores$method_id)
-
-method_ordering_plot <- final_scores %>%
-  ggplot(aes(method_id, score)) +
-    geom_bar(aes(fill=score), stat="identity") +
+method_ordering_plot <- methods_evaluated %>%
+  arrange(-qc_score) %>% 
+  mutate(method_id = factor(name, levels=name)) %>% 
+  ggplot(aes(method_id, qc_score)) +
+    geom_bar(aes(fill=qc_score), stat="identity") +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
     scale_y_continuous(expand=c(0, 0), limits=c(0, 1)) +
     viridis::scale_fill_viridis(option="A", limits=c(0, 1))
@@ -113,51 +107,36 @@ method_ordering_plot <- final_scores %>%
 method_ordering_plot
 ```
 
-Ordering by category or application
-```{r}
-method_qc %>%
-  group_by(method_id, category) %>%
-  summarise(score=sum(answer * score * weight)/sum(score * weight)) %>%
-  ggplot(aes(method_id, category)) + geom_raster(aes(fill=score))
-
-method_qc %>%
-  gather(application, application_applicable, !!qc_applications$application) %>%
-  filter(application_applicable) %>%
-  group_by(method_id, application) %>%
-  summarise(score=sum(answer * score * weight)/sum(score * weight)) %>%
-  ggplot(aes(method_id, application)) + geom_raster(aes(fill=score))
-```
-
 
 
 ```{r, fig.width=10, fig.height=12}
-question_position <- method_qc %>%
+aspect_position <- method_qc %>%
   filter(method_id == "SCORPIUS") %>%
-  arrange(question_id) %>%
-  group_by(question_id) %>%
+  arrange(aspect_id) %>%
+  group_by(aspect_id) %>%
   summarise(
-    question_width = sum(score * weight),
+    aspect_width = sum(score * weight),
     name = first(name)
   ) %>%
   mutate(
-    question_end = cumsum(question_width),
-    question_start = lag(question_end, 1, default=0),
-    question_mid = question_start + (question_end - question_start)/2
+    aspect_end = cumsum(aspect_width),
+    aspect_start = lag(aspect_end, 1, default=0),
+    aspect_mid = aspect_start + (aspect_end - aspect_start)/2
   )
 
 check_position <- method_qc %>%
   filter(method_id == "SCORPIUS") %>%
-  arrange(question_id, check_id) %>%
+  arrange(aspect_id, check_id) %>%
   group_by(check_id) %>%
   summarise(
     check_width = score * weight,
-    question_id = first(question_id)
+    aspect_id = first(aspect_id)
   ) %>%
-  left_join(question_position, by="question_id") %>%
-  group_by(question_id) %>%
+  left_join(aspect_position, by="aspect_id") %>%
+  group_by(aspect_id) %>%
   mutate(
-    check_start = question_start + lag(cumsum(check_width), default=0),
-    check_end = question_start + cumsum(check_width)
+    check_start = aspect_start + lag(cumsum(check_width), default=0),
+    check_end = aspect_start + cumsum(check_width)
   )
 
 
@@ -168,8 +147,8 @@ check_heatmap_plot <- method_qc %>%
   ggplot() +
     geom_rect(aes(xmax=check_start, xmin=check_end, ymin=as.integer(method_id), ymax=as.integer(method_id) + 1, fill=category, alpha=answer)) +
     geom_vline(aes(xintercept=check_end), data=check_position, color="#444444", alpha=0.25) +
-    geom_vline(aes(xintercept=question_end), data=question_position, color="#444444") +
-    scale_x_reverse("Check", breaks = question_position$question_mid, labels = question_position$name, expand = c(0, 0)) +
+    geom_vline(aes(xintercept=aspect_end), data=aspect_position, color="#444444") +
+    scale_x_reverse("Check", breaks = aspect_position$aspect_mid, labels = aspect_position$name, expand = c(0, 0)) +
     scale_y_continuous("Method", breaks = seq_along(levels(method_qc$method_id))+0.5, labels = levels(method_qc$method_id), expand = c(0, 0)) +
     scale_fill_manual(values=set_names(qc_categories$color, qc_categories$category)) +
     coord_flip() +
@@ -228,56 +207,56 @@ method_qc %>%
     geom_bar(aes(check_id, n, fill=answer), stat="identity") +
     coord_flip() +
     scale_y_reverse(expand=c(0, 0)) +
-    scale_x_discrete(labels=setNames(method_qc$scoring, method_qc$check_id)) +
+    scale_x_discrete(labels=setNames(method_qc$item_weight, method_qc$check_id)) +
     scale_fill_distiller(palette="Blues", direction = 1)
 ```
 
 ```{r}
-question_info <- method_qc %>% 
-  group_by(question_id) %>% 
+aspect_info <- method_qc %>% 
+  group_by(aspect_id) %>% 
   summarise(
     name = first(name),
     category = first(category)
   )
 
-question_ordering_plotdata <- method_qc %>%
-  group_by(method_id, question_id) %>%
+aspect_ordering_plotdata <- method_qc %>%
+  group_by(method_id, aspect_id) %>%
   summarise(
-    qc_score=sum(answer * score * weight)/sum(score * weight)
+    qc_score=sum(answer * item_weight * weight)/sum(item_weight * weight)
   ) %>%
   ungroup() %>% 
-  group_by(question_id) %>% 
+  group_by(aspect_id) %>% 
   count(qc_score) %>% 
-  mutate(question_ordering = sum((qc_score < 1) * n)) %>% 
+  mutate(aspect_ordering = sum((qc_score < 1) * n)) %>% 
   ungroup() %>% 
-  arrange(question_ordering) %>% 
-  left_join(question_info, by="question_id") %>% 
-  mutate(question_id = factor(question_id, levels=unique(question_id)))
+  arrange(aspect_ordering) %>% 
+  left_join(aspect_info, by="aspect_id") %>% 
+  mutate(aspect_id = factor(aspect_id, levels=unique(aspect_id)))
 
-question_ordering_plotdata2 <- question_ordering_plotdata %>% 
+aspect_ordering_plotdata2 <- aspect_ordering_plotdata %>% 
   mutate(category = factor(category, levels=qc_categories$category)) %>% 
-  arrange(-as.numeric(category), question_ordering) %>% 
-  mutate(question_id = factor(question_id, levels=as.character(unique(question_id))))
+  arrange(-as.numeric(category), aspect_ordering) %>% 
+  mutate(aspect_id = factor(aspect_id, levels=as.character(unique(aspect_id))))
 
-question_ordering_plotdata2_category <- question_ordering_plotdata2 %>% 
-  group_by(category, question_id) %>% 
+aspect_ordering_plotdata2_category <- aspect_ordering_plotdata2 %>% 
+  group_by(category, aspect_id) %>% 
   summarise() %>% 
   ungroup() %>% 
   mutate(position = n()-seq_len(n())) %>% 
   group_by(category) %>% 
   summarise(start = min(position)+0.5, end=max(position)+1.5)
 
-question_ordering_plot2 <- question_ordering_plotdata2 %>% 
+aspect_ordering_plot2 <- aspect_ordering_plotdata2 %>% 
   arrange(qc_score) %>% 
   ggplot() +
-    geom_bar(aes(question_id, n, fill=set_names(qc_categories$color, qc_categories$category)[category], alpha=qc_score), stat="identity") +
-    geom_vline(aes(xintercept=start), data=question_ordering_plotdata2_category) +
+    geom_bar(aes(aspect_id, n, fill=set_names(qc_categories$color, qc_categories$category)[category], alpha=qc_score), stat="identity") +
+    geom_vline(aes(xintercept=start), data=aspect_ordering_plotdata2_category) +
     scale_fill_identity() +
     scale_alpha_continuous(range=c(1, 0.05), name = "Quality control score", guide = guide_legend(title.position = "top", title.hjust = 0.5,label.position = "bottom"))
-question_ordering_plot2
+aspect_ordering_plot2
 
-category_legend <- question_ordering_plotdata2 %>% 
-  group_by(category, question_id) %>% 
+category_legend <- aspect_ordering_plotdata2 %>% 
+  group_by(category, aspect_id) %>% 
   summarise() %>% 
   ungroup() %>% 
   mutate(position = seq_len(n())) %>% 
@@ -295,13 +274,13 @@ category_legend
 
 n_methods <- length(unique(method_qc$method_id))
 
-question_ordering_plot2 <- question_ordering_plot2 +
+aspect_ordering_plot2 <- aspect_ordering_plot2 +
     coord_flip() +
     scale_y_continuous(expand=c(0, 0), name = "# methods", c(seq(0, n_methods, 5), n_methods)) +
-    scale_x_discrete(labels=setNames(question_ordering_plotdata$name, question_ordering_plotdata$question_id), name="") +
+    scale_x_discrete(labels=setNames(aspect_ordering_plotdata$name, aspect_ordering_plotdata$aspect_id), name="") +
     theme(legend.position="top")
 
-method_qc_ordering_plot <- cowplot::plot_grid(category_legend, question_ordering_plot2, align = "h", rel_widths = c(0.2, 0.8), axis="tb")
+method_qc_ordering_plot <- cowplot::plot_grid(category_legend, aspect_ordering_plot2, align = "h", rel_widths = c(0.2, 0.8), axis="tb")
 method_qc_ordering_plot
 saveRDS(method_qc_ordering_plot, figure_file("method_qc_ordering.rds"))
 ```

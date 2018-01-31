@@ -9,18 +9,18 @@ checks <- readRDS(derived_file("checks.rds"))
 
 
 
-addition_questions_survey <- list(
+addition_aspects_survey <- list(
   type = "paneldynamic",
   name = "additional",
-  title = "Additional questions",
+  title = "Additional aspects",
   keyName = "name",
-  showQuestionNumbers = "none",
+  showaspectNumbers = "none",
   templateTitle = "",
   templateElements = list(
     list(
       type = "text",
-      name = "question",
-      title = "Question",
+      name = "aspect",
+      title = "aspect",
       isRequired = TRUE,
       startWithNewLine = FALSE
     ),
@@ -40,19 +40,19 @@ addition_questions_survey <- list(
 
 
 create_checks_survey <- function(checks, title="Title") {
-  survey_question_data <- checks %>% group_by(question_id) %>%
+  survey_aspect_data <- checks %>% group_by(aspect_id) %>%
     summarise(
       survey_scoring_html = glue::collapse(map2(scoring, score, ~glue::glue("* {.y}: {.} \\n"))),
-      survey_title = first(question),
+      survey_title = first(aspect),
       survey_description = glue::glue("{survey_scoring_html}"),
       category = first(category)
     ) %>%
-    mutate(question_id = as.character(question_id))
+    mutate(aspect_id = as.character(aspect_id))
 
-  survey_questions <- survey_question_data %>% as.list() %>% pmap(function(question_id, survey_title, survey_description, category, ...) {
+  survey_aspects <- survey_aspect_data %>% as.list() %>% pmap(function(aspect_id, survey_title, survey_description, category, ...) {
     list(
       type = "rating",
-      name = question_id,
+      name = aspect_id,
       title = survey_title,
       description = survey_description,
       rateValues = c(0, 1, 2, 3, 4, 5),
@@ -63,14 +63,14 @@ create_checks_survey <- function(checks, title="Title") {
     )
   })
 
-  survey_questions <- c(survey_questions, list(addition_questions_survey))
+  survey_aspects <- c(survey_aspects, list(addition_aspects_survey))
 
   survey_json <-
     list(
       title = title,
-      questions = survey_questions,
+      aspects = survey_aspects,
       requiredText = "",
-      showQuestionNumbers = "off"
+      showaspectNumbers = "off"
     )
   survey_json
 }
@@ -78,17 +78,17 @@ create_checks_survey <- function(checks, title="Title") {
 create_checks_survey(
   checks,
   "How important are these characteristics for both users and developers of bioinformatics tools?"
-) %>% rjson::toJSON() %>% write(paste0(analysis_folder, "/survey/static/questions_both.json"))
+) %>% rjson::toJSON() %>% write(paste0(analysis_folder, "/survey/static/aspects_both.json"))
 
 create_checks_survey(
   checks %>% filter(user_friendly),
   "How important are these characteristics for the users of bioinformatics tools?"
-) %>% rjson::toJSON() %>% write(paste0(analysis_folder, "/survey/static/questions_user.json"))
+) %>% rjson::toJSON() %>% write(paste0(analysis_folder, "/survey/static/aspects_user.json"))
 
 create_checks_survey(
   checks %>% filter(developer_friendly),
   "How important are these characteristics for developers of bioinformatics tools?"
-) %>% rjson::toJSON() %>% write(paste0(analysis_folder, "/survey/static/questions_developer.json"))
+) %>% rjson::toJSON() %>% write(paste0(analysis_folder, "/survey/static/aspects_developer.json"))
 
 
 ###

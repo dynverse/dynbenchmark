@@ -5,7 +5,7 @@ Survey
 var surveyJSON = $.getJSON(window.location.pathname + "/get", "", onDataLoad);
 
 function onDataLoad(surveyJSON) {
-  var survey = new Survey.Model(surveyJSON.questions);
+  var survey = new Survey.Model(surveyJSON.aspects);
   survey.data = surveyJSON.answers
 
   //Create showdown mardown converter
