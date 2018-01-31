@@ -109,8 +109,6 @@ table <- tasks_real %>%
   mutate(
     date = cell_spec(
       glue::glue(grouper("date")),
-      background=technology_colors[technology],
-      color="white",
       escape=FALSE
     ),
     technology = cell_spec(

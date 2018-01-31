@@ -54,8 +54,6 @@ for (category in unique(checks$category)) {
 }
   
 table %>% write_rds(figure_file("qc_checks.rds"))
-
-table
 ```
 
 
@@ -115,7 +113,7 @@ aspect_position <- method_qc %>%
   arrange(aspect_id) %>%
   group_by(aspect_id) %>%
   summarise(
-    aspect_width = sum(score * weight),
+    aspect_width = sum(item_weight * weight),
     name = first(name)
   ) %>%
   mutate(
@@ -129,7 +127,7 @@ check_position <- method_qc %>%
   arrange(aspect_id, check_id) %>%
   group_by(check_id) %>%
   summarise(
-    check_width = score * weight,
+    check_width = item_weight * weight,
     aspect_id = first(aspect_id)
   ) %>%
   left_join(aspect_position, by="aspect_id") %>%
