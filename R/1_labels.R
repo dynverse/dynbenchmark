@@ -6,7 +6,8 @@ labels <- tibble::tribble(
   "ngenes", "Number of genes", "# genes",
   "ncells", "Number of cells", "# cells",
   "silver", "Silver standard", "Silver",
-  "gold", "Gold standard", "Gold"
+  "gold", "Gold standard", "Gold",
+  "gse", "Source(s)", "Source(s)"
 )
 
 #' Short labelling function
