@@ -7,22 +7,8 @@ methods <- read_rds(derived_file("methods.rds"))
 
 # combine with qc scores
 method_qc <- readRDS(derived_file("method_qc.rds"))
-method_qc_scores <- method_qc %>%
-  group_by(method_id) %>%
-  summarise(qc_score=sum(answer * score * weight)/sum(score * weight)) %>%
-  arrange(-qc_score)
 
-method_qc_category_scores <- method_qc %>%
-  group_by(method_id, category) %>%
-  summarise(qc_score=sum(answer * score * weight)/sum(score * weight)) %>%
-  ungroup()
-
-method_qc_application_scores <- method_qc %>%
-  gather(application, application_applicable, !!qc_applications$application) %>%
-  filter(application_applicable) %>%
-  group_by(method_id, application) %>%
-  summarise(score=sum(answer * score * weight)/sum(score * weight))
-
+# merge qc scores with methods tibble
 methods <- methods %>%
   select(-matches("qc_score")) %>%
   left_join(method_qc_scores, c("name"="method_id"))
