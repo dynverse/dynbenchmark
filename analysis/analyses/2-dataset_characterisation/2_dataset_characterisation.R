@@ -11,13 +11,14 @@ trajectory_types <- readRDS(derived_file("trajectory_types.rds"))
 tasks_real <- tasks %>% filter(category == "real")
 
 technology_colors <- unique(tasks_real$technology) %>% {setNames(RColorBrewer::brewer.pal(length(.), "Set1"), .)}
+standard_colors <- c("gold"="#ffeca9", "silver"="#e3e3e3")
 
 ##  ............................................................................
 ##  Pie charts                                                              ####
 pie <- function(tasks, what = "technology") {
   label <-"{label_short(variable_of_interest, 15)}: {n}"
   if (what == "standard") {
-    fill_scale <- scale_fill_manual(values=c("gold"="#ffeca9", "silver"="#e3e3e3"))
+    fill_scale <- scale_fill_manual(values=standard_colors)
   } else if (what == "technology") {
     fill_scale <- scale_fill_manual(values=technology_colors)
   } else if (what == "trajectory_type") {
@@ -100,15 +101,20 @@ cowplot::save_plot(figure_file("dataset_characterisation.svg"), dataset_characte
 
 ##  ............................................................................
 ##  Datasets table                                                          ####
+grouper <- function(x) paste0("<span style='display: none;'>{gse}</span> {", x, "}")
 library(kableExtra)
 table <- tasks_real %>%
-  select(technology, gse, id, trajectory_type, organism, standard, ncells, ngenes) %>%
+  select(gse, organism, technology, id, trajectory_type, standard, ncells, ngenes) %>%
   mutate(
     technology = cell_spec(
-      glue::glue(paste0("<span style='display: none;'>{gse}</span> {technology}")),
+      glue::glue(grouper("technology")),
       background=technology_colors[technology],
       color="white",
-      escape=FALSE,
+      escape=FALSE
+    ),
+    organism = cell_spec(
+      glue::glue(grouper("organism")),
+      escape=FALSE
     ),
     trajectory_type = kableExtra::cell_spec(label_long(trajectory_type), background=set_names(trajectory_types$color, trajectory_types$id)[trajectory_type], color="white"),
     ncells = cell_spec(
@@ -120,10 +126,11 @@ table <- tasks_real %>%
       formattable::color_tile("white", "green")(ngenes),
       escape=FALSE,
       color="black"
-    ),
+    )
   ) %>%
+  rename_all(label_long) %>%
   knitr::kable("html", escape=FALSE) %>%
-  collapse_rows(1:2) %>%
+  collapse_rows(1:3) %>%
   kable_styling(bootstrap_options = c("hover", "striped"))
 table
 
