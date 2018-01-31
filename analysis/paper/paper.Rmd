@@ -1,30 +1,11 @@
 ---
 title: "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
-author:
-  - Wouter Saelens* ¹ ²
-  - Robrecht Cannoodt* ¹ ² ³
-  - Helena Todorov¹ ² ⁴ ⁵
-  - Yvan Saeys¹ ²
-date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: 
-    bookdown::html_document2:
-    fig_caption: yes
-    reference_docx: templates/template.docx
 bibliography: references.bib
 csl: nature-biotechnology.csl
-abstract: |
-  Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Since 2014, already dozens of trajectory inference methods have been developed, each with its own set of methodological characteristics. This makes a direct comparison between trajectory inference methods often difficult, and as a result a comprehensive assessment of the performance and robustness of each method is still lacking. We developed a framework of data structures for trajectory inference methods in order to make their results comparable to each other and to a gold standard, when available. In this work, we compare the results from a total of 22 trajectory inference methods, on a large collection of real datasets and realistic synthetic datasets. We employ a novel parameter optimisation procedure, and compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at www.github.com/dynverse.
-keywords: |
-  trajectory inference; pseudotemporal ordering; single-cell transcriptomics
-highlights: |
-  These are the highlights. 
 ---
-\* Equal contribution  
-¹ Data mining and modelling for biomedicine, VIB Center for Inflammation Research, Ghent, Belgium.  
-² Department of Applied Mathematics, Computer Science and Statistics, Ghent University, Ghent, Belgium.  
-³ Center for Medical Genetics, Ghent University Hospital, Ghent, Belgium.  
-⁴ CIRI, Centre International de Recherche en Infectiologie, Inserm, Lyon, France.  
-⁵ Université Claude Bernard Lyon 1, Lyon, France.  
+
+
+*`r format(Sys.time(), '%d %B, %Y')`*
 <!----
 Tips for working in this document:
 * Go to tools -> perferences and remove Use smart quotes
@@ -52,6 +33,21 @@ A comparison of single-cell trajectory inference methods: towards more accurate 
 ```{r setup, include=FALSE}
 source("setup.R")
 ```
+Wouter Saelens* ¹ ² , Robrecht Cannoodt* ¹ ² ³, Helena Todorov¹ ² ⁴ ⁵, Yvan Saeys¹ ²
+
+
+\* Equal contribution  
+¹ Data mining and Modelling for Biomedicine, VIB Center for Inflammation Research, Ghent, Belgium.  
+² Department of Applied Mathematics, Computer Science and Statistics, Ghent University, Ghent, Belgium.  
+³ Center for Medical Genetics, Ghent University Hospital, Ghent, Belgium.  
+⁴ CIRI, Centre International de Recherche en Infectiologie, Inserm, Lyon, France.  
+⁵ Université Claude Bernard Lyon 1, Lyon, France.  
+
+
+# Abstract
+
+
+Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Since 2014, already dozens of trajectory inference methods have been developed, each with its own set of methodological characteristics. This makes a direct comparison between trajectory inference methods often difficult, and as a result a comprehensive assessment of the performance and robustness of each method is still lacking. We developed a framework of data structures for trajectory inference methods in order to make their results comparable to each other and to a gold standard, when available. In this work, we compare the results from a total of 22 trajectory inference methods, on a large collection of real datasets and realistic synthetic datasets. We employ a novel parameter optimisation procedure, and We compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at https://www.github.com/dynverse.
 
 
 # Introduction
@@ -112,7 +108,16 @@ read_rds(figure_file("methods_table.rds", "method_characteristics"))
 At the level of trajectory structures, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "method_characteristics", "a")`). However, only a handful of more recent methods can currently handle more complex graph structures which can include loops (`r ref("sfig", "methods_over_time", "b")`), one of which is included in the current evaluation (SLICER).
 
 
-While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("snote", "qc_scoring")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or for which purpose(s) they are important (user friendliness, developer friendliness or good science). These categorisations can then be used to help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
+While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or for which purpose(s) they are important (user friendliness, developer friendliness or good science). These categorisations can then be used to help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
+
+
+```{r}
+add_stable(
+read_rds(figure_file("qc_checks.rds","method_characteristics")), 
+"qc_checks", 
+""
+)
+```
 
 
 Most methods fulfilling most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "method_characteristics", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "method_characteristics", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "method_qc_check")` and `r ref("fig", "method_characteristics", "c")`), notwithstanding studies pinpointing these as good practices [@wilson_best_2014].
@@ -168,6 +173,17 @@ readRDS(figure_file("qc_over_time.rds", experiment_id="method_characteristics"))
 `r ref("fig", "evaluation_overview")` Overview of the evaluation
 
 
+```{r}
+add_stable(
+read_rds(figure_file("datasets.rds","dataset_characterisation")), 
+"datasets", 
+"Real datasets used in this study"
+)
+```
+
+
+
+
 Our evaluation was structured in three main phases. In the first phase, we used toy data as a positive control for each method, assessing whether it can detect the correct trajectories in very simplistic data. Next, we generated synthetic data from a model of gene regulation, combined with a simulation of the technical variation introduced by single-cell RNA sequencing. We used this synthetic data in a parameter optimization procedure, where we used cross-validation between datasets to avoid overfitting on particular data set structures. Finally, in the third phase, we used the optimized parameters to score the performance of each method on real data. We split the real datasets in two groups based on the type of reference trajectory available. The reference in datasets with a silver standard were defined by the author’s based on the expression data itself, while the reference for gold standard was defined using external information, such as fluorescent sorting or time series.[a]
 ### Score metrics and parameter optimisation
 
@@ -187,16 +203,29 @@ Echte data. Evaluatie (biologische relevantie van de methode)
 
 
 # Discussion
-# Conclusion
 
 
-# Online Methods
+# Methods
 
 
 ## Trajectory inference methods
 
 
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods `r ref("table", "methods", anchor=TRUE)`, based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018,@gitter_singlecellpseudotimeoverviewalgorithms_2018] and by searching in literature for "trajectory inference" and "pseudotemporal ordering". We believe this to be the most complete list to data, but are happy to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). For each method we investigated whether it was 
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods `r ref("table", "methods", anchor=TRUE)`, based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018,@gitter_singlecellpseudotimeoverviewalgorithms_2018] and by searching in literature for "trajectory inference" and "pseudotemporal ordering". We believe this to be the most complete list to data, but are welcome to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "methods")`).
+
+
+## Method quality control
+
+
+We created a transparent scoring scheme to check the quality of each method (`r ref("table", "methods")`) and weighed each quality check by the number of times it was found in a list of references. 
+
+
+## Real data processing
+
+
+We gathered a list of real datasets by searching for "single-cell" at the Gene Expression Omnibus and selecting those datasets in which the cells are sampled from different stages in a dynamic process (`r ref("stable", "datasets")`) .
+
+
 ## Synthetic data generation
 
 
@@ -209,10 +238,6 @@ Our workflow to generate synthetic data is based on the well established workflo
 One of the main process involved in cellular dynamic processes is through gene regulation, where regulatory cascades and feedback loops lead to . The exact way a cell chooses a certain path during its differentiation is still an active research field, although certain models have already emerged and been tested in vivo. One driver of bifurcations seem to be mutual antagonism, where two genes [@XuRegulationbifurcatingcell2015] or gene modules strongly inhibit each other, forcing one of the two to become inactive [@GrafForcingcellschange2009]. Which of these two Of Modules? [Th17]
 
 
-## Real data processing
-
-
-We gathered 
 
 
 ## Normalization
@@ -221,36 +246,18 @@ We gathered
 
 
 # Acknowledgements
+# References 
 
 
-# Supplementary Figures
+<div id="refs"></div>
 
 
+# Supplementary Material
 
 
 ```{r, echo=FALSE, results='asis'}
-subchunkify <- function(ref_id, caption, width=5, height=7) {
-  subchunk <- glue::glue("",
-  "",
-  "`r anchor('sfig', '{ref_id}')`",
-  "```{{r {ref_id}, fig.height={height}, fig.width={width}, echo=FALSE}}",
-  "sfigs %>% filter(ref_id == !!ref_id) %>% pull(fig) %>% .[[1]]",
-  "```",
-  "`r ref('sfig', '{ref_id}')` {caption}",
-  "", .sep = "\n")
-  
-  cat(knitr::knit(text=subchunk, quiet=TRUE))
-}
-
-
-pwalk(sfigs %>% arrange(match(ref_id, refs$ref_id)), function(ref_id, fig, caption, width, height) {
-  subchunkify(ref_id, caption, width, height)
-})
+source("analysis/paper/sfigs_stables.R")
 ```
-
-
-
-
 
 
 # Colophon
@@ -270,9 +277,4 @@ The current Git commit details are:
 # if your Rmd is not in analysis/paper/
 git2r::repository(".")
 ```
-
-
-# References 
-
-
 [a]Outdated

@@ -18,7 +18,7 @@ method_qc_category_scores <- method_qc %>%
   ungroup()
 
 method_qc_application_scores <- method_qc %>%
-  gather(application, application_applicable, !!applications) %>%
+  gather(application, application_applicable, !!qc_applications$application) %>%
   filter(application_applicable) %>%
   group_by(method_id, application) %>%
   summarise(score=sum(answer * score * weight)/sum(score * weight))
@@ -28,7 +28,7 @@ methods <- methods %>%
   left_join(method_qc_scores, c("name"="method_id"))
 
 methods <- methods %>%
-  mutate(evaluated = wrapper == "Done")
+  mutate(evaluated = wrapper == "Done" & !is.na(wrapper))
 
 methods_evaluated <- methods %>%
   filter(evaluated)

@@ -201,7 +201,7 @@ methods_table <- methods %>%
     evaluated = ifelse(evaluated, "✓", map(non_inclusion_reasons_footnotes, paste0, collapse=" ")),
     evaluated = kableExtra::cell_spec(evaluated, color=ifelse(evaluated == "✓", "green", "")),
     date = strftime(date, "%d/%m/%Y"),
-    maximal_trajectory_type = kableExtra::cell_spec(label_long(maximal_trajectory_type), background=set_names(trajectory_types$background_color, trajectory_types$id)[maximal_trajectory_type]),
+    maximal_trajectory_type = kableExtra::cell_spec(label_long(maximal_trajectory_type), background=set_names(trajectory_types$color, trajectory_types$id)[maximal_trajectory_type], color="white"),
     name = kableExtra::cell_spec(name, link=Code)
   ) %>%
   select(name, date, maximal_trajectory_type, evaluated) %>%
