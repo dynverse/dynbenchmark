@@ -21,6 +21,3 @@ methods_evaluated <- methods %>%
 
 write_rds(methods, derived_file("methods.rds"))
 write_rds(methods_evaluated, derived_file("methods_evaluated.rds"))
-write_rds(method_qc_scores, derived_file("method_qc_scores.rds"))
-write_rds(method_qc_category_scores, derived_file("method_qc_category_scores.rds"))
-write_rds(method_qc_application_scores, derived_file("method_qc_application_scores.rds"))
