@@ -60,29 +60,29 @@ tasks <- tasks %>% rowwise() %>% mutate(
   milenet_spr = milestone_percentages %>% reshape2::acast(cell_id ~ milestone_id, value.var = "percentage", fill = 0) %>% list()
 ) %>% ungroup()
 
-write_rds(lst(methods, designs, metrics, extra_metrics, num_repeats, timeout), derived_file("config.rds"))
-
-# start benchmark
-benchmark_suite_submit(
-  tasks = tasks,
-  task_group = rep("task", nrow(tasks)),
-  task_fold = rep(1, nrow(tasks)),
-  out_dir = derived_file("suite/"),
-  remote_dir = paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/"),
-  methods = methods,
-  designs = designs,
-  metrics = metrics,
-  extra_metrics = extra_metrics,
-  timeout = timeout,
-  memory = "11G",
-  num_cores = 1,
-  num_iterations = 1,
-  num_repeats = num_repeats,
-  num_init_params = num_init_params,
-  execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500",
-  r_module = NULL,
-  output_model = TRUE
-)
+# write_rds(lst(methods, designs, metrics, extra_metrics, num_repeats, timeout), derived_file("config.rds"))
+#
+# # start benchmark
+# benchmark_suite_submit(
+#   tasks = tasks,
+#   task_group = rep("task", nrow(tasks)),
+#   task_fold = rep(1, nrow(tasks)),
+#   out_dir = derived_file("suite/"),
+#   remote_dir = paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/"),
+#   methods = methods,
+#   designs = designs,
+#   metrics = metrics,
+#   extra_metrics = extra_metrics,
+#   timeout = timeout,
+#   memory = "11G",
+#   num_cores = 1,
+#   num_iterations = 1,
+#   num_repeats = num_repeats,
+#   num_init_params = num_init_params,
+#   execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500",
+#   r_module = NULL,
+#   output_model = TRUE
+# )
 
 outputs <- benchmark_suite_retrieve(derived_file("suite/"))
 
@@ -91,7 +91,7 @@ outputs <- benchmark_suite_retrieve(derived_file("suite/"))
 outputs2 <- outputs %>%
   rowwise() %>%
   mutate(
-    any_errored = any(unlist(which_errored)),
+    any_errored = any(which_errored),
     memory = ifelse(!is.null(qacct), qacct$maxvmem, NA)
   ) %>%
   ungroup()
@@ -103,17 +103,89 @@ succeeded <- outputs2 %>%
   filter(n() == num_repeats) %>%
   ungroup()
 
+tmp <- outputs2 %>%
+  rowwise() %>%
+  mutate(
+    qsub_error = ifelse(qsub_error != "all parameter settings errored", qsub_error, individual_scores$error[[1]]$message),
+    qsub_len = str_length(qsub_error),
+    qsub_error = str_sub(qsub_error, qsub_len-600, qsub_len)
+  ) %>%
+  ungroup() %>%
+  select(method_name, qsub_error, which_errored) %>%
+  filter(which_errored) %>%
+  group_by(method_name) %>%
+  slice(1) %>%
+  ungroup()
+for (i in seq_len(nrow(tmp))) {
+  cat("METHOD ", tmp$method_name[[i]], " ERRORED BECAUSE OF: \n", sep = "")
+  cat(tmp$qsub_error[[i]], "\n\n", sep = "")
+}
+
+trajtype_ord <- c("directed_linear", "directed_cycle", "bifurcation", "multifurcation", "rooted_tree", "directed_acyclic_graph", "directed_graph")
+
 # bind the metrics of the individual runs
 eval_ind <-
   bind_rows(succeeded$individual_scores) %>%
-  left_join(tasks %>% select(task_id = id, type, trajectory_type), by = "task_id") %>%
-  mutate(pct_errored = 1 - sapply(error, is.null))
+  filter(!method_name %in% c("identity", "shuffle", "random")) %>%
+  left_join(tasks %>% select(task_id = id, type, trajectory_type, task_group), by = "task_id") %>%
+  mutate(
+    param_group = c("default", "optimised")[param_i],
+    pct_errored = 1 - sapply(error, is.null),
+    prior_sr = sapply(prior_df, function(prdf) ifelse(nrow(prdf) == 0, "", paste(prdf$prior_names, "--", prdf$prior_type, sep = "", collapse = ";"))),
+    trajectory_type_f = factor(trajectory_type, levels = trajtype_ord)
+  ) %>%
+  group_by(task_id) %>%
+  mutate(
+    rank_correlation = percent_rank(correlation),
+    rank_mmse = percent_rank(-mmse)
+  ) %>%
+  ungroup() %>%
+  rowwise() %>%
+  mutate(error_message = ifelse(is.null(error), "", error$message)) %>%
+  ungroup()
 
-# priors <- eval_ind %>%
-#   group_by(method_name) %>%
-#   slice(1) %>%
-#   rowwise() %>%
-#   mutate(prior = ifelse(nrow(prior_df) == 0, "", paste(prior_df$prior_names, "--", prior_df$prior_type, sep = "", collapse = ";"))) %>%
-#   ungroup() %>%
-#   select(method_name, prior, prior_df)
+# process trajtype grouped evaluation
+eval_trajtype <- eval_ind %>%
+  group_by(method_name, method_short_name, task_group, param_group, trajectory_type, trajectory_type_f) %>%
+  mutate(n = n()) %>%
+  summarise_if(is.numeric, mean) %>%
+  ungroup()
+
+# process overall evaluation
+eval_overall <- eval_trajtype %>%
+  group_by(method_name, method_short_name, task_group, param_group) %>%
+  mutate(n = n()) %>%
+  summarise_if(is.numeric, mean) %>%
+  ungroup()
+
+# adding totals and means to table
+eval_trajtype_wm <- eval_trajtype %>%
+  group_by(method_name, method_short_name, param_group, trajectory_type, trajectory_type_f) %>%
+  summarise_if(is.numeric, mean) %>%
+  ungroup() %>%
+  mutate(task_group = "mean") %>%
+  bind_rows(eval_trajtype)
+
+eval_overall_wm <- eval_overall %>%
+  group_by(method_name, method_short_name, param_group) %>%
+  summarise_if(is.numeric, mean) %>%
+  ungroup() %>%
+  mutate(task_group = "mean") %>%
+  bind_rows(eval_overall)
+
+eval_trajtype_wa_wo <- eval_overall_wm %>%
+  mutate(trajectory_type = "overall") %>%
+  bind_rows(eval_trajtype_wm) %>%
+  mutate(trajectory_type_f = factor(trajectory_type, levels = c("overall", trajtype_ord)))
+
+# evaluate per replicate
+eval_repl <- eval_ind %>%
+  group_by(method_name, method_short_name, task_group, param_group, repeat_i) %>%
+  mutate(n = n()) %>%
+  summarise_if(is.numeric, mean) %>%
+  ungroup()
+
+write_rds(lst(eval_ind, eval_overall, eval_trajtype, eval_repl, eval_trajtype_wa_wo, trajtype_ord), derived_file("eval_outputs.rds"))
+
+
 
