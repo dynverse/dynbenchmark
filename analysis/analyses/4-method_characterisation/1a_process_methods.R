@@ -27,8 +27,6 @@ methods <- methods %>%
   mutate(maximal_trajectory_type = map_chr(maximal_trajectory_types_split, first))
 
 # now add for every trajectory type a column, whether it can handle such a trajectory or not
-trajectory_types <- read_rds(derived_file("trajectory_types.rds", "dataset_characterisation"))
-
 trajectory_type_capabilities <- map(
   methods$maximal_trajectory_types_split,
   function(maximal_trajectory_types) {
