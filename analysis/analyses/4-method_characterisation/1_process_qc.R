@@ -18,7 +18,7 @@ method_qc_converted <- method_qc_sheet %>%
   tidyr::fill(question_id) %>%
   mutate(question_id = factor(question_id, levels = method_qc_sheet$question_id %>% unique() %>% keep(~!is.na(.)))) %>%
   group_by(question_id) %>%
-  tidyr::fill(name, category, weight, question, !!applications) %>%
+  tidyr::fill(name, category, weight, question, !!applications, references) %>%
   mutate_at(vars(!!applications), ~ifelse(is.na(.), FALSE, TRUE)) %>%
   ungroup()
 

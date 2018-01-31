@@ -8,7 +8,13 @@ system(pritt("sed -i '1s/^.//' {drive$local_path}")) # remove first character, b
 system(pritt("cat {drive$local_path} > analysis/paper/paper.Rmd"))
 
 file.remove("analysis/paper/paper.html")
-render("analysis/paper/paper.Rmd", "html_document", output_dir = "analysis/paper/", output_file = "paper.html")
+
+render(
+  "analysis/paper/paper.Rmd",
+  output_format = bookdown::gitbook(split_by="none", number_sections=FALSE, config=list(toc=list(scroll_highlight = "yes")), css="style.css", lib_dir = ".scratch/"),
+  output_dir = "analysis/paper/",
+  output_file = "paper.html"
+)
 browseURL("analysis/paper/paper.html")
 
 # for conversion to pdf:
