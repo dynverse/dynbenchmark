@@ -2,12 +2,24 @@ library(dynalysis)
 library(tidyverse)
 library(dynplot)
 
-experiment("5-optimise_parameters/11-evaluate_with_real_datasets-CORRELATION")
+experiment("5-optimise_parameters/13-evaluate_with_real_datasets")
 
-source("analysis/analyses/4-method_characterisation/0_common.R")
-
-evals <- read_rds(derived_file("eval_outputs.rds", "5-optimise_parameters/11-evaluate_with_real_datasets-CORRELATION"))
+evals <- read_rds(derived_file("eval_outputs.rds"))
 list2env(evals, environment())
+
+# get ordering of methods
+method_ord <- eval_overall %>%
+  group_by(method_name) %>%
+  summarise_if(is.numeric, mean) %>%
+  arrange(desc(rank_correlation)) %>%
+  .$method_name
+
+eval_overall <- eval_overall %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
+eval_ind <- eval_ind %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
+eval_trajtype <- eval_trajtype %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
+eval_trajtype_wa_wo <- eval_trajtype_wa_wo %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
+
+# get other method metric data
 method_char <- read_rds(derived_file("method_df_evaluated.rds", "method_characteristics"))
 method_df_evaluated <- method_char %>%
   rowwise() %>%
@@ -17,34 +29,12 @@ method_df_evaluated <- method_char %>%
     data.frame(df, method_short_name, stringsAsFactors = FALSE, check.names = FALSE)
   })
 
-eval_ind <- eval_ind %>% rowwise() %>% mutate(error_message = ifelse(is.null(error), "", error$message)) %>% ungroup()
-
-num_reals <- eval_ind %>% filter(method_short_name == "CTmaptpx", task_group == "real", param_group == "best", replicate == 1) %>%
-  group_by(trajectory_type) %>% summarise(n = n())
-num_synths <- eval_ind %>% filter(method_short_name == "CTmaptpx", task_group == "synthetic", param_group == "best", replicate == 1) %>%
-  group_by(trajectory_type) %>% summarise(n = n())
-write_tsv(num_reals, figure_file("trajtypes_real.tsv"))
-write_tsv(num_synths, figure_file("trajtypes_synth.tsv"))
-
-# adding totals and means to table
-eval_trajtype_wm <- eval_trajtype %>%
-  group_by(method_name, method_name_f, method_short_name, param_group, trajectory_type, trajectory_type_f) %>%
-  summarise_if(is.numeric, mean) %>%
-  ungroup() %>%
-  mutate(task_group = "mean") %>%
-  bind_rows(eval_trajtype)
-
-eval_overall_wm <- eval_overall %>%
-  group_by(method_name, method_name_f, method_short_name, param_group) %>%
-  summarise_if(is.numeric, mean) %>%
-  ungroup() %>%
-  mutate(task_group = "mean") %>%
-  bind_rows(eval_overall)
-
-eval_trajtype_wa_wo <- eval_overall_wm %>%
-  mutate(trajectory_type = "overall") %>%
-  bind_rows(eval_trajtype_wm) %>%
-  mutate(trajectory_type_f = factor(trajectory_type, levels = c("overall", trajtype_ord)))
+# num_reals <- eval_ind %>% filter(method_short_name == "CTmaptpx", task_group == "real", param_group == "best", replicate == 1) %>%
+#   group_by(trajectory_type) %>% summarise(n = n())
+# num_synths <- eval_ind %>% filter(method_short_name == "CTmaptpx", task_group == "synthetic", param_group == "best", replicate == 1) %>%
+#   group_by(trajectory_type) %>% summarise(n = n())
+# write_tsv(num_reals, figure_file("trajtypes_real.tsv"))
+# write_tsv(num_synths, figure_file("trajtypes_synth.tsv"))
 
 # plots
 pdf(figure_file("2_trajtype_comparison.pdf"), 20, 8)
@@ -71,20 +61,20 @@ ggplot(eval_trajtype_wa_wo) +
 #     y = "Mean quantile score of OOB-MSE score when predicting gold milestone percentages",
 #     title = "Evaluation of trajectory inference methods with default parameters"
 #   )
-# ggplot(eval_trajtype_wa_wo) +
-#   geom_point(aes(method_name_f, rank_mmse)) +
-#   coord_flip() +
-#   theme_bw() +
-#   facet_grid(task_group~trajectory_type_f) +
-#   labs(
-#     x = NULL,
-#     colour = "Parameter\ngroup",
-#     y = "Mean quantile score of OOB-MSE score when predicting gold milestone percentages",
-#     title = "Evaluation of trajectory inference methods with default parameters"
-#   )
+ggplot(eval_trajtype_wa_wo) +
+  geom_point(aes(method_name_f, rank_mmse)) +
+  coord_flip() +
+  theme_bw() +
+  facet_grid(task_group~trajectory_type_f) +
+  labs(
+    x = NULL,
+    colour = "Parameter\ngroup",
+    y = "Mean quantile score of OOB-MSE score when predicting gold milestone percentages",
+    title = "Evaluation of trajectory inference methods with default parameters"
+  )
 
 ggplot(eval_trajtype_wa_wo) +
-  geom_point(aes(method_name_f, percentage_errored)) +
+  geom_point(aes(method_name_f, pct_errored)) +
   coord_flip() +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f) +
@@ -166,11 +156,11 @@ cowplot::plot_grid(g1, g2, g3, nrow = 1)
 dev.off()
 
 step_levels <- c("sessionsetup", "preprocessing", "method", "postprocessing", "wrapping", "sessioncleanup", "geodesic", "correlation",
-                 "coranking", "mantel")
+                 "coranking", "mantel", "rfmse")
 
 time_ind <-
   eval_ind %>%
-  select(method_name, method_name_f, task_id, percentage_errored, error_message, trajectory_type_f, starts_with("time_")) %>%
+  select(method_name, method_name_f, task_id, pct_errored, error_message, trajectory_type_f, starts_with("time_")) %>%
   mutate(error_reason = error_reason_fun(error_message)) %>%
   gather(step, time, starts_with("time")) %>%
   mutate(
@@ -194,12 +184,6 @@ time_ind <- time_ind %>% mutate(
   method_name_f = factor(method_name, levels = method_ordering$method_name)
 )
 
-ggplot(time_ind) +
-  geom_bar(aes(task_id_f, time, fill = step_f), stat = "identity") +
-  facet_wrap(~method_name, scales = "free_y") +
-  scale_fill_brewer(palette = "Set3")
-
-
 g <- time_ind %>%
   group_by(trajectory_type_f, method_name, step_f) %>%
   summarise(time = mean(time, na.rm = T)) %>%
@@ -210,7 +194,7 @@ g <- time_ind %>%
   scale_fill_brewer(palette = "Set3") +
   cowplot::theme_cowplot() +
   coord_flip() +
-  labs(x = NULL)
+  labs(x = NULL, fill = "Time step")
 ggsave(figure_file("timestep_permethodandtrajtype.pdf"), g, width = 20, height = 8)
 
 g <- time_ind %>%
@@ -222,9 +206,7 @@ g <- time_ind %>%
   scale_fill_brewer(palette = "Set3") +
   cowplot::theme_cowplot() +
   coord_flip() +
-  labs(x = NULL)
+  labs(x = NULL, fill = "Time step")
 ggsave(figure_file("timestep_permethod.pdf"), g, width = 10, height = 5)
 
 
-
-eval_ind %>% filter(method_name == "slingshot", percentage_errored == 1) %>% select(task_id, error_message)
