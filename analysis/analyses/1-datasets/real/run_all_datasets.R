@@ -19,12 +19,15 @@ handle <- qsub_lapply(
     wait = FALSE,
     r_module = NULL,
     execute_before = "",
-    stop_on_error = FALSE
+    stop_on_error = FALSE,
+    remove_tmp_folder = FALSE
   ),
   qsub_packages = c("GEOquery", "MultiAssayExperiment", "tidyverse", "dynalysis"),
   FUN = function(dataset_script) {
+    oldwd <- getwd()
     setwd("/group/irc/shared/dynalysis/")
     source(paste0(dynalysis::get_dynalysis_folder(), "/", dataset_script))
+    setwd(oldwd)
     TRUE
   }
 )
