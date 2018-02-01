@@ -7,6 +7,9 @@ drive <- drive_download(as_id("1BCCaP21N2PXfzhj9H09yEpZz9lLY2HXd_LxTSsJ_wro"), t
 system(pritt("sed -i '1s/^.//' {drive$local_path}")) # remove first character, because this is some strange unicode character
 system(pritt("cat {drive$local_path} > analysis/paper/paper.Rmd"))
 
+# add wip
+read_file("analysis/paper/paper.Rmd") %>% gsub("§(.*?)\n", "<p class='wip'>\\1</p>", .) %>% write_file("analysis/paper/paper.Rmd")
+
 file.remove("analysis/paper/paper.html")
 
 render(

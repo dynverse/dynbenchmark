@@ -33,7 +33,7 @@ A comparison of single-cell trajectory inference methods: towards more accurate 
 ```{r setup, include=FALSE}
 source("setup.R")
 ```
-Wouter Saelens* ¹ ² , Robrecht Cannoodt* ¹ ² ³, Helena Todorov¹ ² ⁴ ⁵, Yvan Saeys¹ ²
+`r glue::collapse(sample(c("Wouter Saelens* ¹ ²", "Robrecht Cannoodt* ¹ ² ³")), ", ")`, Helena Todorov¹ ² ⁴ ⁵, Yvan Saeys¹ ²
 
 
 \* Equal contribution  
@@ -232,22 +232,24 @@ We gathered a list of real datasets by searching for "single-cell" at the Gene E
 ## Synthetic datasets
 
 
-Our workflow to generate synthetic data is based on the well established workflow used in the evaluation of network inference methods [@schaffter_genenetweaversilicobenchmark_2011; @marbach_wisdom_2012] and consists of four main steps: network generation, simulation, gold standard extraction and simulation of the scRNA-seq experiment. At every step, we took great care was taking to mimic real cellular regulatory networks as best as possible, while keeping the model simple and easily extendable.
+Our workflow to generate synthetic data is based on the well established workflow used in the evaluation of network inference methods [@schaffter_genenetweaversilicobenchmark_2011; @marbach_wisdom_2012] and consists of four main steps: network generation, simulation, gold standard extraction and simulation of the scRNA-seq experiment. At every step, we took great care was taking to mimic real cellular regulatory networks as best as possible, while keeping the model simple and easily extendable. For every synthetic dataset, we used a random real dataset as a reference dataset (from those described earlier), making sure the number of variable genes and cells were similar.
 
 
 ### Network generation
 
 
-One of the main process involved in cellular dynamic processes is through gene regulation, where regulatory cascades and feedback loops lead to progressive changes in expression and decision making. The exact way a cell chooses a certain path during its differentiation is still an active research field, although certain models have already emerged and been tested in vivo. One driver of bifurcations seem to be mutual antagonism, where genes [@xu_regulationbifurcatingcell_2015] strongly repress each other, forcing one of the two to become inactive [@graf_forcingcellschange_2009]. Such mutual antagonism can be modelled and simulated [@wang_quantifyingwaddingtonlandscape_2011; ferrell_bistabilitybifurcationswaddington_2012]. Although such a two-gene model is simple and elegant, the reality is frequently more complex, with multiple genes (grouped into models) repressing each other [@yosef_dynamicregulatorynetwork_2013].
+One of the main process involved in cellular dynamic processes is through gene regulation, where regulatory cascades and feedback loops lead to progressive changes in expression and decision making. The exact way a cell chooses a certain path during its differentiation is still an active research field, although certain models have already emerged and been tested in vivo. One driver of bifurcations seem to be mutual antagonism, where genes [@xu_regulationbifurcatingcell_2015] strongly repress each other, forcing one of the two to become inactive [@graf_forcingcellschange_2009]. Such mutual antagonism can be modelled and simulated [@wang_quantifyingwaddingtonlandscape_2011; @ferrell_bistabilitybifurcationswaddington_2012]. Although such a two-gene model is simple and elegant, the reality is frequently more complex, with multiple genes (grouped into models) repressing each other [@yosef_dynamicregulatorynetwork_2013].
 
 
-To simulate certain trajectory structures, we therefore started from the concept 
+<p class='wip'> Cascades? Cycle?</p>
 
+<p class='wip'> To simulate certain trajectory structures, we therefore designed module networks in which the cells will follow a particular trajectory structure given certain parameters (`r ref("sfig", "modulenets")`). Two module networks generated linear trajectories (linear and linear long), two generated simple forks (bifurcating and converging), one generated a complex fork (trifurcating), one generated a rooted tree (consecutive bifurcating) and two generated trajectories which simple undirected graphs (bifurcating loop and bifurcating convergence).</p>
+
+<p class='wip'> From these module networks we generated gene regulatory networks in two steps: generation of the main regulatory network, and addition of extra target genes from real regulatory networks. For each dataset, we used the same number of genes as were differentially expressed in the real datasets. 5% of genes were assigned to be part of the main, and were randomly distributed among all modules (with at least one gene per module). We sampled edges between these individual genes (according to the module network) using an uniform distribution between 1 and the number of possible targets in each module. To add additional target genes to the network, we assigned every regulator from the network to a real regulator in a real network (from regulatory circuits [@marbach_tissuespecificregulatorycircuits_2016]), and extracted for every regulator a local network around it using personalized pagerank (with damping factor set to 0.1). </p>
 
 ```{r}
 add_sfig({
-readRDS(figure_file("modulenets.rds", experiment_id="dataset_characterisation/synthetic")) %>%
-walk(cowplot::ggdraw)
+readRDS(figure_file("modulenets.rds", experiment_id="dataset_characterisation/synthetic"))
 }, 
 "modulenets", 
 "Module networks, milestone networks and the module dynamics for each of the different types of synthetic data", 
@@ -257,13 +259,102 @@ walk(cowplot::ggdraw)
 ```
 
 
-### Simulation
+### Simulation of thermodynamics
+
+
+To simulate the gene regulatory network, we used a system of differential equations similar to which has been standard in evaluations of network inference [@marbach_wisdom_2012]. In this model, changes in gene expression ($x_i$) and protein expression ($y_i$) are modeled using ordinary differential equations [@schaffter_genenetweaversilicobenchmark_2011] (ODEs):
+
+
+$$
+\begin{align}
+\label{eq:mrna_ode}
+\frac{dx_i}{dt} &= \underbrace{m \times f(y_1, y_2, ...)}_\text{production} - \underbrace{\lambda \times x_i}_\text{degradation} \\
+\label{eq:prot_ode}
+\frac{dy_i}{dt} &= \underbrace{r \times x_i}_\text{production} - \underbrace{\Lambda \times y_i}_\text{degradation}
+\end{align}
+$$
+
+
+where $m$, $\lambda$, $r$ and $\Lambda$ represent production and degradation rates, the ratio of which determines the maximal gene and protein expression. The two types of equations are coupled because the production of protein $y_i$ depends on the amount of gene expression $x_i$, which in turn depends on the amount of other proteins through the activation function $f(y_1, y_2, ...)$.
+
+
+The activation function is inspired by a thermodynamic model of gene regulation, in which the promoter of a gene can be bound or unbound by a set of transcription factors, each representing a certain state of the promoter. Each state is linked with a relative activation $\alpha_j$, a number between 0 and 1 representing the activity of the promoter at this particular state. The production rate of the gene is calculated by combining the probabilities of the promoter being in each state with the relative activation:
+
+
+$$
+\begin{align}
+\label{eq:input_funcion_probabilities}
+f(y_1, y_2, ..., y_n) = \sum_{j \in \{0, 1, ..., n^2\}} \alpha_j \times P_j
+\end{align}
+$$
+
+
+The probability of being in a state is based on the thermodynamics of transcription factor binding. When only one transcription factor is bound in a state:
+$$
+\begin{align}
+P_j \propto \nu = \left(\frac{y}{k}\right)^{n}
+\end{align}
+$$
+
+
+Where the hill coefficient $n$ represents the cooperativity of binding and $k$ the transcription factor concentration at half-maximal binding. When multiple regulators are bound:
+
+
+$$
+\begin{align}
+P_j \propto \nu =  \rho \times \prod_j \left(\frac{y_j}{k_j}\right)^{n_j}
+\end{align}
+$$
+
+
+where $\rho$ represents the cooperativity of binding between the different transcription factors. 
+
+
+$P_i$ is only proportional to $\nu$ because $\nu$ is normalized such that $\sum_{i} P_i = 1$.
+
+
+To each differential equation, we added an additional stochastic term: 
+
+
+$$
+\begin{align}
+\frac{dx_i}{dt} = m \times f(y_1, y_2, ...) - \lambda \times x_i &+ \eta \times \sqrt{x_i} \times \Delta W_t \\
+\frac{dy_i}{dt} = r \times x_i - \Lambda \times y_i &+ \eta \times \sqrt{y_i} \times \Delta W_t
+\end{align}
+$$
+
+
+with $\Delta W_t \sim \mathcal{N}(0, h)$. 
+
+
+Similar to [@schaffter_genenetweaversilicobenchmark_2011], we sample the different parameters from random distributions `r ref("stable", "samplers")`.
+
+
+```{r}
+add_stable(
+read_rds(figure_file("samplers.rds","dataset_characterisation/synthetic")), 
+"samplers", 
+"Distributions from which each parameter in the thermodynamic model was sampled"
+)
+```
+
+
+These SDEs were simulated using the Euler–Maruyama approximation, with time-step $h = 0.01$ and noise strength $\eta = 2$.
+
+
+### Simulation of the single-cell RNA-seq experiment
+
+
+Estimation
+
+
+Simulation
 
 
 ### Gold standard extraction
 
 
-### Simulation of the single-cell RNA-seq experiment
+DTW
 
 
 ## Common normalisation pipeline
@@ -284,7 +375,7 @@ We used a popular single-cell RNA-seq pipeline [@lun_stepbystepworkflowlowlevel_
 # Supplementary Material
 
 
-```{r, echo=FALSE, results='asis'}
+```{r "supplementary", echo=FALSE, results='asis'}
 source("analysis/paper/sfigs_stables.R")
 ```
 
