@@ -7,7 +7,7 @@ subchunkify <- function(ref_id, caption, width=5, height=7) {
   subchunk <- glue::glue("",
                          "",
                          "`r anchor('sfig', '{ref_id}')`",
-                         "```{{r {ref_id}, fig.height={height}, fig.width={width}, echo=FALSE}}",
+                         "```{{r {ref_id}, fig.height={height}, fig.width={width}, echo=FALSE, dev='svg'}}",
                          "sfigs %>% filter(ref_id == !!ref_id) %>% pull(fig) %>% .[[1]]",
                          "```",
                          "`r ref('sfig', '{ref_id}')` {caption}",
