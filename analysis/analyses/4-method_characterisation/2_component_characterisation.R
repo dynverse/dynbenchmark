@@ -26,7 +26,6 @@ categories <- tribble(
   "any multiple dimensionality reductions", "dimensionality reduction",
   "any dimensionality reduction", "dimensionality reduction",
   "diffusion map", "dimensionality reduction",
-  "k-medoids clustering", "clustering",
   "kmeans", "clustering",
   "LLE", "dimensionality reduction",
   "MDS", "dimensionality reduction",
@@ -38,7 +37,11 @@ categories <- tribble(
   "louvain clustering", "clustering",
   "weighted neighbourhood network by number of cells", "graph building",
   "dynamic clustering", "clustering",
-  "laplacian eigenmap", "dimensionality reduction"
+  "laplacian eigenmap", "dimensionality reduction",
+  "EM clustering", "clustering",
+  "consensus clustering", "clustering",
+  "weighted cluster graphs", "graph building",
+  "maximum likelihood ordering", "ordering"
 ) %>% group_by(component) %>%
   filter(row_number() == 1)
 
