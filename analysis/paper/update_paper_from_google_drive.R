@@ -20,5 +20,12 @@ render(
 )
 browseURL("analysis/paper/paper.html")
 
+# render(
+#   "analysis/paper/paper.Rmd",
+#   output_format = rmarkdown::pdf_document(),
+#   output_dir = "analysis/paper/",
+#   output_file = "paper.pdf"
+# )
+
 # for conversion to pdf:
-#system(pritt("pandoc analysis/paper/paper.html +RTS -K1024M -RTS --pdf-engine=xelatex -o analysis/paper/paper.pdf"))
+# system(pritt("cd analysis/paper; pandoc paper.html +RTS -K1024M -RTS --pdf-engine=xelatex -o paper.pdf"))
