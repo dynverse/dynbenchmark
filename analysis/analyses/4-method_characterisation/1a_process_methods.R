@@ -18,7 +18,9 @@ methods$date[is.na(methods$date)] <- methods$PubDate[is.na(methods$date)]
 
 # Num citations ---------------------------------------
 # Don't run this in parallel ─ you can't rush this
-methods$ncitations <- pbapply::pbsapply(methods$GScholarClusterID, dynutils::google_scholar_num_citations)
+# methods$ncitations <- pbapply::pbsapply(methods$GScholarClusterID, dynutils::google_scholar_num_citations)
+library(rcrossref)
+methods$ncitations <- pbapply::pbsapply(cl=4, methods$DOI, cr_citation_count)
 
 # Trajectory components --------------------------
 # split maximal trajectory types
