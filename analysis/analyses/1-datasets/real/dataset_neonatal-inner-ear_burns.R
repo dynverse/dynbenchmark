@@ -71,7 +71,7 @@ for (setting in settings) {
   cell_ids <- cell_info$cell_id
 
   cell_grouping <- cell_info %>% select(cell_id, milestone_id) %>% rename(group_id = milestone_id)
-  milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mutate(percentage=1)
+  milestone_percentages <- cell_grouping %>% rename(milestone_id = group_id) %>% mutate(percentage = 1)
 
   feature_info <- tibble(feature_id = colnames(counts))
 
