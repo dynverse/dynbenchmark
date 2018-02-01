@@ -16,11 +16,11 @@ trajectory_type_edges_undirected <- tribble(
   "unrooted_tree", "complex_fork",
   "undirected_graph", "unrooted_tree",
   "disconnected_undirected_graph", "undirected_graph"
-) %>% mutate(type = "extension")
+) %>% mutate(type = "generalisation")
 trajectory_type_edges_undirected_to_directed <- tibble(from=names(trajectory_type_undirected_to_directed), to = trajectory_type_undirected_to_directed, type="directedness")
 trajectory_type_edges_directed <- tibble(
   from = trajectory_type_undirected_to_directed[trajectory_type_edges_undirected$from], to=trajectory_type_undirected_to_directed[trajectory_type_edges_undirected$to]
-) %>% mutate(type = "extension")
+) %>% mutate(type = "generalisation")
 
 
 ##  ............................................................................
