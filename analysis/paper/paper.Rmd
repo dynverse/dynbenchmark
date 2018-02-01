@@ -6,7 +6,7 @@ csl: nature-biotechnology.csl
 
 
 *`r format(Sys.time(), '%d %B, %Y')`*
-<!----
+<!--
 Tips for working in this document:
 * Go to tools -> perferences and remove Use smart quotes
 * Add extra enters after every paragraph (this is markdown!)
@@ -27,7 +27,7 @@ On the road to more accurate and robust single-cell trajectory inference methods
 Towards more accurate and robust single-cell trajectory inference methods
 On the trajectory to more accurate,robust and trajectory-like single-cell trajectory inference method trajectories
 A comparison of single-cell trajectory inference methods: towards more accurate and robust tools
---->
+-->
 
 
 ```{r setup, include=FALSE}
@@ -73,21 +73,20 @@ cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over
 ```
 
 
-<!--- history of Ti, different methods --->
+<!-- history of Ti, different methods -->
+Dozens of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially, most trajectory inference fixed the trajectory structure to a linear or bifurcating structure, by either algorithmic limitations or through user parameters, and focussed on correctly ordering the cells along this fixed structure. However, several recent methods now infer both the ordering and the structure at the same time, although certain structural limitations are still imposed(`r ref("sfig", "methods_over_time", "b")`). Methods which do not impose limitations on the structure are now being developed [@welch_slicer:_2016; @wolf_graph_2017], and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes happening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
 
 
-
-
-<!--- Common framework of TI, different components, naturally progressing towards the need for an evaluation --->
+<!-- Common framework of TI, different components, naturally progressing towards the need for an evaluation -->
 Although trajectory inference methods use a variety of algorithms and subcomponents to reach a final ordering, most consist of the following three steps: (i) preprocessing (normalization, filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction, clustering or graph building and (iii) ordering the cells along the simplified representation [@cannoodt_computational_2016]. Depending on the way the cells are ordered, some prior information about the dynamic process can be optionally used or required by the method, which can both bias the trajectory to current knowledge but also guide the method towards choosing the right trajectory among many others. Furthermore, with the ongoing strong scalability in single-cell -omics technologies, it becomes more and more important that analysis methods become scalable and user friendly .
 
 
-<!--- Common framework of TI, different components, naturally progressing towards the need for an evaluation --->
+<!-- Common framework of TI, different components, naturally progressing towards the need for an evaluation -->
 Given this plethora of available trajectory inference methods, it is important that methods are compared, so that users can use the most optimal method available for their problem. Moreover, new methods need to be rigorously tested, so that development can focus on improving the current state-of-the-art. In this study, we therefore for the first time developed a comprehensive evaluation framework for trajectory inference methods. We test both on synthetic data, for which the gold standard is known, and real data, for which in some cases the gold standard can be extracted from expert knowledge. We include a rigorous parameter optimisation, making sure that parameters are optimized while avoiding overfitting on characteristics of specific datasets. To make our framework reusable and extendable, we make use of continuous analysis [@beaulieu-jones_reproducibility_2017], which allows the developers of new methods to easily test their methods and compare them against the state-of-the-art.
 
 
 # Results
-## Method characterization
+## Method quality control
 
 
 ```{r}
@@ -167,7 +166,9 @@ readRDS(figure_file("qc_over_time.rds", experiment_id="method_characteristics"))
 10
 )
 ```
-### Evaluation overview
+## Evaluation overview
+
+
 `r anchor("fig", "evaluation_overview")`
 ![](`r figure_file("ti_evaluation_overview_v1.svg", experiment_id="evaluation_overview")`)
 `r ref("fig", "evaluation_overview")` Overview of the evaluation
@@ -185,7 +186,6 @@ read_rds(figure_file("datasets.rds","dataset_characterisation")),
 
 
 Our evaluation was structured in three main phases. In the first phase, we used toy data as a positive control for each method, assessing whether it can detect the correct trajectories in very simplistic data. Next, we generated synthetic data from a model of gene regulation, combined with a simulation of the technical variation introduced by single-cell RNA sequencing. We used this synthetic data in a parameter optimization procedure, where we used cross-validation between datasets to avoid overfitting on particular data set structures. Finally, in the third phase, we used the optimized parameters to score the performance of each method on real data. We split the real datasets in two groups based on the type of reference trajectory available. The reference in datasets with a silver standard were defined by the author’s based on the expression data itself, while the reference for gold standard was defined using external information, such as fluorescent sorting or time series.[a]
-### Score metrics and parameter optimisation
 
 
 ## Overall method comparison
@@ -211,38 +211,67 @@ Echte data. Evaluatie (biologische relevantie van de methode)
 ## Trajectory inference methods
 
 
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods `r ref("table", "methods", anchor=TRUE)`, based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018,@gitter_singlecellpseudotimeoverviewalgorithms_2018] and by searching in literature for "trajectory inference" and "pseudotemporal ordering". We believe this to be the most complete list to data, but are welcome to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "methods")`).
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods `r ref("table", "methods", anchor=TRUE)`, based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018; @gitter_singlecellpseudotimeoverviewalgorithms_2018] and by searching in literature for "trajectory inference" and "pseudotemporal ordering". We believe this to be the most complete list to data, but are welcome to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "methods")`).
 
 
 ## Method quality control
 
 
-We created a transparent scoring scheme to check the quality of each method (`r ref("table", "methods")`) and weighed each quality check by the number of times it was found in a list of references. 
+We created a transparent scoring scheme to check the quality of each method (`r ref("table", "methods")`). The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The goal of this quality control is in the first place to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed the certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of dataset on which the usefulness of the method was shown, and the scope of method evaluation in the paper.
 
 
-## Real data processing
+For each quality aspect received a weight by how frequently it was found in several papers and online sources which discuss tool quality (`r ref("table", "methods")`). This was to prevent make sure more important aspect, such as the open source availability of the method, to outweigh other aspects, such as the availability of a graphical user interface. For calculating the final score, we however weighed each of the six categories equally.
 
 
-We gathered a list of real datasets by searching for "single-cell" at the Gene Expression Omnibus and selecting those datasets in which the cells are sampled from different stages in a dynamic process (`r ref("stable", "datasets")`) .
+## Real datasets
 
 
-## Synthetic data generation
+We gathered a list of real datasets by searching for "single-cell" at the Gene Expression Omnibus and selecting those datasets in which the cells are sampled from different stages in a dynamic process (`r ref("stable", "datasets")`). The scripts to download and process these datasets are all available in our repository (http://www.github.com/dynverse/dynalysis). When available, we preferred to start from the raw counts data. These raw counts were all normalised and filtered using a common pipeline, discussed later. We determined a reference standard for every dataset using labelling provided by the author's, and classified the standards into gold and silver based on whether this labelling was determined by the expert using the expression (silver standard) or using other external information (such as FACS or the origin of the sample, gold standard) (`r ref("stable", "datasets")`).
 
 
-Our workflow to generate synthetic data is based on the well established workflow used in the evaluation of network inference methods [@marbach_wisdom_2012] and consists of four main steps: network generation, simulation, gold standard extraction and simulation of the scRNA-seq experiment. At every step, great care was taking to mimic real cellular regulatory networks as best as possible, while keeping the model simple and easily extendable.
+## Synthetic datasets
+
+
+Our workflow to generate synthetic data is based on the well established workflow used in the evaluation of network inference methods [@schaffter_genenetweaversilicobenchmark_2011; @marbach_wisdom_2012] and consists of four main steps: network generation, simulation, gold standard extraction and simulation of the scRNA-seq experiment. At every step, we took great care was taking to mimic real cellular regulatory networks as best as possible, while keeping the model simple and easily extendable.
 
 
 ### Network generation
 
 
-One of the main process involved in cellular dynamic processes is through gene regulation, where regulatory cascades and feedback loops lead to . The exact way a cell chooses a certain path during its differentiation is still an active research field, although certain models have already emerged and been tested in vivo. One driver of bifurcations seem to be mutual antagonism, where two genes [@XuRegulationbifurcatingcell2015] or gene modules strongly inhibit each other, forcing one of the two to become inactive [@GrafForcingcellschange2009]. Which of these two Of Modules? [Th17]
+One of the main process involved in cellular dynamic processes is through gene regulation, where regulatory cascades and feedback loops lead to progressive changes in expression and decision making. The exact way a cell chooses a certain path during its differentiation is still an active research field, although certain models have already emerged and been tested in vivo. One driver of bifurcations seem to be mutual antagonism, where genes [@xu_regulationbifurcatingcell_2015] strongly repress each other, forcing one of the two to become inactive [@graf_forcingcellschange_2009]. Such mutual antagonism can be modelled and simulated [@wang_quantifyingwaddingtonlandscape_2011; ferrell_bistabilitybifurcationswaddington_2012]. Although such a two-gene model is simple and elegant, the reality is frequently more complex, with multiple genes (grouped into models) repressing each other [@yosef_dynamicregulatorynetwork_2013].
 
 
+To simulate certain trajectory structures, we therefore started from the concept 
 
 
-## Normalization
+```{r}
+add_sfig({
+readRDS(figure_file("modulenets.rds", experiment_id="dataset_characterisation/synthetic")) %>%
+walk(cowplot::ggdraw)
+}, 
+"modulenets", 
+"Module networks, milestone networks and the module dynamics for each of the different types of synthetic data", 
+15, 
+5
+)
+```
+
+
+### Simulation
+
+
+### Gold standard extraction
+
+
+### Simulation of the single-cell RNA-seq experiment
+
+
+## Common normalisation pipeline
+We used a popular single-cell RNA-seq pipeline [@lun_stepbystepworkflowlowlevel_2016] which uses the scran and scater Bioconductor packages. The advantages of this pipeline is that it works both with and without spike-ins, and includes a harsh cell filtering which looks at abnormalities in library sizes, mitochondrial gene expression, and number of genes expressed. Furthermore, the pipeline can select the most highly variable genes.
 ## Evaluation metrics
-## Parameter optimization
+## Trajectory types
+
+
 
 
 # Acknowledgements

@@ -6,7 +6,7 @@ experiment("method_characteristics")
 methods <- read_rds(derived_file("methods.rds"))
 
 # combine with qc scores
-method_qc <- readRDS(derived_file("method_qc.rds"))
+method_qc_scores <- readRDS(derived_file("method_qc_scores.rds"))
 
 # merge qc scores with methods tibble
 methods <- methods %>%
