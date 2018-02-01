@@ -62,7 +62,7 @@ ggplot(eval_trajtype_wa_wo) +
 #     title = "Evaluation of trajectory inference methods with default parameters"
 #   )
 ggplot(eval_trajtype_wa_wo) +
-  geom_point(aes(method_name_f, rank_mmse)) +
+  geom_point(aes(method_name_f, rank_rf_mse)) +
   coord_flip() +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f) +

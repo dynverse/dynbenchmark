@@ -4,23 +4,16 @@ library(dynplot)
 
 experiment("5-optimise_parameters/13-evaluate_with_real_datasets")
 
-# # get the synthetic data
-# synthetic_tasks <- readRDS(derived_file("v6/tasks.rds", experiment_id = "datasets/synthetic"))
-# synthetic_tasks <- synthetic_tasks %>% left_join(synthetic_tasks$info %>% map_df(as_data_frame) %>% mutate(id = synthetic_tasks$id), by = "id")
-#
-# # get the real data
-# real_names <- list_datasets()
-# real_tasks <- pbapply::pblapply(real_names, load_dataset) %>% list_as_tibble() %>%
-#   mutate(nrow = map_int(expression, nrow), ncol = map_int(expression, ncol))
-# real_tasks <- real_tasks %>% filter(nrow < 2000) %>% mutate(trajectory_type = unlist(trajectory_type))
-
 # settings
 methods <- get_descriptions()
 metrics <- c("correlation")
-extra_metrics <- c("rf_mse")#, "edge_flip")
-timeout <- 60 * 60
+extra_metrics <- c("rf_mse", "edge_flip")
+eval_timeout <- 60 * 60
+optim_timeout <- 7 * 24 * 60 * 60
 num_repeats <- 4
 
+
+## PROCESS PARAMETER
 # # extract the best parameters # almost, needs to be data frames
 # best_parms <- read_rds(result_file("best_params.rds", "5-optimise_parameters/7-train_parameters_with_synthetic_datasets")) %>%
 #   mutate(
@@ -47,42 +40,56 @@ designs <- lapply(methods$short_name, function(mn) {
   defaults
 }) %>% setNames(methods$short_name)
 
+
+## PROCESS TASKS
+# # get the synthetic data
+# synthetic_tasks <- readRDS(derived_file("v6/tasks.rds", experiment_id = "datasets/synthetic"))
+# synthetic_tasks <- synthetic_tasks %>% left_join(synthetic_tasks$info %>% map_df(as_data_frame) %>% mutate(id = synthetic_tasks$id), by = "id")
+#
+# # get the real data
+# real_names <- list_datasets()
+# real_tasks <- pbapply::pblapply(real_names, load_dataset) %>% list_as_tibble() %>%
+#   mutate(nrow = map_int(expression, nrow), ncol = map_int(expression, ncol))
+# real_tasks <- real_tasks %>% filter(nrow < 2000) %>% mutate(trajectory_type = unlist(trajectory_type))
+#
 # # combine tasks
 # tasks <- bind_rows(
 #   synthetic_tasks %>% mutate(task_group = "synthetic"),
 #   real_tasks %>% mutate(task_group = "real")
 # )
 # tasks <- tasks %>% select(one_of(c("task_group", intersect(colnames(synthetic_tasks), colnames(real_tasks)))))
+# write_rds(tasks, derived_file("tasks.rds"))
 
-tasks <- read_rds(derived_file("tasks.rds"))
+tasks <- read_rds(derived_file("tasks.rds")) %>%
+  rowwise() %>%
+  mutate(
+    milenet_spr = milestone_percentages %>% reshape2::acast(cell_id ~ milestone_id, value.var = "percentage", fill = 0) %>% list()
+  ) %>%
+  ungroup()
 
-tasks <- tasks %>% rowwise() %>% mutate(
-  milenet_spr = milestone_percentages %>% reshape2::acast(cell_id ~ milestone_id, value.var = "percentage", fill = 0) %>% list()
-) %>% ungroup()
 
-# write_rds(lst(methods, designs, metrics, extra_metrics, num_repeats, timeout), derived_file("config.rds"))
-#
-# # start benchmark
-# benchmark_suite_submit(
-#   tasks = tasks,
-#   task_group = rep("task", nrow(tasks)),
-#   task_fold = rep(1, nrow(tasks)),
-#   out_dir = derived_file("suite/"),
-#   remote_dir = paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/"),
-#   methods = methods,
-#   designs = designs,
-#   metrics = metrics,
-#   extra_metrics = extra_metrics,
-#   timeout = timeout,
-#   memory = "11G",
-#   num_cores = 1,
-#   num_iterations = 1,
-#   num_repeats = num_repeats,
-#   num_init_params = num_init_params,
-#   execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500",
-#   r_module = NULL,
-#   output_model = TRUE
-# )
+write_rds(lst(methods, designs, metrics, extra_metrics, num_repeats, tasks), derived_file("config.rds"))
+
+# start benchmark
+benchmark_suite_submit(
+  tasks = tasks,
+  task_group = rep("task", nrow(tasks)),
+  task_fold = rep(1, nrow(tasks)),
+  out_dir = derived_file("suite/"),
+  remote_dir = paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/"),
+  methods = methods %>% filter(name == "identity"),
+  designs = designs,
+  metrics = metrics,
+  extra_metrics = extra_metrics,
+  memory = "11G",
+  num_cores = 1,
+  num_iterations = 1,
+  num_repeats = num_repeats,
+  num_init_params = num_init_params,
+  execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500",
+  r_module = NULL,
+  output_model = TRUE
+)
 
 outputs <- benchmark_suite_retrieve(derived_file("suite/"))
 
@@ -137,7 +144,9 @@ eval_ind <-
   group_by(task_id) %>%
   mutate(
     rank_correlation = percent_rank(correlation),
-    rank_mmse = percent_rank(-mmse)
+    rank_rf_mse = percent_rank(-rf_mse),
+    rank_rf_rsq = percent_rank(rf_rsq),
+    rank_edge_flip = percent_rank(edge_flip)
   ) %>%
   ungroup() %>%
   rowwise() %>%
