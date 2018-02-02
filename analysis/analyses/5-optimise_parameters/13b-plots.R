@@ -11,23 +11,13 @@ list2env(evals, environment())
 method_ord <- eval_overall %>%
   group_by(method_name) %>%
   summarise_if(is.numeric, mean) %>%
-  arrange(desc(rank_correlation)) %>%
+  arrange(desc(harm_mean)) %>%
   .$method_name
 
 eval_overall <- eval_overall %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
 eval_ind <- eval_ind %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
 eval_trajtype <- eval_trajtype %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
 eval_trajtype_wa_wo <- eval_trajtype_wa_wo %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
-
-# get other method metric data
-method_char <- read_rds(derived_file("method_df_evaluated.rds", "method_characteristics"))
-method_df_evaluated <- method_char %>%
-  rowwise() %>%
-  do({
-    df <- .
-    method_short_name <- strsplit(df$ids, ",")[[1]]
-    data.frame(df, method_short_name, stringsAsFactors = FALSE, check.names = FALSE)
-  })
 
 # num_reals <- eval_ind %>% filter(method_short_name == "CTmaptpx", task_group == "real", param_group == "best", replicate == 1) %>%
 #   group_by(trajectory_type) %>% summarise(n = n())
@@ -36,41 +26,43 @@ method_df_evaluated <- method_char %>%
 # write_tsv(num_reals, figure_file("trajtypes_real.tsv"))
 # write_tsv(num_synths, figure_file("trajtypes_synth.tsv"))
 
+
 # plots
 pdf(figure_file("2_trajtype_comparison.pdf"), 20, 8)
+ggplot(eval_trajtype_wa_wo) +
+  geom_point(aes(method_name_f, harm_mean)) +
+  coord_flip() +
+  theme_bw() +
+  facet_grid(task_group~trajectory_type_f) +
+  labs(
+    x = NULL
+  )
+
 ggplot(eval_trajtype_wa_wo) +
   geom_point(aes(method_name_f, rank_correlation)) +
   coord_flip() +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f) +
   labs(
-    x = NULL,
-    colour = "Parameter\ngroup",
-    y = "Mean quantile score of correlation in pairwise tented geodesic distance between cells",
-    title = "Evaluation of trajectory inference methods with default parameters"
+    x = NULL
   )
 
-# ggplot(eval_trajtype_wa_wo) +
-#   geom_point(aes(method_name_f, rank_mrsq)) +
-#   coord_flip() +
-#   theme_bw() +
-#   facet_grid(task_group~trajectory_type_f) +
-#   labs(
-#     x = NULL,
-#     colour = "Parameter\ngroup",
-#     y = "Mean quantile score of OOB-MSE score when predicting gold milestone percentages",
-#     title = "Evaluation of trajectory inference methods with default parameters"
-#   )
+ggplot(eval_trajtype_wa_wo) +
+  geom_point(aes(method_name_f, rank_edge_flip)) +
+  coord_flip() +
+  theme_bw() +
+  facet_grid(task_group~trajectory_type_f) +
+  labs(
+    x = NULL
+  )
+
 ggplot(eval_trajtype_wa_wo) +
   geom_point(aes(method_name_f, rank_rf_mse)) +
   coord_flip() +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f) +
   labs(
-    x = NULL,
-    colour = "Parameter\ngroup",
-    y = "Mean quantile score of OOB-MSE score when predicting gold milestone percentages",
-    title = "Evaluation of trajectory inference methods with default parameters"
+    x = NULL
   )
 
 ggplot(eval_trajtype_wa_wo) +
@@ -79,13 +71,34 @@ ggplot(eval_trajtype_wa_wo) +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f) +
   labs(
-    x = NULL,
-    colour = "Parameter\ngroup",
-    y = "Percentage errored",
-    title = "Error rates of trajectory inference methods with default parameters"
+    x = NULL
   )
-dev.off()
 
+ggplot(eval_trajtype_wa_wo, aes(harm_mean, rank_correlation)) +
+  geom_point() +
+  ggrepel::geom_text_repel(aes(label = method_name)) +
+  theme_bw() +
+  facet_grid(task_group~trajectory_type_f)
+
+ggplot(eval_trajtype_wa_wo, aes(harm_mean, rank_rf_mse)) +
+  geom_point() +
+  ggrepel::geom_text_repel(aes(label = method_name)) +
+  theme_bw() +
+  facet_grid(task_group~trajectory_type_f)
+
+ggplot(eval_trajtype_wa_wo, aes(harm_mean, rank_edge_flip)) +
+  geom_point() +
+  ggrepel::geom_text_repel(aes(label = method_name)) +
+  theme_bw() +
+  facet_grid(task_group~trajectory_type_f)
+
+ggplot(eval_trajtype_wa_wo, aes(harm_mean, pct_errored)) +
+  geom_point() +
+  ggrepel::geom_text_repel(aes(label = method_name)) +
+  theme_bw() +
+  facet_grid(task_group~trajectory_type_f)
+
+dev.off()
 
 
 
@@ -137,26 +150,9 @@ ggplot(error_messages_overall) +
   labs(x = NULL, y = "Percentage errored", fill = "Reason")
 dev.off()
 
-tasks <- read_rds(derived_file("tasks.rds"))
-tasks_dimensionality <- tasks %>% mutate(num_cells = sapply(cell_ids, length), num_genes = sapply(feature_info, nrow)) %>% select(id, num_cells, num_genes)
-
-timeout_rates <- eval_ind %>%
-  group_by(task_id, task_group) %>%
-  summarise(mean_timeout = mean(grepl("time limit", error_message))) %>%
-  arrange(desc(mean_timeout)) %>%
-  ungroup() %>%
-  left_join(tasks_dimensionality, by = c("task_id"="id"))
-
-g1 <- ggplot(timeout_rates) + geom_point(aes(num_cells, mean_timeout, colour = task_group)) + cowplot::theme_cowplot()
-g2 <- ggplot(timeout_rates) + geom_point(aes(num_genes, mean_timeout, colour = task_group)) + cowplot::theme_cowplot()
-g3 <- ggplot(timeout_rates) + geom_point(aes(sqrt(num_genes*num_cells), mean_timeout, colour = task_group)) + cowplot::theme_cowplot()
-
-pdf(figure_file("mean_timeout.pdf"), 20, 5)
-cowplot::plot_grid(g1, g2, g3, nrow = 1)
-dev.off()
 
 step_levels <- c("sessionsetup", "preprocessing", "method", "postprocessing", "wrapping", "sessioncleanup", "geodesic", "correlation",
-                 "coranking", "mantel", "rfmse")
+                 "coranking", "mantel", "rf", "edge_flip")
 
 time_ind <-
   eval_ind %>%
