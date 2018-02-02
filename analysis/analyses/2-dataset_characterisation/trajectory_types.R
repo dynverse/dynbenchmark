@@ -66,7 +66,7 @@ trajectory_type_tree_overall %>% write_rds(figure_file("trajectory_type_tree_ove
 ##  Combined tree plot                                                      ####
 less_complex_annotation <- ggplot() +
   geom_line(aes(x=0, y=0:1),arrow=arrow()) +
-  geom_text(aes(x=-0.05, y=0.5), label="More complex",angle=90) +
+  geom_text(aes(x=-0.05, y=0.5), label="Increasing complexity",angle=90) +
   theme_void() +
   scale_x_continuous(limits=c(-0.1, 0.05))
 
