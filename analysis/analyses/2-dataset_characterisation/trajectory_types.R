@@ -16,7 +16,7 @@ trajectory_type_tree_data <- trajectory_type_dag %>%
   activate(edges) %>%
   mutate(
     directed_change = map_lgl(prop_changes, ~"undirected" %in% .),
-    directed_change = ifelse(directed_change,"Add directed", "Other generalisation")
+    directed_change = ifelse(directed_change,"Add undirected", "Other generalisation")
   )
 
 
@@ -62,16 +62,22 @@ trajectory_type_tree_overall
 
 trajectory_type_tree_overall %>% write_rds(figure_file("trajectory_type_tree_overall.rds"))
 
-
-
-
 ##  ............................................................................
 ##  Combined tree plot                                                      ####
+less_complex_annotation <- ggplot() +
+  geom_line(aes(x=0, y=0:1),arrow=arrow()) +
+  geom_text(aes(x=-0.05, y=0.5), label="More complex",angle=90) +
+  theme_void() +
+  scale_x_continuous(limits=c(-0.1, 0.05))
+
+
 trajectory_type_trees <- cowplot::plot_grid(
+  less_complex_annotation,
   trajectory_type_tree_changes,
   trajectory_type_tree_overall,
-  ncol=2,
-  labels="auto"
+  ncol=3,
+  labels=c("", "a","b"),
+  rel_widths = c(0.1, 0.4, 0.4)
 )
 trajectory_type_trees
 write_rds(trajectory_type_trees, figure_file("trajectory_type_trees.rds"))
