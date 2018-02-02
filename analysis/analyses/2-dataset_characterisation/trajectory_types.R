@@ -36,7 +36,7 @@ trajectory_type_tree_changes <- trajectory_type_tree_data %>%
   geom_edge_link() +
   geom_edge_link(aes(xend = x+(xend-x)/1.3, yend = y+(yend - y)/1.3), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
   geom_node_label(aes(label=label_long(name) %>% gsub(" ", "\n", .), fill=name)) +
-  ggrepel::geom_label_repel(aes(x=x+(xend-x)/2, y = y+(yend - y)/2, label=label_prop_changes(prop_changes)), data = get_edges(), min.segment.length=Inf) +
+  ggrepel::geom_label_repel(aes(x=x+(xend-x)/2, y = y+(yend - y)/2, label=label_prop_changes(prop_changes)), data = get_edges(), min.segment.length=Inf, force=0.1) +
   scale_fill_manual(values=set_names(trajectory_types$color, trajectory_types$id)) +
   theme_graph() +
   theme(legend.position="none") +
