@@ -30,6 +30,8 @@ task_checks <- pbapply::pblapply(tasks$id, function(task_id) {
 
   checks$marker_feature_ids_in_expression <- all(task$prior_information$marker_feature_ids %in% colnames(expression))
 
+  checks$columns <- all(c("geodesic_dist") %in% names(task))
+
   checks$n_genes <- nrow(task$feature_info)
   checks$n_cells <- nrow(task$cell_info)
 

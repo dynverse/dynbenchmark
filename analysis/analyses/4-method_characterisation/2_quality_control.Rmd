@@ -67,7 +67,7 @@ g1 <- ggplot(methods_evaluated, aes(date, qc_score)) +
     labs(x = "Time", y = "QC score", title = "Code quality score over time")
 g1
 
-g2 <- ggplot(methods_evaluated, aes(date, ncitations+1)) +
+g2 <- ggplot(methods_evaluated %>% mutate(ncitations = ifelse(ncitations == 0, 0.5, ncitations)), aes(date, ncitations)) +
     geom_smooth(span=2) +
     geom_point() +
     ggrepel::geom_label_repel(aes(label = name)) +
@@ -76,7 +76,7 @@ g2 <- ggplot(methods_evaluated, aes(date, ncitations+1)) +
     labs(x = "Time", y = "Citations", title = "Citations over time")
 g2
 
-g3 <- ggplot(methods_evaluated, aes(ncitations+1, qc_score)) +
+g3 <- ggplot(methods_evaluated %>% mutate(ncitations = ifelse(ncitations == 0, 0.5, ncitations)), aes(ncitations, qc_score)) +
     geom_smooth(span=2) +
     geom_point() +
     ggrepel::geom_label_repel(aes(label = name)) +
@@ -108,12 +108,16 @@ method_ordering_plot
 
 
 ```{r, fig.width=10, fig.height=12}
-aspect_position <- method_qc %>%
+qc_checks <- method_qc %>%
   filter(method_id == "SCORPIUS") %>%
+  group_by(category) %>% 
+  mutate(normalised_weight = weight/sum(weight))
+
+aspect_position <- qc_checks %>% 
   arrange(aspect_id) %>%
   group_by(aspect_id) %>%
   summarise(
-    aspect_width = sum(item_weight * weight),
+    aspect_width = sum(item_weight * normalised_weight),
     name = first(name)
   ) %>%
   mutate(
@@ -122,12 +126,11 @@ aspect_position <- method_qc %>%
     aspect_mid = aspect_start + (aspect_end - aspect_start)/2
   )
 
-check_position <- method_qc %>%
-  filter(method_id == "SCORPIUS") %>%
+check_position <- qc_checks %>%
   arrange(aspect_id, check_id) %>%
   group_by(check_id) %>%
   summarise(
-    check_width = item_weight * weight,
+    check_width = item_weight * normalised_weight,
     aspect_id = first(aspect_id)
   ) %>%
   left_join(aspect_position, by="aspect_id") %>%
