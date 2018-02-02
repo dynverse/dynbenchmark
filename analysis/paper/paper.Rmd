@@ -185,21 +185,6 @@ read_rds(figure_file("datasets.rds","dataset_characterisation")),
 
 
 
-Our evaluation was structured in three main phases. In the first phase, we used toy data as a positive control for each method, assessing whether it can detect the correct trajectories in very simplistic data. Next, we generated synthetic data from a model of gene regulation, combined with a simulation of the technical variation introduced by single-cell RNA sequencing. We used this synthetic data in a parameter optimization procedure, where we used cross-validation between datasets to avoid overfitting on particular data set structures. Finally, in the third phase, we used the optimized parameters to score the performance of each method on real data. We split the real datasets in two groups based on the type of reference trajectory available. The reference in datasets with a silver standard were defined by the author’s based on the expression data itself, while the reference for gold standard was defined using external information, such as fluorescent sorting or time series.[a]
-
-
-## Overall method comparison
-
-
-## Evaluation on synthetic data
-Initial evaluation..
-Robustness..
-Gegenereerde synthetische data. Parameter tuning voor echte data + initiële evaluatie (tot wat is de methode in staat) + robustness etc testing
-
-
-## Evaluation on real data
-Biological relevance..
-Echte data. Evaluatie (biologische relevantie van de methode)
 
 
 # Discussion
@@ -211,16 +196,16 @@ Echte data. Evaluatie (biologische relevantie van de methode)
 ## Trajectory types
 
 
-To classify the output of methods and the network `r ref("sfig", "trajectory_type_tree")`.
+To classify the output of methods and the gold standards, we defined a set of basic trajectory types. These trajectory types start from the most general trajectory type, a disconnected simple graph, and moves down in a directed acyclic graph using certain graph properties, progressively becoming more simple until the two basic types: linear and cycles `r ref("sfig", "trajectory_type_tree", "a")`. For every type, a corresponding directed graph type can be defined by allowing directedness `r ref("sfig", "trajectory_type_tree", "b")`.
 
 
 ```{r}
 add_sfig({
-readRDS(figure_file("trajectory_type_tree.rds", experiment_id="dataset_characterisation/trajectory_types"))
+readRDS(figure_file("trajectory_type_trees.rds", experiment_id="dataset_characterisation/trajectory_types"))
 }, 
 "trajectory_type_tree", 
 "Different trajectory types can be classified in a directed acyclic graph, in which certain types are a generalisation of other trajectory types.", 
-10, 
+15, 
 10
 )
 ```
@@ -408,4 +393,3 @@ The current Git commit details are:
 ```{r}
 git2r::repository(".")
 ```
-[a]Outdated
