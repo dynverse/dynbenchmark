@@ -147,7 +147,7 @@ eval_ind <-
     rank_rf_mse = percent_rank(-rf_mse),
     rank_rf_rsq = percent_rank(rf_rsq),
     rank_edge_flip = percent_rank(edge_flip),
-    harm_mean = apply(cbind(rank_correlation, rank_edge_flip), 1, psych::harmonic.mean)
+    harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean)
   ) %>%
   ungroup() %>%
   rowwise() %>%
