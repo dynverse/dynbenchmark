@@ -14,7 +14,10 @@ pieces <- tibble(
   text = sections %>% xml_text,
   section = sections %>% xml_attr("id")
 )
-counts <- pieces$text %>% map(wordcountaddin:::text_stats_fn_) %>% bind_rows()
+counts <- pieces$text %>%
+  map(wordcountaddin:::text_stats_fn_) %>%
+  bind_rows() %>%
+  mutate_all(~as.numeric(gsub("([0-9\\.]*).*", "\\1", .)))
 readibilities <- pieces$text %>% map(wordcountaddin:::readability_fn_)
 
 stats <-

@@ -1,0 +1,11 @@
+parameter	distribution
+r	\mathcal{U}(10, 200)
+d	\mathcal{U}(2, 8)
+p	\mathcal{U}(2, 8)
+q	\mathcal{U}(1, 5)
+a0	\begin{cases}1 & \text{if } e \in \{1\} \text{ or } e = \emptyset \\ 0 & \text{if } e \in \{-1\} \\ 0.5 & \text{otherwise}\end{cases}
+a_i	\begin{cases}1 & \text{if } e_i \in \{-1\} \\ 0 & \text{otherwise}\end{cases}
+s	\mathcal{U}(1, 20)
+k	y_{max} / (2 * s)
+c	\mathcal{U}(1, 4)
+

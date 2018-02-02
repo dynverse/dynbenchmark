@@ -7,6 +7,9 @@ drive <- drive_download(as_id("1BCCaP21N2PXfzhj9H09yEpZz9lLY2HXd_LxTSsJ_wro"), t
 system(pritt("sed -i '1s/^.//' {drive$local_path}")) # remove first character, because this is some strange unicode character
 system(pritt("cat {drive$local_path} > analysis/paper/paper.Rmd"))
 
+# add wip
+read_file("analysis/paper/paper.Rmd") %>% gsub("§(.*?)\n", "<p class='wip'>\\1</p>", .) %>% write_file("analysis/paper/paper.Rmd")
+
 file.remove("analysis/paper/paper.html")
 
 render(
@@ -17,5 +20,12 @@ render(
 )
 browseURL("analysis/paper/paper.html")
 
+# render(
+#   "analysis/paper/paper.Rmd",
+#   output_format = rmarkdown::pdf_document(),
+#   output_dir = "analysis/paper/",
+#   output_file = "paper.pdf"
+# )
+
 # for conversion to pdf:
-#system(pritt("pandoc analysis/paper/paper.html +RTS -K1024M -RTS --pdf-engine=xelatex -o analysis/paper/paper.pdf"))
+# system(pritt("cd analysis/paper; pandoc paper.html +RTS -K1024M -RTS --pdf-engine=xelatex -o paper.pdf"))
