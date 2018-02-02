@@ -2,25 +2,37 @@ trajectory_type_undirected_to_directed<- c(
   "undirected_linear"="directed_linear",
   "simple_fork"="bifurcation",
   "complex_fork"="multifurcation",
+  "unrooted_binary_tree"="rooted_binary_tree",
   "unrooted_tree"="rooted_tree",
   "undirected_cycle"="directed_cycle",
   "undirected_graph"="directed_acyclic_graph",
   "disconnected_undirected_graph"="disconnected_directed_graph",
   "unknown"="unknown"
 )
+# undirected
 trajectory_type_edges_undirected <- tribble(
-  ~to, ~from,
-  "undirected_graph", "undirected_cycle",
-  "simple_fork", "undirected_linear",
-  "complex_fork", "simple_fork",
-  "unrooted_tree", "complex_fork",
-  "undirected_graph", "unrooted_tree",
-  "disconnected_undirected_graph", "undirected_graph"
-) %>% mutate(type = "generalisation")
-trajectory_type_edges_undirected_to_directed <- tibble(from=names(trajectory_type_undirected_to_directed), to = trajectory_type_undirected_to_directed, type="directedness")
+  ~to, ~from, ~prop_changes,
+  "undirected_graph", "undirected_cycle", c("num_branch_nodes == 0", "num_cycles > 1"),
+  "simple_fork", "undirected_linear", "num_branch_nodes == 0",
+  "complex_fork", "simple_fork", "max_degree == 3",
+  "unrooted_binary_tree", "simple_fork", "num_branch_nodes == 1",
+  "unrooted_tree", "complex_fork", "num_branch_nodes == 1",
+  "unrooted_tree", "unrooted_binary_tree", "max_degree == 3",
+  "undirected_graph", "unrooted_tree", "num_cycles == 0",
+  "disconnected_undirected_graph", "undirected_graph", "num_components == 1"
+) %>% mutate(prop_changes = as.list(prop_changes))
+# directed_to_undirected
+trajectory_type_edges_undirected_to_directed <- tibble(
+  from=names(trajectory_type_undirected_to_directed),
+  to = trajectory_type_undirected_to_directed,
+  prop_changes = "undirected"
+) %>% mutate(prop_changes = list(prop_changes))
+# directed (copy over from undirected)
 trajectory_type_edges_directed <- tibble(
-  from = trajectory_type_undirected_to_directed[trajectory_type_edges_undirected$from], to=trajectory_type_undirected_to_directed[trajectory_type_edges_undirected$to]
-) %>% mutate(type = "generalisation")
+  from = trajectory_type_undirected_to_directed[trajectory_type_edges_undirected$from],
+  to=trajectory_type_undirected_to_directed[trajectory_type_edges_undirected$to],
+  prop_changes=trajectory_type_edges_undirected$prop_changes
+)
 
 
 ##  ............................................................................
@@ -47,6 +59,7 @@ trajectory_types <- {
     "undirected_linear" = "#af0dc7",
     "simple_fork" = "#0073d7",
     "unrooted_tree" = "#5ecd2e",
+    "unrooted_binary_tree" = "#01FF70",
     "complex_fork" = "#cfbf00",
     "undirected_cycle" = "#39cccc",
     "undirected_graph" = "#ff8821",
