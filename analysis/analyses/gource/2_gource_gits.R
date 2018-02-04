@@ -37,3 +37,5 @@ unlink(gitlinks_folder, recursive = T)
 cmd <- paste0("gource --output-custom-log ", output_folder, "/dynverse.txt ..")
 system(cmd)
 
+cmd <- paste0("gource --output-custom-log ", output_folder, "/dyndocs.txt ../../dyndocs")
+system(cmd)
