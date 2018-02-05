@@ -68,9 +68,8 @@ tasks <- read_rds(derived_file("tasks.rds")) %>%
   ungroup()
 
 
+# # save benchmark configuration and start it
 # write_rds(lst(methods, designs, metrics, extra_metrics, num_repeats, tasks), derived_file("config.rds"))
-#
-# # start benchmark
 # benchmark_suite_submit(
 #   tasks = tasks,
 #   task_group = rep("task", nrow(tasks)),
@@ -81,7 +80,7 @@ tasks <- read_rds(derived_file("tasks.rds")) %>%
 #   designs = designs,
 #   metrics = metrics,
 #   extra_metrics = extra_metrics,
-#   memory = "11G",
+#   memory = "10G",
 #   num_cores = 4,
 #   num_iterations = 1,
 #   num_repeats = num_repeats,

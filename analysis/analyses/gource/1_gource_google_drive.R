@@ -5,6 +5,7 @@ library(XML)
 
 experiment("gource")
 
+# todo: also parse years
 process <- function(file, docname) {
   data <- xmlParse(file)
 
