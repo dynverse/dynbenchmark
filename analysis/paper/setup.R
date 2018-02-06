@@ -22,7 +22,7 @@ ref <- function(ref_type, ref_id, suffix="", anchor=FALSE) {
   }
   ref <- refs %>% filter(ref_id == !!ref_id) %>%
     pull(name) %>%
-    {pritt("[**{.}{suffix}**](#{ref_type}_{ref_id})")}
+    {pritt("[**{.}{glue::collapse(suffix, ',')}**](#{ref_type}_{ref_id})")}
 
   if (anchor)  ref <- pritt("{ref}{anchor(ref_type, ref_id)}")
   ref

@@ -36,7 +36,7 @@ trajectory_type_tree_changes <- trajectory_type_tree_data %>%
   geom_edge_link() +
   geom_edge_link(aes(xend = x+(xend-x)/1.3, yend = y+(yend - y)/1.3), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
   geom_node_label(aes(label=label_long(name) %>% gsub(" ", "\n", .), fill=name)) +
-  ggrepel::geom_label_repel(aes(x=x+(xend-x)/2, y = y+(yend - y)/2, label=label_prop_changes(prop_changes)), data = get_edges(), min.segment.length=Inf) +
+  ggrepel::geom_label_repel(aes(x=x+(xend-x)/2, y = y+(yend - y)/2, label=label_prop_changes(prop_changes)), data = get_edges(), min.segment.length=Inf, force=0.1) +
   scale_fill_manual(values=set_names(trajectory_types$color, trajectory_types$id)) +
   theme_graph() +
   theme(legend.position="none") +
@@ -66,7 +66,7 @@ trajectory_type_tree_overall %>% write_rds(figure_file("trajectory_type_tree_ove
 ##  Combined tree plot                                                      ####
 less_complex_annotation <- ggplot() +
   geom_line(aes(x=0, y=0:1),arrow=arrow()) +
-  geom_text(aes(x=-0.05, y=0.5), label="More complex",angle=90) +
+  geom_text(aes(x=-0.05, y=0.5), label="Increasing complexity",angle=90) +
   theme_void() +
   scale_x_continuous(limits=c(-0.1, 0.05))
 
