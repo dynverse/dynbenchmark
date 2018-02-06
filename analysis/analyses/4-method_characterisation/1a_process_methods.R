@@ -47,6 +47,15 @@ methods <- methods %>% bind_cols(trajectory_type_capabilities)
 ## Non inclusion reasons ------------------------
 methods$non_inclusion_reasons_split <- methods$non_inclusion_reasons %>% str_split("[ ]?,[ ]?")
 
+## Non inclusion reasons ------------------------
+methods$conversion_split <- methods$conversion %>% str_split("[ ]?,[ ]?")
+allowed_conversions <- c("branching_local", "linear", "branching_cluster", "branching_global", "branching_local_projection", "special", NA)
+if(!methods$conversion_split %>% map_lgl(~all(. %in% allowed_conversions)) %>% all()) {
+  stop("Some conversions are invalid!")
+}
+methods$conversion_special <- map_lgl(methods$conversion_split, ~"special" %in% .)
+
+
 # add extra reason for date cutoff
 date_cutoff <- as.Date("2017-05-01")
 date_filter <- methods$date > date_cutoff
