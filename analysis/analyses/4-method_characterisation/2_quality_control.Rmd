@@ -64,7 +64,7 @@ g1 <- ggplot(methods_evaluated, aes(date, qc_score)) +
     geom_point() +
     ggrepel::geom_label_repel(aes(label = name)) +
     cowplot::theme_cowplot() +
-    labs(x = "Time", y = "QC score", title = "Code quality score over time")
+    labs(x = label_long("publication_date"), y = "QC score", title = "Code quality score over time")
 g1
 
 g2 <- ggplot(methods_evaluated %>% mutate(ncitations = ifelse(ncitations == 0, 0.5, ncitations)), aes(date, ncitations)) +
