@@ -68,27 +68,27 @@ tasks <- read_rds(derived_file("tasks.rds")) %>%
   ungroup()
 
 
-# # save benchmark configuration and start it
-write_rds(lst(methods, designs, metrics, extra_metrics, num_repeats, tasks), derived_file("config.rds"))
-benchmark_suite_submit(
-  tasks = tasks,
-  task_group = rep("task", nrow(tasks)),
-  task_fold = rep(1, nrow(tasks)),
-  out_dir = derived_file("suite/"),
-  remote_dir = paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/"),
-  methods = methods %>% filter(!short_name %in% c("ouija", "ouijaf", "pseudogp", "GPfates", "topslam")), # these methods did not finish
-  designs = designs,
-  metrics = metrics,
-  extra_metrics = extra_metrics,
-  memory = "20G",
-  num_cores = 4,
-  num_iterations = 1,
-  num_repeats = num_repeats,
-  num_init_params = num_init_params,
-  execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500",
-  r_module = NULL,
-  output_model = TRUE
-)
+# # # save benchmark configuration and start it
+# write_rds(lst(methods, designs, metrics, extra_metrics, num_repeats, tasks), derived_file("config.rds"))
+# benchmark_suite_submit(
+#   tasks = tasks,
+#   task_group = rep("task", nrow(tasks)),
+#   task_fold = rep(1, nrow(tasks)),
+#   out_dir = derived_file("suite/"),
+#   remote_dir = paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/"),
+#   methods = methods %>% filter(!short_name %in% c("ouija", "pseudogp", "GPfates", "topslam")), # these methods did not finish
+#   designs = designs,
+#   metrics = metrics,
+#   extra_metrics = extra_metrics,
+#   memory = "20G",
+#   num_cores = 4,
+#   num_iterations = 1,
+#   num_repeats = num_repeats,
+#   num_init_params = num_init_params,
+#   execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500",
+#   r_module = NULL,
+#   output_model = TRUE
+# )
 
 outputs <- benchmark_suite_retrieve(derived_file("suite/"))
 
@@ -193,11 +193,11 @@ eval_overall_wm <- eval_overall %>%
 eval_trajtype_wa_wo <- eval_overall_wm %>%
   mutate(trajectory_type = "overall") %>%
   bind_rows(eval_trajtype_wm) %>%
-  mutate(trajectory_type_f = factor(trajectory_type, levels = c("overall", trajtype_ord)))
+  mutate(trajectory_type_f = factor(trajectory_type, levels = c("overall", dynalysis:::trajectory_type_directed$name)))
 
 
 
-write_rds(lst(eval_ind, eval_overall, eval_trajtype, eval_repl, eval_trajtype_wa_wo, trajtype_ord), derived_file("eval_outputs.rds"))
+write_rds(lst(eval_ind, eval_overall, eval_trajtype, eval_repl, eval_trajtype_wa_wo), derived_file("eval_outputs.rds"))
 
 
 
