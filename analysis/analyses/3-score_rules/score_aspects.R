@@ -30,6 +30,8 @@ gs <- list(
 toys <- tribble(
   ~id, ~gs, ~toy,
 
+  "gs", gs, gs,
+
   "bad_ordering",
   gs,
   list(
@@ -73,7 +75,7 @@ toys <- tribble(
     progressions = gs$progressions %>% mutate(cell_id = set_names(sample(unique(cell_id)), unique(cell_id))[cell_id])
   ) %>% wrap(),
 
-  "bad_network",
+  "bad_topology",
   gs,
   list(
     milestone_network = dyntoy:::generate_toy_milestone_network("consecutive_bifurcating") %>% mutate(length=ifelse(to %in% c("M5", "M6"), 0.1, 1)),
@@ -90,6 +92,15 @@ toys <- tribble(
       "9", "M3", "M4", 0.6
     )
   ) %>% wrap()
+)
+
+toys <- toys %>% add_row(
+  id = "bad_topology,_ordering,_and_neighbourhood",
+  gs = list(gs),
+  toy = list(list(
+    milestone_network = toys %>% filter(id == "bad_topology") %>% pull(toy) %>% first() %>% .$milestone_network,
+    progressions = toys %>% filter(id == "bad_topology") %>% pull(toy) %>% first() %>% .$progressions %>% mutate(cell_id = set_names(sample(unique(cell_id)), unique(cell_id))[cell_id])
+    ) %>% wrap())
 )
 
 dynutils::extract_row_to_list(toys, 1) %>% list2env(.GlobalEnv)
@@ -118,7 +129,7 @@ scores_heatmap <- scores[,c(metrics, "id")] %>%
     #geom_text(aes(metric, id, label=round(score, 2))) +
     scale_fill_distiller("", breaks=c(0, 1), labels=c("Lowest score", "Best score"), direction=1) +
     scale_x_discrete("Metric", expand=c(0, 0), labels=label_long) +
-    scale_y_discrete("Prediction", expand=c(0, 0), labels=label_long) +
+    scale_y_discrete("", expand=c(0, 0), labels=function(x) label_short(x, 20)) +
     cowplot::theme_cowplot() +
     coord_equal() +
     theme(
@@ -137,18 +148,17 @@ scores_heatmap
 
 cell_colors <- shades::gradient(RColorBrewer::brewer.pal(3, "YlGnBu"), 101)[gs$progressions$percentage*100 + 1] %>% as.character() %>% set_names(gs$cell_ids)
 
-tasks <- list(gs=gs) %>%
-  c(set_names(toys$toy, toys$id))
+tasks <- set_names(toys$toy, toys$id)
 connections <- map(tasks, function(task) {
   dynplot::plot_connections(task$milestone_network, cell_progressions=task$progressions, cell_colors=cell_colors, orientation=-1)
 }) %>%
   map2(., names(tasks), ~.+ggtitle(label_long(.y)) + theme(plot.title = element_text(hjust = 0.5))) %>%
-  cowplot::plot_grid(plotlist = ., ncol=1, labels="auto")
+  cowplot::plot_grid(plotlist = ., ncol=1, labels="auto", rel_heights=c(2,2,2,4,4))
 connections
 
 ##  ............................................................................
 ##  Combine plots                                                           ####
 
-score_aspects_plot <- cowplot::plot_grid(connections, scores_heatmap, rel_widths = c(0.6, 0.4))
+score_aspects_plot <- cowplot::plot_grid(connections, scores_heatmap, rel_widths = c(0.6, 0.2))
 score_aspects_plot
 write_rds(score_aspects_plot, figure_file("score_aspects.rds"))
