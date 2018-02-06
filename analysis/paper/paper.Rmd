@@ -47,13 +47,13 @@ source("setup.R")
 # Abstract
 
 
-Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Since 2014, more than 50 trajectory inference methods have been developed, each with its own set of methodological characteristics. This makes a direct comparison between trajectory inference methods often difficult, and as a result a comprehensive assessment of the performance and robustness of each method is still lacking. We developed a framework of data topologies for trajectory inference methods in order to make their results comparable to each other and to a gold standard, when available. In this work, we compare the results from a total of 22 trajectory inference methods, on a large collection of real datasets and realistic synthetic datasets. We employ a novel parameter optimisation procedure, and We compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at https://www.github.com/dynverse.
+Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Since 2014, more than 50 trajectory inference methods have been developed, each with its own set of methodological characteristics. This makes a direct comparison between trajectory inference methods often difficult, and as a result a comprehensive assessment of the performance and robustness of each method is still lacking. We developed a common data structure for trajectory inference methods in order to make their results comparable to each other and to a gold standard. Using this framework, we compare the results from a total of 22 trajectory inference methods, on a large collection of real datasets and realistic synthetic datasets. We employ several metrics, including accuracy of the inferred ordering, correctness of the network topology, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at https://www.github.com/dynverse.
 
 
 # Introduction
 
 
-Single-cell -omics technologies now make it possible to more accurately model biological systems than ever before. One area where single-cell data can be particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation. When cells are sampled from a population in which cells are at different unknown points in the dynamic process, trajectory inference methods can be used to computationally order these cells along their dynamic process [@cannoodt_computational_2016]. Because they offer an unbiased and transcriptome-wide understanding of the dynamic process, trajectories then allow the identification of new (primed) subsets of cells, delineation the exact wiring of a differentiation tree and inference of regulatory interaction responsible for a bifurcation refs.
+Single-cell -omics technologies now make it possible to more accurately model biological systems than ever before. One area where single-cell data can be particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation. When cells are sampled from a population in which cells are at different unknown points in the dynamic process, trajectory inference methods can be used to computationally order these cells along their dynamic process [@cannoodt_computational_2016]. Because they offer an unbiased and transcriptome-wide understanding of the dynamic process, trajectories then allow the identification of new (primed) subsets of cells, delineation the exact wiring of a differentiation tree and inference of regulatory interaction responsible for a bifurcation refs. This both for specific subsets of cells, but in the near future also for whole tissues or organisms [@regev_scienceforumhuman_2017].
 
 
 ```{r}
@@ -92,6 +92,7 @@ Given this plethora of available trajectory inference methods, it is important t
 ```{r}
 # Load method characteristics
 methods <- readRDS(derived_file("methods.rds", experiment_id="method_characteristics"))
+methods_evaluated <- readRDS(derived_file("methods_evaluated.rds", experiment_id="method_characteristics"))
 ```
 
 
@@ -104,10 +105,10 @@ read_rds(figure_file("methods_table.rds", "method_characteristics"))
 ```
 
 
-At the level of trajectory topologies, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "method_characteristics", "a")`). However, only a handful of more recent methods can currently handle more complex graph topologies which can include loops (`r ref("sfig", "methods_over_time", "b")`), one of which is included in the current evaluation (SLICER).
+At the level of trajectory topologies, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "method_characteristics", "a")`). However, only a handful, mostly recent, methods can currently handle more complex graph topologies which can include loops (`r ref("sfig", "methods_over_time", "b")`), one of which is included in the current evaluation (SLICER).
 
 
-While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or for which purpose(s) they are important (user friendliness, developer friendliness or good science). These categorisations can then be used to help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
+While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or for which purpose(s) they are important (user friendliness, developer friendliness or good science). These categorisations can help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
 
 
 ```{r}
@@ -117,12 +118,6 @@ read_rds(figure_file("qc_checks.rds","method_characteristics")),
 ""
 )
 ```
-
-
-Most methods fulfill most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "method_characteristics", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "method_characteristics", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "method_qc_check")` and `r ref("fig", "method_characteristics", "c")`), notwithstanding studies pinpointing these as good practices [@wilson_best_2014].
-
-
-The underlying algorithms can be divided into several modules, and these frequently contain soms clustering, dimensionality reduction and/or graph building steps. Interestingly, modules are frequently shared between different algorithms (`r ref("sfig", "method_components")`).
 
 
 `r anchor("fig", "method_characteristics")`
@@ -142,18 +137,7 @@ readRDS(figure_file("method_qc_check.rds", experiment_id="method_characteristics
 ```
 
 
-```{r}
-add_sfig({
-readRDS(figure_file("method_components.rds", experiment_id="method_characteristics"))
-}, 
-"method_components", 
-"TI methods frequently share steps", 
-15, 
-7.5
-)
-```
-
-
+Most methods fulfill most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "method_characteristics", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "method_characteristics", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "method_qc_check")` and `r ref("fig", "method_characteristics", "c")`), notwithstanding several studies pinpointing these as good practices [@wilson_best_2014; @artaza_top10metrics_2016].
 
 
 ```{r}
@@ -166,7 +150,22 @@ readRDS(figure_file("qc_over_time.rds", experiment_id="method_characteristics"))
 10
 )
 ```
-## Evaluation overview
+
+
+The underlying algorithms can be divided into several modules, and these frequently contain soms clustering, dimensionality reduction and/or graph building steps. Interestingly, modules are frequently shared between different algorithms (`r ref("sfig", "method_components")`).
+
+
+```{r}
+add_sfig({
+readRDS(figure_file("method_components.rds", experiment_id="method_characteristics"))
+}, 
+"method_components", 
+"TI methods frequently share steps", 
+15, 
+7.5
+)
+```
+## Evaluating the accuracy of the inferred trajectory
 
 
 `r anchor("fig", "evaluation_overview")`
@@ -225,7 +224,7 @@ tiens, een discussie die in de discussie zou plaats vinden, wat een goed idee ðŸ
 ## Trajectory types
 
 
-To classify the output of methods and the gold standards, we defined a set of basic trajectory types. These trajectory types start from the most general trajectory type, a disconnected simple graph, and moves down in a directed acyclic graph using certain graph properties, progressively becoming more simple until the two basic types: linear and cycles (`r ref("sfig", "trajectory_type_tree", "a")`). For every type, a corresponding directed graph type can be defined by allowing directedness (`r ref("sfig", "trajectory_type_tree", "b")`).
+We classified all possible trajectory topologies into distinct trajectory types, based on topological criteria. These trajectory types start from the most general trajectory type, a disconnected simple graph, and moves down in a directed acyclic graph, progressively becoming more simple until the two basic types: linear and cycles (`r ref("sfig", "trajectory_type_tree", "a")`). For every type, a corresponding directed graph type can be defined by allowing directedness (`r ref("sfig", "trajectory_type_tree", "b")`).
 
 
 ```{r}
@@ -243,13 +242,13 @@ readRDS(figure_file("trajectory_type_trees.rds", experiment_id="dataset_characte
 ## Trajectory inference methods
 
 
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods (`r ref("table", "methods", anchor=TRUE)`), based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018; @gitter_singlecellpseudotimeoverviewalgorithms_2018] and by searching in literature for "trajectory inference" and "pseudotemporal ordering". We believe this to be the most complete list to data, but are welcome to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "methods")`).
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods (`r ref("table", "methods", anchor=TRUE)`), by searching in literature for "trajectory inference" and "pseudotemporal ordering" and based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018; @gitter_singlecellpseudotimeoverviewalgorithms_2018]. We believe this to be the most complete list to data, but are welcome to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "methods")`).
 
 
-We wrapped each method (available at https://www.github.com/dynverse/dynmethods) and postprocessed its heterogenous output into a common probabilistic trajectory model. This model consisted of two parts. The milestone network represents the overall network topology, and contains of edges between different milestones and the length of the edge between them. The milestone percentages contain for each cell its position between two or more milestones, and sums for each cell to one.
+Due to the absence of a common format for trajectory inference methods, most methods produce a heterogeneous output. We therefore created wrappers around each method in R (available at https://www.github.com/dynverse/dynmethods) and postprocessed its output into a common probabilistic trajectory model. This model consisted of two parts. The milestone network represents the overall network topology, and contains edges between different milestones and the length of the edge between them. The milestone percentages contain for each cell its position between two or more milestones, and sums for each cell to one.
 
 
-Depending on the output of a method, we used different common strategies to convert the output to our common model (in some cases combined with a special conversion denoted by a \*):
+Depending on the output of a method, we used different strategies to convert the output to our model (in some cases combined with a special conversion denoted by a \*):
 
 
 ```{r}
@@ -280,10 +279,10 @@ Special conversions were necessary for certain methods:
 ## Method quality control
 
 
-We created a transparent scoring scheme to check the quality of each method (`r ref("table", "methods")`). The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The goal of this quality control is in the first place to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed the certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of dataset on which the usefulness of the method was shown, and the scope of method evaluation in the paper.
+We created a transparent scoring scheme to check the quality of each method (`r ref("stable", "qc_checks")`), based on several existing tool quality and programming guidelines in literature and online. The goal of this quality control is in the first place to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed the certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of dataset on which the usefulness of the method was shown, and the scope of method evaluation in the paper.
 
 
-For each quality aspect received a weight by how frequently it was found in several papers and online sources which discuss tool quality (`r ref("table", "methods")`). This was to prevent make sure more important aspect, such as the open source availability of the method, to outweigh other aspects, such as the availability of a graphical user interface. For calculating the final score, we however weighed each of the six categories equally.
+For each quality aspect received a weight by how frequently it was found in several papers and online sources which discuss tool quality (`r ref("table", "methods")`). This was to make sure that more important aspect, such as the open source availability of the method, outweigh other aspects, such as the availability of a graphical user interface. For calculating the final score, we weighed each of the six categories equally.
 
 
 ## Real datasets
@@ -301,7 +300,7 @@ Our workflow to generate synthetic data is based on the well established workflo
 ### Network generation
 
 
-One of the main process involved in cellular dynamic processes is through gene regulation, where regulatory cascades and feedback loops lead to progressive changes in expression and decision making. The exact way a cell chooses a certain path during its differentiation is still an active research field, although certain models have already emerged and been tested in vivo. One driver of bifurcations seem to be mutual antagonism, where genes [@xu_regulationbifurcatingcell_2015] strongly repress each other, forcing one of the two to become inactive [@graf_forcingcellschange_2009]. Such mutual antagonism can be modelled and simulated [@wang_quantifyingwaddingtonlandscape_2011; @ferrell_bistabilitybifurcationswaddington_2012]. Although such a two-gene model is simple and elegant, the reality is frequently more complex, with multiple genes (grouped into models) repressing each other [@yosef_dynamicregulatorynetwork_2013].
+One of the main process involved in cellular dynamic processes is gene regulation, where regulatory cascades and feedback loops lead to progressive changes in expression and decision making. The exact way a cell chooses a certain path during its differentiation is still an active research field, although certain models have already emerged and been tested in vivo. One driver of bifurcations seem to be mutual antagonism, where genes [@xu_regulationbifurcatingcell_2015] strongly repress each other, forcing one of the two to become inactive [@graf_forcingcellschange_2009]. Such mutual antagonism can be modelled and simulated [@wang_quantifyingwaddingtonlandscape_2011; @ferrell_bistabilitybifurcationswaddington_2012]. Although such a two-gene model is simple and elegant, the reality is frequently more complex, with multiple genes (grouped into models) repressing each other [@yosef_dynamicregulatorynetwork_2013].
 
 
 <p class='wip'> Cascades? Cycle?</p>
@@ -458,7 +457,7 @@ Although the correlation between geodesic distances directly assesses the positi
 ### Edge flip score
 
 
-As a third independent score, we assessed the similarity between the milestone network topology. We first simplified each network, by merging consecutive linear edges into one edge, by adding new milestones within self loops such that A->A would be converted A->B->C->D, by adding an intermediate node to linear networks. Because we are interested , the network was made undirected. Next, we define the edge flip score as the minimal number of edges which should be added or removed to convert one network into the other, divided by the total number of edges in both networks. This problem is equivalent to the maximum common edge subgraph problem, a known NP-hard problem with no suitable [@bahiense_maximumcommonedge_2012]. We implemented a branch&bound approach for this problem, by first enumerating all possible edge additions and removals with the minimal number of edges (the edge difference between the two networks) and if none of the new networks was isomorphic, try out all solutions with an additional two edge changes. To further limit the search space, we make sure the degree distributions between the two networks are similar, before assessing whether the two networks are isomorphic using the BLISS algorithm [@junttila_engineeringefficientcanonical_2007], as implemented in the R *igraph* package.
+As a third independent score, we assessed the similarity between the milestone network topology. We first simplified each network, by merging consecutive linear edges into one edge, by adding new milestones within self loops such that A->A would be converted A->B->C->D, by adding an intermediate node to linear networks. Because we are interested , the network was made undirected. Next, we define the edge flip score as the minimal number of edges which should be added or removed to convert one network into the other, divided by the total number of edges in both networks. This problem is equivalent to the maximum common edge subgraph problem, a known NP-hard problem with no suitable [@bahiense_maximumcommonedge_2012]. We implemented a branch & bound approach for this problem, by first enumerating all possible edge additions and removals with the minimal number of edges (the edge difference between the two networks) and if none of the new networks was isomorphic, try out all solutions with an additional two edge changes. To further limit the search space, we make sure the degree distributions between the two networks are similar, before assessing whether the two networks are isomorphic using the BLISS algorithm [@junttila_engineeringefficientcanonical_2007], as implemented in the R *igraph* package.
 
 
 ```{r}
