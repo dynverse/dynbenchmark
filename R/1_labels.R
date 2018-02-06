@@ -11,7 +11,8 @@ labels <- tibble::tribble(
   "gse", "Source(s)", "Source(s)",
   "gs", "Gold standard", "Gold standard",
   "rf_mse", "Random Forest MSE", "RF MSE",
-  "maximal_trajectory_type", "Most complex trajectory type", "Trajectory type"
+  "maximal_trajectory_type", "Most complex trajectory type", "Trajectory type",
+  "qc_score", "QC score", "QC score"
 )
 
 #' Short labelling function
