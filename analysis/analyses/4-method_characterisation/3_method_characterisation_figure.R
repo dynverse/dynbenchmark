@@ -28,8 +28,8 @@ empty_left_theme <- theme(
   axis.line.y = element_blank(),
   axis.ticks.y = element_blank()
 )
-base_scale_y <- scale_y_discrete(drop=FALSE, expand=c(0, 0))
-base_scale_x <- scale_x_discrete(drop=FALSE, expand=c(0, 0), labels=labels, name="")
+base_scale_y <- scale_y_discrete(drop=FALSE, expand=c(0, 0), labels=label_long)
+base_scale_x <- scale_x_discrete(drop=FALSE, expand=c(0, 0), labels=label_long, name="")
 
 
 ##  ............................................................................
@@ -246,7 +246,7 @@ map(unique(methods_evaluated$maximal_trajectory_type), function(trajectory_type)
   })
   replaced <- to_replace %>% xml_replace(images)
   if (length(replaced) == 0) {
-    warning("STOOOOOOOOOOOOOOOOOOOOOOOOOOOPPP!!! This will crash your R session")
+    warning("STOOOOOOOOOOOOOOOOOOOOOOOOOOOPPP!!! This will probabily crash your R session")
   }
 })
 
