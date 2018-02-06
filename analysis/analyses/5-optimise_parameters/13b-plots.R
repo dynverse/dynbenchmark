@@ -20,6 +20,8 @@ eval_ind <- eval_ind %>% mutate(method_name_f = factor(method_name, levels = rev
 eval_trajtype <- eval_trajtype %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
 eval_trajtype_wa_wo <- eval_trajtype_wa_wo %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
 
+prior_df <- eval_ind %>% select(method_name, prior_sr) %>% distinct() %>% mutate(prior_sr = prior_sr %>% str_replace_all("--required", ""))
+
 # num_reals <- eval_ind %>% filter(method_short_name == "CTmaptpx", task_group == "real", param_group == "best", replicate == 1) %>%
 #   group_by(trajectory_type) %>% summarise(n = n())
 # num_synths <- eval_ind %>% filter(method_short_name == "CTmaptpx", task_group == "synthetic", param_group == "best", replicate == 1) %>%
@@ -32,12 +34,23 @@ yyy <- zzz %>%
   select(method_name, method_short_name, method_name_f, harm_mean, pct_errored_mean, rank_correlation_mean, rank_correlation_var, rank_rf_mse_mean, rank_rf_mse_var, rank_edge_flip_mean, rank_edge_flip_var, time_method_mean) %>%
   gather(metric, score, -method_name:-method_name_f) %>%
   mutate(metric_f = factor(metric, levels = c("harm_mean", "pct_errored_mean", "time_method_mean", "rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean", "rank_correlation_var", "rank_edge_flip_var", "rank_rf_mse_var")))
+
 pdf(figure_file("1_overall_comparison.pdf"), 12, 8)
 ggplot(yyy) +
   geom_bar(aes(method_name_f, score, fill = metric_f), stat = "identity") +
   facet_wrap(~metric_f, scales = "free", nrow = 3) +
   coord_flip() +
-  theme_bw()
+  theme_bw() +
+  labs(x = NULL, y = NULL, fill = "Metric")
+
+ggplot(yyy %>% left_join(prior_df, by = "method_name")) +
+  geom_bar(aes(method_name_f, score, fill = prior_sr), stat = "identity") +
+  facet_wrap(~metric_f, scales = "free", nrow = 3) +
+  coord_flip() +
+  theme_bw() +
+  scale_fill_brewer(palette = "Dark2") +
+  theme(legend.position = "bottom") +
+  labs(x = NULL, y = NULL, fill = "Prior")
 dev.off()
 
 # plots
@@ -224,5 +237,15 @@ g <- time_ind %>%
   coord_flip() +
   labs(x = NULL, fill = "Time step")
 ggsave(figure_file("timestep_permethod.pdf"), g, width = 10, height = 5)
+
+
+
+
+### individual dataset plots
+eval_ind <- eval_ind %>% mutate(harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean))
+ggplot(eval_ind) +
+  geom_point(aes(method_name_f, harm_mean, colour = trajectory_type_f)) +
+  facet_wrap(~task_id) +
+  coord_flip()
 
 
