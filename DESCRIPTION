@@ -23,6 +23,7 @@ BugReports: https://github.com/Zouter/dynalysis/issues
 Imports: 
   bookdown,
   dplyr,
+  dynnormaliser,
   tidyr,
   tidyverse,
   tibble,
@@ -39,6 +40,7 @@ Imports:
 Remotes:
   rcannood/dyneval,
   rcannood/dynmethods,
+  rcannood/dynnormaliser,
   rcannood/dynutils,
   Zouter/dyntoy,
   Zouter/dyngen
