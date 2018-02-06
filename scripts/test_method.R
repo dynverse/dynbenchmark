@@ -29,10 +29,10 @@ library(dynalysis)
 bigtasks <- read_rds("~/bigtasks.rds")
 
 ## chose method
-method <- description_sincell()
+method <- description_ouijaflow()
 
 par_set <- method$par_set
-default_params <- ParamHelpers::generateDesignOfDefaults(par_set) %>% ParamHelpers::dfRowToList(par_set, 1)
+default_params <- ParamHelpers::generateDesignOfDefaults(par_set, trafo = T) %>% ParamHelpers::dfRowToList(par_set, 1)
 list2env(default_params, environment())
 
 # laad task in environment
@@ -51,20 +51,27 @@ tasks_to_evaluate <- bigtasks
 
 
 ##
-results <- map(seq(18, nrow(tasks_to_evaluate)), function(row_id) {
+results <- map(seq(nrow(tasks_to_evaluate)), function(row_id) {
   print(row_id)
-  bigtasks <- tasks_to_evaluate[row_id, ,drop=F]
-  execute_evaluation(bigtasks, method, default_params, "correlation", extra_metrics=c("rf_mse", "edge_flip")) %>% attr("extras") %>% .$.summary
+  subtasks <- tasks_to_evaluate[row_id, ,drop=F]
+  execute_evaluation(subtasks, method, default_params, "correlation", extra_metrics=c("rf_mse", "edge_flip")) %>% attr("extras") %>% .$.summary
 }) %>% bind_rows()
 
 
-
 results$correlation
+results$edge_flip
+results$rf_mse
 
 
 
 
-result <- dynmethods:::run_sincell(task_to_evaluate$expression)
+result <- dynmethods:::run_ouijaflow(task_to_evaluate$expression)
 result$geodesic_distances <- dynutils::compute_emlike_dist(result)
 
-dyneval:::calculate_metrics(task_to_evaluate, result, "rf_mse")
+result <- wrap_prediction_model_linear(
+  cell_ids = rownames(expression),
+  pseudotimes = pseudotimes
+)
+result$geodesic_distances <- dynutils::compute_emlike_dist(result)
+
+dyneval:::calculate_metrics(task_to_evaluate, result, "correlation")
