@@ -110,11 +110,11 @@ trajectory_type_dag <- {
 
   trajectory_type_dag <- trajectory_type_edges %>% igraph::graph_from_data_frame(vertices=trajectory_types) %>% tidygraph::as_tbl_graph()
 
-  trajectory_type_dag %>% ggraph::ggraph() +
-    ggraph::geom_edge_link() +
-    ggraph::geom_edge_link(ggplot2::aes(xend = x+(xend-x)/2, yend = y+(yend - y)/2), arrow=ggplot2::arrow()) +
-    ggraph::geom_node_label(ggplot2::aes(label=name, fill=directedness)) +
-    ggraph::theme_graph()
+  # trajectory_type_dag %>% ggraph::ggraph() +
+  #   ggraph::geom_edge_link() +
+  #   ggraph::geom_edge_link(ggplot2::aes(xend = x+(xend-x)/2, yend = y+(yend - y)/2), arrow=ggplot2::arrow()) +
+  #   ggraph::geom_node_label(ggplot2::aes(label=name, fill=directedness)) +
+  #   ggraph::theme_graph()
 
   trajectory_type_dag
 }
