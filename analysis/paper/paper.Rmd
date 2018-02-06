@@ -119,7 +119,7 @@ read_rds(figure_file("qc_checks.rds","method_characteristics")),
 ```
 
 
-Most methods fulfilling most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "method_characteristics", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "method_characteristics", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "method_qc_check")` and `r ref("fig", "method_characteristics", "c")`), notwithstanding studies pinpointing these as good practices [@wilson_best_2014].
+Most methods fulfill most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "method_characteristics", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "method_characteristics", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "method_qc_check")` and `r ref("fig", "method_characteristics", "c")`), notwithstanding studies pinpointing these as good practices [@wilson_best_2014].
 
 
 The underlying algorithms can be divided into several modules, and these frequently contain soms clustering, dimensionality reduction and/or graph building steps. Interestingly, modules are frequently shared between different algorithms (`r ref("sfig", "method_components")`).
@@ -196,7 +196,7 @@ read_rds(figure_file("datasets.rds","dataset_characterisation")),
 ## Trajectory types
 
 
-To classify the output of methods and the gold standards, we defined a set of basic trajectory types. These trajectory types start from the most general trajectory type, a disconnected simple graph, and moves down in a directed acyclic graph using certain graph properties, progressively becoming more simple until the two basic types: linear and cycles `r ref("sfig", "trajectory_type_tree", "a")`. For every type, a corresponding directed graph type can be defined by allowing directedness `r ref("sfig", "trajectory_type_tree", "b")`.
+To classify the output of methods and the gold standards, we defined a set of basic trajectory types. These trajectory types start from the most general trajectory type, a disconnected simple graph, and moves down in a directed acyclic graph using certain graph properties, progressively becoming more simple until the two basic types: linear and cycles (`r ref("sfig", "trajectory_type_tree", "a")`). For every type, a corresponding directed graph type can be defined by allowing directedness (`r ref("sfig", "trajectory_type_tree", "b")`).
 
 
 ```{r}
@@ -217,7 +217,24 @@ readRDS(figure_file("trajectory_type_trees.rds", experiment_id="dataset_characte
 We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods `r ref("table", "methods", anchor=TRUE)`, based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018; @gitter_singlecellpseudotimeoverviewalgorithms_2018] and by searching in literature for "trajectory inference" and "pseudotemporal ordering". We believe this to be the most complete list to data, but are welcome to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "methods")`).
 
 
-<p class='wip'> We wrapped each method (available at https://www.github.com/dynverse/dynmethods) and postprocessed its output into a common probabilistic trajectory model. This model consists of two parts. The milestone network represents the overall network topology, and contains of edges between different milestones and the length of the edge between them. The milestone percentages contain for each cell its position between two or more milestones, and sums for each cell to one. Linear methods are the easiest to wrap into this format, with two milestones and all cells in between. Methods such as </p>## Method quality control
+We wrapped each method (available at https://www.github.com/dynverse/dynmethods) and postprocessed its heterogenous output into a common probabilistic trajectory model. This model consists of two parts. The milestone network represents the overall network topology, and contains of edges between different milestones and the length of the edge between them. The milestone percentages contain for each cell its position between two or more milestones, and sums for each cell to one.
+
+
+Depending on the output of a method, we used different strategies to convert the output to our common model:
+
+
+* Linear trajectory methods usually return a single pseudotime value, which can be converted to our model using a single edge between two milestones
+* Conversely, methods which assign each cell to a branch together with a pseudotime value and a branch network easily converted into our model
+* Methods returning both a global pseudotime value and a probability for every end state were converted into our model by using one single begin milestone and an end milestone for every end state. The global pseudotime then determines the distance from the begin milestone, the rest of the cell's position is calculated by distributing the residual percentage over the end states, proportionally to the end state probabilities
+Special conversions were necessary for certain method
+* DPT: 
+* Sincell
+* SLICER
+* SLICE
+* 
+
+
+## Method quality control
 
 
 We created a transparent scoring scheme to check the quality of each method (`r ref("table", "methods")`). The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The goal of this quality control is in the first place to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed the certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of dataset on which the usefulness of the method was shown, and the scope of method evaluation in the paper.
@@ -368,7 +385,7 @@ readRDS(figure_file("score_aspects.rds", experiment_id="score_rules/score_aspect
 "score_aspects", 
 "Different scores assess different aspects of the ", 
 15, 
-5
+8
 )
 ```
 
