@@ -12,7 +12,7 @@ trajectory_type_undirected_to_directed<- c(
 # undirected
 trajectory_type_edges_undirected <- tribble(
   ~to, ~from, ~prop_changes,
-  "undirected_graph", "undirected_cycle", c("num_branch_nodes == 0", "num_cycles > 1"),
+  "undirected_graph", "undirected_cycle", c("num_branch_nodes == 0", "num_cycles == 1"),
   "simple_fork", "undirected_linear", "num_branch_nodes == 0",
   "complex_fork", "simple_fork", "max_degree == 3",
   "unrooted_binary_tree", "simple_fork", "num_branch_nodes == 1",
