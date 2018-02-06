@@ -15,6 +15,7 @@ method_ord <- eval_overall %>%
   .$method_name
 
 eval_overall <- eval_overall %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
+eval_repl <- eval_repl %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
 eval_ind <- eval_ind %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
 eval_trajtype <- eval_trajtype %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
 eval_trajtype_wa_wo <- eval_trajtype_wa_wo %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
@@ -26,6 +27,18 @@ eval_trajtype_wa_wo <- eval_trajtype_wa_wo %>% mutate(method_name_f = factor(met
 # write_tsv(num_reals, figure_file("trajtypes_real.tsv"))
 # write_tsv(num_synths, figure_file("trajtypes_synth.tsv"))
 
+zzz <- eval_trajtype_wa_wo %>% filter(task_group == "mean", trajectory_type_f == "overall")
+yyy <- zzz %>%
+  select(method_name, method_short_name, method_name_f, harm_mean, pct_errored_mean, rank_correlation_mean, rank_correlation_var, rank_rf_mse_mean, rank_rf_mse_var, rank_edge_flip_mean, rank_edge_flip_var, time_method_mean) %>%
+  gather(metric, score, -method_name:-method_name_f) %>%
+  mutate(metric_f = factor(metric, levels = c("harm_mean", "pct_errored_mean", "time_method_mean", "rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean", "rank_correlation_var", "rank_edge_flip_var", "rank_rf_mse_var")))
+pdf(figure_file("1_overall_comparison.pdf"), 12, 8)
+ggplot(yyy) +
+  geom_bar(aes(method_name_f, score, fill = metric_f), stat = "identity") +
+  facet_wrap(~metric_f, scales = "free", nrow = 3) +
+  coord_flip() +
+  theme_bw()
+dev.off()
 
 # plots
 pdf(figure_file("2_trajtype_comparison.pdf"), 20, 8)
@@ -39,7 +52,17 @@ ggplot(eval_trajtype_wa_wo) +
   )
 
 ggplot(eval_trajtype_wa_wo) +
-  geom_point(aes(method_name_f, rank_correlation)) +
+  geom_point(aes(method_name_f, rank_correlation_mean)) +
+  coord_flip() +
+  theme_bw() +
+  facet_grid(task_group~trajectory_type_f) +
+  labs(
+    x = NULL
+  )
+
+
+ggplot(eval_trajtype_wa_wo) +
+  geom_point(aes(method_name_f, rank_edge_flip_mean)) +
   coord_flip() +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f) +
@@ -48,7 +71,7 @@ ggplot(eval_trajtype_wa_wo) +
   )
 
 ggplot(eval_trajtype_wa_wo) +
-  geom_point(aes(method_name_f, rank_edge_flip)) +
+  geom_point(aes(method_name_f, rank_rf_mse_mean)) +
   coord_flip() +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f) +
@@ -57,7 +80,7 @@ ggplot(eval_trajtype_wa_wo) +
   )
 
 ggplot(eval_trajtype_wa_wo) +
-  geom_point(aes(method_name_f, rank_rf_mse)) +
+  geom_point(aes(method_name_f, pct_errored_mean)) +
   coord_flip() +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f) +
@@ -65,40 +88,33 @@ ggplot(eval_trajtype_wa_wo) +
     x = NULL
   )
 
-ggplot(eval_trajtype_wa_wo) +
-  geom_point(aes(method_name_f, pct_errored)) +
-  coord_flip() +
-  theme_bw() +
-  facet_grid(task_group~trajectory_type_f) +
-  labs(
-    x = NULL
-  )
-
-ggplot(eval_trajtype_wa_wo, aes(harm_mean, rank_correlation)) +
+ggplot(eval_trajtype_wa_wo, aes(harm_mean, rank_correlation_mean)) +
   geom_point() +
   ggrepel::geom_text_repel(aes(label = method_name)) +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f)
 
-ggplot(eval_trajtype_wa_wo, aes(harm_mean, rank_rf_mse)) +
+ggplot(eval_trajtype_wa_wo, aes(harm_mean, rank_rf_mse_mean)) +
   geom_point() +
   ggrepel::geom_text_repel(aes(label = method_name)) +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f)
 
-ggplot(eval_trajtype_wa_wo, aes(harm_mean, rank_edge_flip)) +
+ggplot(eval_trajtype_wa_wo, aes(harm_mean, rank_edge_flip_mean)) +
   geom_point() +
   ggrepel::geom_text_repel(aes(label = method_name)) +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f)
 
-ggplot(eval_trajtype_wa_wo, aes(harm_mean, pct_errored)) +
+ggplot(eval_trajtype_wa_wo, aes(harm_mean, pct_errored_mean)) +
   geom_point() +
   ggrepel::geom_text_repel(aes(label = method_name)) +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f)
 
 dev.off()
+
+
 
 
 
@@ -110,35 +126,40 @@ error_messages_overall <-
   ungroup() %>%
   filter(!sapply(error, is.null)) %>%
   rowwise() %>%
-  mutate(error_message = error$message) %>%
+  mutate(
+    error_message = error$message,
+    error_message = str_replace_all(error_message, "/scratch/irc/personal/robrechtc/tmp//Rtmp[A-Za-z0-9_\\-/]*", "{tmpfile}")
+  ) %>%
   ungroup() %>%
   group_by(method_name, method_name_f, error_message) %>%
-  summarise(num = n(), pct = num / num_datasets[[1]]) %>%
+  summarise(num = n(), pct = num / num_datasets[[1]], example_dataset = task_id[[1]]) %>%
   ungroup()
-error_reasons <- tribble(
-  ~partial_message, ~reason,
-  "reached elapsed time limit", "time limit",
-  "Cannot allocate memory", "memory limit",
-  "cannot open the connection", "error inside python code"
-)
-error_reason_fun <- function(error_message) {
-  greps <- sapply(error_reasons$partial_message, function(part_mess) {
-    grepl(part_mess, error_message)
-  })
-  apply(greps, 1, function(bools) {
-    if (any(bools)) {
-      error_reasons$reason[bools]
-    } else {
-      "error in method"
-    }
-  })
-}
+# error_reasons <- tribble(
+#   ~partial_message, ~reason,
+#   "reached elapsed time limit", "time limit",
+#   "Cannot allocate memory", "memory limit",
+#   "cannot open the connection", "error inside python code"
+# )
+# error_reason_fun <- function(error_message) {
+#   greps <- sapply(error_reasons$partial_message, function(part_mess) {
+#     grepl(part_mess, error_message)
+#   })
+#   apply(greps, 1, function(bools) {
+#     if (any(bools)) {
+#       error_reasons$reason[bools]
+#     } else {
+#       "error in method"
+#     }
+#   })
+# }
+#
+# error_messages_overall <- error_messages_overall %>%
+#   mutate(
+#     error_reason = error_reason_fun(error_message),
+#     error_reason_f = factor(error_reason, levels = names(sort(table(error_reason), decreasing = T)))
+#   )
 
-error_messages_overall <- error_messages_overall %>%
-  mutate(
-    error_reason = error_reason_fun(error_message),
-    error_reason_f = factor(error_reason, levels = names(sort(table(error_reason), decreasing = T)))
-  )
+write_tsv(error_messages_overall, figure_file("error_reasons.tsv"))
 
 
 pdf(figure_file("error_reasons.pdf"), 12, 6)
@@ -157,7 +178,6 @@ step_levels <- c("sessionsetup", "preprocessing", "method", "postprocessing", "w
 time_ind <-
   eval_ind %>%
   select(method_name, method_name_f, task_id, pct_errored, error_message, trajectory_type_f, starts_with("time_")) %>%
-  mutate(error_reason = error_reason_fun(error_message)) %>%
   gather(step, time, starts_with("time")) %>%
   mutate(
     step = gsub("time_", "", step),
