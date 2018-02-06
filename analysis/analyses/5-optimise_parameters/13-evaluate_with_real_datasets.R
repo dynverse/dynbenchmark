@@ -69,26 +69,26 @@ tasks <- read_rds(derived_file("tasks.rds")) %>%
 
 
 # # save benchmark configuration and start it
-# write_rds(lst(methods, designs, metrics, extra_metrics, num_repeats, tasks), derived_file("config.rds"))
-# benchmark_suite_submit(
-#   tasks = tasks,
-#   task_group = rep("task", nrow(tasks)),
-#   task_fold = rep(1, nrow(tasks)),
-#   out_dir = derived_file("suite/"),
-#   remote_dir = paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/"),
-#   methods = methods,
-#   designs = designs,
-#   metrics = metrics,
-#   extra_metrics = extra_metrics,
-#   memory = "10G",
-#   num_cores = 4,
-#   num_iterations = 1,
-#   num_repeats = num_repeats,
-#   num_init_params = num_init_params,
-#   execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500",
-#   r_module = NULL,
-#   output_model = TRUE
-# )
+write_rds(lst(methods, designs, metrics, extra_metrics, num_repeats, tasks), derived_file("config.rds"))
+benchmark_suite_submit(
+  tasks = tasks,
+  task_group = rep("task", nrow(tasks)),
+  task_fold = rep(1, nrow(tasks)),
+  out_dir = derived_file("suite/"),
+  remote_dir = paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/"),
+  methods = methods %>% filter(!short_name %in% c("ouija", "ouijaf", "pseudogp", "GPfates", "topslam")), # these methods did not finish
+  designs = designs,
+  metrics = metrics,
+  extra_metrics = extra_metrics,
+  memory = "20G",
+  num_cores = 4,
+  num_iterations = 1,
+  num_repeats = num_repeats,
+  num_init_params = num_init_params,
+  execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500",
+  r_module = NULL,
+  output_model = TRUE
+)
 
 outputs <- benchmark_suite_retrieve(derived_file("suite/"))
 
@@ -127,7 +127,7 @@ for (i in seq_len(nrow(tmp))) {
   cat(tmp$qsub_error[[i]], "\n\n", sep = "")
 }
 
-trajtype_ord <- c("directed_linear", "directed_cycle", "bifurcation", "multifurcation", "rooted_tree", "directed_acyclic_graph", "directed_graph")
+
 
 # bind the metrics of the individual runs
 eval_ind <-
@@ -138,23 +138,31 @@ eval_ind <-
     param_group = c("default", "optimised")[param_i],
     pct_errored = 1 - sapply(error, is.null),
     prior_sr = sapply(prior_df, function(prdf) ifelse(nrow(prdf) == 0, "", paste(prdf$prior_names, "--", prdf$prior_type, sep = "", collapse = ";"))),
-    trajectory_type_f = factor(trajectory_type, levels = trajtype_ord)
+    trajectory_type_f = factor(trajectory_type, levels = dynalysis:::trajectory_type_directed$name)
   ) %>%
   group_by(task_id) %>%
   mutate(
     rank_correlation = percent_rank(correlation),
     rank_rf_mse = percent_rank(-rf_mse),
     rank_rf_rsq = percent_rank(rf_rsq),
-    rank_edge_flip = percent_rank(edge_flip),
-    harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean)
+    rank_edge_flip = percent_rank(edge_flip)
   ) %>%
   ungroup() %>%
   rowwise() %>%
   mutate(error_message = ifelse(is.null(error), "", error$message)) %>%
   ungroup()
 
+# evaluate per replicate
+eval_repl <- eval_ind %>%
+  group_by(method_name, method_short_name, task_id, fold_type, fold_i, group_sel, param_i, iteration_i, type, trajectory_type, task_group, param_group, prior_sr, trajectory_type_f) %>%
+  summarise_if(is.numeric, funs(mean, var)) %>%
+  ungroup() %>%
+  mutate(
+    harm_mean = apply(cbind(rank_correlation_mean, rank_edge_flip_mean, rank_rf_mse_mean), 1, psych::harmonic.mean)
+  )
+
 # process trajtype grouped evaluation
-eval_trajtype <- eval_ind %>%
+eval_trajtype <- eval_repl %>%
   group_by(method_name, method_short_name, task_group, param_group, trajectory_type, trajectory_type_f) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
@@ -187,12 +195,7 @@ eval_trajtype_wa_wo <- eval_overall_wm %>%
   bind_rows(eval_trajtype_wm) %>%
   mutate(trajectory_type_f = factor(trajectory_type, levels = c("overall", trajtype_ord)))
 
-# evaluate per replicate
-eval_repl <- eval_ind %>%
-  group_by(method_name, method_short_name, task_group, param_group, repeat_i) %>%
-  mutate(n = n()) %>%
-  summarise_if(is.numeric, mean) %>%
-  ungroup()
+
 
 write_rds(lst(eval_ind, eval_overall, eval_trajtype, eval_repl, eval_trajtype_wa_wo, trajtype_ord), derived_file("eval_outputs.rds"))
 
