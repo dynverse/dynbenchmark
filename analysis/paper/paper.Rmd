@@ -188,6 +188,35 @@ read_rds(figure_file("datasets.rds","dataset_characterisation")),
 
 
 # Discussion
+Limitations of the model:
+
+
+* Robrecht.Cannoodt @robrechtc 10:21
+en heterogene output van alle methode... true, maar sommigen hebben we wel wat moeten tweaken 😛
+en ik kan me output bedenken dat niet in ons model zou kunnen passen
+* Wouter Saelend @wouters 10:21
+oh 😛
+* Robrecht.Cannoodt @robrechtc 10:21
+welja
+* Wouter Saelend @wouters 10:21
+Misschien een kritiekpunt is onzekerheid... maarja 😛
+* Robrecht.Cannoodt @robrechtc 10:22
+onzekerheid, en dat een cell in meerdere niet-neighbouring milestones zou kunnen zitten
+als in, biologisch gezien houdt het mss geen steek, maar een methode zou wel kunnen zeggen, "wete, ik dénk dat het ofwel een DC is of een rode bloedcel"
+* Wouter Saelend @wouters 10:24
+hmmm uhu true, hoort allemaal wat samen met de onzekerheid. Je zou per cell een probabiliteitsdistributie doorheen het milestone netwerk kunnen geven, maar sla dat eens op 😛
+* Robrecht.Cannoodt @robrechtc 10:25
+uhu ^^
+* Wouter Saelend @wouters 10:25
+En bereken dan eens de emd 😛
+* Robrecht.Cannoodt @robrechtc 10:25
+idd...
+deze discussie zou wel ergens een plaatsje kunnen krijgen in het manuscript, vind ik
+* Wouter Saelend @wouters 10:25
+Uhu in de discussie dan wss
+* Robrecht.Cannoodt @robrechtc 10:26
+tiens, een discussie die in de discussie zou plaats vinden, wat een goed idee 😮
+<tease>
 
 
 # Methods
@@ -220,20 +249,32 @@ We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference me
 We wrapped each method (available at https://www.github.com/dynverse/dynmethods) and postprocessed its heterogenous output into a common probabilistic trajectory model. This model consists of two parts. The milestone network represents the overall network topology, and contains of edges between different milestones and the length of the edge between them. The milestone percentages contain for each cell its position between two or more milestones, and sums for each cell to one.
 
 
-Depending on the output of a method, we used different strategies to convert the output to our common model:
+Depending on the output of a method, we used different common strategies to convert the output to our common model (in some cases combined with a special conversion denoted by a *):
 
 
-* Linear trajectory methods usually return a single pseudotime value, which can be converted to our model using a single edge between two milestones
-* Conversely, methods which assign each cell to a branch together with a pseudotime value and a branch network easily converted into our model
-* Methods returning both a global pseudotime value and a probability for every end state were converted into our model by using one single begin milestone and an end milestone for every end state. The global pseudotime then determines the distance from the begin milestone, the rest of the cell's position is calculated by distributing the residual percentage over the end states, proportionally to the end state probabilities
-Special conversions were necessary for certain method
-* DPT: 
-* Sincell
-* SLICER
-* SLICE
-* 
+```{r}
+list_sentence <- function(x) {pritt(glue::collapse(x[1:length(x) - 1],", "), " and ", last(x))}
+conversion <- function(conversion_oi) {
+    methods_evaluated %>% filter(map_lgl(conversion_split, ~ conversion_oi %in% .)) %>% mutate(text = paste0(name, ifelse(conversion_special, "\\*", ""))) %>% pull(text) %>% list_sentence()
+}
+```
 
 
+* Methods returning a single pseudotime value: `r conversion("linear")`. A single edge between two milestones, its percentage proportional to the pseudotime.
+* Methods which assign each cell to a branch together with a pseudotime value and a branch network: `r conversion("branching_local")`. Similarly, the branch network is used as the milestone network, the percentages of a cell are proportional with its branch pseudotime.
+* Methods returning both a global pseudotime value and a probability for every end state: `r conversion("branching_global")`. We use a single start state and an add an edge to every end milestone each representing an end state. The global pseudotime then determines the distance from the begin milestone, the rest of the cell's position is calculated by distributing the residual percentage over the end states, proportionally to the end state probabilities.
+* Methods returning a cluster assignment and a cluster network:  `r conversion("branching_cluster")`. The cluster network was used as milestone network, each cell received percentage 1 or 0 based on its cluster assignment.
+* Methods returning a cluster assignment, cluster network and dimensionality reduction: `r conversion("branching_local_projection")`. We projected each cell on the closest point on the edges between its own cluster and neighbouring clusters within the dimensionality reduction. This projection allowed us to give each cell a pseudotime within the edge, which was then converted into our model as described above, using the cluster network as milestone network.
+
+
+Special conversions were necessary for certain methods:
+
+
+* DPT: We projected the cells onto the cluster network, consisting of a central milestone (this cluster contains the cells which were assigned to the "unknown" branch) and three terminal milestones, each corresponding to 
+* Sincell: To constrain the number of milestones this method creates, we merged two cell clusters iteratively until the percentage of leaf nodes was below a certain cutoff, default at 25%. This was then processed 
+* SLICER: Although this method returns a branch network and a global pseudotime, it was not clear to us how to assign cells to individual branches in the network. We therefore used the cell graph provided by the method to calculate the shortest paths between each branch, and then projected other cells onto this backbone graph structure, creating a local pseudotime for every cell within its branch. The output was then further processed as above.
+* SLICE: As discussed in the vignette of SLICE, we ran principal curves one by one for every edge detected by SLICE. This local pseudotime was then processed as above.
+* MFA: We used the branch assignment as state probabilities, which together with the global pseudotime were processed as described above.
 ## Method quality control
 
 
