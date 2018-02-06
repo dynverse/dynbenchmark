@@ -47,7 +47,7 @@ source("setup.R")
 # Abstract
 
 
-Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Since 2014, more than 50 trajectory inference methods have been developed, each with its own set of methodological characteristics. This makes a direct comparison between trajectory inference methods often difficult, and as a result a comprehensive assessment of the performance and robustness of each method is still lacking. We developed a framework of data structures for trajectory inference methods in order to make their results comparable to each other and to a gold standard, when available. In this work, we compare the results from a total of 22 trajectory inference methods, on a large collection of real datasets and realistic synthetic datasets. We employ a novel parameter optimisation procedure, and We compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at https://www.github.com/dynverse.
+Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Since 2014, more than 50 trajectory inference methods have been developed, each with its own set of methodological characteristics. This makes a direct comparison between trajectory inference methods often difficult, and as a result a comprehensive assessment of the performance and robustness of each method is still lacking. We developed a framework of data topologies for trajectory inference methods in order to make their results comparable to each other and to a gold standard, when available. In this work, we compare the results from a total of 22 trajectory inference methods, on a large collection of real datasets and realistic synthetic datasets. We employ a novel parameter optimisation procedure, and We compare methods using several metrics, including accuracy of the inferred ordering, correctness of the network wiring, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at https://www.github.com/dynverse.
 
 
 # Introduction
@@ -74,7 +74,7 @@ cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over
 
 
 <!-- history of Ti, different methods -->
-Dozens of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially, most trajectory inference fixed the trajectory structure to a linear or bifurcating structure, by either algorithmic limitations or through user parameters, and focussed on correctly ordering the cells along this fixed structure. However, several recent methods now infer both the ordering and the structure at the same time, although certain structural limitations are still imposed(`r ref("sfig", "methods_over_time", "b")`). Methods which do not impose limitations on the structure are now being developed [@welch_slicer:_2016; @wolf_graph_2017], and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes happening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
+Dozens of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially, most trajectory inference fixed the trajectory topology to a linear or bifurcating topology, by either algorithmic limitations or through user parameters, and focussed on correctly ordering the cells along this fixed topology. However, several recent methods now infer both the ordering and the topology at the same time, although certain structural limitations are still imposed(`r ref("sfig", "methods_over_time", "b")`). Methods which do not impose limitations on the topology are now being developed [@welch_slicer:_2016; @wolf_graph_2017], and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes happening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
 
 
 <!-- Common framework of TI, different components, naturally progressing towards the need for an evaluation -->
@@ -95,7 +95,7 @@ methods <- readRDS(derived_file("methods.rds", experiment_id="method_characteris
 ```
 
 
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability and the presence of a programming interface `r ref("table", "methods")`. We characterized all methods in four different ways: possible trajectory structures, implementation quality, prior information and the underlying algorithm (`r ref("fig", "method_characteristics")`).
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability and the presence of a programming interface `r ref("table", "methods")`. We characterized all methods in four different ways: possible trajectory topologies, implementation quality, prior information and the underlying algorithm (`r ref("fig", "method_characteristics")`).
 
 
 `r ref("table", "methods", anchor=TRUE)` Overview of current trajectory inference methods, and whether they were included in this current evaluation study
@@ -104,7 +104,7 @@ read_rds(figure_file("methods_table.rds", "method_characteristics"))
 ```
 
 
-At the level of trajectory structures, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "method_characteristics", "a")`). However, only a handful of more recent methods can currently handle more complex graph structures which can include loops (`r ref("sfig", "methods_over_time", "b")`), one of which is included in the current evaluation (SLICER).
+At the level of trajectory topologies, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "method_characteristics", "a")`). However, only a handful of more recent methods can currently handle more complex graph topologies which can include loops (`r ref("sfig", "methods_over_time", "b")`), one of which is included in the current evaluation (SLICER).
 
 
 While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or for which purpose(s) they are important (user friendliness, developer friendliness or good science). These categorisations can then be used to help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
@@ -217,7 +217,7 @@ readRDS(figure_file("trajectory_type_trees.rds", experiment_id="dataset_characte
 We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods `r ref("table", "methods", anchor=TRUE)`, based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018; @gitter_singlecellpseudotimeoverviewalgorithms_2018] and by searching in literature for "trajectory inference" and "pseudotemporal ordering". We believe this to be the most complete list to data, but are welcome to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "methods")`).
 
 
-<p class='wip'> We wrapped each method (available at https://www.github.com/dynverse/dynmethods) and postprocessed its output into a common probabilistic trajectory model. This model consists of two parts. The milestone network represents the overall network structure, and contains of edges between different milestones and the length of the edge between them. The milestone percentages contain for each cell its position between two or more milestones, and sums for each cell to one. Linear methods are the easiest to wrap into this format, with two milestones and all cells in between. Methods such as </p>## Method quality control
+<p class='wip'> We wrapped each method (available at https://www.github.com/dynverse/dynmethods) and postprocessed its output into a common probabilistic trajectory model. This model consists of two parts. The milestone network represents the overall network topology, and contains of edges between different milestones and the length of the edge between them. The milestone percentages contain for each cell its position between two or more milestones, and sums for each cell to one. Linear methods are the easiest to wrap into this format, with two milestones and all cells in between. Methods such as </p>## Method quality control
 
 
 We created a transparent scoring scheme to check the quality of each method (`r ref("table", "methods")`). The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The goal of this quality control is in the first place to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed the certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of dataset on which the usefulness of the method was shown, and the scope of method evaluation in the paper.
@@ -246,7 +246,7 @@ One of the main process involved in cellular dynamic processes is through gene r
 
 <p class='wip'> Cascades? Cycle?</p>
 
-<p class='wip'> To simulate certain trajectory structures, we therefore designed module networks in which the cells will follow a particular trajectory structure given certain parameters (`r ref("sfig", "modulenets")`). Two module networks generated linear trajectories (linear and linear long), two generated simple forks (bifurcating and converging), one generated a complex fork (trifurcating), one generated a rooted tree (consecutive bifurcating) and two generated trajectories which simple undirected graphs (bifurcating loop and bifurcating convergence).</p>
+<p class='wip'> To simulate certain trajectory topologies, we therefore designed module networks in which the cells will follow a particular trajectory topology given certain parameters (`r ref("sfig", "modulenets")`). Two module networks generated linear trajectories (linear and linear long), two generated simple forks (bifurcating and converging), one generated a complex fork (trifurcating), one generated a rooted tree (consecutive bifurcating) and two generated trajectories which simple undirected graphs (bifurcating loop and bifurcating convergence).</p>
 
 From these module networks we generated gene regulatory networks in two steps: generation of the main regulatory network, and addition of extra target genes from real regulatory networks. For each dataset, we used the same number of genes as were differentially expressed in the real datasets. 5% of genes were assigned to be part of the main, and were randomly distributed among all modules (with at least one gene per module). We sampled edges between these individual genes (according to the module network) using an uniform distribution between 1 and the number of possible targets in each module. To add additional target genes to the network, we assigned every regulator from the network to a real regulator in a real network (from regulatory circuits [@marbach_tissuespecificregulatorycircuits_2016]), and extracted for every regulator a local network around it using personalized pagerank (with damping factor set to 0.1). 
 
@@ -351,16 +351,66 @@ For each dataset we sampled the same number of cells as were present in the refe
 ### Gold standard extraction
 
 
-<p class='wip'> Because each cellular simulations follows the trajectory it its own speed, knowing the exact position of a cell within the trajectory structure is not straightforward. Furthermore, the speed by which simulated cells made a decision between two or more alternative paths was highly variable sfig?. To estimate a cell's position during a simulation within the trajectory structure, we therefore used the known progression of the modules, given in `r ref("sfig", "modulenets", "c")`,  as a backbone. We smoothed the expression in each simulation using a rolling mean with a window of 50 time steps, and then calculated the average module expression along the simulation. We used dynamic time warping, implemented in the dtw R package [@giorgino_computingvisualizingdynamic_2009; @tormene_matchingincompletetime_2009], with an open end to align a simulation to all possible module progressions, and then picked the alignment which minimised the normalised distance between the simulation and the backbone. In case of cyclical trajectory structures, the number of possible milestones a backbone could progress through was limited to 20.</p>
+<p class='wip'> Because each cellular simulations follows the trajectory it its own speed, knowing the exact position of a cell within the trajectory toplogy is not straightforward. Furthermore, the speed by which simulated cells made a decision between two or more alternative paths was highly variable sfig?. To estimate a cell's position during a simulation within the trajectory toplogy, we therefore used the known progression of the modules, given in `r ref("sfig", "modulenets", "c")`,  as a backbone. We smoothed the expression in each simulation using a rolling mean with a window of 50 time steps, and then calculated the average module expression along the simulation. We used dynamic time warping, implemented in the dtw R package [@giorgino_computingvisualizingdynamic_2009; @tormene_matchingincompletetime_2009], with an open end to align a simulation to all possible module progressions, and then picked the alignment which minimised the normalised distance between the simulation and the backbone. In case of cyclical trajectory topologies, the number of possible milestones a backbone could progress through was limited to 20.</p>
 
 ## Common normalisation pipeline
 We used a standard single-cell RNA-seq preprocessing pipeline which applies parts of the scran and scater Bioconductor packages [@lun_stepbystepworkflowlowlevel_2016]. The advantages of this pipeline is that it works both with and without spike-ins, and includes a harsh cell filtering which looks at abnormalities in library sizes, mitochondrial gene expression, and number of genes expressed using median absolute deviations (set to 3). We required that a gene has to be expressed in at least 5% of the cells, and that it should have an average expression higher than 0.05. Furthermore, we used the pipeline to select the most highly variable genes, using a false discovery rate of 5% and a biological component higher than 0.5. As a final filter, we removed both all zero genes and cells until convergence.
 
 
 ## Evaluation metrics
+We used three different metrics to assess the performance of each TI method. The importance of using multiple metrics to compare complex models has been stated repeatedly REFS. Indeed, each of our metrics looks at the correspondence between prediction and gold standard in a different way: the correlation between geodesic distances assesses the overall ordering, the RF prediction error assesses the cell neighbourhood, and the edge flip score assesses the milestone network topology (`r ref("sfig", "score_aspects")`).
 
 
-We used two different metrics to assess the performance of each TI method, one looking at the accuracy of the cellular ordering, and one looking at the accuracy of the detected trajectory structure. The correlation metric first calculates the geodesic distances between all cells within the trajectory structure and than calculates the Spearman's correlation between these two distance matrices. Cells which are positioned closely to each other in both the prediction and the gold standard will therefore have an equally 
+```{r}
+add_sfig({
+readRDS(figure_file("score_aspects.rds", experiment_id="score_rules/score_aspects"))
+}, 
+"score_aspects", 
+"Different scores assess different aspects of the ", 
+15, 
+5
+)
+```
+
+
+### Correlation between geodesic distances
+The accuracy of cell ordering was assessed by first calculating the geodesic distances $d(c_i, c_j)$ between all cells in both the gold standard and the prediction. This geodesic distance is calculated by finding the shortest path between two cells through the milestone network, while taking into account the edge lengths as returned by most methods. To calculate this for every pair of cells, we first calculated the shortest path lengths $d(m_a, m_b)$ between all milestones using Dijkstra's algorithm, as implemented in the R *igraph* package. We also calculated $d(m_a, c_i)$ for every cell to its neighbouring milestones by calculating the earth's movers distance using the shortlist method [@gottschlich_shortlistmethodfast_2014], as implemented in the R *transport* package. Then we again used Dijkstra's algorithm to calculate the shortest path lengths between every pair of cells which minimises:
+
+
+$$
+d(c_i, c_j) = min_{a \in A, b \in B} d(m_a, c_i) + d(m_a, m_b) + d(m_b, c_j)
+$$
+
+
+where A and B contain all milestones adjacent to respectively $c_i$ and $c_j$.
+The final score was then calculated the Spearman's rank correlation between all $d(c_i, c_j)$ in gold standard and prediction.
+
+
+In some cases, methods are unable to place some cells on a trajectory, mainly because they classify these cells as noisy. In these cases, we add these cells to a new milestone and put this milestone at a distance of 5 times the maximal distance between two milestones within the network.
+
+
+### Random forest prediction error
+
+
+Although the correlation between geodesic distances directly assesses the position of the cells in the trajectory, a bad correlation does not directly imply that similar cells were not grouped together by the method, as illustrated in `r ref("sfig", "score_aspects", c("b", "c"))`. Indeed, certain methods will inevitably reach an incorrect ordering because they cannot handle the correct trajectory type, but these methods could still correctly place similar cells next to each other. We therefore also included a metric which looks at the local neighbourhood of each cell, and assesses whether this neighbourhood can accurately predict the position of this cell in the gold standard. We used a Random Forest regression, implemented in the ranger package [@wright_rangerfastimplementation_2017] to separately predict milestone percentages of every cell in the gold standard, using the milestone percentages of these cells in the prediction as features. We then used the out-of-bag mean-squared error on these percentages to score each method's capability of predicting the correct neighbourhood of each cell.
+
+
+### Edge flip score
+
+
+As a third independent score, we assessed the similarity between the milestone network topology. We first simplified each network, by merging consecutive linear edges into one edge, by adding new milestones within self loops such that A->A would be converted A->B->C->D, by adding an intermediate node to linear networks. Because we are interested , the network was made undirected. Next, we define the edge flip score as the minimal number of edges which should be added or removed to convert one network into the other, divided by the total number of edges in both networks. This problem is equivalent to the maximum common edge subgraph problem, a known NP-hard problem with no suitable [@bahiense_maximumcommonedge_2012]. We implemented a branch&bound approach for this problem, by first enumerating all possible edge additions and removals with the minimal number of edges (the edge difference between the two networks) and if none of the new networks was isomorphic, try out all solutions with an additional two edge changes. To further limit the search space, we make sure the degree distributions between the two networks are similar, before assessing whether the two networks are isomorphic using the BLISS algorithm [@junttila_engineeringefficientcanonical_2007], as implemented in the R *igraph* package.
+
+
+```{r}
+add_sfig({
+readRDS(figure_file("edge_flip_comparison.rds", experiment_id="score_rules/edge_flip"))
+}, 
+"edge_flip_comparison", 
+"Edge flip score values for common trajectory topologies", 
+15, 
+5
+)
+```
 
 
 # Acknowledgements
