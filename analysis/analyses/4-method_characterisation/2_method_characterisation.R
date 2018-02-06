@@ -293,3 +293,12 @@ methods %>%
   group_by(trajectory_type) %>%
   count()
 
+
+
+
+##  ............................................................................
+##  Method output diversity                                                 ####
+method_output_network <- tibble(
+
+)
+methods_evaluated$output_split
