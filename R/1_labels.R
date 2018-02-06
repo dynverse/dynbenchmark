@@ -5,6 +5,7 @@ labels <- tibble::tribble(
   "directed_acyclic_graph", "Directed acyclic graph", "DAG",
   "ngenes", "Number of genes", "# genes",
   "ncells", "Number of cells", "# cells",
+  "n_methods", "Number of methods", "# methods",
   "silver", "Silver standard", "Silver",
   "gold", "Gold standard", "Gold",
   "gse", "Source(s)", "Source(s)",
