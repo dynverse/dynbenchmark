@@ -76,7 +76,7 @@ tasks <- read_rds(derived_file("tasks.rds")) %>%
 #   task_fold = rep(1, nrow(tasks)),
 #   out_dir = derived_file("suite/"),
 #   remote_dir = paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/"),
-#   methods = methods %>% filter(!short_name %in% c("ouija", "ouijaf", "pseudogp", "GPfates", "topslam")), # these methods did not finish
+#   methods = methods %>% filter(!short_name %in% c("ouija", "pseudogp", "GPfates", "topslam")), # these methods did not finish
 #   designs = designs,
 #   metrics = metrics,
 #   extra_metrics = extra_metrics,
