@@ -93,6 +93,7 @@ download_dataset_file <- function(filename, url, dataset_id = NULL) {
   loc
 }
 
+#' @importFrom dynnormaliser normalise_filter_counts
 #' @export
 datasetpreproc_normalise_filter_wrap_and_save <- function(
   counts,

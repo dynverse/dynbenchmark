@@ -140,7 +140,7 @@ walk(seq_along(paramsets), function(params_i) {
 
   experiment$counts %>% {log2(. + 1)} %>% apply(2, sd) %>% sort() %>% rev() %>% head(100) %>% names()
 
-  normalisation <- invoke(dynutils::normalise_filter_counts, params$normalisation, experiment$counts, verbose=TRUE)
+  normalisation <- invoke(dynnormaliser::normalise_filter_counts, params$normalisation, experiment$counts, verbose=TRUE)
   saveRDS(normalisation, normalisation_location(folder, params_i))
   TRUE
 })

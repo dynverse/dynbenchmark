@@ -205,7 +205,7 @@ qsub_lapply(qsub_config = qsub_config_single %>% list_modify(name = "normalisat"
     graphics.off()
     pdf(normalisation_plot_location(folder, params_i), width=12, height=12)
     dev.control('enable')
-    normalisation <- invoke(dynutils::normalise_filter_counts, params$normalisation, experiment$counts, verbose = TRUE)
+    normalisation <- invoke(dynnormaliser::normalise_filter_counts, params$normalisation, experiment$counts, verbose = TRUE)
     normalisation$uuids <- list(normalisation=uuid::UUIDgenerate()) %>% c(experiment$uuids)
     saveRDS(normalisation, normalisation_location(folder, params_i))
 
