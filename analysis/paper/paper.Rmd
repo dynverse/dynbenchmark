@@ -95,7 +95,7 @@ methods <- readRDS(derived_file("methods.rds", experiment_id="method_characteris
 ```
 
 
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods from literature, and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability and the presence of a programming interface `r ref("table", "methods")`. We characterized all methods in four different ways: possible trajectory topologies, implementation quality, prior information and the underlying algorithm (`r ref("fig", "method_characteristics")`).
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods, and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability and the presence of a programming interface (`r ref("table", "methods")`). We characterized all methods in four different ways: possible trajectory topologies, implementation quality, prior information and the underlying algorithm (`r ref("fig", "method_characteristics")`).
 
 
 `r ref("table", "methods", anchor=TRUE)` Overview of current trajectory inference methods, and whether they were included in this current evaluation study
@@ -243,13 +243,13 @@ readRDS(figure_file("trajectory_type_trees.rds", experiment_id="dataset_characte
 ## Trajectory inference methods
 
 
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods `r ref("table", "methods", anchor=TRUE)`, based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018; @gitter_singlecellpseudotimeoverviewalgorithms_2018] and by searching in literature for "trajectory inference" and "pseudotemporal ordering". We believe this to be the most complete list to data, but are welcome to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "methods")`).
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods (`r ref("table", "methods", anchor=TRUE)`), based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018; @gitter_singlecellpseudotimeoverviewalgorithms_2018] and by searching in literature for "trajectory inference" and "pseudotemporal ordering". We believe this to be the most complete list to data, but are welcome to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "methods")`).
 
 
-We wrapped each method (available at https://www.github.com/dynverse/dynmethods) and postprocessed its heterogenous output into a common probabilistic trajectory model. This model consists of two parts. The milestone network represents the overall network topology, and contains of edges between different milestones and the length of the edge between them. The milestone percentages contain for each cell its position between two or more milestones, and sums for each cell to one.
+We wrapped each method (available at https://www.github.com/dynverse/dynmethods) and postprocessed its heterogenous output into a common probabilistic trajectory model. This model consisted of two parts. The milestone network represents the overall network topology, and contains of edges between different milestones and the length of the edge between them. The milestone percentages contain for each cell its position between two or more milestones, and sums for each cell to one.
 
 
-Depending on the output of a method, we used different common strategies to convert the output to our common model (in some cases combined with a special conversion denoted by a *):
+Depending on the output of a method, we used different common strategies to convert the output to our common model (in some cases combined with a special conversion denoted by a \*):
 
 
 ```{r}
@@ -275,6 +275,8 @@ Special conversions were necessary for certain methods:
 * SLICER: Although this method returns a branch network and a global pseudotime, it was not clear to us how to assign cells to individual branches in the network. We therefore used the cell graph provided by the method to calculate the shortest paths between each branch, and then projected other cells onto this backbone graph structure, creating a local pseudotime for every cell within its branch. The output was then further processed as above.
 * SLICE: As discussed in the vignette of SLICE, we ran principal curves one by one for every edge detected by SLICE. This local pseudotime was then processed as above.
 * MFA: We used the branch assignment as state probabilities, which together with the global pseudotime were processed as described above.
+
+
 ## Method quality control
 
 
