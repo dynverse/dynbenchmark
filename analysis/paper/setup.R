@@ -31,11 +31,11 @@ anchor <- function(ref_type, ref_id) {
   pritt("<a name='{ref_type}_{ref_id}'></a>")
 }
 create_names <- list(
-  sfig = function(i) pritt("Supplementary Figure {i}"),
-  fig = function(i) pritt("Figure {i}"),
-  snote = function(i) pritt("Supplementary Note {i}"),
-  table = function(i) pritt("Table {i}"),
-  stable = function(i) pritt("Supplementary Table {i}")
+  sfig = function(i) pritt("Supplementary Figure {glue::collapse(i, ',')}"),
+  fig = function(i) pritt("Figure {glue::collapse(i, ',')}"),
+  snote = function(i) pritt("Supplementary Note {glue::collapse(i, ',')}"),
+  table = function(i) pritt("Table {glue::collapse(i, ',')}"),
+  stable = function(i) pritt("Supplementary Table {glue::collapse(i, ',')}")
 )
 sfigs <- tibble(ref_id = character(), fig = list(), caption = character(), width=numeric(), height=numeric())
 add_sfig <- function(fig, ref_id, caption, width=15, height=10) {
