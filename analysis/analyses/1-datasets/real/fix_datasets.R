@@ -11,7 +11,7 @@ for (i in seq_along(dataset_ids)) {
   # dataset$trajectory_type <- dynutils::classify_milestone_network(dataset$milestone_network)$network_type
   # dataset$geodesic_dist <- dynutils::compute_emlike_dist(dataset)
 
-  dataset$prior_information <- dynutils::generate_prior_information(dataset$milestone_ids, dataset$milestone_network, dataset$progressions, dataset$milestone_percentages, dataset$counts, dataset$feature_info, dataset$cell_info)
+  dataset$prior_information <- dynnormaliser::generate_prior_information(dataset$milestone_ids, dataset$milestone_network, dataset$progressions, dataset$milestone_percentages, dataset$counts, dataset$feature_info, dataset$cell_info)
 
   write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
 }
