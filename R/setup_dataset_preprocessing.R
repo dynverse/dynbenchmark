@@ -93,7 +93,7 @@ download_dataset_file <- function(filename, url, dataset_id = NULL) {
   loc
 }
 
-#' @importFrom dynnormaliser normalise_filter_counts
+#' @importFrom dynnormaliser normalise_filter_counts generate_prior_information
 #' @export
 datasetpreproc_normalise_filter_wrap_and_save <- function(
   counts,
@@ -143,7 +143,7 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     normalisation_info = normalisation_info
   )
 
-  dataset$prior_information <- dynutils::generate_prior_information(
+  dataset$prior_information <- dynnormaliser::generate_prior_information(
     milestone_ids,
     milestone_network,
     dataset$progressions,
