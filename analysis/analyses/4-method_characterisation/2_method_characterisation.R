@@ -106,8 +106,10 @@ publication_cumulative_text <- method_publication_data %>%
 
 
 n_methods_over_time <- publication_cumulative_by_type_interpolated %>%
+  mutate(publication_type = c(PubDate="peer_reviewed", Preprint = "preprint")[publication_type]) %>%
   ggplot() +
     geom_area(aes(publication_date, n_methods_cumulative, fill=publication_type), position="identity") +
+    scale_fill_manual("", labels=label_long, values=c(peer_reviewed="#334466", preprint="#445588")) +
     geom_text(
       aes(publication_date + 1, n_methods_cumulative - 0.5, label=name, group=publication_type),
       data = publication_cumulative_text,
@@ -117,7 +119,9 @@ n_methods_over_time <- publication_cumulative_by_type_interpolated %>%
       fontface = "bold",
       size=3
     ) +
-    theme(legend.position = c(0.05, 0.95), legend.background = element_rect(color = "black", fill = "white", size = 0.5, linetype = "solid"))
+    theme(legend.position = c(0.05, 0.95)) +
+  scale_y_continuous(label_long("n_methods"), expand=c(0, 0)) +
+  scale_x_date(label_long("publication_date"), expand=c(0.05, 0.05))
 n_methods_over_time
 # ggsave(figure_file("n_methods_over_time.png"), n_methods_over_time, width = 15, height = 8)
 saveRDS(n_methods_over_time, figure_file("n_methods_over_time.rds"))
@@ -178,8 +182,10 @@ trajectory_components_over_time <- trajectory_components_gathered %>%
   geom_area(aes(date, n_methods), stat="identity") +
   geom_area(aes(date, n_methods_oi, fill=trajectory_type), stat="identity") +
   scale_fill_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
-  facet_grid(.~trajectory_type) +
-  theme(legend.position = "none")
+  facet_grid(.~trajectory_type, labeller = label_facet()) +
+  theme(legend.position = "none") +
+  scale_x_date(label_long("publication_date")) +
+  scale_y_continuous(label_long("n_methods"))
 
 trajectory_components_over_time
 
@@ -217,7 +223,7 @@ methods_table %>%
 
 ##  ............................................................................
 ##  Small method timeline                                                   ####
-method_small_history <- methods %>%
+method_small_history_data <- methods %>%
   filter(is_ti) %>%
   mutate(
     maximal_trajectory_type = ifelse(is.na(maximal_trajectory_type), "unknown", as.character(maximal_trajectory_type)),
@@ -226,13 +232,14 @@ method_small_history <- methods %>%
     size = ifelse(evaluated, 3.5, 3.5)
   ) %>%
   mutate() %>%
-  arrange(-y) %>%
+  arrange(-y)
+method_small_history <- method_small_history_data %>%
   ggplot(aes(date, y)) +
   ggrepel::geom_label_repel(aes(color=maximal_trajectory_type, label=name, fontface=fontface, size=size), direction="y", max.iter=10000, ylim=c(0, NA), force=10, min.segment.length = 0) +
   scale_color_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
   scale_fill_manual(values=setNames(trajectory_types$background_color, trajectory_types$id)) +
   scale_alpha_manual(values=c(`TRUE`=1, `FALSE`=0.6)) +
-  scale_x_date(label_long("publishing_date"), limits=c(as.Date("2014-01-01"), as.Date("2018-01-01")), date_breaks="1 year", date_labels="%Y") +
+  scale_x_date(label_long("publishing_date"), limits=c(as.Date("2014-01-01"), as.Date("2018-04-01")), date_breaks="1 year", date_labels="%Y") +
   scale_y_continuous(NULL, breaks=NULL, limits=c(0, 1), expand=c(0, 0)) +
   scale_size_identity() +
   theme(legend.position="none")
