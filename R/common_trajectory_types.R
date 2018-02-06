@@ -1,13 +1,24 @@
+trajectory_type_directed <- tribble(
+  ~name,
+  "directed_linear",
+  "directed_cycle",
+  "bifurcation",
+  "multifurcation",
+  "rooted_tree",
+  "directed_acyclic_graph",
+  "directed_graph"
+)
+
 trajectory_type_undirected_to_directed<- c(
-  "undirected_linear"="directed_linear",
-  "simple_fork"="bifurcation",
-  "complex_fork"="multifurcation",
-  "unrooted_binary_tree"="rooted_binary_tree",
-  "unrooted_tree"="rooted_tree",
-  "undirected_cycle"="directed_cycle",
-  "undirected_graph"="directed_acyclic_graph",
-  "disconnected_undirected_graph"="disconnected_directed_graph",
-  "unknown"="unknown"
+  "undirected_linear" = "directed_linear",
+  "simple_fork" = "bifurcation",
+  "complex_fork" = "multifurcation",
+  "unrooted_binary_tree" = "rooted_binary_tree",
+  "unrooted_tree" = "rooted_tree",
+  "undirected_cycle" = "directed_cycle",
+  "undirected_graph" = "directed_acyclic_graph",
+  "disconnected_undirected_graph" = "disconnected_directed_graph",
+  "unknown" = "unknown"
 )
 # undirected
 trajectory_type_edges_undirected <- tribble(
