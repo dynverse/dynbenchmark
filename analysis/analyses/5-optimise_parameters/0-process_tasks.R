@@ -21,6 +21,11 @@ tasks <- bind_rows(
   real_tasks %>% mutate(task_group = "real")
 )
 
+tasks <- tasks %>%
+  rowwise() %>%
+  mutate(milenet_spr = milestone_percentages %>% reshape2::acast(cell_id ~ milestone_id, value.var = "percentage", fill = 0) %>% list()) %>%
+  ungroup()
+
 selected_colnames <- Reduce("intersect", list(colnames(toy_tasks), colnames(synthetic_tasks), colnames(real_tasks)))
 tasks <- tasks %>% select(one_of(c("task_group", selected_colnames)))
 write_rds(tasks, derived_file("tasks.rds"))
