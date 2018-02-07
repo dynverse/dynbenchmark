@@ -2,7 +2,7 @@ library(tidyverse)
 library(googlesheets)
 library(dynalysis)
 
-experiment("method_characteristics")
+experiment("4-method_characterisation")
 analysis_folder <- "analysis/analyses/4-method_characterisation"
 
 checks <- readRDS(derived_file("checks.rds"))
