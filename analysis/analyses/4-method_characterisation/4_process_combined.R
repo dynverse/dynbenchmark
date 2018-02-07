@@ -1,0 +1,23 @@
+library(tidyverse)
+library(dynalysis)
+
+experiment("4-method_characterisation")
+
+methods <- read_rds(derived_file("methods.rds"))
+
+# combine with qc scores
+method_qc_scores <- readRDS(derived_file("method_qc_scores.rds"))
+
+# merge qc scores with methods tibble
+methods <- methods %>%
+  select(-matches("qc_score")) %>%
+  left_join(method_qc_scores, c("name"="method_id"))
+
+methods <- methods %>%
+  mutate(evaluated = wrapper == "Done" & !is.na(wrapper))
+
+methods_evaluated <- methods %>%
+  filter(evaluated)
+
+write_rds(methods, derived_file("methods.rds"))
+write_rds(methods_evaluated, derived_file("methods_evaluated.rds"))
