@@ -3,13 +3,16 @@ title: "Flip score characterisation"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-library(tidyverse)
-library(dynmethods)
-library(dyneval)
-library(dynalysis)
 
-experiment("score_rules/edge_flip")
+```{r setup}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+library(dynalysis)
+library(tidyverse)
+library(dyneval)
+```
+
+```{r}
+experiment("3-score_rules/4-edge_flip")
 
 knitr::opts_chunk$set(echo = TRUE)
 ```
