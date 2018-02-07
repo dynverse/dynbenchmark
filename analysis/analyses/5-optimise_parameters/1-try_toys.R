@@ -41,35 +41,9 @@ benchmark_suite_submit(
 )
 
 outputs <- benchmark_suite_retrieve(derived_file("suite/"))
-#
-#
-# # process output
-# outputs2 <- outputs %>%
-#   rowwise() %>%
-#   mutate(
-#     memory = ifelse(!is.null(qacct), qacct$maxvmem, NA)
-#   ) %>%
-#   ungroup()
-#
-# tmp <- outputs2 %>%
-#   rowwise() %>%
-#   mutate(
-#     qsub_error = ifelse(qsub_error != "all parameter settings errored", qsub_error, individual_scores$error[[1]]$message),
-#     qsub_len = str_length(qsub_error),
-#     qsub_error = str_sub(qsub_error, qsub_len-600, qsub_len)
-#   ) %>%
-#   ungroup() %>%
-#   select(method_name, qsub_error, which_errored)
-# for (i in seq_len(nrow(tmp))) {
-#   cat("METHOD ", tmp$method_name[[i]], " ERRORED BECAUSE OF: \n", sep = "")
-#   cat(tmp$qsub_error[[i]], "\n\n", sep = "")
-# }
-#
-# eval_ind <-
-#   bind_rows(succeeded$individual_scores) %>%
-#   rowwise() %>%
-#   mutate(error_message = ifelse(is.null(error), "", error$message)) %>%
-#   ungroup()
-#
-# eval_ind$error_message
 
+outputs %>%
+  select(method_name, error_message) %>%
+  group_by(method_name, error_message) %>%
+  summarise(n=n()) %>%
+  filter(error_message != "")
