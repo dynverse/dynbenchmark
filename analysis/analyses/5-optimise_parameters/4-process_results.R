@@ -2,9 +2,9 @@ library(dynalysis)
 library(tidyverse)
 library(dynplot)
 
-experiment("5-optimise_parameters/13-evaluate_with_real_datasets")
+experiment("5-optimise_parameters/4-process_results")
 
-evals <- read_rds(derived_file("eval_outputs.rds"))
+evals <- read_rds(derived_file("eval_outputs.rds", "5-optimise_parameters/3-evaluate_parameters"))
 list2env(evals, environment())
 
 # get ordering of methods

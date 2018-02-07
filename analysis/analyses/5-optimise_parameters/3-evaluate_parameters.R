@@ -2,12 +2,12 @@ library(dynalysis)
 library(tidyverse)
 library(dynplot)
 
-experiment("5-optimise_parameters/13-evaluate_with_real_datasets")
+experiment("5-optimise_parameters/3-evaluate_parameters")
 
 # settings
 methods <- get_descriptions()
-metrics <- c("correlation")
-extra_metrics <- c("rf_mse", "edge_flip")
+metrics <- c("correlation", "rf_mse", "edge_flip")
+extra_metrics <- c()
 eval_timeout <- 60 * 60
 optim_timeout <- 7 * 24 * 60 * 60
 num_repeats <- 4
