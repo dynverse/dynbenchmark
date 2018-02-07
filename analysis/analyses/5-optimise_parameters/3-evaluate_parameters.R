@@ -13,6 +13,12 @@ optim_timeout <- 7 * 24 * 60 * 60
 num_repeats <- 4
 
 
+
+# filter tasks, for now
+# %>%
+#   mutate(nrow = map_int(expression, nrow), ncol = map_int(expression, ncol))
+# real_tasks <- real_tasks %>% filter(nrow < 2000) %>% mutate(trajectory_type = unlist(trajectory_type))
+
 ## PROCESS PARAMETER
 # # extract the best parameters # almost, needs to be data frames
 # best_parms <- read_rds(result_file("best_params.rds", "5-optimise_parameters/7-train_parameters_with_synthetic_datasets")) %>%
@@ -97,14 +103,13 @@ outputs <- benchmark_suite_retrieve(derived_file("suite/"))
 outputs2 <- outputs %>%
   rowwise() %>%
   mutate(
-    any_errored = any(which_errored),
     memory = ifelse(!is.null(qacct), qacct$maxvmem, NA)
   ) %>%
   ungroup()
 
 # select only the runs that succeeded
 succeeded <- outputs2 %>%
-  filter(!any_errored) %>%
+  filter(!which_errored) %>%
   group_by(method_name) %>%
   filter(n() == num_repeats) %>%
   ungroup()
