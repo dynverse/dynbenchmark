@@ -5,8 +5,8 @@ library(tidyverse)
 library(tidygraph)
 library(ggraph)
 
-experiment("dataset_characterisation/synthetic")
-tasks <- read_rds(derived_file("tasks.rds", "dataset_characterisation"))
+experiment("2-dataset_characterisation/3-synthetic")
+tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
 
 
 ##  ............................................................................

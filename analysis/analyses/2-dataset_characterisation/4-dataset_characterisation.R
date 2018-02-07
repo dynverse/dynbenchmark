@@ -4,10 +4,9 @@ library(googlesheets)
 library(dynalysis)
 
 
-experiment("dataset_characterisation")
+experiment("2-dataset_characterisation")
 
 tasks <- readRDS(derived_file("tasks.rds"))
-trajectory_types <- readRDS(derived_file("trajectory_types.rds"))
 tasks_real <- tasks %>% filter(category == "real")
 
 technology_colors <- unique(tasks_real$technology) %>% {setNames(RColorBrewer::brewer.pal(length(.), "Set1"), .)}

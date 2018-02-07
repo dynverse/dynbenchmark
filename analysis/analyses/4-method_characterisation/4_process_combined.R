@@ -1,7 +1,7 @@
 library(tidyverse)
 library(dynalysis)
 
-experiment("method_characteristics")
+experiment("4-method_characterisation")
 
 methods <- read_rds(derived_file("methods.rds"))
 

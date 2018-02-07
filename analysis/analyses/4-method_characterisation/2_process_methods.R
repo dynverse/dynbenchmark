@@ -3,7 +3,7 @@ library(tidyverse)
 library(googlesheets)
 library(dynalysis)
 
-experiment("method_characteristics")
+experiment("4-method_characterisation")
 
 # Downloading -----------------------
 # # If it's your first time running this script, run this:
@@ -15,12 +15,6 @@ methods <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
 # Dates ------------------------------
 methods$date <- methods$Preprint
 methods$date[is.na(methods$date)] <- methods$PubDate[is.na(methods$date)]
-
-# Num citations ---------------------------------------
-# Don't run this in parallel ─ you can't rush this
-# methods$ncitations <- pbapply::pbsapply(methods$GScholarClusterID, dynutils::google_scholar_num_citations)
-library(rcrossref)
-methods$ncitations <- pbapply::pbsapply(cl=4, methods$DOI, cr_citation_count)
 
 # Trajectory components --------------------------
 # split maximal trajectory types
