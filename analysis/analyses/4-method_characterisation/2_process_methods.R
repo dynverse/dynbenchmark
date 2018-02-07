@@ -52,11 +52,24 @@ methods$conversion_special <- map_lgl(methods$conversion_split, ~"special" %in% 
 ## Method outputs --------------
 methods$output_split <- methods$output %>% str_split("[ ]?,[ ]?")
 
-
 # add extra reason for date cutoff
 date_cutoff <- as.Date("2017-05-01")
 date_filter <- methods$date > date_cutoff
 methods$non_inclusion_reasons_split[date_filter] <- map(methods$non_inclusion_reasons_split[date_filter], c, "date") %>% map(unique)
+
+## Infer whether the structure is fixed based on other columns -------------
+structure_fix <- function(maximal_trajectory_type, n_branches, n_end_states, ...) {
+  if (any(is.na(c(maximal_trajectory_type, n_branches, n_end_states)))) {
+    NA
+  } else if(maximal_trajectory_type == "undirected_linear") {
+    "algorithm"
+  } else if (n_branches == "required" || n_branches == "required_default" || n_end_states == "required" || n_end_states == "required_default") {
+    "parameter"
+  } else {
+    "free"
+  }
+}
+methods$fixes_structure <- pmap_chr(methods, structure_fix)
 
 # Saving -------------------------
 write_rds(methods, derived_file("methods.rds"))

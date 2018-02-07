@@ -50,6 +50,9 @@ source("setup.R")
 Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Since 2014, more than 50 trajectory inference methods have been developed, each with its own set of methodological characteristics. This makes a direct comparison between trajectory inference methods often difficult, and as a result a comprehensive assessment of the performance and robustness of each method is still lacking. We developed a common data structure for trajectory inference methods in order to make their results comparable to each other and to a gold standard. Using this framework, we compare the results from a total of 22 trajectory inference methods, on a large collection of real datasets and realistic synthetic datasets. We employ several metrics, including accuracy of the inferred ordering, correctness of the network topology, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at https://www.github.com/dynverse.
 
 
+This is the first overview about ~~deep reinforcement learning~~ trajectory inference publicly available online. It is comprehensive. Comments and criticisms are welcome.
+
+
 # Introduction
 
 
@@ -58,8 +61,8 @@ Single-cell -omics technologies now make it possible to more accurately model bi
 
 ```{r}
 add_sfig({
-n_methods_over_time <- readRDS(figure_file("n_methods_over_time.rds", experiment_id="method_characteristics"))
-trajectory_components_over_time <- readRDS(figure_file("trajectory_components_over_time.rds", experiment_id="method_characteristics"))
+n_methods_over_time <- read_rds(figure_file("n_methods_over_time.rds", experiment_id="4-method_characterisation"))
+trajectory_components_over_time <- read_rds(figure_file("trajectory_components_over_time.rds", experiment_id="4-method_characterisation"))
 
 
 cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over_time), nrow=2, rel_heights = c(0.7, 0.3), labels="auto")
@@ -74,11 +77,22 @@ cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over
 
 
 <!-- history of Ti, different methods -->
-Dozens of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially, most trajectory inference fixed the trajectory topology to a linear or bifurcating topology, by either algorithmic limitations or through user parameters, and focussed on correctly ordering the cells along this fixed topology. However, several recent methods now infer both the ordering and the topology at the same time, although certain structural limitations are still imposed(`r ref("sfig", "methods_over_time", "b")`). Methods which do not impose limitations on the topology are now being developed [@welch_slicer:_2016; @wolf_graph_2017], and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes happening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
+```{r}
+fixed_linear <-methods$name[which(methods$fixes_structure != 'free' & methods$maximal_trajectory_type == 'undirected_linear')]
+fixed_bifurcating <-methods$name[which(methods$fixes_structure != 'free' & methods$maximal_trajectory_type == 'simple_fork')]
+fixed_other <-methods$name[which(methods$fixes_structure != 'free' & methods$maximal_trajectory_type != 'undirected_linear'& methods$maximal_trajectory_type != 'simple_fork')]
+fixed_algorithm <-methods$name[which(methods$fixes_structure == 'algorithm')]
+fixed_parameters <-methods$name[which(methods$fixes_structure == 'parameter')]
+```
+
+
+
+
+Dozens of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially, most trajectory inference methods fixed the trajectory topology to a linear `r cite_methods(fixed_linear)`, bifurcating `r cite_methods(fixed_bifurcating)` or other `r cite_methods(fixed_other)` topology, by either algorithmic limitations `r cite_methods(fixed_algorithm)` or through user parameters `r cite_methods(fixed_parameters)`. The focus of these methods was therefore mainly to correctly ordering the cells along this fixed topology. However, several recent methods now infer both the ordering and the topology at the same time, although some topological limitations are still imposed (`r ref("sfig", "methods_over_time", "b")`). Methods which do not impose limitations on the topology at all are now being developed [@welch_slicer:_2016; @wolf_graph_2017], and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes happening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
 
 
 <!-- Common framework of TI, different components, naturally progressing towards the need for an evaluation -->
-Although trajectory inference methods use a variety of algorithms and subcomponents to reach a final ordering, most consist of the following three steps: (i) preprocessing (normalization, filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction, clustering or graph building and (iii) ordering the cells along the simplified representation [@cannoodt_computational_2016]. Depending on the way the cells are ordered, some prior information about the dynamic process can be optionally used or required by the method, which can both bias the trajectory to current knowledge but also guide the method towards choosing the right trajectory among many others. Furthermore, with the ongoing strong scalability in single-cell -omics technologies, it becomes more and more important that analysis methods become scalable and user friendly .
+Although trajectory inference methods use a variety of algorithms and subcomponents to reach a final ordering, most consist of the following three steps: (i) preprocessing (normalization, filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction, clustering or graph building and (iii) ordering the cells along the simplified representation [@cannoodt_computational_2016]. Depending on the way the cells are ordered, some prior information about the dynamic process can be optionally used or required, which can both bias the trajectory to current knowledge but also guide the method towards choosing the right trajectory among many others. Furthermore, with the ongoing strong scalability in single-cell -omics technologies, it becomes more and more important that analysis methods become both scalable [@aibar_scenicsinglecellregulatory_2017] and user friendly.
 
 
 <!-- Common framework of TI, different components, naturally progressing towards the need for an evaluation -->
@@ -89,23 +103,16 @@ Given this plethora of available trajectory inference methods, it is important t
 ## Method quality control
 
 
-```{r}
-# Load method characteristics
-methods <- readRDS(derived_file("methods.rds", experiment_id="method_characteristics"))
-methods_evaluated <- readRDS(derived_file("methods_evaluated.rds", experiment_id="method_characteristics"))
-```
-
-
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods, and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability and the presence of a programming interface (`r ref("table", "methods")`). We characterized all methods in four different ways: possible trajectory topologies, implementation quality, prior information and the underlying algorithm (`r ref("fig", "method_characteristics")`).
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods, and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability and the presence of a programming interface (`r ref("table", "methods")`). We characterized all methods in four different ways: possible trajectory topologies, implementation quality, prior information and the underlying algorithm (`r ref("fig", "4-method_characterisation")`).
 
 
 `r ref("table", "methods", anchor=TRUE)` Overview of current trajectory inference methods, and whether they were included in this current evaluation study
 ```{r}
-read_rds(figure_file("methods_table.rds", "method_characteristics"))
+read_rds(figure_file("methods_table.rds", "4-method_characterisation"))
 ```
 
 
-At the level of trajectory topologies, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "method_characteristics", "a")`). However, only a handful, mostly recent, methods can currently handle more complex graph topologies which can include loops (`r ref("sfig", "methods_over_time", "b")`), one of which is included in the current evaluation (SLICER).
+At the level of trajectory topologies, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "4-method_characterisation", "a")`). However, only a handful, mostly recent, methods can currently handle more complex graph topologies which can include loops (`r ref("sfig", "methods_over_time", "b")`), one of which is included in the current evaluation (SLICER).
 
 
 While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or for which purpose(s) they are important (user friendliness, developer friendliness or good science). These categorisations can help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
@@ -113,21 +120,21 @@ While not directly related to the accuracy of the inferred trajectory, the quali
 
 ```{r}
 add_stable(
-read_rds(figure_file("qc_checks.rds","method_characteristics")), 
+read_rds(figure_file("qc_checks.rds","4-method_characterisation")), 
 "qc_checks", 
 ""
 )
 ```
 
 
-`r anchor("fig", "method_characteristics")`
-![](`r figure_file("method_characteristics.svg", experiment_id="method_characteristics")`)
-`r ref("fig", "method_characteristics", anchor=TRUE)` First characterization of each method.
+`r anchor("fig", "4-method_characterisation")`
+![](`r figure_file("method_characteristics.svg", experiment_id="4-method_characterisation")`)
+`r ref("fig", "4-method_characterisation", anchor=TRUE)` First characterization of each method.
 
 
 ```{r}
 add_sfig({
-readRDS(figure_file("method_qc_check.rds", experiment_id="method_characteristics"))
+read_rds(figure_file("method_qc_check.rds", experiment_id="4-method_characterisation"))
 }, 
 "method_qc_check", 
 "Caption", 
@@ -137,12 +144,12 @@ readRDS(figure_file("method_qc_check.rds", experiment_id="method_characteristics
 ```
 
 
-Most methods fulfill most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "method_characteristics", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "method_characteristics", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "method_qc_check")` and `r ref("fig", "method_characteristics", "c")`), notwithstanding several studies pinpointing these as good practices [@wilson_best_2014; @artaza_top10metrics_2016].
+Most methods fulfill most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "4-method_characterisation", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "4-method_characterisation", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "method_qc_check")` and `r ref("fig", "4-method_characterisation", "c")`), notwithstanding several studies pinpointing these as good practices [@wilson_best_2014; @artaza_top10metrics_2016].
 
 
 ```{r}
 add_sfig({
-readRDS(figure_file("qc_over_time.rds", experiment_id="method_characteristics"))
+read_rds(figure_file("qc_over_time.rds", experiment_id="4-method_characterisation"))
 }, 
 "qc_over_time", 
 "Quality control scores and number of citations over time", 
@@ -157,7 +164,7 @@ The underlying algorithms can be divided into several modules, and these frequen
 
 ```{r}
 add_sfig({
-readRDS(figure_file("method_components.rds", experiment_id="method_characteristics"))
+read_rds(figure_file("method_components.rds", experiment_id="4-method_characterisation"))
 }, 
 "method_components", 
 "TI methods frequently share steps", 
@@ -175,7 +182,7 @@ readRDS(figure_file("method_components.rds", experiment_id="method_characteristi
 
 ```{r}
 add_stable(
-read_rds(figure_file("datasets.rds","dataset_characterisation")), 
+read_rds(figure_file("datasets.rds","2-dataset_characterisation")), 
 "datasets", 
 "Real datasets used in this study"
 )
@@ -187,9 +194,15 @@ read_rds(figure_file("datasets.rds","dataset_characterisation")),
 
 
 # Discussion
+
+
+Trajectory inference is unique among most other categories of single-cell analysis methods, such as clustering, normalisation and differential expression, because it models the data in a way that was almost impossible using bulk data. Indeed, it is for this category that most methods were developed among other single-cell analysis categories, both according to omictools.org [@henry_omictoolsinformativedirectory_2014] (https://omictools.com/single-cell-rna-seq-category) and the "awesome single cell software" list [@davis_awesomesinglecelllistsoftware_2018] created by Sean Davis. In this preprint, we summarise the initial version of our evaluation of trajectory inference methods, focussing on the quality control 
+
+
 Limitations of the model:
 
 
+```
 * Robrecht.Cannoodt @robrechtc 10:21
 en heterogene output van alle methode... true, maar sommigen hebben we wel wat moeten tweaken 😛
 en ik kan me output bedenken dat niet in ons model zou kunnen passen
@@ -216,6 +229,7 @@ Uhu in de discussie dan wss
 * Robrecht.Cannoodt @robrechtc 10:26
 tiens, een discussie die in de discussie zou plaats vinden, wat een goed idee 😮
 <tease>
+```
 
 
 # Methods
@@ -229,7 +243,7 @@ We classified all possible trajectory topologies into distinct trajectory types,
 
 ```{r}
 add_sfig({
-readRDS(figure_file("trajectory_type_trees.rds", experiment_id="dataset_characterisation/trajectory_types"))
+read_rds(figure_file("trajectory_type_trees.rds", experiment_id="2-dataset_characterisation/2-trajectory_types"))
 }, 
 "trajectory_type_tree", 
 "Different trajectory types can be classified in a directed acyclic graph, in which certain types are a generalisation of other trajectory types.", 
@@ -261,7 +275,7 @@ conversion <- function(conversion_oi) {
 
 * Methods returning a single pseudotime value: `r conversion("linear")`. A single edge between two milestones, its percentage proportional to the pseudotime.
 * Methods which assign each cell to a branch together with a pseudotime value and a branch network: `r conversion("branching_local")`. Similarly, the branch network is used as the milestone network, the percentages of a cell are proportional with its branch pseudotime.
-* Methods returning both a global pseudotime value and a probability for every end state: `r conversion("branching_global")`. We use a single start state and an add an edge to every end milestone each representing an end state. The global pseudotime then determines the distance from the begin milestone, the rest of the cell's position is calculated by distributing the residual percentage over the end states, proportionally to the end state probabilities.
+* Methods returning both a global pseudotime value and a probability for every end state: `r conversion("branching_global")`. We use a single start state and add an edge to every end milestone each representing an end state. The global pseudotime then determines the distance from the begin milestone, the rest of the cell's position is calculated by distributing the residual percentage over the end states, proportionally to the end state probabilities.
 * Methods returning a cluster assignment and a cluster network:  `r conversion("branching_cluster")`. The cluster network was used as milestone network, each cell received percentage 1 or 0 based on its cluster assignment.
 * Methods returning a cluster assignment, cluster network and dimensionality reduction: `r conversion("branching_local_projection")`. We projected each cell on the closest point on the edges between its own cluster and neighbouring clusters within the dimensionality reduction. This projection allowed us to give each cell a pseudotime within the edge, which was then converted into our model as described above, using the cluster network as milestone network.
 
@@ -269,8 +283,8 @@ conversion <- function(conversion_oi) {
 Special conversions were necessary for certain methods:
 
 
-* DPT: We projected the cells onto the cluster network, consisting of a central milestone (this cluster contains the cells which were assigned to the "unknown" branch) and three terminal milestones, each corresponding to 
-* Sincell: To constrain the number of milestones this method creates, we merged two cell clusters iteratively until the percentage of leaf nodes was below a certain cutoff, default at 25%. This was then processed 
+* DPT: We projected the cells onto the cluster network, consisting of a central milestone (this cluster contains the cells which were assigned to the "unknown" branch) and three terminal milestones, each corresponding to a tip point. This was then processed as described above.
+* Sincell: To constrain the number of milestones this method creates, we merged two cell clusters iteratively until the percentage of leaf nodes was below a certain cutoff, default at 25%.  This was then processed as described above.
 * SLICER: Although this method returns a branch network and a global pseudotime, it was not clear to us how to assign cells to individual branches in the network. We therefore used the cell graph provided by the method to calculate the shortest paths between each branch, and then projected other cells onto this backbone graph structure, creating a local pseudotime for every cell within its branch. The output was then further processed as above.
 * SLICE: As discussed in the vignette of SLICE, we ran principal curves one by one for every edge detected by SLICE. This local pseudotime was then processed as above.
 * MFA: We used the branch assignment as state probabilities, which together with the global pseudotime were processed as described above.
@@ -312,7 +326,7 @@ From these module networks we generated gene regulatory networks in two steps: g
 
 ```{r}
 add_sfig({
-readRDS(figure_file("modulenets.rds", experiment_id="dataset_characterisation/synthetic"))
+read_rds(figure_file("modulenets.rds", experiment_id="2-dataset_characterisation/3-synthetic"))
 }, 
 "modulenets", 
 "Module networks, milestone networks and the module dynamics for each of the different types of synthetic data", 
@@ -391,7 +405,7 @@ Similar to [@schaffter_genenetweaversilicobenchmark_2011], we sample the differe
 
 ```{r}
 add_stable(
-read_rds(figure_file("samplers.rds","dataset_characterisation/synthetic")), 
+read_rds(figure_file("samplers.rds","2-dataset_characterisation/3-synthetic")), 
 "samplers", 
 "Distributions from which each parameter in the thermodynamic model was sampled"
 )
@@ -422,7 +436,7 @@ We used three different metrics to assess the performance of each TI method. The
 
 ```{r}
 add_sfig({
-readRDS(figure_file("score_aspects.rds", experiment_id="score_rules/score_aspects"))
+read_rds(figure_file("score_aspects.rds", experiment_id="3-score_rules/5-score_aspects"))
 }, 
 "score_aspects", 
 "Different scores assess different aspects of the ", 
@@ -462,7 +476,7 @@ As a third independent score, we assessed the similarity between the milestone n
 
 ```{r}
 add_sfig({
-readRDS(figure_file("edge_flip_comparison.rds", experiment_id="score_rules/edge_flip"))
+read_rds(figure_file("edge_flip_comparison.rds", experiment_id="3-score_rules/4-edge_flip"))
 }, 
 "edge_flip_comparison", 
 "Edge flip score values for common trajectory topologies", 

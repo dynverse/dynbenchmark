@@ -1,3 +1,4 @@
+# knitr options
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -7,9 +8,12 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = paste0(rprojroot::find_rstudio_root_file(), "/analysis/paper/.scratch/")
 )
+
+# load libraries
 library(dynalysis)
 library(tidyverse)
 library(cowplot)
+
 # refering to figures & supplementary figures
 refs <- tibble(ref_id = character(), name = character(), ref_type = character())
 ref <- function(ref_type, ref_id, suffix="", anchor=FALSE) {
@@ -55,4 +59,13 @@ add_stable <- function(table, ref_id, caption) {
     ref_id = ref_id,
     caption=caption
   )
+}
+
+# load data
+methods <- read_rds(derived_file("methods.rds", experiment_id="4-method_characterisation"))
+methods_evaluated <- read_rds(derived_file("methods_evaluated.rds", experiment_id="4-method_characterisation"))
+
+# citate
+cite_methods <- function(method_ids) {
+  methods %>% filter(name %in% !!method_ids) %>% glue::glue_data("@{bibtex}") %>% glue::collapse("; ") %>% glue::glue("[", ., "]")
 }
