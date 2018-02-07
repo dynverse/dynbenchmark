@@ -4,7 +4,7 @@
 \name{non_inclusion_reasons}
 \alias{non_inclusion_reasons}
 \title{Non inclusion reasons}
-\format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 9 rows and 3 columns.}
+\format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 10 rows and 3 columns.}
 \usage{
 non_inclusion_reasons
 }
