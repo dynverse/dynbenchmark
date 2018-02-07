@@ -11,7 +11,7 @@ library(dyneval)
 ```
 
 ```{r}
-experiment("score_rules")
+experiment("3-score_rules/3-rules")
 
 scores <- read_rds(result_file("scores.rds"))
 toys <- read_rds(derived_file("toys.rds"))

@@ -1,5 +1,7 @@
 library(tidyverse)
 
+experiment("3-score_rules/2-toy")
+
 source("scripts/wouter/toy/generation.R")
 source("scripts/wouter/toy/perturbation.R")
 
@@ -55,12 +57,12 @@ toys$toy <- map2(toys$toy, toys$toy_id, ~rename_toy(.x, .y))
 toyplots <- toys %>% group_by(toy_category) %>% filter(row_number()==1) %>%
   {split(., seq_len(nrow(.)))} %>% parallel::mclapply(function(row) dynplot::plot_strip_connections(row$gs[[1]], row$toy[[1]]), mc.cores = 8)
 
-write_rds(toys, "toys.rds")
+write_rds(toys, derived_file("toys.rds"))
 
-toys <- read_rds("toys.rds")
+toys <- read_rds(derived_file("toys.rds"))
 
 # get the scores when comparing the gs to toy
-metrics <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation", "isomorphic", "net_emd", "robbie_network_score", "ged")
+metrics <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation", "edge_flip", "rf_mse", "rf_rsq")
 compare_toy <- function(gs, toy, id=toy$id) {
   scores <- dyneval:::calculate_metrics(gs, toy, metrics=metrics)$summary
   scores %>% mutate(toy_id=id)
@@ -76,4 +78,4 @@ compare_gs_toy <- function(gs, toy) {
 
 scores <- toys %>% rowwise() %>% do(compare_gs_toy(.$gs, .$toy)) %>% select(-starts_with("time"))
 
-write_rds(scores, "scores.rds")
+write_rds(scores, derived_file("scores.rds"))

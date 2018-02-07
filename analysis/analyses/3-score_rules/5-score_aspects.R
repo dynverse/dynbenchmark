@@ -3,7 +3,7 @@ library(dynplot)
 library(tidyverse)
 library(dynalysis)
 
-experiment("score_rules/score_aspects")
+experiment("3-score_rules/5-score_aspects")
 
 wrap <- function(x) {
   wrap <- dynmethods::wrap_prediction_model(sort(unique(x$progressions$cell_id)), unique(c(x$milestone_network$from, x$milestone_network$to)), x$milestone_network, progressions=x$progressions)
