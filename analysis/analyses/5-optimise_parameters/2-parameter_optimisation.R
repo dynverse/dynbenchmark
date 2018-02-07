@@ -7,6 +7,12 @@ experiment("5-optimise_parameters/2-parameter_optimisation")
 # tasks
 tasks <- readRDS(derived_file("v6/tasks.rds", experiment_id = "datasets/synthetic"))
 
+
+# filter tasks, for now
+# %>%
+#   mutate(nrow = map_int(expression, nrow), ncol = map_int(expression, ncol))
+# real_tasks <- real_tasks %>% filter(nrow < 2000) %>% mutate(trajectory_type = unlist(trajectory_type))
+
 num_folds <- 4
 # tasks_info <- tasks$info %>% map_df(as_data_frame) %>% mutate(task_id = tasks$id)
 # platform_folds <- sample(unique(tasks_info$platform_name))
@@ -57,14 +63,13 @@ outputs <- benchmark_suite_retrieve(derived_file("suite/"))
 # outputs2 <- outputs %>%
 #   rowwise() %>%
 #   mutate(
-#     any_errored = any(unlist(which_errored)),
 #     memory = ifelse(!is.null(qacct), qacct$maxvmem, NA)
 #   ) %>%
 #   ungroup()
 #
 # # select only the runs that succeeded
 # succeeded <- outputs2 %>%
-#   filter(!any_errored) %>%
+#   filter(!which_errored) %>%
 #   group_by(method_name) %>%
 #   filter(n() == num_folds * num_repeats) %>%
 #   ungroup()
@@ -379,7 +384,7 @@ outputs <- benchmark_suite_retrieve(derived_file("suite/"))
 #
 #
 # # check errored methods
-# errored <- outputs2 %>% filter(any_errored)
+# errored <- outputs2 %>% filter(which_errored)
 # errored$method_name %>% unique
 #
 # err_spec <- errored %>% filter(method_name == "Mpath")
