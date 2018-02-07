@@ -15,7 +15,7 @@ library(dyneval)
 source("analysis/analyses/3-score_rules/generation.R")
 source("analysis/analyses/3-score_rules/perturbation.R")
 
-experiment("score_rules")
+experiment("3-score_rules/1-generate_toys")
 ```
 
 
@@ -108,7 +108,7 @@ compare_gs_toy <- function(gs, toy, gs_grouped) {
   )
 }
 
-metrics <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation", "isomorphic", "node_edit_score", "node_edge_edit_score", "mantel_pval", "ged")
+metrics <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation", "edge_flip", "rf_mse", "rf_rsq")
 
 library(PRISM)
 
@@ -120,9 +120,11 @@ qsub_run(
       compare_gs_toy(.$gs, .$toy, .$gs_grouped)
     })
   },
-  qsub_config = override_qsub_config(num_cores = 24),
-  qsub_environment = list2env(list(compare_toy, compare_gs_toy, toys)
-))
+  qsub_config = override_qsub_config(
+    num_cores = 24, 
+    execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500"
+  )
+)
 
 
 scores <- results %>% select(-starts_with("time"))
@@ -138,7 +140,7 @@ timings <- results %>%
   group_by(metric_group_id) %>% 
   summarise(time = mean(time))
 
-metric_groups <- c("mean_R_nx"="coranking", "auc_R_nx"="coranking", "Q_local"="coranking", "Q_global"="coranking", "correlation"="correlation", "isomorphic"="isomorphic", "robbie_network_score"="robbie_network_score", "mantel_pval"="mantel", "ged"="ged") %>%
+metric_groups <- c("mean_R_nx"="coranking", "auc_R_nx"="coranking", "Q_local"="coranking", "Q_global"="coranking", "correlation"="correlation", "edge_flip"="edge_flip", "rf_mse"="rf", "rf_msq"="rf") %>%
   enframe("metric_id", "metric_group_id")
 
 timings %>% 

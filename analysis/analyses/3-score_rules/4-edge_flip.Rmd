@@ -9,7 +9,7 @@ library(dynmethods)
 library(dyneval)
 library(dynalysis)
 
-experiment("score_rules/edge_flip")
+experiment("3-score_rules/4-edge_flip")
 
 knitr::opts_chunk$set(echo = TRUE)
 ```
