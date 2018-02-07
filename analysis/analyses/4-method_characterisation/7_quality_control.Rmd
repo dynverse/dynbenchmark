@@ -5,12 +5,15 @@ output:
     df_print: paged
 ---
 
-```{r message=F}
-library(tidyverse)
+```{r setup}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 library(dynalysis)
+library(tidyverse)
 library(cowplot)
+```
 
-experiment("method_characteristics")
+```{r message=F}
+experiment("4-method_characterisation")
 
 method_qc <- readRDS(derived_file("method_qc.rds"))
 methods_evaluated <- readRDS(derived_file("methods_evaluated.rds"))
@@ -67,7 +70,7 @@ g1 <- ggplot(methods_evaluated, aes(date, qc_score)) +
     labs(x = label_long("publication_date"), y = "QC score", title = "Code quality score over time")
 g1
 
-g2 <- ggplot(methods_evaluated %>% mutate(ncitations = ifelse(ncitations == 0, 0.5, ncitations)), aes(date, ncitations)) +
+g2 <- ggplot(methods_evaluated %>% mutate(Citations = ifelse(Citations == 0, 0.5, Citations)), aes(date, Citations)) +
     geom_smooth(span=2) +
     geom_point() +
     ggrepel::geom_label_repel(aes(label = name)) +
@@ -76,7 +79,7 @@ g2 <- ggplot(methods_evaluated %>% mutate(ncitations = ifelse(ncitations == 0, 0
     labs(x = "Time", y = "Citations", title = "Citations over time")
 g2
 
-g3 <- ggplot(methods_evaluated %>% mutate(ncitations = ifelse(ncitations == 0, 0.5, ncitations)), aes(ncitations, qc_score)) +
+g3 <- ggplot(methods_evaluated %>% mutate(Citations = ifelse(Citations == 0, 0.5, Citations)), aes(Citations, qc_score)) +
     geom_smooth(span=2) +
     geom_point() +
     ggrepel::geom_label_repel(aes(label = name)) +

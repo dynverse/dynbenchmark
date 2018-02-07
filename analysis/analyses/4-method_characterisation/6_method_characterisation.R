@@ -5,7 +5,7 @@ library(tidyverse)
 library(dynalysis)
 library(cowplot)
 
-experiment("method_characteristics")
+experiment("4-method_characterisation")
 
 methods_evaluated <- read_rds(derived_file("methods_evaluated.rds"))
 methods <- read_rds(derived_file("methods.rds"))
@@ -152,7 +152,6 @@ saveRDS(platforms, figure_file("platforms.rds"))
 
 ##  ............................................................................
 ##  Trajectory types over time                                              ####
-trajectory_types <- read_rds(derived_file("trajectory_types.rds", "dataset_characterisation"))
 undirected_trajectory_type_order <- trajectory_types %>% filter(directedness == "undirected") %>% pull(id) %>% keep(~.!="unknown")
 
 trajectory_components <- methods %>% filter(is_ti)

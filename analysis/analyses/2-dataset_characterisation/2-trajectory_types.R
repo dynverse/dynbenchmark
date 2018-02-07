@@ -3,7 +3,7 @@ library(tidygraph)
 library(ggraph)
 library(tidyverse)
 
-experiment("dataset_characterisation/trajectory_types")
+experiment("2-dataset_characterisation/2-trajectory_types")
 
 
 

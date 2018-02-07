@@ -3,7 +3,7 @@ library(cowplot)
 library(googlesheets)
 library(dynalysis)
 
-experiment("dataset_characterisation")
+experiment("2-dataset_characterisation")
 
 map_prism <- function (x, f) PRISM::qsub_lapply(x, f, qsub_environment = list2env(list()), qsub_config = PRISM::override_qsub_config(memory="4G"))
 map_local <- function(x, f) pbapply::pblapply(x, f, cl=1)

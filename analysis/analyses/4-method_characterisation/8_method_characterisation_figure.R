@@ -2,7 +2,7 @@ library(tidyverse)
 library(dynalysis)
 library(cowplot)
 
-experiment("method_characteristics")
+experiment("4-method_characterisation")
 
 
 #   ____________________________________________________________________________
@@ -199,7 +199,7 @@ saveRDS(method_characteristics, figure_file("method_characteristics.rds"))
 ##  Combining the figure                                                    ####
 
 method_characteristics <- read_rds(figure_file("method_characteristics.rds"))
-method_qc_ordering_plot <- read_rds(figure_file("method_qc_ordering_plot.rds"))
+method_qc_ordering_plot <- read_rds(figure_file("method_qc_ordering.rds"))
 
 figure <- plot_grid(
   method_characteristics,

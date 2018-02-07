@@ -2,7 +2,7 @@ library(tidyverse)
 library(googlesheets)
 library(dynalysis)
 
-experiment("method_characteristics")
+experiment("4-method_characterisation")
 
 
 ##  ............................................................................
