@@ -1,0 +1,41 @@
+---
+title: "Guide for manual trajectory inference"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(dynalysis)
+library(tidyverse)
+
+tasks_control <- read_rds(derived_file("tasks.rds", "1-datasets/control"))
+space <- tasks_control %>% filter(id == "control_bifurcating") %>% pull(space) %>% first()
+```
+
+Shown are individual cells within a single-cell RNA-seq dataset in 2D. Cells closer to each other have more similar expression profiles compared to cells farther apart.
+
+```{r cars}
+annotation <- tribble(
+  ~x1, ~x2, ~y1, ~y2, ~label,
+  0.5, 0.8, 0.8, 0.75, "",
+  0.5, 0.8, 0.75, 0.75, "Very similar cells",
+  0., 0.25, 0., 0.5, "",
+  0.5, 0.25, 0.8, 0.5, "Very different cells"
+)
+space %>% 
+  ggplot(aes(Comp1, Comp2)) +
+    geom_point() +
+    geom_segment(aes(x1, y1, xend=x2, yend=y2), data=annotation) +
+    geom_label(aes(x2, y2, label=label), data=annotation %>% filter(label != "")) +
+    geom_point(aes(x1, y1), color="red", data=annotation) +
+    ggraph::theme_graph()
+```
+
+In all datasets, cells were sampled while they were going through a cellular dynamic process, such as the cell cycle, differentiation, activation, ... However, some cells are earlier in this process, others are later.
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
