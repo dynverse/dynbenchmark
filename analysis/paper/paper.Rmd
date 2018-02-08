@@ -78,11 +78,11 @@ cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over
 
 <!-- history of Ti, different methods -->
 ```{r}
-fixed_linear <-methods$name[which(methods$fixes_structure != 'free' & methods$maximal_trajectory_type == 'undirected_linear')]
-fixed_bifurcating <-methods$name[which(methods$fixes_structure != 'free' & methods$maximal_trajectory_type == 'simple_fork')]
-fixed_other <-methods$name[which(methods$fixes_structure != 'free' & methods$maximal_trajectory_type != 'undirected_linear'& methods$maximal_trajectory_type != 'simple_fork')]
-fixed_algorithm <-methods$name[which(methods$fixes_structure == 'algorithm')]
-fixed_parameters <-methods$name[which(methods$fixes_structure == 'parameter')]
+fixed_linear <-methods$id[which(methods$fixes_structure != 'free' & methods$maximal_trajectory_type == 'undirected_linear')]
+fixed_bifurcating <-methods$id[which(methods$fixes_structure != 'free' & methods$maximal_trajectory_type == 'simple_fork')]
+fixed_other <-methods$id[which(methods$fixes_structure != 'free' & methods$maximal_trajectory_type != 'undirected_linear'& methods$maximal_trajectory_type != 'simple_fork')]
+fixed_algorithm <-methods$id[which(methods$fixes_structure == 'algorithm')]
+fixed_parameters <-methods$id[which(methods$fixes_structure == 'parameter')]
 ```
 
 
@@ -115,7 +115,7 @@ read_rds(figure_file("methods_table.rds", "4-method_characterisation"))
 At the level of trajectory topologies, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "4-method_characterisation", "a")`). However, only a handful, mostly recent, methods can currently handle more complex graph topologies which can include loops (`r ref("sfig", "methods_over_time", "b")`), one of which is included in the current evaluation (SLICER).
 
 
-While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or for which purpose(s) they are important (user friendliness, developer friendliness or good science). These categorisations can help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
+While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or which purpose(s) they serve (user friendliness, developer friendliness or good science). These categorisations can help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
 
 
 ```{r}
@@ -175,6 +175,9 @@ read_rds(figure_file("method_components.rds", experiment_id="4-method_characteri
 ## Evaluating the accuracy of the inferred trajectory
 
 
+We evaluated 
+
+
 `r anchor("fig", "evaluation_overview")`
 ![](`r figure_file("ti_evaluation_overview_v1.svg", experiment_id="evaluation_overview")`)
 `r ref("fig", "evaluation_overview")` Overview of the evaluation
@@ -194,15 +197,19 @@ read_rds(figure_file("datasets.rds","2-dataset_characterisation")),
 
 
 # Discussion
+<!-- Some intro -->
+Trajectory inference is unique among most other categories of single-cell analysis methods, such as clustering, normalisation and differential expression, because it models the data in a way that was almost impossible using bulk data. Indeed, it is for this category that most methods were developed among other single-cell analysis categories, both according to omictools.org [@henry_omictoolsinformativedirectory_2014] (https://omictools.com/single-cell-rna-seq-category) and the "awesome single cell software" list [@davis_awesomesinglecelllistsoftware_2018] created by Sean Davis. It is therefore critical that these methods, now reaching `r sum(methods$is_ti, na.rm=TRUE)`, are evaluated to guide the users in their choice. In this preprint, we summarise the initial version of our evaluation of these methods, focussing on the quality control and the accuracy of their model using their default parameters on real and synthetic data.
 
 
-Trajectory inference is unique among most other categories of single-cell analysis methods, such as clustering, normalisation and differential expression, because it models the data in a way that was almost impossible using bulk data. Indeed, it is for this category that most methods were developed among other single-cell analysis categories, both according to omictools.org [@henry_omictoolsinformativedirectory_2014] (https://omictools.com/single-cell-rna-seq-category) and the "awesome single cell software" list [@davis_awesomesinglecelllistsoftware_2018] created by Sean Davis. In this preprint, we summarise the initial version of our evaluation of trajectory inference methods, focussing on the quality control 
+<!-- Results  -->
 
 
+<!-- Our common output model, advantages & limitations -->
+We managed to wrap the output of all methods into one common format. This not only allowed us to compare different methods with a gold standard, but could also be useful for users of these tools because it allows the user to test multiple methods without manual conversion of input and output. Furthermore, it makes it possible to compare the output of different methods, which opens up possibilities for new comparative visualisation techniques or ensemble methods. However, we acknowledge that our model has some limitations. It can currently not take into account uncertainty of the cell's position. This can be both locally, for example uncertainty of its position within one branch, or globally, for example uncertainty over multiple branches. Some current methods already model this uncertainty in some way, mainly locally `r cite_methods("ouija")`, and in the future we will adapt our output model to also allow this uncertainty.
+
+
+<!----
 Limitations of the model:
-
-
-```
 * Robrecht.Cannoodt @robrechtc 10:21
 en heterogene output van alle methode... true, maar sommigen hebben we wel wat moeten tweaken 😛
 en ik kan me output bedenken dat niet in ons model zou kunnen passen
@@ -214,9 +221,9 @@ welja
 Misschien een kritiekpunt is onzekerheid... maarja 😛
 * Robrecht.Cannoodt @robrechtc 10:22
 onzekerheid, en dat een cell in meerdere niet-neighbouring milestones zou kunnen zitten
-als in, biologisch gezien houdt het mss geen steek, maar een methode zou wel kunnen zeggen, "wete, ik dénk dat het ofwel een DC is of een rode bloedcel"
+als in, biologisch gezien houdt het mss geen steek, maar een methode zou wel kunnen zeggen, "wete, ik denk dat het ofwel een DC is of een rode bloedcel"
 * Wouter Saelend @wouters 10:24
-hmmm uhu true, hoort allemaal wat samen met de onzekerheid. Je zou per cell een probabiliteitsdistributie doorheen het milestone netwerk kunnen geven, maar sla dat eens op 😛
+hmmm uhu true, hoort allemaal wat samen met de onzekerheid. Je zou per cell een probabiliteit distributie doorheen het milestone netwerk kunnen geven, maar sla dat eens op 😛
 * Robrecht.Cannoodt @robrechtc 10:25
 uhu ^^
 * Wouter Saelend @wouters 10:25
@@ -229,9 +236,7 @@ Uhu in de discussie dan wss
 * Robrecht.Cannoodt @robrechtc 10:26
 tiens, een discussie die in de discussie zou plaats vinden, wat een goed idee 😮
 <tease>
-```
-
-
+-->
 # Methods
 
 
@@ -266,6 +271,7 @@ Depending on the output of a method, we used different strategies to convert the
 
 
 ```{r}
+# create functions to list the methods within a particular conversion category
 list_sentence <- function(x) {pritt(glue::collapse(x[1:length(x) - 1],", "), " and ", last(x))}
 conversion <- function(conversion_oi) {
     methods_evaluated %>% filter(map_lgl(conversion_split, ~ conversion_oi %in% .)) %>% mutate(text = paste0(name, ifelse(conversion_special, "\\*", ""))) %>% pull(text) %>% list_sentence()
