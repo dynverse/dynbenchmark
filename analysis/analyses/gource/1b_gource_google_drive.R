@@ -4,11 +4,12 @@ library(dynalysis)
 experiment("gource")
 
 curl::curl_download("https://goo.gl/wz6ovx", derived_file("selenium-server-standalone.jar"))
-curl::curl_download("http://chromedriver.storage.googleapis.com/2.33/chromedriver_linux64.zip", derived_file("chrome_driver.zip"))
-system(glue::glue("unzip {derived_file('chrome_driver.zip')} -d {derived_file()}"))
+curl::curl_download("https://chromedriver.storage.googleapis.com/2.35/chromedriver_linux64.zip", derived_file("chrome_driver.zip"))
+system(glue::glue("unzip -o {derived_file('chrome_driver.zip')} -d {derived_file()}"))
 
-command <- glue::glue("java -Dwebdriver.chrome.driver='{derived_file('chrome_driver')}' -jar {derived_file('selenium-server-standalone.jar')} -port 4449")
-system(glue::glue(command, " &"))
+command <- glue::glue("java -Dwebdriver.chrome.driver='{derived_file('chromedriver')}' -jar {derived_file('selenium-server-standalone.jar')} -port 4449")
+clipr::write_clip(command)
+# system(glue::glue(command, " &"))
 
 # run server
 
@@ -35,6 +36,7 @@ links <- tribble(
   "hypotheses", "https://docs.google.com/spreadsheets/d/13jHFuMwie7oIxGcyLO95-onFri4M_GJjqgMEUnZliQI/edit?usp=drive_web&ouid=101203131788757899666"
 )
 
+warning("Now leave this browser window alone!!!!!! >:)")
 links$source <- pmap(links %>% as.list, function(id, link, ...) {
   remDr$navigate(link)
   Sys.sleep(5)
@@ -60,3 +62,6 @@ links$source <- pmap(links %>% as.list, function(id, link, ...) {
   html <- read_html(source)
   html %>% html_nodes("div.docs-revisions-sidebar-revisions-list-container") %>% first()
 })
+
+
+links %>% write_rds(derived_file("google_drive_revisions.rds"))
