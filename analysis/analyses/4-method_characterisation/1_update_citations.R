@@ -15,6 +15,7 @@ methods <- sheet %>%
   gs_read(ws = "Software", col_types = cols(GScholarClusterID = "c"), skip = 1)
 
 ncitations <- pbapply::pbsapply(methods$GScholarClusterID, dynutils::google_scholar_num_citations)
+# ncitations <- pbapply::pbsapply(methods$DOI, rcrossref::cr_citation_count)
 ncitations[is.na(ncitations)] <- ""
 
-gs_edit_cells(sheet, input = ncitations, byrow = FALSE, anchor = "AK3")
+gs_edit_cells(sheet, input = ncitations, byrow = FALSE, anchor = which(colnames(methods) == "Citations") %>% {paste0(LETTERS[floor(./26)], LETTERS[. %% 26], "3")})
