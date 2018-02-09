@@ -10,6 +10,8 @@ csl: nature-biotechnology.csl
 Tips for working in this document:
 * Go to tools -> perferences and remove Use smart quotes
 * Add extra enters after every paragraph (this is markdown!)
+* Enable automatic zotero syncing to bibtex
+* Make sure to pin the zotero bibtex references after first using them!
 
 
 TITLES: 
@@ -159,7 +161,7 @@ read_rds(figure_file("qc_over_time.rds", experiment_id="4-method_characterisatio
 ```
 
 
-The underlying algorithms can be divided into several modules, and these frequently contain soms clustering, dimensionality reduction and/or graph building steps. Interestingly, modules are frequently shared between different algorithms (`r ref("sfig", "method_components")`).
+The underlying algorithms can be divided into several steps, and these frequently contain soms clustering, dimensionality reduction and/or graph building steps. Interestingly, steps are frequently shared between different algorithms (`r ref("sfig", "method_components")`). MST in particular, used in the first single-cell RNA-seq trajectory inference methods [@trapnell_dynamicsregulatorscell_2014], is used in almost half of all methods we evaluated  (`r ref("sfig", "method_components", "b")`).
 
 
 ```{r}
@@ -175,11 +177,11 @@ read_rds(figure_file("method_components.rds", experiment_id="4-method_characteri
 ## Evaluating the accuracy of the inferred trajectory
 
 
-We evaluated 
+We wrapped each method and postprocessed its output into a common probabilistic format. This format works at two level: at the To evaluate the accuracy of each method, we gathered both synthetic and real datasets, and used these to assess how good a method is at correctly ordering cells, detecting the right trajectory topology and 2
 
 
-`r anchor("fig", "evaluation_overview")`
-![](`r figure_file("ti_evaluation_overview_v1.svg", experiment_id="evaluation_overview")`)
+`r anchor("fig", "evaluation_overview")`  
+![](`r figure_file("ti_evaluation_overview_v2.svg", experiment_id="evaluation_overview")`)  
 `r ref("fig", "evaluation_overview")` Overview of the evaluation
 
 
@@ -198,7 +200,7 @@ read_rds(figure_file("datasets.rds","2-dataset_characterisation")),
 
 # Discussion
 <!-- Some intro -->
-Trajectory inference is unique among most other categories of single-cell analysis methods, such as clustering, normalisation and differential expression, because it models the data in a way that was almost impossible using bulk data. Indeed, it is for this category that most methods were developed among other single-cell analysis categories, both according to omictools.org [@henry_omictoolsinformativedirectory_2014] (https://omictools.com/single-cell-rna-seq-category) and the "awesome single cell software" list [@davis_awesomesinglecelllistsoftware_2018] created by Sean Davis. It is therefore critical that these methods, now reaching `r sum(methods$is_ti, na.rm=TRUE)`, are evaluated to guide the users in their choice. In this preprint, we summarise the initial version of our evaluation of these methods, focussing on the quality control and the accuracy of their model using their default parameters on real and synthetic data.
+Trajectory inference is unique among most other categories of single-cell analysis methods, such as clustering, normalisation and differential expression, because it models the data in a way that was almost impossible using bulk data. Indeed, for no other single-cell analysis types have so many tools been developed, according to omictools.org [@henry_omictoolsinformativedirectory_2014] (https://omictools.com/single-cell-rna-seq-category), the "awesome single cell software" list [@davis_awesomesinglecelllistsoftware_2018] created by Sean Davis and scRNA-tools [@zappia_exploringsinglecellrnaseq_2017] (https://www.scrna-tools.org) . It is therefore critical that these methods, now reaching `r sum(methods$is_ti, na.rm=TRUE)`, are evaluated to guide the users in their choice. In this preprint, we summarise the initial version of our evaluation of these methods, focussing on the quality control and the accuracy of their model using their default parameters on real and synthetic data.
 
 
 <!-- Results  -->
