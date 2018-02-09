@@ -105,7 +105,7 @@ Given this plethora of available trajectory inference methods, it is important t
 ## Method quality control
 
 
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods, and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability and the presence of a programming interface (`r ref("table", "methods")`). We characterized all methods in four different ways: possible trajectory topologies, implementation quality, prior information and the underlying algorithm (`r ref("fig", "4-method_characterisation")`).
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods  (`r ref("fig", "evaluation_overview", "a")`), and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability and the presence of a programming interface (`r ref("table", "methods")`). We characterized all methods in four different ways: possible trajectory topologies, implementation quality, prior information and the underlying algorithm (`r ref("fig", "method_characterisation")`).
 
 
 `r ref("table", "methods", anchor=TRUE)` Overview of current trajectory inference methods, and whether they were included in this current evaluation study
@@ -114,7 +114,23 @@ read_rds(figure_file("methods_table.rds", "4-method_characterisation"))
 ```
 
 
-At the level of trajectory topologies, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "4-method_characterisation", "a")`). However, only a handful, mostly recent, methods can currently handle more complex graph topologies which can include loops (`r ref("sfig", "methods_over_time", "b")`), one of which is included in the current evaluation (SLICER).
+`r anchor("fig", "evaluation_overview")`  
+![](`r figure_file("ti_evaluation_overview_v2.svg", experiment_id="evaluation_overview")`)  
+`r ref("fig", "evaluation_overview")` Overview of the evaluation
+
+
+```{r}
+add_stable(
+read_rds(figure_file("datasets.rds","2-dataset_characterisation")), 
+"datasets", 
+"Real datasets used in this study"
+)
+```
+
+
+
+
+At the level of trajectory topologies, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "method_characterisation", "a")`). However, only a handful, mostly recent, methods can currently handle more complex graph topologies which can include loops (`r ref("sfig", "methods_over_time", "b")`), one of which is included in the current evaluation (SLICER).
 
 
 While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or which purpose(s) they serve (user friendliness, developer friendliness or good science). These categorisations can help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
@@ -129,9 +145,9 @@ read_rds(figure_file("qc_checks.rds","4-method_characterisation")),
 ```
 
 
-`r anchor("fig", "4-method_characterisation")`
-![](`r figure_file("method_characteristics.svg", experiment_id="4-method_characterisation")`)
-`r ref("fig", "4-method_characterisation", anchor=TRUE)` First characterization of each method.
+`r anchor("fig", "method_characterisation")`
+![](`r figure_file("method_characteristics.svg", experiment_id="method_characterisation")`)
+`r ref("fig", "method_characterisation", anchor=TRUE)` First characterization of each method.
 
 
 ```{r}
@@ -146,7 +162,7 @@ read_rds(figure_file("method_qc_check.rds", experiment_id="4-method_characterisa
 ```
 
 
-Most methods fulfill most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "4-method_characterisation", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "4-method_characterisation", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "method_qc_check")` and `r ref("fig", "4-method_characterisation", "c")`), notwithstanding several studies pinpointing these as good practices [@wilson_best_2014; @artaza_top10metrics_2016].
+Most methods fulfill most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "method_characterisation", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "method_characterisation", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "method_qc_check")` and `r ref("fig", "method_characterisation", "c")`), notwithstanding several studies pinpointing these as good practices [@wilson_best_2014; @artaza_top10metrics_2016].
 
 
 ```{r}
@@ -178,26 +194,6 @@ read_rds(figure_file("method_components.rds", experiment_id="4-method_characteri
 
 
 We wrapped each method and postprocessed its output into a common probabilistic format. This format works at two level: at the To evaluate the accuracy of each method, we gathered both synthetic and real datasets, and used these to assess how good a method is at correctly ordering cells, detecting the right trajectory topology and 2
-
-
-`r anchor("fig", "evaluation_overview")`  
-![](`r figure_file("ti_evaluation_overview_v2.svg", experiment_id="evaluation_overview")`)  
-`r ref("fig", "evaluation_overview")` Overview of the evaluation
-
-
-```{r}
-add_stable(
-read_rds(figure_file("datasets.rds","2-dataset_characterisation")), 
-"datasets", 
-"Real datasets used in this study"
-)
-```
-
-
-
-
-
-
 # Discussion
 <!-- Some intro -->
 Trajectory inference is unique among most other categories of single-cell analysis methods, such as clustering, normalisation and differential expression, because it models the data in a way that was almost impossible using bulk data. Indeed, for no other single-cell analysis types have so many tools been developed, according to omictools.org [@henry_omictoolsinformativedirectory_2014] (https://omictools.com/single-cell-rna-seq-category), the "awesome single cell software" list [@davis_awesomesinglecelllistsoftware_2018] created by Sean Davis and scRNA-tools [@zappia_exploringsinglecellrnaseq_2017] (https://www.scrna-tools.org) . It is therefore critical that these methods, now reaching `r sum(methods$is_ti, na.rm=TRUE)`, are evaluated to guide the users in their choice. In this preprint, we summarise the initial version of our evaluation of these methods, focussing on the quality control and the accuracy of their model using their default parameters on real and synthetic data.
