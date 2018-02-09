@@ -11,6 +11,9 @@ methods_evaluated <- read_rds(derived_file("methods_evaluated.rds"))
 methods <- read_rds(derived_file("methods.rds"))
 method_qc <- read_rds(derived_file("method_qc.rds"))
 
+start_date <- as.Date("2014-01-01")
+end_date <- as.Date("2018-06-01")
+
 
 #   ____________________________________________________________________________
 #   Figure generation                                                       ####
@@ -57,7 +60,8 @@ latest <- publication_cumulative_by_type %>%
 publication_cumulative_by_type <- bind_rows(earliest, publication_cumulative_by_type, latest)
 
 ggplot(publication_cumulative_by_type) +
-  geom_step(aes(publication_date, n_methods, color=publication_type))
+  geom_step(aes(publication_date, n_methods, color=publication_type)) +
+  scale_x_date(limits=c(start_date, end_date))
 
 # the following code is very complex, don't try to understand it, I don't either
 # for geom_area it is important that every date is represented in every group
@@ -121,7 +125,7 @@ n_methods_over_time <- publication_cumulative_by_type_interpolated %>%
     ) +
     theme(legend.position = c(0.05, 0.95)) +
   scale_y_continuous(label_long("n_methods"), expand=c(0, 0)) +
-  scale_x_date(label_long("publication_date"), expand=c(0.05, 0.05))
+  scale_x_date(label_long("publication_date"), expand=c(0.05, 0.05), limits=c(start_date, end_date))
 n_methods_over_time
 # ggsave(figure_file("n_methods_over_time.png"), n_methods_over_time, width = 15, height = 8)
 saveRDS(n_methods_over_time, figure_file("n_methods_over_time.rds"))
@@ -183,7 +187,7 @@ trajectory_components_over_time <- trajectory_components_gathered %>%
   scale_fill_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
   facet_grid(.~trajectory_type, labeller = label_facet()) +
   theme(legend.position = "none") +
-  scale_x_date(label_long("publication_date")) +
+  scale_x_date(label_long("publication_date"), limits=c(start_date, end_date)) +
   scale_y_continuous(label_long("n_methods"))
 
 trajectory_components_over_time
@@ -291,13 +295,3 @@ methods %>%
   filter(can_handle) %>%
   group_by(trajectory_type) %>%
   count()
-
-
-
-
-##  ............................................................................
-##  Method output diversity                                                 ####
-method_output_network <- tibble(
-
-)
-methods_evaluated$output_split
