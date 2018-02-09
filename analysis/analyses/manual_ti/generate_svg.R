@@ -9,7 +9,7 @@ experiment("manual_ti")
 tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation")) %>% filter() %>% filter(category != "toy")
 
 # runs <- tibble(dimred_id = character(), person_id = character(), run_i = integer(), run_id = character(), seed = integer()) %>% write_rds(result_file("runs.rds"))
-runs <- read_rds(result_file("runs.rds"))
+runs <- read_rds(derived_file("runs.rds"))
 
 run <- lst(
   dimred_id = "pca",
@@ -21,8 +21,6 @@ run <- lst(
 
 set.seed(run$seed)
 selected_tasks <- tasks %>% arrange(sample(n()))
-
-run$task_ids <- list(tasks$id)
 
 ##  ............................................................................
 ##  Generate svg for run                                                    ####
@@ -64,7 +62,8 @@ spaces <- pmap(as.list(selected_tasks), function(...) {
 
   tibble(
     plot=list(plot),
-    task_id = task$id,
+    id = task$id,
+    task_id = task$task_id,
     x_scale = max(space$Comp1) - min(space$Comp1),
     y_scale = max(space$Comp2) - min(space$Comp2),
     x_shift = min(space$Comp1),

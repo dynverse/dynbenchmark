@@ -34,6 +34,10 @@ dimensions <- c(
 base_coords <- layer %>% xml_attr("transform") %>% str_extract("\\(.*\\)") %>% str_sub(2, -2) %>% split_coords()
 if(is.na(base_coords)) base_coords <- c(0, 0)
 
+
+
+### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
+### Process paths                                                           ####
 path <- paths_svg[[1]]
 process_path <- function(path, base_coords = c(0, 0)) {
   # split <- path %>% gsub(" ", ",", .) %>% gsub("([A-Z])", ";\\1;", .) %>% str_split(";") %>% first()
@@ -82,17 +86,19 @@ process_path <- function(path, base_coords = c(0, 0)) {
   path
 }
 
-
 paths <- tibble(
   path = map(paths_svg, process_path, base_coords)
 )
+
+
+### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
+### Put paths into boxes                                                    ####
 paths <- paths %>% mutate(
   left = map_dbl(path, ~min(.$x)),
   top = map_dbl(path,~max(.$y)),
   bottom = map_dbl(path,~min(.$y)),
   right = map_dbl(path,~max(.$x))
 )
-
 
 box_width <- dimensions[[1]]/run$ncol
 box_height <- dimensions[[2]]/run$nrow
@@ -111,11 +117,15 @@ if(any(as.integer(paths$box_id) != paths$box_id)) {
   stop("Paths overlap between boxes!")
 }
 
-# plot all paths
+# intermediate plot check, make sure all paths look ok
 paths[1:20,] %>%
   mutate(path_id = row_number()) %>%
   unnest(path) %>%
   ggplot(aes(x=x, y=-y, color=factor(box_id))) + geom_path(aes(group=path_id)) + coord_equal() + facet_wrap(~box_id, scales="free") + ggraph::theme_graph() + theme(legend.position = "none")
+
+
+### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
+### Merge close nodes                                                       ####
 
 # get nodes
 nodes_premerge <- paths %>%
@@ -148,6 +158,10 @@ nodes <- nodes_premerge %>%
   select(-node_id) %>%
   rename(node_id = node_group_id)
 
+
+
+### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
+### Map nodes on space                                                      ####
 # now create cluster networks and cluster centers
 cluster_networks <- nodes %>%
   group_by(path_id) %>%
@@ -188,13 +202,16 @@ cluster_positions <- nodes %>%
   summarise(cluster_positions = list(tibble(x=x, y=y, node_id=node_id))) %>%
   ungroup()
 
+# make sure points overlap with data
 run$spaces[100:120, ] %>% unnest(space) %>%
   ggplot(aes(Comp1, Comp2)) +
   geom_point() +
   geom_point(aes(x, y), color="red", data=cluster_positions[100:120, ] %>% unnest(cluster_positions)) +
   facet_wrap(~box_id, scale="free")
 
-# now project
+
+### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
+### Project cells                                                           ####
 predictions_data <- left_join(cluster_positions, cluster_networks, "box_id") %>% left_join(run$spaces, "box_id")
 predictions_list <- predictions_data %>% pmap(function(box_id, cluster_positions, cluster_network, space, ...) {
   print(box_id)
@@ -217,13 +234,15 @@ predictions_list <- predictions_data %>% pmap(function(box_id, cluster_positions
 predictions <- tibble(prediction = predictions_list, task_id = run$spaces$task_id)
 
 
+
+### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
+### Check scores of controls                                                ####
 tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation")) %>% filter() %>% filter(category != "toy")
-tasks <- tasks %>% slice(match(run$spaces$task_id, id))
+tasks <- tasks %>% slice(match(run$spaces$task_id, task_id))
 
-
-controls <- map(tasks %>% filter(category == "control" & id != "control/control_BA") %>% pull(id), function(task_id) {
+controls <- map(tasks %>% filter(category == "control" & task_id != "control_BA") %>% pull(task_id), function(task_id) {
   print(task_id)
-  task <- extract_row_to_list(tasks, which(tasks$id == task_id))
+  task <- extract_row_to_list(tasks, which(tasks$task_id == task_id))
   task$geodesic_dist <- dynutils::compute_emlike_dist(task)
 
   prediction <- extract_row_to_list(predictions, which(predictions$task_id == task_id))$prediction
@@ -247,6 +266,7 @@ controls
 ##  Save                                                                    ####
 predictions %>% write_rds(derived_file(pritt("predictions_{run$run_id}")))
 
+# upload to PRISM
 PRISM:::rsync_remote(
   remote_dest = "prism",
   path_dest = derived_file() %>% gsub(dynalysis::get_dynalysis_folder(), PRISM:::run_remote("echo $DYNALYSIS_PATH", "prism")$cmd_out, .),
