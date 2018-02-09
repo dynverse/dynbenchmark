@@ -14,7 +14,7 @@ standard_colors <- c("gold"="#ffeca9", "silver"="#e3e3e3")
 
 ##  ............................................................................
 ##  Pie charts                                                              ####
-pie <- function(tasks, what = "technology") {
+pie <- function(tasks=tasks_real, what = "technology") {
   label <-"{label_short(variable_of_interest, 15)}: {n}"
   if (what == "standard") {
     fill_scale <- scale_fill_manual(values=standard_colors)
@@ -22,7 +22,6 @@ pie <- function(tasks, what = "technology") {
     fill_scale <- scale_fill_manual(values=technology_colors)
   } else if (what == "trajectory_type") {
     fill_scale <- scale_fill_manual(values=setNames(trajectory_types$background_color,trajectory_types$id))
-    label <- "{n}"
   } else {
     fill_scale <- scale_fill_grey(start = 0.6, end = 0.9)
   }
@@ -45,6 +44,23 @@ pie <- function(tasks, what = "technology") {
     scale_x_continuous(expand=c(0, 0)) +
     scale_y_continuous(expand=c(0, 0)) +
     coord_flip()
+
+  # tasks %>%
+  #   count(variable_of_interest) %>%
+  #   arrange(n) %>%
+  #   #arrange(rbind(seq_len(n()),rev(seq_len(n())))[seq_len(n())]) %>% # do largest - smallest - second largest - second smallest - ...
+  #   mutate(variable_of_interest = factor(variable_of_interest, levels=variable_of_interest)) %>%
+  #   mutate(start = lag(cumsum(n), 1, 0), end = cumsum(n), mid = start + (end - start)/2) %>%
+  #   ggplot(aes(ymin=0, ymax=1)) +
+  #   geom_rect(aes(xmin=start, xmax=end, fill=variable_of_interest), stat="identity", color="white", size=0.5) +
+  #   geom_text(aes(mid, 1, label = pritt(label), vjust=ifelse(mid > max(end)/4 & mid < max(end)/4*3, 1, 0), hjust=ifelse(mid > max(end)/2, 1, 0)), color="black", size=5) +
+  #   fill_scale +
+  #   ggtitle(label_long(what)) +
+  #   theme_void() +
+  #   theme(legend.position = "none") +
+  #   scale_x_continuous(expand=c(0.5, 0.5)) +
+  #   scale_y_continuous(expand=c(0.5, 0.5)) +
+  #   coord_polar("x")
 }
 
 dataset_characterisation_pies <- c("technology", "organism", "standard", "trajectory_type") %>% map(pie, tasks = tasks_real) %>% cowplot::plot_grid(plotlist=., nrow =1)
@@ -94,7 +110,7 @@ dataset_characterisation_plot <- cowplot::plot_grid(
 dataset_characterisation_plot
 
 
-cowplot::save_plot(figure_file("dataset_characterisation.svg"), dataset_characterisation_plot, base_height = 15, base_width = 8)
+cowplot::save_plot(figure_file("dataset_characterisation.svg"), dataset_characterisation_plot, base_height = 12, base_width = 6.5)
 
 
 
