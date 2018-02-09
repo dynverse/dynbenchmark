@@ -2,34 +2,33 @@ library(dynalysis)
 library(tidyverse)
 library(dynplot)
 
-experiment("5-optimise_parameters/4-process_results")
+experiment("5-optimise_parameters/3-evaluate_parameters")
 
-evals <- read_rds(derived_file("eval_outputs.rds", "5-optimise_parameters/3-evaluate_parameters"))
-list2env(evals, environment())
+###########################################################
+############### PART FOUR: GENERATE FIGURES ###############
+###########################################################
+
+outputs_list <- read_rds(derived_file("outputs_postprocessed.rds"))
+list2env(read_rds(derived_file("config.rds")), environment())
 
 # get ordering of methods
-method_ord <- eval_overall %>%
+method_ord <- outputs_list$outputs_summmethod %>%
   group_by(method_name) %>%
   summarise_if(is.numeric, mean) %>%
   arrange(desc(harm_mean)) %>%
-  .$method_name
+  .$method_name %>%
+  {c(., setdiff(methods$name, .))}
 
-eval_overall <- eval_overall %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
-eval_repl <- eval_repl %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
-eval_ind <- eval_ind %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
-eval_trajtype <- eval_trajtype %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
-eval_trajtype_wa_wo <- eval_trajtype_wa_wo %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
+for (oname in str_subset(names(outputs_list), "outputs")) {
+  outputs_list[[oname]] <- outputs_list[[oname]] %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
+}
 
-prior_df <- eval_ind %>% select(method_name, prior_sr) %>% distinct() %>% mutate(prior_sr = prior_sr %>% str_replace_all("--required", ""))
+list2env(outputs_list, environment())
+rm(outputs_list)
 
-# num_reals <- eval_ind %>% filter(method_short_name == "CTmaptpx", task_group == "real", param_group == "best", replicate == 1) %>%
-#   group_by(trajectory_type) %>% summarise(n = n())
-# num_synths <- eval_ind %>% filter(method_short_name == "CTmaptpx", task_group == "synthetic", param_group == "best", replicate == 1) %>%
-#   group_by(trajectory_type) %>% summarise(n = n())
-# write_tsv(num_reals, figure_file("trajtypes_real.tsv"))
-# write_tsv(num_synths, figure_file("trajtypes_synth.tsv"))
+prior_df <- outputs %>% select(method_name, prior_str) %>% distinct()
 
-zzz <- eval_trajtype_wa_wo %>% filter(task_group == "mean", trajectory_type_f == "overall")
+zzz <- outputs_summtrajtype_totalsx2 %>% filter(task_group == "mean", trajectory_type_f == "overall")
 yyy <- zzz %>%
   select(method_name, method_short_name, method_name_f, harm_mean, pct_errored_mean, rank_correlation_mean, rank_correlation_var, rank_rf_mse_mean, rank_rf_mse_var, rank_edge_flip_mean, rank_edge_flip_var, time_method_mean) %>%
   gather(metric, score, -method_name:-method_name_f) %>%
@@ -44,7 +43,7 @@ ggplot(yyy) +
   labs(x = NULL, y = NULL, fill = "Metric")
 
 ggplot(yyy %>% left_join(prior_df, by = "method_name")) +
-  geom_bar(aes(method_name_f, score, fill = prior_sr), stat = "identity") +
+  geom_bar(aes(method_name_f, score, fill = prior_str), stat = "identity") +
   facet_wrap(~metric_f, scales = "free", nrow = 3) +
   coord_flip() +
   theme_bw() +
@@ -54,8 +53,8 @@ ggplot(yyy %>% left_join(prior_df, by = "method_name")) +
 dev.off()
 
 # plots
-pdf(figure_file("2_trajtype_comparison.pdf"), 20, 8)
-ggplot(eval_trajtype_wa_wo) +
+pdf(figure_file("2_trajtype_comparison.pdf"), 20, 12)
+ggplot(outputs_summtrajtype_totalsx2) +
   geom_point(aes(method_name_f, harm_mean)) +
   coord_flip() +
   theme_bw() +
@@ -64,7 +63,7 @@ ggplot(eval_trajtype_wa_wo) +
     x = NULL
   )
 
-ggplot(eval_trajtype_wa_wo) +
+ggplot(outputs_summtrajtype_totalsx2) +
   geom_point(aes(method_name_f, rank_correlation_mean)) +
   coord_flip() +
   theme_bw() +
@@ -74,7 +73,7 @@ ggplot(eval_trajtype_wa_wo) +
   )
 
 
-ggplot(eval_trajtype_wa_wo) +
+ggplot(outputs_summtrajtype_totalsx2) +
   geom_point(aes(method_name_f, rank_edge_flip_mean)) +
   coord_flip() +
   theme_bw() +
@@ -83,7 +82,7 @@ ggplot(eval_trajtype_wa_wo) +
     x = NULL
   )
 
-ggplot(eval_trajtype_wa_wo) +
+ggplot(outputs_summtrajtype_totalsx2) +
   geom_point(aes(method_name_f, rank_rf_mse_mean)) +
   coord_flip() +
   theme_bw() +
@@ -92,7 +91,7 @@ ggplot(eval_trajtype_wa_wo) +
     x = NULL
   )
 
-ggplot(eval_trajtype_wa_wo) +
+ggplot(outputs_summtrajtype_totalsx2) +
   geom_point(aes(method_name_f, pct_errored_mean)) +
   coord_flip() +
   theme_bw() +
@@ -101,25 +100,25 @@ ggplot(eval_trajtype_wa_wo) +
     x = NULL
   )
 
-ggplot(eval_trajtype_wa_wo, aes(harm_mean, rank_correlation_mean)) +
+ggplot(outputs_summtrajtype_totalsx2, aes(harm_mean, rank_correlation_mean)) +
   geom_point() +
   ggrepel::geom_text_repel(aes(label = method_name)) +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f)
 
-ggplot(eval_trajtype_wa_wo, aes(harm_mean, rank_rf_mse_mean)) +
+ggplot(outputs_summtrajtype_totalsx2, aes(harm_mean, rank_rf_mse_mean)) +
   geom_point() +
   ggrepel::geom_text_repel(aes(label = method_name)) +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f)
 
-ggplot(eval_trajtype_wa_wo, aes(harm_mean, rank_edge_flip_mean)) +
+ggplot(outputs_summtrajtype_totalsx2, aes(harm_mean, rank_edge_flip_mean)) +
   geom_point() +
   ggrepel::geom_text_repel(aes(label = method_name)) +
   theme_bw() +
   facet_grid(task_group~trajectory_type_f)
 
-ggplot(eval_trajtype_wa_wo, aes(harm_mean, pct_errored_mean)) +
+ggplot(outputs_summtrajtype_totalsx2, aes(harm_mean, pct_errored_mean)) +
   geom_point() +
   ggrepel::geom_text_repel(aes(label = method_name)) +
   theme_bw() +
@@ -133,7 +132,7 @@ dev.off()
 
 # error messages
 error_messages_overall <-
-  eval_ind %>%
+  outputs %>%
   group_by(method_name, method_name_f) %>%
   mutate(num_datasets = n()) %>%
   ungroup() %>%
@@ -189,7 +188,7 @@ step_levels <- c("sessionsetup", "preprocessing", "method", "postprocessing", "w
                  "coranking", "mantel", "rf", "edge_flip")
 
 time_ind <-
-  eval_ind %>%
+  outputs %>%
   select(method_name, method_name_f, task_id, pct_errored, error_message, trajectory_type_f, starts_with("time_")) %>%
   gather(step, time, starts_with("time")) %>%
   mutate(
@@ -242,8 +241,8 @@ ggsave(figure_file("timestep_permethod.pdf"), g, width = 10, height = 5)
 
 
 ### individual dataset plots
-eval_ind <- eval_ind %>% mutate(harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean))
-ggplot(eval_ind) +
+outputs <- outputs %>% mutate(harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean))
+ggplot(outputs) +
   geom_point(aes(method_name_f, harm_mean, colour = trajectory_type_f)) +
   facet_wrap(~task_id) +
   coord_flip()
