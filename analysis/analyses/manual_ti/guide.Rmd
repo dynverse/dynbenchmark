@@ -30,12 +30,4 @@ space %>%
     ggraph::theme_graph()
 ```
 
-In all datasets, cells were sampled while they were going through a cellular dynamic process, such as the cell cycle, differentiation, activation, ... However, some cells are earlier in this process, others are later.
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+In all datasets, cells were sampled while they were going through a cellular dynamic process, such as the cell cycle, differentiation, activation, ... 
