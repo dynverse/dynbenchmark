@@ -57,6 +57,16 @@ process_path <- function(path, base_coords = c(0, 0)) {
       if(relative && length(pieces) > 1) {
         pieces[[length(pieces)]] <- pieces[[length(pieces)]] + pieces[[length(pieces)-1]]
       }
+    } else if (cur == "h") {
+      split[[i + 1]] <- paste0(split[[i + 1]], ",0")
+    } else if (cur == "v") {
+      split[[i + 1]] <- paste0("0,", split[[i + 1]])
+    } else if (cur == "l") {
+
+    }else {
+      print(cur)
+      print(path)
+      stop("Invalid line")
     }
 
       # } else if (cur == "c" | cur == "C") {
@@ -113,12 +123,17 @@ paths <- paths %>% mutate(
   box_id = (row - 1) * run$ncol + col
 )
 
+if(!all(run$spaces$box_id %in% paths$box_id)) {
+  print(which(!run$spaces$box_id %in% paths$box_id))
+  stop("Not all boxes have lines")
+}
+
 if(any(as.integer(paths$box_id) != paths$box_id)) {
   stop("Paths overlap between boxes!")
 }
 
 # intermediate plot check, make sure all paths look ok
-paths[1:20,] %>%
+paths[paths$box_id %in% 140:150,] %>%
   mutate(path_id = row_number()) %>%
   unnest(path) %>%
   ggplot(aes(x=x, y=-y, color=factor(box_id))) + geom_path(aes(group=path_id)) + coord_equal() + facet_wrap(~box_id, scales="free") + ggraph::theme_graph() + theme(legend.position = "none")
@@ -157,6 +172,10 @@ nodes <- nodes_premerge %>%
   mutate(x=mean(x), y=mean(y)) %>%
   select(-node_id) %>%
   rename(node_id = node_group_id)
+
+if(!all(run$spaces$box_id %in% nodes$box_id)) {
+  stop("Not all boxes have lines")
+}
 
 
 
@@ -237,7 +256,7 @@ predictions <- tibble(prediction = predictions_list, task_id = run$spaces$task_i
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
 ### Check scores of controls                                                ####
-tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation")) %>% filter() %>% filter(category != "toy")
+tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
 tasks <- tasks %>% slice(match(run$spaces$task_id, task_id))
 
 controls <- map(tasks %>% filter(category == "control" & task_id != "control_BA") %>% pull(task_id), function(task_id) {
@@ -264,7 +283,7 @@ controls
 
 ##  ............................................................................
 ##  Save                                                                    ####
-predictions %>% write_rds(derived_file(pritt("predictions_{run$run_id}")))
+predictions %>% write_rds(derived_file(pritt("predictions_{run$run_id}.rds")))
 
 # upload to PRISM
 PRISM:::rsync_remote(
@@ -273,5 +292,3 @@ PRISM:::rsync_remote(
   remote_src = "",
   path_src = derived_file()
 )
-
-

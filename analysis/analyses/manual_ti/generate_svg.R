@@ -6,7 +6,7 @@ library(dynalysis)
 experiment("manual_ti")
 
 # load in all datasets
-tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation")) %>% filter() %>% filter(category != "toy")
+tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
 
 # runs <- tibble(dimred_id = character(), person_id = character(), run_i = integer(), run_id = character(), seed = integer()) %>% write_rds(result_file("runs.rds"))
 runs <- read_rds(derived_file("runs.rds"))
@@ -19,8 +19,18 @@ run <- lst(
   seed = sodium::data_encrypt(charToRaw(run_id), sodium::hash(charToRaw("robrecht")), nonce = sodium::hash(charToRaw("hi"), size = 24)) %>% rawToBits() %>% head(32) %>% packBits("integer") %>% abs()
 ) %>% list %>% dynutils::list_as_tibble()
 
-set.seed(run$seed)
-selected_tasks <- tasks %>% arrange(sample(n()))
+if(run$run_id %in% runs$run_id) {
+  previous_task_ids <- runs %>% filter(run_id == run$run_id) %>% pull(spaces) %>% first() %>% pull(task_id)
+  new_task_ids <- tasks$task_id[!(tasks$task_id %in% previous_task_ids)]
+
+  print("Previous run found, using previous ordering (plus extra datasets)")
+  selected_tasks <- tasks %>% slice(match(c(previous_task_ids, new_task_ids), task_id))
+} else {
+  set.seed(run$seed)
+  selected_tasks <- tasks %>% arrange(sample(n()))
+}
+
+
 
 ##  ............................................................................
 ##  Generate svg for run                                                    ####
@@ -100,8 +110,19 @@ svg <- glue::glue(
 
 </svg>
 ")
-svg %>% xml2::read_xml() %>% xml2::write_xml(derived_file(glue::glue("{run$run_id}.svg")))
 
+if(!(run$run_id %in% runs$run_id)) {
+  svg %>% xml2::read_xml() %>% xml2::write_xml(derived_file(glue::glue("{run$run_id}.svg")))
+} else {
+  svg <- xml2::read_xml(derived_file(glue::glue("{run$run_id}.svg")))
+  xml2::xml_find_first(svg, ".//svg:image")
+  xml2::xml_replace(xml2::xml_find_first(svg, ".//svg:image"), glue::glue("<svg:image xlink:href='{run$run_id}.png' x='0' y='0' width='{ncol*base_size}cm' height='{nrow*base_size}cm' />"), .copy=FALSE)
+  xml2::xml_attr(svg, "width") <- glue::glue("{ncol*base_size}cm")
+  xml2::xml_attr(svg, "height") <- glue::glue("{nrow*base_size}cm")
+  svg %>% xml2::write_xml(derived_file(glue::glue("{run$run_id}_new.svg")))
+
+  print("Not recreating svg")
+}
 
 
 ##  ............................................................................
