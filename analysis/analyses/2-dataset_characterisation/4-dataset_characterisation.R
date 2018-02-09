@@ -58,7 +58,7 @@ dataset_characterisation_pies
 tasks_real$ngenes <- map_int(tasks_real$normalisation_info, ~last(.$normalisation_steps[["ngenes"]]))
 tasks_real$ncells <- map_int(tasks_real$normalisation_info, ~last(.$normalisation_steps[["ncells"]]))
 dataset_characterisation_distributions <- c("ncells", "ngenes", "date") %>% map(function(what) {
-  nbins <- 30
+  nbins <- 50
 
   if (what %in% c("ncells", "ngenes")) {
     limits <- c(10, 10000)
@@ -88,13 +88,13 @@ dataset_characterisation_distributions
 dataset_characterisation_plot <- cowplot::plot_grid(
   dataset_characterisation_distributions,
   dataset_characterisation_pies,
-  rel_widths = c(0.35, 0.68),
-  ncol=2
+  rel_heights = c(1,1.5),
+  ncol=1
 )
 dataset_characterisation_plot
 
 
-cowplot::save_plot(figure_file("dataset_characterisation.svg"), dataset_characterisation_plot, base_height = 6, base_width = 9)
+cowplot::save_plot(figure_file("dataset_characterisation.svg"), dataset_characterisation_plot, base_height = 15, base_width = 8)
 
 
 
