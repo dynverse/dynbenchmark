@@ -42,25 +42,28 @@ tasks_real <- map_local(task_ids_real, function(task_id) {
 
   dynutils::list_as_tibble(list(task))
 }) %>% bind_rows()
-tasks_real <- tasks_real %>% left_join(task_info_real, "id") %>% mutate(category = "real")
+tasks_real <- tasks_real %>% left_join(task_info_real, "id") %>% mutate(category = "real") %>% mutate(task_id = id)
 
 ##  ............................................................................
 ##  Synthetic datasets                                                      ####
 tasks_synthetic <- read_rds("analysis/data/derived_data/datasets/synthetic/v6/tasks.rds") %>%
-  mutate(id = paste0("synthetic/", id)) %>%
+  rename(task_id = id) %>%
+  mutate(id = paste0("synthetic/", task_id)) %>%
   mutate(category = "synthetic")
 
 ##  ............................................................................
 ##  Toy datasets                                                            ####
 tasks_toy <- dyntoy::toy_tasks %>%
   mutate(category = "toy") %>%
-  mutate(id = paste0("toy/", id))
+  rename(task_id = id) %>%
+  mutate(id = paste0("toy/", task_id))
 
 
 ##  ............................................................................
 ##  Control datasets                                                        ####
 tasks_control <- read_rds(derived_file("tasks.rds", "1-datasets/control")) %>%
-  mutate(id = paste0("control/", id)) %>%
+  rename(task_id = id) %>%
+  mutate(id = paste0("control/", task_id)) %>%
   mutate(category = "control")
 
 
