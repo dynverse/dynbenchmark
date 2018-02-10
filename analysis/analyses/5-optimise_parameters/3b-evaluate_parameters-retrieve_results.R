@@ -8,7 +8,7 @@ experiment("5-optimise_parameters/3-evaluate_parameters")
 ############### PART TWO: RETRIEVE RESULTS ###############
 ##########################################################
 
-benchmark_suite_retrieve(derived_file("suite/"), return_outputs = F)
+# benchmark_suite_retrieve(derived_file("suite/"), return_outputs = F)
 
 outputs <- benchmark_suite_retrieve(derived_file("suite/"), return_outputs = T) %>% as_tibble()
 
@@ -18,7 +18,8 @@ outputs %>%
   mutate(error_message = str_sub(error_message, -600, -1)) %>%
   group_by(method_name, error_message) %>%
   summarise(n = n()) %>%
-  ungroup()
+  ungroup() %>%
+  write_tsv(figure_file("errors_qsub.tsv"))
 
 # print job errors
 outputs %>%
@@ -26,7 +27,8 @@ outputs %>%
   mutate(error_message = str_sub(error_message, -600, -1)) %>%
   group_by(method_name, error_message) %>%
   summarise(n = n()) %>%
-  ungroup()
+  ungroup() %>%
+  write_tsv(figure_file("errors_method.tsv"))
 
 # process succeeded results
 write_rds(outputs, derived_file("outputs_with_models.rds"))
