@@ -53,20 +53,37 @@ outputs_summmethod <- outputs_summtrajtype %>%
   ungroup()
 
 # adding mean per trajtype
-outputs_summtrajtype_totals <- outputs_summtrajtype %>%
-  group_by(method_name, method_short_name, param_group, trajectory_type, trajectory_type_f) %>%
-  summarise_if(is.numeric, mean) %>%
-  ungroup() %>%
-  mutate(task_group = "mean") %>%
-  bind_rows(outputs_summtrajtype)
+outputs_summtrajtype_totals <- bind_rows(
+  outputs_summtrajtype,
+  outputs_summtrajtype %>%
+    filter(task_group != "toy") %>%
+    group_by(method_name, method_short_name, param_group, trajectory_type, trajectory_type_f) %>%
+    summarise_if(is.numeric, mean) %>%
+    ungroup() %>%
+    mutate(task_group = "mean_notoy"),
+  outputs_summtrajtype %>%
+    group_by(method_name, method_short_name, param_group, trajectory_type, trajectory_type_f) %>%
+    summarise_if(is.numeric, mean) %>%
+    ungroup() %>%
+    mutate(task_group = "mean_withtoy")
+)
 
 # adding mean per method
-outputs_summmethod_totals <- outputs_summmethod %>%
-  group_by(method_name, method_short_name, param_group) %>%
-  summarise_if(is.numeric, mean) %>%
-  ungroup() %>%
-  mutate(task_group = "mean") %>%
-  bind_rows(outputs_summmethod)
+outputs_summmethod_totals <-
+  bind_rows(
+    outputs_summmethod,
+    outputs_summmethod %>%
+      filter(task_group != "toy") %>%
+      group_by(method_name, method_short_name, param_group) %>%
+      summarise_if(is.numeric, mean) %>%
+      ungroup() %>%
+      mutate(task_group = "mean_notoy"),
+    outputs_summmethod %>%
+      group_by(method_name, method_short_name, param_group) %>%
+      summarise_if(is.numeric, mean) %>%
+      ungroup() %>%
+      mutate(task_group = "mean_withtoy")
+  )
 
 # combine all aggregated data frames
 outputs_summtrajtype_totalsx2 <- bind_rows(
