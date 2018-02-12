@@ -24,8 +24,7 @@ chosen_task_group <- "mean_notoy"
 method_ord <- outputs_list$outputs_summtrajtype_totalsx2 %>%
   filter(task_group == chosen_task_group, trajectory_type == "overall") %>%
   arrange(desc(harm_mean)) %>%
-  .$method_name %>%
-  {c(., setdiff(methods$name, .))}
+  .$method_name
 
 for (oname in str_subset(names(outputs_list), "outputs")) {
   outputs_list[[oname]] <- outputs_list[[oname]] %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
@@ -34,7 +33,7 @@ for (oname in str_subset(names(outputs_list), "outputs")) {
 list2env(outputs_list, environment())
 rm(outputs_list)
 
-prior_df <- outputs %>% select(method_name, prior_str) %>% distinct()
+prior_df <- outputs_ind %>% select(method_name, prior_str) %>% distinct()
 
 zzz <- outputs_summtrajtype_totalsx2 %>% filter(task_group == chosen_task_group, trajectory_type_f == "overall")
 yyy <- zzz %>%
