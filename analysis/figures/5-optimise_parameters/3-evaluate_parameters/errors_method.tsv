@@ -1,289 +1,511 @@
-method_name	error_message	n
-DPT	stats$g >= gmin is not TRUE	136
-embeddr	'tol' must be strictly positive and finite	8
-embeddr	need at least four unique 'x' values	8
-embeddr	smoothing parameter value too small	16
-identity	In ‘progressions’, cells should only have 1 unique from milestone.	4
-monocle with DDRTree	initial centers are not distinct	8
-monocle with DDRTree	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	52
-monocle with ICA	Memory limit exceeded	4
-Mpath	more cluster centers than distinct data points.	8
-Mpath	Mpath only detected one landmark	203
-ouija	a dimension is zero	8
-ouija	error reading from connection	576
-ouijaflow	missing value where TRUE/FALSE needed	25
+method_name	error_message	n	example
+Mpath	Mpath only detected one landmark	203	toy_bifurcating_1
+monocle with DDRTree	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	52	bifurcating_10
+monocle with ICA	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	26	bifurcating_10
+SLICE	replacement has 1 row, data has 0	26	bifurcating_9
+ouijaflow	missing value where TRUE/FALSE needed	25	real/germline-human-male_guo
+Wishbone	"ne/venv/lib/python3.5/site-packages/wishbone/wb.py"", line 1068, in run_wishbone
+    s=s, k=k, l=k, num_waypoints=num_waypoints, branch=branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 54, in wishbone
+    RNK, bp, diffdists, Y = _splittobranches(traj, traj[0], data, iter_l, dist, paths_l2l)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 346, in _splittobranches
+    Y = np.zeros((len(RNK)))
+TypeError: object of type 'numpy.float64' has no len()"	20	consecutive_bifurcating_6
+embeddr	smoothing parameter value too small	16	toy_bifurcating_1
+sincell	Column `node` is unknown	16	real/cell-cycle_buettner
+embeddr	'tol' must be strictly positive and finite	8	toy_trifurcating_2
+embeddr	need at least four unique 'x' values	8	toy_BA_2
+monocle with DDRTree	initial centers are not distinct	8	cycle_10
+Mpath	more cluster centers than distinct data points.	8	converging_9
+Wishbone	"/wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 9"	7	real/germline-human-male_li
+Wanderlust	"/wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 9"	5	real/germline-human-male_li
+identity	In ‘progressions’, cells should only have 1 unique from milestone.	4	real/neonatal-inner-ear-all_burns
+monocle with ICA	vector size specified is too large	4	cycle_10
+shuffle	In ‘progressions’, cells should only have 1 unique from milestone.	4	real/neonatal-inner-ear-all_burns
+sincell	subscript out of bounds	4	real/cortical-interneuron-differentiation_frazer
+slingshot	Lapack routine dgesv: system is exactly singular: U[1,1] = 0	4	bifurcating_loop_8
+Wanderlust	"ishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 140"	4	toy_trifurcating_1
+Wanderlust	"ishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 603"	4	consecutive_bifurcating_10
+Wishbone	"ishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 140"	4	toy_trifurcating_1
+Wishbone	"ishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 276"	4	linear_long_11
+Wishbone	"ishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 603"	4	consecutive_bifurcating_10
+Wishbone	"rc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 232, in _trajectory_landmarks
+    tailband_sample = np.random.choice( tailband, size=tailk, replace=False)
+  File ""mtrand.pyx"", line 1121, in mtrand.RandomState.choice
+ValueError: a must be non-empty"	4	real/mesoderm-development_loh
+Wishbone	"wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 52"	4	toy_consecutive_bifurcating_2
+SCUBA	"thon/3.5.1/lib/python3.5/site-packages/sklearn/metrics/pairwise.py"", line 223, in euclidean_distances
+    X, Y = check_pairwise_arrays(X, Y)
+  File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/metrics/pairwise.py"", line 110, in check_pairwise_arrays
+    warn_on_dtype=warn_on_dtype, estimator=estimator)
+  File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/utils/validation.py"", line 439, in check_array
+    context))
+ValueError: Found array with 0 feature(s) (shape=(1, 0)) while a minimum of 1 is required by check_pairwise_arrays."	3	cycle_6
+SLICE	some weights should be positive	3	toy_simple_linear_2
+Wanderlust	"ishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 131"	3	toy_trifurcating_2
+Wanderlust	"ishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 214"	3	converging_7
+Wanderlust	"wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 15"	3	bifurcating_converging_6
+Wanderlust	"wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 72"	3	trifurcating_6
+Wishbone	"ishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 131"	3	toy_trifurcating_2
+Wishbone	"wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 44"	3	bifurcating_loop_7
+Wishbone	"wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 70"	3	toy_BA_2
+monocle with ICA	evaluation nested too deeply: infinite recursion / options(expressions=)?	2	real/human-embryos_petropoulos
+slingshot	system is computationally singular: reciprocal condition number = 1.08378e-17	2	linear_long_11
+Wanderlust	"ishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 261"	2	real/mesoderm-development_loh
+Wanderlust	"ishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 276"	2	linear_long_11
+Wanderlust	"wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 27"	2	real/germline-human-male-weeks_li
+Wanderlust	"wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 44"	2	bifurcating_loop_7
+Wanderlust	"wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 48"	2	linear_long_11
+Wanderlust	"wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 52"	2	toy_consecutive_bifurcating_2
+Wanderlust	"wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 87"	2	toy_consecutive_bifurcating_2
+Wanderlust	"wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 94"	2	linear_long_4
+Wishbone	"ishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 103"	2	bifurcating_converging_6
+Wishbone	"ishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 159"	2	trifurcating_6
+Wishbone	"ishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 214"	2	converging_7
+Wishbone	"ishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 593"	2	linear_long_2
+Wishbone	"wishbone/core.py"", line 50, in wishbone
+    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
+    paths_l2l.append( [paths[li] for li in l] )
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
+    paths_l2l.append( [paths[li] for li in l] )
+KeyError: 15"	2	bifurcating_converging_6
 SCOUP	" command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59620265ce4/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59620265ce4/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59620265ce4/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59620265ce4/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59620265ce4/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59620265ce4/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_2
 SCOUP	" command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5965533ca93/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5965533ca93/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5965533ca93/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5965533ca93/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5965533ca93/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5965533ca93/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_6
 SCOUP	" command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59820265ce4/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59820265ce4/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59820265ce4/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59820265ce4/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59820265ce4/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59820265ce4/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_3
 SCOUP	" command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59920265ce4/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59920265ce4/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59920265ce4/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59920265ce4/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59920265ce4/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59920265ce4/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_4
 SCOUP	" command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5995533ca93/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5995533ca93/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5995533ca93/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5995533ca93/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5995533ca93/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5995533ca93/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_7
 SCOUP	" running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb27071619/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb27071619/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb27071619/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb27071619/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb27071619/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb27071619/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_10
 SCOUP	" running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb5f50544e/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb5f50544e/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb5f50544e/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb5f50544e/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb5f50544e/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb5f50544e/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_10
 SCOUP	"command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe596403fd387/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe596403fd387/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe596403fd387/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe596403fd387/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe596403fd387/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe596403fd387/ll 3725 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	real/cell-cycle_leng
 SCOUP	"command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a20265ce4/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a20265ce4/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a20265ce4/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a20265ce4/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a20265ce4/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a20265ce4/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_5
 SCOUP	"command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a49e2cc42/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a49e2cc42/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a49e2cc42/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a49e2cc42/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a49e2cc42/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a49e2cc42/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	real/cell-cycle_buettner
 SCOUP	"Error running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd37504694/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd37504694/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd37504694/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd37504694/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd37504694/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd37504694/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_10
 SCOUP	"Error running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd47504694/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd47504694/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd47504694/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd47504694/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd47504694/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd47504694/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_11
 SCOUP	"g command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5965d93cb80/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5965d93cb80/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5965d93cb80/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5965d93cb80/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5965d93cb80/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5965d93cb80/ll 60 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_cycle_1
 SCOUP	"g command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59819f2365a/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59819f2365a/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59819f2365a/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59819f2365a/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59819f2365a/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59819f2365a/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_11
 SCOUP	"g command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5985d93cb80/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5985d93cb80/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5985d93cb80/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5985d93cb80/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5985d93cb80/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5985d93cb80/ll 64 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_cycle_2
 SCOUP	"g command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5995b025e81/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5995b025e81/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5995b025e81/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5995b025e81/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5995b025e81/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5995b025e81/ll 64 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifuracting_loop_1
 SCOUP	"g command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5996bd46df9/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5996bd46df9/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5996bd46df9/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5996bd46df9/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5996bd46df9/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe5996bd46df9/ll 66 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifurcating_cycle_1
 SCOUP	"g command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a5533ca93/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a5533ca93/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a5533ca93/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a5533ca93/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a5533ca93/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a5533ca93/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_8
 SCOUP	"g command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a5b025e81/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a5b025e81/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a5b025e81/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a5b025e81/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a5b025e81/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a5b025e81/ll 67 150 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifuracting_loop_2
 SCOUP	"g command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a6bd46df9/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a6bd46df9/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a6bd46df9/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a6bd46df9/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a6bd46df9/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59a6bd46df9/ll 56 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifurcating_cycle_2
 SCOUP	"ng command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59619f2365a/data /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59619f2365a/init /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59619f2365a/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59619f2365a/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59619f2365a/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp03zdkN/scoupe59619f2365a/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_10
 SCOUP	"nning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd36185d419/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd36185d419/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd36185d419/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd36185d419/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd36185d419/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd36185d419/ll 3725 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	real/cell-cycle_leng
 SCOUP	"nning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd635f58e29/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd635f58e29/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd635f58e29/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd635f58e29/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd635f58e29/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd635f58e29/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_5
 SCOUP	"nning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd647cb3140/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd647cb3140/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd647cb3140/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd647cb3140/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd647cb3140/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd647cb3140/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	real/cell-cycle_buettner
 SCOUP	"nning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb249ee36e/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb249ee36e/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb249ee36e/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb249ee36e/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb249ee36e/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb249ee36e/ll 3725 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	real/cell-cycle_leng
 SCOUP	"nning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb7f5f676d/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb7f5f676d/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb7f5f676d/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb7f5f676d/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb7f5f676d/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb7f5f676d/ll 3725 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	real/cell-cycle_leng
 SCOUP	"nning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf3d6b92b3/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf3d6b92b3/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf3d6b92b3/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf3d6b92b3/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf3d6b92b3/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf3d6b92b3/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	real/cell-cycle_buettner
 SCOUP	"ror running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf580a309/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf580a309/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf580a309/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf580a309/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf580a309/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf580a309/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	real/cell-cycle_buettner
 SCOUP	"ror running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf6b99e5b/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf6b99e5b/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf6b99e5b/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf6b99e5b/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf6b99e5b/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf6b99e5b/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_5
 SCOUP	"ror running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf6c53777/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf6c53777/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf6c53777/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf6c53777/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf6c53777/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf6c53777/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_5
 SCOUP	"rror running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb6b99e5b/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb6b99e5b/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb6b99e5b/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb6b99e5b/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb6b99e5b/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb6b99e5b/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_2
 SCOUP	"rror running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc6b99e5b/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc6b99e5b/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc6b99e5b/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc6b99e5b/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc6b99e5b/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc6b99e5b/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_3
 SCOUP	"rror running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe6b99e5b/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe6b99e5b/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe6b99e5b/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe6b99e5b/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe6b99e5b/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe6b99e5b/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_4
 SCOUP	"rror running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb6c53777/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb6c53777/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb6c53777/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb6c53777/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb6c53777/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb6c53777/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_2
 SCOUP	"rror running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc6c53777/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc6c53777/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc6c53777/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc6c53777/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc6c53777/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc6c53777/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_3
 SCOUP	"rror running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd6c53777/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd6c53777/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd6c53777/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd6c53777/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd6c53777/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd6c53777/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_4
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd36cd3b438/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd36cd3b438/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd36cd3b438/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd36cd3b438/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd36cd3b438/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd36cd3b438/ll 60 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_cycle_1
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd46cd3b438/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd46cd3b438/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd46cd3b438/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd46cd3b438/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd46cd3b438/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd46cd3b438/ll 64 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_cycle_2
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd542ddf013/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd542ddf013/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd542ddf013/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd542ddf013/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd542ddf013/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd542ddf013/ll 66 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifurcating_cycle_1
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd554bd1f73/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd554bd1f73/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd554bd1f73/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd554bd1f73/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd554bd1f73/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd554bd1f73/ll 64 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifuracting_loop_1
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd642ddf013/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd642ddf013/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd642ddf013/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd642ddf013/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd642ddf013/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd642ddf013/ll 56 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifurcating_cycle_2
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd654bd1f73/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd654bd1f73/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd654bd1f73/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd654bd1f73/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd654bd1f73/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd654bd1f73/ll 67 150 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifuracting_loop_2
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd675e18ada/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd675e18ada/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd675e18ada/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd675e18ada/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd675e18ada/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd675e18ada/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_8
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb5485a753/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb5485a753/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb5485a753/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb5485a753/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb5485a753/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb5485a753/ll 60 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_cycle_1
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc27071619/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc27071619/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc27071619/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc27071619/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc27071619/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc27071619/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_11
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc5485a753/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc5485a753/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc5485a753/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc5485a753/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc5485a753/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbc5485a753/ll 64 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_cycle_2
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe3988695f/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe3988695f/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe3988695f/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe3988695f/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe3988695f/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe3988695f/ll 66 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifurcating_cycle_1
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe5aea6cea/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe5aea6cea/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe5aea6cea/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe5aea6cea/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe5aea6cea/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe5aea6cea/ll 64 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifuracting_loop_1
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf3988695f/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf3988695f/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf3988695f/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf3988695f/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf3988695f/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf3988695f/ll 56 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifurcating_cycle_2
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf52731055/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf52731055/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf52731055/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf52731055/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf52731055/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf52731055/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_8
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf5aea6cea/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf5aea6cea/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf5aea6cea/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf5aea6cea/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf5aea6cea/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbf5aea6cea/ll 67 150 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifuracting_loop_2
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb43edad0e/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb43edad0e/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb43edad0e/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb43edad0e/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb43edad0e/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb43edad0e/ll 60 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_cycle_1
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc43edad0e/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc43edad0e/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc43edad0e/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc43edad0e/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc43edad0e/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc43edad0e/ll 64 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_cycle_2
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc5f50544e/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc5f50544e/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc5f50544e/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc5f50544e/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc5f50544e/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedc5f50544e/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_11
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd1c7208ba/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd1c7208ba/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd1c7208ba/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd1c7208ba/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd1c7208ba/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd1c7208ba/ll 64 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifuracting_loop_1
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd71948d74/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd71948d74/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd71948d74/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd71948d74/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd71948d74/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd71948d74/ll 66 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifurcating_cycle_1
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf1c7208ba/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf1c7208ba/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf1c7208ba/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf1c7208ba/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf1c7208ba/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf1c7208ba/ll 67 150 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifuracting_loop_2
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf6e0c1252/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf6e0c1252/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf6e0c1252/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf6e0c1252/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf6e0c1252/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf6e0c1252/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_8
 SCOUP	"running command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf71948d74/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf71948d74/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf71948d74/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf71948d74/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf71948d74/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedf71948d74/ll 56 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	toy_bifurcating_cycle_2
 SCOUP	"unning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd335f58e29/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd335f58e29/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd335f58e29/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd335f58e29/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd335f58e29/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd335f58e29/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_2
 SCOUP	"unning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd375e18ada/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd375e18ada/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd375e18ada/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd375e18ada/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd375e18ada/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd375e18ada/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_6
 SCOUP	"unning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd435f58e29/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd435f58e29/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd435f58e29/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd435f58e29/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd435f58e29/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd435f58e29/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_3
 SCOUP	"unning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd535f58e29/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd535f58e29/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd535f58e29/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd535f58e29/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd535f58e29/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd535f58e29/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_4
 SCOUP	"unning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd575e18ada/data /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd575e18ada/init /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd575e18ada/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd575e18ada/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd575e18ada/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2P1lHp/scoupfd575e18ada/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_7
 SCOUP	"unning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb52731055/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb52731055/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb52731055/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb52731055/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb52731055/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbb52731055/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_6
 SCOUP	"unning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe52731055/data /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe52731055/init /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe52731055/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe52731055/gpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe52731055/cpara /scratch/irc/personal/robrechtc/tmp//RtmpUxueF8/scoupfbe52731055/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_7
 SCOUP	"unning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb6e0c1252/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb6e0c1252/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb6e0c1252/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb6e0c1252/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb6e0c1252/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedb6e0c1252/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_6
 SCOUP	"unning command: 
 '/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd6e0c1252/data /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd6e0c1252/init /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd6e0c1252/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd6e0c1252/gpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd6e0c1252/cpara /scratch/irc/personal/robrechtc/tmp//RtmpYh55rC/scoupedd6e0c1252/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
 -- output --
--- error --"	1
+-- error --"	1	cycle_7
 SCUBA	"_split""])
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCUBA/venv/lib/python3.5/site-packages/PySCUBA/SCUBA_core.py"", line 193, in initialize_tree
     log_W, E_log_W, s_k = gap_stats(XX, 1, k_max)
@@ -291,531 +513,304 @@ SCUBA	"_split""])
     log_W_list.append(np.log(W_k(data, centroids, cluster_IDs))) 
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCUBA/venv/lib/python3.5/site-packages/PySCUBA/Gap_stats.py"", line 88, in W_k
     assert len(centroids) == N_clusters
-AssertionError"	1
+AssertionError"	1	cycle_10
 SCUBA	"/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/cluster/k_means_.py"", line 884, in fit
     X = self._check_fit_data(X)
   File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/cluster/k_means_.py"", line 858, in _check_fit_data
     X = check_array(X, accept_sparse='csr', dtype=[np.float64, np.float32])
   File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/utils/validation.py"", line 439, in check_array
     context))
-ValueError: Found array with 0 feature(s) (shape=(14, 0)) while a minimum of 1 is required."	1
-SCUBA	"thon/3.5.1/lib/python3.5/site-packages/sklearn/metrics/pairwise.py"", line 223, in euclidean_distances
-    X, Y = check_pairwise_arrays(X, Y)
-  File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/metrics/pairwise.py"", line 110, in check_pairwise_arrays
-    warn_on_dtype=warn_on_dtype, estimator=estimator)
-  File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/utils/validation.py"", line 439, in check_array
-    context))
-ValueError: Found array with 0 feature(s) (shape=(1, 0)) while a minimum of 1 is required by check_pairwise_arrays."	3
-shuffle	In ‘progressions’, cells should only have 1 unique from milestone.	4
-sincell	Column `node` is unknown	16
-sincell	subscript out of bounds	4
-SLICE	replacement has 1 row, data has 0	26
-SLICE	some weights should be positive	3
-slingshot	'x' must be an array of at least two dimensions	1
-slingshot	Lapack routine dgesv: system is exactly singular: U[1,1] = 0	4
-slingshot	system is computationally singular: reciprocal condition number = 1.08378e-17	2
-slingshot	system is computationally singular: reciprocal condition number = 1.19902e-17	1
-slingshot	system is computationally singular: reciprocal condition number = 2.02795e-17	1
-slingshot	system is computationally singular: reciprocal condition number = 2.22814e-17	1
-slingshot	system is computationally singular: reciprocal condition number = 5.77905e-18	1
-slingshot	system is computationally singular: reciprocal condition number = 8.68694e-18	1
-StemID	0 (non-NA) cases	7
-StemID	missing value where TRUE/FALSE needed	343
-StemID	NA values in the dissimilarity matrix not allowed.	4
-StemID	Number of clusters 'k' must be in {1,2, .., n-1}; hence n >= 2	17
+ValueError: Found array with 0 feature(s) (shape=(14, 0)) while a minimum of 1 is required."	1	cycle_6
+slingshot	'x' must be an array of at least two dimensions	1	linear_long_11
+slingshot	system is computationally singular: reciprocal condition number = 1.19902e-17	1	cycle_10
+slingshot	system is computationally singular: reciprocal condition number = 2.02795e-17	1	cycle_10
+slingshot	system is computationally singular: reciprocal condition number = 2.22814e-17	1	linear_long_11
+slingshot	system is computationally singular: reciprocal condition number = 5.77905e-18	1	cycle_10
+slingshot	system is computationally singular: reciprocal condition number = 8.68694e-18	1	cycle_10
 Wanderlust	"/wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 5"	1
+KeyError: 5"	1	toy_BA_2
 Wanderlust	"/wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 6"	1
-Wanderlust	"/wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 9"	5
+KeyError: 6"	1	trifurcating_3
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 103"	1
+KeyError: 103"	1	bifurcating_converging_6
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 109"	1
+KeyError: 109"	1	toy_BA_2
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 110"	1
+KeyError: 110"	1	converging_7
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 131"	3
+KeyError: 160"	1	trifurcating_3
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 140"	4
+KeyError: 163"	1	toy_BA_2
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 160"	1
+KeyError: 193"	1	trifurcating_6
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 163"	1
+KeyError: 252"	1	linear_long_2
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 193"	1
+KeyError: 301"	1	trifurcating_3
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 214"	3
+KeyError: 304"	1	trifurcating_3
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 252"	1
+KeyError: 305"	1	linear_long_2
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 261"	2
+KeyError: 350"	1	real/mesoderm-development_loh
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 276"	2
+KeyError: 370"	1	real/mesoderm-development_loh
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 301"	1
-Wanderlust	"ishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 304"	1
-Wanderlust	"ishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 305"	1
-Wanderlust	"ishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 350"	1
-Wanderlust	"ishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 370"	1
-Wanderlust	"ishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 603"	4
-Wanderlust	"ishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 798"	1
+KeyError: 798"	1	linear_long_2
 Wanderlust	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 15"	3
+KeyError: 35"	1	real/germline-human-male-weeks_li
 Wanderlust	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 27"	2
+KeyError: 59"	1	linear_long_4
 Wanderlust	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 35"	1
+KeyError: 63"	1	toy_trifurcating_2
 Wanderlust	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 44"	2
+KeyError: 73"	1	bifurcating_loop_7
 Wanderlust	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 48"	2
+KeyError: 74"	1	linear_long_4
 Wanderlust	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 52"	2
+KeyError: 82"	1	linear_long_4
 Wanderlust	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 59"	1
+KeyError: 83"	1	bifurcating_loop_7
 Wanderlust	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 63"	1
-Wanderlust	"wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 72"	3
-Wanderlust	"wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 73"	1
-Wanderlust	"wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 74"	1
-Wanderlust	"wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 82"	1
-Wanderlust	"wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 83"	1
-Wanderlust	"wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 86"	1
-Wanderlust	"wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 87"	2
-Wanderlust	"wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 94"	2
-Wishbone	"/wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 9"	7
+KeyError: 86"	1	toy_BA_2
 Wishbone	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 103"	2
+KeyError: 119"	1	toy_BA_2
 Wishbone	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 119"	1
+KeyError: 127"	1	converging_7
 Wishbone	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 127"	1
+KeyError: 134"	1	trifurcating_3
 Wishbone	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 131"	3
+KeyError: 187"	1	toy_BA_2
 Wishbone	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 134"	1
+KeyError: 217"	1	linear_long_4
 Wishbone	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 140"	4
+KeyError: 231"	1	converging_7
 Wishbone	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 159"	2
+KeyError: 284"	1	linear_long_2
 Wishbone	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 187"	1
+KeyError: 343"	1	trifurcating_3
 Wishbone	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 214"	2
+KeyError: 359"	1	trifurcating_3
 Wishbone	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 217"	1
+KeyError: 469"	1	trifurcating_3
 Wishbone	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 231"	1
-Wishbone	"ishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 276"	4
-Wishbone	"ishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 284"	1
-Wishbone	"ishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 343"	1
-Wishbone	"ishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 359"	1
-Wishbone	"ishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 469"	1
-Wishbone	"ishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 593"	2
-Wishbone	"ishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 603"	4
-Wishbone	"ishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 762"	1
-Wishbone	"ne/venv/lib/python3.5/site-packages/wishbone/wb.py"", line 1068, in run_wishbone
-    s=s, k=k, l=k, num_waypoints=num_waypoints, branch=branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 54, in wishbone
-    RNK, bp, diffdists, Y = _splittobranches(traj, traj[0], data, iter_l, dist, paths_l2l)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 346, in _splittobranches
-    Y = np.zeros((len(RNK)))
-TypeError: object of type 'numpy.float64' has no len()"	20
-Wishbone	"rc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 232, in _trajectory_landmarks
-    tailband_sample = np.random.choice( tailband, size=tailk, replace=False)
-  File ""mtrand.pyx"", line 1121, in mtrand.RandomState.choice
-ValueError: a must be non-empty"	4
+KeyError: 762"	1	linear_long_2
 Wishbone	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 15"	2
+KeyError: 26"	1	trifurcating_6
 Wishbone	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 26"	1
+KeyError: 27"	1	real/germline-human-male_li
 Wishbone	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 27"	1
+KeyError: 54"	1	toy_BA_2
 Wishbone	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 44"	3
+KeyError: 63"	1	toy_trifurcating_2
 Wishbone	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 52"	4
+KeyError: 73"	1	bifurcating_loop_7
 Wishbone	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 54"	1
+KeyError: 82"	1	linear_long_4
 Wishbone	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
     paths_l2l.append( [paths[li] for li in l] )
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
-KeyError: 63"	1
-Wishbone	"wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 70"	3
-Wishbone	"wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 73"	1
-Wishbone	"wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 82"	1
-Wishbone	"wishbone/core.py"", line 50, in wishbone
-    traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
-    paths_l2l.append( [paths[li] for li in l] )
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
-    paths_l2l.append( [paths[li] for li in l] )
-KeyError: 90"	1
+KeyError: 90"	1	trifurcating_6

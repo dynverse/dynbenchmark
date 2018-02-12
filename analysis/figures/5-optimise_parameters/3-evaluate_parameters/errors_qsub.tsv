@@ -1,2 +1,12 @@
 method_name	error_message	n
-monocle with ICA	Memory limit exceeded	4
+cellTree with gibbs	Memory limit exceeded	4
+GPfates	"File: /home/rcannood/Workspace/dynverse/dynalysis/analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/suite//gpfates/r2gridengine/20180212_113104_D_gpfates_88XKWr8LUi/log/log.1.e.txt
+"	1
+GPfates	"File: /home/rcannood/Workspace/dynverse/dynalysis/analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/suite//gpfates/r2gridengine/20180212_113104_D_gpfates_88XKWr8LUi/log/log.2.e.txt
+"	1
+GPfates	"File: /home/rcannood/Workspace/dynverse/dynalysis/analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/suite//gpfates/r2gridengine/20180212_113104_D_gpfates_88XKWr8LUi/log/log.3.e.txt
+"	1
+GPfates	"File: /home/rcannood/Workspace/dynverse/dynalysis/analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/suite//gpfates/r2gridengine/20180212_113104_D_gpfates_88XKWr8LUi/log/log.4.e.txt
+"	1
+monocle with ICA	Memory limit exceeded	2
+topslam	Memory limit exceeded	4
