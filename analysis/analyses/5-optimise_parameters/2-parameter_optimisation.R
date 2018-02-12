@@ -19,7 +19,7 @@ tasks <- read_rds(derived_file("tasks.rds", "5-optimise_parameters/0-process_tas
   filter(task_group == "synthetic")
 
 # start benchmark suite
-benchmark_suite_submit(
+bs_submit(
   tasks = tasks,
   task_group = rep("task_group", nrow(tasks)),
   task_fold = seq_len(nrow(tasks)) %% num_folds,
@@ -40,7 +40,7 @@ benchmark_suite_submit(
   output_model = TRUE
 )
 
-outputs <- benchmark_suite_retrieve(derived_file("suite/"))
+outputs <- bs_retrieve(derived_file("suite/"))
 
 # # save(outputs, file = derived_file("outputs.RData"))
 # # outputs <- load(file = derived_file("outputs.RData"))
