@@ -29,13 +29,13 @@ library(dynalysis)
 bigtasks <- read_rds("~/bigtasks.rds")
 
 ## chose method
-method <- description_ouijaflow()
+description <- description_ctgibbs()
 
-par_set <- method$par_set
+par_set <- description$par_set
 default_params <- ParamHelpers::generateDesignOfDefaults(par_set, trafo = T) %>% ParamHelpers::dfRowToList(par_set, 1)
 list2env(default_params, environment())
 
-# laad task in environment
+## laad task in environment
 bigtask <- dynutils::extract_row_to_list(bigtasks, nrow(bigtasks))
 smalltask <- extract_row_to_list(dyntoy::toy_tasks, 1)
 
@@ -47,14 +47,14 @@ list2env(prior_information, environment())
 
 
 tasks_to_evaluate <- dynutils::list_as_tibble(list(task_to_evaluate))
-tasks_to_evaluate <- bigtasks
+tasks_to_evaluate <- bigtasks %>% arrange(row_number())
 
 
 ##
-results <- map(seq(nrow(tasks_to_evaluate)), function(row_id) {
-  print(row_id)
+results <- map(seq(nrow(tasks_to_evaluate))[1:20], function(row_id) {
+  print(paste0(">> ", row_id))
   subtasks <- tasks_to_evaluate[row_id, ,drop=F]
-  execute_evaluation(subtasks, method, default_params, "correlation", extra_metrics=c("rf_mse", "edge_flip")) %>% attr("extras") %>% .$.summary
+  execute_evaluation(subtasks, description, default_params, "correlation", extra_metrics=c("rf_mse", "edge_flip")) %>% attr("extras") %>% .$.summary
 }) %>% bind_rows()
 
 
