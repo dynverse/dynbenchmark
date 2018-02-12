@@ -33,7 +33,7 @@ space %>%
 In all datasets, cells were sampled while they were going through a cellular dynamic process, such as the cell cycle, differentiation, activation, ... 
 At some points during this process, cells make decisions about different paths they can take. At other points, they could converge towards very similar cell types. 
 
-When we assume that cells go through this process gradually, the expression changes will follow a continuum, and this will be reflected in the 2D visualisation of the cells. Cells will follow paths within this 2D visualisation, but due to heterogeneity, will not exactly follow the path. See for example the red path in the following visualisation;
+When we assume that cells go through this process gradually, the expression changes will follow a continuum, and this will be reflected in the 2D visualisation of the cells. Cells will follow paths within this 2D visualisation, but due to heterogeneity, will not exactly lie on this "average" path. See for example the red path in the following visualisation:
 
 ```{r, echo=F}
 graph <- tribble(
@@ -63,7 +63,8 @@ To edit lines
 ![](arrow.png)
 To select lines (and delete them with the delete key)
 
-You don't have to define an end or start point. When drawing cycles, splits or convergences, two points don't have to lie at exactly the same position, as they will be mergen computationally.
+You don't have to define an end or start point. When drawing cycles, splits or convergences, two points don't have to lie at exactly the same position, as they will be merged computationally.
 
 When ready, send the svg file back to wouter.saelens@ugent.be
 
+Thank you!
