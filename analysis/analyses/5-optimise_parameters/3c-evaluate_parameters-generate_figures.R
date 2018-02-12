@@ -4,14 +4,13 @@ library(dynplot)
 
 experiment("5-optimise_parameters/3-evaluate_parameters")
 
-# Download ---------------------
-PRISM:::rsync_remote(
-  remote_src = "prism",
-  path_src = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
-  remote_dest = "",
-  path_dest = derived_file()
-)
-
+# Rsync latest results!
+# PRISM:::rsync_remote(
+#   remote_src = "prism",
+#   path_src = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
+#   remote_dest = "",
+#   path_dest = derived_file()
+# )
 
 ############################################################
 ############### PART THREE: GENERATE FIGURES ###############
@@ -26,23 +25,29 @@ method_ord <- outputs_list$outputs_summtrajtype_totalsx2 %>%
   arrange(desc(harm_mean)) %>%
   .$method_name
 
+# create method_name_f factor in all data structures
 for (oname in str_subset(names(outputs_list), "outputs")) {
   outputs_list[[oname]] <- outputs_list[[oname]] %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
 }
 
+# load all outputs in environment and remove outputs_list
 list2env(outputs_list, environment())
 rm(outputs_list)
 
+# collect which methods use which prior information
 prior_df <- outputs_ind %>% select(method_name, prior_str) %>% distinct()
 
-zzz <- outputs_summtrajtype_totalsx2 %>% filter(task_group == chosen_task_group, trajectory_type_f == "overall")
-yyy <- zzz %>%
+
+############### OVERALL COMPARISON ###############
+overall_comp <-
+  outputs_summtrajtype_totalsx2 %>%
+  filter(task_group == chosen_task_group, trajectory_type_f == "overall") %>%
   select(method_name, method_short_name, method_name_f, harm_mean, pct_errored_mean, rank_correlation_mean, rank_correlation_var, rank_rf_mse_mean, rank_rf_mse_var, rank_edge_flip_mean, rank_edge_flip_var, time_method_mean) %>%
   gather(metric, score, -method_name:-method_name_f) %>%
   mutate(metric_f = factor(metric, levels = c("harm_mean", "pct_errored_mean", "time_method_mean", "rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean", "rank_correlation_var", "rank_edge_flip_var", "rank_rf_mse_var")))
 
 pdf(figure_file("1_overall_comparison.pdf"), 12, 12)
-ggplot(yyy) +
+ggplot(overall_comp) +
   geom_bar(aes(method_name_f, score, fill = metric_f), stat = "identity") +
   facet_wrap(~metric_f, scales = "free", nrow = 3) +
   coord_flip() +
@@ -50,7 +55,7 @@ ggplot(yyy) +
   labs(x = NULL, y = NULL, fill = "Metric") +
   theme(legend.position = "none")
 
-ggplot(yyy %>% left_join(prior_df, by = "method_name")) +
+ggplot(overall_comp %>% left_join(prior_df, by = "method_name")) +
   geom_bar(aes(method_name_f, score, fill = prior_str), stat = "identity") +
   facet_wrap(~metric_f, scales = "free", nrow = 3) +
   coord_flip() +
@@ -60,7 +65,10 @@ ggplot(yyy %>% left_join(prior_df, by = "method_name")) +
   labs(x = NULL, y = NULL, fill = "Prior")
 dev.off()
 
-# plots
+rm(overall_comp)
+
+
+############### COMPARISON PER TRAJECTORY TYPE ###############
 pdf(figure_file("2_trajtype_comparison.pdf"), 20, 16)
 ggplot(outputs_summtrajtype_totalsx2) +
   geom_point(aes(method_name_f, harm_mean)) +
@@ -108,95 +116,17 @@ ggplot(outputs_summtrajtype_totalsx2) +
     x = NULL
   )
 
-ggplot(outputs_summtrajtype_totalsx2, aes(harm_mean, rank_correlation_mean)) +
-  geom_point() +
-  ggrepel::geom_text_repel(aes(label = method_name)) +
-  theme_bw() +
-  facet_grid(task_group~trajectory_type_f)
-
-ggplot(outputs_summtrajtype_totalsx2, aes(harm_mean, rank_rf_mse_mean)) +
-  geom_point() +
-  ggrepel::geom_text_repel(aes(label = method_name)) +
-  theme_bw() +
-  facet_grid(task_group~trajectory_type_f)
-
-ggplot(outputs_summtrajtype_totalsx2, aes(harm_mean, rank_edge_flip_mean)) +
-  geom_point() +
-  ggrepel::geom_text_repel(aes(label = method_name)) +
-  theme_bw() +
-  facet_grid(task_group~trajectory_type_f)
-
-ggplot(outputs_summtrajtype_totalsx2, aes(harm_mean, pct_errored_mean)) +
-  geom_point() +
-  ggrepel::geom_text_repel(aes(label = method_name)) +
-  theme_bw() +
-  facet_grid(task_group~trajectory_type_f)
-
 dev.off()
 
 
 
 
-
-# # error messages
-# error_messages_overall <-
-#   outputs %>%
-#   group_by(method_name, method_name_f) %>%
-#   mutate(num_datasets = n()) %>%
-#   ungroup() %>%
-#   filter(!sapply(error, is.null)) %>%
-#   rowwise() %>%
-#   mutate(
-#     error_message = error$message,
-#     error_message = str_replace_all(error_message, "/scratch/irc/personal/robrechtc/tmp//Rtmp[A-Za-z0-9_\\-/]*", "{tmpfile}")
-#   ) %>%
-#   ungroup() %>%
-#   group_by(method_name, method_name_f, error_message) %>%
-#   summarise(num = n(), pct = num / num_datasets[[1]], example_dataset = task_id[[1]]) %>%
-#   ungroup()
-# # error_reasons <- tribble(
-# #   ~partial_message, ~reason,
-# #   "reached elapsed time limit", "time limit",
-# #   "Cannot allocate memory", "memory limit",
-# #   "cannot open the connection", "error inside python code"
-# # )
-# # error_reason_fun <- function(error_message) {
-# #   greps <- sapply(error_reasons$partial_message, function(part_mess) {
-# #     grepl(part_mess, error_message)
-# #   })
-# #   apply(greps, 1, function(bools) {
-# #     if (any(bools)) {
-# #       error_reasons$reason[bools]
-# #     } else {
-# #       "error in method"
-# #     }
-# #   })
-# # }
-# #
-# # error_messages_overall <- error_messages_overall %>%
-# #   mutate(
-# #     error_reason = error_reason_fun(error_message),
-# #     error_reason_f = factor(error_reason, levels = names(sort(table(error_reason), decreasing = T)))
-# #   )
-#
-# write_tsv(error_messages_overall, figure_file("error_reasons.tsv"))
-#
-#
-# pdf(figure_file("error_reasons.pdf"), 12, 6)
-# ggplot(error_messages_overall) +
-#   geom_bar(aes(method_name_f, pct, fill = error_reason_f), stat = "identity") +
-#   coord_flip() +
-#   scale_fill_brewer(palette = "Set1") +
-#   cowplot::theme_cowplot() +
-#   labs(x = NULL, y = "Percentage errored", fill = "Reason")
-# dev.off()
-
-
+############### COMPARISON OF EXECUTION TIMES ###############
 step_levels <- c("sessionsetup", "preprocessing", "method", "postprocessing", "wrapping", "sessioncleanup", "geodesic", "correlation",
                  "coranking", "mantel", "rf", "edge_flip")
 
 time_ind <-
-  outputs %>%
+  outputs_ind %>%
   select(method_name, method_name_f, task_id, pct_errored, error_message, trajectory_type_f, starts_with("time_")) %>%
   gather(step, time, starts_with("time")) %>%
   mutate(
@@ -204,21 +134,33 @@ time_ind <-
     step_f = factor(step, levels = step_levels)
   )
 
-task_ordering <- time_ind %>%
+timeind_task_ord <- time_ind %>%
   group_by(task_id) %>%
   summarise(time = sum(time, na.rm = T)) %>%
   arrange(desc(time))
 
-method_ordering <- time_ind %>%
+timeind_meth_ord <- time_ind %>%
   group_by(method_name, step_f) %>%
   summarise(time = mean(time, na.rm = T)) %>%
   summarise(time = sum(time, na.rm=T)) %>%
   arrange(desc(time))
 
 time_ind <- time_ind %>% mutate(
-  task_id_f = factor(task_id, levels = task_ordering$task_id),
-  method_name_f = factor(method_name, levels = method_ordering$method_name)
+  task_id_f = factor(task_id, levels = timeind_task_ord$task_id),
+  method_name_f = factor(method_name, levels = timeind_meth_ord$method_name)
 )
+
+g <- time_ind %>%
+  group_by(method_name_f, step_f) %>%
+  summarise(time = mean(time, na.rm = T)) %>%
+  ungroup() %>%
+  ggplot() +
+  geom_bar(aes(method_name_f, time, fill = step_f), stat = "identity", position = position_stack(reverse = TRUE)) +
+  scale_fill_brewer(palette = "Set3") +
+  cowplot::theme_cowplot() +
+  coord_flip() +
+  labs(x = NULL, fill = "Time step")
+ggsave(figure_file("3_timeperstep_overall.pdf"), g, width = 10, height = 5)
 
 g <- time_ind %>%
   group_by(trajectory_type_f, method_name, step_f) %>%
@@ -231,39 +173,8 @@ g <- time_ind %>%
   cowplot::theme_cowplot() +
   coord_flip() +
   labs(x = NULL, fill = "Time step")
-ggsave(figure_file("timestep_permethodandtrajtype.pdf"), g, width = 20, height = 8)
+ggsave(figure_file("3_timeperstep_pertrajtype.pdf"), g, width = 20, height = 8)
 
-g <- time_ind %>%
-  group_by(method_name_f, step_f) %>%
-  summarise(time = mean(time, na.rm = T)) %>%
-  ungroup() %>%
-  ggplot() +
-  geom_bar(aes(method_name_f, time, fill = step_f), stat = "identity", position = position_stack(reverse = TRUE)) +
-  scale_fill_brewer(palette = "Set3") +
-  cowplot::theme_cowplot() +
-  coord_flip() +
-  labs(x = NULL, fill = "Time step")
-ggsave(figure_file("timestep_permethod.pdf"), g, width = 10, height = 5)
+rm(time_ind, timeind_task_ord, timeind_meth_ord)
 
 
-
-
-
-# outputs_with_models <- read_rds(derived_file("outputs_with_models.rds"))
-#
-# manual_outs <- outputs_with_models %>%
-#   filter(method_name == "manual", repeat_i == 1) %>%
-#   sample_n(20)
-#
-# models <- manual_outs$model
-# for (i in seq_along(models)) {
-#   models[[i]]$id <- manual_outs$task_id
-# }
-#
-# cowplot::plot_grid(plotlist = lapply(models, dynplot::plot_default))
-#
-# dynplot::plot_default(models[[2]]) # ??
-#
-# cowplot::plot_grid(plotlist = lapply(models, dynmethods:::plot_manual))
-#
-# dynmethods:::plot_manual(models[[2]]) # ??
