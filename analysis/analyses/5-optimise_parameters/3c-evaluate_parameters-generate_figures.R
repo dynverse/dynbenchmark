@@ -4,13 +4,20 @@ library(dynplot)
 
 experiment("5-optimise_parameters/3-evaluate_parameters")
 
-###########################################################
-############### PART FOUR: GENERATE FIGURES ###############
-###########################################################
+# Download ---------------------
+PRISM:::rsync_remote(
+  remote_src = "prism",
+  path_src = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
+  remote_dest = "",
+  path_dest = derived_file()
+)
+
+
+############################################################
+############### PART THREE: GENERATE FIGURES ###############
+############################################################
 
 outputs_list <- read_rds(derived_file("outputs_postprocessed.rds"))
-list2env(read_rds(derived_file("config.rds")), environment())
-
 chosen_task_group <- "mean_notoy"
 
 # get ordering of methods
