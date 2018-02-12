@@ -175,6 +175,72 @@ g <- time_ind %>%
   labs(x = NULL, fill = "Time step")
 ggsave(figure_file("3_timeperstep_pertrajtype.pdf"), g, width = 20, height = 8)
 
-rm(time_ind, timeind_task_ord, timeind_meth_ord)
+rm(g, time_ind, timeind_task_ord, timeind_meth_ord)
 
 
+
+
+
+############### COMPARISON OF SCORES BETWEEN TASK GROUPS ###############
+out_gath <- outputs_summtrajtype %>%
+  select(method_name, method_short_name, method_name_f, task_group, trajectory_type, trajectory_type_f, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, harm_mean) %>%
+  gather(metric, value, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, harm_mean) %>%
+  spread(task_group, value)
+
+one <-
+  ggplot(out_gath) +
+  geom_point(aes(real, synthetic, colour = trajectory_type)) +
+  coord_equal() +
+  theme_bw() +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(title = paste0("Real versus synthetic - Rsq = ", round(rsq(out_gath$real, out_gath$synthetic), 3))) +
+  facet_wrap(~metric, nrow = 1)
+two <-
+  ggplot(out_gath) +
+  geom_point(aes(real, toy, colour = trajectory_type)) +
+  coord_equal() +
+  theme_bw() +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(title = paste0("Real versus toy - Rsq = ", round(rsq(out_gath$real, out_gath$toy), 3))) +
+  facet_wrap(~metric, nrow = 1)
+three <-
+  ggplot(out_gath) +
+  geom_point(aes(synthetic, toy, colour = trajectory_type)) +
+  coord_equal() +
+  theme_bw() +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(title = paste0("Synthetic versus toy - Rsq = ", round(rsq(out_gath$synthetic, out_gath$toy), 3))) +
+  facet_wrap(~metric, nrow = 1)
+cowplot::plot_grid(one, two, three, ncol = 1)
+
+
+
+out_gath <- outputs_summmethod %>%
+  select(method_name, method_short_name, method_name_f, task_group, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, harm_mean) %>%
+  gather(metric, value, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, harm_mean) %>%
+  spread(task_group, value)
+
+one <-
+  ggplot(out_gath) +
+  geom_point(aes(real, synthetic)) +
+  coord_equal() +
+  theme_bw() +
+  scale_colour_brewer(palette = "Dark2") +
+  facet_wrap(~metric, nrow = 1)
+two <-
+  ggplot(out_gath) +
+  geom_point(aes(real, toy)) +
+  coord_equal() +
+  theme_bw() +
+  scale_colour_brewer(palette = "Dark2") +
+  facet_wrap(~metric, nrow = 1)
+three <-
+  ggplot(out_gath) +
+  geom_point(aes(synthetic, toy)) +
+  coord_equal() +
+  theme_bw() +
+  scale_colour_brewer(palette = "Dark2") +
+  facet_wrap(~metric, nrow = 1)
+cowplot::plot_grid(one, two, three, ncol = 1)
+
+rm(out_gath, one, two, three)

@@ -8,7 +8,7 @@ experiment("5-optimise_parameters/3-evaluate_parameters")
 ##########################################################
 
 # fetch results from cluster
-# bs_fetch_results(derived_file("suite/"))
+bs_fetch_results(derived_file("suite/"))
 
 # bind results in one data frame (without models)
 outputs <- bs_bind_results(derived_file("suite/"), load_models = FALSE)
