@@ -7,7 +7,7 @@ experiment("5-optimise_parameters/2-parameter_optimisation")
 methods <- get_descriptions() %>% filter(!short_name %in% c("pseudogp", "mnclica", "ctgibbs"))
 metrics <- c("correlation", "rf_mse", "edge_flip")
 extra_metrics <- c()
-optim_timeout <- 1 * 24 * 60 * 60
+optimisation_timeout <- 1 * 24 * 60 * 60
 num_repeats <- 1
 num_folds <- 3
 num_init_params <- 50
@@ -20,21 +20,24 @@ tasks <- read_rds(derived_file("tasks.rds", "5-optimise_parameters/0-process_tas
 
 # start benchmark suite
 benchmark_suite_submit(
-  tasks,
-  task_group = rep("group", nrow(tasks)),
+  tasks = tasks,
+  task_group = rep("task_group", nrow(tasks)),
   task_fold = seq_len(nrow(tasks)) %% num_folds,
   out_dir = derived_file("suite/"),
-  save_r2g_to_outdir = TRUE,
+  remote_dir = paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/"),
+  designs = NULL,
   methods = methods,
   metrics = metrics,
+  extra_metrics = extra_metrics,
   optimisation_timeout = optimisation_timeout,
-  memory = "11G",
+  memory = "10G",
   num_cores = num_cores,
   num_iterations = num_iterations,
   num_repeats = num_repeats,
   num_init_params = num_init_params,
-  execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500",
-  r_module = NULL
+  execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500; export DYNALYSIS_PATH=/group/irc/shared/dynalysis/",
+  r_module = NULL,
+  output_model = TRUE
 )
 
 outputs <- benchmark_suite_retrieve(derived_file("suite/"))
