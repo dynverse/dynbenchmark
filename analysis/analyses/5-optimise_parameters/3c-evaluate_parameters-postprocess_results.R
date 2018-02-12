@@ -1,6 +1,5 @@
 library(dynalysis)
 library(tidyverse)
-library(dynplot)
 
 experiment("5-optimise_parameters/3-evaluate_parameters")
 
