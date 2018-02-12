@@ -134,6 +134,12 @@ PRISM:::rsync_remote(
   remote_dest = "prism",
   path_dest = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
   remote_src = "",
+  path_src = derived_file("config.rds")
+)
+PRISM:::rsync_remote(
+  remote_dest = "prism",
+  path_dest = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
+  remote_src = "",
   path_src = derived_file("outputs_postprocessed.rds")
 )
 method_names <- list.dirs(derived_file("suite"), recursive = FALSE, full.names = FALSE)

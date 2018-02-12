@@ -6,7 +6,7 @@
 #' @param experiment_id The experiment id (default NULL
 #'
 #' @export
-load_model <- function(method_short_name, model_id, auto_gc = TRUE, experiment_id = NULL) {
+load_dyneval_model <- function(method_short_name, model_id, auto_gc = TRUE, experiment_id = NULL) {
   models_filename <- derived_file(paste0("suite/", method_short_name, "/output_models.rds"), experiment_id = experiment_id)
 
   if (!file.exists(models_filename)) {
