@@ -41,7 +41,8 @@ ggplot(yyy) +
   facet_wrap(~metric_f, scales = "free", nrow = 3) +
   coord_flip() +
   theme_bw() +
-  labs(x = NULL, y = NULL, fill = "Metric")
+  labs(x = NULL, y = NULL, fill = "Metric") +
+  theme(legend.position = "none")
 
 ggplot(yyy %>% left_join(prior_df, by = "method_name")) +
   geom_bar(aes(method_name_f, score, fill = prior_str), stat = "identity") +
@@ -242,21 +243,21 @@ ggsave(figure_file("timestep_permethod.pdf"), g, width = 10, height = 5)
 
 
 
-outputs_with_models <- read_rds(derived_file("outputs_with_models.rds"))
-
-manual_outs <- outputs_with_models %>%
-  filter(method_name == "manual", repeat_i == 1) %>%
-  sample_n(20)
-
-models <- manual_outs$model
-for (i in seq_along(models)) {
-  models[[i]]$id <- manual_outs$task_id
-}
-
-cowplot::plot_grid(plotlist = lapply(models, dynplot::plot_default))
-
-dynplot::plot_default(models[[2]]) # ??
-
-cowplot::plot_grid(plotlist = lapply(models, dynmethods:::plot_manual))
-
-dynmethods:::plot_manual(models[[2]]) # ??
+# outputs_with_models <- read_rds(derived_file("outputs_with_models.rds"))
+#
+# manual_outs <- outputs_with_models %>%
+#   filter(method_name == "manual", repeat_i == 1) %>%
+#   sample_n(20)
+#
+# models <- manual_outs$model
+# for (i in seq_along(models)) {
+#   models[[i]]$id <- manual_outs$task_id
+# }
+#
+# cowplot::plot_grid(plotlist = lapply(models, dynplot::plot_default))
+#
+# dynplot::plot_default(models[[2]]) # ??
+#
+# cowplot::plot_grid(plotlist = lapply(models, dynmethods:::plot_manual))
+#
+# dynmethods:::plot_manual(models[[2]]) # ??

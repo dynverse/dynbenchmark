@@ -1,58 +1,43 @@
 library(dynalysis)
 library(tidyverse)
-library(dynplot)
 
 experiment("5-optimise_parameters/2-parameter_optimisation")
 
-# tasks
-tasks <- readRDS(derived_file("v6/tasks.rds", experiment_id = "datasets/synthetic"))
-
-
-# filter tasks, for now
-# %>%
-#   mutate(nrow = map_int(expression, nrow), ncol = map_int(expression, ncol))
-# real_tasks <- real_tasks %>% filter(nrow < 2000) %>% mutate(trajectory_type = unlist(trajectory_type))
-
-num_folds <- 4
-# tasks_info <- tasks$info %>% map_df(as_data_frame) %>% mutate(task_id = tasks$id)
-# platform_folds <- sample(unique(tasks_info$platform_name))
-# platform_folds_map <- setNames(ceiling(seq(1e-10, num_folds, length = length(platform_folds))), platform_folds)
-# table(platform_folds_map)
-# tasks_info <- tasks_info %>% mutate(fold = platform_folds_map[platform_name])
-# write_rds(tasks_info, derived_file("tasks_info.rds"))
-
-tasks_info <- read_rds(derived_file("tasks_info.rds"))
-
-# configure run
-task_group <- rep("group", nrow(tasks))
-task_fold <- tasks_info$fold
-methods <- get_descriptions(as_tibble = T)
-
-metrics <- c("correlation", "edge_flip", "rf_mse")
-optimisation_timeout <- 3600*7
-num_repeats <- 4
-
-num_init_params <- 100
+# settings
+methods <- get_descriptions() %>% filter(!short_name %in% c("pseudogp", "mnclica", "ctgibbs"))
+metrics <- c("correlation", "rf_mse", "edge_flip")
+extra_metrics <- c()
+optimisation_timeout <- 1 * 24 * 60 * 60
+num_repeats <- 1
+num_folds <- 3
+num_init_params <- 50
 num_iterations <- 200
 num_cores <- 1
 
+# read tasks
+tasks <- read_rds(derived_file("tasks.rds", "5-optimise_parameters/0-process_tasks")) %>%
+  filter(task_group == "synthetic")
+
 # start benchmark suite
 benchmark_suite_submit(
-  tasks,
-  task_group,
-  task_fold,
+  tasks = tasks,
+  task_group = rep("task_group", nrow(tasks)),
+  task_fold = seq_len(nrow(tasks)) %% num_folds,
   out_dir = derived_file("suite/"),
-  save_r2g_to_outdir = TRUE,
+  remote_dir = paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/"),
+  designs = NULL,
   methods = methods,
   metrics = metrics,
+  extra_metrics = extra_metrics,
   optimisation_timeout = optimisation_timeout,
-  memory = "11G",
+  memory = "10G",
   num_cores = num_cores,
   num_iterations = num_iterations,
   num_repeats = num_repeats,
   num_init_params = num_init_params,
-  execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500",
-  r_module = NULL
+  execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500; export DYNALYSIS_PATH=/group/irc/shared/dynalysis/",
+  r_module = NULL,
+  output_model = TRUE
 )
 
 outputs <- benchmark_suite_retrieve(derived_file("suite/"))

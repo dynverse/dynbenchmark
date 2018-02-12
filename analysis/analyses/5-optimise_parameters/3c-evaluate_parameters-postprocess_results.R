@@ -1,6 +1,5 @@
 library(dynalysis)
 library(tidyverse)
-library(dynplot)
 
 experiment("5-optimise_parameters/3-evaluate_parameters")
 
@@ -98,4 +97,19 @@ to_save <- to_save[str_detect(names(to_save), "^outputs")]
 write_rds(to_save, derived_file("outputs_postprocessed.rds"))
 
 
+# Download ---------------------
+PRISM:::rsync_remote(
+  remote_src = "prism",
+  path_src = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
+  remote_dest = "",
+  path_dest = derived_file()
+)
+
+# Upload ---------------------
+PRISM:::rsync_remote(
+  remote_dest = "prism",
+  path_dest = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
+  remote_src = "",
+  path_src = derived_file("outputs_postprocessed.rds")
+)
 
