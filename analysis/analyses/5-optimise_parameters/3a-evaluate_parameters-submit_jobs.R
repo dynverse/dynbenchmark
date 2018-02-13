@@ -27,7 +27,7 @@ designs <- lapply(methods$short_name, function(mn) {
 
 # save benchmark configuration and start it
 write_rds(lst(methods, designs, metrics, extra_metrics, num_repeats, tasks), derived_file("config.rds"))
-benchmark_suite_submit(
+bs_submit(
   tasks = tasks,
   task_group = rep("task_group", nrow(tasks)),
   task_fold = rep(1, nrow(tasks)),

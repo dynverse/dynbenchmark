@@ -21,7 +21,7 @@ designs <- lapply(methods$par_set, function(par_set) {
 }) %>% setNames(methods$short_name)
 
 # save benchmark configuration and start it
-benchmark_suite_submit(
+bs_submit(
   tasks = tasks,
   task_group = tasks$task_group,
   task_fold = rep(1, nrow(tasks)),
@@ -40,7 +40,7 @@ benchmark_suite_submit(
   output_model = TRUE
 )
 
-outputs <- benchmark_suite_retrieve(derived_file("suite/"))
+outputs <- bs_retrieve(derived_file("suite/"))
 
 outputs %>%
   select(method_name, error_message) %>%

@@ -8,7 +8,7 @@ experiment("manual_ti")
 # load in all datasets
 tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
 
-# runs <- tibble(dimred_id = character(), person_id = character(), run_i = integer(), run_id = character(), seed = integer()) %>% write_rds(result_file("runs.rds"))
+# runs <- tibble(dimred_id = character(), person_id = character(), run_i = integer(), run_id = character(), seed = integer()) %>% write_rds(derived_file("runs.rds"))
 runs <- read_rds(derived_file("runs.rds"))
 
 run <- lst(
