@@ -262,10 +262,10 @@ tasks <- tasks %>% slice(match(run$spaces$task_id, task_id))
 controls <- map(tasks %>% filter(category == "control" & task_id != "control_BA") %>% pull(task_id), function(task_id) {
   print(task_id)
   task <- extract_row_to_list(tasks, which(tasks$task_id == task_id))
-  task$geodesic_dist <- dynutils::compute_emlike_dist(task)
+  task$geodesic_dist <- dynutils::compute_tented_geodesic_distances(task)
 
   prediction <- extract_row_to_list(predictions, which(predictions$task_id == task_id))$prediction
-  prediction$geodesic_dist <- dynutils::compute_emlike_dist(prediction)
+  prediction$geodesic_dist <- dynutils::compute_tented_geodesic_distances(prediction)
 
   plot = dynplot::plot_default(prediction)
   plot

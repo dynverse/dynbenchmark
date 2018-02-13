@@ -201,7 +201,7 @@ perturb_hairy <- function(task, nhairs=10, overall_hair_length=1) {
     progressions = newprogressions
   )
 
-  newtask$geodesic_dist <- dynutils:::compute_emlike_dist(newtask)
+  newtask$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(newtask)
 
   newtask
 }
@@ -295,7 +295,7 @@ recreate_task <- function(task) {
     task$milestone_network,
     progression=task$progression
   )
-  task$geodesic_dist <- dynutils:::compute_emlike_dist(task)
+  task$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(task)
 
   task
 }
@@ -318,6 +318,6 @@ group_task <- function(task) {
     task$milestone_network,
     task$milestone_percentages
   )
-  task$geodesic_dist <- dynutils:::compute_emlike_dist(task)
+  task$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(task)
   task
 }

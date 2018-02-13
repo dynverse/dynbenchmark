@@ -3,6 +3,8 @@ library(dynutils)
 library(PRISM)
 #library(dyngen)
 
+dataset_preprocessing("synthetic/v6")
+
 updates_model <- tribble(
   ~modulenet_name, ~totaltime,
   "linear", 5,
@@ -21,7 +23,7 @@ updates_replicates <- tibble(replicate_id = 1)
 updates <- tidyr::crossing(updates_model, updates_platform, updates_replicates)
 updates <- updates %>%
   group_by(modulenet_name) %>%
-  mutate(dataset_id = paste0(modulenet_name, "_", seq_len(n()))) %>%
+  mutate(dataset_id = paste0("synthetic/", modulenet_name, "_", seq_len(n()))) %>%
   ungroup()
 
 update_params <- function(base_params=dyngen:::base_params, ...) {
@@ -56,8 +58,8 @@ folder <- "~/thesis/projects/dynverse/dynalysis/analysis/data/derived_data/datas
 # PRISM:::run_remote(glue::glue("rm -r {remote_folder}"), "prism")
 # PRISM:::run_remote(glue::glue("mkdir {remote_folder}"), "prism")
 
-# saveRDS(paramsets, paste0(folder, "paramsets.rds"))
-paramsets <- readRDS(paste0(folder, "paramsets.rds"))
+# write_rds(paramsets, dataset_preproc_file("paramsets.rds"))
+paramsets <- read_rds(dataset_preproc_file("paramsets.rds"))
 PRISM:::rsync_remote("", folder, "prism", remote_folder)
 
 # functions for get the folder for saving
@@ -94,8 +96,8 @@ handle <- qsub_lapply(
       saveRDS(model, model_location(folder, params_i))
     }
   }
-) %>% saveRDS("model_handle.rds")
-models <- qsub_retrieve(readRDS("model_handle.rds"))
+) %>% write_rds(dataset_preproc_file("model_handle.rds"))
+models <- qsub_retrieve(read_rds(dataset_preproc_file("model_handle.rds")))
 PRISM:::rsync_remote("prism", remote_folder, "", folder)
 
 ## SIMULATE CELLS ---------------------------
@@ -118,8 +120,8 @@ qsub_lapply(
     }
     TRUE
   }
-) %>% saveRDS("simulations_handle.rds")
-simulations <- qsub_retrieve(readRDS("simulations_handle.rds"))
+) %>% write_rds(dataset_preproc_file("simulations_handle.rds"))
+simulations <- qsub_retrieve(read_rds(dataset_preproc_file("simulations_handle.rds")))
 PRISM:::rsync_remote("prism", remote_folder, "", folder)
 
 ## Check simulations -------
@@ -136,8 +138,8 @@ PRISM::qsub_run(qsub_config = qsub_config %>% list_modify(name = "simulation_che
       )
     }
   }, mc.cores=ncores)
-}) %>% saveRDS("simulations_checks_handle.rds")
-checks <- qsub_retrieve(readRDS("simulations_checks_handle.rds"))
+}) %>% write_rds(dataset_preproc_file("simulations_checks_handle.rds"))
+checks <- qsub_retrieve(read_rds(dataset_preproc_file("simulations_checks_handle.rds")))
 
 
 # GOLD STANDARD ----------------------
@@ -163,8 +165,8 @@ qsub_lapply(
       saveRDS(gs, gs_location(folder, params_i))
     }
   }
-) %>% saveRDS("gs_handle.rds")
-gs <- qsub_retrieve(readRDS("gs_handle.rds"))
+) %>% write_rds(dataset_preproc_file("gs_handle.rds"))
+gs <- qsub_retrieve(read_rds(dataset_preproc_file("gs_handle.rds")))
 PRISM:::rsync_remote("prism", remote_folder, "", folder)
 
 checks <- map_dfr(seq_along(paramsets), function(params_i) {
@@ -191,8 +193,8 @@ handle <- qsub_lapply(qsub_config = qsub_config_single %>% list_modify(name = "e
     experiment$uuids <- list(experiment=uuid::UUIDgenerate()) %>% c(gs$uuids)
     saveRDS(experiment, experiment_location(folder, params_i))
   }
-}) %>% saveRDS("experiments_handle.rds")
-experiments <- qsub_retrieve(readRDS("experiments_handle.rds"))
+}) %>% write_rds(dataset_preproc_file("experiments_handle.rds"))
+experiments <- qsub_retrieve(read_rds(dataset_preproc_file("experiments_handle.rds")))
 
 # NORMALISE ----------------------------
 qsub_lapply(qsub_config = qsub_config_single %>% list_modify(name = "normalisat"), qsub_environment=qsub_environment, qsub_packages = qsub_packages, seq_along(paramsets), function(params_i) {
@@ -213,8 +215,8 @@ qsub_lapply(qsub_config = qsub_config_single %>% list_modify(name = "normalisat"
     dyngen:::plot_normalisation(experiment, normalisation)
     graphics.off()
   }
-}) %>% saveRDS("normalisation_handle.rds")
-normalizations <- qsub_retrieve(readRDS("normalisation_handle.rds"))
+}) %>% write_rds(dataset_preproc_file("normalisation_handle.rds"))
+normalizations <- qsub_retrieve(read_rds(dataset_preproc_file("normalisation_handle.rds")))
 
 # Plot GOLD STANDARD ----------------------------------------
 qsub_lapply(qsub_config = qsub_config_single %>% list_modify(name = "gs_plot", memory="15G"), qsub_environment=qsub_environment, qsub_packages = qsub_packages, seq_along(paramsets), function(params_i) {
@@ -234,8 +236,8 @@ qsub_lapply(qsub_config = qsub_config_single %>% list_modify(name = "gs_plot", m
       graphics.off()
     }
   }, error=function(e) {print(params_i)}, finally={graphics.off()})
-}) %>% saveRDS("gs_plot_handle.rds")
-gs <- qsub_retrieve(readRDS("gs_plot_handle.rds"))
+}) %>% write_rds(dataset_preproc_file("gs_plot_handle.rds"))
+gs <- qsub_retrieve(read_rds(dataset_preproc_file("gs_plot_handle.rds")))
 
 # Plot EXPERIMENT ----------------------------------------
 params_i <- 3
@@ -250,8 +252,8 @@ qsub_lapply(qsub_config = qsub_config_single %>% list_modify(name = "exp_plot"),
     dyngen:::plot_experiment(experiment)
     graphics.off()
   }, error=function(e) {print(params_i)}, finally={graphics.off()})
-}) %>% saveRDS("experiment_plot_handle.rds")
-experiment_plot <- qsub_retrieve(readRDS("experiment_plot_handle.rds"))
+}) %>% write_rds(dataset_preproc_file("experiment_plot_handle.rds"))
+experiment_plot <- qsub_retrieve(read_rds(dataset_preproc_file("experiment_plot_handle.rds")))
 
 # Wrap into tasks ----------------------------
 qsub_lapply(qsub_config = qsub_config_single %>% list_modify(name = "wrap", memory="20G"), qsub_environment=qsub_environment, qsub_packages = qsub_packages, seq_along(paramsets), function(params_i) {
@@ -269,14 +271,21 @@ qsub_lapply(qsub_config = qsub_config_single %>% list_modify(name = "wrap", memo
 
     task %>% saveRDS(task_location(folder, params_i))
   }
-}) %>% saveRDS("wrap_handle.rds")
-wrap <- qsub_retrieve(readRDS("wrap_handle.rds"))
+}) %>% write_rds(dataset_preproc_file("wrap_handle.rds"))
+wrap <- qsub_retrieve(read_rds(dataset_preproc_file("wrap_handle.rds")))
 
 tasks <- dynutils::list_as_tibble(tasks)
 
-write_rds(tasks, "../dynalysis/analysis/data/derived_data/datasets/synthetic/v6.rds")
-tasks <- read_rds("../dynalysis/analysis/data/derived_data/datasets/synthetic/v6.rds")
+write_rds(tasks, dataset_file("tasks.rds"))
+tasks <- read_rds(dataset_file("tasks.rds"))
 
+# tasks$id <- paste0("synthetic/", tasks$id)
+# tasks$geodesic_dist <- pbapply::pblapply(seq_len(nrow(tasks)), function(i) {
+#   dynutils::compute_tented_geodesic_distances(
+#     dynutils::extract_row_to_list(tasks, i)
+#   )
+# })
+# tasks$task_source <- "synthetic"
 
 
 tasks <- list.files(folder, "*task.rds", full.names=T) %>% map(readRDS) %>% dynutils::list_as_tibble()

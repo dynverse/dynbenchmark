@@ -8,7 +8,7 @@ wrap <- function(milestone_network, progressions) {
     progressions = progressions
   )
 
-  task$geodesic_dist <- dynutils:::compute_emlike_dist(task)
+  task$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(task)
 
   task
 }
