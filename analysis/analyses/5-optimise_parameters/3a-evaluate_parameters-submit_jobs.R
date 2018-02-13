@@ -25,6 +25,13 @@ designs <- lapply(methods$short_name, function(mn) {
   defaults
 }) %>% setNames(methods$short_name)
 
+designs$manual <-
+  tribble(
+    ~person_id, ~dimred_id, ~run_i,
+    "wouters", "pca", 1,
+    "robrechtc", "mds", 1
+  )
+
 # save benchmark configuration and start it
 write_rds(lst(methods, designs, metrics, extra_metrics, num_repeats, tasks), derived_file("config.rds"))
 bs_submit(
