@@ -247,12 +247,20 @@ g <- ggplot() +
   geom_segment(aes(x = x, xend = x, y = ymin, yend = ymax), task_groups) +
   geom_text(aes(x = x, y = y, label = task_group_nice[task_group]), task_groups, size = 5, vjust = "center", hjust = "right", nudge_x = -.05) +
   cowplot::theme_nothing() +
-  scale_fill_manual(values = trajectory_type_colours) +
+  scale_fill_manual(values = trajectory_type_colours, label=label_long) +
   coord_cartesian(
     expand = F,
-    xlim = c(-1, max(metrics$xend)+.1),
+    xlim = c(-.5, max(metrics$xend)+.1),
     ylim = c(-4.5, max(scores$ymax))
-  )
+  ) +
+  theme(
+    legend.position = "right"
+  ) +
+  labs(fill = "Trajectory type")
 
 g
-ggsave(figure_file("dataset_difficulty_filled.pdf"), g, width = 16, height = 20)
+ggsave(figure_file("dataset_difficulty_filled.pdf"), g, width = 20, height = 20)
+
+
+
+scores
