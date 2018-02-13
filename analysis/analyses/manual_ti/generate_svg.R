@@ -7,20 +7,20 @@ experiment("manual_ti")
 
 # load in all datasets
 tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
-
-# runs <- tibble(dimred_id = character(), person_id = character(), run_i = integer(), run_id = character(), seed = integer()) %>% write_rds(derived_file("runs.rds"))
-runs <- read_rds(derived_file("runs.rds"))
+tasks <- tasks %>% filter(task_id != "real/dentate-gyrus-neurogenesis_hochgerner")
 
 run <- lst(
-  dimred_id = "pca",
-  person_id = "wouters",
+  dimred_id = "mds",
+  person_id = "robrechtc",
   run_i = 1,
   run_id=glue::collapse(c(dimred_id, person_id, run_i), "_"),
   seed = sodium::data_encrypt(charToRaw(run_id), sodium::hash(charToRaw("robrecht")), nonce = sodium::hash(charToRaw("hi"), size = 24)) %>% rawToBits() %>% head(32) %>% packBits("integer") %>% abs()
-) %>% list %>% dynutils::list_as_tibble()
+)
 
-if(run$run_id %in% runs$run_id) {
-  previous_task_ids <- runs %>% filter(run_id == run$run_id) %>% pull(spaces) %>% first() %>% pull(task_id)
+if(file.exists(derived_file(paste0(run$run_id, ".rds")))) {
+  run2 <- read_rds(derived_file(paste0(run$run_id, ".rds")))
+
+  previous_task_ids <- run2$spaces %>% pull(task_id)
   new_task_ids <- tasks$task_id[!(tasks$task_id %in% previous_task_ids)]
 
   print("Previous run found, using previous ordering (plus extra datasets)")
@@ -29,8 +29,6 @@ if(run$run_id %in% runs$run_id) {
   set.seed(run$seed)
   selected_tasks <- tasks %>% arrange(sample(n()))
 }
-
-
 
 ##  ............................................................................
 ##  Generate svg for run                                                    ####
@@ -131,5 +129,4 @@ run$base_size <- base_size
 run$ncol <- ncol
 run$nrow <- nrow
 run$spaces <- list(select(spaces, -plot)) # the plots are enormous (pryr::object_size(spaces$plot))
-runs <- runs %>% bind_rows(run) %>% group_by(run_id) %>% filter(row_number() == n()) %>% ungroup()
-write_rds(runs, derived_file("runs.rds"))
+run %>% write_rds(derived_file(paste0(run$run_id, ".rds")))

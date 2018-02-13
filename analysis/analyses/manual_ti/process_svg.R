@@ -11,8 +11,9 @@ experiment("manual_ti")
 # load in all datasets and runs
 runs <- read_rds(derived_file("runs.rds"))
 
-run_id <- "pca_wouters_1"
+run_id <- "mds_robrechtc_1"
 run <- extract_row_to_list(runs, runs$run_id == run_id)
+run
 
 ##  ............................................................................
 ##  Process svg                                                             ####
