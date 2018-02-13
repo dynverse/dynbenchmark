@@ -32,7 +32,3 @@ handle <- qsub_lapply(
     TRUE
   }
 )
-
-write_rds(handle, derived_file("handle.rds"))
-
-results <- qsub_retrieve(read_rds(derived_file("handle.rds")))
