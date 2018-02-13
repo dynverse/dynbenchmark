@@ -4,7 +4,7 @@ library(tidyverse)
 experiment("5-optimise_parameters/3-evaluate_parameters")
 
 # settings
-methods <- get_descriptions()
+methods <- get_descriptions() %>% filter(short_name != "manual")
 metrics <- c("correlation", "rf_mse", "edge_flip")
 extra_metrics <- c()
 eval_timeout <- 60 * 60
@@ -25,12 +25,12 @@ designs <- lapply(methods$short_name, function(mn) {
   defaults
 }) %>% setNames(methods$short_name)
 
-designs$manual <-
-  tribble(
-    ~person_id, ~dimred_id, ~run_i,
-    "wouters", "pca", 1,
-    "robrechtc", "mds", 1
-  )
+# designs$manual <-
+#   tribble(
+#     ~person_id, ~dimred_id, ~run_i,
+#     "wouters", "pca", 1,
+#     "robrechtc", "mds", 1
+#   )
 
 # save benchmark configuration and start it
 write_rds(lst(methods, designs, metrics, extra_metrics, num_repeats, tasks), derived_file("config.rds"))
