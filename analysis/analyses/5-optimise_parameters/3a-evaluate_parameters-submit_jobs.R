@@ -36,7 +36,8 @@ designs$manual <-
 write_rds(lst(methods, designs, metrics, extra_metrics, num_repeats, tasks), derived_file("config.rds"))
 bs_submit(
   tasks = tasks,
-  task_group = rep("task_group", nrow(tasks)),
+  # task_group = rep("task_group", nrow(tasks)),
+  task_group = tasks$id,
   task_fold = rep(1, nrow(tasks)),
   out_dir = derived_file("suite/"),
   remote_dir = paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/"),
@@ -45,7 +46,8 @@ bs_submit(
   metrics = metrics,
   extra_metrics = extra_metrics,
   memory = "10G",
-  num_cores = 4,
+  # num_cores = 4,
+  num_cores = 1,
   num_iterations = 1,
   num_repeats = num_repeats,
   num_init_params = num_init_params,
