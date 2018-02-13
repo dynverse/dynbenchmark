@@ -7,7 +7,7 @@ experiment("3-score_rules/5-score_aspects")
 
 wrap <- function(x) {
   wrap <- dynmethods::wrap_prediction_model(sort(unique(x$progressions$cell_id)), unique(c(x$milestone_network$from, x$milestone_network$to)), x$milestone_network, progressions=x$progressions)
-  wrap$geodesic_dist <- dynutils::compute_emlike_dist(wrap)
+  wrap$geodesic_dist <- dynutils::compute_tented_geodesic_distances(wrap)
   wrap
 }
 
