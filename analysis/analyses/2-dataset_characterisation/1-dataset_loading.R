@@ -85,7 +85,8 @@ load_expression <- function(expression) {
   }
 }
 
-task_checks <- pbapply::pblapply(tasks$id, function(task_id) {
+tasks_to_check <-tasks %>% filter(id == "real/mESC-differentiation_hayashi")
+task_checks <- pbapply::pblapply(tasks_to_check$id, function(task_id) {
   print(task_id)
   task <- extract_row_to_list(tasks, which(tasks$id == task_id))
   expression <- load_expression(task$expression)
@@ -107,7 +108,7 @@ task_checks <- pbapply::pblapply(tasks$id, function(task_id) {
   checks
 }) %>% bind_rows()
 
-task_checks %>% bind_cols(tasks) %>% ggplot() + geom_point(aes(n_genes, n_cells, color=category))
+task_checks %>% bind_cols(tasks_to_check) %>% ggplot() + geom_point(aes(n_genes, n_cells, color=category))
 
 task_ids_filtered <- task_checks %>% filter(all_milestones_represented) %>% pull(task_id)
 tasks_filtered <- tasks %>% filter(id %in% task_ids_filtered)

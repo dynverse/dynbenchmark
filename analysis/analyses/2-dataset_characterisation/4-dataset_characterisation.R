@@ -63,7 +63,7 @@ pie <- function(tasks=tasks_real, what = "technology") {
   #   coord_polar("x")
 }
 
-dataset_characterisation_pies <- c("technology", "organism", "standard", "trajectory_type") %>% map(pie, tasks = tasks_real) %>% cowplot::plot_grid(plotlist=., nrow =1)
+dataset_characterisation_pies <- c("technology", "organism", "standard", "trajectory_type", "material") %>% map(pie, tasks = tasks_real) %>% cowplot::plot_grid(plotlist=., nrow =1)
 dataset_characterisation_pies
 
 
@@ -77,11 +77,11 @@ dataset_characterisation_distributions <- c("ncells", "ngenes", "date") %>% map(
   nbins <- 50
 
   if (what %in% c("ncells", "ngenes")) {
-    limits <- c(10, 10000)
+    limits <- c(10, 30000)
     x_scale <- scale_x_log10(label_long(what), breaks=c(10, 100, 100, 1000, 10000), limits=limits)
     limits <- log10(limits)
   } else {
-    limits <- c(as.Date("2014-01-01"), as.Date("2018-01-01"))
+    limits <- c(as.Date("2014-01-01"), as.Date("2018-06-01"))
     x_scale <- scale_x_date(label_long(what), limits = limits, date_breaks="1 year", date_labels="%Y")
   }
   tasks_real$what <- tasks_real[[what]]
