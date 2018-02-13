@@ -16,9 +16,9 @@ real_tasks <- pbapply::pblapply(real_names, load_dataset) %>% list_as_tibble()
 
 # combine tasks
 tasks <- bind_rows(
-  toy_tasks %>% mutate(task_group = "toy"),
-  synthetic_tasks %>% mutate(task_group = "synthetic"),
-  real_tasks %>% mutate(task_group = "real")
+  toy_tasks,
+  synthetic_tasks,
+  real_tasks
 )
 
 tasks <- tasks %>%
@@ -26,6 +26,4 @@ tasks <- tasks %>%
   mutate(milenet_spr = milestone_percentages %>% reshape2::acast(cell_id ~ milestone_id, value.var = "percentage", fill = 0) %>% list()) %>%
   ungroup()
 
-selected_colnames <- Reduce("intersect", list(colnames(toy_tasks), colnames(synthetic_tasks), colnames(real_tasks)))
-tasks <- tasks %>% select(one_of(c("task_group", selected_colnames)))
 write_rds(tasks, derived_file("tasks.rds"))
