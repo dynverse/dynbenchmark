@@ -3,7 +3,7 @@ library(tidyverse)
 library(tidygraph)
 library(ggraph)
 
-experiment("1-datasets/control")
+experiment("datasets/control")
 
 models <- formals(dyntoy:::generate_toy_milestone_network)$model
 

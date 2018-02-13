@@ -29,3 +29,9 @@ PRISM:::rsync_remote(
   remote_src = "",
   path_src = paste0(get_dynalysis_folder(), "/analysis/data/derived_data/datasets/synthetic/")
 )
+PRISM:::rsync_remote(
+  remote_dest = "prism",
+  path_dest = "/group/irc/shared/dynalysis/analysis/data/derived_data/datasets/control/",
+  remote_src = "",
+  path_src = paste0(get_dynalysis_folder(), "/analysis/data/derived_data/datasets/control/")
+)
