@@ -7,11 +7,10 @@ experiment("manual_ti")
 
 # load in all datasets
 tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
-tasks <- tasks %>% filter(task_id != "real/dentate-gyrus-neurogenesis_hochgerner")
 
 run <- lst(
-  dimred_id = "mds",
-  person_id = "robrechtc",
+  dimred_id = "pca",
+  person_id = "wouters",
   run_i = 1,
   run_id=glue::collapse(c(dimred_id, person_id, run_i), "_"),
   seed = sodium::data_encrypt(charToRaw(run_id), sodium::hash(charToRaw("robrecht")), nonce = sodium::hash(charToRaw("hi"), size = 24)) %>% rawToBits() %>% head(32) %>% packBits("integer") %>% abs()
@@ -39,34 +38,36 @@ dimred_function <- get(paste0("dimred_", run$dimred_id))
 ##  ............................................................................
 ##  Plot cells                                                              ####
 
-load_expression <- function(expression) {
-  if(class(expression) == "matrix") {
-    expression
+load <- function(x) {
+  if(class(x) == "matrix") {
+    x
   } else {
-    expression()
+    x()
   }
 }
 
-spaces <- pmap(as.list(selected_tasks), function(...) {
+spaces <- map(seq_len(nrow(selected_tasks)), function(task_i) {
   # task <- extract_row_to_list(tasks %>% filter(category == "real"), 21)
-  task <- list(...)
+  task <- extract_row_to_list(selected_tasks, task_i)
   print(task$id)
 
-  task$expression <- load_expression(task$expression)
+  task$expression <- load(task$expression)
 
   plots <- list()
 
   set.seed(run$seed)
-  if (task$category == "control") {
+  if (task$task_group == "control") {
     space <- task$space
   } else {
-    space <- dimred_pca(task$expression)
+    space <- dimred_function(task$expression)
     space <- space %>% as.data.frame() %>% tibble::rownames_to_column("cell_id")
   }
 
   plot <- ggplot(space) +
     geom_point(aes(Comp1, Comp2), alpha=0.5) +
-    ggraph::theme_graph()
+    ggraph::theme_graph() +
+    theme(panel.border = element_rect(colour = "black", fill=NA, size=1), plot.margin = margin(0, 0, 0, 0))
+
 
   tibble(
     plot=list(plot),
@@ -85,7 +86,8 @@ spaces <- pmap(as.list(selected_tasks), function(...) {
 ##  ............................................................................
 ##  Create svg                                                              ####
 
-base_size <- 3
+# save png
+base_size <- 2.5
 plots <- spaces$plot
 ncol <- 5
 nrow <- ceiling(length(plots)/ncol)
@@ -93,8 +95,10 @@ plots %>%
   cowplot::plot_grid(plotlist=., ncol=5) %>%
   cowplot::save_plot(derived_file(glue::glue("{run$run_id}.png")), ., base_width = base_size*ncol, base_height = nrow * base_size, limitsize=F)
 
-svg <- glue::glue(
-"
+# save svg
+if(!file.exists(derived_file(glue::glue("{run$run_id}.svg")))) {
+  svg <- glue::glue(
+    "
 <?xml version='1.0' standalone='no'?>
 <!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN'
   'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
@@ -108,8 +112,6 @@ svg <- glue::glue(
 
 </svg>
 ")
-
-if(!(run$run_id %in% runs$run_id)) {
   svg %>% xml2::read_xml() %>% xml2::write_xml(derived_file(glue::glue("{run$run_id}.svg")))
 } else {
   svg <- xml2::read_xml(derived_file(glue::glue("{run$run_id}.svg")))
@@ -117,7 +119,7 @@ if(!(run$run_id %in% runs$run_id)) {
   xml2::xml_replace(xml2::xml_find_first(svg, ".//svg:image"), glue::glue("<svg:image xlink:href='{run$run_id}.png' x='0' y='0' width='{ncol*base_size}cm' height='{nrow*base_size}cm' />"), .copy=FALSE)
   xml2::xml_attr(svg, "width") <- glue::glue("{ncol*base_size}cm")
   xml2::xml_attr(svg, "height") <- glue::glue("{nrow*base_size}cm")
-  svg %>% xml2::write_xml(derived_file(glue::glue("{run$run_id}_new.svg")))
+  svg %>% xml2::write_xml(derived_file(glue::glue("{run$run_id}.svg")))
 
   print("Not recreating svg")
 }
