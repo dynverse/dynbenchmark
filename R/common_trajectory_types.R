@@ -9,41 +9,50 @@ trajectory_type_directed <- tribble(
   "directed_graph"
 )
 
-trajectory_type_undirected_to_directed<- c(
-  "undirected_linear" = "directed_linear",
-  "simple_fork" = "bifurcation",
-  "complex_fork" = "multifurcation",
-  "unrooted_binary_tree" = "rooted_binary_tree",
-  "unrooted_tree" = "rooted_tree",
-  "undirected_cycle" = "directed_cycle",
-  "undirected_graph" = "directed_acyclic_graph",
-  "disconnected_undirected_graph" = "disconnected_directed_graph",
+trajectory_type_directed_to_undirected<- c(
+  "directed_linear"= "undirected_linear",
+  "bifurcation"="simple_fork" ,
+  "multifurcation"="complex_fork" ,
+  "rooted_binary_tree"="unrooted_binary_tree",
+  "rooted_tree"="unrooted_tree" ,
+  "directed_cycle"="undirected_cycle" ,
+  "directed_graph"="undirected_graph" ,
+  "directed_acyclic_graph"="undirected_graph" ,
+  "disconnected_directed_graph"="disconnected_undirected_graph" ,
   "unknown" = "unknown"
 )
 # undirected
 trajectory_type_edges_undirected <- tribble(
   ~to, ~from, ~prop_changes,
-  "undirected_graph", "undirected_cycle", c("num_branch_nodes == 0", "num_cycles == 1"),
   "simple_fork", "undirected_linear", "num_branch_nodes == 0",
   "complex_fork", "simple_fork", "max_degree == 3",
   "unrooted_binary_tree", "simple_fork", "num_branch_nodes == 1",
   "unrooted_tree", "complex_fork", "num_branch_nodes == 1",
   "unrooted_tree", "unrooted_binary_tree", "max_degree == 3",
   "undirected_graph", "unrooted_tree", "num_cycles == 0",
-  "disconnected_undirected_graph", "undirected_graph", "num_components == 1"
+  "disconnected_undirected_graph", "undirected_graph", "num_components == 1",
+  "undirected_graph", "undirected_cycle", c("num_branch_nodes == 0", "num_cycles == 1")
 ) %>% mutate(prop_changes = as.list(prop_changes))
 # directed_to_undirected
 trajectory_type_edges_undirected_to_directed <- tibble(
-  from=names(trajectory_type_undirected_to_directed),
-  to = trajectory_type_undirected_to_directed,
+  from=trajectory_type_directed_to_undirected,
+  to = names(trajectory_type_directed_to_undirected),
   prop_changes = "undirected"
 ) %>% mutate(prop_changes = list(prop_changes))
 # directed (copy over from undirected)
-trajectory_type_edges_directed <- tibble(
-  from = trajectory_type_undirected_to_directed[trajectory_type_edges_undirected$from],
-  to=trajectory_type_undirected_to_directed[trajectory_type_edges_undirected$to],
-  prop_changes=trajectory_type_edges_undirected$prop_changes
-)
+
+trajectory_type_edges_directed <- tribble(
+  ~to, ~from, ~prop_changes,
+  "bifurcation", "directed_linear", "num_branch_nodes == 0",
+  "multifurcation", "bifurcation", "max_degree == 3",
+  "rooted_binary_tree", "bifurcation", "num_branch_nodes == 1",
+  "rooted_tree", "multifurcation", "num_branch_nodes == 1",
+  "rooted_tree", "rooted_binary_tree", "max_degree == 3",
+  "directed_acyclic_graph", "rooted_tree", "num_cycles == 0",
+  "directed_graph", "directed_acyclic_graph", "num_cycles == 0",
+  "disconnected_directed_graph", "directed_graph", "num_components == 1",
+  "directed_graph", "directed_cycle", c("num_branch_nodes == 0", "num_cycles == 1"),
+) %>% mutate(prop_changes = as.list(prop_changes))
 
 
 ##  ............................................................................
@@ -53,12 +62,16 @@ trajectory_type_edges_directed <- tibble(
 trajectory_types <- {
   trajectory_types <- bind_rows(
     tibble(
-      id = names(trajectory_type_undirected_to_directed),
+      id = unique(c(trajectory_type_edges_undirected$from, trajectory_type_edges_undirected$to)),
       directedness = "undirected"
     ),
     tibble(
-      id = trajectory_type_undirected_to_directed,
+      id = unique(c(trajectory_type_edges_directed$from, trajectory_type_edges_directed$to)),
       directedness = "directed"
+    ),
+    tibble(
+      id = "unknown",
+      directedness = "unknown"
     )
   ) %>% group_by(id) %>% filter(row_number() == 1) %>% ungroup()
 
@@ -77,7 +90,7 @@ trajectory_types <- {
     "disconnected_undirected_graph" = "#ff4237",
     "unknown" = "#AAAAAA"
   )
-  trajectory_type_colors[trajectory_type_undirected_to_directed[names(trajectory_type_colors)]] <- trajectory_type_colors
+  trajectory_type_colors[names(trajectory_type_directed_to_undirected)] <- trajectory_type_colors[trajectory_type_directed_to_undirected]
 
   lighten <- function(color, factor=1.4){
     purrr::map_chr(color, function(color) {
@@ -110,11 +123,11 @@ trajectory_type_dag <- {
 
   trajectory_type_dag <- trajectory_type_edges %>% igraph::graph_from_data_frame(vertices=trajectory_types) %>% tidygraph::as_tbl_graph()
 
-  # trajectory_type_dag %>% ggraph::ggraph() +
-  #   ggraph::geom_edge_link() +
-  #   ggraph::geom_edge_link(ggplot2::aes(xend = x+(xend-x)/2, yend = y+(yend - y)/2), arrow=ggplot2::arrow()) +
-  #   ggraph::geom_node_label(ggplot2::aes(label=name, fill=directedness)) +
-  #   ggraph::theme_graph()
+  trajectory_type_dag %>% ggraph::ggraph() +
+    ggraph::geom_edge_link() +
+    ggraph::geom_edge_link(ggplot2::aes(xend = x+(xend-x)/2, yend = y+(yend - y)/2), arrow=ggplot2::arrow()) +
+    ggraph::geom_node_label(ggplot2::aes(label=name, fill=directedness)) +
+    ggraph::theme_graph()
 
   trajectory_type_dag
 }
