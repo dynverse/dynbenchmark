@@ -20,7 +20,8 @@ task_info_real <- gs_title("Real datasets") %>%
   gs_read(ws = "datasets", col_types = cols(date = col_date())) %>%
   separate_rows(id, sep=",\n") %>%
   mutate(id = paste0("real/", id)) %>%
-  mutate(category = "real")
+  mutate(category = "real") %>%
+  filter(ready)
 
 task_ids_real <- task_info_real$id
 
@@ -35,36 +36,58 @@ tasks_real <- map_local(task_ids_real, function(task_id) {
   print(task_id)
   task <- readRDS(dataset_file("dataset.rds", dataset_id = task_id))
 
-  print(task$trajectory_type)
+  env <- new.env(baseenv())
+  assign("task_id", task_id, env)
 
-  task$expression <- function() {readRDS(dataset_file("dataset.rds", dataset_id = task_id))$expression}
-  task$counts <- function() {readRDS(dataset_file("dataset.rds", dataset_id = task_id))$counts}
+  task$expression <- function() {readRDS(dynalysis::dataset_file("dataset.rds", dataset_id = task_id))$expression}
+  task$counts <- function() {readRDS(dynalysis::dataset_file("dataset.rds", dataset_id = task_id))$counts}
+  task$geodesic_dist <- function() {readRDS(dynalysis::dataset_file("dataset.rds", dataset_id = task_id))$geodesic_dist}
+  environment(task$expression) <- env
+  environment(task$counts) <- env
+  environment(task$geodesic_dist) <- env
 
-  dynutils::list_as_tibble(list(task))
-}) %>% bind_rows()
+  task %>% list %>% dynutils::list_as_tibble()
+}) %>% bind_rows() %>% mutate(task_group = "real")
 tasks_real <- tasks_real %>% left_join(task_info_real, "id") %>% mutate(category = "real") %>% mutate(task_id = id)
 
 ##  ............................................................................
 ##  Synthetic datasets                                                      ####
-tasks_synthetic <- read_rds("analysis/data/derived_data/datasets/synthetic/v6/tasks.rds") %>%
-  rename(task_id = id) %>%
-  mutate(id = paste0("synthetic/", task_id)) %>%
-  mutate(category = "synthetic")
+synthetic_folder <- "analysis/data/derived_data/datasets/synthetic/v6/"
+tasks_synthetic <- read_rds(paste0(synthetic_folder, "tasks.rds")) %>%
+  mutate(task_group = "synthetic")
+tasks_synthetic <- map(seq_len(nrow(tasks_synthetic)), function(task_i) {
+  task <- dynutils::extract_row_to_list(tasks_synthetic, task_i)
+
+  env <- new.env(baseenv())
+  assign("task_id", task$task_id, env)
+
+  # to re save
+  # task$expression %>% saveRDS(paste0(synthetic_folder, task_i, "_expression.rds"))
+  # task$counts %>% saveRDS(paste0(synthetic_folder, task_i, "_counts.rds"))
+  # task$geodesic_dist %>% saveRDS(paste0(synthetic_folder, task_i, "_geodesic_dist.rds"))
+
+  task$expression <- function() {readRDS(paste0(synthetic_folder, task_i, "_expression.rds"))}
+  task$counts <- function() {readRDS(paste0(synthetic_folder, task_i, "_counts.rds"))}
+  task$geodesic_dist <- function() {readRDS(paste0(synthetic_folder, task_i, "_geodesic_dist.rds"))}
+
+  environment(task$expression) <- env
+  environment(task$counts) <- env
+  environment(task$geodesic_dist) <- env
+
+  task
+}) %>% dynutils::list_as_tibble()
+
 
 ##  ............................................................................
 ##  Toy datasets                                                            ####
 tasks_toy <- dyntoy::toy_tasks %>%
-  mutate(category = "toy") %>%
-  rename(task_id = id) %>%
-  mutate(id = paste0("toy/", task_id))
+  mutate(task_group = "toy")
 
 
 ##  ............................................................................
 ##  Control datasets                                                        ####
-tasks_control <- read_rds(derived_file("tasks.rds", "1-datasets/control")) %>%
-  rename(task_id = id) %>%
-  mutate(id = paste0("control/", task_id)) %>%
-  mutate(category = "control")
+tasks_control <- read_rds(dataset_file("tasks.rds", "control")) %>%
+  mutate(task_group = "control")
 
 
 ##  ............................................................................
@@ -77,28 +100,32 @@ saveRDS(tasks, derived_file("tasks.rds"))
 #   ____________________________________________________________________________
 #   Check datasets                                                          ####
 
-load_expression <- function(expression) {
-  if(class(expression) == "matrix") {
-    expression
+load <- function(x) {
+  if(class(x) == "matrix") {
+    x
   } else {
-    expression()
+    x()
   }
 }
 
-tasks_to_check <-tasks %>% filter(id == "real/mESC-differentiation_hayashi")
+tasks_to_check <-tasks# %>% filter(id == "real/mESC-differentiation_hayashi")
 task_checks <- pbapply::pblapply(tasks_to_check$id, function(task_id) {
   print(task_id)
   task <- extract_row_to_list(tasks, which(tasks$id == task_id))
-  expression <- load_expression(task$expression)
-  counts <- load_expression(task$counts)
+  expression <- load(task$expression)
+  counts <- load(task$counts)
 
   checks <- list(id = task_id)
 
-  checks$all_milestones_represented <- all(task$milestone_ids %in% task$prior_information$grouping_assignment$group_id)
+  checks$check_all_milestones_represented <- all(task$milestone_ids %in% task$prior_information$grouping_assignment$group_id)
 
-  checks$marker_feature_ids_in_expression <- all(task$prior_information$marker_feature_ids %in% colnames(expression))
+  checks$check_marker_feature_ids_in_expression <- all(task$prior_information$marker_feature_ids %in% colnames(expression))
 
-  checks$columns <- all(c("geodesic_dist") %in% names(task))
+  checks$check_double_froms <- all(
+    (task$progressions %>% group_by(cell_id) %>% summarise(n=length(unique(from))) %>% pull(n)) == 1
+  )
+
+  checks$check_columns <- all(c("geodesic_dist") %in% names(task))
 
   checks$n_genes <- ncol(counts)
   checks$n_cells <- nrow(counts)
@@ -108,7 +135,16 @@ task_checks <- pbapply::pblapply(tasks_to_check$id, function(task_id) {
   checks
 }) %>% bind_rows()
 
-task_checks %>% bind_cols(tasks_to_check) %>% ggplot() + geom_point(aes(n_genes, n_cells, color=category))
+task_checks %>%
+  bind_cols(tasks_to_check) %>%
+  ggplot() +
+    geom_point(aes(n_genes, n_cells, color=task_group)) +
+    scale_x_log10() +
+    scale_y_log10()
 
-task_ids_filtered <- task_checks %>% filter(all_milestones_represented) %>% pull(task_id)
+task_checks %>% select(id, starts_with("check")) %>% gather("check_id", "passed", -id) %>%
+  ggplot() +
+    geom_raster(aes(check_id, id, fill=passed))
+
+task_ids_filtered <- task_checks %>% filter(check_all_milestones_represented) %>% pull(task_id)
 tasks_filtered <- tasks %>% filter(id %in% task_ids_filtered)
