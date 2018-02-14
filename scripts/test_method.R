@@ -27,9 +27,10 @@ library(tidyverse)
 library(dynalysis)
 
 bigtasks <- read_rds("~/bigtasks.rds")
+smalltasks <- dyntoy::toy_tasks
 
 ## chose method
-description <- description_ctgibbs()
+description <- description_gpfates()
 
 par_set <- description$par_set
 default_params <- ParamHelpers::generateDesignOfDefaults(par_set, trafo = T) %>% ParamHelpers::dfRowToList(par_set, 1)
@@ -37,7 +38,8 @@ list2env(default_params, environment())
 
 ## laad task in environment
 bigtask <- dynutils::extract_row_to_list(bigtasks, nrow(bigtasks))
-smalltask <- extract_row_to_list(dyntoy::toy_tasks, 1)
+smalltask <- dynutils::extract_row_to_list(bigtasks,seq_len(nrow(bigtasks))[bigtasks$id == "linear_10"])
+# smalltask <- extract_row_to_list(dyntoy::toy_tasks, 15)# %>% {.$geodesic_dist <- dynutils::compute_emlike_dist(.);.}
 
 task_to_evaluate <- smalltask
 list2env(task_to_evaluate, environment())
@@ -47,13 +49,16 @@ list2env(prior_information, environment())
 
 
 tasks_to_evaluate <- dynutils::list_as_tibble(list(task_to_evaluate))
-tasks_to_evaluate <- bigtasks %>% arrange(row_number())
+tasks_to_evaluate <- bigtasks %>% arrange(-row_number())
 
 
 ##
-results <- map(seq(nrow(tasks_to_evaluate))[1:20], function(row_id) {
+execute_method(tasks_to_evaluate, description, default_params, mc_cores=20)
+
+results <- map(seq(nrow(tasks_to_evaluate)), function(row_id) {
   print(paste0(">> ", row_id))
   subtasks <- tasks_to_evaluate[row_id, ,drop=F]
+  print(subtasks$id)
   execute_evaluation(subtasks, description, default_params, "correlation", extra_metrics=c("rf_mse", "edge_flip")) %>% attr("extras") %>% .$.summary
 }) %>% bind_rows()
 
