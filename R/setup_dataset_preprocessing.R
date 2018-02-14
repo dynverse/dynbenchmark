@@ -116,7 +116,7 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   original_counts <- conversion_out$counts
   feature_info <- feature_info[conversion_out$filtered, ] %>% mutate(feature_id = colnames(original_counts))
 
-  norm_out <- normalise_filter_counts(original_counts, verbose = TRUE)
+  norm_out <- dynnormaliser::normalise_filter_counts(original_counts, verbose = TRUE)
 
   normalisation_info <- norm_out$info
 
