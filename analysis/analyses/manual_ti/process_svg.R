@@ -8,11 +8,8 @@ library(stringr)
 
 experiment("manual_ti")
 
-# load in all datasets and runs
-runs <- read_rds(derived_file("runs.rds"))
-
-run_id <- "mds_robrechtc_1"
-run <- extract_row_to_list(runs, runs$run_id == run_id)
+run_id <- "pca_wouters_1"
+run <- read_rds(derived_file(paste0(run_id, ".rds")))
 run
 
 ##  ............................................................................
@@ -32,6 +29,7 @@ dimensions <- c(
   svg %>% xml_find_first("svg:g[@inkscape:label='back']") %>% xml_child() %>% xml_attr("width") %>% as.numeric(),
   svg %>% xml_find_first("svg:g[@inkscape:label='back']") %>% xml_child() %>% xml_attr("height") %>% as.numeric()
 )
+if (any(is.na(dimensions))) {stop("Dimensions should be in pt!!")}
 base_coords <- layer %>% xml_attr("transform") %>% str_extract("\\(.*\\)") %>% str_sub(2, -2) %>% split_coords()
 if(is.na(base_coords)) base_coords <- c(0, 0)
 
@@ -49,20 +47,27 @@ process_path <- function(path, base_coords = c(0, 0)) {
   while (i <= length(split)) {
     cur <- split[[i]]
 
-    if(cur == "m") {
+    if(cur %in% c("m", "l")) {
       relative=TRUE
-    } else if (cur == "M"){
+    } else if (cur %in% c("M", "L")){
       relative=FALSE
     } else if(str_detect(cur, "[0-9\\.-]*,[0-9\\.-]")) {
       pieces <- c(pieces, list(split_coords(cur)))
       if(relative && length(pieces) > 1) {
         pieces[[length(pieces)]] <- pieces[[length(pieces)]] + pieces[[length(pieces)-1]]
       }
-    } else if (cur == "h") {
+    } else if (cur %in% c("h")) {
       split[[i + 1]] <- paste0(split[[i + 1]], ",0")
-    } else if (cur == "v") {
+    } else if (cur %in% c("v")) {
       split[[i + 1]] <- paste0("0,", split[[i + 1]])
-    } else if (cur == "l") {
+    } else if (cur %in% c("H")) {
+      stop()
+      relative <- F
+      split[[i + 1]] <- paste0(split[[i + 1]], ",", 0)
+    } else if (cur %in% c("V")) {
+      relative <- F
+      split[[i + 1]] <- paste0("0,", split[[i + 1]])
+    } else if (cur %in% c("l")) {
 
     }else {
       print(cur)
@@ -134,7 +139,7 @@ if(any(as.integer(paths$box_id) != paths$box_id)) {
 }
 
 # intermediate plot check, make sure all paths look ok
-paths[paths$box_id %in% 140:150,] %>%
+paths[paths$box_id < 40 & paths$box_id > 30,] %>%
   mutate(path_id = row_number()) %>%
   unnest(path) %>%
   ggplot(aes(x=x, y=-y, color=factor(box_id))) + geom_path(aes(group=path_id)) + coord_equal() + facet_wrap(~box_id, scales="free") + ggraph::theme_graph() + theme(legend.position = "none")
@@ -251,18 +256,18 @@ predictions_list <- predictions_data %>% pmap(function(box_id, cluster_positions
     edge = out$edge_df
   )
 })
-predictions <- tibble(prediction = predictions_list, task_id = run$spaces$task_id)
+predictions <- tibble(prediction = predictions_list, task_id = run$spaces$id)
 
 
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
 ### Check scores of controls                                                ####
 tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
-tasks <- tasks %>% slice(match(run$spaces$task_id, task_id))
+tasks <- tasks %>% slice(match(run$spaces$id, task_id))
 
-controls <- map(tasks %>% filter(category == "control" & task_id != "control_BA") %>% pull(task_id), function(task_id) {
+controls <- map(tasks %>% filter(category == "control" & task_id != "control_BA") %>% pull(id), function(task_id) {
   print(task_id)
-  task <- extract_row_to_list(tasks, which(tasks$task_id == task_id))
+  task <- extract_row_to_list(tasks, which(tasks$id == task_id))
   task$geodesic_dist <- dynutils::compute_tented_geodesic_distances(task)
 
   prediction <- extract_row_to_list(predictions, which(predictions$task_id == task_id))$prediction

@@ -9,8 +9,8 @@ experiment("manual_ti")
 tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
 
 run <- lst(
-  dimred_id = "pca",
-  person_id = "wouters",
+  dimred_id = "mds",
+  person_id = "robrechtc",
   run_i = 1,
   run_id=glue::collapse(c(dimred_id, person_id, run_i), "_"),
   seed = sodium::data_encrypt(charToRaw(run_id), sodium::hash(charToRaw("robrecht")), nonce = sodium::hash(charToRaw("hi"), size = 24)) %>% rawToBits() %>% head(32) %>% packBits("integer") %>% abs()
