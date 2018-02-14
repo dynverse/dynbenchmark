@@ -1,4 +1,3 @@
-rm(list=ls())
 library(dynalysis)
 library(tidyverse)
 library(GEOquery)

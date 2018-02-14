@@ -71,12 +71,12 @@ results$rf_mse
 
 
 result <- dynmethods:::run_ouijaflow(task_to_evaluate$expression)
-result$geodesic_distances <- dynutils::compute_emlike_dist(result)
+result$geodesic_distances <- dynutils::compute_tented_geodesic_distances(result)
 
 result <- wrap_prediction_model_linear(
   cell_ids = rownames(expression),
   pseudotimes = pseudotimes
 )
-result$geodesic_distances <- dynutils::compute_emlike_dist(result)
+result$geodesic_distances <- dynutils::compute_tented_geodesic_distances(result)
 
 dyneval:::calculate_metrics(task_to_evaluate, result, "correlation")
