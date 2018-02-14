@@ -5,6 +5,15 @@ experiment("1-datasets/real/run_all_datasets")
 
 # # Local
 dataset_scripts <- list.files(path = "analysis/analyses/1-datasets/real", pattern = "^dataset_.*\\.R", full.names = TRUE)
+# dataset_scripts <- paste0(
+#   "analysis/analyses/1-datasets/real/",
+#   c(
+#     "dataset_oligodendrocyte-differentiation_marques.R",
+#     "dataset_dentate-gyrus-neurogenesis_hochgerner.R",
+#     "dataset_mESC-differentation_hayashi.R"
+#   )
+# )
+
 #
 # for (scr in dataset_scripts) {
 #   do.call(source, list(scr))
@@ -32,3 +41,5 @@ handle <- qsub_lapply(
     TRUE
   }
 )
+
+
