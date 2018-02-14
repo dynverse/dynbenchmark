@@ -193,7 +193,6 @@ one <-
   coord_equal() +
   theme_bw() +
   scale_colour_brewer(palette = "Dark2") +
-  labs(title = paste0("Real versus synthetic - Rsq = ", round(rsq(out_gath$real, out_gath$synthetic), 3))) +
   facet_wrap(~metric, nrow = 1)
 two <-
   ggplot(out_gath) +
@@ -201,7 +200,6 @@ two <-
   coord_equal() +
   theme_bw() +
   scale_colour_brewer(palette = "Dark2") +
-  labs(title = paste0("Real versus toy - Rsq = ", round(rsq(out_gath$real, out_gath$toy), 3))) +
   facet_wrap(~metric, nrow = 1)
 three <-
   ggplot(out_gath) +
@@ -209,7 +207,6 @@ three <-
   coord_equal() +
   theme_bw() +
   scale_colour_brewer(palette = "Dark2") +
-  labs(title = paste0("Synthetic versus toy - Rsq = ", round(rsq(out_gath$synthetic, out_gath$toy), 3))) +
   facet_wrap(~metric, nrow = 1)
 cowplot::plot_grid(one, two, three, ncol = 1)
 
