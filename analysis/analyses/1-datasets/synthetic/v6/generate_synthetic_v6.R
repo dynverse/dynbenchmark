@@ -279,14 +279,13 @@ tasks <- dynutils::list_as_tibble(tasks)
 write_rds(tasks, dataset_file("tasks.rds"))
 tasks <- read_rds(dataset_file("tasks.rds"))
 
-# tasks$id <- paste0("synthetic/", tasks$id)
 # tasks$geodesic_dist <- pbapply::pblapply(seq_len(nrow(tasks)), function(i) {
 #   dynutils::compute_tented_geodesic_distances(
 #     dynutils::extract_row_to_list(tasks, i)
 #   )
 # })
-# tasks$task_source <- "synthetic"
-
+#
+# write_rds(tasks, dataset_file("tasks.rds"))
 
 tasks <- list.files(folder, "*task.rds", full.names=T) %>% map(readRDS) %>% dynutils::list_as_tibble()
 tasks$trajectory_type %>% table()

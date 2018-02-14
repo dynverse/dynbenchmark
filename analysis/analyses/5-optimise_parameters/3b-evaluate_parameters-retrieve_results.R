@@ -43,6 +43,8 @@ list2env(read_rds(derived_file("config.rds")), environment())
 tasks_info <- tasks %>% select(task_id = id, type, trajectory_type, task_group)
 rm(tasks)
 
+required_outputs <- nrow(tasks_info) * num_repeats
+
 outputs_ind <- outputs %>%
   filter(!is.na(task_id)) %>%
   left_join(tasks_info, by = "task_id") %>%
