@@ -140,7 +140,8 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     cell_grouping = cell_grouping,
     cell_info = cell_info,
     feature_info = feature_info,
-    normalisation_info = normalisation_info
+    normalisation_info = normalisation_info,
+    task_group = "real"
   )
 
   dataset$prior_information <- dynnormaliser::generate_prior_information(
@@ -153,7 +154,7 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     cell_info
   )
 
-  dataset$geodesic_dist <- dynutils::compute_emlike_dist(dataset)
+  dataset$geodesic_dist <- dynutils::compute_tented_geodesic_distances(dataset)
 
   write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
   write_rds(original_counts, dataset_file(dataset_id = dataset_id, filename = "original_counts.rds"))

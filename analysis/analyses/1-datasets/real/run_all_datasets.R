@@ -4,7 +4,7 @@ library(PRISM)
 experiment("1-datasets/real/run_all_datasets")
 
 # # Local
-# dataset_scripts <- list.files(path = "analysis/analyses/1-datasets/real", pattern = "^dataset_.*\\.R", full.names = TRUE)
+dataset_scripts <- list.files(path = "analysis/analyses/1-datasets/real", pattern = "^dataset_.*\\.R", full.names = TRUE)
 #
 # for (scr in dataset_scripts) {
 #   do.call(source, list(scr))
@@ -15,6 +15,7 @@ handle <- qsub_lapply(
   X = dataset_scripts,
   qsub_environment = list2env(list()),
   qsub_config = override_qsub_config(
+    name = "dynreal",
     memory = "30G",
     wait = FALSE,
     r_module = NULL,
@@ -31,7 +32,3 @@ handle <- qsub_lapply(
     TRUE
   }
 )
-
-write_rds(handle, derived_file("handle.rds"))
-
-results <- qsub_retrieve(read_rds(derived_file("handle.rds")))
