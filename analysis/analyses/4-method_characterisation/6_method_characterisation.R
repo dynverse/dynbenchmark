@@ -156,7 +156,7 @@ saveRDS(platforms, figure_file("platforms.rds"))
 
 ##  ............................................................................
 ##  Trajectory types over time                                              ####
-undirected_trajectory_type_order <- trajectory_types %>% filter(directedness == "undirected") %>% pull(id) %>% keep(~.!="unknown")
+directed_trajectory_type_order <- trajectory_types %>% filter(directedness == "directed") %>% pull(id) %>% keep(~.!="unknown")
 
 trajectory_components <- methods %>% filter(is_ti)
 trajectory_components <- trajectory_components %>%
@@ -173,8 +173,8 @@ add_step <- function(df) {
 trajectory_components_step <- add_step(arrange(trajectory_components, date))
 
 trajectory_components_gathered <- trajectory_components_step %>%
-  gather(trajectory_type, can_trajectory_type, !!undirected_trajectory_type_order) %>%
-  mutate(trajectory_type = factor(trajectory_type, levels=undirected_trajectory_type_order)) %>%
+  gather(trajectory_type, can_trajectory_type, !!directed_trajectory_type_order) %>%
+  mutate(trajectory_type = factor(trajectory_type, levels=directed_trajectory_type_order)) %>%
   group_by(trajectory_type) %>%
   arrange(date) %>%
   mutate(n_methods = cumsum(count), n_methods_oi = cumsum(count * can_trajectory_type))
@@ -248,7 +248,7 @@ method_small_history <- method_small_history_data %>%
   theme(legend.position="none")
 method_small_history
 
-ggsave(figure_file("method_small_history.svg"), method_small_history, height = 3.5, width = 10)
+ggsave(figure_file("method_small_history.svg"), method_small_history, height = 4.5, width = 10)
 
 # move lines to back
 library(xml2)
@@ -270,8 +270,8 @@ xml2::write_xml(svg, figure_file("method_small_history.svg"))
 
 method_small_distribution <- methods %>%
   filter(is_ti) %>%
-  gather(trajectory_type, can_handle, !!undirected_trajectory_type_order) %>%
-  mutate(trajectory_type = factor(trajectory_type, levels=undirected_trajectory_type_order)) %>%
+  gather(trajectory_type, can_handle, !!directed_trajectory_type_order) %>%
+  mutate(trajectory_type = factor(trajectory_type, levels=directed_trajectory_type_order)) %>%
   filter(can_handle) %>%
   group_by(trajectory_type) %>%
   count() %>%
@@ -290,8 +290,8 @@ ggsave(figure_file("method_small_distribution.svg"), method_small_distribution, 
 
 methods %>%
   filter(is_ti) %>%
-  gather(trajectory_type, can_handle, !!undirected_trajectory_type_order) %>%
-  mutate(trajectory_type = factor(trajectory_type, levels=undirected_trajectory_type_order)) %>%
+  gather(trajectory_type, can_handle, !!directed_trajectory_type_order) %>%
+  mutate(trajectory_type = factor(trajectory_type, levels=directed_trajectory_type_order)) %>%
   filter(can_handle) %>%
   group_by(trajectory_type) %>%
   count()

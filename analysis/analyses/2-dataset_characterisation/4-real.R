@@ -15,28 +15,38 @@ standard_colors <- c("gold"="#ffeca9", "silver"="#e3e3e3")
 ##  ............................................................................
 ##  Pie charts                                                              ####
 pie <- function(tasks=tasks_real, what = "technology") {
+  tasks$variable_of_interest <- tasks[[what]]
+
+  # first extract the variable
+  pie_data <- tasks %>%
+    count(variable_of_interest) %>%
+    arrange(n)
+
+  # change labels, fill or order depending on variable
   label <-"{label_short(variable_of_interest, 15)}: {n}"
+  fill_scale <- scale_fill_grey(start = 0.6, end = 0.9)
+  text_position <- 0.5
   if (what == "standard") {
     fill_scale <- scale_fill_manual(values=standard_colors)
   } else if (what == "technology") {
     fill_scale <- scale_fill_manual(values=technology_colors)
   } else if (what == "trajectory_type") {
     fill_scale <- scale_fill_manual(values=setNames(trajectory_types$background_color,trajectory_types$id))
-  } else {
-    fill_scale <- scale_fill_grey(start = 0.6, end = 0.9)
+    pie_data <- pie_data %>% arrange(
+      -match(as.character(variable_of_interest), trajectory_types$id)
+    )
+    label <- "{n}"
+    text_position <- 0.9
   }
 
-  tasks$variable_of_interest <- tasks[[what]]
-  tasks %>%
-    count(variable_of_interest) %>%
-    arrange(n) %>%
-    #arrange(rbind(seq_len(n()),rev(seq_len(n())))[seq_len(n())]) %>% # do largest - smallest - second largest - second smallest - ...
-    mutate(odd = row_number()%%2, row_number = row_number()) %>%
-    mutate(variable_of_interest = factor(variable_of_interest, levels=variable_of_interest)) %>%
-    mutate(start = lag(cumsum(n), 1, 0), end = cumsum(n), mid = start + (end - start)/2) %>%
+  # now calcualte positions
+  pie_data <- pie_data %>% mutate(odd = row_number()%%2, row_number = row_number()) %>%
+    mutate(start = lag(cumsum(n), 1, 0), end = cumsum(n), mid = start + (end - start)/2)
+
+  pie <- pie_data %>%
     ggplot(aes(ymin=0, ymax=1)) +
     geom_rect(aes(xmin=start, xmax=end, fill=variable_of_interest), stat="identity", color="white", size=0.5) +
-    geom_text(aes(mid, 0.5, label = pritt(label), vjust=0.5), color="black", hjust=0.5, size=5) +
+    geom_text(aes(mid, text_position, label = pritt(label), vjust=0.5), color="black", hjust=0.5, size=5) +
     fill_scale +
     ggtitle(label_long(what)) +
     theme_void() +
@@ -44,26 +54,9 @@ pie <- function(tasks=tasks_real, what = "technology") {
     scale_x_continuous(expand=c(0, 0)) +
     scale_y_continuous(expand=c(0, 0)) +
     coord_flip()
-
-  # tasks %>%
-  #   count(variable_of_interest) %>%
-  #   arrange(n) %>%
-  #   #arrange(rbind(seq_len(n()),rev(seq_len(n())))[seq_len(n())]) %>% # do largest - smallest - second largest - second smallest - ...
-  #   mutate(variable_of_interest = factor(variable_of_interest, levels=variable_of_interest)) %>%
-  #   mutate(start = lag(cumsum(n), 1, 0), end = cumsum(n), mid = start + (end - start)/2) %>%
-  #   ggplot(aes(ymin=0, ymax=1)) +
-  #   geom_rect(aes(xmin=start, xmax=end, fill=variable_of_interest), stat="identity", color="white", size=0.5) +
-  #   geom_text(aes(mid, 1, label = pritt(label), vjust=ifelse(mid > max(end)/4 & mid < max(end)/4*3, 1, 0), hjust=ifelse(mid > max(end)/2, 1, 0)), color="black", size=5) +
-  #   fill_scale +
-  #   ggtitle(label_long(what)) +
-  #   theme_void() +
-  #   theme(legend.position = "none") +
-  #   scale_x_continuous(expand=c(0.5, 0.5)) +
-  #   scale_y_continuous(expand=c(0.5, 0.5)) +
-  #   coord_polar("x")
 }
 
-dataset_characterisation_pies <- c("technology", "organism", "standard", "trajectory_type", "material") %>% map(pie, tasks = tasks_real) %>% cowplot::plot_grid(plotlist=., nrow =1)
+dataset_characterisation_pies <- c("technology", "organism", "standard","dynamic_process", "trajectory_type") %>% map(pie, tasks = tasks_real) %>% cowplot::plot_grid(plotlist=., nrow =1)
 dataset_characterisation_pies
 
 
@@ -110,7 +103,7 @@ dataset_characterisation_plot <- cowplot::plot_grid(
 dataset_characterisation_plot
 
 
-cowplot::save_plot(figure_file("dataset_characterisation.svg"), dataset_characterisation_plot, base_height = 12, base_width = 6.5)
+cowplot::save_plot(figure_file("dataset_characterisation.svg"), dataset_characterisation_plot, base_height = 12, base_width = 8)
 
 
 
@@ -164,3 +157,28 @@ table
 table %>%
   write_rds(figure_file("datasets.rds"))
 
+
+##  ............................................................................
+##  Plots of each dataset                                                   ####
+library(tidygraph)
+library(ggraph)
+plots <- seq_len(nrow(tasks_real)) %>% map(function(task_i) {
+  task <- dynutils::extract_row_to_list(tasks_real, task_i)
+
+  milestone_graph <- tbl_graph(tibble(node=factor(task$milestone_ids, levels=task$milestone_ids)), task$milestone_network)
+
+  # determine layout
+  layout <- "tree"
+  if (task$trajectory_type == "directed_cycle") {
+    layout <- "circle"
+  }
+
+  milestone_graph %>%
+    ggraph(layout=layout) +
+      geom_edge_link() +
+      geom_edge_link(aes(xend=x + (xend - x)/2, yend = y + (yend - y)/2), arrow=arrow(type="closed")) +
+      geom_node_label(aes(label=node, fill=node)) +
+      theme_graph() +
+      theme(legend.position="none")
+})
+cowplot::plot_grid(plotlist=plots[1:20])

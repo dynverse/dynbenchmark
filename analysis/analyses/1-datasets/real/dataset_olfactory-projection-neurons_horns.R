@@ -64,6 +64,25 @@ settings <- list(
       "VA1d_48hAPF", "VA1d_72hAPF",
       "VA1d_72hAPF", "adPN_adult"
     ) %>% mutate(length = 1, directed = TRUE)
+  ),
+  list(
+    id = "real/olfactory-projection-neurons_horns",
+    milestone_source = "group_id",
+    milestone_network = tribble(
+      ~from, ~to,
+      "DC3_24hAPF", "DC3_36hAPF",
+      "DC3_36hAPF", "DC3_48hAPF",
+      "DC3_48hAPF", "DC3_72hAPF",
+      "DC3_72hAPF", "adPN_adult",
+      "VA1d_24hAPF", "VA1d_36hAPF",
+      "VA1d_36hAPF", "VA1d_48hAPF",
+      "VA1d_48hAPF", "VA1d_72hAPF",
+      "VA1d_72hAPF", "adPN_adult",
+      "DA1_24hAPF", "DA1_36hAPF",
+      "DA1_36hAPF", "DA1_48hAPF",
+      "DA1_48hAPF", "DA1_72hAPF",
+      "DA1_72hAPF", "DA1_adult"
+    ) %>% mutate(length = 1, directed = TRUE)
   )
 )
 
