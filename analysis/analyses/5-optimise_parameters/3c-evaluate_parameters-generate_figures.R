@@ -17,11 +17,11 @@ experiment("5-optimise_parameters/3-evaluate_parameters")
 ############################################################
 
 outputs_list <- read_rds(derived_file("outputs_postprocessed.rds"))
-chosen_task_group <- "mean_notoy"
+chosen_task_source <- "mean_notoy"
 
 # get ordering of methods
 method_ord <- outputs_list$outputs_summtrajtype_totalsx2 %>%
-  filter(task_group == chosen_task_group, trajectory_type == "overall") %>%
+  filter(task_source == chosen_task_source, trajectory_type == "overall") %>%
   arrange(desc(harm_mean)) %>%
   .$method_name
 
@@ -41,7 +41,7 @@ prior_df <- outputs_ind %>% select(method_name, prior_str) %>% distinct()
 ############### OVERALL COMPARISON ###############
 overall_comp <-
   outputs_summtrajtype_totalsx2 %>%
-  filter(task_group == chosen_task_group, trajectory_type_f == "overall") %>%
+  filter(task_source == chosen_task_source, trajectory_type_f == "overall") %>%
   select(method_name, method_short_name, method_name_f, harm_mean, pct_errored_mean, rank_correlation_mean, rank_correlation_var, rank_rf_mse_mean, rank_rf_mse_var, rank_edge_flip_mean, rank_edge_flip_var, time_method_mean) %>%
   gather(metric, score, -method_name:-method_name_f) %>%
   mutate(metric_f = factor(metric, levels = c("harm_mean", "pct_errored_mean", "time_method_mean", "rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean", "rank_correlation_var", "rank_edge_flip_var", "rank_rf_mse_var")))
@@ -74,7 +74,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
   geom_point(aes(method_name_f, harm_mean)) +
   coord_flip() +
   theme_bw() +
-  facet_grid(task_group~trajectory_type_f) +
+  facet_grid(task_source~trajectory_type_f) +
   labs(
     x = NULL
   )
@@ -83,7 +83,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
   geom_point(aes(method_name_f, rank_correlation_mean)) +
   coord_flip() +
   theme_bw() +
-  facet_grid(task_group~trajectory_type_f) +
+  facet_grid(task_source~trajectory_type_f) +
   labs(
     x = NULL
   )
@@ -93,7 +93,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
   geom_point(aes(method_name_f, rank_edge_flip_mean)) +
   coord_flip() +
   theme_bw() +
-  facet_grid(task_group~trajectory_type_f) +
+  facet_grid(task_source~trajectory_type_f) +
   labs(
     x = NULL
   )
@@ -102,7 +102,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
   geom_point(aes(method_name_f, rank_rf_mse_mean)) +
   coord_flip() +
   theme_bw() +
-  facet_grid(task_group~trajectory_type_f) +
+  facet_grid(task_source~trajectory_type_f) +
   labs(
     x = NULL
   )
@@ -111,7 +111,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
   geom_point(aes(method_name_f, pct_errored_mean)) +
   coord_flip() +
   theme_bw() +
-  facet_grid(task_group~trajectory_type_f) +
+  facet_grid(task_source~trajectory_type_f) +
   labs(
     x = NULL
   )
@@ -183,9 +183,9 @@ rm(g, time_ind, timeind_task_ord, timeind_meth_ord)
 
 ############### COMPARISON OF SCORES BETWEEN TASK GROUPS ###############
 out_gath <- outputs_summtrajtype %>%
-  select(method_name, method_short_name, method_name_f, task_group, trajectory_type, trajectory_type_f, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, harm_mean) %>%
+  select(method_name, method_short_name, method_name_f, task_source, trajectory_type, trajectory_type_f, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, harm_mean) %>%
   gather(metric, value, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, harm_mean) %>%
-  spread(task_group, value)
+  spread(task_source, value)
 
 one <-
   ggplot(out_gath) +
@@ -216,9 +216,9 @@ cowplot::plot_grid(one, two, three, ncol = 1)
 
 
 out_gath <- outputs_summmethod %>%
-  select(method_name, method_short_name, method_name_f, task_group, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, harm_mean) %>%
+  select(method_name, method_short_name, method_name_f, task_source, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, harm_mean) %>%
   gather(metric, value, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, harm_mean) %>%
-  spread(task_group, value)
+  spread(task_source, value)
 
 one <-
   ggplot(out_gath) +

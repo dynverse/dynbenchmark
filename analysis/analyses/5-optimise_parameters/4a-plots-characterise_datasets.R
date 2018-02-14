@@ -21,7 +21,7 @@ outputs_ind_dataset <- outputs_ind %>%
 
 # aggregate over replicates
 outputs_summrepl_dataset <- outputs_ind_dataset %>%
-  group_by(method_name, method_short_name, task_id, fold_type, fold_i, group_sel, param_i, iteration_i, type, trajectory_type, task_group, param_group, prior_str, trajectory_type_f) %>%
+  group_by(method_name, method_short_name, task_id, fold_type, fold_i, group_sel, param_i, iteration_i, type, trajectory_type, task_source, param_group, prior_str, trajectory_type_f) %>%
   summarise_if(is.numeric, funs(mean, var)) %>%
   ungroup() %>%
   mutate(
@@ -30,7 +30,7 @@ outputs_summrepl_dataset <- outputs_ind_dataset %>%
 
 # process overall evaluation
 outputs_summ_dataset <- outputs_summrepl_dataset %>%
-  group_by(task_id, trajectory_type, trajectory_type_f, task_group) %>%
+  group_by(task_id, trajectory_type, trajectory_type_f, task_source) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup()
@@ -45,8 +45,8 @@ outputs_summ_dataset <- outputs_summ_dataset %>% mutate(task_id_f = factor(task_
 
 dataset_comp <-
   outputs_summ_dataset %>%
-  select(task_id, task_id_f, trajectory_type, trajectory_type_f, task_group, harm_mean, pct_errored_mean, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean) %>%
-  gather(metric, score, -task_id:-task_group) %>%
+  select(task_id, task_id_f, trajectory_type, trajectory_type_f, task_source, harm_mean, pct_errored_mean, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean) %>%
+  gather(metric, score, -task_id:-task_source) %>%
   mutate(metric_f = factor(metric, levels = c("harm_mean", "pct_errored_mean","rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean")))
 
 ggplot(dataset_comp) +
@@ -119,8 +119,8 @@ dataset_info <-
   dataset_comp %>%
   filter(metric == "harm_mean") %>%
   select(-metric:-metric_f)
-task_groups <- unique(dataset_info$task_group)
-task_group_colours <- RColorBrewer::brewer.pal(length(task_groups), "Set1") %>% setNames(task_groups)
+task_sources <- unique(dataset_info$task_source)
+task_source_colours <- RColorBrewer::brewer.pal(length(task_sources), "Set1") %>% setNames(task_sources)
 trajectory_types <- levels(dataset_info$trajectory_type_f)
 trajectory_type_colours <- RColorBrewer::brewer.pal(length(trajectory_types), "Dark2") %>% setNames(trajectory_types)
 
@@ -137,7 +137,7 @@ dataset_info_boxes <- bind_rows(
     xmax = -.5,
     ymin = (as.integer(task_id_f) - 1) * 1.05,
     ymax = ymin + 1,
-    colour = task_group_colours[task_group]
+    colour = task_source_colours[task_source]
   )
 )
 
@@ -172,13 +172,13 @@ g <- ggplot() +
 ggsave(figure_file("dataset_difficulty_leftside.pdf"), g, width = 16, height = 20)
 
 
-task_group_levels <- c("real", "synthetic", "toy")
-task_group_nice <- c("real" = "Real", "synthetic" = "Synthetic", "toy" = "Toy")
-outputs_summ_dataset <- outputs_summ_dataset %>% mutate(task_group_f = factor(task_group, levels = rev(task_group_levels)))
+task_source_levels <- c("real", "synthetic", "toy")
+task_source_nice <- c("real" = "Real", "synthetic" = "Synthetic", "toy" = "Toy")
+outputs_summ_dataset <- outputs_summ_dataset %>% mutate(task_source_f = factor(task_source, levels = rev(task_source_levels)))
 
 # get ordering of methods
 dataset_ord <- outputs_summ_dataset %>%
-  arrange(task_group_f, desc(harm_mean)) %>%
+  arrange(task_source_f, desc(harm_mean)) %>%
   .$task_id
 
 # create method_name_f factor in all data structures
@@ -186,8 +186,8 @@ outputs_summ_dataset <- outputs_summ_dataset %>% mutate(task_id_f = factor(task_
 
 dataset_comp <-
   outputs_summ_dataset %>%
-  select(task_id, task_id_f, trajectory_type, trajectory_type_f, task_group, task_group_f, harm_mean, pct_errored_mean, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean) %>%
-  gather(metric, score, -task_id:-task_group_f) %>%
+  select(task_id, task_id_f, trajectory_type, trajectory_type_f, task_source, task_source_f, harm_mean, pct_errored_mean, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean) %>%
+  gather(metric, score, -task_id:-task_source_f) %>%
   mutate(metric_f = factor(metric, levels = c("harm_mean", "pct_errored_mean","rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean")))
 
 
@@ -198,7 +198,7 @@ scores <-
   arrange(task_id_f) %>%
   mutate(
     yheight = 1,
-    ydiff = c(FALSE, diff(as.integer(task_group_f)) != 0),
+    ydiff = c(FALSE, diff(as.integer(task_source_f)) != 0),
     ygap = ifelse(ydiff, 1.05, .05),
     xmin = (as.integer(metric_f) - 1) * 1.05,
     xmax = xmin + score,
@@ -214,7 +214,7 @@ scores <-
 guides <-
   scores %>%
   filter(metric == "harm_mean") %>%
-  group_by(task_group) %>%
+  group_by(task_source) %>%
   arrange(task_id_f) %>%
   filter(seq_len(n()) %% 5 == 1) %>%
   mutate(
@@ -224,10 +224,10 @@ guides <-
     yend = y
   )
 
-task_groups <-
+task_sources <-
   scores %>%
   filter(metric == "harm_mean") %>%
-  group_by(task_group, task_group_f) %>%
+  group_by(task_source, task_source_f) %>%
   arrange(task_id_f) %>%
   summarise(
     x = -.1,
@@ -244,8 +244,8 @@ g <- ggplot() +
   geom_segment(aes(x = x, xend = x, y = y, yend = yend), ticks) +
   geom_text(aes(x = x, y = y, label = label), labels, vjust = "top", hjust = "middle") +
   geom_text(aes(x = x, y = y, label = label), metric_labels, nudge_y = 1, vjust = "top", hjust = "middle", size = 5) +
-  geom_segment(aes(x = x, xend = x, y = ymin, yend = ymax), task_groups) +
-  geom_text(aes(x = x, y = y, label = task_group_nice[task_group]), task_groups, size = 5, vjust = "center", hjust = "right", nudge_x = -.05) +
+  geom_segment(aes(x = x, xend = x, y = ymin, yend = ymax), task_sources) +
+  geom_text(aes(x = x, y = y, label = task_source_nice[task_source]), task_sources, size = 5, vjust = "center", hjust = "right", nudge_x = -.05) +
   cowplot::theme_nothing() +
   scale_fill_manual(values = trajectory_type_colours, label=label_long) +
   coord_cartesian(
