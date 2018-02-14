@@ -3,6 +3,7 @@
 labels <- tibble::tribble(
   ~id, ~long, ~short,
   "directed_acyclic_graph", "Directed acyclic graph", "DAG",
+  "disconnected_directed_graph", "Disconnected directed graph", "DDG",
   "ngenes", "Number of genes", "# genes",
   "ncells", "Number of cells", "# cells",
   "n_methods", "Number of methods", "# methods",
