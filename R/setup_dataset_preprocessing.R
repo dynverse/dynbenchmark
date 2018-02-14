@@ -156,6 +156,8 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
 
   dataset$geodesic_dist <- dynutils::compute_tented_geodesic_distances(dataset)
 
+  dataset$creation_date <- Sys.time()
+
   write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
   write_rds(original_counts, dataset_file(dataset_id = dataset_id, filename = "original_counts.rds"))
 }
