@@ -15,29 +15,38 @@ standard_colors <- c("gold"="#ffeca9", "silver"="#e3e3e3")
 ##  ............................................................................
 ##  Pie charts                                                              ####
 pie <- function(tasks=tasks_real, what = "technology") {
+  tasks$variable_of_interest <- tasks[[what]]
+
+  # first extract the variable
+  pie_data <- tasks %>%
+    count(variable_of_interest) %>%
+    arrange(n)
+
+  # change labels, fill or order depending on variable
   label <-"{label_short(variable_of_interest, 15)}: {n}"
   fill_scale <- scale_fill_grey(start = 0.6, end = 0.9)
+  text_position <- 0.5
   if (what == "standard") {
     fill_scale <- scale_fill_manual(values=standard_colors)
   } else if (what == "technology") {
     fill_scale <- scale_fill_manual(values=technology_colors)
   } else if (what == "trajectory_type") {
     fill_scale <- scale_fill_manual(values=setNames(trajectory_types$background_color,trajectory_types$id))
+    pie_data <- pie_data %>% arrange(
+      -match(as.character(variable_of_interest), trajectory_types$id)
+    )
+    label <- "{n}"
+    text_position <- 0.9
   }
 
-  tasks$variable_of_interest <- tasks[[what]]
-  pie_data <- tasks %>%
-    count(variable_of_interest) %>%
-    arrange(n) %>%
-    #arrange(rbind(seq_len(n()),rev(seq_len(n())))[seq_len(n())]) %>% # do largest - smallest - second largest - second smallest - ...
-    mutate(odd = row_number()%%2, row_number = row_number()) %>%
-    mutate(variable_of_interest = factor(variable_of_interest, levels=variable_of_interest)) %>%
+  # now calcualte positions
+  pie_data <- pie_data %>% mutate(odd = row_number()%%2, row_number = row_number()) %>%
     mutate(start = lag(cumsum(n), 1, 0), end = cumsum(n), mid = start + (end - start)/2)
 
   pie <- pie_data %>%
     ggplot(aes(ymin=0, ymax=1)) +
     geom_rect(aes(xmin=start, xmax=end, fill=variable_of_interest), stat="identity", color="white", size=0.5) +
-    geom_text(aes(mid, 0.5, label = pritt(label), vjust=0.5), color="black", hjust=0.5, size=5) +
+    geom_text(aes(mid, text_position, label = pritt(label), vjust=0.5), color="black", hjust=0.5, size=5) +
     fill_scale +
     ggtitle(label_long(what)) +
     theme_void() +
@@ -94,7 +103,7 @@ dataset_characterisation_plot <- cowplot::plot_grid(
 dataset_characterisation_plot
 
 
-cowplot::save_plot(figure_file("dataset_characterisation.svg"), dataset_characterisation_plot, base_height = 12, base_width = 6.5)
+cowplot::save_plot(figure_file("dataset_characterisation.svg"), dataset_characterisation_plot, base_height = 12, base_width = 8)
 
 
 
