@@ -5,6 +5,24 @@ experiment("5-optimise_parameters/3-evaluate_parameters")
 
 # settings
 methods <- get_descriptions() %>% filter(short_name != "manual")
+
+# use previous output to determine method ordering based on its running time
+# outs <- read_rds("analysis/data/derived_data/5-optimise_parameters-old/3-evaluate_parameters/outputs_postprocessed.rds")
+# outs$outputs_summmethod %>%
+#   group_by(method_short_name) %>%
+#   summarise_if(is.numeric, sum) %>%
+#   arrange(time_method_mean) %>%
+#   .$method_short_name %>%
+#   paste("\"", ., "\"", collapse = ", ", sep = "") %>%
+#   cat
+methods_order <- c(
+  "identity", "shuffle", "random", "slngsht", "scorpius", "mpath", "sincell", "embeddr", "waterfll",
+  "dpt", "tscan", "slicer", "slice", "mnclica", "wndrlst", "mnclddr", "wishbone", "ctvem", "scuba",
+  "topslam", "ouijaflw", "phenopth", "ctmaptpx", "mfa", "scoup"
+)
+methods <- methods %>% slice(c(match(methods_order, methods$short_name), which(!methods$short_name %in% methods_order)))
+methods$short_name
+
 metrics <- c("correlation", "rf_mse", "edge_flip")
 extra_metrics <- c()
 eval_timeout <- 60 * 60
