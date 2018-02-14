@@ -1,4 +1,3 @@
-rm(list=ls())
 library(dynalysis)
 library(tidyverse)
 options('download.file.method.GEOquery'='curl')
