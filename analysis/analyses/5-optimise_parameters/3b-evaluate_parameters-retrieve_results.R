@@ -57,7 +57,7 @@ outputs_ind <- outputs %>%
     param_group = c("default", "optimised")[param_i],
     pct_errored = (error_message != "") + 0,
     prior_str = sapply(prior_df, function(prdf) ifelse(is.null(prdf) || nrow(prdf) == 0, "", paste(prdf$prior_names, collapse = ";"))),
-    trajectory_type_f = factor(trajectory_type, levels = dynalysis::trajectory_types$id)
+    trajectory_type_f = factor(trajectory_type, levels = intersect(unique(trajectory_type), dynalysis::trajectory_types$id))
   ) %>%
   group_by(task_id) %>%
   mutate(
@@ -129,7 +129,7 @@ outputs_summtrajtype_totalsx2 <- bind_rows(
   outputs_summmethod_totals %>% mutate(trajectory_type = "overall"),
   outputs_summtrajtype_totals
 ) %>%
-  mutate(trajectory_type_f = factor(trajectory_type, levels = c("overall", dynalysis::trajectory_types$id)))
+  mutate(trajectory_type_f = factor(trajectory_type, levels = c("overall", intersect(unique(trajectory_type), dynalysis::trajectory_types$id))))
 
 # save data structures
 to_save <- environment() %>% as.list()
