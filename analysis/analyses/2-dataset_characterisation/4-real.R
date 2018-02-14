@@ -148,3 +148,28 @@ table
 table %>%
   write_rds(figure_file("datasets.rds"))
 
+
+##  ............................................................................
+##  Plots of each dataset                                                   ####
+library(tidygraph)
+library(ggraph)
+plots <- seq_len(nrow(tasks_real)) %>% map(function(task_i) {
+  task <- dynutils::extract_row_to_list(tasks_real, task_i)
+
+  milestone_graph <- tbl_graph(tibble(node=factor(task$milestone_ids, levels=task$milestone_ids)), task$milestone_network)
+
+  # determine layout
+  layout <- "tree"
+  if (task$trajectory_type == "directed_cycle") {
+    layout <- "circle"
+  }
+
+  milestone_graph %>%
+    ggraph(layout=layout) +
+      geom_edge_link() +
+      geom_edge_link(aes(xend=x + (xend - x)/2, yend = y + (yend - y)/2), arrow=arrow(type="closed")) +
+      geom_node_label(aes(label=node, fill=node)) +
+      theme_graph() +
+      theme(legend.position="none")
+})
+cowplot::plot_grid(plotlist=plots[1:20])
