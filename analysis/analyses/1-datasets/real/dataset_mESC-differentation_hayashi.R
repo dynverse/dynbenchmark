@@ -7,12 +7,12 @@ options('download.file.method.GEOquery'='curl')
 id <- "real/mESC-differentiation_hayashi"
 dataset_preprocessing(id)
 
-expression_location <- download_dataset_file(
+counts_location <- download_dataset_file(
   "GSE98664_tpm_sailfish_mergedGTF_RamDA_mESC_differentiation_time_course.txt.gz",
   "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE98nnn/GSE98664/suppl/GSE98664_tpm_sailfish_mergedGTF_RamDA_mESC_differentiation_time_course.txt.gz"
 )
 
-counts_all <- read_tsv(expression_location) %>% as.data.frame %>% column_to_rownames("transcript_id") %>% as.matrix() %>% t %>% round()
+counts_all <- read_tsv(counts_location) %>% as.data.frame %>% column_to_rownames("transcript_id") %>% as.matrix() %>% t %>% round()
 
 cell_info_all <- tibble(
   cell_id = rownames(counts_all),
@@ -32,7 +32,7 @@ milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
 cell_info <- slice(cell_info_all, match(rownames(counts_all), cell_id))
 cell_info <- cell_info %>% filter(milestone_id %in% milestone_ids)
-counts <- expression_all[cell_info$cell_id, ]
+counts <- counts_all[cell_info$cell_id, ]
 cell_ids <- cell_info$cell_id
 
 cell_grouping <- cell_info %>% select(cell_id, milestone_id) %>% rename(group_id = milestone_id)
