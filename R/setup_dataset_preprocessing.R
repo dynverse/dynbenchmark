@@ -141,7 +141,7 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     cell_info = cell_info,
     feature_info = feature_info,
     normalisation_info = normalisation_info,
-    task_group = "real"
+    task_source = "real"
   )
 
   dataset$prior_information <- dynnormaliser::generate_prior_information(
