@@ -36,17 +36,22 @@ job_errors <- outputs %>%
 print(job_errors)
 write_tsv(job_errors, figure_file("errors_method.tsv"))
 
+outputs %>% filter(!is.na(task_id)) %>% group_by(method_name) %>% summarise(n = n())
+
 ###################################################
 ############### CREATE AGGREGATIONS ###############
 ###################################################
 list2env(read_rds(derived_file("config.rds")), environment())
-tasks_info <- tasks %>% select(task_id = id, type, trajectory_type, task_group)
+tasks_info <- tasks %>% select(task_id = id, type, trajectory_type, task_source)
 rm(tasks)
 
 required_outputs <- nrow(tasks_info) * num_repeats
 
 outputs_ind <- outputs %>%
   filter(!is.na(task_id)) %>%
+  group_by(method_name) %>%
+  filter(n() == required_outputs) %>%
+  ungroup() %>%
   left_join(tasks_info, by = "task_id") %>%
   mutate(
     param_group = c("default", "optimised")[param_i],
@@ -65,7 +70,7 @@ outputs_ind <- outputs %>%
 
 # aggregate over replicates
 outputs_summrepl <- outputs_ind %>%
-  group_by(method_name, method_short_name, task_id, fold_type, fold_i, group_sel, param_i, iteration_i, type, trajectory_type, task_group, param_group, prior_str, trajectory_type_f) %>%
+  group_by(method_name, method_short_name, task_id, fold_type, fold_i, group_sel, param_i, iteration_i, type, trajectory_type, task_source, param_group, prior_str, trajectory_type_f) %>%
   summarise_if(is.numeric, funs(mean, var)) %>%
   ungroup() %>%
   mutate(
@@ -74,14 +79,14 @@ outputs_summrepl <- outputs_ind %>%
 
 # process trajtype grouped evaluation
 outputs_summtrajtype <- outputs_summrepl %>%
-  group_by(method_name, method_short_name, task_group, param_group, trajectory_type, trajectory_type_f) %>%
+  group_by(method_name, method_short_name, task_source, param_group, trajectory_type, trajectory_type_f) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup()
 
 # process overall evaluation
 outputs_summmethod <- outputs_summtrajtype %>%
-  group_by(method_name, method_short_name, task_group, param_group) %>%
+  group_by(method_name, method_short_name, task_source, param_group) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup()
@@ -90,16 +95,16 @@ outputs_summmethod <- outputs_summtrajtype %>%
 outputs_summtrajtype_totals <- bind_rows(
   outputs_summtrajtype,
   outputs_summtrajtype %>%
-    filter(task_group != "toy") %>%
+    filter(task_source != "toy") %>%
     group_by(method_name, method_short_name, param_group, trajectory_type, trajectory_type_f) %>%
     summarise_if(is.numeric, mean) %>%
     ungroup() %>%
-    mutate(task_group = "mean_notoy"),
+    mutate(task_source = "mean_notoy"),
   outputs_summtrajtype %>%
     group_by(method_name, method_short_name, param_group, trajectory_type, trajectory_type_f) %>%
     summarise_if(is.numeric, mean) %>%
     ungroup() %>%
-    mutate(task_group = "mean_withtoy")
+    mutate(task_source = "mean_withtoy")
 )
 
 # adding mean per method
@@ -107,16 +112,16 @@ outputs_summmethod_totals <-
   bind_rows(
     outputs_summmethod,
     outputs_summmethod %>%
-      filter(task_group != "toy") %>%
+      filter(task_source != "toy") %>%
       group_by(method_name, method_short_name, param_group) %>%
       summarise_if(is.numeric, mean) %>%
       ungroup() %>%
-      mutate(task_group = "mean_notoy"),
+      mutate(task_source = "mean_notoy"),
     outputs_summmethod %>%
       group_by(method_name, method_short_name, param_group) %>%
       summarise_if(is.numeric, mean) %>%
       ungroup() %>%
-      mutate(task_group = "mean_withtoy")
+      mutate(task_source = "mean_withtoy")
   )
 
 # combine all aggregated data frames
