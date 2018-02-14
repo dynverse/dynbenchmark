@@ -16,24 +16,25 @@ standard_colors <- c("gold"="#ffeca9", "silver"="#e3e3e3")
 ##  Pie charts                                                              ####
 pie <- function(tasks=tasks_real, what = "technology") {
   label <-"{label_short(variable_of_interest, 15)}: {n}"
+  fill_scale <- scale_fill_grey(start = 0.6, end = 0.9)
   if (what == "standard") {
     fill_scale <- scale_fill_manual(values=standard_colors)
   } else if (what == "technology") {
     fill_scale <- scale_fill_manual(values=technology_colors)
   } else if (what == "trajectory_type") {
     fill_scale <- scale_fill_manual(values=setNames(trajectory_types$background_color,trajectory_types$id))
-  } else {
-    fill_scale <- scale_fill_grey(start = 0.6, end = 0.9)
   }
 
   tasks$variable_of_interest <- tasks[[what]]
-  tasks %>%
+  pie_data <- tasks %>%
     count(variable_of_interest) %>%
     arrange(n) %>%
     #arrange(rbind(seq_len(n()),rev(seq_len(n())))[seq_len(n())]) %>% # do largest - smallest - second largest - second smallest - ...
     mutate(odd = row_number()%%2, row_number = row_number()) %>%
     mutate(variable_of_interest = factor(variable_of_interest, levels=variable_of_interest)) %>%
-    mutate(start = lag(cumsum(n), 1, 0), end = cumsum(n), mid = start + (end - start)/2) %>%
+    mutate(start = lag(cumsum(n), 1, 0), end = cumsum(n), mid = start + (end - start)/2)
+
+  pie <- pie_data %>%
     ggplot(aes(ymin=0, ymax=1)) +
     geom_rect(aes(xmin=start, xmax=end, fill=variable_of_interest), stat="identity", color="white", size=0.5) +
     geom_text(aes(mid, 0.5, label = pritt(label), vjust=0.5), color="black", hjust=0.5, size=5) +
@@ -44,26 +45,9 @@ pie <- function(tasks=tasks_real, what = "technology") {
     scale_x_continuous(expand=c(0, 0)) +
     scale_y_continuous(expand=c(0, 0)) +
     coord_flip()
-
-  # tasks %>%
-  #   count(variable_of_interest) %>%
-  #   arrange(n) %>%
-  #   #arrange(rbind(seq_len(n()),rev(seq_len(n())))[seq_len(n())]) %>% # do largest - smallest - second largest - second smallest - ...
-  #   mutate(variable_of_interest = factor(variable_of_interest, levels=variable_of_interest)) %>%
-  #   mutate(start = lag(cumsum(n), 1, 0), end = cumsum(n), mid = start + (end - start)/2) %>%
-  #   ggplot(aes(ymin=0, ymax=1)) +
-  #   geom_rect(aes(xmin=start, xmax=end, fill=variable_of_interest), stat="identity", color="white", size=0.5) +
-  #   geom_text(aes(mid, 1, label = pritt(label), vjust=ifelse(mid > max(end)/4 & mid < max(end)/4*3, 1, 0), hjust=ifelse(mid > max(end)/2, 1, 0)), color="black", size=5) +
-  #   fill_scale +
-  #   ggtitle(label_long(what)) +
-  #   theme_void() +
-  #   theme(legend.position = "none") +
-  #   scale_x_continuous(expand=c(0.5, 0.5)) +
-  #   scale_y_continuous(expand=c(0.5, 0.5)) +
-  #   coord_polar("x")
 }
 
-dataset_characterisation_pies <- c("technology", "organism", "standard", "trajectory_type", "material") %>% map(pie, tasks = tasks_real) %>% cowplot::plot_grid(plotlist=., nrow =1)
+dataset_characterisation_pies <- c("technology", "organism", "standard","dynamic_process", "trajectory_type") %>% map(pie, tasks = tasks_real) %>% cowplot::plot_grid(plotlist=., nrow =1)
 dataset_characterisation_pies
 
 
