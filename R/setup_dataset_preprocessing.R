@@ -110,13 +110,13 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     dataset_id <- datasetpreproc_getid()
   }
 
+  readr::write_lines(as.character(Sys.time()), dataset_file(dataset_id = dataset_id, filename = "date.txt"))
+
   conversion_out <- convert_to_symbol(counts)
   original_counts <- conversion_out$counts
   feature_info <- feature_info[conversion_out$filtered, ] %>% mutate(feature_id = colnames(original_counts))
 
   norm_out <- normalise_filter_counts(original_counts, verbose = TRUE)
-
-  pdf(dataset_file(dataset_id = dataset_id, "normalisation.pdf"));walk(norm_out$normalisation_plots, print);graphics.off()
 
   normalisation_info <- norm_out$info
 
@@ -160,6 +160,8 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
 
   write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
   write_rds(original_counts, dataset_file(dataset_id = dataset_id, filename = "original_counts.rds"))
+
+  pdf(dataset_file(dataset_id = dataset_id, "normalisation.pdf"));walk(norm_out$normalisation_plots, print);graphics.off()
 }
 
 convert_to_symbol <- function(counts) {
