@@ -8,11 +8,11 @@ experiment("2-dataset_characterisation")
 tasks <- read_rds(derived_file("tasks.rds"))
 
 
-load_expression <- function(expression) {
-  if(class(expression) == "matrix") {
-    expression
+load <- function(x) {
+  if(class(x) == "matrix") {
+    x
   } else {
-    expression()
+    x()
   }
 }
 
@@ -24,7 +24,7 @@ task_scores <- pmap(as.list(tasks), function(...) {
   print(paste0("-------------", task$id))
   print("loading")
 
-  task$expression <- load_expression(task$expression)
+  task$expression <- load(task$expression)
 
   Coi <- rowMeans(task$expression) %>% {(. > (median(.) - IQR(., 0.5)*2)) & (. < (median(.) + IQR(., 0.5)*2))} %>% keep(~.) %>% names
 
@@ -99,7 +99,7 @@ cell_plots <- pmap(as.list(tasks), function(...) {
   # task <- extract_row_to_list(tasks %>% filter(category == "real"), 21)
   task <- list(...)
 
-  task$expression <- load_expression(task$expression)
+  task$expression <- load(task$expression)
 
   source("../dynmodular/dimred_wrappers.R")
 
@@ -161,7 +161,7 @@ s <- pmap(as.list(tasks_filtered), function(...) {
   print(paste0("-------------", task$id))
   print("loading")
 
-  task$expression <- load_expression(task$expression)
+  task$expression <- load(task$expression)
 
   source("../dynmodular/dimred_wrappers.R")
 
