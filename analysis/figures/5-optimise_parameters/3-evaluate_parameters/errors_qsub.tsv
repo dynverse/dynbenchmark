@@ -1,56 +1,11 @@
 method_name	error_message	n
-cellTree with gibbs	Memory limit exceeded	4
-GPfates	"File: /home/rcannood/Workspace/dynverse/dynalysis/analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/suite//gpfates/r2gridengine/20180212_151650_D_gpfates_4RgQsbwdTp/log/log.1.e.txt
-Error in .$model : $ operator is invalid for atomic vectors
-Calls: do.call ... freduce -> withVisible -> <Anonymous> -> map -> .Call -> .f
-In addition: Warning message:
-In parallel::mclapply(seq_len(nrow(tasks)), mc.cores = mc_cores,  :
-  all scheduled cores encountered errors in user code
-Execution halted
+monocle with ICA	"d_type = ""train"", train_out,             param_i, design_test, output_model, grid, grid_i,             iterations), summarise_mlr_output(fold_type = ""test"",             test_out, param_i, design_test, output_model, grid,             grid_i, iterations))    })})(272L)
+26: do.call(PitSoL_params$FUN, c(list(PitSoL_params$X[[PitSoL_index]]),     PitSoL_params$DOTPARAMS))
+An irrecoverable exception occurred. R is aborting now ...
+/var/spool/sge/prismcls07/job_scripts/1915: line 10: 78010 Segmentation fault      Rscript --default-packages=methods,stats,utils,graphics,grDevices script.R $SGE_TASK_ID
 "	1
-GPfates	"File: /home/rcannood/Workspace/dynverse/dynalysis/analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/suite//gpfates/r2gridengine/20180212_151650_D_gpfates_4RgQsbwdTp/log/log.2.e.txt
-Error in .$model : $ operator is invalid for atomic vectors
-Calls: do.call ... freduce -> withVisible -> <Anonymous> -> map -> .Call -> .f
-In addition: Warning message:
-In parallel::mclapply(seq_len(nrow(tasks)), mc.cores = mc_cores,  :
-  scheduled cores 4, 1, 3 encountered errors in user code, all values of the jobs will be affected
-Execution halted
+monocle with ICA	"d_type = ""train"", train_out,             param_i, design_test, output_model, grid, grid_i,             iterations), summarise_mlr_output(fold_type = ""test"",             test_out, param_i, design_test, output_model, grid,             grid_i, iterations))    })})(596L)
+26: do.call(PitSoL_params$FUN, c(list(PitSoL_params$X[[PitSoL_index]]),     PitSoL_params$DOTPARAMS))
+An irrecoverable exception occurred. R is aborting now ...
+/var/spool/sge/prismcls03/job_scripts/1915: line 10: 44174 Segmentation fault      Rscript --default-packages=methods,stats,utils,graphics,grDevices script.R $SGE_TASK_ID
 "	1
-GPfates	"File: /home/rcannood/Workspace/dynverse/dynalysis/analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/suite//gpfates/r2gridengine/20180212_151650_D_gpfates_4RgQsbwdTp/log/log.3.e.txt
-Error in .$model : $ operator is invalid for atomic vectors
-Calls: do.call ... freduce -> withVisible -> <Anonymous> -> map -> .Call -> .f
-In addition: Warning message:
-In parallel::mclapply(seq_len(nrow(tasks)), mc.cores = mc_cores,  :
-  scheduled cores 2, 4 encountered errors in user code, all values of the jobs will be affected
-Execution halted
-"	1
-GPfates	"File: /home/rcannood/Workspace/dynverse/dynalysis/analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/suite//gpfates/r2gridengine/20180212_151650_D_gpfates_4RgQsbwdTp/log/log.4.e.txt
-Error in .$model : $ operator is invalid for atomic vectors
-Calls: do.call ... freduce -> withVisible -> <Anonymous> -> map -> .Call -> .f
-In addition: Warning message:
-In parallel::mclapply(seq_len(nrow(tasks)), mc.cores = mc_cores,  :
-  all scheduled cores encountered errors in user code
-Execution halted
-"	1
-manual	"File: /home/rcannood/Workspace/dynverse/dynalysis/analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/suite//manual/r2gridengine/20180213_110905_D_manual_0B0mBKhLp6/log/log.1.e.txt
-  STRING_ELT() can only be applied to a 'character vector', not a 'double'
-Calls: do.call ... <Anonymous> -> no_train_mlrmbo -> <Anonymous> -> dfRowsToList
-Execution halted
-"	1
-manual	"File: /home/rcannood/Workspace/dynverse/dynalysis/analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/suite//manual/r2gridengine/20180213_110905_D_manual_0B0mBKhLp6/log/log.2.e.txt
-  STRING_ELT() can only be applied to a 'character vector', not a 'double'
-Calls: do.call ... <Anonymous> -> no_train_mlrmbo -> <Anonymous> -> dfRowsToList
-Execution halted
-"	1
-manual	"File: /home/rcannood/Workspace/dynverse/dynalysis/analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/suite//manual/r2gridengine/20180213_110905_D_manual_0B0mBKhLp6/log/log.3.e.txt
-  STRING_ELT() can only be applied to a 'character vector', not a 'double'
-Calls: do.call ... <Anonymous> -> no_train_mlrmbo -> <Anonymous> -> dfRowsToList
-Execution halted
-"	1
-manual	"File: /home/rcannood/Workspace/dynverse/dynalysis/analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/suite//manual/r2gridengine/20180213_110905_D_manual_0B0mBKhLp6/log/log.4.e.txt
-  STRING_ELT() can only be applied to a 'character vector', not a 'double'
-Calls: do.call ... <Anonymous> -> no_train_mlrmbo -> <Anonymous> -> dfRowsToList
-Execution halted
-"	1
-monocle with ICA	Memory limit exceeded	2
-StemID	Memory limit exceeded	4

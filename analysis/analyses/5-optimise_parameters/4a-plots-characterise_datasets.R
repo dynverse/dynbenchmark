@@ -122,7 +122,7 @@ dataset_info <-
 task_sources <- unique(dataset_info$task_source)
 task_source_colours <- RColorBrewer::brewer.pal(length(task_sources), "Set1") %>% setNames(task_sources)
 trajectory_types <- levels(dataset_info$trajectory_type_f)
-trajectory_type_colours <- RColorBrewer::brewer.pal(length(trajectory_types), "Dark2") %>% setNames(trajectory_types)
+trajectory_type_colours <- setNames(dynalysis::trajectory_types$color, dynalysis::trajectory_types$id)
 
 dataset_info_boxes <- bind_rows(
   dataset_info %>% mutate(
