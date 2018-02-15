@@ -60,6 +60,7 @@ tasks_synthetic <- map(seq_len(nrow(tasks_synthetic)), function(task_i) {
 
   env <- new.env(baseenv())
   assign("task_id", task$task_id, env)
+  assign("synthetic_folder", synthetic_folder, env)
 
   # to re save
   # task$expression %>% saveRDS(paste0(synthetic_folder, task_i, "_expression.rds"))
@@ -75,7 +76,7 @@ tasks_synthetic <- map(seq_len(nrow(tasks_synthetic)), function(task_i) {
   environment(task$geodesic_dist) <- env
 
   task
-}) %>% dynutils::list_as_tibble()
+}) %>% dynutils::list_as_tibble() %>% mutate(id = paste0("synthetic/", id))
 
 
 ##  ............................................................................
