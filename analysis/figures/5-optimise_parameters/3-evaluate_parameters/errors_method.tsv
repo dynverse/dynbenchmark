@@ -1,10 +1,24 @@
 method_name	error_message	n	example
 Mpath	Mpath only detected one landmark	223	real/cell-cycle_leng
+GPfates	"ynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPclust/collapsed_mixture.py"", line 42, in __init__
+    self.phi, logphi, self.H = softmax_weave(self.phi_)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPclust/np_utilities.py"", line 27, in softmax_numpy
+    max_x_i = X.max(1)
+  File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/numpy/core/_methods.py"", line 26, in _amax
+    return umr_maximum(a, axis, None, out, keepdims)
+ValueError: zero-size array to reduction operation maximum which has no identity"	64	real/cell-cycle_buettner
 monocle with DDRTree	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	44	synthetic/bifurcating_10
 monocle with ICA	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	44	synthetic/bifurcating_10
 embeddr	need at least four unique 'x' values	28	toy/bifuracting_loop_1
 SLICE	replacement has 1 row, data has 0	24	real/cell-cycle_buettner
 embeddr	smoothing parameter value too small	16	synthetic/consecutive_bifurcating_10
+GPfates	"es/venv/lib/python3.5/site-packages/GPy/core/sparse_gp.py"", line 80, in parameters_changed
+    mean_function=self.mean_function)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/inference/latent_function_inference/var_dtc.py"", line 135, in inference
+    LB = jitchol(B)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/util/linalg.py"", line 61, in jitchol
+    raise linalg.LinAlgError(""not pd: non-positive diagonal elements"")
+numpy.linalg.linalg.LinAlgError: not pd: non-positive diagonal elements"	16	synthetic/bifurcating_loop_10
 Wishbone	"ne/venv/lib/python3.5/site-packages/wishbone/wb.py"", line 1068, in run_wishbone
     s=s, k=k, l=k, num_waypoints=num_waypoints, branch=branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 54, in wishbone
@@ -46,6 +60,13 @@ ouijaflow	"f, var_list)
     return self._call_log_prob(value, name)
   File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/tensorflow/python/ops/distributions/distribution.py"", line 674, in _call_l"	5	synthetic/trifurcating_2
 slingshot	Lapack routine dgesv: system is exactly singular: U[1,1] = 0	5	synthetic/bifurcating_loop_8
+GPfates	"py"", line 49, in __call__
+    self = super(ParametersChangedMeta, self).__call__(*args, **kw)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/kern/src/rbf.py"", line 23, in __init__
+    super(RBF, self).__init__(input_dim, variance, lengthscale, ARD, active_dims, name, useGPU=useGPU)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/kern/src/stationary.py"", line 72, in __init__
+    assert lengthscale.size in [1, input_dim], ""Bad number of lengthscales""
+AssertionError: Bad number of lengthscales"	4	synthetic/linear_long_11
 monocle with ICA	evaluation nested too deeply: infinite recursion / options(expressions=)?	4	real/human-embryos_petropoulos
 ouijaflow	".py"", line 3018, in create_op
     op_def=op_def)
@@ -416,6 +437,319 @@ Wishbone	"wishbone/core.py"", line 50, in wishbone
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
 KeyError: 97"	2	synthetic/linear_long_4
+GPfates	" self.parameters_changed()
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/models/bayesian_gplvm.py"", line 85, in parameters_changed
+    super(BayesianGPLVM,self).parameters_changed()
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/core/sparse_gp_mpi.py"", line 122, in parameters_changed
+    super(SparseGP_MPI,self).parameters_changed()
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/core/sparse_gp.py"", line 80, in parameters_changed
+    mea"	1	synthetic/consecutive_bifurcating_3
+GPfates	"_, callble in self.observers]
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
+    [callble(self, which=which) for _, _, callble in self.observers]
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 498, in _parameters_changed_notification
+    self.parameters_changed()
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/models/bayesian_gplvm.py"", line 85, in parameters_"	1	real/germline-human-both_guo
+GPfates	"/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/models/bayesian_gplvm.py"", line 85, in parameters_changed
+    super(BayesianGPLVM,self).parameters_changed()
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/core/sparse_gp_mpi.py"", line 122, in parameters_changed
+    super(SparseGP_MPI,self).parameters_changed()
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/core/sparse_gp.py"", line 80, in parameters_changed
+    mean_function=self.mean_function)
+  File ""/scr"	1	synthetic/bifurcating_converging_9
+GPfates	"+05   1.356995e+02 
+ 02m43s49  1201   7.874548e+05   2.229122e+05 
+ 02m44s58  1209   7.874528e+05   7.452172e+02 
+ 02m45s67  1217   7.874526e+05   2.983351e+02 
+ 02m46s76  1225   7.874526e+05   4.973639e+01 
+ 02m47s85  1233   7.874525e+05   2.506026e+02 
+ 02m48s93  1241   7.874523e+05   4.975879e+02 
+ 02m50s02  1249   7.874522e+05   1.855765e+04 
+ 02m51s10  1257   7.874520e+05   4.405287e+02 
+ 02m52s19  1265   7.874519e+05   1.119738e+02 
+ 02m53s28  1273   7.874517e+05   1.153621e+02 
+ 02m54s36  1281   7.874516e+05   8.716566e+01 
+ 02m55s45  1289   7.874514e+05   4.197895e+02 
+ 02m56s54  1297 "	1	synthetic/cycle_2
+GPfates	"+05   1.494669e+02 
+ 02m44s46  1158   7.479897e+05   1.760434e+02 
+ 02m45s59  1166   7.479895e+05   3.894358e+02 
+ 02m46s70  1174   7.479956e+05   1.088537e+06 
+ 02m47s84  1182   7.479890e+05   1.296038e+03 
+ 02m48s84  1189   7.479889e+05   7.263623e+02 
+ 02m49s84  1196   7.479887e+05   4.623973e+02 
+ 02m50s85  1203   7.479886e+05   6.480164e+01 
+ 02m51s86  1210   7.479884e+05   7.912135e+01 
+ 02m52s88  1217   7.479883e+05   1.143800e+02 
+ 02m53s89  1224   7.479882e+05   2.025940e+02 
+ 02m54s89  1231   7.479881e+05   1.686592e+02 
+ 02m55s89  1238   7.479880e+05   5.690421e+02 
+ 02m56s90  1245 "	1	synthetic/trifurcating_2
+GPfates	"+05   2.848057e+02 
+ 02m44s67  1200  -1.704951e+05   3.165682e+02 
+ 02m45s78  1208  -1.704954e+05   1.426877e+03 
+ 02m46s89  1216  -1.704955e+05   2.907898e+02 
+ 02m48s00  1224  -1.704959e+05   8.003899e+01 
+ 02m49s11  1232  -1.704960e+05   1.976093e+02 
+ 02m50s22  1240  -1.704961e+05   2.626690e+02 
+ 02m51s34  1248  -1.704964e+05   2.428935e+03 
+ 02m52s45  1256  -1.704965e+05   1.605468e+02 
+ 02m53s55  1264  -1.704969e+05   4.860654e+03 
+ 02m54s66  1272  -1.704972e+05   1.817020e+04 
+ 02m55s77  1280  -1.704974e+05   1.842182e+02 
+ 02m56s88  1288  -1.704975e+05   2.696338e+03 
+ 02m57s99  1296 "	1	real/epidermis-hair-spatial_joost
+GPfates	"+05   2.866594e+02 
+ 02m39s96  1108   7.874769e+05   1.334545e+03 
+ 02m40s99  1115   7.874766e+05   2.319401e+02 
+ 02m42s00  1122   7.874763e+05   5.975515e+02 
+ 02m43s01  1129   7.874759e+05   4.403324e+02 
+ 02m44s14  1137   7.874755e+05   1.348241e+02 
+ 02m45s14  1144   7.874754e+05   1.887364e+02 
+ 02m46s28  1152   7.874749e+05   1.710047e+02 
+ 02m47s42  1160   7.874748e+05   3.625694e+02 
+ 02m48s56  1168   7.874745e+05   7.373940e+03 
+ 02m49s69  1176   7.874743e+05   7.624390e+01 
+ 02m50s82  1184   7.874739e+05   1.147306e+03 
+ 02m51s95  1192   7.874737e+05   2.925282e+02 
+ 02m52s96  1199 "	1	synthetic/cycle_2
+GPfates	"+06   1.348504e+07 
+ 03m34s97  0151   5.177459e+06   5.595561e+08 
+ 03m36s28  0152   5.177001e+06   5.750558e+07 
+ 03m37s59  0153   5.176932e+06   4.258877e+06 
+ 03m38s91  0154   5.176916e+06   4.494706e+06 
+ 03m40s22  0155   5.176807e+06   3.625018e+07 
+ 03m41s53  0156   5.176558e+06   1.001661e+08 
+ 03m42s84  0157   5.176153e+06   3.780658e+08 
+ 03m44s15  0158   5.175740e+06   9.498293e+07 
+ 03m45s46  0159   5.175568e+06   1.106953e+08 
+ 03m46s77  0160   5.362645e+06   5.627092e+10 
+ 03m48s08  0161   5.175549e+06   2.254942e+07 
+ 03m49s39  0162   5.175498e+06   3.742605e+06 
+ 03m50s70  0163 "	1	real/human-embryos_petropoulos
+GPfates	"05   1.248838e+03 
+ 02m42s13  1105   7.874560e+05   2.875283e+03 
+ 02m43s27  1113   7.874554e+05   1.305005e+03 
+
+ 02m44s27  1120   7.874559e+05   8.961577e+04 
+ 02m45s30  1127   7.874551e+05   1.274037e+02 
+ 02m46s36  1134   7.874549e+05   1.997635e+02 
+ 02m47s40  1141   7.874547e+05   1.990237e+02 
+ 02m48s47  1148   7.874546e+05   7.436937e+01 
+ 02m49s50  1155   7.874546e+05   1.649556e+04 
+ 02m50s64  1163   7.874544e+05   1.060944e+03 
+ 02m51s78  1171   7.874541e+05   4.191552e+02 
+ 02m52s82  1178   7.874540e+05   3.741074e+03 
+ 02m53s89  1185   7.874535e+05   2.510078e+03 
+ 02m54s94  1192 "	1	synthetic/cycle_2
+GPfates	"06   1.434285e+06 
+ 03m01s44  0537   2.449944e+06   6.186848e+04 
+ 03m02s75  0541   2.449925e+06   1.274579e+06 
+ 03m04s07  0545   2.449876e+06   5.787060e+05 
+ 03m05s38  0549   2.449869e+06   1.189769e+06 
+ 03m06s70  0553   2.449854e+06   3.622317e+05 
+ 03m08s01  0557   2.449837e+06   8.508422e+04 
+ 03m09s34  0561   2.450837e+06   2.656935e+08 
+ 03m10s65  0565   2.449817e+06   2.284994e+05 
+ 03m11s97  0569   2.449794e+06   1.931769e+05 
+ 03m13s29  0573   2.449778e+06   3.393746e+04 
+ 03m14s60  0577   2.449770e+06   7.806756e+04 
+ 03m15s93  0581   2.449754e+06   1.419878e+06 
+ 03m17s24  0585  "	1	real/germline-human-male-weeks_li
+GPfates	"06   2.769129e+06 
+ 03m08s45  0555   2.449284e+06   9.961324e+04 
+ 03m09s77  0559   2.449278e+06   7.788022e+04 
+ 03m11s09  0563   2.449293e+06   1.213282e+07 
+ 03m12s41  0567   2.449266e+06   6.130087e+04 
+ 03m13s73  0571   2.449250e+06   7.915476e+04 
+ 03m15s05  0575   2.449245e+06   8.582544e+04 
+ 03m16s06  0578   2.449242e+06   2.553843e+05 
+ 03m17s39  0582   2.449230e+06   1.278385e+05 
+ 03m18s72  0586   2.449223e+06   1.855148e+05 
+ 03m20s05  0590   2.449220e+06   3.503289e+06 
+ 03m21s38  0594   2.449213e+06   3.504140e+04 
+ 03m22s71  0598   2.449206e+06   2.315990e+05 
+ 03m24s04  0602  "	1	real/germline-human-male-weeks_li
+GPfates	"17e+05   8.473442e+03 
+ 02m45s38  1013   9.601313e+05   7.360865e+03 
+ 02m46s50  1020   9.601308e+05   7.043380e+03 
+ 02m47s62  1027   9.601303e+05   1.880477e+03 
+ 02m48s77  1034   9.601301e+05   2.509671e+03 
+ 02m49s90  1041   9.601298e+05   1.931091e+03 
+ 02m51s04  1048   9.601305e+05   1.315084e+05 
+ 02m52s18  1055   9.601291e+05   2.564837e+03 
+ 02m53s32  1062   9.601289e+05   2.218104e+03 
+ 02m54s45  1069   9.601286e+05   1.732267e+03 
+ 02m55s58  1076   9.601282e+05   1.433816e+03 
+ 02m56s70  1083   9.601279e+05   7.049137e+02 
+ 02m57s83  1090   9.601277e+05   2.497344e+02 
+ 02m58s98  10"	1	synthetic/linear_long_2
+GPfates	"2e+05   2.914509e+02 
+ 02m48s25  1016   9.613490e+05   2.299826e+03 
+ 02m49s42  1022   9.613484e+05   5.119192e+02 
+ 02m50s60  1028   9.613481e+05   3.854690e+02 
+ 02m51s76  1034   9.613477e+05   7.925792e+02 
+ 02m52s92  1040   9.613473e+05   7.131955e+02 
+ 02m54s06  1046   9.613467e+05   3.041630e+03 
+ 02m55s22  1052   9.613465e+05   1.560928e+03 
+ 02m56s40  1058   9.613463e+05   1.730861e+03 
+ 02m57s58  1064   9.613459e+05   2.539120e+04 
+ 02m58s68  1070   9.613459e+05   3.631169e+04 
+ 02m59s76  1076   9.613454e+05   1.193859e+03 
+ 03m00s76  1082   9.613451e+05   1.431599e+03 
+ 03m01s90  108"	1	synthetic/bifurcating_converging_2
+GPfates	"5   1.634287e+03 
+ 02m47s01  0914   9.157475e+05   2.749790e+03 
+ 02m48s18  0920   9.157470e+05   3.403970e+03 
+ 02m49s34  0926   9.157461e+05   2.806981e+04 
+ 02m50s49  0932   9.157455e+05   5.940760e+02 
+ 02m51s64  0938   9.157447e+05   7.915415e+03 
+ 02m52s77  0944   9.157443e+05   3.501172e+02 
+ 02m53s89  0950   9.157441e+05   2.692782e+02 
+ 02m55s02  0956   9.157437e+05   9.580759e+02 
+ 02m56s18  0962   9.157437e+05   1.564616e+04 
+ 02m57s34  0968   9.157431e+05   5.924709e+03 
+ 02m58s47  0974   9.157439e+05   1.159379e+05 
+ 02m59s58  0980   9.157426e+05   9.437269e+04 
+ 03m00s70  0986   "	1	synthetic/bifurcating_2
+GPfates	"5   2.232870e+02 
+ 02m40s02  1047   9.157338e+05   9.405922e+02 
+Runtime:  02m40s02
+Optimization status: Converged
+
+Store DR------------------------------------------------------
+Infer pseudotime----------------------------------------------
+-- error --
+Traceback (most recent call last):
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/wrapper.py"", line 28, in <module>
+    m.infer_pseudotime(s_columns=[""bgplvm_"" + str(i) for i in range(p[""ndims""])]) # use the first two components to infer pseudotime
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5"	1	synthetic/bifurcating_2
+GPfates	"6   1.985153e+06 
+ 03m21s69  0151   5.181324e+06   9.589044e+08 
+ 03m22s98  0152   5.180957e+06   1.631842e+07 
+ 03m24s33  0153   5.180931e+06   7.690587e+06 
+ 03m25s68  0154   5.180838e+06   3.637598e+06 
+ 03m27s03  0155   5.180745e+06   1.283615e+07 
+ 03m28s36  0156   5.180516e+06   3.134911e+07 
+ 03m29s71  0157   5.180229e+06   3.215889e+07 
+ 03m31s05  0158   5.297535e+06   2.240888e+11 
+ 03m32s40  0159   5.180224e+06   1.520861e+07 
+ 03m33s69  0160   5.180027e+06   1.669030e+06 
+ 03m35s00  0161   5.179924e+06   9.044731e+06 
+ 03m36s29  0162   5.179966e+06   2.255539e+07 
+ 03m37s76  0163   "	1	real/human-embryos_petropoulos
+GPfates	"7e+04   4.806248e+02 
+ 02m37s12  1224  -7.391385e+04   4.114115e+02 
+ 02m38s13  1232  -7.391405e+04   2.932490e+02 
+ 02m39s13  1240  -7.391441e+04   4.959503e+04 
+
+ 02m40s13  1248  -7.391503e+04   9.041336e+01 
+ 02m41s13  1256  -7.391529e+04   2.038247e+02 
+ 02m42s14  1264  -7.391559e+04   7.749885e+01 
+ 02m43s15  1272  -7.391583e+04   7.422836e+02 
+ 02m44s15  1280  -7.391597e+04   7.566901e+01 
+ 02m45s15  1288  -7.391600e+04   2.636393e+02 
+ 02m46s15  1296  -7.391606e+04   1.810603e+02 
+ 02m47s16  1304  -7.391614e+04   4.340334e+02 
+ 02m48s16  1312  -7.391620e+04   1.588463e+03 
+ 02m49s16  13"	1	real/epidermis-hair-IFE_joost
+GPfates	"allble in self.observers]
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
+    [callble(self, which=which) for _, _, callble in self.observers]
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 500, in _pass_through_notify_observers
+    self.notify_observers(which=which)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in notify_obse"	1	synthetic/consecutive_bifurcating_9
+GPfates	"d
+    super(SparseGP_MPI,self).parameters_changed()
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/core/sparse_gp.py"", line 80, in parameters_changed
+    mean_function=self.mean_function)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/inference/latent_function_inference/var_dtc.py"", line 135, in inference
+    LB = jitchol(B)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/util/linalg.py"", line 61, in jitchol
+    raise linalg.LinAlgError("""	1	synthetic/linear_long_10
+GPfates	"e+05   1.141805e+03 
+ 02m46s28  1013   9.613518e+05   1.341845e+04 
+ 02m47s37  1020   9.613513e+05   1.753234e+03 
+ 02m48s45  1027   9.613510e+05   4.137654e+03 
+ 02m49s53  1034   9.613506e+05   9.640382e+03 
+ 02m50s61  1041   9.613505e+05   5.495286e+02 
+ 02m51s69  1048   9.613502e+05   8.046018e+02 
+ 02m52s78  1055   9.613501e+05   1.696068e+04 
+ 02m53s86  1062   9.613498e+05   1.914033e+03 
+ 02m54s94  1069   9.613496e+05   7.391216e+03 
+ 02m56s03  1076   9.613493e+05   1.853798e+03 
+ 02m57s13  1083   9.613490e+05   3.276063e+03 
+ 02m58s20  1090   9.613494e+05   8.007927e+04 
+ 02m59s28  1097"	1	synthetic/bifurcating_converging_2
+GPfates	"e+05   1.863270e+02 
+ 02m41s02  1113   8.218071e+05   4.959051e+05 
+ 02m42s05  1119   8.218037e+05   8.162439e+01 
+ 02m43s08  1125   8.218060e+05   4.540121e+05 
+ 02m44s11  1131   8.218034e+05   1.969997e+02 
+ 02m45s14  1137   8.218033e+05   1.428838e+02 
+ 02m46s16  1143   8.218033e+05   1.130229e+02 
+ 02m47s19  1149   8.218035e+05   2.180608e+04 
+ 02m48s22  1155   8.218030e+05   3.415208e+02 
+ 02m49s24  1161   8.218029e+05   1.194641e+02 
+ 02m50s27  1167   8.218028e+05   9.303786e+01 
+ 02m51s29  1173   8.218028e+05   3.321535e+02 
+ 02m52s31  1179   8.218026e+05   3.239967e+03 
+ 02m53s33  1185"	1	synthetic/consecutive_bifurcating_2
+GPfates	"e+05   3.304985e+03 
+ 02m41s06  0921   9.601412e+05   6.672741e+03 
+ 02m42s08  0928   9.601410e+05   5.168253e+02 
+ 02m43s22  0935   9.601406e+05   4.213024e+02 
+ 02m44s38  0942   9.601400e+05   2.174020e+03 
+ 02m45s39  0948   9.601390e+05   8.049367e+02 
+ 02m46s40  0954   9.601385e+05   5.910544e+02 
+ 02m47s42  0960   9.601382e+05   2.407394e+04 
+ 02m48s42  0966   9.601393e+05   3.552916e+05 
+ 02m49s44  0972   9.601375e+05   3.242384e+02 
+ 02m50s45  0978   9.601368e+05   3.571663e+02 
+ 02m51s47  0984   9.601359e+05   5.688807e+02 
+ 02m52s50  0990   9.601353e+05   9.329807e+02 
+ 02m53s55  0996"	1	synthetic/linear_long_2
+GPfates	"e+05   3.789098e+04 
+ 02m40s74  1036   7.874570e+05   5.767825e+03 
+ 02m41s83  1043   7.874566e+05   3.310879e+02 
+ 02m42s92  1050   7.874564e+05   1.703514e+02 
+ 02m44s02  1057   7.874561e+05   3.253212e+02 
+ 02m45s11  1064   7.874558e+05   6.171605e+02 
+ 02m46s20  1071   7.874554e+05   8.206898e+03 
+ 02m47s29  1078   7.874551e+05   2.767470e+02 
+ 02m48s38  1085   7.874547e+05   7.021640e+02 
+ 02m49s49  1092   7.874542e+05   6.926827e+02 
+ 02m50s56  1099   7.874540e+05   1.184217e+02 
+ 02m51s64  1106   7.874539e+05   3.518531e+03 
+ 02m52s71  1112   7.874536e+05   7.904043e+02 
+ 02m53s77  1118"	1	synthetic/cycle_2
+GPfates	"e+05   6.303012e+04 
+ 02m40s21  1040   9.157365e+05   9.085400e+02 
+ 02m41s27  1047   9.157363e+05   5.587013e+02 
+ 02m42s34  1054   9.157362e+05   5.503145e+01 
+ 02m43s40  1061   9.157361e+05   1.336187e+02 
+ 02m44s46  1068   9.157360e+05   2.215694e+02 
+ 02m45s52  1075   9.157359e+05   2.751844e+02 
+ 02m46s59  1082   9.157358e+05   5.648691e+01 
+ 02m47s66  1089   9.157357e+05   2.206806e+03 
+ 02m48s71  1096   9.157356e+05   7.531809e+01 
+ 02m49s77  1103   9.157355e+05   9.826109e+01 
+ 02m50s85  1110   9.157354e+05   3.678103e+01 
+ 02m51s91  1117   9.157353e+05   2.273579e+02 
+ 02m52s97  1124"	1	synthetic/bifurcating_2
+GPfates	"Pfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in notify_observers
+    [callble(self, which=which) for _, _, callble in self.observers]
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
+    [callble(self, which=which) for _, _, callble in self.observers]
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 500, in _pass_through_notify_observers
+    self.notify_observers(which=which)
+  File "	1	synthetic/linear_long_9
+GPfates	"which) for _, _, callble in self.observers]
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 498, in _parameters_changed_notification
+    self.parameters_changed()
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/models/bayesian_gplvm.py"", line 85, in parameters_changed
+    super(BayesianGPLVM,self).parameters_changed()
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/core/sparse_gp_mpi.py"", line 122, in parame"	1	synthetic/linear_9
 ouijaflow	"
  440/1000 [ 44%] █████████████                  ETA: 21s | Loss: 485818.031
  450/1000 [ 45%] █████████████                  ETA: 21s | Loss: 488919.531

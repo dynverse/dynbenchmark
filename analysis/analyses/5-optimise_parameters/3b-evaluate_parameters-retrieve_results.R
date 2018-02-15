@@ -36,7 +36,8 @@ job_errors <- outputs %>%
 print(job_errors)
 write_tsv(job_errors, figure_file("errors_method.tsv"))
 
-outputs %>% filter(!is.na(task_id)) %>% group_by(method_name) %>% summarise(n = n())
+required_outputs <- nrow(tasks_info) * num_repeats
+outputs %>% filter(!is.na(task_id)) %>% group_by(method_name) %>% summarise(n = n()) %>% filter(n != required_outputs)
 
 ###################################################
 ############### CREATE AGGREGATIONS ###############
@@ -44,8 +45,6 @@ outputs %>% filter(!is.na(task_id)) %>% group_by(method_name) %>% summarise(n = 
 list2env(read_rds(derived_file("config.rds")), environment())
 tasks_info <- tasks %>% select(task_id = id, type, trajectory_type, task_source)
 rm(tasks)
-
-required_outputs <- nrow(tasks_info) * num_repeats
 
 outputs_ind <- outputs %>%
   filter(!is.na(task_id)) %>%
