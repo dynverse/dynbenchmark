@@ -11,7 +11,7 @@ experiment("manual_ti")
 ##  ............................................................................
 ##  Load run                                                                ####
 
-run_id <- "mds_rcannood_1"
+run_id <- "mds_robrechtc_1"
 run <- read_rds(derived_file(paste0(run_id, ".rds")))
 run$spaces <- run$spaces[[1]]
 
@@ -19,8 +19,8 @@ run$spaces <- run$spaces[[1]]
 ##  ............................................................................
 ##  Load bitmap                                                             ####
 
-processed_file <- derived_file(run_id, '_run', '.png')
-processx::run(commandline=dynutils::pritt("inkscape -z {derived_file(run_id, '.svg')} -e={processed_file} -d=100"))
+processed_file <- derived_file(c(run_id, '_run', '.png'))
+processx::run(commandline=dynutils::pritt("inkscape -z {derived_file(c(run_id, '.svg'))} -e={processed_file} -d=100"))
 
 png <- readPNG(processed_file)
 red <- png[, , 1] - png[, , 2]
@@ -194,8 +194,7 @@ predictions_list <- graphs %>% pmap(function(box_id, graph_scaled, space, ...) {
     milestone_network = out$milestone_network,
     progressions = out$progressions,
     space = out$space_df,
-    centers = out$centers_df,
-    edge = out$edge_df
+    graph_scaled = graph_scaled
   )
 })
 predictions <- tibble(prediction = predictions_list, task_id = graphs$id)
