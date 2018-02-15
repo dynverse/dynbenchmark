@@ -162,10 +162,15 @@ table %>%
 ##  Plots of each dataset                                                   ####
 library(tidygraph)
 library(ggraph)
+
+label_dataset <- function(x) {
+  gsub(".*/(.*)", "\\1", x) %>% gsub("-", " ", .) %>% gsub("_(.*)", ": \\U\\1 et al.", .) %>% label_capitalise()
+}
+
 plots <- seq_len(nrow(tasks_real)) %>% map(function(task_i) {
   task <- dynutils::extract_row_to_list(tasks_real, task_i)
 
-  milestone_graph <- tbl_graph(tibble(node=factor(task$milestone_ids, levels=task$milestone_ids)), task$milestone_network)
+  milestone_graph <- tbl_graph(tibble(node=factor(task$milestone_ids, levels=task$milestone_ids)), task$milestone_network %>% mutate(from = match(from, task$milestone_ids), to = match(to, task$milestone_ids)))
 
   # determine layout
   layout <- "tree"
@@ -176,9 +181,11 @@ plots <- seq_len(nrow(tasks_real)) %>% map(function(task_i) {
   milestone_graph %>%
     ggraph(layout=layout) +
       geom_edge_link() +
-      geom_edge_link(aes(xend=x + (xend - x)/2, yend = y + (yend - y)/2), arrow=arrow(type="closed")) +
+      geom_edge_link(aes(xend=x + (xend - x)/1.6, yend = y + (yend - y)/1.6), arrow=arrow(type="closed")) +
       geom_node_label(aes(label=node, fill=node)) +
       theme_graph() +
-      theme(legend.position="none")
+      theme(legend.position="none", plot.margin = margin(1, 1, 1, 1)) +
+      scale_x_continuous(expand = c(1,1)) +
+      ggtitle(label_dataset(task$id))
 })
-cowplot::plot_grid(plotlist=plots[1:20])
+cowplot::plot_grid(plotlist=plots[1:10], ncol=5)
