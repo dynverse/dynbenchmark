@@ -28,7 +28,9 @@ experiment <- function(experiment_id) {
 
 # create a helper function
 experiment_subfolder <- function(path) {
-  function(filename = "", experiment_id = NULL) {
+  function(filename= "", experiment_id = NULL) {
+    filename <- paste0(filename, collapse = "")
+
     dyn_fold <- get_dynalysis_folder()
 
     # check whether exp_id is given

@@ -1,242 +1,189 @@
-library(tidyverse)
-library(cowplot)
-library(googlesheets)
 library(dynalysis)
-
-library(xml2)
-library(stringr)
+library(png)
+library(tidyverse)
+library(GNG)
+library(tidygraph)
+library(ggraph)
 
 experiment("manual_ti")
 
-# load in all datasets and runs
-runs <- read_rds(derived_file("runs.rds"))
-
-run_id <- "mds_robrechtc_1"
-run <- extract_row_to_list(runs, runs$run_id == run_id)
-run
 
 ##  ............................................................................
-##  Process svg                                                             ####
-# make sure to
-# - remove beziers using 1. select all paths 2. extensions -> modify paths -> flatten bezier 3. Move all up and down to refresh data
-# - The images dimensions are in points
+##  Load run                                                                ####
 
-svg <- read_xml(derived_file(glue::glue("{run$run_id}.svg")))
-layer <- svg %>% xml_find_first("//svg:g[@inkscape:label='segments']")
-paths_svg <- layer %>% xml_find_all("svg:path") %>% xml_attr("d")
-
-split_coords <- function(x) as.numeric(str_split(x, ",")[[1]])
-
-# calculate dimensions of svg and layer transformation
-dimensions <- c(
-  svg %>% xml_find_first("svg:g[@inkscape:label='back']") %>% xml_child() %>% xml_attr("width") %>% as.numeric(),
-  svg %>% xml_find_first("svg:g[@inkscape:label='back']") %>% xml_child() %>% xml_attr("height") %>% as.numeric()
-)
-base_coords <- layer %>% xml_attr("transform") %>% str_extract("\\(.*\\)") %>% str_sub(2, -2) %>% split_coords()
-if(is.na(base_coords)) base_coords <- c(0, 0)
+run_id <- "mds_robrechtc_1"
+run <- read_rds(derived_file(paste0(run_id, ".rds")))
+run$spaces <- run$spaces[[1]]
 
 
+##  ............................................................................
+##  Load bitmap                                                             ####
 
-### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
-### Process paths                                                           ####
-path <- paths_svg[[1]]
-process_path <- function(path, base_coords = c(0, 0)) {
-  # split <- path %>% gsub(" ", ",", .) %>% gsub("([A-Z])", ";\\1;", .) %>% str_split(";") %>% first()
-  split <- path %>% str_split(" ") %>% first()
-  i <- 1
-  pieces <- list()
+processed_file <- derived_file(c(run_id, '_run', '.png'))
+processx::run(commandline=dynutils::pritt("inkscape -z {derived_file(c(run_id, '.svg'))} -e={processed_file} -d=100"))
 
-  while (i <= length(split)) {
-    cur <- split[[i]]
+png <- readPNG(processed_file)
+red <- png[, , 1] - png[, , 2]
 
-    if(cur == "m") {
-      relative=TRUE
-    } else if (cur == "M"){
-      relative=FALSE
-    } else if(str_detect(cur, "[0-9\\.-]*,[0-9\\.-]")) {
-      pieces <- c(pieces, list(split_coords(cur)))
-      if(relative && length(pieces) > 1) {
-        pieces[[length(pieces)]] <- pieces[[length(pieces)]] + pieces[[length(pieces)-1]]
-      }
-    } else if (cur == "h") {
-      split[[i + 1]] <- paste0(split[[i + 1]], ",0")
-    } else if (cur == "v") {
-      split[[i + 1]] <- paste0("0,", split[[i + 1]])
-    } else if (cur == "l") {
 
-    }else {
-      print(cur)
-      print(path)
-      stop("Invalid line")
-    }
+##  ............................................................................
+##  Get coordinates from bitmap                                             ####
+coordinates <- red %>%
+  reshape2::melt(varnames=c("y", "x"), value.var=value) %>%
+  as_tibble() %>%
+  filter(value > 0.5)
 
-      # } else if (cur == "c" | cur == "C") {
-      #   start <- pieces[[length(pieces)]]
-      #   p1 <- split_coords(split[[i+1]])
-      #   p2 <- split_coords(split[[i+2]])
-      #   end <- split_coords(split[[i+3]])
-      #
-      #   if(cur == "c") {
-      #     p1 <- p1 + start
-      #     p2 <- p2 + start
-      #     end <- end + start
-      #   }
-      #
-      #   bezier_points <- bezier::bezier(seq(0, 1, 0.1), list(p1, p2), start, end) %>% t() %>% as.data.frame() %>% as.list() %>% unname()
-      #
-      #   pieces <- c(pieces, bezier_points)
-      # }
+box_height <- dim(red)[[1]]/run$nrow
+box_width <- dim(red)[[2]]/run$ncol
 
-    i <- i + 1
+coordinates <- coordinates %>%
+  mutate(
+    col = floor((x-1)/box_width) + 1,
+    row = floor((y-1)/box_height),
+    box_id =  (row * run$ncol) + col
+  )
+coordinates %>% filter(y<200) %>%  ggplot() + geom_point(aes(x, -y, color=factor(box_id)))
 
+
+
+##  ............................................................................
+##  Generate initial GNG from coordinates                                   ####
+process_coordinates <- function(coordinates) {
+  data <- coordinates %>% select(x, y) %>% as.matrix()
+  result <- GNG::gng(data, max_nodes=50, assign_cluster=F)
+
+  graph <- result$edges %>% as_tbl_graph() %>%
+    activate(nodes) %>%
+    left_join(result$nodes %>% mutate(index=as.character(index)) %>% rename(id=name), by=c("name"="index")) %>%
+    left_join(result$node_space %>% as.data.frame() %>% tibble::rownames_to_column("id"), "id")
+  graph
+}
+
+coordinates_split <- coordinates %>% split(coordinates$box_id)
+graphs <- tibble(graph = map(coordinates_split, process_coordinates), box_id = as.numeric(names(coordinates_split)))
+graphs <- graphs %>% left_join(run$spaces, by="box_id")
+
+map(graphs$graph[16:16], function(graph) {
+  ggraph(graph) +
+    geom_node_point() +
+    geom_edge_link()
+}) %>% cowplot::plot_grid(plotlist=.)
+
+
+##  ............................................................................
+##  Merge GNG nodes if too close                                            ####
+
+merge_graph <- function(graph, max_dist) {
+  distances <- graph %>% activate(nodes) %>% as_tibble() %>% select(x, y) %>% as.matrix() %>% dist() %>% as.matrix()
+  rownames(distances) <- colnames(distances) <- graph %>% pull(name)
+  close <- distances < maxdist
+
+  n_close <- close %>% apply(1, sum)
+  close <- close[order(n_close, decreasing=T), order(n_close, decreasing=T)]
+  labels <- setNames(rownames(distances), rownames(distances))
+
+  for (i in rownames(close)) {
+    which_close <- names(which(close[i, ]))
+    close[which_close, ] <- FALSE
+    close[, which_close] <- FALSE
+    labels[which_close] <- i
   }
-  path <- pieces %>% do.call(rbind, .) %>% as.data.frame() %>% magrittr::set_colnames(c("x", "y"))
-  path$x <- path$x + base_coords[[1]]
-  path$y <- path$y + base_coords[[2]]
-  path %>% ggplot() + geom_path(aes(x, -y)) + coord_equal()
-  path
+
+  nodes <- graph %>%
+    activate(nodes) %>%
+    as_tibble() %>%
+    mutate(new = labels) %>%
+    group_by(new) %>%
+    summarise(x = mean(x), y=mean(y)) %>%
+    rename(name=new)
+  edges <- graph %>%
+    activate(edges) %>%
+    as_tibble() %>%
+    mutate(from = labels[from], to = labels[to]) %>%
+    mutate(from = match(from, nodes$name), to = match(to, nodes$name)) %>%
+    filter(from!=to) %>%
+    group_by(from, to) %>%  # filter duplicates
+    filter(row_number() == 1) %>%
+    ungroup()
+
+  new_graph <- tbl_graph(nodes, edges)
+
+  # new_graph%>%
+  #   ggraph() +
+  #   geom_node_point() +
+  #   geom_edge_link()
+
+  new_graph
 }
 
-paths <- tibble(
-  path = map(paths_svg, process_path, base_coords)
-)
+maxdist <- box_width / 10
+
+graphs$graph_merged <- map(graphs$graph, merge_graph, maxdist)
+
+map(graphs$graph_merged[1:20], function(graph) {
+  ggraph(graph) +
+    geom_node_point() +
+    geom_edge_link()
+}) %>% cowplot::plot_grid(plotlist=.)
+
+##  ............................................................................
+##  Project onto edges                                                      ####
 
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
-### Put paths into boxes                                                    ####
-paths <- paths %>% mutate(
-  left = map_dbl(path, ~min(.$x)),
-  top = map_dbl(path,~max(.$y)),
-  bottom = map_dbl(path,~min(.$y)),
-  right = map_dbl(path,~max(.$x))
-)
+### Rescale to match space                                                  ####
+global_x_scale <- 1.15
+global_y_scale <- 1.15
 
-box_width <- dimensions[[1]]/run$ncol
-box_height <- dimensions[[2]]/run$nrow
+scale_graph <- function(graph, box_id) {
+  space <- run$spaces %>% filter(box_id == !!box_id)
 
-paths <- paths %>% mutate(
-  col1 = ceiling(left / box_width),
-  col2 = ceiling(right / box_width),
-  row1 = ceiling(top / box_height),
-  row2 = ceiling(bottom / box_height),
-  col = map2(col1, col2, c) %>% map_dbl(mean),
-  row = map2(row1, row2, c) %>% map_dbl(mean),
-  box_id = (row - 1) * run$ncol + col
-)
-
-if(!all(run$spaces$box_id %in% paths$box_id)) {
-  print(which(!run$spaces$box_id %in% paths$box_id))
-  stop("Not all boxes have lines")
+  graph %>%
+    activate(nodes) %>%
+    mutate(
+      x = x - box_width * ((box_id-1) %% run$ncol),
+      y = y - box_height * floor((box_id-1) / run$ncol),
+      y = box_height - y, # flip y because svg starts from top,
+      x = x/box_width,
+      y = y/box_height
+    ) %>%
+    mutate( # scale from center
+      x = (x - 0.5) * global_x_scale + 0.5,
+      y = (y - 0.5) * global_y_scale + 0.5
+    ) %>%
+    mutate(
+      x = x * space$x_scale + space$x_shift,
+      y = y * space$y_scale + space$y_shift
+    )
 }
 
-if(any(as.integer(paths$box_id) != paths$box_id)) {
-  stop("Paths overlap between boxes!")
-}
+graphs$graph_scaled <- map2(graphs$graph_merged, graphs$box_id, scale_graph)
 
-# intermediate plot check, make sure all paths look ok
-paths[paths$box_id %in% 140:150,] %>%
-  mutate(path_id = row_number()) %>%
-  unnest(path) %>%
-  ggplot(aes(x=x, y=-y, color=factor(box_id))) + geom_path(aes(group=path_id)) + coord_equal() + facet_wrap(~box_id, scales="free") + ggraph::theme_graph() + theme(legend.position = "none")
+graphs[100:110, ] %>% pmap(function(graph_scaled, space, ...) {
+  ggraph(graph_scaled) +
+    geom_point(aes(Comp1, Comp2), data=space) +
+    geom_edge_link(edge_colour="darkred", edge_width=4)+
+    geom_node_point(color="red")
+}) %>% cowplot::plot_grid(plotlist=.)
 
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
-### Merge close nodes                                                       ####
-
-# get nodes
-nodes_premerge <- paths %>%
-  mutate(path_id = row_number()) %>%
-  unnest(path) %>%
-  mutate(node_id = row_number()) %>%
-  select(node_id, path_id, box_id, x, y)
-
-# merge nodes
-node_max_dist <- 5
-
-# allow three types of merges: of end points (within the same box id and path id), of different paths, or on the diagonal (node merges with itself obviously)
-same_box_id <- (nodes_premerge$box_id %>% dist() %>% as.matrix() %>% {. == 0})
-
-end_nodes <- (c(0, nodes_premerge$path_id) %>% diff()) %>% {. + lead(., 1)}
-possible_node_merges_end <- (end_nodes %*% t(rep(1, length(end_nodes)))) & same_box_id
-
-possible_node_merges_path <- (nodes_premerge$path_id %>% dist() %>% as.matrix() %>% {. != 0}) & same_box_id
-
-possible_node_merges_diagonal <- possible_node_merges_path;possible_node_merges_diagonal[,] <- 0;diag(possible_node_merges_diagonal) <- 1
-
-node_dist <- nodes_premerge %>% select(x, y) %>% dist() %>% as.matrix()
-possible_node_merges <- possible_node_merges_end | possible_node_merges_path | possible_node_merges_diagonal
-
-nodes_premerge$node_group_id <- (possible_node_merges * (node_dist < node_max_dist)) %>% igraph::graph_from_adjacency_matrix() %>% igraph::components() %>% .$membership %>% as.integer()
-
-nodes <- nodes_premerge %>%
-  group_by(node_group_id) %>%
-  mutate(x=mean(x), y=mean(y)) %>%
-  select(-node_id) %>%
-  rename(node_id = node_group_id)
-
-if(!all(run$spaces$box_id %in% nodes$box_id)) {
-  stop("Not all boxes have lines")
-}
-
-
-
-### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
-### Map nodes on space                                                      ####
-# now create cluster networks and cluster centers
-cluster_networks <- nodes %>%
-  group_by(path_id) %>%
-  summarise(
-    cluster_network = list(drop_na(tibble(from=lag(node_id, 1), to=node_id) %>% filter(from != to))),
-    box_id = as.integer(first(box_id))
-  ) %>%
-  group_by(box_id) %>%
-  summarise(cluster_network = list(bind_rows(cluster_network)))
-
-
-global_x_scale <- 1.5
-global_y_scale <- 1.5
-cluster_positions <- nodes %>%
-  group_by(node_id) %>%
-  summarise(
-    x = first(x),
-    y = first(y),
-    box_id = as.integer(first(box_id))
-  ) %>%
-  mutate(
-    x = x - box_width * ((box_id-1) %% run$ncol),
-    y = y - box_height * floor((box_id-1) / run$ncol),
-    y = box_height - y, # flip y because svg starts from top,
-    x = x/box_width,
-    y = y/box_height
-  ) %>%
-  mutate( # scale from center
-    x = (x - 0.5) * global_x_scale + 0.5,
-    y = (y - 0.5) * global_y_scale + 0.5
-  ) %>%
-  left_join(run$spaces %>% select(x_scale, y_scale, y_shift, x_shift, box_id), by="box_id") %>%
-  mutate(
-    x = x * x_scale + x_shift,
-    y = y * y_scale + y_shift
-  ) %>%
-  group_by(box_id) %>%
-  summarise(cluster_positions = list(tibble(x=x, y=y, node_id=node_id))) %>%
-  ungroup()
-
-# make sure points overlap with data
-run$spaces[100:120, ] %>% unnest(space) %>%
-  ggplot(aes(Comp1, Comp2)) +
-  geom_point() +
-  geom_point(aes(x, y), color="red", data=cluster_positions[100:120, ] %>% unnest(cluster_positions)) +
-  facet_wrap(~box_id, scale="free")
-
-
-### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
-### Project cells                                                           ####
-predictions_data <- left_join(cluster_positions, cluster_networks, "box_id") %>% left_join(run$spaces, "box_id")
-predictions_list <- predictions_data %>% pmap(function(box_id, cluster_positions, cluster_network, space, ...) {
+### Project                                                                 ####
+predictions_list <- graphs %>% pmap(function(box_id, graph_scaled, space, ...) {
   print(box_id)
-  cluster_space <- cluster_positions %>% column_to_rownames("node_id") %>% as.matrix()
-  cluster_network <- cluster_network %>% mutate_all(as.character) %>% mutate(directed=F, length=1)
+  cluster_space <- graph_scaled %>%
+    activate(nodes) %>%
+    as_tibble() %>%
+    select(x, y) %>%
+    as.matrix()
+  rownames(cluster_space) <- seq_len(nrow(cluster_space))
+
+  cluster_network <- graph_scaled %>%
+    activate(edges) %>%
+    as_tibble() %>%
+    mutate_all(as.character) %>%
+    mutate(directed=F, length=1)
+
   sample_space <- space %>% .[, c("Comp1", "Comp2")] %>% magrittr::set_colnames(c("x", "y")) %>% magrittr::set_rownames(space$cell_id)
 
   out <- dynmethods:::project_cells_to_segments(cluster_network, cluster_space, sample_space)
@@ -247,22 +194,21 @@ predictions_list <- predictions_data %>% pmap(function(box_id, cluster_positions
     milestone_network = out$milestone_network,
     progressions = out$progressions,
     space = out$space_df,
-    centers = out$centers_df,
-    edge = out$edge_df
+    graph_scaled = graph_scaled
   )
 })
-predictions <- tibble(prediction = predictions_list, task_id = run$spaces$task_id)
+predictions <- tibble(prediction = predictions_list, task_id = graphs$id)
 
 
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
 ### Check scores of controls                                                ####
-tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
-tasks <- tasks %>% slice(match(run$spaces$task_id, task_id))
+tasks <- read_rds(derived_file("tasks.rds", experiment_id="2-dataset_characterisation"))
+tasks <- tasks %>% slice(match(run$spaces$id, id))
 
-controls <- map(tasks %>% filter(category == "control" & task_id != "control_BA") %>% pull(task_id), function(task_id) {
+controls <- map(tasks %>% filter(task_group == "control" & id != "control_BA") %>% pull(id), function(task_id) {
   print(task_id)
-  task <- extract_row_to_list(tasks, which(tasks$task_id == task_id))
+  task <- extract_row_to_list(tasks, which(tasks$id == task_id))
   task$geodesic_dist <- dynutils::compute_tented_geodesic_distances(task)
 
   prediction <- extract_row_to_list(predictions, which(predictions$task_id == task_id))$prediction
