@@ -1,5 +1,6 @@
 method_name	error_message	n	example
 Mpath	Mpath only detected one landmark	223	real/cell-cycle_leng
+SCOUP	cannot open the connection	88	real/aging-hsc-old_kowalczyk
 GPfates	"ynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPclust/collapsed_mixture.py"", line 42, in __init__
     self.phi, logphi, self.H = softmax_weave(self.phi_)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPclust/np_utilities.py"", line 27, in softmax_numpy
@@ -9,6 +10,7 @@ GPfates	"ynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPcl
 ValueError: zero-size array to reduction operation maximum which has no identity"	64	real/cell-cycle_buettner
 monocle with DDRTree	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	44	synthetic/bifurcating_10
 monocle with ICA	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	44	synthetic/bifurcating_10
+StemID	missing value where TRUE/FALSE needed	40	real/aging-hsc-old_kowalczyk
 embeddr	need at least four unique 'x' values	28	toy/bifuracting_loop_1
 SLICE	replacement has 1 row, data has 0	24	real/cell-cycle_buettner
 embeddr	smoothing parameter value too small	16	synthetic/consecutive_bifurcating_10
@@ -19,6 +21,8 @@ GPfates	"es/venv/lib/python3.5/site-packages/GPy/core/sparse_gp.py"", line 80, i
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/util/linalg.py"", line 61, in jitchol
     raise linalg.LinAlgError(""not pd: non-positive diagonal elements"")
 numpy.linalg.linalg.LinAlgError: not pd: non-positive diagonal elements"	16	synthetic/bifurcating_loop_10
+StemID	0 (non-NA) cases	14	synthetic/bifurcating_10
+StemID	Number of clusters 'k' must be in {1,2, .., n-1}; hence n >= 2	14	synthetic/bifurcating_loop_8
 Wishbone	"ne/venv/lib/python3.5/site-packages/wishbone/wb.py"", line 1068, in run_wishbone
     s=s, k=k, l=k, num_waypoints=num_waypoints, branch=branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 54, in wishbone
@@ -68,6 +72,7 @@ GPfates	"py"", line 49, in __call__
     assert lengthscale.size in [1, input_dim], ""Bad number of lengthscales""
 AssertionError: Bad number of lengthscales"	4	synthetic/linear_long_11
 monocle with ICA	evaluation nested too deeply: infinite recursion / options(expressions=)?	4	real/human-embryos_petropoulos
+ouija	a dimension is zero	4	real/macrophage-salmonella_saliba
 ouijaflow	".py"", line 3018, in create_op
     op_def=op_def)
   File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/tensorflow/python/framework/ops.py"", line 1576, in __init__
@@ -84,6 +89,7 @@ ouijaflow	"ry/ouijaflow/venv/lib/python3.5/site-packages/edward/inferences/klqp.
     return self._log_prob(value, **kwargs)
   File ""/scrat"	4	real/pancreatic-alpha-cell-maturation_zhang
 sincell	subscript out of bounds	4	real/cortical-interneuron-differentiation_frazer
+StemID	NA values in the dissimilarity matrix not allowed.	4	synthetic/linear_long_11
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
@@ -225,6 +231,8 @@ Wishbone	"wishbone/core.py"", line 50, in wishbone
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in <listcomp>
     paths_l2l.append( [paths[li] for li in l] )
 KeyError: 73"	3	synthetic/bifurcating_loop_7
+ouija	cannot allocate vector of size 1 Kb	2	real/human-embryos_petropoulos
+ouija	memory exhausted (limit reached?)	2	real/mESC-differentiation_hayashi
 ouijaflow	" 'gradients/inference/sample/DropoutNormal_1/log_prob/ReduceLogSumExp/Sum_grad/Tile', defined at:
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/ouijaflow/wrapper.py"", line 17, in <module>
     oui.fit(data.as_matrix(), n_iter=int(p[""iter""]))
@@ -1655,6 +1663,278 @@ ouijaflow	"ython/3.5.1/lib/python3.5/site-packages/tensorflow/python/framework/o
 ResourceExhaustedError (see above for traceback): OOM when allocating tensor with shape[827528]
 	 [[Node: inference/sample/DropoutNormal_1/log_prob/ReduceLogSumExp/Sum = Sum[T=DT_FLOAT, Tidx=DT_INT32, keep_dims=true, _device=""/job:localhost/replica:0/task:0/cpu:0""](inference/sample/DropoutNormal_1/log_prob/ReduceLogSumExp/Exp, inference/sample/DropoutNormal_1/log_prob/ReduceLogSumExp/Sum/reduction_indices)]]
 "	1	synthetic/linear_long_2
+SCOUP	" command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp0s5T8D/scoup12fffbbce54a/data /scratch/irc/personal/robrechtc/tmp//Rtmp0s5T8D/scoup12fffbbce54a/init /scratch/irc/personal/robrechtc/tmp//Rtmp0s5T8D/scoup12fffbbce54a/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp0s5T8D/scoup12fffbbce54a/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp0s5T8D/scoup12fffbbce54a/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp0s5T8D/scoup12fffbbce54a/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_2
+SCOUP	" command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp3yBwLw/scoup16265bba58c1/data /scratch/irc/personal/robrechtc/tmp//Rtmp3yBwLw/scoup16265bba58c1/init /scratch/irc/personal/robrechtc/tmp//Rtmp3yBwLw/scoup16265bba58c1/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp3yBwLw/scoup16265bba58c1/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp3yBwLw/scoup16265bba58c1/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp3yBwLw/scoup16265bba58c1/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_7
+SCOUP	" command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp8EeXeV/scoupdd87129c0f45/data /scratch/irc/personal/robrechtc/tmp//Rtmp8EeXeV/scoupdd87129c0f45/init /scratch/irc/personal/robrechtc/tmp//Rtmp8EeXeV/scoupdd87129c0f45/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp8EeXeV/scoupdd87129c0f45/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp8EeXeV/scoupdd87129c0f45/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp8EeXeV/scoupdd87129c0f45/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_6
+SCOUP	" command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmpd1lM17/scoup16d0d1bf89f4/data /scratch/irc/personal/robrechtc/tmp//Rtmpd1lM17/scoup16d0d1bf89f4/init /scratch/irc/personal/robrechtc/tmp//Rtmpd1lM17/scoup16d0d1bf89f4/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmpd1lM17/scoup16d0d1bf89f4/gpara /scratch/irc/personal/robrechtc/tmp//Rtmpd1lM17/scoup16d0d1bf89f4/cpara /scratch/irc/personal/robrechtc/tmp//Rtmpd1lM17/scoup16d0d1bf89f4/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_6
+SCOUP	" command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmptZspth/scoup7a07174fdd8a/data /scratch/irc/personal/robrechtc/tmp//RtmptZspth/scoup7a07174fdd8a/init /scratch/irc/personal/robrechtc/tmp//RtmptZspth/scoup7a07174fdd8a/time_sp /scratch/irc/personal/robrechtc/tmp//RtmptZspth/scoup7a07174fdd8a/gpara /scratch/irc/personal/robrechtc/tmp//RtmptZspth/scoup7a07174fdd8a/cpara /scratch/irc/personal/robrechtc/tmp//RtmptZspth/scoup7a07174fdd8a/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_2
+SCOUP	" command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpwLl7PH/scoupd998140501dc/data /scratch/irc/personal/robrechtc/tmp//RtmpwLl7PH/scoupd998140501dc/init /scratch/irc/personal/robrechtc/tmp//RtmpwLl7PH/scoupd998140501dc/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpwLl7PH/scoupd998140501dc/gpara /scratch/irc/personal/robrechtc/tmp//RtmpwLl7PH/scoupd998140501dc/cpara /scratch/irc/personal/robrechtc/tmp//RtmpwLl7PH/scoupd998140501dc/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_6
+SCOUP	" command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpyTfvws/scoup81c14ac90d70/data /scratch/irc/personal/robrechtc/tmp//RtmpyTfvws/scoup81c14ac90d70/init /scratch/irc/personal/robrechtc/tmp//RtmpyTfvws/scoup81c14ac90d70/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpyTfvws/scoup81c14ac90d70/gpara /scratch/irc/personal/robrechtc/tmp//RtmpyTfvws/scoup81c14ac90d70/cpara /scratch/irc/personal/robrechtc/tmp//RtmpyTfvws/scoup81c14ac90d70/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_7
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp0tOVKw/scoup15ec73a1f35b9/data /scratch/irc/personal/robrechtc/tmp//Rtmp0tOVKw/scoup15ec73a1f35b9/init /scratch/irc/personal/robrechtc/tmp//Rtmp0tOVKw/scoup15ec73a1f35b9/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp0tOVKw/scoup15ec73a1f35b9/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp0tOVKw/scoup15ec73a1f35b9/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp0tOVKw/scoup15ec73a1f35b9/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_11
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp5YMf7j/scoup1563e27b59e04/data /scratch/irc/personal/robrechtc/tmp//Rtmp5YMf7j/scoup1563e27b59e04/init /scratch/irc/personal/robrechtc/tmp//Rtmp5YMf7j/scoup1563e27b59e04/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp5YMf7j/scoup1563e27b59e04/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp5YMf7j/scoup1563e27b59e04/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp5YMf7j/scoup1563e27b59e04/ll 72 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_1
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp66uXMI/scoup16f187bc306a2/data /scratch/irc/personal/robrechtc/tmp//Rtmp66uXMI/scoup16f187bc306a2/init /scratch/irc/personal/robrechtc/tmp//Rtmp66uXMI/scoup16f187bc306a2/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp66uXMI/scoup16f187bc306a2/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp66uXMI/scoup16f187bc306a2/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp66uXMI/scoup16f187bc306a2/ll 60 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_2
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp6oricJ/scoup16f257bc306a2/data /scratch/irc/personal/robrechtc/tmp//Rtmp6oricJ/scoup16f257bc306a2/init /scratch/irc/personal/robrechtc/tmp//Rtmp6oricJ/scoup16f257bc306a2/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp6oricJ/scoup16f257bc306a2/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp6oricJ/scoup16f257bc306a2/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp6oricJ/scoup16f257bc306a2/ll 66 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_3
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp7WRUAE/scoup1b6cd6b675e62/data /scratch/irc/personal/robrechtc/tmp//Rtmp7WRUAE/scoup1b6cd6b675e62/init /scratch/irc/personal/robrechtc/tmp//Rtmp7WRUAE/scoup1b6cd6b675e62/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp7WRUAE/scoup1b6cd6b675e62/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp7WRUAE/scoup1b6cd6b675e62/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp7WRUAE/scoup1b6cd6b675e62/ll 52 193 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_3
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpCexTdi/scoup1b673576bc33c/data /scratch/irc/personal/robrechtc/tmp//RtmpCexTdi/scoup1b673576bc33c/init /scratch/irc/personal/robrechtc/tmp//RtmpCexTdi/scoup1b673576bc33c/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpCexTdi/scoup1b673576bc33c/gpara /scratch/irc/personal/robrechtc/tmp//RtmpCexTdi/scoup1b673576bc33c/cpara /scratch/irc/personal/robrechtc/tmp//RtmpCexTdi/scoup1b673576bc33c/ll 62 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_1
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpcQxtMB/scoup1302b27551d5b/data /scratch/irc/personal/robrechtc/tmp//RtmpcQxtMB/scoup1302b27551d5b/init /scratch/irc/personal/robrechtc/tmp//RtmpcQxtMB/scoup1302b27551d5b/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpcQxtMB/scoup1302b27551d5b/gpara /scratch/irc/personal/robrechtc/tmp//RtmpcQxtMB/scoup1302b27551d5b/cpara /scratch/irc/personal/robrechtc/tmp//RtmpcQxtMB/scoup1302b27551d5b/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_8
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpCyNFmG/scoup1599b57c96845/data /scratch/irc/personal/robrechtc/tmp//RtmpCyNFmG/scoup1599b57c96845/init /scratch/irc/personal/robrechtc/tmp//RtmpCyNFmG/scoup1599b57c96845/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpCyNFmG/scoup1599b57c96845/gpara /scratch/irc/personal/robrechtc/tmp//RtmpCyNFmG/scoup1599b57c96845/cpara /scratch/irc/personal/robrechtc/tmp//RtmpCyNFmG/scoup1599b57c96845/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_11
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmpd2xhqx/scoup15f421710c99d/data /scratch/irc/personal/robrechtc/tmp//Rtmpd2xhqx/scoup15f421710c99d/init /scratch/irc/personal/robrechtc/tmp//Rtmpd2xhqx/scoup15f421710c99d/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmpd2xhqx/scoup15f421710c99d/gpara /scratch/irc/personal/robrechtc/tmp//Rtmpd2xhqx/scoup15f421710c99d/cpara /scratch/irc/personal/robrechtc/tmp//Rtmpd2xhqx/scoup15f421710c99d/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_8
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpfWnfMM/scoup160433dd3ea4c/data /scratch/irc/personal/robrechtc/tmp//RtmpfWnfMM/scoup160433dd3ea4c/init /scratch/irc/personal/robrechtc/tmp//RtmpfWnfMM/scoup160433dd3ea4c/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpfWnfMM/scoup160433dd3ea4c/gpara /scratch/irc/personal/robrechtc/tmp//RtmpfWnfMM/scoup160433dd3ea4c/cpara /scratch/irc/personal/robrechtc/tmp//RtmpfWnfMM/scoup160433dd3ea4c/ll 72 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_1
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpGlWfB2/scoup12be15270fa3d/data /scratch/irc/personal/robrechtc/tmp//RtmpGlWfB2/scoup12be15270fa3d/init /scratch/irc/personal/robrechtc/tmp//RtmpGlWfB2/scoup12be15270fa3d/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpGlWfB2/scoup12be15270fa3d/gpara /scratch/irc/personal/robrechtc/tmp//RtmpGlWfB2/scoup12be15270fa3d/cpara /scratch/irc/personal/robrechtc/tmp//RtmpGlWfB2/scoup12be15270fa3d/ll 66 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_3
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpgplVsi/scoup1eb181a0e85c9/data /scratch/irc/personal/robrechtc/tmp//RtmpgplVsi/scoup1eb181a0e85c9/init /scratch/irc/personal/robrechtc/tmp//RtmpgplVsi/scoup1eb181a0e85c9/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpgplVsi/scoup1eb181a0e85c9/gpara /scratch/irc/personal/robrechtc/tmp//RtmpgplVsi/scoup1eb181a0e85c9/cpara /scratch/irc/personal/robrechtc/tmp//RtmpgplVsi/scoup1eb181a0e85c9/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_11
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpJDeZr2/scoup1566520655065/data /scratch/irc/personal/robrechtc/tmp//RtmpJDeZr2/scoup1566520655065/init /scratch/irc/personal/robrechtc/tmp//RtmpJDeZr2/scoup1566520655065/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpJDeZr2/scoup1566520655065/gpara /scratch/irc/personal/robrechtc/tmp//RtmpJDeZr2/scoup1566520655065/cpara /scratch/irc/personal/robrechtc/tmp//RtmpJDeZr2/scoup1566520655065/ll 68 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_2
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpKwcY3v/scoup159c650e66d2e/data /scratch/irc/personal/robrechtc/tmp//RtmpKwcY3v/scoup159c650e66d2e/init /scratch/irc/personal/robrechtc/tmp//RtmpKwcY3v/scoup159c650e66d2e/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpKwcY3v/scoup159c650e66d2e/gpara /scratch/irc/personal/robrechtc/tmp//RtmpKwcY3v/scoup159c650e66d2e/cpara /scratch/irc/personal/robrechtc/tmp//RtmpKwcY3v/scoup159c650e66d2e/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_8
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmplGxlGd/scoup1de925cc5253b/data /scratch/irc/personal/robrechtc/tmp//RtmplGxlGd/scoup1de925cc5253b/init /scratch/irc/personal/robrechtc/tmp//RtmplGxlGd/scoup1de925cc5253b/time_sp /scratch/irc/personal/robrechtc/tmp//RtmplGxlGd/scoup1de925cc5253b/gpara /scratch/irc/personal/robrechtc/tmp//RtmplGxlGd/scoup1de925cc5253b/cpara /scratch/irc/personal/robrechtc/tmp//RtmplGxlGd/scoup1de925cc5253b/ll 60 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_2
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmplRihF2/scoup1237422351d52/data /scratch/irc/personal/robrechtc/tmp//RtmplRihF2/scoup1237422351d52/init /scratch/irc/personal/robrechtc/tmp//RtmplRihF2/scoup1237422351d52/time_sp /scratch/irc/personal/robrechtc/tmp//RtmplRihF2/scoup1237422351d52/gpara /scratch/irc/personal/robrechtc/tmp//RtmplRihF2/scoup1237422351d52/cpara /scratch/irc/personal/robrechtc/tmp//RtmplRihF2/scoup1237422351d52/ll 66 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_3
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpLSHZEl/scoup163b730b2d6d2/data /scratch/irc/personal/robrechtc/tmp//RtmpLSHZEl/scoup163b730b2d6d2/init /scratch/irc/personal/robrechtc/tmp//RtmpLSHZEl/scoup163b730b2d6d2/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpLSHZEl/scoup163b730b2d6d2/gpara /scratch/irc/personal/robrechtc/tmp//RtmpLSHZEl/scoup163b730b2d6d2/cpara /scratch/irc/personal/robrechtc/tmp//RtmpLSHZEl/scoup163b730b2d6d2/ll 66 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_3
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmppi9Dzj/scoup169bb6336be90/data /scratch/irc/personal/robrechtc/tmp//Rtmppi9Dzj/scoup169bb6336be90/init /scratch/irc/personal/robrechtc/tmp//Rtmppi9Dzj/scoup169bb6336be90/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmppi9Dzj/scoup169bb6336be90/gpara /scratch/irc/personal/robrechtc/tmp//Rtmppi9Dzj/scoup169bb6336be90/cpara /scratch/irc/personal/robrechtc/tmp//Rtmppi9Dzj/scoup169bb6336be90/ll 68 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_2
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmprhQGo6/scoup1b5427549ad94/data /scratch/irc/personal/robrechtc/tmp//RtmprhQGo6/scoup1b5427549ad94/init /scratch/irc/personal/robrechtc/tmp//RtmprhQGo6/scoup1b5427549ad94/time_sp /scratch/irc/personal/robrechtc/tmp//RtmprhQGo6/scoup1b5427549ad94/gpara /scratch/irc/personal/robrechtc/tmp//RtmprhQGo6/scoup1b5427549ad94/cpara /scratch/irc/personal/robrechtc/tmp//RtmprhQGo6/scoup1b5427549ad94/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_11
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpsNHlJp/scoup15d8d480410ce/data /scratch/irc/personal/robrechtc/tmp//RtmpsNHlJp/scoup15d8d480410ce/init /scratch/irc/personal/robrechtc/tmp//RtmpsNHlJp/scoup15d8d480410ce/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpsNHlJp/scoup15d8d480410ce/gpara /scratch/irc/personal/robrechtc/tmp//RtmpsNHlJp/scoup15d8d480410ce/cpara /scratch/irc/personal/robrechtc/tmp//RtmpsNHlJp/scoup15d8d480410ce/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_8
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmpu0RLfy/scoup1606a5ebf902e/data /scratch/irc/personal/robrechtc/tmp//Rtmpu0RLfy/scoup1606a5ebf902e/init /scratch/irc/personal/robrechtc/tmp//Rtmpu0RLfy/scoup1606a5ebf902e/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmpu0RLfy/scoup1606a5ebf902e/gpara /scratch/irc/personal/robrechtc/tmp//Rtmpu0RLfy/scoup1606a5ebf902e/cpara /scratch/irc/personal/robrechtc/tmp//Rtmpu0RLfy/scoup1606a5ebf902e/ll 52 193 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_3
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpuGRFzk/scoup15bb14cf19d1d/data /scratch/irc/personal/robrechtc/tmp//RtmpuGRFzk/scoup15bb14cf19d1d/init /scratch/irc/personal/robrechtc/tmp//RtmpuGRFzk/scoup15bb14cf19d1d/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpuGRFzk/scoup15bb14cf19d1d/gpara /scratch/irc/personal/robrechtc/tmp//RtmpuGRFzk/scoup15bb14cf19d1d/cpara /scratch/irc/personal/robrechtc/tmp//RtmpuGRFzk/scoup15bb14cf19d1d/ll 68 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_2
+SCOUP	"and: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmpz3GUsG/scoup1650530112a87/data /scratch/irc/personal/robrechtc/tmp//Rtmpz3GUsG/scoup1650530112a87/init /scratch/irc/personal/robrechtc/tmp//Rtmpz3GUsG/scoup1650530112a87/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmpz3GUsG/scoup1650530112a87/gpara /scratch/irc/personal/robrechtc/tmp//Rtmpz3GUsG/scoup1650530112a87/cpara /scratch/irc/personal/robrechtc/tmp//Rtmpz3GUsG/scoup1650530112a87/ll 52 193 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_3
+SCOUP	"command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpGhJ706/scoupe39f6797242f/data /scratch/irc/personal/robrechtc/tmp//RtmpGhJ706/scoupe39f6797242f/init /scratch/irc/personal/robrechtc/tmp//RtmpGhJ706/scoupe39f6797242f/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpGhJ706/scoupe39f6797242f/gpara /scratch/irc/personal/robrechtc/tmp//RtmpGhJ706/scoupe39f6797242f/cpara /scratch/irc/personal/robrechtc/tmp//RtmpGhJ706/scoupe39f6797242f/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_buettner
+SCOUP	"command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmph3Ptoh/scoupda344e842fde/data /scratch/irc/personal/robrechtc/tmp//Rtmph3Ptoh/scoupda344e842fde/init /scratch/irc/personal/robrechtc/tmp//Rtmph3Ptoh/scoupda344e842fde/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmph3Ptoh/scoupda344e842fde/gpara /scratch/irc/personal/robrechtc/tmp//Rtmph3Ptoh/scoupda344e842fde/cpara /scratch/irc/personal/robrechtc/tmp//Rtmph3Ptoh/scoupda344e842fde/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_5
+SCOUP	"command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpP4NuFR/scoupd7905a774eec/data /scratch/irc/personal/robrechtc/tmp//RtmpP4NuFR/scoupd7905a774eec/init /scratch/irc/personal/robrechtc/tmp//RtmpP4NuFR/scoupd7905a774eec/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpP4NuFR/scoupd7905a774eec/gpara /scratch/irc/personal/robrechtc/tmp//RtmpP4NuFR/scoupd7905a774eec/cpara /scratch/irc/personal/robrechtc/tmp//RtmpP4NuFR/scoupd7905a774eec/ll 3766 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_leng
+SCOUP	"command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmpz1OvCj/scoupd974649e836f/data /scratch/irc/personal/robrechtc/tmp//Rtmpz1OvCj/scoupd974649e836f/init /scratch/irc/personal/robrechtc/tmp//Rtmpz1OvCj/scoupd974649e836f/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmpz1OvCj/scoupd974649e836f/gpara /scratch/irc/personal/robrechtc/tmp//Rtmpz1OvCj/scoupd974649e836f/cpara /scratch/irc/personal/robrechtc/tmp//Rtmpz1OvCj/scoupd974649e836f/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_5
+SCOUP	"d: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp7boX8W/scoup1eb3d2a29e9e2/data /scratch/irc/personal/robrechtc/tmp//Rtmp7boX8W/scoup1eb3d2a29e9e2/init /scratch/irc/personal/robrechtc/tmp//Rtmp7boX8W/scoup1eb3d2a29e9e2/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp7boX8W/scoup1eb3d2a29e9e2/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp7boX8W/scoup1eb3d2a29e9e2/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp7boX8W/scoup1eb3d2a29e9e2/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_5
+SCOUP	"d: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpbRRNiD/scoup1b37c2c45c347/data /scratch/irc/personal/robrechtc/tmp//RtmpbRRNiD/scoup1b37c2c45c347/init /scratch/irc/personal/robrechtc/tmp//RtmpbRRNiD/scoup1b37c2c45c347/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpbRRNiD/scoup1b37c2c45c347/gpara /scratch/irc/personal/robrechtc/tmp//RtmpbRRNiD/scoup1b37c2c45c347/cpara /scratch/irc/personal/robrechtc/tmp//RtmpbRRNiD/scoup1b37c2c45c347/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_buettner
+SCOUP	"d: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpBtO3HR/scoup15c7671fecc9e/data /scratch/irc/personal/robrechtc/tmp//RtmpBtO3HR/scoup15c7671fecc9e/init /scratch/irc/personal/robrechtc/tmp//RtmpBtO3HR/scoup15c7671fecc9e/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpBtO3HR/scoup15c7671fecc9e/gpara /scratch/irc/personal/robrechtc/tmp//RtmpBtO3HR/scoup15c7671fecc9e/cpara /scratch/irc/personal/robrechtc/tmp//RtmpBtO3HR/scoup15c7671fecc9e/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_buettner
+SCOUP	"d: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpGEBPnR/scoup15c6f71fecc9e/data /scratch/irc/personal/robrechtc/tmp//RtmpGEBPnR/scoup15c6f71fecc9e/init /scratch/irc/personal/robrechtc/tmp//RtmpGEBPnR/scoup15c6f71fecc9e/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpGEBPnR/scoup15c6f71fecc9e/gpara /scratch/irc/personal/robrechtc/tmp//RtmpGEBPnR/scoup15c6f71fecc9e/cpara /scratch/irc/personal/robrechtc/tmp//RtmpGEBPnR/scoup15c6f71fecc9e/ll 3766 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_leng
+SCOUP	"d: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpgLMjnF/scoup161061352c4b4/data /scratch/irc/personal/robrechtc/tmp//RtmpgLMjnF/scoup161061352c4b4/init /scratch/irc/personal/robrechtc/tmp//RtmpgLMjnF/scoup161061352c4b4/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpgLMjnF/scoup161061352c4b4/gpara /scratch/irc/personal/robrechtc/tmp//RtmpgLMjnF/scoup161061352c4b4/cpara /scratch/irc/personal/robrechtc/tmp//RtmpgLMjnF/scoup161061352c4b4/ll 3766 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_leng
+SCOUP	"d: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpSxJZey/scoup123dd3aaaa710/data /scratch/irc/personal/robrechtc/tmp//RtmpSxJZey/scoup123dd3aaaa710/init /scratch/irc/personal/robrechtc/tmp//RtmpSxJZey/scoup123dd3aaaa710/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpSxJZey/scoup123dd3aaaa710/gpara /scratch/irc/personal/robrechtc/tmp//RtmpSxJZey/scoup123dd3aaaa710/cpara /scratch/irc/personal/robrechtc/tmp//RtmpSxJZey/scoup123dd3aaaa710/ll 3766 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_leng
+SCOUP	"d: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpVzUlza/scoup1e2834fead575/data /scratch/irc/personal/robrechtc/tmp//RtmpVzUlza/scoup1e2834fead575/init /scratch/irc/personal/robrechtc/tmp//RtmpVzUlza/scoup1e2834fead575/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpVzUlza/scoup1e2834fead575/gpara /scratch/irc/personal/robrechtc/tmp//RtmpVzUlza/scoup1e2834fead575/cpara /scratch/irc/personal/robrechtc/tmp//RtmpVzUlza/scoup1e2834fead575/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_5
+SCOUP	"g command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp0TR0Az/scoup83277149b5ce/data /scratch/irc/personal/robrechtc/tmp//Rtmp0TR0Az/scoup83277149b5ce/init /scratch/irc/personal/robrechtc/tmp//Rtmp0TR0Az/scoup83277149b5ce/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp0TR0Az/scoup83277149b5ce/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp0TR0Az/scoup83277149b5ce/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp0TR0Az/scoup83277149b5ce/ll 62 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_1
+SCOUP	"g command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp3S3Uc3/scoupd7872e48c0d7/data /scratch/irc/personal/robrechtc/tmp//Rtmp3S3Uc3/scoupd7872e48c0d7/init /scratch/irc/personal/robrechtc/tmp//Rtmp3S3Uc3/scoupd7872e48c0d7/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp3S3Uc3/scoupd7872e48c0d7/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp3S3Uc3/scoupd7872e48c0d7/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp3S3Uc3/scoupd7872e48c0d7/ll 52 193 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_3
+SCOUP	"g command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpFiDs0Y/scoupe2e032e608bc/data /scratch/irc/personal/robrechtc/tmp//RtmpFiDs0Y/scoupe2e032e608bc/init /scratch/irc/personal/robrechtc/tmp//RtmpFiDs0Y/scoupe2e032e608bc/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpFiDs0Y/scoupe2e032e608bc/gpara /scratch/irc/personal/robrechtc/tmp//RtmpFiDs0Y/scoupe2e032e608bc/cpara /scratch/irc/personal/robrechtc/tmp//RtmpFiDs0Y/scoupe2e032e608bc/ll 60 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_2
+SCOUP	"g command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpfjCL7M/scoupde753d2ecd6a/data /scratch/irc/personal/robrechtc/tmp//RtmpfjCL7M/scoupde753d2ecd6a/init /scratch/irc/personal/robrechtc/tmp//RtmpfjCL7M/scoupde753d2ecd6a/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpfjCL7M/scoupde753d2ecd6a/gpara /scratch/irc/personal/robrechtc/tmp//RtmpfjCL7M/scoupde753d2ecd6a/cpara /scratch/irc/personal/robrechtc/tmp//RtmpfjCL7M/scoupde753d2ecd6a/ll 60 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_2
+SCOUP	"g command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpgdN5Jh/scoup12bb92667663/data /scratch/irc/personal/robrechtc/tmp//RtmpgdN5Jh/scoup12bb92667663/init /scratch/irc/personal/robrechtc/tmp//RtmpgdN5Jh/scoup12bb92667663/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpgdN5Jh/scoup12bb92667663/gpara /scratch/irc/personal/robrechtc/tmp//RtmpgdN5Jh/scoup12bb92667663/cpara /scratch/irc/personal/robrechtc/tmp//RtmpgdN5Jh/scoup12bb92667663/ll 62 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_1
+SCOUP	"g command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmplM1Tlo/scoup1640a795fd65/data /scratch/irc/personal/robrechtc/tmp//RtmplM1Tlo/scoup1640a795fd65/init /scratch/irc/personal/robrechtc/tmp//RtmplM1Tlo/scoup1640a795fd65/time_sp /scratch/irc/personal/robrechtc/tmp//RtmplM1Tlo/scoup1640a795fd65/gpara /scratch/irc/personal/robrechtc/tmp//RtmplM1Tlo/scoup1640a795fd65/cpara /scratch/irc/personal/robrechtc/tmp//RtmplM1Tlo/scoup1640a795fd65/ll 72 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_1
+SCOUP	"g command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpMi8mb1/scoup7af25867f153/data /scratch/irc/personal/robrechtc/tmp//RtmpMi8mb1/scoup7af25867f153/init /scratch/irc/personal/robrechtc/tmp//RtmpMi8mb1/scoup7af25867f153/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpMi8mb1/scoup7af25867f153/gpara /scratch/irc/personal/robrechtc/tmp//RtmpMi8mb1/scoup7af25867f153/cpara /scratch/irc/personal/robrechtc/tmp//RtmpMi8mb1/scoup7af25867f153/ll 62 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_1
+SCOUP	"g command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpuiKezN/scoup1eca3dc32d6f/data /scratch/irc/personal/robrechtc/tmp//RtmpuiKezN/scoup1eca3dc32d6f/init /scratch/irc/personal/robrechtc/tmp//RtmpuiKezN/scoup1eca3dc32d6f/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpuiKezN/scoup1eca3dc32d6f/gpara /scratch/irc/personal/robrechtc/tmp//RtmpuiKezN/scoup1eca3dc32d6f/cpara /scratch/irc/personal/robrechtc/tmp//RtmpuiKezN/scoup1eca3dc32d6f/ll 72 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_1
+SCOUP	"mand: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp2xz14K/scoup1684e30ece8e8/data /scratch/irc/personal/robrechtc/tmp//Rtmp2xz14K/scoup1684e30ece8e8/init /scratch/irc/personal/robrechtc/tmp//Rtmp2xz14K/scoup1684e30ece8e8/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp2xz14K/scoup1684e30ece8e8/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp2xz14K/scoup1684e30ece8e8/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp2xz14K/scoup1684e30ece8e8/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_10
+SCOUP	"mand: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpWIZjxd/scoup15d101e58dfd2/data /scratch/irc/personal/robrechtc/tmp//RtmpWIZjxd/scoup15d101e58dfd2/init /scratch/irc/personal/robrechtc/tmp//RtmpWIZjxd/scoup15d101e58dfd2/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpWIZjxd/scoup15d101e58dfd2/gpara /scratch/irc/personal/robrechtc/tmp//RtmpWIZjxd/scoup15d101e58dfd2/cpara /scratch/irc/personal/robrechtc/tmp//RtmpWIZjxd/scoup15d101e58dfd2/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_10
+SCOUP	"nd: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp8861TT/scoup16ce96f81f700/data /scratch/irc/personal/robrechtc/tmp//Rtmp8861TT/scoup16ce96f81f700/init /scratch/irc/personal/robrechtc/tmp//Rtmp8861TT/scoup16ce96f81f700/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp8861TT/scoup16ce96f81f700/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp8861TT/scoup16ce96f81f700/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp8861TT/scoup16ce96f81f700/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_3
+SCOUP	"nd: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmp9UC1lJ/scoup163ea50bd58f3/data /scratch/irc/personal/robrechtc/tmp//Rtmp9UC1lJ/scoup163ea50bd58f3/init /scratch/irc/personal/robrechtc/tmp//Rtmp9UC1lJ/scoup163ea50bd58f3/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmp9UC1lJ/scoup163ea50bd58f3/gpara /scratch/irc/personal/robrechtc/tmp//Rtmp9UC1lJ/scoup163ea50bd58f3/cpara /scratch/irc/personal/robrechtc/tmp//Rtmp9UC1lJ/scoup163ea50bd58f3/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_4
+SCOUP	"nd: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpaqZVba/scoup1e28a4fead575/data /scratch/irc/personal/robrechtc/tmp//RtmpaqZVba/scoup1e28a4fead575/init /scratch/irc/personal/robrechtc/tmp//RtmpaqZVba/scoup1e28a4fead575/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpaqZVba/scoup1e28a4fead575/gpara /scratch/irc/personal/robrechtc/tmp//RtmpaqZVba/scoup1e28a4fead575/cpara /scratch/irc/personal/robrechtc/tmp//RtmpaqZVba/scoup1e28a4fead575/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_4
+SCOUP	"nd: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpI1II8W/scoup1b58c124667bf/data /scratch/irc/personal/robrechtc/tmp//RtmpI1II8W/scoup1b58c124667bf/init /scratch/irc/personal/robrechtc/tmp//RtmpI1II8W/scoup1b58c124667bf/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpI1II8W/scoup1b58c124667bf/gpara /scratch/irc/personal/robrechtc/tmp//RtmpI1II8W/scoup1b58c124667bf/cpara /scratch/irc/personal/robrechtc/tmp//RtmpI1II8W/scoup1b58c124667bf/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_4
+SCOUP	"nd: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpI8LQ5P/scoup162284d5ffa57/data /scratch/irc/personal/robrechtc/tmp//RtmpI8LQ5P/scoup162284d5ffa57/init /scratch/irc/personal/robrechtc/tmp//RtmpI8LQ5P/scoup162284d5ffa57/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpI8LQ5P/scoup162284d5ffa57/gpara /scratch/irc/personal/robrechtc/tmp//RtmpI8LQ5P/scoup162284d5ffa57/cpara /scratch/irc/personal/robrechtc/tmp//RtmpI8LQ5P/scoup162284d5ffa57/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_3
+SCOUP	"nd: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpiJCIUl/scoup15ef05c655546/data /scratch/irc/personal/robrechtc/tmp//RtmpiJCIUl/scoup15ef05c655546/init /scratch/irc/personal/robrechtc/tmp//RtmpiJCIUl/scoup15ef05c655546/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpiJCIUl/scoup15ef05c655546/gpara /scratch/irc/personal/robrechtc/tmp//RtmpiJCIUl/scoup15ef05c655546/cpara /scratch/irc/personal/robrechtc/tmp//RtmpiJCIUl/scoup15ef05c655546/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_4
+SCOUP	"nd: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpMpfKl7/scoup15f1654fe1055/data /scratch/irc/personal/robrechtc/tmp//RtmpMpfKl7/scoup15f1654fe1055/init /scratch/irc/personal/robrechtc/tmp//RtmpMpfKl7/scoup15f1654fe1055/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpMpfKl7/scoup15f1654fe1055/gpara /scratch/irc/personal/robrechtc/tmp//RtmpMpfKl7/scoup15f1654fe1055/cpara /scratch/irc/personal/robrechtc/tmp//RtmpMpfKl7/scoup15f1654fe1055/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_6
+SCOUP	"nd: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmpnwg2Kp/scoup15d8f480410ce/data /scratch/irc/personal/robrechtc/tmp//Rtmpnwg2Kp/scoup15d8f480410ce/init /scratch/irc/personal/robrechtc/tmp//Rtmpnwg2Kp/scoup15d8f480410ce/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmpnwg2Kp/scoup15d8f480410ce/gpara /scratch/irc/personal/robrechtc/tmp//Rtmpnwg2Kp/scoup15d8f480410ce/cpara /scratch/irc/personal/robrechtc/tmp//Rtmpnwg2Kp/scoup15d8f480410ce/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_7
+SCOUP	"nd: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpSgWkfd/scoup1e61b1b786a53/data /scratch/irc/personal/robrechtc/tmp//RtmpSgWkfd/scoup1e61b1b786a53/init /scratch/irc/personal/robrechtc/tmp//RtmpSgWkfd/scoup1e61b1b786a53/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpSgWkfd/scoup1e61b1b786a53/gpara /scratch/irc/personal/robrechtc/tmp//RtmpSgWkfd/scoup1e61b1b786a53/cpara /scratch/irc/personal/robrechtc/tmp//RtmpSgWkfd/scoup1e61b1b786a53/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_2
+SCOUP	"nd: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpsINrXw/scoup1687412114b28/data /scratch/irc/personal/robrechtc/tmp//RtmpsINrXw/scoup1687412114b28/init /scratch/irc/personal/robrechtc/tmp//RtmpsINrXw/scoup1687412114b28/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpsINrXw/scoup1687412114b28/gpara /scratch/irc/personal/robrechtc/tmp//RtmpsINrXw/scoup1687412114b28/cpara /scratch/irc/personal/robrechtc/tmp//RtmpsINrXw/scoup1687412114b28/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_3
+SCOUP	"nd: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpTUbUo5/scoup1b565709e1f3c/data /scratch/irc/personal/robrechtc/tmp//RtmpTUbUo5/scoup1b565709e1f3c/init /scratch/irc/personal/robrechtc/tmp//RtmpTUbUo5/scoup1b565709e1f3c/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpTUbUo5/scoup1b565709e1f3c/gpara /scratch/irc/personal/robrechtc/tmp//RtmpTUbUo5/scoup1b565709e1f3c/cpara /scratch/irc/personal/robrechtc/tmp//RtmpTUbUo5/scoup1b565709e1f3c/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_2
+SCOUP	"nd: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//Rtmpve9fmj/scoup1e6506cffac51/data /scratch/irc/personal/robrechtc/tmp//Rtmpve9fmj/scoup1e6506cffac51/init /scratch/irc/personal/robrechtc/tmp//Rtmpve9fmj/scoup1e6506cffac51/time_sp /scratch/irc/personal/robrechtc/tmp//Rtmpve9fmj/scoup1e6506cffac51/gpara /scratch/irc/personal/robrechtc/tmp//Rtmpve9fmj/scoup1e6506cffac51/cpara /scratch/irc/personal/robrechtc/tmp//Rtmpve9fmj/scoup1e6506cffac51/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_7
+SCOUP	"nd: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpwQQyr0/scoup15d39124667bf/data /scratch/irc/personal/robrechtc/tmp//RtmpwQQyr0/scoup15d39124667bf/init /scratch/irc/personal/robrechtc/tmp//RtmpwQQyr0/scoup15d39124667bf/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpwQQyr0/scoup15d39124667bf/gpara /scratch/irc/personal/robrechtc/tmp//RtmpwQQyr0/scoup15d39124667bf/cpara /scratch/irc/personal/robrechtc/tmp//RtmpwQQyr0/scoup15d39124667bf/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_3
+SCOUP	"ng command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmppifCCD/scoup819a40c6b36a/data /scratch/irc/personal/robrechtc/tmp//RtmppifCCD/scoup819a40c6b36a/init /scratch/irc/personal/robrechtc/tmp//RtmppifCCD/scoup819a40c6b36a/time_sp /scratch/irc/personal/robrechtc/tmp//RtmppifCCD/scoup819a40c6b36a/gpara /scratch/irc/personal/robrechtc/tmp//RtmppifCCD/scoup819a40c6b36a/cpara /scratch/irc/personal/robrechtc/tmp//RtmppifCCD/scoup819a40c6b36a/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_10
+SCOUP	"ng command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpRaWJf2/scoupdd605f7cad23/data /scratch/irc/personal/robrechtc/tmp//RtmpRaWJf2/scoupdd605f7cad23/init /scratch/irc/personal/robrechtc/tmp//RtmpRaWJf2/scoupdd605f7cad23/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpRaWJf2/scoupdd605f7cad23/gpara /scratch/irc/personal/robrechtc/tmp//RtmpRaWJf2/scoupdd605f7cad23/cpara /scratch/irc/personal/robrechtc/tmp//RtmpRaWJf2/scoupdd605f7cad23/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_10
+SCOUP	"nning command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpMioPGX/scoupdb317b0ec1b/data /scratch/irc/personal/robrechtc/tmp//RtmpMioPGX/scoupdb317b0ec1b/init /scratch/irc/personal/robrechtc/tmp//RtmpMioPGX/scoupdb317b0ec1b/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpMioPGX/scoupdb317b0ec1b/gpara /scratch/irc/personal/robrechtc/tmp//RtmpMioPGX/scoupdb317b0ec1b/cpara /scratch/irc/personal/robrechtc/tmp//RtmpMioPGX/scoupdb317b0ec1b/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_buettner
+SCOUP	"running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /scratch/irc/personal/robrechtc/tmp//RtmpQ4i4Ui/scoupe7443967c40/data /scratch/irc/personal/robrechtc/tmp//RtmpQ4i4Ui/scoupe7443967c40/init /scratch/irc/personal/robrechtc/tmp//RtmpQ4i4Ui/scoupe7443967c40/time_sp /scratch/irc/personal/robrechtc/tmp//RtmpQ4i4Ui/scoupe7443967c40/gpara /scratch/irc/personal/robrechtc/tmp//RtmpQ4i4Ui/scoupe7443967c40/cpara /scratch/irc/personal/robrechtc/tmp//RtmpQ4i4Ui/scoupe7443967c40/ll 68 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_2
 SCUBA	"""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/cluster/k_means_.py"", line 884, in fit
     X = self._check_fit_data(X)
   File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/cluster/k_means_.py"", line 858, in _check_fit_data
