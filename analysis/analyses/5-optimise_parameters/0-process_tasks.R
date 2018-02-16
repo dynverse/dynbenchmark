@@ -28,8 +28,8 @@ tasks <- tasks %>%
 
 # write_rds(tasks, derived_file("tasks.rds"))
 
-# sync_tasks(
-#   tasks = tasks,
-#   local_tasks_folder = derived_file("tasks"),
-#   remote_tasks_folder = "/scratch/irc/shared/dynverse_derived/5-optimise_parameters/0-process_tasks/tasks"
-# )
+sync_tasks(
+  tasks = tasks,
+  local_tasks_folder = derived_file("tasks"),
+  remote_tasks_folder = "/scratch/irc/shared/dynverse_derived/5-optimise_parameters/0-process_tasks/tasks"
+)
