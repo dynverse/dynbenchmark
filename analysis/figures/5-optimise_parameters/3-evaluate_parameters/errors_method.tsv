@@ -1,6 +1,21 @@
 method_name	error_message	n	example
-manual	1	388	real/aging-hsc-old_kowalczyk
+SCIMITAR	"t under R version 3.4.3 
+
+  warnings.warn(x, RRuntimeWarning)
+Traceback (most recent call last):
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/wrapper.py"", line 5, in <module>
+    import scimitar.models
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/models.py"", line 11, in <module>
+    from . import model_comparisons
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/model_comparisons.py"", line 3, in <module>
+    import munkres
+ImportError: No module named munkres"	660	real/aging-hsc-old_kowalczyk
+pseudogp	Time limit exceeded	599	real/aging-hsc-old_kowalczyk
+ouija	Time limit exceeded	577	real/aging-hsc-old_kowalczyk
 Mpath	Mpath only detected one landmark	211	real/cell-cycle_leng
+cellTree with gibbs	Time limit exceeded	199	real/aging-hsc-young_kowalczyk
+manual	1	172	real/macrophage-salmonella_saliba
+SCOUP	Time limit exceeded	112	real/aging-hsc-old_kowalczyk
 GPfates	"ynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPclust/collapsed_mixture.py"", line 42, in __init__
     self.phi, logphi, self.H = softmax_weave(self.phi_)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPclust/np_utilities.py"", line 27, in softmax_numpy
@@ -9,6 +24,7 @@ GPfates	"ynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPcl
     return umr_maximum(a, axis, None, out, keepdims)
 ValueError: zero-size array to reduction operation maximum which has no identity"	64	real/cell-cycle_buettner
 mfa	Time limit exceeded	56	real/aging-hsc-old_kowalczyk
+cellTree with gibbs	Memory limit exceeded	48	real/aging-hsc-old_kowalczyk
 cellTree with maptpx	Time limit exceeded	44	real/aging-hsc-old_kowalczyk
 monocle with DDRTree	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	44	synthetic/bifurcating_10
 monocle with ICA	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	44	synthetic/bifurcating_10
@@ -30,6 +46,7 @@ DPT	Time limit exceeded	12	real/dentate-gyrus-neurogenesis_hochgerner
 embeddr	'tol' must be strictly positive and finite	12	real/olfactory-projection-neurons-DA1_horns
 embeddr	Time limit exceeded	12	real/dentate-gyrus-neurogenesis_hochgerner
 Mpath	more cluster centers than distinct data points.	12	real/epidermis-hair-uHF_joost
+pseudogp	attempt to set an attribute on NULL	12	real/dentate-gyrus-neurogenesis_hochgerner
 SCORPIUS	Time limit exceeded	12	real/dentate-gyrus-neurogenesis_hochgerner
 sincell	Column `node` is unknown	12	real/cell-cycle_buettner
 SLICER	Time limit exceeded	12	real/dentate-gyrus-neurogenesis_hochgerner
@@ -39,6 +56,7 @@ GPfates	Time limit exceeded	11	real/dentate-gyrus-neurogenesis_hochgerner
 ouijaflow	missing value where TRUE/FALSE needed	11	real/neonatal-inner-ear-TEC-HSC_burns
 SCUBA	Time limit exceeded	11	real/dentate-gyrus-neurogenesis_hochgerner
 Waterfall	Time limit exceeded	11	real/dentate-gyrus-neurogenesis_hochgerner
+ouija	error reading from connection	10	real/distal-lung-epithelium_treutlein
 StemID	0 (non-NA) cases	10	synthetic/bifurcating_10
 embeddr	need at least four unique 'x' values	8	toy/consecutive_bifurcating_1
 GPfates	"es/venv/lib/python3.5/site-packages/GPy/core/sparse_gp.py"", line 80, in parameters_changed
@@ -48,97 +66,9 @@ GPfates	"es/venv/lib/python3.5/site-packages/GPy/core/sparse_gp.py"", line 80, i
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/util/linalg.py"", line 61, in jitchol
     raise linalg.LinAlgError(""not pd: non-positive diagonal elements"")
 numpy.linalg.linalg.LinAlgError: not pd: non-positive diagonal elements"	8	synthetic/bifurcating_11
-manual	No prediction of synthetic/bifurcating_10 found prediction found in predictions	8	synthetic/bifurcating_10
-manual	No prediction of synthetic/bifurcating_11 found prediction found in predictions	8	synthetic/bifurcating_11
-manual	No prediction of synthetic/bifurcating_2 found prediction found in predictions	8	synthetic/bifurcating_2
-manual	No prediction of synthetic/bifurcating_3 found prediction found in predictions	8	synthetic/bifurcating_3
-manual	No prediction of synthetic/bifurcating_4 found prediction found in predictions	8	synthetic/bifurcating_4
-manual	No prediction of synthetic/bifurcating_5 found prediction found in predictions	8	synthetic/bifurcating_5
-manual	No prediction of synthetic/bifurcating_6 found prediction found in predictions	8	synthetic/bifurcating_6
-manual	No prediction of synthetic/bifurcating_7 found prediction found in predictions	8	synthetic/bifurcating_7
-manual	No prediction of synthetic/bifurcating_8 found prediction found in predictions	8	synthetic/bifurcating_8
-manual	No prediction of synthetic/bifurcating_9 found prediction found in predictions	8	synthetic/bifurcating_9
-manual	No prediction of synthetic/bifurcating_converging_10 found prediction found in predictions	8	synthetic/bifurcating_converging_10
-manual	No prediction of synthetic/bifurcating_converging_11 found prediction found in predictions	8	synthetic/bifurcating_converging_11
-manual	No prediction of synthetic/bifurcating_converging_2 found prediction found in predictions	8	synthetic/bifurcating_converging_2
-manual	No prediction of synthetic/bifurcating_converging_3 found prediction found in predictions	8	synthetic/bifurcating_converging_3
-manual	No prediction of synthetic/bifurcating_converging_4 found prediction found in predictions	8	synthetic/bifurcating_converging_4
-manual	No prediction of synthetic/bifurcating_converging_5 found prediction found in predictions	8	synthetic/bifurcating_converging_5
-manual	No prediction of synthetic/bifurcating_converging_6 found prediction found in predictions	8	synthetic/bifurcating_converging_6
-manual	No prediction of synthetic/bifurcating_converging_7 found prediction found in predictions	8	synthetic/bifurcating_converging_7
-manual	No prediction of synthetic/bifurcating_converging_8 found prediction found in predictions	8	synthetic/bifurcating_converging_8
-manual	No prediction of synthetic/bifurcating_converging_9 found prediction found in predictions	8	synthetic/bifurcating_converging_9
-manual	No prediction of synthetic/bifurcating_loop_10 found prediction found in predictions	8	synthetic/bifurcating_loop_10
-manual	No prediction of synthetic/bifurcating_loop_11 found prediction found in predictions	8	synthetic/bifurcating_loop_11
-manual	No prediction of synthetic/bifurcating_loop_2 found prediction found in predictions	8	synthetic/bifurcating_loop_2
-manual	No prediction of synthetic/bifurcating_loop_3 found prediction found in predictions	8	synthetic/bifurcating_loop_3
-manual	No prediction of synthetic/bifurcating_loop_4 found prediction found in predictions	8	synthetic/bifurcating_loop_4
-manual	No prediction of synthetic/bifurcating_loop_5 found prediction found in predictions	8	synthetic/bifurcating_loop_5
-manual	No prediction of synthetic/bifurcating_loop_6 found prediction found in predictions	8	synthetic/bifurcating_loop_6
-manual	No prediction of synthetic/bifurcating_loop_7 found prediction found in predictions	8	synthetic/bifurcating_loop_7
-manual	No prediction of synthetic/bifurcating_loop_8 found prediction found in predictions	8	synthetic/bifurcating_loop_8
-manual	No prediction of synthetic/bifurcating_loop_9 found prediction found in predictions	8	synthetic/bifurcating_loop_9
-manual	No prediction of synthetic/consecutive_bifurcating_10 found prediction found in predictions	8	synthetic/consecutive_bifurcating_10
-manual	No prediction of synthetic/consecutive_bifurcating_11 found prediction found in predictions	8	synthetic/consecutive_bifurcating_11
-manual	No prediction of synthetic/consecutive_bifurcating_2 found prediction found in predictions	8	synthetic/consecutive_bifurcating_2
-manual	No prediction of synthetic/consecutive_bifurcating_3 found prediction found in predictions	8	synthetic/consecutive_bifurcating_3
-manual	No prediction of synthetic/consecutive_bifurcating_4 found prediction found in predictions	8	synthetic/consecutive_bifurcating_4
-manual	No prediction of synthetic/consecutive_bifurcating_5 found prediction found in predictions	8	synthetic/consecutive_bifurcating_5
-manual	No prediction of synthetic/consecutive_bifurcating_6 found prediction found in predictions	8	synthetic/consecutive_bifurcating_6
-manual	No prediction of synthetic/consecutive_bifurcating_7 found prediction found in predictions	8	synthetic/consecutive_bifurcating_7
-manual	No prediction of synthetic/consecutive_bifurcating_8 found prediction found in predictions	8	synthetic/consecutive_bifurcating_8
-manual	No prediction of synthetic/consecutive_bifurcating_9 found prediction found in predictions	8	synthetic/consecutive_bifurcating_9
-manual	No prediction of synthetic/converging_10 found prediction found in predictions	8	synthetic/converging_10
-manual	No prediction of synthetic/converging_11 found prediction found in predictions	8	synthetic/converging_11
-manual	No prediction of synthetic/converging_2 found prediction found in predictions	8	synthetic/converging_2
-manual	No prediction of synthetic/converging_3 found prediction found in predictions	8	synthetic/converging_3
-manual	No prediction of synthetic/converging_4 found prediction found in predictions	8	synthetic/converging_4
-manual	No prediction of synthetic/converging_5 found prediction found in predictions	8	synthetic/converging_5
-manual	No prediction of synthetic/converging_6 found prediction found in predictions	8	synthetic/converging_6
-manual	No prediction of synthetic/converging_7 found prediction found in predictions	8	synthetic/converging_7
-manual	No prediction of synthetic/converging_8 found prediction found in predictions	8	synthetic/converging_8
-manual	No prediction of synthetic/converging_9 found prediction found in predictions	8	synthetic/converging_9
-manual	No prediction of synthetic/cycle_10 found prediction found in predictions	8	synthetic/cycle_10
-manual	No prediction of synthetic/cycle_11 found prediction found in predictions	8	synthetic/cycle_11
-manual	No prediction of synthetic/cycle_2 found prediction found in predictions	8	synthetic/cycle_2
-manual	No prediction of synthetic/cycle_3 found prediction found in predictions	8	synthetic/cycle_3
-manual	No prediction of synthetic/cycle_4 found prediction found in predictions	8	synthetic/cycle_4
-manual	No prediction of synthetic/cycle_5 found prediction found in predictions	8	synthetic/cycle_5
-manual	No prediction of synthetic/cycle_6 found prediction found in predictions	8	synthetic/cycle_6
-manual	No prediction of synthetic/cycle_7 found prediction found in predictions	8	synthetic/cycle_7
-manual	No prediction of synthetic/cycle_8 found prediction found in predictions	8	synthetic/cycle_8
-manual	No prediction of synthetic/linear_10 found prediction found in predictions	8	synthetic/linear_10
-manual	No prediction of synthetic/linear_11 found prediction found in predictions	8	synthetic/linear_11
-manual	No prediction of synthetic/linear_2 found prediction found in predictions	8	synthetic/linear_2
-manual	No prediction of synthetic/linear_3 found prediction found in predictions	8	synthetic/linear_3
-manual	No prediction of synthetic/linear_4 found prediction found in predictions	8	synthetic/linear_4
-manual	No prediction of synthetic/linear_5 found prediction found in predictions	8	synthetic/linear_5
-manual	No prediction of synthetic/linear_6 found prediction found in predictions	8	synthetic/linear_6
-manual	No prediction of synthetic/linear_7 found prediction found in predictions	8	synthetic/linear_7
-manual	No prediction of synthetic/linear_8 found prediction found in predictions	8	synthetic/linear_8
-manual	No prediction of synthetic/linear_9 found prediction found in predictions	8	synthetic/linear_9
-manual	No prediction of synthetic/linear_long_10 found prediction found in predictions	8	synthetic/linear_long_10
-manual	No prediction of synthetic/linear_long_11 found prediction found in predictions	8	synthetic/linear_long_11
-manual	No prediction of synthetic/linear_long_2 found prediction found in predictions	8	synthetic/linear_long_2
-manual	No prediction of synthetic/linear_long_3 found prediction found in predictions	8	synthetic/linear_long_3
-manual	No prediction of synthetic/linear_long_4 found prediction found in predictions	8	synthetic/linear_long_4
-manual	No prediction of synthetic/linear_long_5 found prediction found in predictions	8	synthetic/linear_long_5
-manual	No prediction of synthetic/linear_long_6 found prediction found in predictions	8	synthetic/linear_long_6
-manual	No prediction of synthetic/linear_long_7 found prediction found in predictions	8	synthetic/linear_long_7
-manual	No prediction of synthetic/linear_long_8 found prediction found in predictions	8	synthetic/linear_long_8
-manual	No prediction of synthetic/linear_long_9 found prediction found in predictions	8	synthetic/linear_long_9
-manual	No prediction of synthetic/trifurcating_10 found prediction found in predictions	8	synthetic/trifurcating_10
-manual	No prediction of synthetic/trifurcating_11 found prediction found in predictions	8	synthetic/trifurcating_11
-manual	No prediction of synthetic/trifurcating_2 found prediction found in predictions	8	synthetic/trifurcating_2
-manual	No prediction of synthetic/trifurcating_3 found prediction found in predictions	8	synthetic/trifurcating_3
-manual	No prediction of synthetic/trifurcating_4 found prediction found in predictions	8	synthetic/trifurcating_4
-manual	No prediction of synthetic/trifurcating_5 found prediction found in predictions	8	synthetic/trifurcating_5
-manual	No prediction of synthetic/trifurcating_6 found prediction found in predictions	8	synthetic/trifurcating_6
-manual	No prediction of synthetic/trifurcating_7 found prediction found in predictions	8	synthetic/trifurcating_7
-manual	No prediction of synthetic/trifurcating_8 found prediction found in predictions	8	synthetic/trifurcating_8
-manual	No prediction of synthetic/trifurcating_9 found prediction found in predictions	8	synthetic/trifurcating_9
 monocle with DDRTree	initial centers are not distinct	8	synthetic/consecutive_bifurcating_10
 monocle with ICA	vector size specified is too large	8	synthetic/consecutive_bifurcating_10
+ouija	a dimension is zero	8	real/macrophage-salmonella_saliba
 SLICE	Time limit exceeded	8	real/dentate-gyrus-neurogenesis_hochgerner
 Wishbone	"rc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
@@ -146,6 +76,7 @@ Wishbone	"rc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-
     tailband_sample = np.random.choice( tailband, size=tailk, replace=False)
   File ""mtrand.pyx"", line 1121, in mtrand.RandomState.choice
 ValueError: a must be non-empty"	8	real/mesoderm-development_loh
+ouija	cannot allocate vector of size 1 Kb	7	real/human-embryos_petropoulos
 Wishbone	Time limit exceeded	7	real/oligodendrocyte-differentiation-clusters_marques
 SLICE	some weights should be positive	5	synthetic/bifurcating_loop_8
 GPfates	"py"", line 49, in __call__
@@ -155,7 +86,9 @@ GPfates	"py"", line 49, in __call__
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/kern/src/stationary.py"", line 72, in __init__
     assert lengthscale.size in [1, input_dim], ""Bad number of lengthscales""
 AssertionError: Bad number of lengthscales"	4	synthetic/linear_long_11
-manual	Time limit exceeded	4	real/oligodendrocyte-differentiation-subclusters_marques
+manual	No prediction of synthetic/bifurcating_loop_6 found prediction found in predictions	4	synthetic/bifurcating_loop_6
+manual	No prediction of synthetic/consecutive_bifurcating_5 found prediction found in predictions	4	synthetic/consecutive_bifurcating_5
+manual	No prediction of synthetic/linear_long_11 found prediction found in predictions	4	synthetic/linear_long_11
 monocle with DDRTree	Time limit exceeded	4	real/oligodendrocyte-differentiation-subclusters_marques
 Mpath	1	4	real/oligodendrocyte-differentiation-subclusters_marques
 ouijaflow	"le ""/scratch/irc/shared/dynverse/R/lib64/R/library/ouijaflow/venv/lib/python3.5/site-packages/edward/inferences/klqp.py"", line 663, in build_reparam_loss_and_gradients
@@ -965,6 +898,7 @@ GPfates	"thon3.5/site-packages/paramz/core/observable.py"", line 91, in <listcom
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in notify_observers
     [callble(self, which=which) for _, _, callble in self.observers]
   File ""/scratch/irc/shar"	1	real/aging-hsc-young_kowalczyk
+ouija	could not allocate memory (0 Mb) in C function 'R_AllocStringBuffer'	1	real/oligodendrocyte-differentiation-subclusters_marques
 ouijaflow	"
  440/1000 [ 44%] █████████████                  ETA: 24s | Loss: 506518.688
  450/1000 [ 45%] █████████████                  ETA: 23s | Loss: 510588.531
@@ -1989,6 +1923,278 @@ ouijaflow	"ython/3.5.1/lib/python3.5/site-packages/tensorflow/python/framework/o
 ResourceExhaustedError (see above for traceback): OOM when allocating tensor with shape[642664]
 	 [[Node: inference/sample/DropoutNormal_1/log_prob/ReduceLogSumExp/Sum = Sum[T=DT_FLOAT, Tidx=DT_INT32, keep_dims=true, _device=""/job:localhost/replica:0/task:0/cpu:0""](inference/sample/DropoutNormal_1/log_prob/ReduceLogSumExp/Exp, inference/sample/DropoutNormal_1/log_prob/ReduceLogSumExp/Sum/reduction_indices)]]
 "	1	synthetic/trifurcating_2
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.10.all.q/RtmpTobArI/scoup173004840ade7/data /tmp/2063.10.all.q/RtmpTobArI/scoup173004840ade7/init /tmp/2063.10.all.q/RtmpTobArI/scoup173004840ade7/time_sp /tmp/2063.10.all.q/RtmpTobArI/scoup173004840ade7/gpara /tmp/2063.10.all.q/RtmpTobArI/scoup173004840ade7/cpara /tmp/2063.10.all.q/RtmpTobArI/scoup173004840ade7/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_buettner
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.11.all.q/RtmpIDU6K4/scoup1d75c1cef3086/data /tmp/2063.11.all.q/RtmpIDU6K4/scoup1d75c1cef3086/init /tmp/2063.11.all.q/RtmpIDU6K4/scoup1d75c1cef3086/time_sp /tmp/2063.11.all.q/RtmpIDU6K4/scoup1d75c1cef3086/gpara /tmp/2063.11.all.q/RtmpIDU6K4/scoup1d75c1cef3086/cpara /tmp/2063.11.all.q/RtmpIDU6K4/scoup1d75c1cef3086/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_buettner
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.12.all.q/RtmpjZz5fj/scoup501a414a88cc/data /tmp/2063.12.all.q/RtmpjZz5fj/scoup501a414a88cc/init /tmp/2063.12.all.q/RtmpjZz5fj/scoup501a414a88cc/time_sp /tmp/2063.12.all.q/RtmpjZz5fj/scoup501a414a88cc/gpara /tmp/2063.12.all.q/RtmpjZz5fj/scoup501a414a88cc/cpara /tmp/2063.12.all.q/RtmpjZz5fj/scoup501a414a88cc/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_buettner
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.13.all.q/Rtmp2UfPSO/scoup933f46125c31/data /tmp/2063.13.all.q/Rtmp2UfPSO/scoup933f46125c31/init /tmp/2063.13.all.q/Rtmp2UfPSO/scoup933f46125c31/time_sp /tmp/2063.13.all.q/Rtmp2UfPSO/scoup933f46125c31/gpara /tmp/2063.13.all.q/Rtmp2UfPSO/scoup933f46125c31/cpara /tmp/2063.13.all.q/Rtmp2UfPSO/scoup933f46125c31/ll 3766 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_leng
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.14.all.q/RtmpyXmrJH/scoup1044934777883/data /tmp/2063.14.all.q/RtmpyXmrJH/scoup1044934777883/init /tmp/2063.14.all.q/RtmpyXmrJH/scoup1044934777883/time_sp /tmp/2063.14.all.q/RtmpyXmrJH/scoup1044934777883/gpara /tmp/2063.14.all.q/RtmpyXmrJH/scoup1044934777883/cpara /tmp/2063.14.all.q/RtmpyXmrJH/scoup1044934777883/ll 3766 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_leng
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.15.all.q/RtmpadH7qK/scoup936741b73265/data /tmp/2063.15.all.q/RtmpadH7qK/scoup936741b73265/init /tmp/2063.15.all.q/RtmpadH7qK/scoup936741b73265/time_sp /tmp/2063.15.all.q/RtmpadH7qK/scoup936741b73265/gpara /tmp/2063.15.all.q/RtmpadH7qK/scoup936741b73265/cpara /tmp/2063.15.all.q/RtmpadH7qK/scoup936741b73265/ll 3766 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_leng
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.16.all.q/Rtmpg39W1X/scoup1752c1d76f97d/data /tmp/2063.16.all.q/Rtmpg39W1X/scoup1752c1d76f97d/init /tmp/2063.16.all.q/Rtmpg39W1X/scoup1752c1d76f97d/time_sp /tmp/2063.16.all.q/Rtmpg39W1X/scoup1752c1d76f97d/gpara /tmp/2063.16.all.q/Rtmpg39W1X/scoup1752c1d76f97d/cpara /tmp/2063.16.all.q/Rtmpg39W1X/scoup1752c1d76f97d/ll 3766 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_leng
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.373.all.q/RtmpIRF2Hc/scoup1ec815d57d643/data /tmp/2063.373.all.q/RtmpIRF2Hc/scoup1ec815d57d643/init /tmp/2063.373.all.q/RtmpIRF2Hc/scoup1ec815d57d643/time_sp /tmp/2063.373.all.q/RtmpIRF2Hc/scoup1ec815d57d643/gpara /tmp/2063.373.all.q/RtmpIRF2Hc/scoup1ec815d57d643/cpara /tmp/2063.373.all.q/RtmpIRF2Hc/scoup1ec815d57d643/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_10
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.374.all.q/RtmpptwyCx/scoup1e137223a0e0d/data /tmp/2063.374.all.q/RtmpptwyCx/scoup1e137223a0e0d/init /tmp/2063.374.all.q/RtmpptwyCx/scoup1e137223a0e0d/time_sp /tmp/2063.374.all.q/RtmpptwyCx/scoup1e137223a0e0d/gpara /tmp/2063.374.all.q/RtmpptwyCx/scoup1e137223a0e0d/cpara /tmp/2063.374.all.q/RtmpptwyCx/scoup1e137223a0e0d/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_10
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.375.all.q/Rtmpbba6e6/scoup9f2734555679/data /tmp/2063.375.all.q/Rtmpbba6e6/scoup9f2734555679/init /tmp/2063.375.all.q/Rtmpbba6e6/scoup9f2734555679/time_sp /tmp/2063.375.all.q/Rtmpbba6e6/scoup9f2734555679/gpara /tmp/2063.375.all.q/Rtmpbba6e6/scoup9f2734555679/cpara /tmp/2063.375.all.q/Rtmpbba6e6/scoup9f2734555679/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_10
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.376.all.q/RtmphIKwoM/scoup57dd46904505/data /tmp/2063.376.all.q/RtmphIKwoM/scoup57dd46904505/init /tmp/2063.376.all.q/RtmphIKwoM/scoup57dd46904505/time_sp /tmp/2063.376.all.q/RtmphIKwoM/scoup57dd46904505/gpara /tmp/2063.376.all.q/RtmphIKwoM/scoup57dd46904505/cpara /tmp/2063.376.all.q/RtmphIKwoM/scoup57dd46904505/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_10
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.377.all.q/Rtmpg6IHcz/scoup1eca7894efb7/data /tmp/2063.377.all.q/Rtmpg6IHcz/scoup1eca7894efb7/init /tmp/2063.377.all.q/Rtmpg6IHcz/scoup1eca7894efb7/time_sp /tmp/2063.377.all.q/Rtmpg6IHcz/scoup1eca7894efb7/gpara /tmp/2063.377.all.q/Rtmpg6IHcz/scoup1eca7894efb7/cpara /tmp/2063.377.all.q/Rtmpg6IHcz/scoup1eca7894efb7/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_11
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.378.all.q/RtmpYMVwbk/scoup9f592a5cbfec/data /tmp/2063.378.all.q/RtmpYMVwbk/scoup9f592a5cbfec/init /tmp/2063.378.all.q/RtmpYMVwbk/scoup9f592a5cbfec/time_sp /tmp/2063.378.all.q/RtmpYMVwbk/scoup9f592a5cbfec/gpara /tmp/2063.378.all.q/RtmpYMVwbk/scoup9f592a5cbfec/cpara /tmp/2063.378.all.q/RtmpYMVwbk/scoup9f592a5cbfec/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_11
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.379.all.q/RtmphiJkYX/scoup1e15e7beaa41a/data /tmp/2063.379.all.q/RtmphiJkYX/scoup1e15e7beaa41a/init /tmp/2063.379.all.q/RtmphiJkYX/scoup1e15e7beaa41a/time_sp /tmp/2063.379.all.q/RtmphiJkYX/scoup1e15e7beaa41a/gpara /tmp/2063.379.all.q/RtmphiJkYX/scoup1e15e7beaa41a/cpara /tmp/2063.379.all.q/RtmphiJkYX/scoup1e15e7beaa41a/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_11
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.380.all.q/Rtmpeb8CUt/scoup9f9c657d7541/data /tmp/2063.380.all.q/Rtmpeb8CUt/scoup9f9c657d7541/init /tmp/2063.380.all.q/Rtmpeb8CUt/scoup9f9c657d7541/time_sp /tmp/2063.380.all.q/Rtmpeb8CUt/scoup9f9c657d7541/gpara /tmp/2063.380.all.q/Rtmpeb8CUt/scoup9f9c657d7541/cpara /tmp/2063.380.all.q/Rtmpeb8CUt/scoup9f9c657d7541/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_11
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.381.all.q/RtmpL2Cnww/scoup9fa7657d7541/data /tmp/2063.381.all.q/RtmpL2Cnww/scoup9fa7657d7541/init /tmp/2063.381.all.q/RtmpL2Cnww/scoup9fa7657d7541/time_sp /tmp/2063.381.all.q/RtmpL2Cnww/scoup9fa7657d7541/gpara /tmp/2063.381.all.q/RtmpL2Cnww/scoup9fa7657d7541/cpara /tmp/2063.381.all.q/RtmpL2Cnww/scoup9fa7657d7541/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_2
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.382.all.q/RtmpDk4jTe/scoup580371df4a82/data /tmp/2063.382.all.q/RtmpDk4jTe/scoup580371df4a82/init /tmp/2063.382.all.q/RtmpDk4jTe/scoup580371df4a82/time_sp /tmp/2063.382.all.q/RtmpDk4jTe/scoup580371df4a82/gpara /tmp/2063.382.all.q/RtmpDk4jTe/scoup580371df4a82/cpara /tmp/2063.382.all.q/RtmpDk4jTe/scoup580371df4a82/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_2
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.383.all.q/RtmpdZiXeL/scoup9ff25aee928d/data /tmp/2063.383.all.q/RtmpdZiXeL/scoup9ff25aee928d/init /tmp/2063.383.all.q/RtmpdZiXeL/scoup9ff25aee928d/time_sp /tmp/2063.383.all.q/RtmpdZiXeL/scoup9ff25aee928d/gpara /tmp/2063.383.all.q/RtmpdZiXeL/scoup9ff25aee928d/cpara /tmp/2063.383.all.q/RtmpdZiXeL/scoup9ff25aee928d/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_2
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.384.all.q/RtmpUHUctI/scoup9feb5aee928d/data /tmp/2063.384.all.q/RtmpUHUctI/scoup9feb5aee928d/init /tmp/2063.384.all.q/RtmpUHUctI/scoup9feb5aee928d/time_sp /tmp/2063.384.all.q/RtmpUHUctI/scoup9feb5aee928d/gpara /tmp/2063.384.all.q/RtmpUHUctI/scoup9feb5aee928d/cpara /tmp/2063.384.all.q/RtmpUHUctI/scoup9feb5aee928d/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_2
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.385.all.q/RtmprN2RCQ/scoupa0251573cedf/data /tmp/2063.385.all.q/RtmprN2RCQ/scoupa0251573cedf/init /tmp/2063.385.all.q/RtmprN2RCQ/scoupa0251573cedf/time_sp /tmp/2063.385.all.q/RtmprN2RCQ/scoupa0251573cedf/gpara /tmp/2063.385.all.q/RtmprN2RCQ/scoupa0251573cedf/cpara /tmp/2063.385.all.q/RtmprN2RCQ/scoupa0251573cedf/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_3
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.386.all.q/RtmpqzL7J5/scoup1ecda75022794/data /tmp/2063.386.all.q/RtmpqzL7J5/scoup1ecda75022794/init /tmp/2063.386.all.q/RtmpqzL7J5/scoup1ecda75022794/time_sp /tmp/2063.386.all.q/RtmpqzL7J5/scoup1ecda75022794/gpara /tmp/2063.386.all.q/RtmpqzL7J5/scoup1ecda75022794/cpara /tmp/2063.386.all.q/RtmpqzL7J5/scoup1ecda75022794/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_3
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.387.all.q/RtmpWEfBj7/scoup17d5e53d8dabf/data /tmp/2063.387.all.q/RtmpWEfBj7/scoup17d5e53d8dabf/init /tmp/2063.387.all.q/RtmpWEfBj7/scoup17d5e53d8dabf/time_sp /tmp/2063.387.all.q/RtmpWEfBj7/scoup17d5e53d8dabf/gpara /tmp/2063.387.all.q/RtmpWEfBj7/scoup17d5e53d8dabf/cpara /tmp/2063.387.all.q/RtmpWEfBj7/scoup17d5e53d8dabf/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_3
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.388.all.q/Rtmpniv7Ss/scoup1e18327bcdfd3/data /tmp/2063.388.all.q/Rtmpniv7Ss/scoup1e18327bcdfd3/init /tmp/2063.388.all.q/Rtmpniv7Ss/scoup1e18327bcdfd3/time_sp /tmp/2063.388.all.q/Rtmpniv7Ss/scoup1e18327bcdfd3/gpara /tmp/2063.388.all.q/Rtmpniv7Ss/scoup1e18327bcdfd3/cpara /tmp/2063.388.all.q/Rtmpniv7Ss/scoup1e18327bcdfd3/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_3
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.389.all.q/RtmpkgYlqZ/scoupa07f1b4c9fd6/data /tmp/2063.389.all.q/RtmpkgYlqZ/scoupa07f1b4c9fd6/init /tmp/2063.389.all.q/RtmpkgYlqZ/scoupa07f1b4c9fd6/time_sp /tmp/2063.389.all.q/RtmpkgYlqZ/scoupa07f1b4c9fd6/gpara /tmp/2063.389.all.q/RtmpkgYlqZ/scoupa07f1b4c9fd6/cpara /tmp/2063.389.all.q/RtmpkgYlqZ/scoupa07f1b4c9fd6/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_4
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.390.all.q/RtmpoFEjyV/scoupa0781b4c9fd6/data /tmp/2063.390.all.q/RtmpoFEjyV/scoupa0781b4c9fd6/init /tmp/2063.390.all.q/RtmpoFEjyV/scoupa0781b4c9fd6/time_sp /tmp/2063.390.all.q/RtmpoFEjyV/scoupa0781b4c9fd6/gpara /tmp/2063.390.all.q/RtmpoFEjyV/scoupa0781b4c9fd6/cpara /tmp/2063.390.all.q/RtmpoFEjyV/scoupa0781b4c9fd6/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_4
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.391.all.q/RtmpkphOEw/scoup582d2d35a8f5/data /tmp/2063.391.all.q/RtmpkphOEw/scoup582d2d35a8f5/init /tmp/2063.391.all.q/RtmpkphOEw/scoup582d2d35a8f5/time_sp /tmp/2063.391.all.q/RtmpkphOEw/scoup582d2d35a8f5/gpara /tmp/2063.391.all.q/RtmpkphOEw/scoup582d2d35a8f5/cpara /tmp/2063.391.all.q/RtmpkphOEw/scoup582d2d35a8f5/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_4
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.392.all.q/Rtmp8H9s92/scoupa0a616a93890/data /tmp/2063.392.all.q/Rtmp8H9s92/scoupa0a616a93890/init /tmp/2063.392.all.q/Rtmp8H9s92/scoupa0a616a93890/time_sp /tmp/2063.392.all.q/Rtmp8H9s92/scoupa0a616a93890/gpara /tmp/2063.392.all.q/Rtmp8H9s92/scoupa0a616a93890/cpara /tmp/2063.392.all.q/Rtmp8H9s92/scoupa0a616a93890/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_4
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.393.all.q/RtmpbvvQhe/scoup1ed0574db7a09/data /tmp/2063.393.all.q/RtmpbvvQhe/scoup1ed0574db7a09/init /tmp/2063.393.all.q/RtmpbvvQhe/scoup1ed0574db7a09/time_sp /tmp/2063.393.all.q/RtmpbvvQhe/scoup1ed0574db7a09/gpara /tmp/2063.393.all.q/RtmpbvvQhe/scoup1ed0574db7a09/cpara /tmp/2063.393.all.q/RtmpbvvQhe/scoup1ed0574db7a09/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_5
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.394.all.q/Rtmp7le03c/scoup17d87140ac1e6/data /tmp/2063.394.all.q/Rtmp7le03c/scoup17d87140ac1e6/init /tmp/2063.394.all.q/Rtmp7le03c/scoup17d87140ac1e6/time_sp /tmp/2063.394.all.q/Rtmp7le03c/scoup17d87140ac1e6/gpara /tmp/2063.394.all.q/Rtmp7le03c/scoup17d87140ac1e6/cpara /tmp/2063.394.all.q/Rtmp7le03c/scoup17d87140ac1e6/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_5
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.395.all.q/RtmpU347Q7/scoupa0ca112e7349/data /tmp/2063.395.all.q/RtmpU347Q7/scoupa0ca112e7349/init /tmp/2063.395.all.q/RtmpU347Q7/scoupa0ca112e7349/time_sp /tmp/2063.395.all.q/RtmpU347Q7/scoupa0ca112e7349/gpara /tmp/2063.395.all.q/RtmpU347Q7/scoupa0ca112e7349/cpara /tmp/2063.395.all.q/RtmpU347Q7/scoupa0ca112e7349/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_5
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.396.all.q/RtmpwSrKLK/scoup1e1af6302e92e/data /tmp/2063.396.all.q/RtmpwSrKLK/scoup1e1af6302e92e/init /tmp/2063.396.all.q/RtmpwSrKLK/scoup1e1af6302e92e/time_sp /tmp/2063.396.all.q/RtmpwSrKLK/scoup1e1af6302e92e/gpara /tmp/2063.396.all.q/RtmpwSrKLK/scoup1e1af6302e92e/cpara /tmp/2063.396.all.q/RtmpwSrKLK/scoup1e1af6302e92e/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_5
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.397.all.q/RtmpsI07sf/scoupa10fcb41a05/data /tmp/2063.397.all.q/RtmpsI07sf/scoupa10fcb41a05/init /tmp/2063.397.all.q/RtmpsI07sf/scoupa10fcb41a05/time_sp /tmp/2063.397.all.q/RtmpsI07sf/scoupa10fcb41a05/gpara /tmp/2063.397.all.q/RtmpsI07sf/scoupa10fcb41a05/cpara /tmp/2063.397.all.q/RtmpsI07sf/scoupa10fcb41a05/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_6
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.398.all.q/RtmpP4UfXe/scoupa10dcb41a05/data /tmp/2063.398.all.q/RtmpP4UfXe/scoupa10dcb41a05/init /tmp/2063.398.all.q/RtmpP4UfXe/scoupa10dcb41a05/time_sp /tmp/2063.398.all.q/RtmpP4UfXe/scoupa10dcb41a05/gpara /tmp/2063.398.all.q/RtmpP4UfXe/scoupa10dcb41a05/cpara /tmp/2063.398.all.q/RtmpP4UfXe/scoupa10dcb41a05/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_6
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.399.all.q/RtmpDZGCEl/scoupa137722bba2/data /tmp/2063.399.all.q/RtmpDZGCEl/scoupa137722bba2/init /tmp/2063.399.all.q/RtmpDZGCEl/scoupa137722bba2/time_sp /tmp/2063.399.all.q/RtmpDZGCEl/scoupa137722bba2/gpara /tmp/2063.399.all.q/RtmpDZGCEl/scoupa137722bba2/cpara /tmp/2063.399.all.q/RtmpDZGCEl/scoupa137722bba2/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_6
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.400.all.q/Rtmpg48LF6/scoup585319c055cb/data /tmp/2063.400.all.q/Rtmpg48LF6/scoup585319c055cb/init /tmp/2063.400.all.q/Rtmpg48LF6/scoup585319c055cb/time_sp /tmp/2063.400.all.q/Rtmpg48LF6/scoup585319c055cb/gpara /tmp/2063.400.all.q/Rtmpg48LF6/scoup585319c055cb/cpara /tmp/2063.400.all.q/Rtmpg48LF6/scoup585319c055cb/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_6
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.401.all.q/Rtmp9XHNzH/scoupa17d6504ff9c/data /tmp/2063.401.all.q/Rtmp9XHNzH/scoupa17d6504ff9c/init /tmp/2063.401.all.q/Rtmp9XHNzH/scoupa17d6504ff9c/time_sp /tmp/2063.401.all.q/Rtmp9XHNzH/scoupa17d6504ff9c/gpara /tmp/2063.401.all.q/Rtmp9XHNzH/scoupa17d6504ff9c/cpara /tmp/2063.401.all.q/Rtmp9XHNzH/scoupa17d6504ff9c/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_7
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.402.all.q/RtmphNTj2G/scoupa1866504ff9c/data /tmp/2063.402.all.q/RtmphNTj2G/scoupa1866504ff9c/init /tmp/2063.402.all.q/RtmphNTj2G/scoupa1866504ff9c/time_sp /tmp/2063.402.all.q/RtmphNTj2G/scoupa1866504ff9c/gpara /tmp/2063.402.all.q/RtmphNTj2G/scoupa1866504ff9c/cpara /tmp/2063.402.all.q/RtmphNTj2G/scoupa1866504ff9c/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_7
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.403.all.q/RtmpUZXHvO/scoupa1a8213412e5/data /tmp/2063.403.all.q/RtmpUZXHvO/scoupa1a8213412e5/init /tmp/2063.403.all.q/RtmpUZXHvO/scoupa1a8213412e5/time_sp /tmp/2063.403.all.q/RtmpUZXHvO/scoupa1a8213412e5/gpara /tmp/2063.403.all.q/RtmpUZXHvO/scoupa1a8213412e5/cpara /tmp/2063.403.all.q/RtmpUZXHvO/scoupa1a8213412e5/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_7
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.404.all.q/Rtmp81k7cx/scoup587932e1ea97/data /tmp/2063.404.all.q/Rtmp81k7cx/scoup587932e1ea97/init /tmp/2063.404.all.q/Rtmp81k7cx/scoup587932e1ea97/time_sp /tmp/2063.404.all.q/Rtmp81k7cx/scoup587932e1ea97/gpara /tmp/2063.404.all.q/Rtmp81k7cx/scoup587932e1ea97/cpara /tmp/2063.404.all.q/Rtmp81k7cx/scoup587932e1ea97/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_7
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.405.all.q/RtmpZ0XUue/scoupa1f77a4684fc/data /tmp/2063.405.all.q/RtmpZ0XUue/scoupa1f77a4684fc/init /tmp/2063.405.all.q/RtmpZ0XUue/scoupa1f77a4684fc/time_sp /tmp/2063.405.all.q/RtmpZ0XUue/scoupa1f77a4684fc/gpara /tmp/2063.405.all.q/RtmpZ0XUue/scoupa1f77a4684fc/cpara /tmp/2063.405.all.q/RtmpZ0XUue/scoupa1f77a4684fc/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_8
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.406.all.q/Rtmp4rnIgh/scoupa2147a4684fc/data /tmp/2063.406.all.q/Rtmp4rnIgh/scoupa2147a4684fc/init /tmp/2063.406.all.q/Rtmp4rnIgh/scoupa2147a4684fc/time_sp /tmp/2063.406.all.q/Rtmp4rnIgh/scoupa2147a4684fc/gpara /tmp/2063.406.all.q/Rtmp4rnIgh/scoupa2147a4684fc/cpara /tmp/2063.406.all.q/Rtmp4rnIgh/scoupa2147a4684fc/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_8
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.407.all.q/RtmpEPJTAh/scoupa21a7a4684fc/data /tmp/2063.407.all.q/RtmpEPJTAh/scoupa21a7a4684fc/init /tmp/2063.407.all.q/RtmpEPJTAh/scoupa21a7a4684fc/time_sp /tmp/2063.407.all.q/RtmpEPJTAh/scoupa21a7a4684fc/gpara /tmp/2063.407.all.q/RtmpEPJTAh/scoupa21a7a4684fc/cpara /tmp/2063.407.all.q/RtmpEPJTAh/scoupa21a7a4684fc/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_8
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.408.all.q/Rtmp2z0fSt/scoup17ddc38746cdd/data /tmp/2063.408.all.q/Rtmp2z0fSt/scoup17ddc38746cdd/init /tmp/2063.408.all.q/Rtmp2z0fSt/scoup17ddc38746cdd/time_sp /tmp/2063.408.all.q/Rtmp2z0fSt/scoup17ddc38746cdd/gpara /tmp/2063.408.all.q/Rtmp2z0fSt/scoup17ddc38746cdd/cpara /tmp/2063.408.all.q/Rtmp2z0fSt/scoup17ddc38746cdd/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	synthetic/cycle_8
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.565.all.q/Rtmp30sYZb/scoup1e50e688ff58d/data /tmp/2063.565.all.q/Rtmp30sYZb/scoup1e50e688ff58d/init /tmp/2063.565.all.q/Rtmp30sYZb/scoup1e50e688ff58d/time_sp /tmp/2063.565.all.q/Rtmp30sYZb/scoup1e50e688ff58d/gpara /tmp/2063.565.all.q/Rtmp30sYZb/scoup1e50e688ff58d/cpara /tmp/2063.565.all.q/Rtmp30sYZb/scoup1e50e688ff58d/ll 66 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_1
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.566.all.q/RtmpvBQEcV/scoup180c1262ebd2f/data /tmp/2063.566.all.q/RtmpvBQEcV/scoup180c1262ebd2f/init /tmp/2063.566.all.q/RtmpvBQEcV/scoup180c1262ebd2f/time_sp /tmp/2063.566.all.q/RtmpvBQEcV/scoup180c1262ebd2f/gpara /tmp/2063.566.all.q/RtmpvBQEcV/scoup180c1262ebd2f/cpara /tmp/2063.566.all.q/RtmpvBQEcV/scoup180c1262ebd2f/ll 66 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_1
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.567.all.q/RtmpFvBTkI/scoupa779396285e4/data /tmp/2063.567.all.q/RtmpFvBTkI/scoupa779396285e4/init /tmp/2063.567.all.q/RtmpFvBTkI/scoupa779396285e4/time_sp /tmp/2063.567.all.q/RtmpFvBTkI/scoupa779396285e4/gpara /tmp/2063.567.all.q/RtmpFvBTkI/scoupa779396285e4/cpara /tmp/2063.567.all.q/RtmpFvBTkI/scoupa779396285e4/ll 66 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_1
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.568.all.q/RtmpjNnMMP/scoup111c11201d3d2/data /tmp/2063.568.all.q/RtmpjNnMMP/scoup111c11201d3d2/init /tmp/2063.568.all.q/RtmpjNnMMP/scoup111c11201d3d2/time_sp /tmp/2063.568.all.q/RtmpjNnMMP/scoup111c11201d3d2/gpara /tmp/2063.568.all.q/RtmpjNnMMP/scoup111c11201d3d2/cpara /tmp/2063.568.all.q/RtmpjNnMMP/scoup111c11201d3d2/ll 66 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_1
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.569.all.q/RtmpXQNlw2/scoupa7aa30b00653/data /tmp/2063.569.all.q/RtmpXQNlw2/scoupa7aa30b00653/init /tmp/2063.569.all.q/RtmpXQNlw2/scoupa7aa30b00653/time_sp /tmp/2063.569.all.q/RtmpXQNlw2/scoupa7aa30b00653/gpara /tmp/2063.569.all.q/RtmpXQNlw2/scoupa7aa30b00653/cpara /tmp/2063.569.all.q/RtmpXQNlw2/scoupa7aa30b00653/ll 68 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_2
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.570.all.q/Rtmp5yb9D6/scoup1838763926e0b/data /tmp/2063.570.all.q/Rtmp5yb9D6/scoup1838763926e0b/init /tmp/2063.570.all.q/Rtmp5yb9D6/scoup1838763926e0b/time_sp /tmp/2063.570.all.q/Rtmp5yb9D6/scoup1838763926e0b/gpara /tmp/2063.570.all.q/Rtmp5yb9D6/scoup1838763926e0b/cpara /tmp/2063.570.all.q/Rtmp5yb9D6/scoup1838763926e0b/ll 68 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_2
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.571.all.q/RtmpExnvrw/scoup1e53358f19542/data /tmp/2063.571.all.q/RtmpExnvrw/scoup1e53358f19542/init /tmp/2063.571.all.q/RtmpExnvrw/scoup1e53358f19542/time_sp /tmp/2063.571.all.q/RtmpExnvrw/scoup1e53358f19542/gpara /tmp/2063.571.all.q/RtmpExnvrw/scoup1e53358f19542/cpara /tmp/2063.571.all.q/RtmpExnvrw/scoup1e53358f19542/ll 68 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_2
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.572.all.q/RtmpH8zK58/scoupa7d02a914848/data /tmp/2063.572.all.q/RtmpH8zK58/scoupa7d02a914848/init /tmp/2063.572.all.q/RtmpH8zK58/scoupa7d02a914848/time_sp /tmp/2063.572.all.q/RtmpH8zK58/scoupa7d02a914848/gpara /tmp/2063.572.all.q/RtmpH8zK58/scoupa7d02a914848/cpara /tmp/2063.572.all.q/RtmpH8zK58/scoupa7d02a914848/ll 68 200 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_2
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.573.all.q/RtmpL24RIr/scoup1f0c421225377/data /tmp/2063.573.all.q/RtmpL24RIr/scoup1f0c421225377/init /tmp/2063.573.all.q/RtmpL24RIr/scoup1f0c421225377/time_sp /tmp/2063.573.all.q/RtmpL24RIr/scoup1f0c421225377/gpara /tmp/2063.573.all.q/RtmpL24RIr/scoup1f0c421225377/cpara /tmp/2063.573.all.q/RtmpL24RIr/scoup1f0c421225377/ll 66 108 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_3
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.574.all.q/Rtmp3BDXDt/scoup180e652016aaa/data /tmp/2063.574.all.q/Rtmp3BDXDt/scoup180e652016aaa/init /tmp/2063.574.all.q/Rtmp3BDXDt/scoup180e652016aaa/time_sp /tmp/2063.574.all.q/Rtmp3BDXDt/scoup180e652016aaa/gpara /tmp/2063.574.all.q/Rtmp3BDXDt/scoup180e652016aaa/cpara /tmp/2063.574.all.q/Rtmp3BDXDt/scoup180e652016aaa/ll 66 108 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_3
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.575.all.q/RtmpHHskre/scoup111e641eb1620/data /tmp/2063.575.all.q/RtmpHHskre/scoup111e641eb1620/init /tmp/2063.575.all.q/RtmpHHskre/scoup111e641eb1620/time_sp /tmp/2063.575.all.q/RtmpHHskre/scoup111e641eb1620/gpara /tmp/2063.575.all.q/RtmpHHskre/scoup111e641eb1620/cpara /tmp/2063.575.all.q/RtmpHHskre/scoup111e641eb1620/ll 66 108 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_3
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.576.all.q/RtmpZXLKQA/scoup1f0e71bb1d0a4/data /tmp/2063.576.all.q/RtmpZXLKQA/scoup1f0e71bb1d0a4/init /tmp/2063.576.all.q/RtmpZXLKQA/scoup1f0e71bb1d0a4/time_sp /tmp/2063.576.all.q/RtmpZXLKQA/scoup1f0e71bb1d0a4/gpara /tmp/2063.576.all.q/RtmpZXLKQA/scoup1f0e71bb1d0a4/cpara /tmp/2063.576.all.q/RtmpZXLKQA/scoup1f0e71bb1d0a4/ll 66 108 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/bifurcating_cycle_3
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.601.all.q/RtmpREsbAv/scoup112bfef32117/data /tmp/2063.601.all.q/RtmpREsbAv/scoup112bfef32117/init /tmp/2063.601.all.q/RtmpREsbAv/scoup112bfef32117/time_sp /tmp/2063.601.all.q/RtmpREsbAv/scoup112bfef32117/gpara /tmp/2063.601.all.q/RtmpREsbAv/scoup112bfef32117/cpara /tmp/2063.601.all.q/RtmpREsbAv/scoup112bfef32117/ll 52 196 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_1
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.602.all.q/RtmptJb0Va/scoup5c221d235e65/data /tmp/2063.602.all.q/RtmptJb0Va/scoup5c221d235e65/init /tmp/2063.602.all.q/RtmptJb0Va/scoup5c221d235e65/time_sp /tmp/2063.602.all.q/RtmptJb0Va/scoup5c221d235e65/gpara /tmp/2063.602.all.q/RtmptJb0Va/scoup5c221d235e65/cpara /tmp/2063.602.all.q/RtmptJb0Va/scoup5c221d235e65/ll 52 196 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_1
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.603.all.q/RtmpXG434O/scoup1f16b690ceb54/data /tmp/2063.603.all.q/RtmpXG434O/scoup1f16b690ceb54/init /tmp/2063.603.all.q/RtmpXG434O/scoup1f16b690ceb54/time_sp /tmp/2063.603.all.q/RtmpXG434O/scoup1f16b690ceb54/gpara /tmp/2063.603.all.q/RtmpXG434O/scoup1f16b690ceb54/cpara /tmp/2063.603.all.q/RtmpXG434O/scoup1f16b690ceb54/ll 52 196 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_1
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.604.all.q/RtmpDQIhL4/scoup1e5c05bca3d9f/data /tmp/2063.604.all.q/RtmpDQIhL4/scoup1e5c05bca3d9f/init /tmp/2063.604.all.q/RtmpDQIhL4/scoup1e5c05bca3d9f/time_sp /tmp/2063.604.all.q/RtmpDQIhL4/scoup1e5c05bca3d9f/gpara /tmp/2063.604.all.q/RtmpDQIhL4/scoup1e5c05bca3d9f/cpara /tmp/2063.604.all.q/RtmpDQIhL4/scoup1e5c05bca3d9f/ll 52 196 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_1
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.605.all.q/RtmpGclZLG/scoup112efaac0b97/data /tmp/2063.605.all.q/RtmpGclZLG/scoup112efaac0b97/init /tmp/2063.605.all.q/RtmpGclZLG/scoup112efaac0b97/time_sp /tmp/2063.605.all.q/RtmpGclZLG/scoup112efaac0b97/gpara /tmp/2063.605.all.q/RtmpGclZLG/scoup112efaac0b97/cpara /tmp/2063.605.all.q/RtmpGclZLG/scoup112efaac0b97/ll 76 194 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_2
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.606.all.q/RtmpV8WCvI/scoupa8ab2dd4dbce/data /tmp/2063.606.all.q/RtmpV8WCvI/scoupa8ab2dd4dbce/init /tmp/2063.606.all.q/RtmpV8WCvI/scoupa8ab2dd4dbce/time_sp /tmp/2063.606.all.q/RtmpV8WCvI/scoupa8ab2dd4dbce/gpara /tmp/2063.606.all.q/RtmpV8WCvI/scoupa8ab2dd4dbce/cpara /tmp/2063.606.all.q/RtmpV8WCvI/scoupa8ab2dd4dbce/ll 76 194 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_2
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.607.all.q/RtmpFiHczD/scoupa15b41eb1620/data /tmp/2063.607.all.q/RtmpFiHczD/scoupa15b41eb1620/init /tmp/2063.607.all.q/RtmpFiHczD/scoupa15b41eb1620/time_sp /tmp/2063.607.all.q/RtmpFiHczD/scoupa15b41eb1620/gpara /tmp/2063.607.all.q/RtmpFiHczD/scoupa15b41eb1620/cpara /tmp/2063.607.all.q/RtmpFiHczD/scoupa15b41eb1620/ll 76 194 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_2
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.608.all.q/Rtmp8HWMei/scoup1e5e256f2ef26/data /tmp/2063.608.all.q/Rtmp8HWMei/scoup1e5e256f2ef26/init /tmp/2063.608.all.q/Rtmp8HWMei/scoup1e5e256f2ef26/time_sp /tmp/2063.608.all.q/Rtmp8HWMei/scoup1e5e256f2ef26/gpara /tmp/2063.608.all.q/Rtmp8HWMei/scoup1e5e256f2ef26/cpara /tmp/2063.608.all.q/Rtmp8HWMei/scoup1e5e256f2ef26/ll 76 194 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_2
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.609.all.q/Rtmpz5y6cS/scoup1133b45fc7ee2/data /tmp/2063.609.all.q/Rtmpz5y6cS/scoup1133b45fc7ee2/init /tmp/2063.609.all.q/Rtmpz5y6cS/scoup1133b45fc7ee2/time_sp /tmp/2063.609.all.q/Rtmpz5y6cS/scoup1133b45fc7ee2/gpara /tmp/2063.609.all.q/Rtmpz5y6cS/scoup1133b45fc7ee2/cpara /tmp/2063.609.all.q/Rtmpz5y6cS/scoup1133b45fc7ee2/ll 56 187 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_3
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.610.all.q/RtmpqgFDtP/scoup1133445fc7ee2/data /tmp/2063.610.all.q/RtmpqgFDtP/scoup1133445fc7ee2/init /tmp/2063.610.all.q/RtmpqgFDtP/scoup1133445fc7ee2/time_sp /tmp/2063.610.all.q/RtmpqgFDtP/scoup1133445fc7ee2/gpara /tmp/2063.610.all.q/RtmpqgFDtP/scoup1133445fc7ee2/cpara /tmp/2063.610.all.q/RtmpqgFDtP/scoup1133445fc7ee2/ll 56 187 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_3
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.611.all.q/Rtmpa827V0/scoup184691d235e65/data /tmp/2063.611.all.q/Rtmpa827V0/scoup184691d235e65/init /tmp/2063.611.all.q/Rtmpa827V0/scoup184691d235e65/time_sp /tmp/2063.611.all.q/Rtmpa827V0/scoup184691d235e65/gpara /tmp/2063.611.all.q/Rtmpa827V0/scoup184691d235e65/cpara /tmp/2063.611.all.q/Rtmpa827V0/scoup184691d235e65/ll 56 187 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_3
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.612.all.q/Rtmp1wGXSK/scoupa17d3d87c5c5/data /tmp/2063.612.all.q/Rtmp1wGXSK/scoupa17d3d87c5c5/init /tmp/2063.612.all.q/Rtmp1wGXSK/scoupa17d3d87c5c5/time_sp /tmp/2063.612.all.q/Rtmp1wGXSK/scoupa17d3d87c5c5/gpara /tmp/2063.612.all.q/Rtmp1wGXSK/scoupa17d3d87c5c5/cpara /tmp/2063.612.all.q/Rtmp1wGXSK/scoupa17d3d87c5c5/ll 56 187 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	toy/cycle_3
+SCOUP	"Error running command: 
+'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2063.9.all.q/RtmpCnLZBs/scoup94ad1ffbde18/data /tmp/2063.9.all.q/RtmpCnLZBs/scoup94ad1ffbde18/init /tmp/2063.9.all.q/RtmpCnLZBs/scoup94ad1ffbde18/time_sp /tmp/2063.9.all.q/RtmpCnLZBs/scoup94ad1ffbde18/gpara /tmp/2063.9.all.q/RtmpCnLZBs/scoup94ad1ffbde18/cpara /tmp/2063.9.all.q/RtmpCnLZBs/scoup94ad1ffbde18/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
+-- output --
+-- error --"	1	real/cell-cycle_buettner
 SCUBA	"_split""])
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCUBA/venv/lib/python3.5/site-packages/PySCUBA/SCUBA_core.py"", line 193, in initialize_tree
     log_W, E_log_W, s_k = gap_stats(XX, 1, k_max)

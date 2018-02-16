@@ -20,6 +20,12 @@ tasks_info <- map_df(
   ~ read_rds(.) %>% select(task_id = id, type, trajectory_type, task_source)
 )
 
+# collect relevant trajectory types
+trajtypes <-
+  dynalysis::trajectory_types %>%
+  filter(id %in% unique(tasks_info$trajectory_type)) %>%
+  add_row(id = "overall", directedness = "directed", color = "#AAAAAA", background_color = "E6A1A1")
+
 # print task errors
 task_errors <- outputs %>%
   filter(is.na(task_id)) %>%
@@ -50,7 +56,7 @@ job_errors %>% group_by(method_name) %>% summarise(n = sum(n), example = example
 required_outputs <- length(task_ids) * num_repeats
 outputs %>% filter(!is.na(task_id)) %>% group_by(method_name) %>% summarise(n = n()) %>% filter(n != required_outputs) %>% mutate(pass = n > .9 * required_outputs)
 
-###################################################
+  ###################################################
 ############### CREATE AGGREGATIONS ###############
 ###################################################
 
@@ -66,8 +72,10 @@ outputs_ind <- outputs %>%
   left_join(tasks_info, by = "task_id") %>%
   mutate(
     pct_errored = (error_message != "") + 0,
+    pct_time_exceeded = (error_message == "Time limit exceeded") + 0,
+    pct_memory_exceeded = (error_message == "Memory limit exceeded") + 0,
     prior_str = sapply(prior_df, function(prdf) ifelse(is.null(prdf) || nrow(prdf) == 0, "", paste(prdf$prior_names, collapse = ";"))),
-    trajectory_type_f = factor(trajectory_type, levels = intersect(dynalysis::trajectory_types$id, unique(trajectory_type)))
+    trajectory_type_f = factor(trajectory_type, levels = trajtypes$id)
   ) %>%
   group_by(task_id) %>%
   mutate(
@@ -139,11 +147,11 @@ outputs_summtrajtype_totalsx2 <- bind_rows(
   outputs_summmethod_totals %>% mutate(trajectory_type = "overall"),
   outputs_summtrajtype_totals
 ) %>%
-  mutate(trajectory_type_f = factor(trajectory_type, levels = c("overall", intersect(dynalysis::trajectory_types$id, unique(trajectory_type)))))
+  mutate(trajectory_type_f = factor(trajectory_type, levels = trajtypes$id))
 
 # save data structures
 to_save <- environment() %>% as.list()
-to_save <- to_save[str_detect(names(to_save), "^outputs_")]
+to_save <- to_save[c(str_subset(names(to_save), "^outputs_"), "trajtypes")]
 write_rds(to_save, derived_file("outputs_postprocessed.rds"))
 
 # # Upload ---------------------
