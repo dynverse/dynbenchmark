@@ -21,7 +21,7 @@ outputs_ind_dataset <- outputs_ind %>%
 
 # aggregate over replicates
 outputs_summrepl_dataset <- outputs_ind_dataset %>%
-  group_by(method_name, method_short_name, task_id, fold_type, fold_i, group_sel, param_i, iteration_i, type, trajectory_type, task_source, param_group, prior_str, trajectory_type_f) %>%
+  group_by(method_name, method_short_name, task_id, paramset_id, task_source, trajectory_type, trajectory_type_f) %>%
   summarise_if(is.numeric, funs(mean, var)) %>%
   ungroup() %>%
   mutate(
