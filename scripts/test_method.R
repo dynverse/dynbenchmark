@@ -26,7 +26,7 @@ bigtasks %>% write_rds("~/bigtasks.rds")
 library(tidyverse)
 library(dynalysis)
 
-bigtasks <- read_rds("~/bigtasks.rds")
+tasks <- read_rds(derived_file("tasks.rds", experiment_id = "2-dataset_characterisation"))
 smalltasks <- dyntoy::toy_tasks
 
 ## chose method
@@ -37,8 +37,8 @@ default_params <- ParamHelpers::generateDesignOfDefaults(par_set, trafo = T) %>%
 list2env(default_params, environment())
 
 ## laad task in environment
-bigtask <- dynutils::extract_row_to_list(bigtasks, nrow(bigtasks))
-smalltask <- dynutils::extract_row_to_list(bigtasks,seq_len(nrow(bigtasks))[bigtasks$id == "linear_10"])
+bigtask <- dynutils::extract_row_to_list(tasks, nrow(tasks))
+smalltask <- dynutils::extract_row_to_list(tasks,which(tasks$id == "real/cell-cycle_buettner"))
 # smalltask <- extract_row_to_list(dyntoy::toy_tasks, 15)# %>% {.$geodesic_dist <- dynutils::compute_emlike_dist(.);.}
 
 task_to_evaluate <- smalltask
@@ -49,11 +49,17 @@ list2env(prior_information, environment())
 
 
 tasks_to_evaluate <- dynutils::list_as_tibble(list(task_to_evaluate))
-tasks_to_evaluate <- bigtasks %>% arrange(-row_number())
+# tasks_to_evaluate <- bigtasks %>% arrange(-row_number())
+
+{
+  tasks_to_evaluate$expression <- tasks_to_evaluate$expression %>% map(~.())
+  tasks_to_evaluate$counts <- tasks_to_evaluate$counts %>% map(~.())
+  tasks_to_evaluate$geodesic_dist <- tasks_to_evaluate$geodesic_dist %>% map(~.())
+}
 
 
 ##
-execute_method(tasks_to_evaluate, description, default_params, mc_cores=20)
+results <- execute_method(tasks_to_evaluate, description, default_params, mc_cores=4)
 
 results <- map(seq(nrow(tasks_to_evaluate)), function(row_id) {
   print(paste0(">> ", row_id))
