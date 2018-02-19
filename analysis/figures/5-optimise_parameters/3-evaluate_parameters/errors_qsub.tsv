@@ -1,11 +1,1 @@
 method_name	error_message	n
-monocle with ICA	"d_type = ""train"", train_out,             param_i, design_test, output_model, grid, grid_i,             iterations), summarise_mlr_output(fold_type = ""test"",             test_out, param_i, design_test, output_model, grid,             grid_i, iterations))    })})(272L)
-26: do.call(PitSoL_params$FUN, c(list(PitSoL_params$X[[PitSoL_index]]),     PitSoL_params$DOTPARAMS))
-An irrecoverable exception occurred. R is aborting now ...
-/var/spool/sge/prismcls07/job_scripts/1915: line 10: 78010 Segmentation fault      Rscript --default-packages=methods,stats,utils,graphics,grDevices script.R $SGE_TASK_ID
-"	1
-monocle with ICA	"d_type = ""train"", train_out,             param_i, design_test, output_model, grid, grid_i,             iterations), summarise_mlr_output(fold_type = ""test"",             test_out, param_i, design_test, output_model, grid,             grid_i, iterations))    })})(596L)
-26: do.call(PitSoL_params$FUN, c(list(PitSoL_params$X[[PitSoL_index]]),     PitSoL_params$DOTPARAMS))
-An irrecoverable exception occurred. R is aborting now ...
-/var/spool/sge/prismcls03/job_scripts/1915: line 10: 44174 Segmentation fault      Rscript --default-packages=methods,stats,utils,graphics,grDevices script.R $SGE_TASK_ID
-"	1

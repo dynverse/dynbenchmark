@@ -18,6 +18,7 @@ experiment("5-optimise_parameters/3-evaluate_parameters")
 
 outputs_list <- read_rds(derived_file("outputs_postprocessed.rds"))
 chosen_task_source <- "mean_notoy"
+# chosen_task_source <- "real"
 
 # get ordering of methods
 method_ord <- outputs_list$outputs_summtrajtype_totalsx2 %>%
@@ -27,7 +28,8 @@ method_ord <- outputs_list$outputs_summtrajtype_totalsx2 %>%
 
 # create method_name_f factor in all data structures
 for (oname in str_subset(names(outputs_list), "outputs")) {
-  outputs_list[[oname]] <- outputs_list[[oname]] %>% mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
+  outputs_list[[oname]] <- outputs_list[[oname]] %>%
+    mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
 }
 
 # load all outputs in environment and remove outputs_list
@@ -42,9 +44,9 @@ prior_df <- outputs_ind %>% select(method_name, prior_str) %>% distinct()
 overall_comp <-
   outputs_summtrajtype_totalsx2 %>%
   filter(task_source == chosen_task_source, trajectory_type_f == "overall") %>%
-  select(method_name, method_short_name, method_name_f, harm_mean, pct_errored_mean, rank_correlation_mean, rank_correlation_var, rank_rf_mse_mean, rank_rf_mse_var, rank_edge_flip_mean, rank_edge_flip_var, time_method_mean) %>%
-  gather(metric, score, -method_name:-method_name_f) %>%
-  mutate(metric_f = factor(metric, levels = c("harm_mean", "pct_errored_mean", "time_method_mean", "rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean", "rank_correlation_var", "rank_edge_flip_var", "rank_rf_mse_var")))
+  select(method_name, method_short_name, method_name_f, paramset_id, harm_mean, num_setseed_calls_mean, pct_errored_mean, pct_time_exceeded_mean, pct_memory_exceeded_mean, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, time_method_mean) %>%
+  gather(metric, score, -method_name:-paramset_id) %>%
+  mutate(metric_f = factor(metric, levels = c("harm_mean", "time_method_mean", "num_setseed_calls_mean", "rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean", "pct_errored_mean", "pct_time_exceeded_mean", "pct_memory_exceeded_mean")))
 
 pdf(figure_file("1_overall_comparison.pdf"), 12, 12)
 ggplot(overall_comp) +
