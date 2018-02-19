@@ -21,7 +21,7 @@ outputs_ind_dataset <- outputs_ind %>%
 
 # aggregate over replicates
 outputs_summrepl_dataset <- outputs_ind_dataset %>%
-  group_by(method_name, method_short_name, task_id, fold_type, fold_i, group_sel, param_i, iteration_i, type, trajectory_type, task_source, param_group, prior_str, trajectory_type_f) %>%
+  group_by(method_name, method_short_name, task_id, paramset_id, task_source, trajectory_type, trajectory_type_f) %>%
   summarise_if(is.numeric, funs(mean, var)) %>%
   ungroup() %>%
   mutate(
@@ -48,14 +48,6 @@ dataset_comp <-
   select(task_id, task_id_f, trajectory_type, trajectory_type_f, task_source, harm_mean, pct_errored_mean, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean) %>%
   gather(metric, score, -task_id:-task_source) %>%
   mutate(metric_f = factor(metric, levels = c("harm_mean", "pct_errored_mean","rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean")))
-
-ggplot(dataset_comp) +
-  geom_bar(aes(task_id_f, score), stat = "identity") +
-  facet_wrap(~metric_f, nrow = 1) +
-  coord_flip() +
-  cowplot::theme_cowplot() +
-  labs(x = NULL, y = NULL, fill = "Metric") +
-  scale_fill_brewer(palette = "Dark2")
 
 ##### create custom plot #####
 
@@ -121,8 +113,7 @@ dataset_info <-
   select(-metric:-metric_f)
 task_sources <- unique(dataset_info$task_source)
 task_source_colours <- RColorBrewer::brewer.pal(length(task_sources), "Set1") %>% setNames(task_sources)
-trajectory_types <- levels(dataset_info$trajectory_type_f)
-trajectory_type_colours <- setNames(dynalysis::trajectory_types$color, dynalysis::trajectory_types$id)
+trajectory_type_colours <- setNames(trajtypes$color, trajtypes$id)
 
 dataset_info_boxes <- bind_rows(
   dataset_info %>% mutate(
@@ -263,4 +254,49 @@ ggsave(figure_file("dataset_difficulty_filled.pdf"), g, width = 20, height = 20)
 
 
 
-scores
+
+
+############### COMPARISON OF EXECUTION TIMES ###############
+step_levels <- c("sessionsetup", "preprocessing", "method", "postprocessing", "wrapping", "sessioncleanup", "geodesic", "correlation",
+                 "coranking", "mantel", "rf", "edge_flip")
+
+time_ind <-
+  outputs_ind_dataset %>%
+  select(method_name, task_id, pct_errored, error_message, trajectory_type_f, starts_with("time_")) %>%
+  gather(step, time, starts_with("time")) %>%
+  mutate(
+    step = gsub("time_", "", step),
+    step_f = factor(step, levels = step_levels)
+  )
+
+timeind_task_ord <- time_ind %>%
+  group_by(task_id) %>%
+  summarise(time = sum(time, na.rm = T)) %>%
+  arrange(desc(time))
+
+timeind_meth_ord <- time_ind %>%
+  group_by(method_name, step_f) %>%
+  summarise(time = mean(time, na.rm = T)) %>%
+  summarise(time = sum(time, na.rm=T)) %>%
+  arrange(desc(time))
+
+time_ind <- time_ind %>% mutate(
+  task_id_f = factor(task_id, levels = timeind_task_ord$task_id),
+  method_name_f = factor(method_name, levels = timeind_meth_ord$method_name)
+)
+
+g <- time_ind %>%
+  group_by(task_id_f, step_f) %>%
+  summarise(time = mean(time, na.rm = T)) %>%
+  ungroup() %>%
+  ggplot() +
+  geom_bar(aes(task_id_f, time, fill = step_f), stat = "identity", position = position_stack(reverse = TRUE)) +
+  scale_fill_brewer(palette = "Set3") +
+  cowplot::theme_cowplot() +
+  coord_flip() +
+  labs(x = NULL, fill = "Time step")
+ggsave(figure_file("dataset_timeperstep_overall.pdf"), g, width = 20, height = 10)
+
+rm(g, time_ind, timeind_task_ord, timeind_meth_ord)
+
+
