@@ -3,8 +3,10 @@ source("analysis/analyses/4-method_characterisation/svg_helpers.R")
 library(tidyverse)
 library(dynalysis)
 
+trajectory_types$id
+
 boxes <- tibble(
-  id = c("undirected_linear", "simple_fork", "complex_fork", "undirected_cycle", "unrooted_tree", "undirected_graph", "disconnected_undirected_graph"), opacity = 1
+  id = trajectory_types$id, opacity = 1
 )
 map(boxes$id, function(id) {
   boxes$opacity <- ifelse(boxes$id == id, 1, 0)
