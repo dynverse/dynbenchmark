@@ -6,7 +6,7 @@
       <stop style="stop-color:#ca0565;stop-opacity:1;" offset="0" id="stop7040"/>
     </linearGradient>
     <linearGradient id="linearGradient7024" osb:paint="solid">
-      <stop style="stop-color:#efcc04;stop-opacity:1;" offset="0" id="stop7022"/>
+      <stop style="stop-color:#e8ef04;stop-opacity:1;" offset="0" id="stop7022"/>
     </linearGradient>
     <marker inkscape:stockid="Arrow2Send" orient="auto" refY="0.0" refX="0.0" id="marker17849" style="overflow:visible;" inkscape:isstock="true">
       <path id="path17847" style="fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round;stroke:#000000;stroke-opacity:1;fill:#000000;fill-opacity:1" d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z " transform="scale(0.3) rotate(180) translate(-2.3,0)"/>
@@ -297,7 +297,7 @@
     <linearGradient inkscape:collect="always" xlink:href="#linearGradient7042" id="linearGradient7058" x1="14.970002" y1="99.374405" x2="16.670894" y2="99.374405" gradientUnits="userSpaceOnUse"/>
     <linearGradient inkscape:collect="always" xlink:href="#linearGradient7042" id="linearGradient7060" x1="16.528984" y1="96.072426" x2="18.229877" y2="96.072426" gradientUnits="userSpaceOnUse"/>
   </defs>
-  <sodipodi:namedview id="base" pagecolor="#ffffff" bordercolor="#666666" borderopacity="1.0" inkscape:pageopacity="0.0" inkscape:pageshadow="2" inkscape:zoom="1.8187444" inkscape:cx="-64.411677" inkscape:cy="161.53192" inkscape:document-units="mm" inkscape:current-layer="layer1" showgrid="false" inkscape:window-width="1920" inkscape:window-height="1028" inkscape:window-x="0" inkscape:window-y="0" inkscape:window-maximized="1" fit-margin-top="0" fit-margin-left="0" fit-margin-right="0" fit-margin-bottom="0">
+  <sodipodi:namedview id="base" pagecolor="#ffffff" bordercolor="#666666" borderopacity="1.0" inkscape:pageopacity="0.0" inkscape:pageshadow="2" inkscape:zoom="3.6374888" inkscape:cx="80.223825" inkscape:cy="268.53128" inkscape:document-units="mm" inkscape:current-layer="layer1" showgrid="false" inkscape:window-width="1920" inkscape:window-height="1028" inkscape:window-x="0" inkscape:window-y="0" inkscape:window-maximized="1" fit-margin-top="0" fit-margin-left="0" fit-margin-right="0" fit-margin-bottom="0">
     <inkscape:grid type="xygrid" id="grid1904"/>
   </sodipodi:namedview>
   <metadata id="metadata5">
