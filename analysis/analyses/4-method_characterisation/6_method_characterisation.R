@@ -216,10 +216,12 @@ methods_table <- methods %>%
   select(name, date, maximal_trajectory_type, evaluated) %>%
   rename_all(label_long)
 
-methods_table %>%
+table <- methods_table %>%
   knitr::kable("html", escape=F) %>%
   kableExtra::kable_styling(bootstrap_options = c("striped", "hover","condensed")) %>%
-  kableExtra::add_footnote(non_inclusion_reasons$long, "number") %>%
+  kableExtra::add_footnote(non_inclusion_reasons$long, "number")
+table
+table %>%
   saveRDS(figure_file("methods_table.rds"))
 
 

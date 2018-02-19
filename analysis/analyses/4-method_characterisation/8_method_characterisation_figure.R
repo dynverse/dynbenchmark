@@ -210,7 +210,7 @@ figure <- plot_grid(
   rel_widths = c(0.4, 0.6)
 )
 figure
-save_plot(figure_file("figure_methods_overview.pdf"), figure, base_width = 17, base_height= 12)
+save_plot(figure_file("methods_characterisation.pdf"), figure, base_width = 17, base_height= 12)
 
 
 
@@ -221,12 +221,12 @@ save_plot(figure_file("figure_methods_overview.pdf"), figure, base_width = 17, b
 ### Replacing trajectory types                                              ####
 library(xml2)
 
-command <- glue::glue("inkscape {figure_file('figure_methods_overview.pdf')} --export-plain-svg={figure_file('figure_methods_overview.svg')}")
+command <- glue::glue("inkscape {figure_file('methods_characterisation.pdf')} --export-plain-svg={figure_file('methods_characterisation.svg')}")
 system(command)
 
-file.remove(figure_file('figure_methods_overview.pdf'))
+file.remove(figure_file('methods_characterisation.pdf'))
 
-svg_location <- figure_file('figure_methods_overview.svg')
+svg_location <- figure_file('methods_characterisation.svg')
 xml <- read_xml(svg_location)
 
 aspect <- read_xml("analysis/figures/trajectory_types/mini/complex_fork.svg") %>% xml_root() %>% xml_attr("viewBox") %>% str_split(" ") %>% unlist() %>% tail(2) %>% as.numeric() %>% {.[[1]]/.[[2]]}

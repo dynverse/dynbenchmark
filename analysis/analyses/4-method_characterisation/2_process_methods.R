@@ -53,7 +53,7 @@ methods$conversion_special <- map_lgl(methods$conversion_split, ~"special" %in% 
 methods$output_split <- methods$output %>% str_split("[ ]?,[ ]?")
 
 # add extra reason for date cutoff
-date_cutoff <- as.Date("2017-05-01")
+date_cutoff <- as.Date("2017-06-01")
 date_filter <- methods$date > date_cutoff
 methods$non_inclusion_reasons_split[date_filter] <- map(methods$non_inclusion_reasons_split[date_filter], c, "date") %>% map(unique)
 
