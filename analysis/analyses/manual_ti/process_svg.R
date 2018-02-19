@@ -13,8 +13,6 @@ experiment("manual_ti")
 
 run_id <- "mds_robrechtc_1"
 run <- read_rds(derived_file(paste0(run_id, ".rds")))
-run$spaces <- run$spaces[[1]]
-
 
 ##  ............................................................................
 ##  Load bitmap                                                             ####
@@ -102,7 +100,8 @@ merge_graph <- function(graph, max_dist) {
     mutate(from = labels[from], to = labels[to]) %>%
     mutate(from = match(from, nodes$name), to = match(to, nodes$name)) %>%
     filter(from!=to) %>%
-    group_by(from, to) %>%  # filter duplicates
+    mutate(fromto = map2_chr(from, to, ~paste0(sort(c(.x, .y)), collapse="#"))) %>%
+    group_by(fromto) %>%  # filter duplicates
     filter(row_number() == 1) %>%
     ungroup()
 

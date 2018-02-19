@@ -9,8 +9,8 @@ experiment("manual_ti")
 tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
 
 run <- lst(
-  dimred_id = "mds",
-  person_id = "robrechtc",
+  dimred_id = "dp",
+  person_id = "helenat",
   run_i = 1,
   run_id=glue::collapse(c(dimred_id, person_id, run_i), "_"),
   seed = sodium::data_encrypt(charToRaw(run_id), sodium::hash(charToRaw("robrecht")), nonce = sodium::hash(charToRaw("hi"), size = 24)) %>% rawToBits() %>% head(32) %>% packBits("integer") %>% abs()
@@ -19,11 +19,11 @@ run <- lst(
 if(file.exists(derived_file(paste0(run$run_id, ".rds")))) {
   run2 <- read_rds(derived_file(paste0(run$run_id, ".rds")))
 
-  previous_task_ids <- run2$spaces %>% pull(task_id)
-  new_task_ids <- tasks$task_id[!(tasks$task_id %in% previous_task_ids)]
+  previous_task_ids <- run2$spaces %>% pull(id)
+  new_task_ids <- tasks$id[!(tasks$id %in% previous_task_ids)]
 
   print("Previous run found, using previous ordering (plus extra datasets)")
-  selected_tasks <- tasks %>% slice(match(c(previous_task_ids, new_task_ids), task_id))
+  selected_tasks <- tasks %>% slice(match(c(previous_task_ids, new_task_ids), id))
 } else {
   set.seed(run$seed)
   selected_tasks <- tasks %>% arrange(sample(n()))
@@ -59,7 +59,10 @@ spaces <- map(seq_len(nrow(selected_tasks)), function(task_i) {
   if (task$task_group == "control") {
     space <- task$space
   } else {
-    space <- dimred_function(task$expression)
+    space <- tryCatch(
+      {dimred_function(task$expression)},
+      error = function(x) dimred_pca(task$expression)
+    )
     space <- space %>% as.data.frame() %>% tibble::rownames_to_column("cell_id")
   }
 
@@ -72,7 +75,7 @@ spaces <- map(seq_len(nrow(selected_tasks)), function(task_i) {
   tibble(
     plot=list(plot),
     id = task$id,
-    task_id = task$task_id,
+    task_id = task$id,
     x_scale = max(space$Comp1) - min(space$Comp1),
     y_scale = max(space$Comp2) - min(space$Comp2),
     x_shift = min(space$Comp1),
@@ -130,5 +133,5 @@ if(!file.exists(derived_file(glue::glue("{run$run_id}.svg")))) {
 run$base_size <- base_size
 run$ncol <- ncol
 run$nrow <- nrow
-run$spaces <- list(select(spaces, -plot)) # the plots are enormous (pryr::object_size(spaces$plot))
+run$spaces <- select(spaces, -plot) # the plots are enormous (pryr::object_size(spaces$plot))
 run %>% write_rds(derived_file(paste0(run$run_id, ".rds")))
