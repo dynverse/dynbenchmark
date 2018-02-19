@@ -41,6 +41,7 @@ trajectory_type_edges_undirected_to_directed <- tibble(
 ) %>% mutate(prop_changes = list(prop_changes))
 # directed (copy over from undirected)
 
+# TODO: the following prop_changes are incomplete!!
 trajectory_type_edges_directed <- tribble(
   ~to, ~from, ~prop_changes,
   "bifurcation", "directed_linear", "num_branch_nodes == 0",
@@ -51,7 +52,7 @@ trajectory_type_edges_directed <- tribble(
   "directed_acyclic_graph", "rooted_tree", "num_cycles == 0",
   "directed_graph", "directed_acyclic_graph", "num_cycles == 0",
   "disconnected_directed_graph", "directed_graph", "num_components == 1",
-  "directed_graph", "directed_cycle", c("num_branch_nodes == 0", "num_cycles == 1"),
+  "directed_graph", "directed_cycle", c("num_branch_nodes == 0", "num_cycles == 1")
 ) %>% mutate(prop_changes = as.list(prop_changes))
 
 
@@ -79,18 +80,30 @@ trajectory_types <- {
   ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
   ### Colors                                                                  ####
 
-  trajectory_type_colors <- c(
-    "undirected_linear" = "#af0dc7",
-    "simple_fork" = "#0073d7",
-    "unrooted_tree" = "#5ecd2e",
-    "unrooted_binary_tree" = "#01FF70",
-    "complex_fork" = "#cfbf00",
-    "undirected_cycle" = "#39cccc",
-    "undirected_graph" = "#ff8821",
-    "disconnected_undirected_graph" = "#ff4237",
-    "unknown" = "#AAAAAA"
+  trajectory_type_colors <- tribble(
+    ~id, ~color,
+    "directed_linear", "#0278dd",
+    "bifurcation" , "#3ad1d1",
+    "rooted_tree" , "#efcc04",
+    "rooted_binary_tree" , "#00b009",
+    "multifurcation" , "#7fbe00",
+    "directed_cycle" , "#003b6f",
+    "directed_acyclic_graph" , "#ff8821",
+    "directed_graph" , "#ff4237",
+    "disconnected_directed_graph" , "#ca0565",
+    "unknown" , "#AAAAAA"
   )
-  trajectory_type_colors[names(trajectory_type_directed_to_undirected)] <- trajectory_type_colors[trajectory_type_directed_to_undirected]
+
+  trajectory_type_colors <- trajectory_type_colors %>%
+    left_join(trajectory_type_edges_undirected_to_directed, by=c("id"="to")) %>%
+    select(-id) %>%
+    rename(id = from) %>%
+    select(id, color) %>%
+    group_by(id) %>%
+    summarise(color = first(color)) %>%
+    bind_rows(trajectory_type_colors)
+
+  trajectory_type_colors[trajectory_type_directed_to_undirected] <- trajectory_type_colors[names(trajectory_type_directed_to_undirected)]
 
   lighten <- function(color, factor=1.4){
     purrr::map_chr(color, function(color) {
