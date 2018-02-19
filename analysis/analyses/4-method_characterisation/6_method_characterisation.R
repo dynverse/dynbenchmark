@@ -134,7 +134,7 @@ saveRDS(n_methods_over_time, figure_file("n_methods_over_time.rds"))
 
 ##  ............................................................................
 ##  Platforms                                                               ####
-platforms <- methods_evaluated %>% separate_rows(platform=platforms, sep=", ") %>%
+platforms <- methods %>% separate_rows(platform=platforms, sep=", ") %>%
   group_by(platforms) %>%
   summarise(quantity = n()) %>%
   arrange(quantity) %>%
@@ -295,3 +295,4 @@ methods %>%
   filter(can_handle) %>%
   group_by(trajectory_type) %>%
   count()
+

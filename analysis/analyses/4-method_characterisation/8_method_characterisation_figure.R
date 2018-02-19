@@ -86,6 +86,7 @@ method_qc_overall_width <- 1
 ##  Prior information                                                       ####
 priors <- c("start_cell_ids", "grouping_assignment", "time", "timecourse",	"end_cell_ids",	"n_end_states","n_branches", "marker_gene_ids")
 prior_usage_colors <- c("?" = "#AAAAAA", "no" = "#EEEEEE", "required" = "#FF4136", "can_use" = "#0074D9", "can_root" = "#39CCCC")
+prior_usage_colors[["required_default"]] <- prior_usage_colors[["required"]]
 prior_information <- methods_evaluated %>%
   gather(prior_id, prior_usage, !!priors, factor_key=TRUE) %>%
   select(prior_id, prior_usage, name) %>%
@@ -137,7 +138,7 @@ prior_usage_width <- length(prior_usages)/2
 
 ##  ............................................................................
 ##  Trajectory types                                                        ####
-undirected_trajectory_type_order <- trajectory_types %>% filter(directedness == "undirected") %>% pull(id) %>% keep(~.!="unknown")
+undirected_trajectory_type_order <- trajectory_types %>% filter(directedness == "directed") %>% pull(id) %>% keep(~.!="unknown")
 
 trajectory_components_plot <- methods_evaluated %>%
   gather(trajectory_type, can, !!undirected_trajectory_type_order, factor_key=TRUE) %>%
@@ -209,7 +210,7 @@ figure <- plot_grid(
   rel_widths = c(0.4, 0.6)
 )
 figure
-save_plot(figure_file("figure_methods_overview.pdf"), figure, base_width = 17, base_height= 10)
+save_plot(figure_file("figure_methods_overview.pdf"), figure, base_width = 17, base_height= 12)
 
 
 
