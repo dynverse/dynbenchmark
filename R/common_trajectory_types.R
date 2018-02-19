@@ -74,7 +74,7 @@ trajectory_types <- {
       id = "unknown",
       directedness = "unknown"
     )
-  ) %>% group_by(id) %>% filter(row_number() == 1) %>% ungroup()
+  )
 
 
   ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
@@ -84,10 +84,10 @@ trajectory_types <- {
     ~id, ~color,
     "directed_linear", "#0278dd",
     "bifurcation" , "#3ad1d1",
-    "rooted_tree" , "#efcc04",
+    "rooted_tree" , "#e8ef04",
     "rooted_binary_tree" , "#00b009",
     "multifurcation" , "#7fbe00",
-    "directed_cycle" , "#003b6f",
+    "directed_cycle" , "#003d76",
     "directed_acyclic_graph" , "#ff8821",
     "directed_graph" , "#ff4237",
     "disconnected_directed_graph" , "#ca0565",
@@ -103,8 +103,6 @@ trajectory_types <- {
     summarise(color = first(color)) %>%
     bind_rows(trajectory_type_colors)
 
-  trajectory_type_colors[trajectory_type_directed_to_undirected] <- trajectory_type_colors[names(trajectory_type_directed_to_undirected)]
-
   lighten <- function(color, factor=1.4){
     purrr::map_chr(color, function(color) {
       col <- col2rgb(color)
@@ -115,11 +113,9 @@ trajectory_types <- {
       colorspace::hex(do.call(colorspace::HSV, as.list(col)))
     })
   }
-  trajectory_type_background_colors <- set_names(rep("white", length(trajectory_types)), trajectory_types)
-  trajectory_type_background_colors <- lighten(trajectory_type_colors, 0.3)
+  trajectory_type_colors$background_color <- lighten(trajectory_type_colors$color, 0.3)
 
-  trajectory_types$color <- trajectory_type_colors[trajectory_types$id]
-  trajectory_types$background_color <- trajectory_type_background_colors[trajectory_types$id]
+  trajectory_types <- left_join(trajectory_types, trajectory_type_colors, "id") %>% group_by(id) %>% filter(row_number() == 1) %>% ungroup()
 
   trajectory_types
 }
