@@ -129,34 +129,48 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   feature_info <- feature_info %>% slice(match(colnames(counts), feature_id))
   milestone_percentages <- milestone_percentages %>% filter(cell_id %in% cell_ids)
 
-  dataset <- wrap_ti_task_data(
+  part1 <- progressions %>%
+    group_by(cell_id) %>%
+    filter(n() > 1) %>%
+    ungroup() %>%
+    select(from, to) %>%
+    distinct()
+
+  if (nrow(part1) > 0) {
+    divergence_regions <-
+      part1 %>%
+      group_by(from) %>%
+      do({
+        data_frame(
+          divergence_id = paste0("div_", .$from[[1]]),
+          milestone_id = c(.$from[[1]], .$to),
+          is_start = c(T, rep(F, nrow(.)))
+        )
+      }) %>%
+      ungroup() %>%
+      select(divergence_id, milestone_id, is_start)
+  } else {
+    divergence_regions <- NULL
+  }
+
+  wrap_data(
     id = dataset_id,
-    counts = counts,
-    expression = expression,
     cell_ids = cell_ids,
+    cell_info = cell_info,
+    task_source = "real",
+    cell_grouping = cell_grouping,
+    normalisation_info = normalisation_info,
+    creation_date = Sys.time()
+  ) %>% add_trajectory_to_wrapper(
     milestone_ids = milestone_ids,
     milestone_network = milestone_network,
-    milestone_percentages = milestone_percentages,
-    cell_grouping = cell_grouping,
-    cell_info = cell_info,
-    feature_info = feature_info,
-    normalisation_info = normalisation_info,
-    task_source = "real"
-  )
-
-  dataset$prior_information <- dynnormaliser::generate_prior_information(
-    milestone_ids,
-    milestone_network,
-    dataset$progressions,
-    milestone_percentages,
-    counts,
-    feature_info,
-    cell_info
-  )
-
-  dataset$geodesic_dist <- dynutils::compute_tented_geodesic_distances(dataset)
-
-  dataset$creation_date <- Sys.time()
+    divergence_regions = divergence_regions,
+    progressions = progressions
+  ) %>% add_expression_to_wrapper(
+    counts = counts,
+    expression = expression,
+    feature_info = feature_info
+  ) %>% dynnormaliser::add_prior_information_to_wrapper()
 
   write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
   write_rds(original_counts, dataset_file(dataset_id = dataset_id, filename = "original_counts.rds"))
