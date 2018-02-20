@@ -66,14 +66,28 @@ outputs <- outputs %>%
     method_short_name = ifelse(method_short_name == "manual", paste0("manual_", paramset_id), method_short_name)
   )
 
+error_message_interpret <- function(error_message) {
+  map_chr(
+    error_message,
+    function(err) {
+      if (grepl("MemoryError", err)) {
+        "Memory limit exceeded"
+      } else {
+        err
+      }
+    }
+  )
+}
+
 outputs_ind <- outputs %>%
   group_by(method_name) %>%
   ungroup() %>%
   left_join(tasks_info, by = "task_id") %>%
   mutate(
-    pct_errored = (error_message != "") + 0,
-    pct_time_exceeded = (error_message == "Time limit exceeded") + 0,
-    pct_memory_exceeded = (error_message == "Memory limit exceeded") + 0,
+    error_message_int = error_message_interpret(error_message),
+    pct_errored = (error_message_int != "") + 0,
+    pct_time_exceeded = (error_message_int == "Time limit exceeded") + 0,
+    pct_memory_exceeded = (error_message_int == "Memory limit exceeded") + 0,
     prior_str = sapply(prior_df, function(prdf) ifelse(is.null(prdf) || nrow(prdf) == 0, "", paste(prdf$prior_names, collapse = ";"))),
     trajectory_type_f = factor(trajectory_type, levels = trajtypes$id)
   ) %>%

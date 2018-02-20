@@ -6,7 +6,7 @@ experiment("5-optimise_parameters/3-evaluate_parameters")
 # settings
 methods <- get_descriptions()
 metrics <- c("correlation", "rf_mse", "edge_flip")
-timeout_per_execution <- 60 * 60
+timeout_per_execution <- 60 * 60 * 24
 num_repeats <- 4
 max_memory_per_execution <- "10G"
 execute_before <- "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500; export DYNALYSIS_PATH=/group/irc/shared/dynalysis/"
@@ -29,9 +29,10 @@ task_ids <- read_rds(paste0(local_tasks_folder, "/task_ids.rds"))
 #   paste("\"", ., "\"", collapse = ", ", sep = "") %>%
 #   cat
 methods_order <- c(
-  "identity", "shuffle", "random", "manual", "scorpius", "slngsht", "mpath", "sincell", "waterfll", "embeddr", "dpt",
-  "tscan", "slice", "slicer", "wndrlst", "mnclddr", "wishbone", "mnclica", "ctvem", "ouijaflw", "scuba", "topslam",
-  "gpfates", "phenopth", "stemid", "ctmaptpx", "mfa", "scoup"
+  "identity", "shuffle", "random", "manual_wouters", "manual_robrechtc", "slngsht", "scorpius", "mpath", "waterfll",
+  "embeddr", "dpt", "tscan", "sincell", "slice", "slicer", "wndrlst", "wishbone", "mnclddr", "mnclica", "ctvem", "ouijaflw",
+  "scuba", "topslam", "pseudogp", "gpfates", "ouija", "scimitar", "phenopth", "recat", "ctgibbs", "ctmaptpx", "scoup",
+  "mfa", "stemid"
 )
 methods <- methods %>% slice(c(match(methods_order, methods$short_name), which(!methods$short_name %in% methods_order)))
 methods$short_name
