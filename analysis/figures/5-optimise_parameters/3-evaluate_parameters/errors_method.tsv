@@ -1,5 +1,8 @@
 method_name	error_message	n	example
+SCIMITAR	Job cancelled by user	660	real/aging-hsc-old_kowalczyk
+pseudogp	Time limit exceeded	330	real/aging-hsc-old_kowalczyk
 ouija	Time limit exceeded	321	real/aging-hsc-old_kowalczyk
+pseudogp	Job cancelled by user	229	synthetic/linear_5
 Mpath	Mpath only detected one landmark	205	real/cell-cycle_leng
 manual	1	184	real/macrophage-salmonella_saliba
 cellTree with gibbs	Memory limit exceeded	92	real/aging-hsc-old_kowalczyk
@@ -26,6 +29,7 @@ Wishbone	"ne/venv/lib/python3.5/site-packages/wishbone/wb.py"", line 1068, in ru
 TypeError: object of type 'numpy.float64' has no len()"	16	real/epidermis-hair-IFE_joost
 embeddr	'tol' must be strictly positive and finite	12	real/olfactory-projection-neurons-DA1_horns
 Mpath	more cluster centers than distinct data points.	12	real/epidermis-hair-uHF_joost
+pseudogp	attempt to set an attribute on NULL	12	real/dentate-gyrus-neurogenesis_hochgerner
 sincell	Column `node` is unknown	12	real/cell-cycle_buettner
 embeddr	need at least four unique 'x' values	8	toy/consecutive_bifurcating_1
 monocle with DDRTree	initial centers are not distinct	8	synthetic/consecutive_bifurcating_10
