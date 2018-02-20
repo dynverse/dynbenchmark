@@ -21,6 +21,15 @@ tasks <- bind_rows(
   real_tasks
 )
 
+# compute waypoints for tasks
+tasks <-
+  seq_len(nrow(tasks)) %>% map(function(i) {
+    tasks %>% dynutils::extract_row_to_list(i) %>% dynutils::add_cell_waypoints_to_wrapper(num_cells_selected = 100)
+  }) %>%
+  dynutils::list_as_tibble()
+
+tasks %>% mutate(num_cells = map_int(cell_ids, length)) %>% .$num_cells
+
 tasks <- tasks %>%
   rowwise() %>%
   mutate(milenet_spr = milestone_percentages %>% reshape2::acast(cell_id ~ milestone_id, value.var = "percentage", fill = 0) %>% list()) %>%

@@ -279,6 +279,30 @@ tasks <- dynutils::list_as_tibble(tasks)
 write_rds(tasks, dataset_file("tasks.rds"))
 tasks <- read_rds(dataset_file("tasks.rds"))
 
+# # update tasks to new wrappers
+# new_tasks <- seq_len(nrow(tasks)) %>% map(function(i) {
+#   old_task <- tasks %>% dynutils::extract_row_to_list(i)
+#
+#   with(old_task, wrap_data(
+#     id = id,
+#     cell_ids = cell_ids,
+#     cell_info = cell_info,
+#     task_source = task_source,
+#     settings = settings,
+#     normalisation_info = normalisation_info,
+#     uuids = uuids
+#   ) %>% add_trajectory_to_wrapper(
+#     milestone_ids = milestone_ids,
+#     milestone_network = milestone_network,
+#     divergence_regions = NULL, # dyngen does not support divergence regions right now
+#     progressions = progressions
+#   ) %>% add_expression_to_wrapper(
+#     counts = counts,
+#     expression = expression,
+#     feature_info = feature_info
+#   ) %>% dynnormaliser::add_prior_information_to_wrapper())
+# }) %>% list_as_tibble()
+
 # tasks$geodesic_dist <- pbapply::pblapply(seq_len(nrow(tasks)), function(i) {
 #   dynutils::compute_tented_geodesic_distances(
 #     dynutils::extract_row_to_list(tasks, i)
