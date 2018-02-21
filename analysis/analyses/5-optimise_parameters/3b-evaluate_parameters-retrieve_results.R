@@ -17,7 +17,7 @@ outputs <- benchmark_bind_results(derived_file("suite/"), load_models = FALSE)
 list2env(read_rds(derived_file("config.rds")), environment())
 tasks_info <- map_df(
   paste0(local_tasks_folder, "/", task_ids, ".rds"),
-  ~ read_rds(.) %>% select(task_id = id, type, trajectory_type, task_source)
+  ~ read_rds(.) %>% select(task_id = id, trajectory_type, task_source)
 )
 
 # collect relevant trajectory types
@@ -56,7 +56,7 @@ job_errors %>% group_by(method_name) %>% summarise(n = sum(n), example = example
 required_outputs <- length(task_ids) * num_repeats
 outputs %>% filter(!is.na(task_id)) %>% group_by(method_name) %>% summarise(n = n()) %>% filter(n != required_outputs) %>% mutate(pass = n > .9 * required_outputs)
 
-  ###################################################
+###################################################
 ############### CREATE AGGREGATIONS ###############
 ###################################################
 
@@ -102,7 +102,7 @@ outputs_ind <- outputs %>%
 
 # aggregate over replicates
 outputs_summrepl <- outputs_ind %>%
-  group_by(method_name, method_short_name, task_id, paramset_id, type, trajectory_type, task_source, prior_str, trajectory_type_f) %>%
+  group_by(method_name, method_short_name, task_id, paramset_id, trajectory_type, task_source, prior_str, trajectory_type_f) %>%
   summarise_if(is.numeric, funs(mean, var)) %>%
   ungroup() %>%
   mutate(
