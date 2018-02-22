@@ -257,8 +257,8 @@ ggsave(figure_file("dataset_difficulty_filled.pdf"), g, width = 20, height = 20)
 
 
 ############### COMPARISON OF EXECUTION TIMES ###############
-step_levels <- c("sessionsetup", "preprocessing", "method", "postprocessing", "wrapping", "sessioncleanup", "geodesic", "correlation",
-                 "coranking", "mantel", "rf", "edge_flip")
+step_levels <- c("sessionsetup", "preprocessing", "method", "postprocessing", "wrapping", "sessioncleanup", "cellwaypoints", "waypointedgeodesic", "correlation",
+                 "mantel", "rf", "edge_flip")
 
 time_ind <-
   outputs_ind_dataset %>%

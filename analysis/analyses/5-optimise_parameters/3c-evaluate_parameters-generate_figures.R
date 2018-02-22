@@ -17,7 +17,7 @@ experiment("5-optimise_parameters/3-evaluate_parameters")
 ############################################################
 
 outputs_list <- read_rds(derived_file("outputs_postprocessed.rds"))
-chosen_task_source <- "mean_notoy"
+chosen_task_source <- "mean"
 # chosen_task_source <- "real"
 
 # get ordering of methods
@@ -71,7 +71,7 @@ rm(overall_comp)
 
 
 ############### COMPARISON PER TRAJECTORY TYPE ###############
-pdf(figure_file("2_trajtype_comparison.pdf"), 20, 16)
+pdf(figure_file("2_trajtype_comparison.pdf"), 20, 12)
 ggplot(outputs_summtrajtype_totalsx2) +
   geom_point(aes(method_name_f, harm_mean)) +
   coord_flip() +
@@ -226,20 +226,21 @@ one <-
   theme_bw() +
   scale_colour_brewer(palette = "Dark2") +
   facet_wrap(~metric, nrow = 1)
-two <-
-  ggplot(out_gath) +
-  geom_point(aes(real, toy)) +
-  coord_equal() +
-  theme_bw() +
-  scale_colour_brewer(palette = "Dark2") +
-  facet_wrap(~metric, nrow = 1)
-three <-
-  ggplot(out_gath) +
-  geom_point(aes(synthetic, toy)) +
-  coord_equal() +
-  theme_bw() +
-  scale_colour_brewer(palette = "Dark2") +
-  facet_wrap(~metric, nrow = 1)
-cowplot::plot_grid(one, two, three, ncol = 1)
+one
+# two <-
+#   ggplot(out_gath) +
+#   geom_point(aes(real, toy)) +
+#   coord_equal() +
+#   theme_bw() +
+#   scale_colour_brewer(palette = "Dark2") +
+#   facet_wrap(~metric, nrow = 1)
+# three <-
+#   ggplot(out_gath) +
+#   geom_point(aes(synthetic, toy)) +
+#   coord_equal() +
+#   theme_bw() +
+#   scale_colour_brewer(palette = "Dark2") +
+#   facet_wrap(~metric, nrow = 1)
+# cowplot::plot_grid(one, two, three, ncol = 1)
 
-rm(out_gath, one, two, three)
+rm(out_gath, one, two)

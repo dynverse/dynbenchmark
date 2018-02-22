@@ -4,11 +4,11 @@ library(tidyverse)
 experiment("5-optimise_parameters/3-evaluate_parameters")
 
 # settings
-methods <- get_descriptions()
+methods <- get_descriptions() %>% filter(short_name != "manual")
 metrics <- c("correlation", "rf_mse", "edge_flip")
-timeout_per_execution <- 60 * 60
+timeout_per_execution <- 60 * 60 * 6
 num_repeats <- 4
-max_memory_per_execution <- "10G"
+max_memory_per_execution <- "32G"
 execute_before <- "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500; export DYNALYSIS_PATH=/group/irc/shared/dynalysis/"
 verbose <- TRUE
 
@@ -45,12 +45,12 @@ parameters <- lapply(methods$short_name, function(mn) {
   defaults
 }) %>% setNames(methods$short_name)
 
-parameters$manual <-
-  tribble(
-    ~person_id, ~dimred_id, ~run_i, ~paramset_id,
-    "wouters", "pca", "1", "wouters",
-    "robrechtc", "mds", "1", "robrechtc"
-  )
+# parameters$manual <-
+#   tribble(
+#     ~person_id, ~dimred_id, ~run_i, ~paramset_id,
+#     "wouters", "pca", "1", "wouters",
+#     "robrechtc", "mds", "1", "robrechtc"
+#   )
 
 # save benchmark configuration and start it
 write_rds(lst(
