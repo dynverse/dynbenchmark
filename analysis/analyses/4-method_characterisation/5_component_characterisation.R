@@ -7,14 +7,14 @@ experiment("4-method_characterisation")
 
 methods <- read_rds(derived_file("methods.rds"))
 
-method_components <- methods %>% select(name, components) %>%
+method_components <- methods %>% select(method_id, components) %>%
   mutate(components = gsub("\\(.*?\\)", "", components)) %>%  # remove anything between ()
-  unnest_tokens(component, components, "regex", pattern="[\\{\\}\\[\\]\\|\\+\\=]", to_lower=FALSE) %>%
-  mutate(component = trimws(component)) %>%
-  filter(nchar(component) > 0)
+  unnest_tokens(component_id, components, "regex", pattern = "[\\{\\}\\[\\]\\|\\+\\=]", to_lower = FALSE) %>%
+  mutate(component_id = trimws(component_id)) %>%
+  filter(nchar(component_id) > 0)
 
-categories <- tribble(
-  ~component, ~category,
+component_categories <- tribble(
+  ~component_id, ~category,
   "principal curves", "ordering",
   "PCA", "dimensionality reduction",
   "knn graph", "graph building",
@@ -42,19 +42,21 @@ categories <- tribble(
   "consensus clustering", "clustering",
   "weighted cluster graphs", "graph building",
   "maximum likelihood ordering", "ordering"
-) %>% group_by(component) %>%
+) %>% group_by(component_id) %>%
   filter(row_number() == 1)
 
+write_rds(method_components, derived_file("method_components.rds"))
+write_rds(component_categories, derived_file("component_categories.rds"))
 
 method_component_counts <- method_components %>%
-  count(component) %>%
-  left_join(categories, "component")
+  count(component_id) %>%
+  left_join(component_categories, "component_id")
 
 
 method_components_wordcloud_plot <- method_component_counts %>%
   filter(n > 1 | !is.na(category)) %>%
   ggplot() +
-    ggrepel::geom_text_repel(aes(1, 1, size=n, label=component, color=category), segment.size = 0) +
+    ggrepel::geom_text_repel(aes(1, 1, size=n, label=component_id, color=category), segment.size = 0) +
     scale_y_continuous(breaks = NULL) +
     scale_x_continuous(breaks = NULL) +
     theme_void() +
@@ -66,20 +68,20 @@ method_components_wordcloud_plot
 method_components_ordering_plot <- method_component_counts %>%
   arrange(n) %>%
   filter(n > 1 | !is.na(category)) %>%
-  mutate(component = factor(component, levels=unique(component))) %>%
-  ggplot(aes(component, n, fill = category)) +
+  mutate(component_id = forcats::fct_inorder(component_id)) %>%
+  ggplot(aes(component_id, n, fill = category)) +
     geom_bar(stat="identity") +
-    geom_text(aes(y=0, label=component), stat="identity", hjust=0) +
+    geom_text(aes(y=0, label=pritt("{component_id}: {n}")), stat="identity", hjust=0) +
     scale_x_discrete(breaks=c(), expand=c(0, 0), name="") +
     scale_y_continuous(expand=c(0, 0), name="# methods") +
     coord_flip() +
     theme(legend.position="top")
 method_components_ordering_plot
 
-n_methods <- length(unique(method_components$name))
+n_methods <- length(unique(method_components$method_id))
 category_counts <- method_components %>%
-  left_join(categories, "component") %>%
-  group_by(name, category) %>%
+  left_join(component_categories, "component_id") %>%
+  group_by(method_id, category) %>%
   summarise() %>%
   group_by(category) %>%
   count() %>%
@@ -104,3 +106,4 @@ method_components_plot <- cowplot::plot_grid(method_components_wordcloud_plot, m
 method_components_plot
 
 saveRDS(method_components_plot, figure_file("method_components.rds"))
+
