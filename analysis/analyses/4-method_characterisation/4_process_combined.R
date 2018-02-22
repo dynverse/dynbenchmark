@@ -20,9 +20,13 @@ implementations_evaluated <- implementations %>%
   filter(evaluated)
 
 # create methods tibble
+methods <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
+  gs_read(ws = "Methods")
+
 methods <- implementations %>%
   separate_rows(method_ids) %>%
-  rename(method_id = method_ids)
+  rename(method_id = method_ids) %>%
+  left_join(methods, by="method_id")
 methods_evaluated <- methods %>%
   filter(evaluated)
 
