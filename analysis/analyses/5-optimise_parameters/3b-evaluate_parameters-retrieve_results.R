@@ -83,6 +83,7 @@ outputs_ind <- outputs %>%
   group_by(method_name) %>%
   ungroup() %>%
   left_join(tasks_info, by = "task_id") %>%
+  filter(task_source != "toy") %>%
   mutate(
     error_message_int = error_message_interpret(error_message),
     pct_errored = (error_message_int != "") + 0,
@@ -127,16 +128,16 @@ outputs_summmethod <- outputs_summtrajtype %>%
 outputs_summtrajtype_totals <- bind_rows(
   outputs_summtrajtype,
   outputs_summtrajtype %>%
-    filter(task_source != "toy") %>%
+    # filter(task_source != "toy") %>%
     group_by(method_name, method_short_name, paramset_id, trajectory_type, trajectory_type_f) %>%
     summarise_if(is.numeric, mean) %>%
     ungroup() %>%
-    mutate(task_source = "mean_notoy"),
-  outputs_summtrajtype %>%
-    group_by(method_name, method_short_name, paramset_id, trajectory_type, trajectory_type_f) %>%
-    summarise_if(is.numeric, mean) %>%
-    ungroup() %>%
-    mutate(task_source = "mean_withtoy")
+    mutate(task_source = "mean")
+  # outputs_summtrajtype %>%
+  #   group_by(method_name, method_short_name, paramset_id, trajectory_type, trajectory_type_f) %>%
+  #   summarise_if(is.numeric, mean) %>%
+  #   ungroup() %>%
+  #   mutate(task_source = "mean_withtoy")
 )
 
 # adding mean per method
@@ -144,16 +145,16 @@ outputs_summmethod_totals <-
   bind_rows(
     outputs_summmethod,
     outputs_summmethod %>%
-      filter(task_source != "toy") %>%
+      # filter(task_source != "toy") %>%
       group_by(method_name, method_short_name, paramset_id) %>%
       summarise_if(is.numeric, mean) %>%
       ungroup() %>%
-      mutate(task_source = "mean_notoy"),
-    outputs_summmethod %>%
-      group_by(method_name, method_short_name, paramset_id) %>%
-      summarise_if(is.numeric, mean) %>%
-      ungroup() %>%
-      mutate(task_source = "mean_withtoy")
+      mutate(task_source = "mean")
+    # outputs_summmethod %>%
+    #   group_by(method_name, method_short_name, paramset_id) %>%
+    #   summarise_if(is.numeric, mean) %>%
+    #   ungroup() %>%
+    #   mutate(task_source = "mean_withtoy")
   )
 
 # combine all aggregated data frames
