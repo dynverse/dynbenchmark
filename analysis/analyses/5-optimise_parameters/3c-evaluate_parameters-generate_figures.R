@@ -51,7 +51,7 @@ overall_comp <-
 pdf(figure_file("1_overall_comparison.pdf"), 12, 12)
 ggplot(overall_comp) +
   geom_bar(aes(method_name_f, score, fill = metric_f), stat = "identity") +
-  facet_wrap(~metric_f, scales = "free", nrow = 3) +
+  facet_wrap(~metric_f, scales = "free", nrow = 3, labeller = label_facet()) +
   coord_flip() +
   theme_bw() +
   labs(x = NULL, y = NULL, fill = "Metric") +
@@ -59,7 +59,7 @@ ggplot(overall_comp) +
 
 ggplot(overall_comp %>% left_join(prior_df, by = "method_name")) +
   geom_bar(aes(method_name_f, score, fill = prior_str), stat = "identity") +
-  facet_wrap(~metric_f, scales = "free", nrow = 3) +
+  facet_wrap(~metric_f, scales = "free", nrow = 3, labeller = label_facet()) +
   coord_flip() +
   theme_bw() +
   scale_fill_brewer(palette = "Dark2") +
