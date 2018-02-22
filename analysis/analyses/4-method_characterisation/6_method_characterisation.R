@@ -23,13 +23,13 @@ end_date <- as.Date("2018-06-01")
 
 method_publication_data <- methods %>% filter(is_ti) %>%
   gather("publication_type", "publication_date", c(PubDate, Preprint)) %>%
-  select(name, publication_type, publication_date) %>%
+  select(method_ids, publication_type, publication_date) %>%
   drop_na() %>%
   mutate(counter = 1)
 
 # add published preprints
 method_publication_data <- method_publication_data %>%
-  group_by(name) %>%
+  group_by(method_ids) %>%
   filter(n() == 2) %>%
   filter(publication_type == "PubDate") %>%
   mutate(publication_type = "Preprint", counter = -1) %>%
@@ -49,13 +49,13 @@ earliest <- publication_cumulative_by_type %>%
   group_by(publication_type) %>%
   arrange(publication_date) %>%
   filter(row_number() == 1) %>%
-  mutate(n_methods = 0, publication_date = earliest_date, name = NA, counter=0) %>%
+  mutate(n_methods = 0, publication_date = earliest_date, method_ids = NA, counter=0) %>%
   ungroup()
 latest <- publication_cumulative_by_type %>%
   group_by(publication_type) %>%
   arrange(publication_date) %>%
   filter(row_number() == n()) %>%
-  mutate(publication_date = latest_date, name = NA, counter = 0) %>%
+  mutate(publication_date = latest_date, method_ids = NA, counter = 0) %>%
   ungroup()
 publication_cumulative_by_type <- bind_rows(earliest, publication_cumulative_by_type, latest)
 
@@ -99,10 +99,10 @@ publication_cumulative_by_type_interpolated_text <- publication_cumulative_by_ty
   mutate(run = rle(n_methods_cumulative) %>% {rep(seq_along(.$lengths), .$lengths)}) %>%
   filter(counter == 1) %>%
   group_by(publication_type, n_methods_cumulative, run) %>%
-  summarise(name = paste0(name, collapse="   "), publication_date = min(publication_date))
+  summarise(method_ids = paste0(method_ids, collapse="   "), publication_date = min(publication_date))
 
 publication_cumulative_text <- method_publication_data %>%
-  group_by(name) %>%
+  group_by(method_ids) %>%
   arrange(publication_date) %>%
   filter(row_number() == 1) %>%
   ungroup() %>%
@@ -115,7 +115,7 @@ n_methods_over_time <- publication_cumulative_by_type_interpolated %>%
     geom_area(aes(publication_date, n_methods_cumulative, fill=publication_type), position="identity") +
     scale_fill_manual("", labels=label_long, values=c(peer_reviewed="#334466", preprint="#445588")) +
     geom_text(
-      aes(publication_date + 1, n_methods_cumulative - 0.5, label=name, group=publication_type),
+      aes(publication_date + 1, n_methods_cumulative - 0.5, label=method_ids, group=publication_type),
       data = publication_cumulative_text,
       color="white",
       vjust=0.5,
@@ -211,9 +211,9 @@ methods_table <- methods %>%
     evaluated = kableExtra::cell_spec(evaluated, color=ifelse(evaluated == "✓", "green", "")),
     date = strftime(date, "%d/%m/%Y"),
     maximal_trajectory_type = kableExtra::cell_spec(label_long(maximal_trajectory_type), background=set_names(trajectory_types$color, trajectory_types$id)[maximal_trajectory_type], color="white"),
-    name = kableExtra::cell_spec(name, link=Code)
+    method_ids = kableExtra::cell_spec(method_ids, link=Code)
   ) %>%
-  select(name, date, maximal_trajectory_type, evaluated) %>%
+  select(method_ids, date, maximal_trajectory_type, evaluated) %>%
   rename_all(label_long)
 
 table <- methods_table %>%
@@ -240,7 +240,7 @@ method_small_history_data <- methods %>%
   arrange(-y)
 method_small_history <- method_small_history_data %>%
   ggplot(aes(date, y)) +
-  ggrepel::geom_label_repel(aes(color=maximal_trajectory_type, label=name, fontface=fontface, size=size), direction="y", max.iter=10000, ylim=c(0, NA), force=10, min.segment.length = 0) +
+  ggrepel::geom_label_repel(aes(color=maximal_trajectory_type, label=method_ids, fontface=fontface, size=size), direction="y", max.iter=10000, ylim=c(0, NA), force=10, min.segment.length = 0) +
   scale_color_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
   scale_fill_manual(values=setNames(trajectory_types$background_color, trajectory_types$id)) +
   scale_alpha_manual(values=c(`TRUE`=1, `FALSE`=0.6)) +
