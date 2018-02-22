@@ -35,7 +35,7 @@ leading <- comb %>%
 g <- ggplot(comb, aes(date_earliest, harm_mean)) +
   geom_step(data = leading, colour = "red") +
   geom_point() +
-  geom_text(aes(label = method_short_name), nudge_y = .01) +
+  geom_text(aes(label = method_short_name), nudge_y = .015) +
   labs(x = "Time", y = "Overall score")
 
-ggsave(figure_file("leading_method.pdf"), g, width = 6, height = 4)
+ggsave(figure_file("leading_method.pdf"), g, width = 10, height = 6)
