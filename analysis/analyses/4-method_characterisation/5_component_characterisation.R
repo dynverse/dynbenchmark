@@ -7,11 +7,7 @@ experiment("4-method_characterisation")
 
 methods <- read_rds(derived_file("methods.rds"))
 
-<<<<<<< HEAD
 method_components <- methods %>% select(method_id, components) %>%
-=======
-method_components <- methods %>% select(method_ids, components) %>%
->>>>>>> 9e301137201def4def1a1fd2c24b1386d3004001
   mutate(components = gsub("\\(.*?\\)", "", components)) %>%  # remove anything between ()
   unnest_tokens(component_id, components, "regex", pattern = "[\\{\\}\\[\\]\\|\\+\\=]", to_lower = FALSE) %>%
   mutate(component_id = trimws(component_id)) %>%
@@ -82,17 +78,10 @@ method_components_ordering_plot <- method_component_counts %>%
     theme(legend.position="top")
 method_components_ordering_plot
 
-<<<<<<< HEAD
 n_methods <- length(unique(method_components$method_id))
 category_counts <- method_components %>%
   left_join(component_categories, "component_id") %>%
   group_by(method_id, category) %>%
-=======
-n_methods <- length(unique(method_components$method_ids))
-category_counts <- method_components %>%
-  left_join(categories, "component") %>%
-  group_by(method_ids, category) %>%
->>>>>>> 9e301137201def4def1a1fd2c24b1386d3004001
   summarise() %>%
   group_by(category) %>%
   count() %>%
