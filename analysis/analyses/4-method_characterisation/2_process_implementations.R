@@ -57,11 +57,11 @@ date_cutoff <- as.Date("2017-06-01")
 date_filter <- implementations$date > date_cutoff
 implementations$non_inclusion_reasons_split[date_filter] <- map(implementations$non_inclusion_reasons_split[date_filter], c, "date") %>% map(unique)
 
-## Infer whether the structure is fixed based on other columns -------------
-structure_fix <- function(maximal_trajectory_type, n_branches, n_end_states, ...) {
+## Infer whether the topology is fixed based on other columns -------------
+topology_fix <- function(maximal_trajectory_type, n_branches, n_end_states, fixes_topology_, ...) {
   if (any(is.na(c(maximal_trajectory_type, n_branches, n_end_states)))) {
     NA
-  } else if(maximal_trajectory_type == "undirected_linear") {
+  } else if(maximal_trajectory_type == "directed_linear" | maximal_trajectory_type == "directed_cycle" | !is.na(fixes_topology_)) {
     "algorithm"
   } else if (n_branches == "required" || n_branches == "required_default" || n_end_states == "required" || n_end_states == "required_default") {
     "parameter"
@@ -69,7 +69,7 @@ structure_fix <- function(maximal_trajectory_type, n_branches, n_end_states, ...
     "free"
   }
 }
-implementations$fixes_structure <- pmap_chr(implementations, structure_fix)
+implementations$fixes_topology <- pmap_chr(implementations, topology_fix)
 
 # Saving -------------------------
 write_rds(implementations, derived_file("implementations.rds"))
