@@ -11,7 +11,7 @@ method_qc_scores <- readRDS(derived_file("method_qc_scores.rds"))
 # merge qc scores with methods tibble
 methods <- methods %>%
   select(-matches("qc_score")) %>%
-  left_join(method_qc_scores, c("name"="method_id"))
+  left_join(method_qc_scores, c("method_ids"="method_id"))
 
 methods <- methods %>%
   mutate(evaluated = wrapper == "Done" & !is.na(wrapper))
