@@ -36,6 +36,7 @@ g <- ggplot(comb, aes(date_earliest, harm_mean)) +
   geom_step(data = leading, colour = "red") +
   geom_point() +
   geom_text(aes(label = method_short_name), nudge_y = .015) +
-  labs(x = "Time", y = "Overall score")
+  labs(x = "Time", y = "Overall score") +
+  cowplot::theme_cowplot()
 
 ggsave(figure_file("leading_method.pdf"), g, width = 10, height = 6)

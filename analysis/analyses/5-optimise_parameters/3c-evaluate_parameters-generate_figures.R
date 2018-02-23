@@ -243,4 +243,4 @@ one
 #   facet_wrap(~metric, nrow = 1)
 # cowplot::plot_grid(one, two, three, ncol = 1)
 
-rm(out_gath, one, two)
+rm(out_gath, one)
