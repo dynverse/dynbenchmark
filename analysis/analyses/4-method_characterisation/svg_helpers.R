@@ -16,6 +16,7 @@ change_opacity <- function(
   trim = FALSE,
   size = "100%",
   identifier = "g",
+  attribute = "id",
   png=TRUE,
   svg=FALSE
 ) {
@@ -26,8 +27,10 @@ change_opacity <- function(
   xml <- read_xml(svg_location)
 
   xml_find_multiple_ids <- function(xml, ids) {
-    ids_txt <- paste0("@id = \'", ids, "\'", collapse=" or ")
-    xpath <- glue::glue("//svg:{identifier}[{ids_txt}]")
+    ids_txt <- paste0(glue::glue("@{attribute} = \'"), ids, "\'", collapse=" or ")
+    xpath <- glue::glue(".//svg:{identifier}[{ids_txt}]")
+
+    print(xpath)
     xml_find_all(xml, xpath)
   }
 

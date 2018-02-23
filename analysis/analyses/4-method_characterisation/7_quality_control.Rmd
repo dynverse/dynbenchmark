@@ -1,5 +1,5 @@
 ---
-title: "Method quality control"
+title: "implementation quality control"
 output:
   html_document:
     df_print: paged
@@ -15,8 +15,8 @@ library(cowplot)
 ```{r message=F}
 experiment("4-method_characterisation")
 
-method_qc <- readRDS(derived_file("method_qc.rds"))
-methods_evaluated <- readRDS(derived_file("methods_evaluated.rds"))
+implementation_qc <- readRDS(derived_file("implementation_qc.rds"))
+implementations_evaluated <- readRDS(derived_file("implementations_evaluated.rds"))
 checks <- readRDS(derived_file("checks.rds"))
 ```
 
@@ -62,27 +62,27 @@ table %>% write_rds(figure_file("qc_checks.rds"))
 
 Comparing qc and citations overtime     
 ```{r, fig.width=16, fig.height=8}
-g1 <- ggplot(methods_evaluated, aes(date, qc_score)) +
+g1 <- ggplot(implementations_evaluated, aes(date, qc_score)) +
     geom_smooth(span=2) +
     geom_point() +
-    ggrepel::geom_label_repel(aes(label = name)) +
+    ggrepel::geom_label_repel(aes(label = implementation_name)) +
     cowplot::theme_cowplot() +
     labs(x = label_long("publication_date"), y = "QC score", title = "Code quality score over time")
 g1
 
-g2 <- ggplot(methods_evaluated %>% mutate(Citations = ifelse(Citations == 0, 0.5, Citations)), aes(date, Citations)) +
+g2 <- ggplot(implementations_evaluated %>% mutate(Citations = ifelse(Citations == 0, 0.5, Citations)), aes(date, Citations)) +
     geom_smooth(span=2) +
     geom_point() +
-    ggrepel::geom_label_repel(aes(label = name)) +
+    ggrepel::geom_label_repel(aes(label = implementation_name)) +
     cowplot::theme_cowplot() +
     scale_y_log10() +
     labs(x = "Time", y = "Citations", title = "Citations over time")
 g2
 
-g3 <- ggplot(methods_evaluated %>% mutate(Citations = ifelse(Citations == 0, 0.5, Citations)), aes(Citations, qc_score)) +
+g3 <- ggplot(implementations_evaluated %>% mutate(Citations = ifelse(Citations == 0, 0.5, Citations)), aes(Citations, qc_score)) +
     geom_smooth(span=2) +
     geom_point() +
-    ggrepel::geom_label_repel(aes(label = name)) +
+    ggrepel::geom_label_repel(aes(label = implementation_name)) +
     cowplot::theme_cowplot() +
     scale_x_log10() +
     labs(x = "Citations", y = "QC score", title = "QC score over # citations")
@@ -93,26 +93,26 @@ cowplot::plot_grid(g1, g3, g2, ncol=2, nrow=2, labels = "auto") %>%
 ```
 
 
-Calculate the overall qc scores for each method
+Calculate the overall qc scores for each implementation
 ```{r}
-# set the ordering of method_ids to this ordering
-method_ordering_plot <- methods_evaluated %>%
+# set the ordering of implementation_ids to this ordering
+implementation_ordering_plot <- implementations_evaluated %>%
   arrange(-qc_score) %>% 
-  mutate(method_id = factor(name, levels=name)) %>% 
-  ggplot(aes(method_id, qc_score)) +
+  mutate(implementation_id = factor(implementation_id, levels=implementation_id)) %>% 
+  ggplot(aes(implementation_id, qc_score)) +
     geom_bar(aes(fill=qc_score), stat="identity") +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
     scale_y_continuous(expand=c(0, 0), limits=c(0, 1)) +
     viridis::scale_fill_viridis(option="A", limits=c(0, 1))
 
-method_ordering_plot
+implementation_ordering_plot
 ```
 
 
 
 ```{r, fig.width=10, fig.height=12}
-qc_checks <- method_qc %>%
-  filter(method_id == "SCORPIUS") %>%
+qc_checks <- implementation_qc %>%
+  filter(implementation_id == "scorpius") %>%
   group_by(category) %>% 
   mutate(normalised_weight = weight/sum(weight))
 
@@ -144,16 +144,16 @@ check_position <- qc_checks %>%
   )
 
 
-check_heatmap_plot <- method_qc %>%
+check_heatmap_plot <- implementation_qc %>%
   left_join(check_position, by="check_id") %>%
-  mutate(method_id = factor(method_id)) %>%
+  mutate(implementation_id = factor(implementation_id)) %>%
   mutate(answer = ifelse(is.na(answer), 0, answer)) %>%
   ggplot() +
-    geom_rect(aes(xmax=check_start, xmin=check_end, ymin=as.integer(method_id), ymax=as.integer(method_id) + 1, fill=category, alpha=answer)) +
+    geom_rect(aes(xmax=check_start, xmin=check_end, ymin=as.integer(implementation_id), ymax=as.integer(implementation_id) + 1, fill=category, alpha=answer)) +
     geom_vline(aes(xintercept=check_end), data=check_position, color="#444444", alpha=0.25) +
     geom_vline(aes(xintercept=aspect_end), data=aspect_position, color="#444444") +
     scale_x_reverse("Check", breaks = aspect_position$aspect_mid, labels = aspect_position$name, expand = c(0, 0)) +
-    scale_y_continuous("Method", breaks = seq_along(levels(method_qc$method_id))+0.5, labels = levels(method_qc$method_id), expand = c(0, 0)) +
+    scale_y_continuous("implementation", breaks = seq_along(levels(implementation_qc$implementation_id))+0.5, labels = levels(implementation_qc$implementation_id), expand = c(0, 0)) +
     scale_fill_manual(values=set_names(qc_categories$color, qc_categories$category)) +
     coord_flip() +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
@@ -169,15 +169,15 @@ empty_x <- theme(
   axis.ticks.x=element_blank()
 )
 
-method_qc_check_plot <- cowplot::plot_grid(method_ordering_plot + empty_x, check_heatmap_plot, nrow=2, align = "v", axis = "rl", rel_heights = c(0.2, 0.9))
+implementation_qc_check_plot <- cowplot::plot_grid(implementation_ordering_plot + empty_x, check_heatmap_plot, nrow=2, align = "v", axis = "rl", rel_heights = c(0.2, 0.9))
 
-method_qc_check_plot %>% saveRDS(figure_file("method_qc_check.rds"))
+implementation_qc_check_plot %>% saveRDS(figure_file("implementation_qc_check.rds"))
 ```
 
 
 ## Order checks
 
-Order by breakpoint (when ordering all methods by score)
+Order by breakpoint (when ordering all implementations by score)
 ```{r}
 breakpoint <- function(x) {
   map_dbl(0:length(x), function(i) {
@@ -185,20 +185,20 @@ breakpoint <- function(x) {
       sum(x[seq(i, length(x), length.out=length(x)-i)])
   }) %>% which.min()
 }
-check_breakpoints <- method_qc %>%
-  reshape2::acast(check_id~method_id, value.var="answer") %>%
+check_breakpoints <- implementation_qc %>%
+  reshape2::acast(check_id~implementation_id, value.var="answer") %>%
   {
     tibble(
       breakpoint=apply(., 1, breakpoint),
       check_id = as.integer(rownames(.)),
-      n_bad_methods = apply(., 1, sum)
+      n_bad_implementations = apply(., 1, sum)
     )
   } %>% 
   left_join(checks, by="check_id")
 ```
 
 ```{r fig.width=20}
-method_qc %>% 
+implementation_qc %>% 
   mutate(answer = round(answer, 2)) %>% 
   group_by(check_id) %>% 
   count(answer) %>% 
@@ -211,20 +211,20 @@ method_qc %>%
     geom_bar(aes(check_id, n, fill=answer), stat="identity") +
     coord_flip() +
     scale_y_reverse(expand=c(0, 0)) +
-    scale_x_discrete(labels=setNames(method_qc$item_weight, method_qc$check_id)) +
+    scale_x_discrete(labels=setNames(implementation_qc$item_weight, implementation_qc$check_id)) +
     scale_fill_distiller(palette="Blues", direction = 1)
 ```
 
 ```{r}
-aspect_info <- method_qc %>% 
+aspect_info <- implementation_qc %>% 
   group_by(aspect_id) %>% 
   summarise(
     name = first(name),
     category = first(category)
   )
 
-aspect_ordering_plotdata <- method_qc %>%
-  group_by(method_id, aspect_id) %>%
+aspect_ordering_plotdata <- implementation_qc %>%
+  group_by(implementation_id, aspect_id) %>%
   summarise(
     qc_score=sum(answer * item_weight * weight)/sum(item_weight * weight)
   ) %>%
@@ -276,15 +276,15 @@ category_legend <- aspect_ordering_plotdata2 %>%
     theme(legend.position="none")
 category_legend
 
-n_methods <- length(unique(method_qc$method_id))
+n_implementations <- length(unique(implementation_qc$implementation_id))
 
 aspect_ordering_plot2 <- aspect_ordering_plot2 +
     coord_flip() +
-    scale_y_continuous(expand=c(0, 0), name = "# methods", c(seq(0, n_methods, 5), n_methods)) +
+    scale_y_continuous(expand=c(0, 0), name = "# implementations", c(seq(0, n_implementations, 5), n_implementations)) +
     scale_x_discrete(labels=setNames(aspect_ordering_plotdata$name, aspect_ordering_plotdata$aspect_id), name="") +
     theme(legend.position="top")
 
-method_qc_ordering_plot <- cowplot::plot_grid(category_legend, aspect_ordering_plot2, align = "h", rel_widths = c(0.2, 0.8), axis="tb")
-method_qc_ordering_plot
-saveRDS(method_qc_ordering_plot, figure_file("method_qc_ordering.rds"))
+implementation_qc_ordering_plot <- cowplot::plot_grid(category_legend, aspect_ordering_plot2, align = "h", rel_widths = c(0.2, 0.8), axis="tb")
+implementation_qc_ordering_plot
+saveRDS(implementation_qc_ordering_plot, figure_file("implementation_qc_ordering.rds"))
 ```
