@@ -13,35 +13,44 @@ trajtype_scores <- outputs_list$outputs_summtrajtype_totals %>% filter(task_sour
 
 decision_nodes_decisions <- tribble(
   ~node_id, ~node_label, ~type,
-  "fixes_topology", "Do you know the topology of the trajectory?", "decision",
-  "fixes_topology_yes", "Yes: the topology is known", "decision",
-  "fixes_topology_some", "I know some characteristics of the topology", "decision",
-  "fixes_topology_no", "No: I want to let the algorithm decide on the topology", "decision",
+  "disconnected", "Do you expect multiple trajectories in the data?", "decision",
+  "disconnected_yes", "Yes: Multiple trajectories could be contained in the data", "decision",
+  "disconnected_directed_graph*", "≤ Disconnected directed graph", "topology",
+  "disconnected_no", "No: The data contains one trajectory", "decision",
+  "fixes_topology", "Do you expect a certain topology in the trajectory?", "decision",
+  "fixes_topology_yes", "Yes", "decision",
+  "fixes_topology_some", "Kind of: \nI know some characteristics of the topology", "decision",
   "directed_linear", NA, "topology",
   "bifurcation", NA, "topology",
   "directed_cycle", NA, "topology",
-  "other_fixed_topology", "Other topology", "topology",
+  "multifurcation*", "> Bifurcating", "topology",
   "contains_cycles", "Will the topology contain\ncycles or convergences?", "decision",
   "contains_cycles_no", "No", "decision",
   "contains_cycles_yes", "Yes/not sure", "decision",
   "at_least_bifurcations", "Do you expect the trajectory to contain at least 2 bifurcations?", "decision",
   "at_least_bifurcations_no", "Not necessarily", "decision",
   "at_least_bifurcations_yes", "Yes", "decision",
-  "rooted_tree*", "<= Rooted tree", "topology",
-  "rooted_tree", "Rooted tree", "topology",
-  "directed_graph*", "<= Directed (acyclic) graph", "topology"
+  "rooted_tree*", "≤ Rooted tree", "topology",
+  "rooted_tree", NA, "topology",
+  "directed_graph*", "≤ Directed (acyclic) graph", "topology",
+  "fixes_topology_no", "No: \nI want to let the algorithm decide on the topology", "decision"
 ) %>%
-  mutate(node_label = ifelse(is.na(node_label), label_long(node_id), node_label))
+  mutate(node_label = ifelse(is.na(node_label), label_long(node_id), node_label)) %>%
+  mutate(trajectory_type = gsub("(.*)\\*", "\\1", node_id))
 
 decision_edges_decisions <- tribble(
   ~from, ~to,
+  "disconnected", "disconnected_yes",
+  "disconnected_yes", "disconnected_directed_graph*",
+  "disconnected", "disconnected_no",
+  "disconnected_no", "fixes_topology",
   "fixes_topology", "fixes_topology_yes",
-  "fixes_topology", "fixes_topology_some",
-  "fixes_topology", "fixes_topology_no",
   "fixes_topology_yes", "directed_linear",
   "fixes_topology_yes", "bifurcation",
   "fixes_topology_yes", "directed_cycle",
-  "fixes_topology_yes", "other_fixed_topology",
+  "fixes_topology_yes", "multifurcation*",
+  "fixes_topology", "fixes_topology_some",
+  "fixes_topology", "fixes_topology_no",
   "fixes_topology_some", "contains_cycles",
   "contains_cycles", "contains_cycles_no",
   "contains_cycles_no", "at_least_bifurcations",
@@ -52,12 +61,12 @@ decision_edges_decisions <- tribble(
   "contains_cycles", "contains_cycles_yes",
   "contains_cycles_yes", "directed_graph*",
   "fixes_topology_no", "directed_graph*"
-)
+) %>% mutate(type = "decision")
 
-if(!all(decision_edges_decisions %>% unlist() %>% {. %in% decision_nodes_decisions$node_id})) stop("Not all nodes are present in dataframe")
+if(!all(decision_edges_decisions %>% select(from, to) %>% unlist() %>% {. %in% decision_nodes_decisions$node_id})) stop("Not all nodes are present in dataframe")
 
 
-decision_tree <- tbl_graph(decision_nodes_decisions, decision_edges_decisions)
+decision_tree <- tbl_graph(decision_nodes_decisions, decision_edges_decisions %>% mutate(from=match(from, decision_nodes_decisions$node_id), to=match(to, decision_nodes_decisions$node_id)))
 layout <- create_layout(decision_tree, "tree")
 layout %>% ggraph() +
   geom_edge_link() +
@@ -66,28 +75,10 @@ layout %>% ggraph() +
 
 ##
 
-
-decision_methods <- tribble(
-  ~origin, ~method_id, ~score,
-  "directed_linear", "scorpius", 1,
-  "directed_linear", "embeddr", 0.9,
-  "directed_linear", "waterfall", 0.8,
-  "bifurcation", "slngsht", 1,
-  "bifurcation", "tscan", 0.9,
-  "bifurcation", "wishbone", 0.8,
-  "bifurcation", "dpt", 0.7,
-  "directed_cycle", "recat", 1,
-  "other_fixed_topology", "?", 1,
-  "rooted_tree", "mnclddr", 1,
-  "rooted_tree", "slngsht", 0.9,
-  "non_cycle_topology", "slngsht", 1,
-  "directed_graph", "?", 1,
-)
-
 # get top methods per decision leaf
 
 # first do trajectory types
-trajectory_type_ids <- c("directed_linear", "bifurcation", "directed_cycle", "rooted_tree", "directed_graph*", "rooted_tree*")
+trajectory_type_ids <- c("directed_linear", "bifurcation", "directed_cycle", "rooted_tree", "directed_graph*", "rooted_tree*", "disconnected_directed_graph*")
 decision_methods <- map(trajectory_type_ids, function(node_id) {
   trajectory_type <- node_id %>% gsub("(.*)\\*", "\\1", .)
   if (str_sub(node_id, -1) == "*") {
@@ -107,28 +98,46 @@ decision_methods <- map(trajectory_type_ids, function(node_id) {
     mutate(origin = node_id) %>%
     arrange(-harm_mean)
 
-  if(nrow(top_methods) == 0 | max(top_methods$harm_mean) < 0.2) {top_methods <- top_methods %>% add_row(method_id = "?", harm_mean = 0.2, origin=node_id)}
+  # if no top methods or if top method has low score: add ?
+  if(nrow(top_methods) == 0 | max(top_methods$harm_mean) < 0.2) {
+    top_methods <- top_methods %>% add_row(method_id = "?", harm_mean = 0.2, origin=node_id)
+  }
+
+  top_methods <- top_methods %>%
+    arrange(-harm_mean) %>%
+    mutate(method_i = row_number() - 1)
 
   top_methods
 
 }) %>% bind_rows() %>%
   rename(score=harm_mean)
 
-decision_methods <- decision_methods %>% add_row(method_id = "?", score = 1, origin="other_fixed_topology")
+# add other fixed topology
+decision_methods <- decision_methods %>% add_row(method_id = "?", score = 1, origin="multifurcation*", method_i = 0)
 
+# now sort the origin, to keep the same ordering of vertices (will be used later to layout the x in the same order)
+decision_methods$origin <- factor(decision_methods$origin, levels=intersect(decision_nodes$node_id, decision_methods$origin))
+decision_methods <- decision_methods %>% arrange(origin) %>% mutate(origin = as.character(origin))
 
-
-
-
+# create unique node_id
 decision_methods$node_id <- paste0(decision_methods$origin, "-", decision_methods$method_id)
 
+# create edges between methods
 decision_edges_methods <- decision_methods %>%
   group_by(origin) %>%
   arrange(-score) %>%
   mutate(
     from = c(origin[[1]], node_id[-length(method_id)]),
-    to = node_id
+    to = node_id,
+    type = c("to_method", rep("method", n()-1))
   )
+
+
+
+##  ............................................................................
+##  Create tree                                                             ####
+
+
 
 
 
@@ -170,9 +179,9 @@ decision_nodes <- decision_nodes %>%
         method = "black",
         decision = "white",
         topology = ifelse(
-          node_id %in% trajectory_types$id,
-          trajectory_types$color[match(node_id, trajectory_types$id)],
-          "grey"
+          trajectory_type %in% trajectory_types$id,
+          trajectory_types$color[match(trajectory_type, trajectory_types$id)],
+          "#472000"
         )
       )
     )
@@ -186,13 +195,39 @@ if(any(is.na(decision_edges %>% select(from, to)))) stop("Not every edge in node
 type_fills <- c(method = "#333333", decision = "white")
 type_colors <- c(method = "white", decision = "black", topology="white")
 
+# create tree
 decision_tree <- tbl_graph(decision_nodes, decision_edges)
+
+# create layout
 layout <- create_layout(decision_tree, "tree")
+
+leaves <- V(decision_tree)[degree(decision_tree, mode="out") == 0] %>% as.integer()
+leaves2 <- map(as.integer(V(decision_tree)[degree(decision_tree, mode="in") == 2]), function(v) ego(decision_tree, 1, v, mode="in")[[1]][-c(1,2)]) %>% unlist()
+leaves <- unique(c(leaves, leaves2))
+# leaves <- leaves[order(layout$x[leaves])]
+leave_cols <- set_names(seq_along(leaves), leaves)
+
+layout$x <- layout$ggraph.index %>% map_dbl(function(i) {
+  leaves <- intersection(ego(decision_tree, 999999, i, "out")[[1]], leaves)
+  mean(leave_cols[as.character(leaves)])
+})
+
+layout$level[layout$type == "method"] <- -layout$method_i[layout$type == "method"] * 0.5
+layout$level[layout$type == "topology"] <- 1
+layout$level[layout$type == "decision"] <- layout$y[layout$type == "decision"] - min(layout$y[layout$type == "decision"]) + 2
+#
+# # change layout to level
+layout$y <- ifelse(is.na(layout$level), layout$y, layout$level)
+
 layout %>% ggraph() +
-  geom_edge_link() +
+  geom_edge_diagonal(aes(alpha=type), data = get_edges("short")(layout) %>% filter(type != "to_method")) +
+  geom_edge_link(aes(xend=x + (xend-x)/1.2, yend = y + (yend-y)/1.2, alpha=type), arrow=arrow(type="closed", length=unit(0.1, "inches")), data = get_edges("short")(layout) %>% filter(type == "to_method")) +
   geom_node_label(aes(label=label_wrap(node_label, 25), fill=fill, color=type, alpha=alpha)) +
   scale_color_manual(values=type_colors) +
   scale_fill_identity() +
   scale_alpha_identity() +
-  theme_graph()
+  scale_edge_alpha_manual(values=c(method=0, decision=1, to_method=1)) +
+  theme_graph() +
+  scale_x_continuous(expand=c(0.2,0.2)) +
+  theme(legend.position="none", plot.margin=margin(0, 0, 0, 0))
 
