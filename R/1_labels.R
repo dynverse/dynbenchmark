@@ -24,8 +24,12 @@ label_short <- function(x, width=10) {
   tibble(id = as.character(x)) %>%
     left_join(labels, "id") %>%
     mutate(short=ifelse(is.na(short), label_capitalise(id), short)) %>%
-    mutate(short=map_chr(strwrap(short, width, simplify=FALSE), paste0, collapse="\n")) %>%
+    mutate(short=label_wrap(short, width=width)) %>%
     pull(short)
+}
+
+label_wrap <- function(x, width=10) {
+  map_chr(strwrap(x, width, simplify=FALSE), paste0, collapse="\n")
 }
 
 #' Long labelling function

@@ -4,15 +4,17 @@ library(cowplot)
 
 experiment("4-method_characterisation")
 
+implementation_id_to_name <- setNames(implementations$implementation_name, implementations$implementation_id)
+
 
 #   ____________________________________________________________________________
-#   Create method aspects figure                                            ####
-methods_evaluated <- read_rds(derived_file("methods_evaluated.rds"))
-methods <- read_rds(derived_file("methods.rds"))
-method_qc <- read_rds(derived_file("method_qc.rds"))
+#   Create implementation aspects figure                                            ####
+implementations_evaluated <- read_rds(derived_file("implementations_evaluated.rds"))
+implementations <- read_rds(derived_file("implementations.rds"))
+implementation_qc <- read_rds(derived_file("implementation_qc.rds"))
 
-method_order <- methods_evaluated %>% arrange(qc_score) %>% pull(name)
-horizontal_lines <- geom_hline(aes(yintercept = y+0.5), alpha=0.2, data=tibble(y=seq_along(method_order)))
+implementation_order <- implementations_evaluated %>% arrange(qc_score) %>% pull(implementation_id)
+horizontal_lines <- geom_hline(aes(yintercept = y+0.5), alpha=0.2, data=tibble(y=seq_along(implementation_order)))
 
 rotated_axis_text_x <- element_text(angle=45, hjust=1)
 
@@ -34,12 +36,12 @@ base_scale_x <- scale_x_discrete(drop=FALSE, expand=c(0, 0), labels=label_long, 
 
 ##  ............................................................................
 ##  QC                                                                      ####
-method_qc_scores <- read_rds(derived_file("method_qc_scores.rds"))
-method_qc_category_scores <- read_rds(derived_file("method_qc_category_scores.rds"))
-method_qc_application_scores <- read_rds(derived_file("method_qc_application_scores.rds"))
-method_qc_category <- method_qc_category_scores %>%
-  mutate(name = factor(method_id, levels=method_order)) %>%
-  ggplot(aes(category, name)) +
+implementation_qc_scores <- read_rds(derived_file("implementation_qc_scores.rds"))
+implementation_qc_category_scores <- read_rds(derived_file("implementation_qc_category_scores.rds"))
+implementation_qc_application_scores <- read_rds(derived_file("implementation_qc_application_scores.rds"))
+implementation_qc_category <- implementation_qc_category_scores %>%
+  mutate(implementation_id = factor(implementation_id, levels=implementation_order)) %>%
+  ggplot(aes(category, implementation_id)) +
   geom_tile(aes(fill=qc_score)) +
   viridis::scale_fill_viridis(option="A", limits=c(0, 1)) +
   theme(axis.text.x=rotated_axis_text_x) +
@@ -49,12 +51,12 @@ method_qc_category <- method_qc_category_scores %>%
   base_scale_y + base_scale_x +
   ggtitle("Implementation\nquality control") +
   theme(legend.position = "none")
-method_qc_category
-method_qc_category_width <- nrow(qc_categories)
+implementation_qc_category
+implementation_qc_category_width <- nrow(qc_categories)
 
-method_qc_application <- method_qc_application_scores %>%
-  mutate(name = factor(method_id, levels=method_order)) %>%
-  ggplot(aes(application, name)) +
+implementation_qc_application <- implementation_qc_application_scores %>%
+  mutate(implementation_id = factor(implementation_id, levels=implementation_order)) %>%
+  ggplot(aes(application, implementation_id)) +
   geom_tile(aes(fill=score)) +
   viridis::scale_fill_viridis(option="A", limits=c(0, 1)) +
   theme(axis.text.x=rotated_axis_text_x) +
@@ -63,12 +65,12 @@ method_qc_application <- method_qc_application_scores %>%
   horizontal_lines +
   base_scale_y + base_scale_x +
   theme(legend.position = "none")
-method_qc_application
-method_qc_application_width <- nrow(qc_applications)
+implementation_qc_application
+implementation_qc_application_width <- nrow(qc_applications)
 
-method_qc_overall <- method_qc_scores %>%
-  mutate(name = factor(method_id, levels=method_order)) %>%
-  ggplot(aes("qc_score", name)) +
+implementation_qc_overall <- implementation_qc_scores %>%
+  mutate(implementation_id = factor(implementation_id, levels=implementation_order)) %>%
+  ggplot(aes("qc_score", implementation_id)) +
   geom_tile(aes(fill = qc_score)) +
   geom_text(aes(label = round(qc_score*10, 1), color=ifelse(qc_score > 0.76, "black", "white"))) +
   viridis::scale_fill_viridis(option="A", limits=c(0, 1)) +
@@ -78,8 +80,8 @@ method_qc_overall <- method_qc_scores %>%
   horizontal_lines +
   base_scale_y + base_scale_x +
   theme(legend.position = "none")
-method_qc_overall
-method_qc_overall_width <- 1
+implementation_qc_overall
+implementation_qc_overall_width <- 1
 
 
 ##  ............................................................................
@@ -87,14 +89,14 @@ method_qc_overall_width <- 1
 priors <- c("start_cell_ids", "grouping_assignment", "time", "timecourse",	"end_cell_ids",	"n_end_states","n_branches", "marker_gene_ids")
 prior_usage_colors <- c("?" = "#AAAAAA", "no" = "#EEEEEE", "required" = "#FF4136", "can_use" = "#0074D9", "can_root" = "#39CCCC")
 prior_usage_colors[["required_default"]] <- prior_usage_colors[["required"]]
-prior_information <- methods_evaluated %>%
+prior_information <- implementations_evaluated %>%
   gather(prior_id, prior_usage, !!priors, factor_key=TRUE) %>%
-  select(prior_id, prior_usage, name) %>%
-  mutate(name = factor(name, levels=method_order)) %>%
+  select(prior_id, prior_usage, implementation_id) %>%
+  mutate(implementation_id = factor(implementation_id, levels=implementation_order)) %>%
   drop_na() %>%
   ggplot() +
-  geom_tile(aes(prior_id, name, fill = prior_usage)) +
-  geom_text(aes(prior_id, name, label=ifelse(prior_usage == "No", "-", prior_usage))) +
+  geom_tile(aes(prior_id, implementation_id, fill = prior_usage)) +
+  geom_text(aes(prior_id, implementation_id, label=ifelse(prior_usage == "No", "-", prior_usage))) +
   scale_fill_manual(values=prior_usage_colors) +
   base_theme +
   empty_left_theme +
@@ -107,21 +109,21 @@ prior_information
 
 prior_usages <- c("can_root", "can_use", "required")
 prior_usages_text <- c(CanRoot = "", CanUse = "", Required = "!", No = "")
-prior_usage <- methods_evaluated %>%
+prior_usage <- implementations_evaluated %>%
   gather(prior_id, prior_usage, !!priors, factor_key=TRUE) %>%
-  select(prior_id, prior_usage, name) %>%
-  group_by(name, prior_usage) %>%
+  select(prior_id, prior_usage, implementation_id) %>%
+  group_by(implementation_id, prior_usage) %>%
   summarise() %>%
   ungroup() %>%
   mutate(
     prior_usage = factor(prior_usage, levels=prior_usages),
-    name = factor(name, levels=method_order)
+    implementation_id = factor(implementation_id, levels=implementation_order)
   ) %>%
   drop_na() %>%
   mutate(really = TRUE) %>%
-  complete(name, prior_usage) %>%
+  complete(implementation_id, prior_usage) %>%
   mutate(really = ifelse(is.na(really), "no", "yes")) %>%
-  ggplot(aes(prior_usage, name)) +
+  ggplot(aes(prior_usage, implementation_id)) +
   geom_tile(aes(fill = prior_usage, alpha=really)) +
   geom_text(aes(label = prior_usages_text[prior_usage]), color="white", fontface="bold", size=8) +
   scale_fill_manual(values=prior_usage_colors) +
@@ -140,13 +142,13 @@ prior_usage_width <- length(prior_usages)/2
 ##  Trajectory types                                                        ####
 undirected_trajectory_type_order <- trajectory_types %>% filter(directedness == "directed") %>% pull(id) %>% keep(~.!="unknown")
 
-trajectory_components_plot <- methods_evaluated %>%
+trajectory_components_plot <- implementations_evaluated %>%
   gather(trajectory_type, can, !!undirected_trajectory_type_order, factor_key=TRUE) %>%
-  select(trajectory_type, can, name) %>%
-  mutate(name = factor(name, levels=method_order)) %>%
+  select(trajectory_type, can, implementation_id) %>%
+  mutate(implementation_id = factor(implementation_id, levels=implementation_order)) %>%
   drop_na() %>%
   ggplot() +
-  geom_tile(aes(trajectory_type, name, fill = ifelse(can, trajectory_type, ""))) +
+  geom_tile(aes(trajectory_type, implementation_id, fill = ifelse(can, trajectory_type, ""))) +
   scale_fill_manual(values = set_names(trajectory_types$color, trajectory_types$id), guide=FALSE) +
   base_theme +
   empty_left_theme +
@@ -168,49 +170,50 @@ lighten <- function(color, factor=1.4){
   })
 }
 
-maximal_trajectory_components_plot <- methods_evaluated %>%
+maximal_trajectory_components_plot <- implementations_evaluated %>%
   rename(trajectory_type = maximal_trajectory_type) %>%
-  select(name, trajectory_type) %>%
+  select(implementation_id, trajectory_type) %>%
   ungroup() %>%
-  mutate(name = factor(name, levels=method_order)) %>%
-  ggplot(aes("trajectory_type", name)) +
+  mutate(implementation_id = factor(implementation_id, levels=implementation_order)) %>%
+  ggplot(aes("trajectory_type", implementation_id)) +
   geom_tile(fill="white") +
   geom_text(aes(label=trajectory_type), hjust=0, vjust=0) +
   base_theme +
   base_scale_y + base_scale_x +
+  scale_y_discrete(label=function(x) implementation_id_to_name[x]) +
   horizontal_lines +
   theme(legend.position="none") +
   ggtitle("Trajectory\ntype")
 maximal_trajectory_components_plot
 maximal_trajectory_components_width <- 2
 
-plotlist <- list(maximal_trajectory_components_plot, method_qc_overall, method_qc_category, method_qc_application, prior_usage)
-widths <- c(maximal_trajectory_components_width+2, method_qc_overall_width, method_qc_category_width/2, method_qc_application_width/2, prior_usage_width+2)
+plotlist <- list(maximal_trajectory_components_plot, implementation_qc_overall, implementation_qc_category, implementation_qc_application, prior_usage)
+widths <- c(maximal_trajectory_components_width+3, implementation_qc_overall_width, implementation_qc_category_width/2, implementation_qc_application_width/2, prior_usage_width+2)
 
-method_characteristics <- plot_grid(plotlist=plotlist, nrow=1, align="h", rel_widths = widths, axis="bt", labels="auto")
-method_characteristics
+implementation_characterisation <- plot_grid(plotlist=plotlist, nrow=1, align="h", rel_widths = widths, axis="bt", labels="auto")
+implementation_characterisation
 
-method_characteristics$width <- sum(widths)/2
-method_characteristics$height <- length(method_order)/2
+implementation_characterisation$width <- sum(widths)/2
+implementation_characterisation$height <- length(implementation_order)/2
 
-saveRDS(method_characteristics, figure_file("method_characteristics.rds"))
+saveRDS(implementation_characterisation, figure_file("implementation_characterisation.rds"))
 
 
 ##  ............................................................................
 ##  Combining the figure                                                    ####
 
-method_characteristics <- read_rds(figure_file("method_characteristics.rds"))
-method_qc_ordering_plot <- read_rds(figure_file("method_qc_ordering.rds"))
+implementation_characterisation <- read_rds(figure_file("implementation_characterisation.rds"))
+implementation_qc_ordering_plot <- read_rds(figure_file("implementation_qc_ordering.rds"))
 
 figure <- plot_grid(
-  method_characteristics,
-  method_qc_ordering_plot,
+  implementation_characterisation,
+  implementation_qc_ordering_plot,
   ncol=2,
   labels=c("", "e"),
   rel_widths = c(0.4, 0.6)
 )
 figure
-save_plot(figure_file("methods_characterisation.pdf"), figure, base_width = 17, base_height= 12)
+save_plot(figure_file("implementations_characterisation.pdf"), figure, base_width = 17, base_height= 12)
 
 
 
@@ -221,12 +224,12 @@ save_plot(figure_file("methods_characterisation.pdf"), figure, base_width = 17, 
 ### Replacing trajectory types                                              ####
 library(xml2)
 
-command <- glue::glue("inkscape {figure_file('methods_characterisation.pdf')} --export-plain-svg={figure_file('methods_characterisation.svg')}")
+command <- glue::glue("inkscape {figure_file('implementations_characterisation.pdf')} --export-plain-svg={figure_file('implementations_characterisation.svg')}")
 system(command)
 
-file.remove(figure_file('methods_characterisation.pdf'))
+file.remove(figure_file('implementations_characterisation.pdf'))
 
-svg_location <- figure_file('methods_characterisation.svg')
+svg_location <- figure_file('implementations_characterisation.svg')
 xml <- read_xml(svg_location)
 
 aspect <- read_xml("analysis/figures/trajectory_types/mini/complex_fork.svg") %>% xml_root() %>% xml_attr("viewBox") %>% str_split(" ") %>% unlist() %>% tail(2) %>% as.numeric() %>% {.[[1]]/.[[2]]}
@@ -236,7 +239,7 @@ h <- w / aspect
 
 trajectory_type_boxes <- readRDS(figure_file("trajectory_type_boxes.rds", "trajectory_types"))
 
-map(unique(methods_evaluated$maximal_trajectory_type), function(trajectory_type) {
+map(unique(implementations_evaluated$maximal_trajectory_type), function(trajectory_type) {
   to_replace <- xml_find_all(xml, glue::glue("//svg:tspan[text()='{trajectory_type}']")) %>% xml_parent()
   transforms <- to_replace %>% xml_attr("transform")
   images <- map(transforms, function(transform) {
@@ -253,5 +256,5 @@ map(unique(methods_evaluated$maximal_trajectory_type), function(trajectory_type)
 
 xml_root(xml) %>% xml_set_attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
 
-write(as.character(xml), file=figure_file('method_characteristics.svg')); xml <- NULL
+write(as.character(xml), file=figure_file('implementations_characterisation.svg')); xml <- NULL
 
