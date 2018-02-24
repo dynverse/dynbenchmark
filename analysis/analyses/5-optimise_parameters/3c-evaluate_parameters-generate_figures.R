@@ -75,13 +75,14 @@ dev.off()
 
 rm(overall_comp)
 
+
+############### COMPARISON PER TRAJECTORY TYPE ###############
 lvls <- rev(levels(outputs_summtrajtype_totalsx2$method_name_f))
 cols <- RColorBrewer::brewer.pal(8, "Dark2")
 cols <- RColorBrewer::brewer.pal(4, "Blues")[2:4]
 cols <- viridis::viridis(8)[-1]
 method_cols <- rep(cols, ceiling(length(lvls) / length(cols)))[seq_along(lvls)]
 
-############### COMPARISON PER TRAJECTORY TYPE ###############
 pdf(figure_file("2_trajtype_comparison.pdf"), 20, 12)
 ggplot(outputs_summtrajtype_totalsx2) +
   geom_point(aes(method_name_f, harm_mean, colour = method_name_f)) +
