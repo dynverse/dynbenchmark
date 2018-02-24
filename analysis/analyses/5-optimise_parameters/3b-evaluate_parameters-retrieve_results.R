@@ -170,18 +170,18 @@ to_save <- to_save[c(str_subset(names(to_save), "^outputs_"), "trajtypes")]
 write_rds(to_save, derived_file("outputs_postprocessed.rds"))
 
 # # Upload ---------------------
-# PRISM:::rsync_remote(
-#   remote_dest = "prism",
-#   path_dest = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
-#   remote_src = "",
-#   path_src = derived_file("config.rds")
-# )
-# PRISM:::rsync_remote(
-#   remote_dest = "prism",
-#   path_dest = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
-#   remote_src = "",
-#   path_src = derived_file("outputs_postprocessed.rds")
-# )
+PRISM:::rsync_remote(
+  remote_dest = "prism",
+  path_dest = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
+  remote_src = "",
+  path_src = derived_file("config.rds")
+)
+PRISM:::rsync_remote(
+  remote_dest = "prism",
+  path_dest = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
+  remote_src = "",
+  path_src = derived_file("outputs_postprocessed.rds")
+)
 # method_names <- list.dirs(derived_file("suite"), recursive = FALSE, full.names = FALSE)
 # for (method_name in method_names) {
 #   cat("Syncing method output for ", method_name, "\n", sep = "")
