@@ -1,5 +1,6 @@
 method_name	error_message	n	example
 pseudogp	Time limit exceeded	569	real/aging-hsc-old_kowalczyk
+ouija	Time limit exceeded	406	real/aging-hsc-old_kowalczyk
 Mpath	Mpath only detected one landmark	212	real/cell-cycle_leng
 SCIMITAR	Time limit exceeded	187	real/developing-dendritic-cells_schlitzer
 SCIMITAR	"ges/scimitar/morphing_mixture.py"", line 396, in morphing_gaussian_from_embedding
@@ -19,6 +20,7 @@ ValueError: zero-size array to reduction operation maximum which has no identity
 monocle with DDRTree	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	48	synthetic/bifurcating_10
 monocle with ICA	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	48	synthetic/bifurcating_10
 StemID	missing value where TRUE/FALSE needed	42	real/aging-hsc-old_kowalczyk
+cellTree with gibbs	Time limit exceeded	32	real/cell-cycle_buettner
 embeddr	need at least four unique 'x' values	28	toy/consecutive_bifurcating_1
 SLICE	replacement has 1 row, data has 0	27	real/cell-cycle_buettner
 SCIMITAR	"hon/2.7.14/lib/python2.7/site-packages/sklearn/manifold/locally_linear.py"", line 645, in _fit_transform
@@ -56,6 +58,7 @@ Sum of milestone percentages per cell_id should be exactly one"	9	real/macrophag
 embeddr	smoothing parameter value too small	8	real/olfactory-projection-neurons-DA1_horns
 monocle with DDRTree	initial centers are not distinct	8	synthetic/consecutive_bifurcating_10
 monocle with ICA	vector size specified is too large	8	synthetic/consecutive_bifurcating_10
+ouija	a dimension is zero	8	real/macrophage-salmonella_saliba
 SCIMITAR	"ackages/scimitar/morphing_mixture.py"", line 396, in morphing_gaussian_from_embedding
     pseudotimes, cov_estimator=cov_estimator, **kwargs)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 309, in morphing_mixture_from_pseudotime
@@ -71,6 +74,7 @@ SCIMITAR	"xpression.as_matrix().T, fit_type='spline', degree=p[""degree""], step
 MemoryError"	8	real/cell-cycle_buettner
 SLICE	some weights should be positive	7	synthetic/linear_long_11
 StemID	Time limit exceeded	7	real/dentate-gyrus-neurogenesis_hochgerner
+ouija	cannot allocate vector of size 1 Kb	5	real/human-embryos_petropoulos
 ouijaflow	"File ""/scratch/irc/shared/dynverse/R/lib64/R/library/ouijaflow/venv/lib/python3.5/site-packages/edward/inferences/klqp.py"", line 663, in build_reparam_loss_and_gradients
     inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
   File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/tensorflow/python/ops/distributions/distribution.py"", line 692, in log_prob
@@ -167,6 +171,7 @@ Lengths differ: 643 is not 644"	3	synthetic/consecutive_bifurcating_10
 cellTree with vem	"sort(unique(c(cell_graph$from, cell_graph$to))) not equal to sort(names(to_keep)).
 Lengths differ: 674 is not 680"	3	synthetic/converging_10
 monocle with ICA	Memory limit exceeded	3	synthetic/linear_long_10
+ouija	could not allocate memory (0 Mb) in C function 'R_AllocStringBuffer'	3	real/human-embryos_petropoulos
 ouijaflow	"build_loss_and_gradients
     return build_reparam_loss_and_gradients(self, var_list)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/ouijaflow/venv/lib/python3.5/site-packages/edward/inferences/klqp.py"", line 663, in build_reparam_loss_and_gradients

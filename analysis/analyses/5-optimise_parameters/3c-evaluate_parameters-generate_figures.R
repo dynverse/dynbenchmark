@@ -41,17 +41,23 @@ prior_df <- outputs_ind %>% select(method_name, prior_str) %>% distinct()
 
 
 ############### OVERALL COMPARISON ###############
+metr_lev <- c(
+  "harm_mean", "rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean",
+  "num_setseed_calls_mean", "num_files_created_mean", "time_method_mean", "pct_errored_mean",
+  "pct_time_exceeded_mean", "pct_memory_exceeded_mean"
+)
+
 overall_comp <-
   outputs_summtrajtype_totalsx2 %>%
   filter(task_source == chosen_task_source, trajectory_type_f == "overall") %>%
-  select(method_name, method_short_name, method_name_f, paramset_id, harm_mean, num_setseed_calls_mean, pct_errored_mean, pct_time_exceeded_mean, pct_memory_exceeded_mean, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, time_method_mean) %>%
+  select(method_name, method_short_name, method_name_f, paramset_id, one_of(metr_lev)) %>%
   gather(metric, score, -method_name:-paramset_id) %>%
-  mutate(metric_f = factor(metric, levels = c("harm_mean", "time_method_mean", "num_setseed_calls_mean", "rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean", "pct_errored_mean", "pct_time_exceeded_mean", "pct_memory_exceeded_mean")))
+  mutate(metric_f = factor(metric, levels = metr_lev))
 
-pdf(figure_file("1_overall_comparison.pdf"), 12, 12)
+pdf(figure_file("1_overall_comparison.pdf"), 16, 12)
 ggplot(overall_comp) +
   geom_bar(aes(method_name_f, score, fill = metric_f), stat = "identity") +
-  facet_wrap(~metric_f, scales = "free", nrow = 3, labeller = label_facet()) +
+  facet_wrap(~metric_f, scales = "free", ncol = 4, labeller = label_facet()) +
   coord_flip() +
   theme_bw() +
   labs(x = NULL, y = NULL, fill = "Metric") +
@@ -59,7 +65,7 @@ ggplot(overall_comp) +
 
 ggplot(overall_comp %>% left_join(prior_df, by = "method_name")) +
   geom_bar(aes(method_name_f, score, fill = prior_str), stat = "identity") +
-  facet_wrap(~metric_f, scales = "free", nrow = 3, labeller = label_facet()) +
+  facet_wrap(~metric_f, scales = "free", ncol = 4, labeller = label_facet()) +
   coord_flip() +
   theme_bw() +
   scale_fill_brewer(palette = "Dark2") +
@@ -69,22 +75,31 @@ dev.off()
 
 rm(overall_comp)
 
+lvls <- rev(levels(outputs_summtrajtype_totalsx2$method_name_f))
+cols <- RColorBrewer::brewer.pal(8, "Dark2")
+cols <- RColorBrewer::brewer.pal(4, "Blues")[2:4]
+cols <- viridis::viridis(8)[-1]
+method_cols <- rep(cols, ceiling(length(lvls) / length(cols)))[seq_along(lvls)]
 
 ############### COMPARISON PER TRAJECTORY TYPE ###############
 pdf(figure_file("2_trajtype_comparison.pdf"), 20, 12)
 ggplot(outputs_summtrajtype_totalsx2) +
-  geom_point(aes(method_name_f, harm_mean)) +
+  geom_point(aes(method_name_f, harm_mean, colour = method_name_f)) +
   coord_flip() +
   theme_bw() +
+  theme(legend.position = "none") +
+  scale_colour_manual(values = method_cols) +
   facet_grid(task_source~trajectory_type_f) +
   labs(
     x = NULL
   )
 
 ggplot(outputs_summtrajtype_totalsx2) +
-  geom_point(aes(method_name_f, rank_correlation_mean)) +
+  geom_point(aes(method_name_f, rank_correlation_mean, colour = method_name_f)) +
   coord_flip() +
   theme_bw() +
+  theme(legend.position = "none") +
+  scale_colour_manual(values = method_cols) +
   facet_grid(task_source~trajectory_type_f) +
   labs(
     x = NULL
@@ -92,31 +107,27 @@ ggplot(outputs_summtrajtype_totalsx2) +
 
 
 ggplot(outputs_summtrajtype_totalsx2) +
-  geom_point(aes(method_name_f, rank_edge_flip_mean)) +
+  geom_point(aes(method_name_f, rank_edge_flip_mean, colour = method_name_f)) +
   coord_flip() +
   theme_bw() +
+  theme(legend.position = "none") +
+  scale_colour_manual(values = method_cols) +
   facet_grid(task_source~trajectory_type_f) +
   labs(
     x = NULL
   )
 
 ggplot(outputs_summtrajtype_totalsx2) +
-  geom_point(aes(method_name_f, rank_rf_mse_mean)) +
+  geom_point(aes(method_name_f, rank_rf_mse_mean, colour = method_name_f)) +
   coord_flip() +
   theme_bw() +
+  theme(legend.position = "none") +
+  scale_colour_manual(values = method_cols) +
   facet_grid(task_source~trajectory_type_f) +
   labs(
     x = NULL
   )
 
-ggplot(outputs_summtrajtype_totalsx2) +
-  geom_point(aes(method_name_f, pct_errored_mean)) +
-  coord_flip() +
-  theme_bw() +
-  facet_grid(task_source~trajectory_type_f) +
-  labs(
-    x = NULL
-  )
 
 dev.off()
 
@@ -124,8 +135,10 @@ dev.off()
 
 
 ############### COMPARISON OF EXECUTION TIMES ###############
-step_levels <- c("sessionsetup", "preprocessing", "method", "postprocessing", "wrapping", "sessioncleanup", "geodesic", "correlation",
-                 "coranking", "mantel", "rf", "edge_flip")
+step_levels <- c(
+  "sessionsetup", "preprocessing", "method", "postprocessing", "wrapping", "sessioncleanup",
+  "cellwaypoints", "waypointedgeodesic", "correlation", "mantel", "rf", "edge_flip"
+)
 
 time_ind <-
   outputs_ind %>%
@@ -174,8 +187,8 @@ g <- time_ind %>%
   scale_fill_brewer(palette = "Set3") +
   cowplot::theme_cowplot() +
   coord_flip() +
-  labs(x = NULL, fill = "Time step")
-ggsave(figure_file("3_timeperstep_pertrajtype.pdf"), g, width = 20, height = 8)
+  labs(x = NULL, y = NULL, fill = "Time step")
+ggsave(figure_file("3_timeperstep_pertrajtype.pdf"), g, width = 20, height = 10)
 
 rm(g, time_ind, timeind_task_ord, timeind_meth_ord)
 
@@ -196,22 +209,7 @@ one <-
   theme_bw() +
   scale_colour_brewer(palette = "Dark2") +
   facet_wrap(~metric, nrow = 1)
-two <-
-  ggplot(out_gath) +
-  geom_point(aes(real, toy, colour = trajectory_type)) +
-  coord_equal() +
-  theme_bw() +
-  scale_colour_brewer(palette = "Dark2") +
-  facet_wrap(~metric, nrow = 1)
-three <-
-  ggplot(out_gath) +
-  geom_point(aes(synthetic, toy, colour = trajectory_type)) +
-  coord_equal() +
-  theme_bw() +
-  scale_colour_brewer(palette = "Dark2") +
-  facet_wrap(~metric, nrow = 1)
-cowplot::plot_grid(one, two, three, ncol = 1)
-
+one
 
 
 out_gath <- outputs_summmethod %>%
@@ -227,20 +225,5 @@ one <-
   scale_colour_brewer(palette = "Dark2") +
   facet_wrap(~metric, nrow = 1)
 one
-# two <-
-#   ggplot(out_gath) +
-#   geom_point(aes(real, toy)) +
-#   coord_equal() +
-#   theme_bw() +
-#   scale_colour_brewer(palette = "Dark2") +
-#   facet_wrap(~metric, nrow = 1)
-# three <-
-#   ggplot(out_gath) +
-#   geom_point(aes(synthetic, toy)) +
-#   coord_equal() +
-#   theme_bw() +
-#   scale_colour_brewer(palette = "Dark2") +
-#   facet_wrap(~metric, nrow = 1)
-# cowplot::plot_grid(one, two, three, ncol = 1)
 
 rm(out_gath, one)
