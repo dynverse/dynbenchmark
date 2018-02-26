@@ -6,6 +6,8 @@ experiment("6-developer_guidelines")
 outputs_list <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_parameters/3-evaluate_parameters"))
 
 
+
+
 #   ____________________________________________________________________________
 #   Component importance                                                    ####
 method_components <- read_rds(derived_file("method_components.rds", experiment_id = "4-method_characterisation"))
@@ -125,3 +127,4 @@ method_components_scores_tests <- method_components_scores_data %>%
 method_components_scores_plot <- cowplot::plot_grid(method_components_scores_tests, method_components_scores_dots, rel_widths = c(0.2, 0.8),  ncol=2, align="hv", axis="bt")
 method_components_scores_plot
 method_components_scores_plot %>% write_rds(figure_file("method_components_scores_plot.rds"))
+
