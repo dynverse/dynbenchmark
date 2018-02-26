@@ -47,16 +47,16 @@ metr_lev <- c(
   "pct_time_exceeded_mean", "pct_memory_exceeded_mean", "num_setseed_calls_mean", "num_files_created_mean"
 )
 
+
 oc1 <-
-  outputs_summtrajtype_totalsx2 %>%
-  filter(task_source == c("real", "synthetic")) %>%
-  select(method_name:paramset_id, metric = task_source, score = harm_mean)
-oc2 <-
   outputs_summtrajtype_totalsx2 %>%
   filter(task_source == chosen_task_source, trajectory_type_f == "overall") %>%
   select(method_name, method_short_name, method_name_f, paramset_id, one_of(metr_lev)) %>%
   gather(metric, score, -method_name:-paramset_id)
-
+oc2 <-
+  outputs_summtrajtype_totalsx2 %>%
+  filter(task_source == c("real", "synthetic"), trajectory_type == "overall") %>%
+  select(method_name:paramset_id, method_name_f, metric = task_source, score = harm_mean)
 
 overall_comp <-
   bind_rows(oc1, oc2) %>%
