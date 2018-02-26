@@ -1,24 +1,14 @@
-trajectory_type_directed <- tribble(
-  ~name,
-  "directed_linear",
-  "directed_cycle",
-  "bifurcation",
-  "multifurcation",
-  "rooted_tree",
-  "directed_acyclic_graph",
-  "directed_graph"
-)
-
 trajectory_type_directed_to_undirected<- c(
-  "directed_linear"= "undirected_linear",
-  "bifurcation"="simple_fork" ,
-  "multifurcation"="complex_fork" ,
-  "rooted_binary_tree"="unrooted_binary_tree",
-  "rooted_tree"="unrooted_tree" ,
-  "directed_cycle"="undirected_cycle" ,
-  "directed_graph"="undirected_graph" ,
-  "directed_acyclic_graph"="undirected_graph" ,
-  "disconnected_directed_graph"="disconnected_undirected_graph" ,
+  "directed_linear" = "undirected_linear",
+  "bifurcation" = "simple_fork",
+  "convergence" = "simple_fork",
+  "multifurcation" = "complex_fork",
+  "rooted_binary_tree" = "unrooted_binary_tree",
+  "rooted_tree" = "unrooted_tree",
+  "directed_cycle" = "undirected_cycle",
+  "directed_graph" = "undirected_graph",
+  "directed_acyclic_graph" = "undirected_graph",
+  "disconnected_directed_graph" = "disconnected_undirected_graph",
   "unknown" = "unknown"
 )
 # undirected
@@ -35,7 +25,7 @@ trajectory_type_edges_undirected <- tribble(
 ) %>% mutate(prop_changes = as.list(prop_changes))
 # directed_to_undirected
 trajectory_type_edges_undirected_to_directed <- tibble(
-  from=trajectory_type_directed_to_undirected,
+  from = trajectory_type_directed_to_undirected,
   to = names(trajectory_type_directed_to_undirected),
   prop_changes = "undirected"
 ) %>% mutate(prop_changes = list(prop_changes))
@@ -45,6 +35,7 @@ trajectory_type_edges_undirected_to_directed <- tibble(
 trajectory_type_edges_directed <- tribble(
   ~to, ~from, ~prop_changes,
   "bifurcation", "directed_linear", "num_branch_nodes == 0",
+  "convergence", "directed_linear", "num_branch_nodes == 0",
   "multifurcation", "bifurcation", "max_degree == 3",
   "rooted_binary_tree", "bifurcation", "num_branch_nodes == 1",
   "rooted_tree", "multifurcation", "num_branch_nodes == 1",
@@ -84,6 +75,7 @@ trajectory_types <- {
     ~id, ~color,
     "directed_linear", "#0278dd",
     "bifurcation" , "#3ad1d1",
+    "convergence", "#8bd21e",
     "rooted_tree" , "#e8ef04",
     "rooted_binary_tree" , "#00b009",
     "multifurcation" , "#7fbe00",
@@ -95,7 +87,7 @@ trajectory_types <- {
   )
 
   trajectory_type_colors <- trajectory_type_colors %>%
-    left_join(trajectory_type_edges_undirected_to_directed, by=c("id"="to")) %>%
+    left_join(trajectory_type_edges_undirected_to_directed, by=c("id" = "to")) %>%
     select(-id) %>%
     rename(id = from) %>%
     select(id, color) %>%
