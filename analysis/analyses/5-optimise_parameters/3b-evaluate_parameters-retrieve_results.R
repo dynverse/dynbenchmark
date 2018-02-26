@@ -170,31 +170,31 @@ to_save <- environment() %>% as.list()
 to_save <- to_save[c(str_subset(names(to_save), "^outputs_"), "trajtypes")]
 write_rds(to_save, derived_file("outputs_postprocessed.rds"))
 
-# # Upload ---------------------
-PRISM:::rsync_remote(
-  remote_dest = "prism",
-  path_dest = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
-  remote_src = "",
-  path_src = derived_file("config.rds")
-)
-PRISM:::rsync_remote(
-  remote_dest = "prism",
-  path_dest = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
-  remote_src = "",
-  path_src = derived_file("outputs_postprocessed.rds")
-)
-method_names <- list.dirs(derived_file("suite"), recursive = FALSE, full.names = FALSE)
-for (method_name in method_names) {
-  cat("Syncing method output for ", method_name, "\n", sep = "")
-  path_dest <- paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/suite/", method_name, "/")
-
-  if (length(list.files(paste0(derived_file("suite/"), method_name, "/"), pattern = "output_*")) > 0) {
-    PRISM:::mkdir_remote(path_dest, remote = "prism")
-    PRISM:::rsync_remote(
-      remote_dest = "prism",
-      path_dest = path_dest,
-      remote_src = "",
-      path_src = paste0(derived_file("suite/"), method_name, "/output_*.rds")
-    )
-  }
-}
+# # # Upload ---------------------
+# PRISM:::rsync_remote(
+#   remote_dest = "prism",
+#   path_dest = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
+#   remote_src = "",
+#   path_src = derived_file("config.rds")
+# )
+# PRISM:::rsync_remote(
+#   remote_dest = "prism",
+#   path_dest = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
+#   remote_src = "",
+#   path_src = derived_file("outputs_postprocessed.rds")
+# )
+# method_names <- list.dirs(derived_file("suite"), recursive = FALSE, full.names = FALSE)
+# for (method_name in method_names) {
+#   cat("Syncing method output for ", method_name, "\n", sep = "")
+#   path_dest <- paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/suite/", method_name, "/")
+#
+#   if (length(list.files(paste0(derived_file("suite/"), method_name, "/"), pattern = "output_*")) > 0) {
+#     PRISM:::mkdir_remote(path_dest, remote = "prism")
+#     PRISM:::rsync_remote(
+#       remote_dest = "prism",
+#       path_dest = path_dest,
+#       remote_src = "",
+#       path_src = paste0(derived_file("suite/"), method_name, "/output_*.rds")
+#     )
+#   }
+# }

@@ -280,7 +280,7 @@ g <- ggplot(out_summtraj_dataset %>% gather(metric, score, harm_mean, one_of(sel
   coord_flip() +
   labs(x = NULL, y = NULL) +
   theme(legend.position = "none")
-ggsave(figure_file("dataset_difficulty_grouped.pdf"), g, width = 20, height = 12)
+ggsave(figure_file("dataset_difficulty_grouped.pdf"), g, width = 16, height = 6)
 
 
 ############### COMPARISON OF EXECUTION TIMES ###############
