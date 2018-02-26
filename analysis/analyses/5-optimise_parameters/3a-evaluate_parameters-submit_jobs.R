@@ -20,8 +20,9 @@ remote_output_folder <- paste0("/scratch/irc/shared/dynverse_derived/", getOptio
 task_ids <- read_rds(paste0(local_tasks_folder, "/task_ids.rds"))
 
 # use previous output to determine method ordering based on its running time
-# outs <- read_rds("analysis/data/derived_data/5-optimise_parameters-previousresults/180220-derived_data/3-evaluate_parameters/outputs_postprocessed.rds")
-# outs$outputs_summmethod %>%
+# #read_rds("analysis/data/derived_data/5-optimise_parameters-previousresults/180220-derived_data/3-evaluate_parameters/outputs_postprocessed.rds")
+# read_rds("analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/outputs_postprocessed.rds") %>%
+#   .$outputs_summmethod %>%
 #   group_by(method_short_name) %>%
 #   summarise_if(is.numeric, sum) %>%
 #   arrange(time_method_mean) %>%

@@ -175,11 +175,12 @@ dataset_ord <- outputs_summ_dataset %>%
 # create method_name_f factor in all data structures
 outputs_summ_dataset <- outputs_summ_dataset %>% mutate(task_id_f = factor(task_id, levels = rev(dataset_ord)))
 
+sel_metrics <- c("harm_mean", "pct_errored_mean","rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean")
 dataset_comp <-
   outputs_summ_dataset %>%
-  select(task_id, task_id_f, trajectory_type, trajectory_type_f, task_source, task_source_f, harm_mean, pct_errored_mean, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean) %>%
+  select(task_id, task_id_f, trajectory_type, trajectory_type_f, task_source, task_source_f, one_of(sel_metrics)) %>%
   gather(metric, score, -task_id:-task_source_f) %>%
-  mutate(metric_f = factor(metric, levels = c("harm_mean", "pct_errored_mean","rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean")))
+  mutate(metric_f = factor(metric, levels = sel_metrics))
 
 
 # collect score boxes
@@ -253,7 +254,33 @@ g
 ggsave(figure_file("dataset_difficulty_filled.pdf"), g, width = 20, height = 20)
 
 
+### difficulty
+out_summtraj_dataset <- outputs_summrepl_dataset %>%
+  group_by(trajectory_type, task_source) %>%
+  summarise_if(is.numeric, mean) %>%
+  ungroup() %>%
+  arrange(desc(harm_mean))
 
+
+trajlevels <-
+  out_summtraj_dataset %>%
+  filter(task_source == "synthetic") %>%
+  arrange(desc(harm_mean)) %>%
+  .$trajectory_type
+
+out_summtraj_dataset <- out_summtraj_dataset %>% mutate(
+  trajectory_type_f = factor(trajectory_type, levels = trajlevels)
+)
+
+g <- ggplot(out_summtraj_dataset %>% gather(metric, score, harm_mean, one_of(sel_metrics)) %>% mutate(metric_f = factor(metric, levels = sel_metrics))) +
+  geom_bar(aes(fct_rev(trajectory_type_f), score, fill = trajectory_type_f), stat = "identity") +
+  facet_grid(task_source~metric_f) +
+  scale_fill_manual(values = trajectory_type_colours, label=label_long) +
+  cowplot::theme_cowplot() +
+  coord_flip() +
+  labs(x = NULL, y = NULL) +
+  theme(legend.position = "none")
+ggsave(figure_file("dataset_difficulty_grouped.pdf"), g, width = 16, height = 6)
 
 
 ############### COMPARISON OF EXECUTION TIMES ###############
