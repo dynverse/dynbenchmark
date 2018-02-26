@@ -98,14 +98,17 @@ Calculate the overall qc scores for each implementation
 # set the ordering of implementation_ids to this ordering
 implementation_ordering_plot <- implementations_evaluated %>%
   arrange(-qc_score) %>% 
-  mutate(implementation_id = factor(implementation_id, levels=implementation_id)) %>% 
-  ggplot(aes(implementation_id, qc_score)) +
+  mutate(implementation_name = factor(implementation_name, levels=implementation_name)) %>% 
+  ggplot(aes(implementation_name, qc_score)) +
     geom_bar(aes(fill=qc_score), stat="identity") +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
     scale_y_continuous(expand=c(0, 0), limits=c(0, 1)) +
-    viridis::scale_fill_viridis(option="A", limits=c(0, 1))
+    viridis::scale_fill_viridis(option="A", limits=c(0, 1)) +
+    labs(y=label_long("qc_score"), x=label_long("implementation_name")) +
+    theme(legend.position="none")
 
 implementation_ordering_plot
+implementation_ordering_plot %>% write_rds(figure_file("implementation_qc_ordering.rds"))
 ```
 
 
@@ -286,5 +289,5 @@ aspect_ordering_plot2 <- aspect_ordering_plot2 +
 
 implementation_qc_ordering_plot <- cowplot::plot_grid(category_legend, aspect_ordering_plot2, align = "h", rel_widths = c(0.2, 0.8), axis="tb")
 implementation_qc_ordering_plot
-saveRDS(implementation_qc_ordering_plot, figure_file("implementation_qc_ordering.rds"))
+saveRDS(implementation_qc_ordering_plot, figure_file("implementation_qc_issues.rds"))
 ```

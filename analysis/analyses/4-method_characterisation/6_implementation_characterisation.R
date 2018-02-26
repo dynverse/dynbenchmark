@@ -14,7 +14,7 @@ implementation_qc <- read_rds(derived_file("implementation_qc.rds"))
 implementation_id_to_name <- setNames(implementations$implementation_name, implementations$implementation_id)
 
 start_date <- as.Date("2014-01-01")
-end_date <- as.Date("2018-06-01")
+end_date <- as.Date("2018-09-01")
 
 
 #   ____________________________________________________________________________
@@ -135,7 +135,7 @@ n_implementations_over_time <- publication_cumulative_by_type_interpolated %>%
   scale_x_date(label_long("publication_date"), expand=c(0.05, 0.05), limits=c(start_date, end_date))
 n_implementations_over_time
 # ggsave(figure_file("n_implementations_over_time.png"), n_implementations_over_time, width = 15, height = 8)
-saveRDS(n_implementations_over_time, figure_file("n_implementations_over_time.rds"))
+saveRDS(n_implementations_over_time %>% ggdraw(), figure_file("n_implementations_over_time.rds"))
 
 
 
@@ -189,7 +189,7 @@ trajectory_components_gathered <- trajectory_components_step %>%
 trajectory_components_over_time <- trajectory_components_gathered %>%
   arrange(date) %>%
   ggplot() +
-  geom_area(aes(date, n_implementations), stat="identity") +
+  geom_area(aes(date, n_implementations), stat="identity", fill="#BBBBBB") +
   geom_area(aes(date, n_implementations_oi, fill=trajectory_type), stat="identity") +
   scale_fill_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
   facet_grid(.~trajectory_type, labeller = label_facet()) +
