@@ -4,6 +4,7 @@ library(dynalysis)
 
 library(tidygraph)
 library(ggraph)
+library(igraph)
 
 experiment("7-user_guidelines")
 
@@ -116,7 +117,7 @@ decision_methods <- map(trajectory_type_ids, function(node_id) {
 decision_methods <- decision_methods %>% add_row(method_id = "?", score = 1, origin="multifurcation*", method_i = 0)
 
 # now sort the origin, to keep the same ordering of vertices (will be used later to layout the x in the same order)
-decision_methods$origin <- factor(decision_methods$origin, levels=intersect(decision_nodes$node_id, decision_methods$origin))
+decision_methods$origin <- factor(decision_methods$origin, levels=intersect(decision_nodes_decisions$node_id, decision_methods$origin))
 decision_methods <- decision_methods %>% arrange(origin) %>% mutate(origin = as.character(origin))
 
 # create unique node_id
@@ -219,7 +220,7 @@ layout$level[layout$type == "decision"] <- layout$y[layout$type == "decision"] -
 # # change layout to level
 layout$y <- ifelse(is.na(layout$level), layout$y, layout$level)
 
-layout %>% ggraph() +
+guidelines <- layout %>% ggraph() +
   geom_edge_diagonal(aes(alpha=type), data = get_edges("short")(layout) %>% filter(type != "to_method")) +
   geom_edge_link(aes(xend=x + (xend-x)/1.2, yend = y + (yend-y)/1.2, alpha=type), arrow=arrow(type="closed", length=unit(0.1, "inches")), data = get_edges("short")(layout) %>% filter(type == "to_method")) +
   geom_node_label(aes(label=label_wrap(node_label, 25), fill=fill, color=type, alpha=alpha)) +
@@ -230,4 +231,6 @@ layout %>% ggraph() +
   theme_graph() +
   scale_x_continuous(expand=c(0.2,0.2)) +
   theme(legend.position="none", plot.margin=margin(0, 0, 0, 0))
+guidelines
 
+guidelines %>% ggdraw() %>% write_rds(figure_file("user_guidelines.rds"))
