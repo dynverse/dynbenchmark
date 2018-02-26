@@ -67,5 +67,5 @@ methods_evaluated <- read_rds(derived_file("methods_evaluated.rds", experiment_i
 
 # citate
 cite_methods <- function(method_ids) {
-  methods %>% filter(id %in% !!method_ids) %>% glue::glue_data("@{bibtex}") %>% glue::collapse("; ") %>% glue::glue("[", ., "]")
+  methods %>% filter(method_id %in% !!method_ids) %>% glue::glue_data("@{bibtex}") %>% glue::collapse("; ") %>% glue::glue("[", ., "]")
 }
