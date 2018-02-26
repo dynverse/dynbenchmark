@@ -41,6 +41,7 @@ trajectory_type_edges_directed <- tribble(
   "rooted_tree", "multifurcation", "num_branch_nodes == 1",
   "rooted_tree", "rooted_binary_tree", "max_degree == 3",
   "directed_acyclic_graph", "rooted_tree", "num_cycles == 0",
+  "directed_acyclic_graph", "convergence", c("num_cycles == 0", "num_branch_nodes == 1"),
   "directed_graph", "directed_acyclic_graph", "num_cycles == 0",
   "disconnected_directed_graph", "directed_graph", "num_components == 1",
   "directed_graph", "directed_cycle", c("num_branch_nodes == 0", "num_cycles == 1")

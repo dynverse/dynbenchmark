@@ -31,7 +31,7 @@ label_prop_changes <- function(prop_changes) {
 
 trajectory_type_tree_changes <- trajectory_type_tree_data %>%
   activate(nodes) %>%
-  filter(directedness == "directed") %>%
+  filter(directedness == "undirected") %>%
   ggraph(layout = "tree") +
   geom_edge_link() +
   geom_edge_link(aes(xend = x+(xend-x)/1.3, yend = y+(yend - y)/1.3), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
