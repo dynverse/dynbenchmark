@@ -12,59 +12,63 @@ create_replacers <- function(to_replace) {
 #' @param svg The svg to replace
 #' @param replacer Replacer dataframe
 #' @export
-replace <- function(svg, replacer) {
+replace_svg <- function(svg, replacer) {
   if(!all(c("replace_id", "svg") %in% colnames(replacer))) stop("Replacer requires columns replace_id and svg")
 
   walk2(replacer$replace_id, replacer$svg, function(replace_id, sub_svg_str) {
     print(replace_id)
 
     # remove and extract rects
-    rects <- svg %>% xml2::xmlfind_all(".//d1:rect[contains(@style, 'fill: #ABCDEF; fill-opacity: ')]")
+    rects <- svg %>% xml2::xml_find_all(".//d1:rect[contains(@style, 'fill: #ABCDEF; fill-opacity: ')]")
 
     # match rect
-    matched_rects <- map_chr(rects, xml2::xmlattr, "style") %>%
+    matched_rects <- map_chr(rects, xml2::xml_attr, "style") %>%
       str_detect(pritt("fill: #ABCDEF; fill-opacity: {replace_id};")) %>%
       which()
 
-    if(length(matched_rects) > 1) stop("Multiple matched rectangles with replace_id")
-    if(length(matched_rects) == 0) stop("No matched rectangles with replace_id")
+    print(matched_rects)
 
-    # find correct rect
-    rectoi <- rects[[matched_rects]]
+    if(length(matched_rects) > 1) warning("Multiple matched rectangles with replace_id")
+    if(length(matched_rects) == 0) warning("No matched rectangles with replace_id")
 
-    attrs <- xml2::xmlattrs(rectoi) %>% map(type.convert)
+    walk(matched_rects, function(matched_rect) {
+      # find correct rect
+      rectoi <- rects[[matched_rect]]
 
-    # create sub_svg
-    sub_svg <- xml2::xmlnew_root(read_xml(sub_svg_str))
+      attrs <- xml2::xml_attrs(rectoi) %>% map(type.convert)
 
-    # calculate scaling
-    sub_svg_width <- xml2::xmlattr(sub_svg, "width") %>% gsub("(.*)pt", "\\1", .) %>% as.numeric()
-    sub_svg_height <- xml2::xmlattr(sub_svg, "height") %>% gsub("(.*)pt", "\\1", .) %>% as.numeric()
-    scale <- min(c(attrs$height/sub_svg_height, attrs$width/sub_svg_width))
+      # create sub_svg
+      sub_svg <- xml2::xml_new_root(xml2::read_xml(sub_svg_str))
 
-    # create new group
-    sub_g <- xml2::xmlnew_root("g")
+      # calculate scaling
+      sub_svg_width <- xml2::xml_attr(sub_svg, "width") %>% gsub("(.*)pt", "\\1", .) %>% as.numeric()
+      sub_svg_height <- xml2::xml_attr(sub_svg, "height") %>% gsub("(.*)pt", "\\1", .) %>% as.numeric()
+      scale <- min(c(attrs$height/sub_svg_height, attrs$width/sub_svg_width))
 
-    # transform the group
-    transform <- glue::collapse(c(
-      "translate({attrs$x}, {attrs$y})", # translate to box
-      "translate({(attrs$width - sub_svg_width*scale)/2}, {(attrs$height - sub_svg_height*scale)/2})", # move to center
-      "scale({scale})" # scale within box
-    )) %>% pritt()
+      # create new group
+      sub_g <- xml2::xml_new_root("g")
 
-    sub_g %>%
-      xml2::xmlset_attrs(list(
-        transform=transform
-      ))
+      # transform the group
+      transform <- glue::collapse(c(
+        "translate({attrs$x}, {attrs$y})", # translate to box
+        "translate({(attrs$width - sub_svg_width*scale)/2}, {(attrs$height - sub_svg_height*scale)/2})", # move to center
+        "scale({scale})" # scale within box
+      )) %>% pritt()
 
-    # put sub_svg in group
-    xml2::xmladd_child(sub_g, sub_svg)
+      sub_g %>%
+        xml2::xml_set_attrs(list(
+          transform=transform
+        ))
 
-    # add group to svg
-    svg %>% xml2::xmladd_child(sub_g)
+      # put sub_svg in group
+      xml2::xml_add_child(sub_g, sub_svg)
 
-    # remove rectangle
-    rectoi %>% xml2::xmlremove()
+      # add group to svg
+      svg %>% xml2::xml_add_child(sub_g)
+
+      # remove rectangle
+      rectoi %>% xml2::xml_remove()
+    })
   })
 
   svg
