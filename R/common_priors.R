@@ -27,12 +27,12 @@ prior_usages <- tribble(
 #' @param svg The base svg of the priors
 #' @export
 generate_prior_mini <- function(method_priors, svg = xml2::read_xml(figure_file("priors.svg", experiment_id = "priors"))) {
-  svg2 <- xml_new_root(svg, .copy=T)
+  svg2 <- xml2::xml_new_root(svg, .copy=T)
 
   map2(method_priors$prior_id, method_priors$prior_usage, function(prior_id, usage) {
     color <- prior_usages$color[prior_usages$prior_usage == usage]
 
-    layer <- svg2 %>% xml_find_first(pritt(".//svg:g[@inkscape:label='{prior_id}']")) %>% xml_remove()
+    layer <- svg2 %>% xml2::xml_find_first(pritt(".//svg:g[@inkscape:label='{prior_id}']")) %>% xml2::xml_remove()
 
     if(!is.na(usage) && usage != "no") {
 
@@ -43,11 +43,11 @@ generate_prior_mini <- function(method_priors, svg = xml2::read_xml(figure_file(
         gsub("stroke:#fb1e00", pritt("stroke:{color}"), .) %>%
         gsub("fill:#fb1e00", pritt("fill:{color}"), .) %>%
         {suppressWarnings(xml2::read_xml(.))} %>%
-        xml_add_child(svg2, .)
+        xml2::xml_add_child(svg2, .)
     }
   })
 
-  svg2 %>% write_xml("~/test.svg")
+  svg2 %>% xml2::write_xml("~/test.svg")
 
   svg2 %>% as.character()# %>% charToRaw() %>% base64enc::base64encode()
 }
