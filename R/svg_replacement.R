@@ -19,10 +19,10 @@ replace <- function(svg, replacer) {
     print(replace_id)
 
     # remove and extract rects
-    rects <- svg %>% xml_find_all(".//d1:rect[contains(@style, 'fill: #ABCDEF; fill-opacity: ')]")
+    rects <- svg %>% xml2::xmlfind_all(".//d1:rect[contains(@style, 'fill: #ABCDEF; fill-opacity: ')]")
 
     # match rect
-    matched_rects <- map_chr(rects, xml_attr, "style") %>%
+    matched_rects <- map_chr(rects, xml2::xmlattr, "style") %>%
       str_detect(pritt("fill: #ABCDEF; fill-opacity: {replace_id};")) %>%
       which()
 
@@ -32,18 +32,18 @@ replace <- function(svg, replacer) {
     # find correct rect
     rectoi <- rects[[matched_rects]]
 
-    attrs <- xml_attrs(rectoi) %>% map(type.convert)
+    attrs <- xml2::xmlattrs(rectoi) %>% map(type.convert)
 
     # create sub_svg
-    sub_svg <- xml_new_root(read_xml(sub_svg_str))
+    sub_svg <- xml2::xmlnew_root(read_xml(sub_svg_str))
 
     # calculate scaling
-    sub_svg_width <- xml_attr(sub_svg, "width") %>% gsub("(.*)pt", "\\1", .) %>% as.numeric()
-    sub_svg_height <- xml_attr(sub_svg, "height") %>% gsub("(.*)pt", "\\1", .) %>% as.numeric()
+    sub_svg_width <- xml2::xmlattr(sub_svg, "width") %>% gsub("(.*)pt", "\\1", .) %>% as.numeric()
+    sub_svg_height <- xml2::xmlattr(sub_svg, "height") %>% gsub("(.*)pt", "\\1", .) %>% as.numeric()
     scale <- min(c(attrs$height/sub_svg_height, attrs$width/sub_svg_width))
 
     # create new group
-    sub_g <- xml_new_root("g")
+    sub_g <- xml2::xmlnew_root("g")
 
     # transform the group
     transform <- glue::collapse(c(
@@ -53,18 +53,18 @@ replace <- function(svg, replacer) {
     )) %>% pritt()
 
     sub_g %>%
-      xml_set_attrs(list(
+      xml2::xmlset_attrs(list(
         transform=transform
       ))
 
     # put sub_svg in group
-    xml_add_child(sub_g, sub_svg)
+    xml2::xmladd_child(sub_g, sub_svg)
 
     # add group to svg
-    svg %>% xml_add_child(sub_g)
+    svg %>% xml2::xmladd_child(sub_g)
 
     # remove rectangle
-    rectoi %>% xml_remove()
+    rectoi %>% xml2::xmlremove()
   })
 
   svg
