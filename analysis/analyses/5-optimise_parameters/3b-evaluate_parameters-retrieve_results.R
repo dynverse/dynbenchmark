@@ -24,7 +24,8 @@ tasks_info <- map_df(
 trajtypes <-
   dynalysis::trajectory_types %>%
   filter(id %in% unique(tasks_info$trajectory_type)) %>%
-  add_row(id = "overall", directedness = "directed", color = "#AAAAAA", background_color = "E6A1A1")
+  add_row(id = "overall", directedness = "directed", color = "#AAAAAA", background_color = "E6A1A1") %>%
+  slice(match(c("overall", "directed_linear", "bifurcation", "convergence", "multifurcation", "rooted_tree", "directed_acyclic_graph", "directed_graph", "directed_cycle"), id))
 
 # print task errors
 task_errors <- outputs %>%
