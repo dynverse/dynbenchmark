@@ -30,7 +30,7 @@ tasks <- read_rds(derived_file("tasks.rds", experiment_id = "2-dataset_character
 smalltasks <- dyntoy::toy_tasks
 
 ## chose method
-description <- description_gpfates()
+description <- description_ouijaflw()
 
 par_set <- description$par_set
 default_params <- ParamHelpers::generateDesignOfDefaults(par_set, trafo = T) %>% ParamHelpers::dfRowToList(par_set, 1)
@@ -39,7 +39,7 @@ list2env(default_params, environment())
 ## laad task in environment
 bigtask <- dynutils::extract_row_to_list(tasks, nrow(tasks))
 smalltask <- dynutils::extract_row_to_list(tasks,which(tasks$id == "real/cell-cycle_buettner"))
-# smalltask <- extract_row_to_list(dyntoy::toy_tasks, 15)# %>% {.$geodesic_dist <- dynutils::compute_emlike_dist(.);.}
+smalltask <- extract_row_to_list(dyntoy::toy_tasks, first(which(dyntoy::toy_tasks$trajectory_type == "directed_cycle"))) # %>% {.$geodesic_dist <- dynutils::compute_emlike_dist(.);.}
 
 task_to_evaluate <- smalltask
 list2env(task_to_evaluate, environment())
@@ -61,11 +61,11 @@ tasks_to_evaluate <- dynutils::list_as_tibble(list(task_to_evaluate))
 ##
 results <- execute_method(tasks_to_evaluate, description, default_params, mc_cores=4)
 
-results <- map(seq(nrow(tasks_to_evaluate)), function(row_id) {
+results <- map(seq_len(nrow(tasks_to_evaluate)), function(row_id) {
   print(paste0(">> ", row_id))
   subtasks <- tasks_to_evaluate[row_id, ,drop=F]
   print(subtasks$id)
-  execute_evaluation(subtasks, description, default_params, "correlation", extra_metrics=c("rf_mse", "edge_flip")) %>% attr("extras") %>% .$.summary
+  execute_evaluation(subtasks, description, default_params, "edge_flip", extra_metrics=c("rf_mse")) %>% attr("extras") %>% .$.summary
 }) %>% bind_rows()
 
 
