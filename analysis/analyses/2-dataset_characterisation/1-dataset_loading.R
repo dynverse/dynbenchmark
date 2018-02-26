@@ -95,6 +95,23 @@ tasks_control <- read_rds(dataset_file("tasks.rds", "control")) %>%
 ##  Combine datasets                                                        ####
 tasks <- bind_rows(tasks_synthetic, tasks_real, tasks_toy, tasks_control)
 
+
+##  ............................................................................
+##  Add characteristics                                                     ####
+task_characteristics <- pbapply::pblapply(tasks_to_check$id, function(task_id) {
+  print(task_id)
+  task <- extract_row_to_list(tasks, which(tasks$id == task_id))
+  counts <- load(task$counts)
+
+  characteristics <- list(id = task_id)
+
+  characteristics$n_genes <- ncol(counts)
+  characteristics$n_cells <- nrow(counts)
+
+  characteristics
+}) %>% bind_rows()
+tasks <- left_join(tasks[c("id", colnames(tasks)[!colnames(tasks) %in% colnames(task_characteristics)])], task_characteristics, by="id")
+
 saveRDS(tasks, derived_file("tasks.rds"))
 
 
@@ -128,9 +145,6 @@ task_checks <- pbapply::pblapply(tasks_to_check$id, function(task_id) {
 
   checks$check_columns <- all(c("geodesic_dist") %in% names(task))
 
-  checks$n_genes <- ncol(counts)
-  checks$n_cells <- nrow(counts)
-
   checks$task_id <- task$id
 
   checks
@@ -146,6 +160,8 @@ task_checks %>%
 task_checks %>% select(id, starts_with("check")) %>% gather("check_id", "passed", -id) %>%
   ggplot() +
     geom_raster(aes(check_id, id, fill=passed))
+
+saveRDS(task_checks, derived_file("tasks_checks.rds"))
 
 task_ids_filtered <- task_checks %>% filter(check_all_milestones_represented) %>% pull(task_id)
 tasks_filtered <- tasks %>% filter(id %in% task_ids_filtered)
