@@ -28,7 +28,7 @@ timeout_lines <- oi %>%
   group_by(method_short_name) %>%
   summarise(max = max(time_method)) %>%
   filter(max > .5 * timeout_per_execution) %>%
-  summarise(timeout_per_execution)
+  mutate(timeout_per_execution)
 
 ct <- oi %>% filter(method_short_name == "ctvem", pct_errored == 0)
 ct %>% select(time_method, nrow, ncol) %>% mutate()
