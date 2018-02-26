@@ -303,6 +303,7 @@ tasks <- read_rds(dataset_file("tasks.rds"))
 #   ) %>% dynnormaliser::add_prior_information_to_wrapper())
 # }) %>% list_as_tibble()
 
+# tasks$trajectory_type <- map_chr(tasks$milestone_network, ~ dynutils::classify_milestone_network(.)$network_type)
 # tasks$geodesic_dist <- pbapply::pblapply(seq_len(nrow(tasks)), function(i) {
 #   dynutils::compute_tented_geodesic_distances(
 #     dynutils::extract_row_to_list(tasks, i)
