@@ -67,7 +67,7 @@ dataset_characterisation_pies %>% write_rds(figure_file("dataset_characterisatio
 tasks_real$ngenes <- map_int(tasks_real$normalisation_info, ~last(.$normalisation_steps[["ngenes"]]))
 tasks_real$ncells <- map_int(tasks_real$normalisation_info, ~last(.$normalisation_steps[["ncells"]]))
 dataset_characterisation_distributions <- c("ncells", "ngenes", "date") %>% map(function(what) {
-  nbins <- 50
+  nbins <- 70
 
   if (what %in% c("ncells", "ngenes")) {
     limits <- c(10, 30000)
@@ -88,7 +88,7 @@ dataset_characterisation_distributions <- c("ncells", "ngenes", "date") %>% map(
     scale_color_manual(values=technology_colors) +
     theme(legend.position="none")
 })
-dataset_characterisation_distributions[[2]] <- dataset_characterisation_distributions[[2]] + theme(legend.position="right")
+# dataset_characterisation_distributions[[2]] <- dataset_characterisation_distributions[[2]] + theme(legend.position="right")
 dataset_characterisation_distributions <- cowplot::plot_grid(plotlist=dataset_characterisation_distributions, ncol=1, align="v", axis="lr")
 
 
