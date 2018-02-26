@@ -6,7 +6,7 @@ library(tidygraph)
 library(ggraph)
 library(igraph)
 
-experiment("8-developer_guidelines")
+experiment("6-developer_guidelines")
 
 methods <- read_rds(derived_file("methods.rds", "4-method_characterisation"))
 outputs_list <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_parameters/3-evaluate_parameters"))
@@ -39,5 +39,7 @@ trajtype_perfect_edge_flips_bars <- trajtype_perfect_edge_flips %>%
   scale_y_continuous(label_long("Percentage"), expand=c(0, 0)) +
   coord_flip()
 trajtype_perfect_edge_flips_bars
+
+## Still have to add the opposite here, ~ false positive rate
 
 trajtype_perfect_edge_flips_bars %>% write_rds(figure_file("trajtype_perfect_edge_flips.rds"))
