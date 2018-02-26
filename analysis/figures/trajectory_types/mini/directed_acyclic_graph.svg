@@ -11,9 +11,9 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="16.033298mm"
-   height="9.5520077mm"
-   viewBox="0 0 16.033298 9.5520076"
+   width="60.598289"
+   height="36.102077"
+   viewBox="0 0 16.033297 9.5520081"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.2 (unknown)"
@@ -1217,8 +1217,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="3.6374888"
-     inkscape:cx="79.835035"
-     inkscape:cy="188.5227"
+     inkscape:cx="21.140696"
+     inkscape:cy="188.52271"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -1230,12 +1230,13 @@
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
-     fit-margin-bottom="0">
+     fit-margin-bottom="0"
+     units="px">
     <inkscape:grid
        type="xygrid"
        id="grid1904"
-       originx="-0.10286729"
-       originy="-21.168936" />
+       originx="-0.10286728"
+       originy="-21.168935" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
