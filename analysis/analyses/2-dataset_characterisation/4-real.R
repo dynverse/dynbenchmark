@@ -58,7 +58,7 @@ pie <- function(tasks=tasks_real, what = "technology") {
 
 dataset_characterisation_pies <- c("technology", "organism", "standard","dynamic_process", "trajectory_type") %>% map(pie, tasks = tasks_real) %>% cowplot::plot_grid(plotlist=., nrow =1)
 dataset_characterisation_pies
-
+dataset_characterisation_pies %>% write_rds(figure_file("dataset_characterisation_pies.rds"))
 
 
 
@@ -87,9 +87,13 @@ dataset_characterisation_distributions <- c("ncells", "ngenes", "date") %>% map(
     scale_fill_manual(values=technology_colors) +
     scale_color_manual(values=technology_colors) +
     theme(legend.position="none")
-}) %>% cowplot::plot_grid(plotlist=., ncol=1)
-dataset_characterisation_distributions
+})
+dataset_characterisation_distributions[[2]] <- dataset_characterisation_distributions[[2]] + theme(legend.position="right")
+dataset_characterisation_distributions <- cowplot::plot_grid(plotlist=dataset_characterisation_distributions, ncol=1, align="v", axis="lr")
 
+
+dataset_characterisation_distributions
+dataset_characterisation_distributions %>% write_rds(figure_file("dataset_characterisation_distributions.rds"))
 
 
 ##  ............................................................................
