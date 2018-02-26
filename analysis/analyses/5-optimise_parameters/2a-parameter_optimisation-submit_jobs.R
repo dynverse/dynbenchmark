@@ -8,10 +8,10 @@ methods <- get_descriptions() %>% filter(short_name != "manual")
 metrics <- c("correlation", "rf_mse", "edge_flip")
 timeout_paramoptim <- 1 * 24 * 60 * 60
 num_repeats <- 4
-num_init_params <- 20
+num_init_params <- 16
 num_iterations <- 1000
-num_cores <- 4
-max_memory_per_core <- "8G"
+num_cores <- 8
+max_memory_per_core <- "10G"
 execute_before <- "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500; export DYNALYSIS_PATH=/group/irc/shared/dynalysis/"
 verbose <- TRUE
 
