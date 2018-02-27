@@ -99,14 +99,17 @@ model <- ""
 ##  ............................................................................
 ##  Samplers table                                                          ####
 samplers <- read_tsv(raw_file("samplers"))
-notes <- c("$$y_{max} = r/d * p/q$$")
+notes <- c("$y_{max} = r/d * p/q$")
 
-table <- samplers %>% mutate(text = pritt("${parameter} = {distribution}$")) %>%
-  select(text) %>%
-  mutate(text = kableExtra::cell_spec(text, escape=TRUE)) %>%
-  knitr::kable("html", escape = FALSE, col.names=NULL) %>%
-  kableExtra::kable_styling(bootstrap_options="condensed") %>%
-  kableExtra::footnote(notes, general_title = "where") %>%
-  gsub("&amp;", "&", .)
+table <- map(c("latex", "html"), function(format) {
+  table <- samplers %>% mutate(text = pritt("${parameter} = {distribution}$")) %>%
+    select(text) %>%
+    mutate(text = kableExtra::cell_spec(text, format, escape=FALSE)) %>%
+    knitr::kable(format, escape = FALSE, col.names=NULL) %>%
+    kableExtra::kable_styling(bootstrap_options="condensed") %>%
+    kableExtra::footnote(notes, general_title = "where") %>%
+    gsub("&amp;", "&", .)
+  table
+}) %>% set_names(c("latex", "html"))
 
 table %>% saveRDS(figure_file("samplers.rds"))

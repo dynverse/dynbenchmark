@@ -29,8 +29,8 @@ label_short <- function(x, width=10) {
     pull(short)
 }
 
-label_wrap <- function(x, width=10) {
-  map_chr(strwrap(x, width, simplify=FALSE), paste0, collapse="\n")
+label_wrap <- function(x, width=10, collapse="\n") {
+  map_chr(strwrap(x, width, simplify=FALSE), paste0, collapse=collapse)
 }
 
 #' Long labelling function

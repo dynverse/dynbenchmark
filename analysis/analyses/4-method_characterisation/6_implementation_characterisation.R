@@ -138,7 +138,6 @@ n_implementations_over_time
 saveRDS(n_implementations_over_time %>% ggdraw(), figure_file("n_implementations_over_time.rds"))
 
 
-
 ##  ............................................................................
 ##  Platforms                                                               ####
 platforms <- implementations %>% separate_rows(platform=platforms, sep=", ") %>%
@@ -194,13 +193,23 @@ trajectory_components_over_time <- trajectory_components_gathered %>%
   scale_fill_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
   facet_grid(.~trajectory_type, labeller = label_facet()) +
   theme(legend.position = "none") +
-  scale_x_date(label_long("publication_date"), limits=c(start_date, end_date)) +
-  scale_y_continuous(label_long("n_implementations"))
+  scale_x_date(label_long("publication_date"), limits=c(start_date, end_date), breaks=c(start_date, end_date), labels=c("", ""), expand=c(0, 0)) +
+  scale_y_continuous(label_long("n_implementations"), expand=c(0, 0))
 
 trajectory_components_over_time
 
 saveRDS(trajectory_components_over_time, figure_file("trajectory_components_over_time.rds"))
 
+
+
+##  ............................................................................
+##  Create timeline overview figure                                         ####
+n_methods_over_time <- read_rds(figure_file("n_implementations_over_time.rds", experiment_id="4-method_characterisation"))
+trajectory_components_over_time <- read_rds(figure_file("trajectory_components_over_time.rds", experiment_id="4-method_characterisation"))
+
+methods_timeline <- cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over_time), nrow=2, rel_heights = c(0.7, 0.3), labels="auto")
+methods_timeline %>% save_plot(figure_file("methods_timeline.svg"), ., base_width=15, base_height=10)
+methods_timeline %>% save_plot(figure_file("methods_timeline.png"), ., base_width=15, base_height=10)
 
 
 ##  ............................................................................
@@ -210,29 +219,42 @@ implementations$non_inclusion_reasons_footnotes <- implementations$non_inclusion
     slice(non_inclusion_reasons, match(reasons, id))$footnote
   })
 
-implementations_table <- implementations %>%
-  filter(is_ti) %>%
-  arrange(date) %>%
-  mutate(
-    evaluated = ifelse(evaluated, "✓", map(non_inclusion_reasons_footnotes, paste0, collapse=" ")),
-    evaluated = kableExtra::cell_spec(evaluated, color=ifelse(evaluated == "✓", "green", "")),
-    date = strftime(date, "%d/%m/%Y"),
-    maximal_trajectory_type =
-      kableExtra::cell_spec(
-        label_long(maximal_trajectory_type),
-        background=set_names(trajectory_types$color, trajectory_types$id)[maximal_trajectory_type],
-        color=ifelse(maximal_trajectory_type == "rooted_tree", "#333", "#FFF")
-      ),
-    implementation_name = kableExtra::cell_spec(implementation_name, link=Code)
-  ) %>%
-  select(implementation_name, date, maximal_trajectory_type, evaluated) %>%
-  rename_all(label_long)
+superscript <- c(latex = function(x) pritt("\\textsuperscript{{{x}}}"), html=function(x) pritt("<sup>{x}</sup>"))
 
-table <- implementations_table %>%
-  knitr::kable("html", escape=F) %>%
-  kableExtra::kable_styling(bootstrap_options = c("striped", "hover","condensed")) %>%
-  kableExtra::add_footnote(non_inclusion_reasons$long, "number")
-table
+table <- map(c("latex", "html"), function(format) {
+  implementations_table <- implementations %>%
+    filter(is_ti) %>%
+    arrange(date) %>%
+    mutate(
+      evaluated = ifelse(evaluated, "Yes", map_chr(non_inclusion_reasons_footnotes, ~paste0("No" , superscript[[format]](paste0(., collapse=" "))))),
+      evaluated = kableExtra::cell_spec(
+        evaluated,
+        format,
+        color=ifelse(evaluated == "Yes", "green", "black"),
+        escape = F
+      ),
+      date = strftime(date, "%d/%m/%Y"),
+      maximal_trajectory_type =
+        kableExtra::cell_spec(
+          label_long(maximal_trajectory_type),
+          format,
+          background=toupper(set_names(trajectory_types$color, trajectory_types$id)[maximal_trajectory_type]),
+          color=ifelse(maximal_trajectory_type == "rooted_tree", "#333333", "#FFFFFF"),
+        ),
+      implementation_name = kableExtra::cell_spec(
+        implementation_name,
+        format,
+        link=Code)
+    ) %>%
+    select(implementation_name, date, maximal_trajectory_type, evaluated) %>%
+    rename_all(label_long)
+
+  table <- implementations_table %>%
+    knitr::kable(format, escape=F) %>%
+    kableExtra::kable_styling(bootstrap_options = c("striped", "hover","condensed"), font_size=ifelse(format == "latex", 7, 12)) %>%
+    kableExtra::add_footnote(non_inclusion_reasons$long, "number")
+  table
+}) %>% set_names(c("latex", "html"))
 table %>%
   saveRDS(figure_file("implementations_table.rds"))
 
