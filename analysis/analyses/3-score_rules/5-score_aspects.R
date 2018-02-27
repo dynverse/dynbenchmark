@@ -6,8 +6,7 @@ library(dynalysis)
 experiment("3-score_rules/5-score_aspects")
 
 wrap <- function(x) {
-  wrap <- dynmethods::wrap_prediction_model(sort(unique(x$progressions$cell_id)), unique(c(x$milestone_network$from, x$milestone_network$to)), x$milestone_network, progressions=x$progressions)
-  wrap$geodesic_dist <- dynutils::compute_tented_geodesic_distances(wrap)
+  wrap <- dynmethods::wrap_prediction_model(sort(unique(x$progressions$cell_id))) %>% dynutils::add_trajectory_to_wrapper(unique(c(x$milestone_network$from, x$milestone_network$to)), x$milestone_network, progressions=x$progressions, divergence_regions = tibble())
   wrap
 }
 
@@ -162,3 +161,4 @@ connections
 score_aspects_plot <- cowplot::plot_grid(connections, scores_heatmap, rel_widths = c(0.6, 0.2))
 score_aspects_plot
 write_rds(score_aspects_plot, figure_file("score_aspects.rds"))
+save_plot(figure_file("score_aspects.svg"), score_aspects_plot, base_width=15, base_height=8)

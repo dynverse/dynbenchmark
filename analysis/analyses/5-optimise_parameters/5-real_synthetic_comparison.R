@@ -64,4 +64,5 @@ real_synthetic_comparison <- trajtype_source_scores %>%
   coord_equal() +
   labs(x="Real", y="Synthetic")+
   theme(legend.position="none")
+real_synthetic_comparison
 real_synthetic_comparison %>% write_rds(figure_file("real_synthetic_comparison.rds"))

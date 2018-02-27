@@ -113,49 +113,70 @@ cowplot::save_plot(figure_file("dataset_characterisation.svg"), dataset_characte
 
 ##  ............................................................................
 ##  Datasets table                                                          ####
-grouper <- function(x) paste0("<span style='display: none;'>{gse}</span> {", x, "}")
+grouper <- list(
+  latex=function(x) paste0("\\iffalse {label_long(gse)} \\fi {", x, "}"),
+  html=function(x) paste0("<span style='display: none;'>{gse}</span> {", x, "}")
+)
+
 library(kableExtra)
-table <- tasks_real %>%
-  select(date, gse, organism, technology, id, trajectory_type, standard, standard_determination, ncells, ngenes) %>%
-  arrange(date) %>%
-  mutate(
-    date = cell_spec(
-      glue::glue(grouper("date")),
-      escape=FALSE
-    ),
-    technology = cell_spec(
-      glue::glue(grouper("technology")),
-      background=technology_colors[technology],
-      color="white",
-      escape=FALSE
-    ),
-    organism = cell_spec(
-      glue::glue(grouper("organism")),
-      escape=FALSE
-    ),
-    trajectory_type = kableExtra::cell_spec(label_long(trajectory_type), background=set_names(trajectory_types$color, trajectory_types$id)[trajectory_type], color="white"),
-    ncells = cell_spec(
-      ncells,
-      background=spec_color(log(ncells), end = 0.9, option = "D", direction = -1),
-      escape=FALSE,
-      color="white"
-    ),
-    ngenes = cell_spec(
-      ngenes,
-      background=spec_color(log(ngenes), end = 0.9, option = "D", direction = -1),
-      escape=FALSE,
-      color="white"
-    ),
-    standard_determination = cell_spec(
-      standard_determination,
-      background=standard_colors[standard]
-    )
-  ) %>%
-  select(-id, -standard) %>%
-  rename_all(label_long) %>%
-  knitr::kable("html", escape=FALSE) %>%
-  collapse_rows(1:4) %>%
-  kable_styling(bootstrap_options = c("hover", "striped"))
+
+table <- map(c("latex", "html"), function(format) {
+  table <- tasks_real %>%
+    select(date, gse, organism, technology, id, trajectory_type, standard, standard_determination, ncells, ngenes) %>%
+    arrange(date) %>%
+    select(-date) %>%
+    mutate(
+      # date = cell_spec(
+      #   glue::glue(grouper[[format]]("date")),
+      #   format,
+      #   escape=FALSE
+      # ),
+      technology = cell_spec(
+        glue::glue(grouper[[format]]("technology")),
+        format,
+        background=technology_colors[technology],
+        color="white",
+        escape=FALSE
+      ),
+      organism = cell_spec(
+        glue::glue(grouper[[format]]("organism")),
+        format,
+        escape=FALSE
+      ),
+      trajectory_type = kableExtra::cell_spec(
+        label_long(trajectory_type),
+        format,
+        background=toupper(set_names(trajectory_types$color, trajectory_types$id)[trajectory_type]),
+        color="white"
+      ),
+      ncells = cell_spec(
+        ncells,
+        format,
+        background=spec_color(log(ncells), end = 0.9, option = "D", direction = -1),
+        escape=FALSE,
+        color="white"
+      ),
+      ngenes = cell_spec(
+        ngenes,
+        format,
+        background=spec_color(log(ngenes), end = 0.9, option = "D", direction = -1),
+        escape=FALSE,
+        color="white"
+      ),
+      standard_determination = cell_spec(
+        standard_determination,
+        format,
+        background=toupper(standard_colors[standard])
+      )
+    ) %>%
+    select(-id, -standard) %>%
+    rename_all(label_short, width=99999999) %>%
+    rename_all(function(x) if(format == "latex") {gsub("\\#", "\\\\#", x)} else {x}) %>%
+    knitr::kable(format, escape=FALSE) %>%
+    collapse_rows(1:2) %>%
+    kable_styling(bootstrap_options = c("hover", "striped"), latex_options = c("striped", "scale_down"), font_size=7)
+  table
+}) %>% set_names(c("latex", "html"))
 table
 
 table %>%
