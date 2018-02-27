@@ -37,7 +37,7 @@ part1 <-
   eval_param_outputs$outputs_summtrajtype_totalsx2 %>%
   filter(trajectory_type == "overall", task_source == "mean") %>%
   select(
-    method_short_name, method_name, harm_mean, rank_correlation, rank_edge_flip, rank_rf_mse, rank_time_method,
+    method_short_name, harm_mean, rank_correlation, rank_edge_flip, rank_rf_mse, time_method, rank_time_method,
     num_files_created, num_setseed_calls, pct_errored, pct_time_exceeded, pct_memory_exceeded
   )
 
@@ -76,6 +76,7 @@ part5 <-
   meta %>%
   select(
     method_short_name = method_id,
+    method_name,
     implementation_id,
     implementation_name,
     output_transformation,
