@@ -97,7 +97,7 @@ outputs_ind <- outputs %>%
     rank_rf_mse = percent_rank(-rf_mse),
     rank_rf_rsq = percent_rank(rf_rsq),
     rank_edge_flip = percent_rank(edge_flip),
-    rank_time_method = percent_rank(time_method)
+    rank_time_method = percent_rank(-time_method)
   ) %>%
   ungroup()
 
