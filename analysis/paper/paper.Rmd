@@ -15,6 +15,7 @@ header-includes:
   - \usepackage{tabu}
   - \usepackage{threeparttable}
   - \usepackage[normalem]{ulem}
+  - \ExecuteBibliographyOptions{sorting=none,sortcites=true,autocite=superscript}
 mainfont: Open Sans
 
 
@@ -369,7 +370,20 @@ Special conversions were necessary for certain methods:
 ## Method quality control
 
 
-We created a transparent scoring scheme to check the quality of each method (`r ref("stable", "qc_checks")`), based on several existing tool quality and programming guidelines in literature and online. The goal of this quality control is in the first place to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed the certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of dataset on which the usefulness of the method was shown, and the scope of method evaluation in the paper.
+```{r}
+qc_references <- readRDS(derived_file("checks.rds", "4-method_characterisation"))$references %>% 
+  str_split("[, \n]+") %>% 
+  unlist() %>% 
+  unique() %>% 
+  discard(is.na) %>%
+  glue::collapse(., ";") %>%
+  paste0("[", ., "]")
+```
+
+
+
+
+We created a transparent scoring scheme to check the quality of each method (`r ref("stable", "qc_checks")`), based on several existing tool quality and programming guidelines in literature and online `r qc_references` . The goal of this quality control is in the first place to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed the certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of dataset on which the usefulness of the method was shown, and the scope of method evaluation in the paper.
 
 
 For each quality aspect received a weight by how frequently it was found in several papers and online sources which discuss tool quality (`r ref("table", "implementations")`). This was to make sure that more important aspect, such as the open source availability of the method, outweigh other aspects, such as the availability of a graphical user interface. For calculating the final score, we weighed each of the six categories equally.
@@ -393,9 +407,11 @@ Our workflow to generate synthetic data is based on the well established workflo
 One of the main process involved in cellular dynamic processes is gene regulation, where regulatory cascades and feedback loops lead to progressive changes in expression and decision making. The exact way a cell chooses a certain path during its differentiation is still an active research field, although certain models have already emerged and been tested in vivo. One driver of bifurcations seem to be mutual antagonism, where genes [@xu_regulationbifurcatingcell_2015] strongly repress each other, forcing one of the two to become inactive [@graf_forcingcellschange_2009]. Such mutual antagonism can be modelled and simulated [@wang_quantifyingwaddingtonlandscape_2011; @ferrell_bistabilitybifurcationswaddington_2012]. Although such a two-gene model is simple and elegant, the reality is frequently more complex, with multiple genes (grouped into models) repressing each other [@yosef_dynamicregulatorynetwork_2013].
 
 
-<p class='wip'> Cascades? Cycle?</p>
+<p class='wip'> Cascades? Cycle?
+</p>
 
-<p class='wip'> To simulate certain trajectory topologies, we therefore designed module networks in which the cells will follow a particular trajectory topology given certain parameters (`r ref("sfig", "modulenets")`). Two module networks generated linear trajectories (linear and linear long), two generated simple forks (bifurcating and converging), one generated a complex fork (trifurcating), one generated a rooted tree (consecutive bifurcating) and two generated trajectories which simple undirected graphs (bifurcating loop and bifurcating convergence).</p>
+<p class='wip'> To simulate certain trajectory topologies, we therefore designed module networks in which the cells will follow a particular trajectory topology given certain parameters (`r ref("sfig", "modulenets")`). Two module networks generated linear trajectories (linear and linear long), two generated simple forks (bifurcating and converging), one generated a complex fork (trifurcating), one generated a rooted tree (consecutive bifurcating) and two generated trajectories which simple undirected graphs (bifurcating loop and bifurcating convergence).
+</p>
 
 From these module networks we generated gene regulatory networks in two steps: generation of the main regulatory network, and addition of extra target genes from real regulatory networks. For each dataset, we used the same number of genes as were differentially expressed in the real datasets. 5% of genes were assigned to be part of the main, and were randomly distributed among all modules (with at least one gene per module). We sampled edges between these individual genes (according to the module network) using an uniform distribution between 1 and the number of possible targets in each module. To add additional target genes to the network, we assigned every regulator from the network to a real regulator in a real network (from regulatory circuits [@marbach_tissuespecificregulatorycircuits_2016]), and extracted for every regulator a local network around it using personalized pagerank (with damping factor set to 0.1). 
 
@@ -504,7 +520,8 @@ For each dataset we sampled the same number of cells as were present in the refe
 ### Gold standard extraction
 
 
-<p class='wip'> Because each cellular simulations follows the trajectory it its own speed, knowing the exact position of a cell within the trajectory toplogy is not straightforward. Furthermore, the speed by which simulated cells made a decision between two or more alternative paths was highly variable sfig?. To estimate a cell's position during a simulation within the trajectory toplogy, we therefore used the known progression of the modules, given in `r ref("sfig", "modulenets", "c")`,  as a backbone. We smoothed the expression in each simulation using a rolling mean with a window of 50 time steps, and then calculated the average module expression along the simulation. We used dynamic time warping, implemented in the dtw R package [@giorgino_computingvisualizingdynamic_2009; @tormene_matchingincompletetime_2009], with an open end to align a simulation to all possible module progressions, and then picked the alignment which minimised the normalised distance between the simulation and the backbone. In case of cyclical trajectory topologies, the number of possible milestones a backbone could progress through was limited to 20.</p>
+<p class='wip'> Because each cellular simulations follows the trajectory it its own speed, knowing the exact position of a cell within the trajectory toplogy is not straightforward. Furthermore, the speed by which simulated cells made a decision between two or more alternative paths was highly variable sfig?. To estimate a cell's position during a simulation within the trajectory toplogy, we therefore used the known progression of the modules, given in `r ref("sfig", "modulenets", "c")`,  as a backbone. We smoothed the expression in each simulation using a rolling mean with a window of 50 time steps, and then calculated the average module expression along the simulation. We used dynamic time warping, implemented in the dtw R package [@giorgino_computingvisualizingdynamic_2009; @tormene_matchingincompletetime_2009], with an open end to align a simulation to all possible module progressions, and then picked the alignment which minimised the normalised distance between the simulation and the backbone. In case of cyclical trajectory topologies, the number of possible milestones a backbone could progress through was limited to 20.
+</p>
 
 ## Common normalisation pipeline
 We used a standard single-cell RNA-seq preprocessing pipeline which applies parts of the scran and scater Bioconductor packages [@lun_stepbystepworkflowlowlevel_2016]. The advantages of this pipeline is that it works both with and without spike-ins, and includes a harsh cell filtering which looks at abnormalities in library sizes, mitochondrial gene expression, and number of genes expressed using median absolute deviations (set to 3). We required that a gene has to be expressed in at least 5% of the cells, and that it should have an average expression higher than 0.05. Furthermore, we used the pipeline to select the most highly variable genes, using a false discovery rate of 5% and a biological component higher than 0.5. As a final filter, we removed both all zero genes and cells until convergence.
@@ -567,10 +584,6 @@ figure_file("edge_flip_comparison.pdf", experiment_id="3-score_rules/4-edge_flip
 
 
 # Acknowledgements
-# References 
-
-
-<div id="refs"></div>
 
 
 # Supplementary Material
