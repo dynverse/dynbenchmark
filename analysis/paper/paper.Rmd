@@ -254,10 +254,21 @@ Top methods tend to contain similar components, with …
 Over time, both the average and maximum performance increased with the addition of new methods `r ref("sfig", "top_performers_over_time")` 
 
 
+Performance was stable between real and synthetic datasets `r ref("sfig", "real_synthetic_comparison")`
 
 
 
 
+```{r}
+add_sfig(
+        figure_file('real_synthetic_comparison.svg', "5-optimise_parameters/5-real_synthetic_comparison")
+, 
+"real_synthetic_comparison", 
+"Comparison of method performance between real and synthetic datasets. ", 
+12, 
+4
+)
+```
 # Discussion
 <!-- Some intro -->
 Trajectory inference is unique among most other categories of single-cell analysis methods, such as clustering, normalisation and differential expression, because it models the data in a way that was almost impossible using bulk data. Indeed, for no other single-cell analysis types have so many tools been developed, according to omictools.org [@henry_omictoolsinformativedirectory_2014] (https://omictools.com/single-cell-rna-seq-category), the "awesome single cell software" list created by Sean Davis [@davis_awesomesinglecelllistsoftware_2018] and scRNA-tools [@zappia_exploringsinglecellrnaseq_2017] (https://www.scrna-tools.org) . It is therefore critical that these methods, now reaching `r sum(methods$is_ti, na.rm=TRUE)`, are evaluated to guide the users in their choice. In this preprint, we summarise the initial version of our evaluation of these methods, focusing on the quality control and the accuracy of their model using their default parameters on real and synthetic data.
@@ -330,7 +341,7 @@ figure_file("trajectory_type_trees.svg","2-dataset_characterisation/2-trajectory
 We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods (`r ref("table", "implementations", anchor=TRUE)`), by searching in literature for "trajectory inference" and "pseudotemporal ordering" and based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018; @gitter_singlecellpseudotimeoverviewalgorithms_2018]. We believe this to be the most complete list to data, but are welcome to include additional methods through e-mail or an issue on our github (https://github.com/dynverse/dynalysis). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "implementations")`).
 
 
-Due to the absence of a common format for trajectory inference methods, most methods produce a heterogeneous output. We therefore created wrappers around each method in R (available at https://www.github.com/dynverse/dynmethods) and postprocessed its output into a common probabilistic trajectory model. This model consisted of two parts. The milestone network represents the overall network topology, and contains edges between different milestones and the length of the edge between them. The milestone percentages contain for each cell its position between two or more milestones, and sums for each cell to one.
+Due to the absence of a common format for trajectory models, most methods return a unique set of output formats with rarely any overlap. We therefore created wrappers around each method in R (available at https://www.github.com/dynverse/dynmethods) and postprocessed its output into a common probabilistic trajectory model. This model consisted of two parts. The milestone network represents the overall network topology, and contains edges between different milestones and the length of the edge between them. The milestone percentages contain for each cell its position between two or more milestones, and sums for each cell to one.
 
 
 Depending on the output of a method, we used different strategies to convert the output to our model (in some cases combined with a special conversion denoted by a \*):
@@ -373,7 +384,9 @@ Special conversions were necessary for certain methods:
 ### Prior information
 
 
-TODO: describe which prior information was given and how it was extracted
+TODO: describe which prior information was given and how it was extracted.
+
+
 ## Method quality control
 
 
@@ -390,10 +403,10 @@ qc_references <- readRDS(derived_file("checks.rds", "4-method_characterisation")
 
 
 
-We created a transparent scoring scheme to check the quality of each method (`r ref("stable", "qc_checks")`), based on several existing tool quality and programming guidelines in literature and online `r qc_references` . The goal of this quality control is in the first place to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed the certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of dataset on which the usefulness of the method was shown, and the scope of method evaluation in the paper.
+We created a transparent scoring scheme to check the quality of each method (`r ref("stable", "qc_checks")`), based on several existing tool quality and programming guidelines in literature and online `r qc_references` . The goal of this quality control in the first place is to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed the certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of dataset on which the usefulness of the method was shown, and the scope of method evaluation in the paper.
 
 
-For each quality aspect received a weight by how frequently it was found in several papers and online sources which discuss tool quality (`r ref("table", "implementations")`). This was to make sure that more important aspect, such as the open source availability of the method, outweigh other aspects, such as the availability of a graphical user interface. For calculating the final score, we weighed each of the six categories equally.
+Each quality aspect received a weight by how frequently it was found in several papers and online sources which discuss tool quality (`r ref("table", "implementations")`). This was to make sure that more important aspect, such as the open source availability of the method, outweigh other aspects, such as the availability of a graphical user interface. For calculating the final score, we weighed each of the six categories equally.
 
 
 ## Real datasets
