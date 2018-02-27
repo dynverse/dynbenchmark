@@ -241,6 +241,7 @@ citation_format <- c(
       references %>%
         str_split("[, \\n]+") %>%
         first() %>%
+        paste0("@", .) %>%
         glue::collapse(";") %>%
         {pritt("[{.}]")}
     }

@@ -41,15 +41,14 @@ walk2(files, tofiles, ~system(glue::glue("inkscape {.} --export-png={.y}")))
 tofiles <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg") %>% gsub("\\.svg", "\\.pdf", .)
 walk2(files, tofiles, ~system(glue::glue("inkscape {.} --export-pdf={.y}")))
 
-read_file("analysis/paper/paper.Rmd") %>% gsub("\\.svg", "\\.pdf", .) %>% write_file("analysis/paper/paper.Rmd")
-
-
 # generate pdfs
 file.remove("analysis/paper/paper.pdf")
 
+# create pdf
+read_file("analysis/paper/paper.Rmd") %>% gsub("\\.svg", "\\.pdf", .) %>% write_file("analysis/paper/paper_latex.Rmd")
 params <- list(table_format="latex")
 render(
-  "analysis/paper/paper.Rmd",
+  "analysis/paper/paper_latex.Rmd",
   output_format = rmarkdown::pdf_document(
     latex_engine = "xelatex",
     dev="png",
