@@ -33,8 +33,18 @@ browseURL("analysis/paper/paper.html")
 
 ##  ............................................................................
 ##  PDF                                                                     ####
+
+# create pdfs and pngs for every svg, svg conversion is not really good in pandoc
+files <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg")
+tofiles <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg") %>% gsub("\\.svg", "\\.png", .)
+walk2(files, tofiles, ~system(glue::glue("inkscape {.} --export-png={.y}")))
+tofiles <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg") %>% gsub("\\.svg", "\\.pdf", .)
+walk2(files, tofiles, ~system(glue::glue("inkscape {.} --export-pdf={.y}")))
+
 read_file("analysis/paper/paper.Rmd") %>% gsub("\\.svg", "\\.pdf", .) %>% write_file("analysis/paper/paper.Rmd")
 
+
+# generate pdfs
 file.remove("analysis/paper/paper.pdf")
 
 params <- list(table_format="latex")
@@ -56,11 +66,3 @@ drive_update("dynverse/paper.pdf", "analysis/paper/paper.pdf")
 
 # for conversion to pdf:
 # system(pritt("cd analysis/paper; pandoc paper.html +RTS -K1024M -RTS --pdf-engine=xelatex -o paper.pdf"))
-
-
-
-files <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg")
-tofiles <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg") %>% gsub("\\.svg", "\\.png", .)
-walk2(files, tofiles, ~system(glue::glue("inkscape {.} --export-png={.y}")))
-tofiles <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg") %>% gsub("\\.svg", "\\.pdf", .)
-walk2(files, tofiles, ~system(glue::glue("inkscape {.} --export-pdf={.y}")))
