@@ -42,9 +42,9 @@ prior_df <- outputs_ind %>% select(method_name, prior_str) %>% distinct()
 
 ############### OVERALL COMPARISON ###############
 metr_lev <- c(
-  "harm_mean", "rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean",
-  "real", "synthetic", "time_method_mean", "pct_errored_mean",
-  "pct_time_exceeded_mean", "pct_memory_exceeded_mean", "num_setseed_calls_mean", "num_files_created_mean"
+  "harm_mean", "rank_correlation", "rank_edge_flip", "rank_rf_mse",
+  "real", "synthetic", "time_method", "pct_errored",
+  "pct_time_exceeded", "pct_memory_exceeded", "num_setseed_calls", "num_files_created"
 )
 
 
@@ -104,7 +104,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
   )
 
 ggplot(outputs_summtrajtype_totalsx2) +
-  geom_point(aes(method_name_f, rank_correlation_mean, colour = method_name_f)) +
+  geom_point(aes(method_name_f, rank_correlation, colour = method_name_f)) +
   coord_flip() +
   theme_bw() +
   theme(legend.position = "none") +
@@ -116,7 +116,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
 
 
 ggplot(outputs_summtrajtype_totalsx2) +
-  geom_point(aes(method_name_f, rank_edge_flip_mean, colour = method_name_f)) +
+  geom_point(aes(method_name_f, rank_edge_flip, colour = method_name_f)) +
   coord_flip() +
   theme_bw() +
   theme(legend.position = "none") +
@@ -127,7 +127,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
   )
 
 ggplot(outputs_summtrajtype_totalsx2) +
-  geom_point(aes(method_name_f, rank_rf_mse_mean, colour = method_name_f)) +
+  geom_point(aes(method_name_f, rank_rf_mse, colour = method_name_f)) +
   coord_flip() +
   theme_bw() +
   theme(legend.position = "none") +
@@ -207,8 +207,8 @@ rm(g, time_ind, timeind_task_ord, timeind_meth_ord)
 
 ############### COMPARISON OF SCORES BETWEEN TASK GROUPS ###############
 out_gath <- outputs_summtrajtype %>%
-  select(method_name, method_short_name, method_name_f, task_source, trajectory_type, trajectory_type_f, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, harm_mean) %>%
-  gather(metric, value, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, harm_mean) %>%
+  select(method_name, method_short_name, method_name_f, task_source, trajectory_type, trajectory_type_f, rank_correlation, rank_rf_mse, rank_edge_flip, harm_mean) %>%
+  gather(metric, value, rank_correlation, rank_rf_mse, rank_edge_flip, harm_mean) %>%
   spread(task_source, value)
 
 one <-
@@ -222,8 +222,8 @@ one
 
 
 out_gath <- outputs_summmethod %>%
-  select(method_name, method_short_name, method_name_f, task_source, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, harm_mean) %>%
-  gather(metric, value, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean, harm_mean) %>%
+  select(method_name, method_short_name, method_name_f, task_source, rank_correlation, rank_rf_mse, rank_edge_flip, harm_mean) %>%
+  gather(metric, value, rank_correlation, rank_rf_mse, rank_edge_flip, harm_mean) %>%
   spread(task_source, value)
 
 one <-
