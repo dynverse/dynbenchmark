@@ -85,7 +85,7 @@ Single-cell -omics technologies now make it possible to model biological systems
 
 ```{r}
 add_sfig(
-figure_file("methods_timeline.svg", "4-method_characterisation"),
+figure_file("methods_timeline.pdf", "4-method_characterisation"),
 "methods_over_time", 
 "New TI methods over time. **a** Number of methods published or in preprint. **b** Number of methods which can handle a particular type of trajectory."
 )
@@ -168,7 +168,7 @@ read_rds(figure_file("implementations_table.rds", "4-method_characterisation"))[
 
 
 `r anchor("fig", "evaluation_overview")`
-![](`r figure_file("ti_evaluation_overview_v2.svg", experiment_id="evaluation_overview")`)
+![](`r figure_file("ti_evaluation_overview_v2.pdf", experiment_id="evaluation_overview")`)
 `r ref("fig", "evaluation_overview")` Overview of the evaluation
 
 
@@ -199,7 +199,7 @@ read_rds(figure_file("qc_checks.rds","4-method_characterisation"))[[params$table
 
 
 `r anchor("fig", "implementation_overview")`
-![](`r figure_file("implementation_overview.svg", experiment_id="4-method_characterisation")`)
+![](`r figure_file("implementation_overview.pdf", experiment_id="4-method_characterisation")`)
 `r ref("fig", "implementation_overview", anchor=TRUE)` First characterization of each method.
 
 
@@ -210,7 +210,7 @@ Most methods fulfill most of the basic criteria, such as free availability and b
 
 ```{r}
 add_sfig(
-figure_file("qc_over_time.svg","4-method_characterisation"), 
+figure_file("qc_over_time.pdf","4-method_characterisation"), 
 "qc_over_time", 
 "Quality control scores and number of citations over time"
 )
@@ -222,7 +222,7 @@ The underlying algorithms can be divided into several steps, and these frequentl
 
 ```{r}
 add_sfig(
-figure_file("method_components.svg","4-method_characterisation"), 
+figure_file("method_components.pdf","4-method_characterisation"), 
 "method_components", 
 "TI methods frequently share steps"
 )
@@ -235,7 +235,7 @@ We compared the accuracy of each method by comparing its output with a gold stan
 
 ```{r}
 add_sfig({
-        figure_file('wrapping.svg', '4-method_characterisation')
+        figure_file('wrapping.pdf', '4-method_characterisation')
 }, 
 "wrapping", 
 "Our wrapping workflow", 
@@ -310,7 +310,7 @@ We classified all possible trajectory topologies into distinct trajectory types,
 
 ```{r}
 add_sfig(
-figure_file("trajectory_type_trees.svg","2-dataset_characterisation/2-trajectory_types"), 
+figure_file("trajectory_type_trees.pdf","2-dataset_characterisation/2-trajectory_types"), 
 "trajectory_type_tree", 
 "Different trajectory types can be classified in a directed acyclic graph, in which certain types are a generalisation of other trajectory types.", 
 15, 
@@ -577,7 +577,7 @@ As a third independent score, we assessed the similarity between the milestone n
 
 ```{r}
 add_sfig({
-figure_file("edge_flip_comparison.svg", experiment_id="3-score_rules/4-edge_flip")
+figure_file("edge_flip_comparison.pdf", experiment_id="3-score_rules/4-edge_flip")
 }, 
 "edge_flip_comparison", 
 "Edge flip score values for common trajectory topologies", 
