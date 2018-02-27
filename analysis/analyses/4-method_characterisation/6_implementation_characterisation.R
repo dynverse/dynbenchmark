@@ -221,6 +221,33 @@ implementations$non_inclusion_reasons_footnotes <- implementations$non_inclusion
 
 superscript <- c(latex = function(x) pritt("\\textsuperscript{{{x}}}"), html=function(x) pritt("<sup>{x}</sup>"))
 
+citation_format <- c(
+  latex=function(references) {
+    if(is.na(references)) {
+      ""
+    } else {
+      references %>%
+        gsub("@", "", .) %>%
+        str_split("[, \\n]+") %>%
+        first() %>%
+        glue::collapse(",") %>%
+        paste0("\\cite{", ., "}")
+    }
+  },
+  html=function(references) {
+    if(is.na(references)) {
+      ""
+    } else {
+      references %>%
+        str_split("[, \\n]+") %>%
+        first() %>%
+        paste0("@", .) %>%
+        glue::collapse(";") %>%
+        {pritt("[{.}]")}
+    }
+  }
+)
+
 table <- map(c("latex", "html"), function(format) {
   implementations_table <- implementations %>%
     filter(is_ti) %>%
@@ -230,7 +257,8 @@ table <- map(c("latex", "html"), function(format) {
       evaluated = kableExtra::cell_spec(
         evaluated,
         format,
-        color=ifelse(evaluated == "Yes", "green", "black"),
+        background=ifelse(evaluated == "Yes", "#AAAAAA", "white"),
+        color="black",
         escape = F
       ),
       date = strftime(date, "%d/%m/%Y"),
@@ -244,9 +272,15 @@ table <- map(c("latex", "html"), function(format) {
       implementation_name = kableExtra::cell_spec(
         implementation_name,
         format,
-        link=Code)
+        link=Code
+      ),
+      reference = kableExtra::cell_spec(
+        map_chr(bibtex, citation_format[[format]]),
+        format,
+        escape=F
+      ),
     ) %>%
-    select(implementation_name, date, maximal_trajectory_type, evaluated) %>%
+    select(implementation_name, date, maximal_trajectory_type, evaluated, reference) %>%
     rename_all(label_long)
 
   table <- implementations_table %>%
@@ -255,6 +289,7 @@ table <- map(c("latex", "html"), function(format) {
     kableExtra::add_footnote(non_inclusion_reasons$long, "number")
   table
 }) %>% set_names(c("latex", "html"))
+table
 table %>%
   saveRDS(figure_file("implementations_table.rds"))
 
