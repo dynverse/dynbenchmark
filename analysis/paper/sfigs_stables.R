@@ -5,6 +5,8 @@ cat("\n\n")
 plot_figs <- function(figs) {
   if("ggplot" %in% class(figs)) {
     print(figs)
+  } else if ("character" %in% class(figs)) {
+    cat(paste0("![](", figs, ")"))
   } else {
     walk(figs, print)
   }
@@ -15,7 +17,7 @@ subchunkify <- function(ref_id, caption, width=5, height=7) {
   subchunk <- glue::glue("",
                          "",
                          "`r anchor('sfig', '{ref_id}')`",
-                         "```{{r {ref_id}, fig.height={height}, fig.width={width}, echo=FALSE, dev='svg', results='asis'}}",
+                         "```{{r {ref_id}, fig.height={height}, fig.width={width}, echo=FALSE, dev='pdf', results='asis'}}",
                          "fig <- sfigs %>% filter(ref_id == !!ref_id) %>% pull(fig) %>% .[[1]] %>% plot_figs()",
                          "```",
                          "`r ref('sfig', '{ref_id}')` {caption}",
