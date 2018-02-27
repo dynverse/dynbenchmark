@@ -147,19 +147,19 @@ table <- map(c("latex", "html"), function(format) {
         label_long(trajectory_type),
         format,
         background=toupper(set_names(trajectory_types$color, trajectory_types$id)[trajectory_type]),
-        color="white"
+        color=ifelse(trajectory_type == "rooted_tree", "#333333", "#FFFFFF"),
       ),
       ncells = cell_spec(
         ncells,
         format,
-        background=spec_color(log(ncells), end = 0.9, option = "D", direction = -1),
+        background=spec_color(log(ncells), end = 0.9, option = "D", direction = 1),
         escape=FALSE,
         color="white"
       ),
       ngenes = cell_spec(
         ngenes,
         format,
-        background=spec_color(log(ngenes), end = 0.9, option = "D", direction = -1),
+        background=spec_color(log(ngenes), end = 0.9, option = "D", direction = 1),
         escape=FALSE,
         color="white"
       ),
