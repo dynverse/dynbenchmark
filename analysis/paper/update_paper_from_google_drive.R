@@ -54,7 +54,8 @@ render(
     latex_engine = "xelatex",
     dev="png",
     keep_tex=TRUE,
-    citation_package="biblatex"
+    citation_package="biblatex",
+    pandoc_args=c("--csl=nature-biotechnology.csl")
   ),
   output_dir = "analysis/paper/",
   output_file = "paper.pdf",
