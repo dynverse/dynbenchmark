@@ -15,7 +15,7 @@ sc_fun <- function(x) {
 }
 sc_col_fun <- function(x) {
   sc <- sc_fun(x)
-  continuous_scale[round(sc * 100)+1]
+  ifelse(is.na(sc), "darkgray", continuous_scale[round(sc * 100)+1])
 }
 
 error_colours <- setNames(RColorBrewer::brewer.pal(3, "Set2"), c("pct_inside", "pct_memory_exceeded", "pct_time_exceeded"))
@@ -214,13 +214,12 @@ g <- ggplot(method_tib) +
   geom_rect(aes(xmin = axtr$qcpa$xmin, xmax = axtr$qcpa$xmax, ymin = method_ymin, ymax = method_ymax, fill = qc_paper_sc_col)) +
 
   # RESERVE SPACE
-  expand_limits(x = c(-6, 40)) +
+  expand_limits(x = c(-6, 47)) +
 
   # THEME SETTINGS
   coord_equal(expand = FALSE) +
-  # viridis::scale_fill_viridis(option = "B") +
   scale_fill_identity() +
   cowplot::theme_nothing()
 
-ggsave(figure_file("overview.pdf"), g, width = 20, height = 10)
+ggsave(figure_file("overview.pdf"), g, width = 16, height = 10)
 
