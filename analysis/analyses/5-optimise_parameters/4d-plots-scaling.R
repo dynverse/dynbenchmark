@@ -51,7 +51,7 @@ oi_datas <-
   ) %>%
   ungroup()
 
-rsq_cutoff <- .5
+rsq_cutoff <- .25
 
 oi_lm <- oi %>%
   filter(pct_errored == 0) %>%
