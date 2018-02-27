@@ -71,16 +71,17 @@ source(paste0(dynalysis::get_dynalysis_folder(), "/analysis/paper/setup.R"))
 # Abstract
 
 
-Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Since 2014, more than 50 trajectory inference methods have been developed, each with its own set of methodological characteristics. As a result, comparing between trajectory inference methods often challenging, and a comprehensive assessment of the performance and robustness of each method is still lacking. We developed a common data structure for trajectory inference methods in order to make their results comparable to each other and to a gold standard. Using this framework, we compare the results from a total of 22 trajectory inference methods, on a large collection of real datasets and realistic synthetic datasets. We employ several metrics, including accuracy of the inferred ordering, correctness of the network topology, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at https://www.github.com/dynverse.
+Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Since 2014, more than 50 trajectory inference methods have been developed, each with its own set of methodological characteristics. As a result, comparing between trajectory inference methods is often challenging, and a comprehensive assessment of the performance and robustness of each method is still lacking. We developed a common data structure for trajectory inference methods in order to make their results comparable to each other and to a gold standard. Using this framework, we compare the results from a total of 22 trajectory inference methods, on a large collection of real datasets and realistic synthetic datasets. We employ several metrics, including accuracy of the inferred ordering, correctness of the network topology, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at https://www.github.com/dynverse.
 
 
 This is the first comprehensive assessment the performance of trajectory inference methods publicly available online. Comments and criticisms are welcome.
 
 
 # Introduction
+<!-- Introduction to single-cell and TI --->
 
 
-Single-cell -omics technologies now make it possible to model biological systems more accurately than ever before. One area where single-cell data can be particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation. When cells are sampled from a population in which cells are at different unknown points in the dynamic process, trajectory inference (TI) methods can be used to computationally order these cells along their dynamic process [@cannoodt_computational_2016]. Because they offer an unbiased and transcriptome-wide understanding of dynamic process, trajectories then allow the objective identification of new (primed) subsets of cells, delineation the exact wiring of a differentiation tree and inference of regulatory interaction responsible for a bifurcation refs. This is currently applicable to specific subsets of cells, but might also be applicable to whole tissues or organisms in the near future [@regev_scienceforumhuman_2017; @han_mappingmousecell_2018].
+Single-cell -omics technologies now make it possible to model biological systems more accurately than ever before. One area where single-cell data can be particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation. When cells are sampled from a population in which cells are at different unknown points in the dynamic process, trajectory inference (TI) methods can be used to computationally order these cells along their dynamic process [@cannoodt_computational_2016]. TI methods offer an unbiased and transcriptome-wide understanding of dynamic process [@tanay_scaling_2017], and thus allow the objective identification of new (primed) subsets of cells [@schlitzer_identificationcdc1cdc2committed_2015], delineation of a differentiation tree [@velten_humanhaematopoieticstem_2017; @see_mappinghumandc_2017] and inference of regulatory interaction responsible for a bifurcation [@aibar_scenicsinglecellregulatory_2017]. Current applications of TI focus on specific subsets of cells, but current efforts to construct transcriptomic catalogues of whole organisms [@regev_scienceforumhuman_2017; @han_mappingmousecell_2018] underline the urgency for accurate, scalable[@aibar_scenicsinglecellregulatory_2017; @angerer_singlecellsmake_2017] and user-friendly TI methods.
 
 
 ```{r}
@@ -94,44 +95,64 @@ figure_file("methods_timeline.pdf", "4-method_characterisation"),
 
 <!-- history of Ti, different methods -->
 ```{r}
-fixed_linear <- methods %>%
+fixed_linear <- implementations %>%
  filter(
    fixes_topology != 'free', 
-   maximal_trajectory_type != 'undirected_linear'
+   maximal_trajectory_type == 'directed_linear'
  ) %>%
- .$method_id
-fixed_bifurcating <- methods %>%
+ .$implementation_id
+fixed_bifurcating <- implementations %>%
  filter(
    fixes_topology != 'free', 
-   maximal_trajectory_type != 'simple_fork'
+   maximal_trajectory_type == 'bifurcation'
  ) %>%
- .$method_id
-fixed_other <- methods %>%
+ .$implementation_id
+fixed_other <- implementations %>%
  filter(
    fixes_topology != 'free', 
-   !maximal_trajectory_type %in% c('undirected_linear', 'simple_fork')
+   !maximal_trajectory_type %in% c('directed_linear', 'bifurcation')
  ) %>%
- .$method_id
-fixed_algorithm <- methods %>%
+ .$implementation_id
+fixed_algorithm <- implementations %>%
  filter(fixes_topology == 'algorithm') %>%
- .$method_id
-fixed_parameters <- methods %>%
+ .$implementation_id
+fixed_parameters <- implementations %>%
  filter(fixes_topology == 'parameter') %>%
- .$method_id
+ .$implementation_id
 	
 
 ```
 
 
-Dozens of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially, most trajectory inference methods fixed the trajectory topology to a linear `r cite_methods(fixed_linear)`, bifurcating `r cite_methods(fixed_bifurcating)` or other `r cite_methods(fixed_other)` topology, by either algorithmic limitations `r cite_methods(fixed_algorithm)` or through user parameters `r cite_methods(fixed_parameters)`. The focus of these methods was therefore mainly to correctly order the cells along this fixed topology. However, several recent methods now infer both the ordering and the topology at the same time, although some topological limitations are still imposed (`r ref("sfig", "methods_over_time", "b")`). Methods which do not impose limitations on the topology at all are now being developed [@welch_slicer:_2016; @wolf_graph_2017], and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes happening at parallel in a single-cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
+Dozens of trajectory inference methods have been developed over the last years, and more are being published almost every month (`r ref("sfig", "methods_over_time", "a")`). Initially, most trajectory inference methods fixed the trajectory topology to a linear `r cite_methods(fixed_linear)`, bifurcating `r cite_methods(fixed_bifurcating)` or other `r cite_methods(fixed_other)` topology, by either algorithmic limitations `r cite_methods(fixed_algorithm)` or through user parameters `r cite_methods(fixed_parameters)`. The focus of these methods was therefore mainly to correctly order the cells along this fixed topology. However, several recent methods now infer both the ordering and the topology at the same time, although some topological limitations are still imposed (`r ref("sfig", "methods_over_time", "b")`). Methods which do not impose limitations on the topology at all are now being developed [@welch_slicer:_2016; @wolf_graph_2017], and it is expected that in the future methods will be able to model even more complex behavior, such as multiple dynamic processes happening at parallel in a single cell or the integration of datasets from different patients [@tanay_scaling_2017; @cannoodt_computational_2016].
 
 
 <!-- Common framework of TI, different components, naturally progressing towards the need for an evaluation -->
-Although trajectory inference methods use a variety of algorithms and steps to reach a final ordering, most consist of the following three main steps: (i) preprocessing (normalization, filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction, clustering or graph building and (iii) ordering the cells along the simplified representation [@cannoodt_computational_2016]. Depending on the way the cells are ordered, some prior information about the dynamic process can be optionally used or required, which can both bias the trajectory to current knowledge but also guide the method towards choosing the right trajectory among many others. Furthermore, with the ongoing scalability in single-cell -omics technologies (reaching a million cells [@angerer_singlecellsmake_2017], it becomes more and more important that analysis methods become both scalable [@aibar_scenicsinglecellregulatory_2017; @angerer_singlecellsmake_2017] and user friendly.
 
 
-<!-- Common framework of TI, different components, naturally progressing towards the need for an evaluation -->
-Given this plethora of available trajectory inference methods, it is important that methods are compared, so that users can use the most optimal method available for their problem. Moreover, new methods need to be rigorously tested, so that development can focus on improving the current state-of-the-art. In this study, we therefore for the first time developed a comprehensive evaluation framework for trajectory inference methods. We test both on synthetic data, for which the gold standard is known, and real data, for which in some cases the gold standard can be extracted from expert knowledge. We include a rigorous parameter optimisation, making sure that parameters are optimized while avoiding overfitting on characteristics of specific datasets. To make our framework reusable and extendable, we make use of continuous analysis [@beaulieu-jones_reproducibility_2017], which allows the developers of new methods to easily test their methods and compare them against the state-of-the-art.
+```{r}
+uses_priors <- implementations %>% 
+  gather(prior_id, prior_usage, !!priors$prior_id) %>% 
+  filter(prior_usage %in% c("can_use", "can_root")) %>% 
+  pull(implementation_id) %>% unique()
+
+
+requires_priors <- implementations %>% 
+  gather(prior_id, prior_usage, !!priors$prior_id) %>% 
+  filter(prior_usage %in% c("required", "required_default")) %>% 
+  pull(implementation_id) %>% unique()
+	
+
+```
+
+
+Although trajectory inference methods use a variety of algorithms and steps to reach a final ordering, most consist of the following three main steps: (i) preprocessing (normalization, filtering of genes and/or cells), (ii) conversion to a simplified representation using dimensionality reduction, clustering or graph building and (iii) ordering the cells along the simplified representation [@cannoodt_computational_2016]. Depending on the way the cells are ordered, some prior information about the dynamic process can be optionally used`r cite_methods(uses_priors)` or required`r cite_methods(requires_priors)`, which can both bias the trajectory to current knowledge but also guide the method towards choosing the right trajectory among many others.
+
+
+<!-- Common framework of TI, different components, naturally progressing towards the need for an evaluation →
+
+
+Given this plethora of available trajectory inference methods, it is important that methods are compared, so that users can use the most optimal methods available for their problem. Moreover, new methods need to be rigorously tested, so that development can focus on improving the current state-of-the-art. In this study, we therefore present the first comprehensive evaluation framework for trajectory inference methods. We compared `r sum(methods$evaluated)` methods both on synthetic data, for which the gold standard is known, and real data, for which a gold standard has to be extracted from expert knowledge. <!-- We include a rigorous parameter optimisation, making sure that parameters are optimized while avoiding overfitting on characteristics of specific datasets. --> To make our framework reusable and extendable, we make use of continuous analysis [@beaulieu-jones_reproducibility_2017], which allows the developers of new methods to easily test their methods and compare them against the state-of-the-art.
 
 
 # Results
@@ -575,12 +596,8 @@ The current Git commit details are:
 ```{r}
 git2r::repository(".")
 ```
-When sampled, single cells will most probably be in different states of dynamic processes, due to the stochasticity of expression. Trajectory inference methods can be used to computationally order these cells along trajectories, based on gradual changes in the expression of several genes.
-It is not really due to stochasticity that these cells are in different states of a dynamic process though?
-insert refs
-get an idea of which available method or set of methods would optimally resolve their problem.
-we present the first comprehensive (...)?
-compared 22 TI methods on both synthetic (..)
+I think we should mention something here about sc transcriptomics, flow/mass cytometry etc...
+For example, I talked with Abhishek the other day and his view was really flow oriented. I think people who primarily use flow will be confused by whether this paper looks at scRNAseq or both flow and scRNAseq
 Love this figure! It's a great summary of the /whole/ study methodology
 I have several comments (that I might address myself if I get to it first). I'll post them as separate comments, so they can get resolved individually.
 I would include a part for the method wrappers; that is the way that linear, cellcluster, cellgraph and generic TI's get translated to the probabilistic trajectory model

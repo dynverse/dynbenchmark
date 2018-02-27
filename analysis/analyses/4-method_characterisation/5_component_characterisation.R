@@ -105,5 +105,5 @@ method_components_categories_plot
 method_components_plot <- cowplot::plot_grid(method_components_wordcloud_plot, method_components_ordering_plot)
 method_components_plot
 
-saveRDS(method_components_plot, figure_file("method_components.rds"))
+save_plot(figure_file("method_components.svg"), method_components_plot, base_width=15, base_height=7.5)
 

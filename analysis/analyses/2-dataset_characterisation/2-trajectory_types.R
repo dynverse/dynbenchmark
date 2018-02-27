@@ -80,4 +80,4 @@ trajectory_type_trees <- cowplot::plot_grid(
   rel_widths = c(0.1, 0.4, 0.4)
 )
 trajectory_type_trees
-write_rds(trajectory_type_trees, figure_file("trajectory_type_trees.rds"))
+save_plot(figure_file("trajectory_type_trees.svg"), trajectory_type_trees, base_width=15, base_height=10)

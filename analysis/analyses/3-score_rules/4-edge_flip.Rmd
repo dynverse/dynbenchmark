@@ -9,6 +9,7 @@ knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 library(dynalysis)
 library(tidyverse)
 library(dyneval)
+library(cowplot)
 ```
 
 ```{r}
@@ -80,6 +81,7 @@ edge_flip_comparison <- design %>%
   coord_equal()
 edge_flip_comparison
 write_rds(edge_flip_comparison, figure_file("edge_flip_comparison.rds"))
+ggsave(figure_file("edge_flip_comparison.svg"), edge_flip_comparison, width=7, height=7)
 ```
 
 ```{r}
