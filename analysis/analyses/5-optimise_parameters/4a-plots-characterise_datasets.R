@@ -25,7 +25,7 @@ outputs_summrepl_dataset <- outputs_ind_dataset %>%
   summarise_if(is.numeric, funs(mean, var)) %>%
   ungroup() %>%
   mutate(
-    harm_mean = apply(cbind(rank_correlation_mean, rank_edge_flip_mean, rank_rf_mse_mean), 1, psych::harmonic.mean)
+    harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean)
   )
 
 # process overall evaluation
@@ -45,9 +45,9 @@ outputs_summ_dataset <- outputs_summ_dataset %>% mutate(task_id_f = factor(task_
 
 dataset_comp <-
   outputs_summ_dataset %>%
-  select(task_id, task_id_f, trajectory_type, trajectory_type_f, task_source, harm_mean, pct_errored_mean, rank_correlation_mean, rank_rf_mse_mean, rank_edge_flip_mean) %>%
+  select(task_id, task_id_f, trajectory_type, trajectory_type_f, task_source, harm_mean, pct_errored, rank_correlation, rank_rf_mse, rank_edge_flip) %>%
   gather(metric, score, -task_id:-task_source) %>%
-  mutate(metric_f = factor(metric, levels = c("harm_mean", "pct_errored_mean","rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean")))
+  mutate(metric_f = factor(metric, levels = c("harm_mean", "pct_errored","rank_correlation", "rank_edge_flip", "rank_rf_mse")))
 
 ##### create custom plot #####
 
@@ -93,10 +93,10 @@ labels <- ticks %>%
 # construct axis labels
 metric_nice_labels <- c(
   "harm_mean" = "Harmonic mean",
-  "pct_errored_mean" = "Percentage errored",
-  "rank_correlation_mean" = "Mean rank of correlation",
-  "rank_edge_flip_mean" = "Mean rank of edge flip",
-  "rank_rf_mse_mean" = "Mean rank of RF MSE"
+  "pct_errored" = "Percentage errored",
+  "rank_correlation" = "Mean rank of correlation",
+  "rank_edge_flip" = "Mean rank of edge flip",
+  "rank_rf_mse" = "Mean rank of RF MSE"
 )
 metric_labels <- ticks %>%
   filter(ticks_at == .5) %>%
@@ -175,7 +175,7 @@ dataset_ord <- outputs_summ_dataset %>%
 # create method_name_f factor in all data structures
 outputs_summ_dataset <- outputs_summ_dataset %>% mutate(task_id_f = factor(task_id, levels = rev(dataset_ord)))
 
-sel_metrics <- c("harm_mean", "pct_errored_mean","rank_correlation_mean", "rank_edge_flip_mean", "rank_rf_mse_mean")
+sel_metrics <- c("harm_mean", "pct_errored","rank_correlation", "rank_edge_flip", "rank_rf_mse")
 dataset_comp <-
   outputs_summ_dataset %>%
   select(task_id, task_id_f, trajectory_type, trajectory_type_f, task_source, task_source_f, one_of(sel_metrics)) %>%

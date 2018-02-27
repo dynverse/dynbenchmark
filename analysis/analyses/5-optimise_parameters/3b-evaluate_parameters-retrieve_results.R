@@ -96,17 +96,18 @@ outputs_ind <- outputs %>%
     rank_correlation = percent_rank(correlation),
     rank_rf_mse = percent_rank(-rf_mse),
     rank_rf_rsq = percent_rank(rf_rsq),
-    rank_edge_flip = percent_rank(edge_flip)
+    rank_edge_flip = percent_rank(edge_flip),
+    rank_time_method = percent_rank(time_method)
   ) %>%
   ungroup()
 
 # aggregate over replicates
 outputs_summrepl <- outputs_ind %>%
   group_by(method_name, method_short_name, task_id, paramset_id, trajectory_type, task_source, prior_str, trajectory_type_f) %>%
-  summarise_if(is.numeric, funs(mean, var)) %>%
+  summarise_if(is.numeric, mean) %>%
   ungroup() %>%
   mutate(
-    harm_mean = apply(cbind(rank_correlation_mean, rank_edge_flip_mean, rank_rf_mse_mean), 1, psych::harmonic.mean)
+    harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean)
   )
 
 # process trajtype grouped evaluation

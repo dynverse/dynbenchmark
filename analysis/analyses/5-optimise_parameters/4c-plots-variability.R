@@ -14,13 +14,10 @@ chosen_task_source <- "mean"
 trajtypes <- outputs_list$trajtypes
 
 # aggregate over replicates
-renamefun <- function(x) paste0(x, "_mean")
 outputs_repl <- outputs_list$outputs_ind %>%
-  rename_if(is.numeric, renamefun) %>%
   mutate(
-    harm_mean = apply(cbind(rank_correlation_mean, rank_edge_flip_mean, rank_rf_mse_mean), 1, psych::harmonic.mean)
-  ) %>%
-  rename(repeat_i = repeat_i_mean)
+    harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean)
+  )
 
 # process trajtype grouped evaluation
 outputs_trajtype <- outputs_repl %>%
@@ -107,7 +104,7 @@ ggplot(outputs_summtrajtype_totalsx2, aes(method_name_f, harm_mean)) +
     x = NULL
   )
 
-ggplot(outputs_summtrajtype_totalsx2, aes(method_name_f, rank_correlation_mean)) +
+ggplot(outputs_summtrajtype_totalsx2, aes(method_name_f, rank_correlation)) +
   geom_bar(aes(fill = method_name_f), alpha = .2, stat = "identity") +
   geom_point(aes(colour = method_name_f), stat = "identity", outputs_trajtype_totalsx2) +
   coord_flip() +
@@ -121,7 +118,7 @@ ggplot(outputs_summtrajtype_totalsx2, aes(method_name_f, rank_correlation_mean))
   )
 
 
-ggplot(outputs_summtrajtype_totalsx2, aes(method_name_f, rank_edge_flip_mean)) +
+ggplot(outputs_summtrajtype_totalsx2, aes(method_name_f, rank_edge_flip)) +
   geom_bar(aes(fill = method_name_f), alpha = .2, stat = "identity") +
   geom_point(aes(colour = method_name_f), stat = "identity", outputs_trajtype_totalsx2) +
   coord_flip() +
@@ -134,7 +131,7 @@ ggplot(outputs_summtrajtype_totalsx2, aes(method_name_f, rank_edge_flip_mean)) +
     x = NULL
   )
 
-ggplot(outputs_summtrajtype_totalsx2, aes(method_name_f, rank_rf_mse_mean)) +
+ggplot(outputs_summtrajtype_totalsx2, aes(method_name_f, rank_rf_mse)) +
   geom_bar(aes(fill = method_name_f), alpha = .2, stat = "identity") +
   geom_point(aes(colour = method_name_f), stat = "identity", outputs_trajtype_totalsx2) +
   coord_flip() +
