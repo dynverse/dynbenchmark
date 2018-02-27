@@ -2,6 +2,22 @@
 title: "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
 bibliography: references.bib
 csl: nature-biotechnology.csl
+header-includes:
+  - \usepackage{booktabs}
+  - \usepackage{longtable}
+  - \usepackage{array}
+  - \usepackage{multirow}
+  - \usepackage[table]{xcolor}
+  - \usepackage{wrapfig}
+  - \usepackage{float}
+  - \usepackage{colortbl}
+  - \usepackage{pdflscape}
+  - \usepackage{tabu}
+  - \usepackage{threeparttable}
+  - \usepackage[normalem]{ulem}
+mainfont: Open Sans
+
+
 ---
 
 
@@ -32,6 +48,12 @@ A comparison of single-cell trajectory inference methods: towards more accurate 
 -->
 
 
+
+
+
+
+
+
 ```{r setup, include=FALSE}
 source(paste0(dynalysis::get_dynalysis_folder(), "/analysis/paper/setup.R"))
 ```
@@ -49,42 +71,55 @@ source(paste0(dynalysis::get_dynalysis_folder(), "/analysis/paper/setup.R"))
 # Abstract
 
 
-Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Since 2014, more than 50 trajectory inference methods have been developed, each with its own set of methodological characteristics. This makes a comparison between trajectory inference methods often difficult, and as a result a comprehensive assessment of the performance and robustness of each method is still lacking. We developed a common data structure for trajectory inference methods in order to make their results comparable to each other and to a gold standard. Using this framework, we compare the results from a total of 22 trajectory inference methods, on a large collection of real datasets and realistic synthetic datasets. We employ several metrics, including accuracy of the inferred ordering, correctness of the network topology, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at https://www.github.com/dynverse.
+Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Since 2014, more than 50 trajectory inference methods have been developed, each with its own set of methodological characteristics. As a result, comparing between trajectory inference methods often challenging, and a comprehensive assessment of the performance and robustness of each method is still lacking. We developed a common data structure for trajectory inference methods in order to make their results comparable to each other and to a gold standard. Using this framework, we compare the results from a total of 22 trajectory inference methods, on a large collection of real datasets and realistic synthetic datasets. We employ several metrics, including accuracy of the inferred ordering, correctness of the network topology, code quality and user friendliness. We conclude with practical guidelines for method users, and also believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is fully reproducible, can be easily extended, and is available at https://www.github.com/dynverse.
 
 
-This is the first overview about ~~deep reinforcement learning~~ trajectory inference publicly available online. It is comprehensive. Comments and criticisms are welcome.
+This is the first comprehensive assessment the performance of trajectory inference methods publicly available online. Comments and criticisms are welcome.
 
 
 # Introduction
 
 
-Single-cell -omics technologies now make it possible to model biological systems more accurately than ever before. One area where single-cell data can be particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation. When cells are sampled from a population in which cells are at different unknown points in the dynamic process,[a][b] trajectory inference methods can be used to computationally order these cells along their dynamic process [@cannoodt_computational_2016]. Because they offer an unbiased and transcriptome-wide understanding of dynamic process, trajectories then allow the objective identification of new (primed) subsets of cells, delineation the exact wiring of a differentiation tree and inference of regulatory interaction responsible for a bifurcation refs. This is currently applicable to specific subsets of cells, but might also be applicable to whole tissues or organisms in the near future [@regev_scienceforumhuman_2017; @han_mappingmousecell_2018].
+Single-cell -omics technologies now make it possible to model biological systems more accurately than ever before. One area where single-cell data can be particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation. When cells are sampled from a population in which cells are at different unknown points in the dynamic process, trajectory inference (TI) methods can be used to computationally order these cells along their dynamic process [@cannoodt_computational_2016]. Because they offer an unbiased and transcriptome-wide understanding of dynamic process, trajectories then allow the objective identification of new (primed) subsets of cells, delineation the exact wiring of a differentiation tree and inference of regulatory interaction responsible for a bifurcation refs. This is currently applicable to specific subsets of cells, but might also be applicable to whole tissues or organisms in the near future [@regev_scienceforumhuman_2017; @han_mappingmousecell_2018].
 
 
 ```{r}
-add_sfig({
-n_methods_over_time <- read_rds(figure_file("n_implementations_over_time.rds", experiment_id="4-method_characterisation"))
-trajectory_components_over_time <- read_rds(figure_file("trajectory_components_over_time.rds", experiment_id="4-method_characterisation"))
-
-
-cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over_time), nrow=2, rel_heights = c(0.7, 0.3), labels="auto")
-}, 
+add_sfig(
+figure_file("methods_timeline.pdf", "4-method_characterisation"),
 "methods_over_time", 
-"New TI methods over time. **a** Number of methods published or in preprint. **b** Number of methods which can handle a particular type of trajectory.
-", 
-15, 
-10
+"New TI methods over time. **a** Number of methods published or in preprint. **b** Number of methods which can handle a particular type of trajectory."
 )
 ```
 
 
 <!-- history of Ti, different methods -->
 ```{r}
-fixed_linear <-methods$method_id[which(methods$fixes_topology != 'free' & methods$maximal_trajectory_type == 'undirected_linear')]
-fixed_bifurcating <-methods$method_id[which(methods$fixes_topology != 'free' & methods$maximal_trajectory_type == 'simple_fork')]
-fixed_other <-methods$method_id[which(methods$fixes_topology != 'free' & methods$maximal_trajectory_type != 'undirected_linear'& methods$maximal_trajectory_type != 'simple_fork')]
-fixed_algorithm <-methods$method_id[which(methods$fixes_topology == 'algorithm')]
-fixed_parameters <-methods$method_id[which(methods$fixes_topology == 'parameter')]
+fixed_linear <- methods %>%
+ filter(
+   fixes_topology != 'free', 
+   maximal_trajectory_type != 'undirected_linear'
+ ) %>%
+ .$method_id
+fixed_bifurcating <- methods %>%
+ filter(
+   fixes_topology != 'free', 
+   maximal_trajectory_type != 'simple_fork'
+ ) %>%
+ .$method_id
+fixed_other <- methods %>%
+ filter(
+   fixes_topology != 'free', 
+   !maximal_trajectory_type %in% c('undirected_linear', 'simple_fork')
+ ) %>%
+ .$method_id
+fixed_algorithm <- methods %>%
+ filter(fixes_topology == 'algorithm') %>%
+ .$method_id
+fixed_parameters <- methods %>%
+ filter(fixes_topology == 'parameter') %>%
+ .$method_id
+	
+
 ```
 
 
@@ -96,30 +131,30 @@ Although trajectory inference methods use a variety of algorithms and steps to r
 
 
 <!-- Common framework of TI, different components, naturally progressing towards the need for an evaluation -->
-Given this plethora of available trajectory inference methods, it is important that methods are compared, so that users can use the most optimal method available for their problem[c]. Moreover, new methods need to be rigorously tested, so that development can focus on improving the current state-of-the-art. In this study, we therefore for the first time developed a[d] comprehensive evaluation framework for trajectory inference methods. We test[e] both on synthetic data, for which the gold standard is known, and real data, for which in some cases the gold standard can be extracted from expert knowledge. We include a rigorous parameter optimisation, making sure that parameters are optimized while avoiding overfitting on characteristics of specific datasets. To make our framework reusable and extendable, we make use of continuous analysis [@beaulieu-jones_reproducibility_2017], which allows the developers of new methods to easily test their methods and compare them against the state-of-the-art.
+Given this plethora of available trajectory inference methods, it is important that methods are compared, so that users can use the most optimal method available for their problem. Moreover, new methods need to be rigorously tested, so that development can focus on improving the current state-of-the-art. In this study, we therefore for the first time developed a comprehensive evaluation framework for trajectory inference methods. We test both on synthetic data, for which the gold standard is known, and real data, for which in some cases the gold standard can be extracted from expert knowledge. We include a rigorous parameter optimisation, making sure that parameters are optimized while avoiding overfitting on characteristics of specific datasets. To make our framework reusable and extendable, we make use of continuous analysis [@beaulieu-jones_reproducibility_2017], which allows the developers of new methods to easily test their methods and compare them against the state-of-the-art.
 
 
 # Results
 ## Method quality control
 
 
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods  (`r ref("fig", "evaluation_overview", "a")`), and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability, the presence of a programming interface, and the time they were published (`r ref("table", "implementations")`). We characterised all methods in four different ways: possible trajectory topologies, implementation quality, prior information and the underlying algorithm (`r ref("fig", "implementation_characterisation")`).
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods  (`r ref("fig", "evaluation_overview", "a")`), and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability, the presence of a programming interface, and the time they were published (`r ref("table", "implementations")`). We characterised all methods in four different ways: possible trajectory topologies, implementation quality, prior information and the underlying algorithm (`r ref("fig", "implementation_overview")`).
 
 
 `r ref("table", "implementations", anchor=TRUE)` Overview of current trajectory inference methods, and whether they were included in this current evaluation study
 ```{r}
-read_rds(figure_file("implementations_table.rds", "4-method_characterisation"))
+read_rds(figure_file("implementations_table.rds", "4-method_characterisation"))[[params$table_format]]
 ```
 
 
-`r anchor("fig", "evaluation_overview")`  
-![](`r figure_file("ti_evaluation_overview_v2.svg", experiment_id="evaluation_overview")`)  
+`r anchor("fig", "evaluation_overview")`
+![](`r figure_file("ti_evaluation_overview_v2.pdf", experiment_id="evaluation_overview")`)
 `r ref("fig", "evaluation_overview")` Overview of the evaluation
 
 
 ```{r}
 add_stable(
-read_rds(figure_file("datasets.rds","2-dataset_characterisation")), 
+read_rds(figure_file("datasets.rds","2-dataset_characterisation"))[[params$table_format]], 
 "datasets", 
 "Real datasets used in this study"
 )
@@ -128,7 +163,7 @@ read_rds(figure_file("datasets.rds","2-dataset_characterisation")),
 
 
 
-At the level of trajectory topologies, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "implementation_characterisation", "a")`). However, only a handful, mostly recent[f], methods can handle more complex graph topologies which can include loops (`r ref("sfig", "methods_over_time", "b")`), one of which is included in the current evaluation (SLICER).
+At the level of trajectory topologies, most recent methods can handle one or more splits (either bifurcations or multifurcations) in the trajectory (`r ref("fig", "implementation_overview", "a")`). However, only a handful, mostly recent, methods can handle more complex graph topologies which can include loops (`r ref("sfig", "methods_over_time", "b")`), one of which is included in the current evaluation (SLICER).
 
 
 While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is an important first evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or which purpose(s) they serve (user friendliness, developer friendliness or good science). These categorisations can help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
@@ -136,31 +171,28 @@ While not directly related to the accuracy of the inferred trajectory, the quali
 
 ```{r}
 add_stable(
-read_rds(figure_file("qc_checks.rds","4-method_characterisation")), 
+read_rds(figure_file("qc_checks.rds","4-method_characterisation"))[[params$table_format]], 
 "qc_checks", 
-""
+"QC checks"
 )
 ```
 
 
 `r anchor("fig", "implementation_overview")`
-![](`r figure_file("implementation_overview.svg", experiment_id="4-method_characterisation")`)
+![](`r figure_file("implementation_overview.pdf", experiment_id="4-method_characterisation")`)
 `r ref("fig", "implementation_overview", anchor=TRUE)` First characterization of each method.
 
 
 
 
-Most[g] methods fulfill most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "implementation_overview", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "implementation_overview", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "implementation_qc_check")` and `r ref("fig", "implementation_overview", "c")`), notwithstanding several studies pinpointing these as good practices [@wilson_best_2014; @artaza_top10metrics_2016].
+Most methods fulfill most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "implementation_overview", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "implementation_overview", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "implementation_qc_check")` and `r ref("fig", "implementation_overview", "c")`), notwithstanding several studies pinpointing these as good practices [@wilson_best_2014; @artaza_top10metrics_2016].
 
 
 ```{r}
-add_sfig({
-read_rds(figure_file("qc_over_time.rds", experiment_id="4-method_characterisation"))
-}, 
+add_sfig(
+figure_file("qc_over_time.pdf","4-method_characterisation"), 
 "qc_over_time", 
-"Quality control scores and number of citations over time", 
-10, 
-10
+"Quality control scores and number of citations over time"
 )
 ```
 
@@ -169,13 +201,10 @@ The underlying algorithms can be divided into several steps, and these frequentl
 
 
 ```{r}
-add_sfig({
-read_rds(figure_file("method_components.rds", experiment_id="4-method_characterisation"))
-}, 
+add_sfig(
+figure_file("method_components.pdf","4-method_characterisation"), 
 "method_components", 
-"TI methods frequently share steps", 
-15, 
-7.5
+"TI methods frequently share steps"
 )
 ```
 ## Evaluating the accuracy of the inferred trajectory
@@ -186,7 +215,7 @@ We compared the accuracy of each method by comparing its output with a gold stan
 
 ```{r}
 add_sfig({
-                glue::glue("![]({figure_file('wrapping.svg', experiment_id = '4-method_characterisation')})")
+        figure_file('wrapping.pdf', '4-method_characterisation')
 }, 
 "wrapping", 
 "Our wrapping workflow", 
@@ -260,9 +289,8 @@ We classified all possible trajectory topologies into distinct trajectory types,
 
 
 ```{r}
-add_sfig({
-read_rds(figure_file("trajectory_type_trees.rds", experiment_id="2-dataset_characterisation/2-trajectory_types"))
-}, 
+add_sfig(
+figure_file("trajectory_type_trees.pdf","2-dataset_characterisation/2-trajectory_types"), 
 "trajectory_type_tree", 
 "Different trajectory types can be classified in a directed acyclic graph, in which certain types are a generalisation of other trajectory types.", 
 15, 
@@ -285,10 +313,18 @@ Depending on the output of a method, we used different strategies to convert the
 
 ```{r}
 # create functions to list the methods within a particular conversion category
-list_sentence <- function(x) {pritt(glue::collapse(x[1:length(x) - 1],", "), " and ", last(x))}
-conversion <- function(conversion_oi) {
-    methods_evaluated %>% filter(map_lgl(conversion_split, ~ conversion_oi %in% .)) %>% mutate(text = paste0(method_name, ifelse(conversion_special, "\\*", ""))) %>% pull(text) %>% list_sentence()
+list_sentence <- function(x) {
+  pritt(glue::collapse(x[1:length(x) - 1],", "), " and ", last(x))
 }
+conversion <- function(conversion_oi) {
+ methods_evaluated %>% 
+   filter(map_lgl(conversion_split, ~ conversion_oi %in% .)) %>% 
+   mutate(text = paste0(method_name, ifelse(conversion_special, "\\*", ""))) %>%
+   pull(text) %>% 
+   list_sentence()
+}
+	
+
 ```
 
 
@@ -362,12 +398,16 @@ To simulate the gene regulatory network, we used a system of differential equati
 
 
 $$
-\begin{align}
+\begin{aligned}
 \label{eq:mrna_ode}
-\frac{dx_i}{dt} &= \underbrace{m \times f(y_1, y_2, ...)}_\text{production} - \underbrace{\lambda \times x_i}_\text{degradation} \\
+\frac{dx_i}{dt} &= \underbrace{m \times f(y_1, y_2, ...)}_\text{production} - \underbrace{\lambda \times x_i}_\text{degradation}
+\end{aligned}
+$$
+$$
+\begin{aligned}
 \label{eq:prot_ode}
 \frac{dy_i}{dt} &= \underbrace{r \times x_i}_\text{production} - \underbrace{\Lambda \times y_i}_\text{degradation}
-\end{align}
+\end{aligned}
 $$
 
 
@@ -378,26 +418,26 @@ The activation function is inspired by a thermodynamic model of gene regulation,
 
 
 $$
-\begin{align}
+\begin{aligned}
 \label{eq:input_funcion_probabilities}
 f(y_1, y_2, ..., y_n) = \sum_{j \in \{0, 1, ..., n^2\}} \alpha_j \times P_j
-\end{align}
+\end{aligned}
 $$
 
 
 The probability of being in a state is based on the thermodynamics of transcription factor binding. When only one transcription factor is bound in a state:
 $$
-\begin{align}
+\begin{aligned}
 P_j \propto \nu = \left(\frac{y}{k}\right)^{n}
-\end{align}
+\end{aligned}
 $$
 
 
 Where the hill coefficient $n$ represents the cooperativity of binding and $k$ the transcription factor concentration at half-maximal binding. When multiple regulators are bound:
 $$
-\begin{align}
+\begin{aligned}
 P_j \propto \nu =  \rho \times \prod_j \left(\frac{y_j}{k_j}\right)^{n_j}
-\end{align}
+\end{aligned}
 $$
 
 
@@ -409,10 +449,10 @@ $P_i$ is only proportional to $\nu$ because $\nu$ is normalized such that $\sum_
 
 To each differential equation, we added an additional stochastic term: 
 $$
-\begin{align}
+\begin{aligned}
 \frac{dx_i}{dt} = m \times f(y_1, y_2, ...) - \lambda \times x_i &+ \eta \times \sqrt{x_i} \times \Delta W_t \\
 \frac{dy_i}{dt} = r \times x_i - \Lambda \times y_i &+ \eta \times \sqrt{y_i} \times \Delta W_t
-\end{align}
+\end{aligned}
 $$
 
 
@@ -424,7 +464,7 @@ Similar to [@schaffter_genenetweaversilicobenchmark_2011], we sample the differe
 
 ```{r}
 add_stable(
-read_rds(figure_file("samplers.rds","2-dataset_characterisation/3-synthetic")), 
+read_rds(figure_file("samplers.rds","2-dataset_characterisation/3-synthetic"))[[params$table_format]], 
 "samplers", 
 "Distributions from which each parameter in the thermodynamic model was sampled"
 )
@@ -495,7 +535,7 @@ As a third independent score, we assessed the similarity between the milestone n
 
 ```{r}
 add_sfig({
-read_rds(figure_file("edge_flip_comparison.rds", experiment_id="3-score_rules/4-edge_flip"))
+figure_file("edge_flip_comparison.pdf", experiment_id="3-score_rules/4-edge_flip")
 }, 
 "edge_flip_comparison", 
 "Edge flip score values for common trajectory topologies", 
@@ -535,10 +575,17 @@ The current Git commit details are:
 ```{r}
 git2r::repository(".")
 ```
-[a]When sampled, single cells will most probably be in different states of dynamic processes, due to the stochasticity of expression. Trajectory inference methods can be used to computationally order these cells along trajectories, based on gradual changes in the expression of several genes.
-[b]It is not really due to stochasticity that these cells are in different states of a dynamic process though?
-[c]get an idea of which available method or set of methods would optimally resolve their problem.
-[d]we present the first comprehensive (...)?
-[e]compared 22 TI methods on both synthetic (..)
-[f]a handful of the most recent methods
-[g]Repetition of most: put "The majority of" instead?
+When sampled, single cells will most probably be in different states of dynamic processes, due to the stochasticity of expression. Trajectory inference methods can be used to computationally order these cells along trajectories, based on gradual changes in the expression of several genes.
+It is not really due to stochasticity that these cells are in different states of a dynamic process though?
+insert refs
+get an idea of which available method or set of methods would optimally resolve their problem.
+we present the first comprehensive (...)?
+compared 22 TI methods on both synthetic (..)
+Love this figure! It's a great summary of the /whole/ study methodology
+I have several comments (that I might address myself if I get to it first). I'll post them as separate comments, so they can get resolved individually.
+I would include a part for the method wrappers; that is the way that linear, cellcluster, cellgraph and generic TI's get translated to the probabilistic trajectory model
+part c: I would explicitly show that the probabilistic trajectory models are being used for both the tasks and for the method outputs
+The spacing is a bit variable; e.g. part b takes up a lot of real estate while parts d and e seem to be packed very tightly together
+part f: I'd explicitly mention that each column is to be interpreted separately; there is no connection horizontally. JUST TO MAKE SURE.
+a handful of the most recent methods
+Repetition of most: put "The majority of" instead?
