@@ -53,7 +53,8 @@ render(
   output_format = rmarkdown::pdf_document(
     latex_engine = "xelatex",
     dev="png",
-    keep_tex=TRUE
+    keep_tex=TRUE,
+    citation_package="biblatex"
   ),
   output_dir = "analysis/paper/",
   output_file = "paper.pdf",
