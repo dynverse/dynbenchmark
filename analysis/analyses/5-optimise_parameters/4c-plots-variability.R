@@ -80,7 +80,7 @@ ggsave(figure_file("variance_ranking.pdf"), g, width = 12, height = 6)
 
 
 
-write_rds(list(vardf), derived_file("variance_results.rds"))
+write_rds(lst(vardf), derived_file("variance_results.rds"))
 
 
 
