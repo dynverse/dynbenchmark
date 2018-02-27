@@ -39,7 +39,7 @@ files <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(e
 tofiles <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg") %>% gsub("\\.svg", "\\.png", .)
 walk2(files, tofiles, ~system(glue::glue("inkscape {.} --export-png={.y}")))
 tofiles <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg") %>% gsub("\\.svg", "\\.pdf", .)
-parallel::mclapply(purrr::transpose(list(files, tofiles)), function(.) system(glue::glue("inkscape {.} --export-pdf={.y}")), num.cores=8)
+parallel::mclapply(purrr::transpose(list(files, tofiles)), function(.) system(glue::glue("inkscape {.[[1]]} --export-pdf={.[[2]]}")), mc.cores=8)
 
 # generate pdfs
 file.remove("analysis/paper/paper.pdf")
