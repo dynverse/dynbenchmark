@@ -65,8 +65,9 @@ add_stable <- function(table, ref_id, caption) {
 # load data
 methods <- read_rds(derived_file("methods.rds", experiment_id="4-method_characterisation"))
 methods_evaluated <- read_rds(derived_file("methods_evaluated.rds", experiment_id="4-method_characterisation"))
+implementations <- read_rds(derived_file("implementations.rds", experiment_id="4-method_characterisation"))
 
 # citate
 cite_methods <- function(method_ids) {
-  methods %>% filter(method_id %in% !!method_ids) %>% glue::glue_data("@{bibtex}") %>% glue::collapse("; ") %>% glue::glue("[", ., "]")
+  implementations %>% filter(implementation_id %in% !!method_ids) %>% pull(bibtex) %>% discard(is.na) %>% {glue::glue("@{.}")} %>% glue::collapse("; ") %>% glue::glue("[", ., "]")
 }
