@@ -43,8 +43,8 @@ prior_df <- outputs_ind %>% select(method_name, prior_str) %>% distinct()
 ############### OVERALL COMPARISON ###############
 metr_lev <- c(
   "harm_mean", "rank_correlation", "rank_edge_flip", "rank_rf_mse",
-  "real", "synthetic", "time_method", "pct_errored",
-  "pct_time_exceeded", "pct_memory_exceeded", "num_setseed_calls", "num_files_created"
+  "real", "synthetic", "time_method", "rank_time_method",
+  "pct_errored", "pct_time_exceeded", "pct_memory_exceeded", "num_setseed_calls"
 )
 
 
