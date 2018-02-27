@@ -17,7 +17,10 @@
    version="1.1"
    id="svg16909"
    inkscape:version="0.92.2 (unknown)"
-   sodipodi:docname="ti_evaluation_overview_v2.svg">
+   sodipodi:docname="ti_evaluation_overview_v2.svg"
+   inkscape:export-filename="/home/wouters/thesis/projects/dynverse/dynalysis/analysis/figures/evaluation_overview/ti_evaluation_overview_v2.png"
+   inkscape:export-xdpi="100"
+   inkscape:export-ydpi="100">
   <defs
      id="defs16903">
     <marker
@@ -39330,15 +39333,15 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="1242.8258"
-     inkscape:cy="153.67"
+     inkscape:zoom="0.49497475"
+     inkscape:cx="817.05741"
+     inkscape:cy="220.92104"
      inkscape:document-units="mm"
      inkscape:current-layer="layer7"
      showgrid="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="1028"
-     inkscape:window-x="0"
+     inkscape:window-width="1600"
+     inkscape:window-height="1173"
+     inkscape:window-x="1920"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      fit-margin-top="0"
@@ -39359,7 +39362,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
