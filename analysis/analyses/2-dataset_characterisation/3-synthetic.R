@@ -53,7 +53,7 @@ plots <- map(modulenet_names, function(modulenet_name) {
     geom_node_point(aes()) +
     geom_edge_link(aes(color = edge_id, edge_linetype=burn), arrow=arrow(type="closed")) +
     scale_edge_burn +
-    theme_graph() +
+    theme_graph("") +
     theme_without_legend +
     ggtitle(label_long(modulenet_name))
   milestone_plot
