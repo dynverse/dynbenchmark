@@ -13,139 +13,74 @@ chosen_task_source <- "mean"
 
 trajtypes <- outputs_list$trajtypes
 
+# sets seeds
+setseed <- outputs_list$outputs_ind %>%
+  group_by(method_short_name) %>%
+  summarise(sets_seeds = any(num_setseed_calls > 0)) %>%
+  ungroup()
+
 # aggregate over replicates
-outputs_repl <- outputs_list$outputs_ind %>%
+outputs_summrepl <- outputs_list$outputs_ind %>%
+  group_by(method_name, method_short_name, task_id, paramset_id, trajectory_type, task_source, prior_str, trajectory_type_f) %>%
+  summarise_if(is.numeric, var) %>%
+  group_by(task_id) %>%
+  ungroup() %>%
+  rename_if(is.numeric, function(x) paste0("var_", x)) %>%
   mutate(
-    harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean)
+    mean_var = apply(cbind(var_rank_correlation, var_rank_edge_flip, var_rank_rf_mse), 1, mean)
   )
 
 # process trajtype grouped evaluation
-outputs_trajtype <- outputs_repl %>%
-  group_by(method_name, method_short_name, task_source, paramset_id, trajectory_type, trajectory_type_f, repeat_i) %>%
+outputs_summtrajtype <- outputs_summrepl %>%
+  group_by(method_name, method_short_name, task_source, paramset_id, trajectory_type, trajectory_type_f) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup()
 
 # process overall evaluation
-outputs_method <- outputs_trajtype %>%
-  group_by(method_name, method_short_name, task_source, paramset_id, repeat_i) %>%
+outputs_summmethod <- outputs_summtrajtype %>%
+  group_by(method_name, method_short_name, task_source, paramset_id) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup()
 
-# adding mean per trajtype
-outputs_trajtype_totals <- bind_rows(
-  outputs_trajtype,
-  outputs_trajtype %>%
-    group_by(method_name, method_short_name, paramset_id, trajectory_type, trajectory_type_f, repeat_i) %>%
-    summarise_if(is.numeric, mean) %>%
-    ungroup() %>%
-    mutate(task_source = "mean")
-)
-
 # adding mean per method
-outputs_method_totals <-
-  bind_rows(
-    outputs_method,
-    outputs_method %>%
-      group_by(method_name, method_short_name, paramset_id, repeat_i) %>%
-      summarise_if(is.numeric, mean) %>%
-      ungroup() %>%
-      mutate(task_source = "mean")
-  )
-
-# combine all aggregated data frames
-outputs_trajtype_totalsx2 <- bind_rows(
-  outputs_method_totals %>% mutate(trajectory_type = "overall"),
-  outputs_trajtype_totals
-) %>%
-  mutate(trajectory_type_f = factor(trajectory_type, levels = trajtypes$id))
+outputs_summmethod_totals <-
+  outputs_summmethod %>%
+  group_by(method_name, method_short_name, paramset_id) %>%
+  summarise_if(is.numeric, mean) %>%
+  ungroup()
 
 
-outputs_list$outputs_trajtype_totalsx2 <- outputs_trajtype_totalsx2
+vardf <-
+  outputs_summmethod_totals %>%
+  arrange(mean_var) %>%
+  mutate(
+    method_name_f = factor(method_name, levels = method_name)
+  ) %>%
+  left_join(setseed, by = "method_short_name")
 
-# get ordering of methods
-method_ord <- outputs_list$outputs_summtrajtype_totalsx2 %>%
-  filter(task_source == chosen_task_source, trajectory_type == "overall") %>%
-  arrange(desc(harm_mean)) %>%
-  .$method_name
+plot_metrics <- c("mean_var", "var_rank_correlation", "var_rank_edge_flip", "var_rank_rf_mse")
+vardf_g <- vardf %>%
+  select(method_name, method_name_f, method_short_name, sets_seeds, one_of(plot_metrics)) %>%
+  gather(metric, score, one_of(plot_metrics))
 
-# create method_name_f factor in all data structures
-for (oname in str_subset(names(outputs_list), "outputs")) {
-  outputs_list[[oname]] <- outputs_list[[oname]] %>%
-    mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
-}
-
-# load all outputs in environment and remove outputs_list
-list2env(outputs_list, environment())
-rm(outputs_list)
-
-
-
-
-lvls <- rev(levels(outputs_summtrajtype_totalsx2$method_name_f))
-cols <- RColorBrewer::brewer.pal(8, "Dark2")
-cols <- RColorBrewer::brewer.pal(4, "Blues")[2:4]
-cols <- viridis::viridis(8)[-1]
-method_cols <- rep(cols, ceiling(length(lvls) / length(cols)))[seq_along(lvls)]
-
-############### COMPARISON PER TRAJECTORY TYPE ###############
-pdf(figure_file("2b_trajtype_comparison_vars.pdf"), 20, 12)
-ggplot(outputs_summtrajtype_totalsx2, aes(method_name_f, harm_mean)) +
-  geom_bar(aes(fill = method_name_f), alpha = .2, stat = "identity") +
-  geom_point(aes(colour = method_name_f), stat = "identity", outputs_trajtype_totalsx2) +
+g <- ggplot(vardf_g) +
+  geom_bar(aes(fct_rev(method_name_f), score, fill = metric, alpha = sets_seeds), stat = "identity") +
   coord_flip() +
-  theme_bw() +
+  facet_wrap(~metric, nrow = 1) +
+  cowplot::theme_cowplot() +
   theme(legend.position = "none") +
-  scale_colour_manual(values = method_cols) +
-  scale_fill_manual(values = method_cols) +
-  facet_grid(task_source~trajectory_type_f) +
-  labs(
-    x = NULL
-  )
+  labs(x = NULL, y = NULL) +
+  scale_alpha_manual(values = c("TRUE" = .3, "FALSE" = 1))
 
-ggplot(outputs_summtrajtype_totalsx2, aes(method_name_f, rank_correlation)) +
-  geom_bar(aes(fill = method_name_f), alpha = .2, stat = "identity") +
-  geom_point(aes(colour = method_name_f), stat = "identity", outputs_trajtype_totalsx2) +
-  coord_flip() +
-  theme_bw() +
-  theme(legend.position = "none") +
-  scale_colour_manual(values = method_cols) +
-  scale_fill_manual(values = method_cols) +
-  facet_grid(task_source~trajectory_type_f) +
-  labs(
-    x = NULL
-  )
+g
+
+ggsave(figure_file("variance_ranking.pdf"), g, width = 12, height = 6)
 
 
-ggplot(outputs_summtrajtype_totalsx2, aes(method_name_f, rank_edge_flip)) +
-  geom_bar(aes(fill = method_name_f), alpha = .2, stat = "identity") +
-  geom_point(aes(colour = method_name_f), stat = "identity", outputs_trajtype_totalsx2) +
-  coord_flip() +
-  theme_bw() +
-  theme(legend.position = "none") +
-  scale_colour_manual(values = method_cols) +
-  scale_fill_manual(values = method_cols) +
-  facet_grid(task_source~trajectory_type_f) +
-  labs(
-    x = NULL
-  )
 
-ggplot(outputs_summtrajtype_totalsx2, aes(method_name_f, rank_rf_mse)) +
-  geom_bar(aes(fill = method_name_f), alpha = .2, stat = "identity") +
-  geom_point(aes(colour = method_name_f), stat = "identity", outputs_trajtype_totalsx2) +
-  coord_flip() +
-  theme_bw() +
-  theme(legend.position = "none") +
-  scale_colour_manual(values = method_cols) +
-  scale_fill_manual(values = method_cols) +
-  facet_grid(task_source~trajectory_type_f) +
-  labs(
-    x = NULL
-  )
-
-
-dev.off()
+write_rds(lst(vardf), derived_file("variance_results.rds"))
 
 
 
