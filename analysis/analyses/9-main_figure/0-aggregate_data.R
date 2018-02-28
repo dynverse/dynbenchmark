@@ -90,7 +90,7 @@ part_method_characterisation <-
     preprint_date = Preprint,
     n_citations = Citations,
     qc_score,
-    prior_mini_id
+    starts_with("prior_")
   )
 
 part_qc_category <-
