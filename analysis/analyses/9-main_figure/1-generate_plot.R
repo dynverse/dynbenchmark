@@ -215,7 +215,7 @@ text_data <- map_df(seq_len(nrow(axis)), function(i) {
 })
 
 # MAKE PLOT
-g <- ggplot(method_tib) +
+g1 <- ggplot(method_tib) +
 
   # THEME SETTINGS
   coord_equal(expand = FALSE) +
@@ -260,8 +260,11 @@ g <- ggplot(method_tib) +
   geom_rect(aes(xmin = axtr$prio$xmin, xmax = axtr$prio$xmax, ymin = method_ymin, ymax = method_ymax, alpha = prior_replace_id, fill = "#ABCDEF"), colour = "black", size = .25) +
 
   # RESERVE SPACE
-  expand_limits(x = c(56))
+  expand_limits(x = c(max(axis$xmax)+2))
 
+
+
+# WRITE FILES
 overview_fig_file <- figure_file("overview.svg")
-ggsave(overview_fig_file, g, width = 16, height = 10)
+ggsave(overview_fig_file, g1, width = 14, height = 10)
 xml2::read_xml(overview_fig_file) %>% replace_svg(minis) %>% xml2::write_xml(overview_fig_file)
