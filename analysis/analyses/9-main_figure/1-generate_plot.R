@@ -41,7 +41,7 @@ coltime_fun <- scale_viridis_funs[[coltime]]
 prior_type1cols <- c("required_" = "#cc2400", "optional_" = "#00aaed", "_" = "#00ab1b")
 prior_type1_fun <- function(x) ifelse(is.na(x), "", gsub("_.*", "", x))
 prior_type1col_fun <- function(x) prior_type1cols[paste0(prior_type1_fun(x), "_")]
-prior_type2_fun <- function(x) ifelse(is.na(x), "/", gsub(".*_", "", x))
+prior_type2_fun <- function(x) ifelse(is.na(x), "-", gsub(".*_", "", x))
 
 # PROCESS COORDINATES AND COLOURS
 row_height <- 1
@@ -107,16 +107,16 @@ method_tib <- method_tib %>%
 axis <-
   tribble(
     ~id,       ~label,                 ~xsep, ~xwidth, ~show_label, ~geom,      ~col,                                      ~value,
-    "name",    "Name",                 0.0,   5,       F,           "custom",   NA,                                        NA,
+    "name",    "Name",                 0.0,   4,       F,           "custom",   NA,                                        NA,
 
     "maxt",    "Type",                 0.1,   2,       T,           "custom",   "maxtraj_colour",                          NA,
-    "topo",    "Topo. constr.",        0.1,   2,       T,           "text",     "topinf_colour",                           "topinf_lab",
+    "topo",    "Topo. constr.",        0.1,   1,       T,           "text",     "topinf_colour",                           "topinf_lab",
     "prst",    "Start",                0.1,   1,       T,           "text",     "prior_start_type1col",                    "prior_start_type2",
     "pren",    "End",                  0.1,   1,       T,           "text",     "prior_end_type1col",                      "prior_end_type2",
     "prgr",    "States",               0.1,   1,       T,           "text",     "prior_states_type1col",                   "prior_states_type2",
     "prge",    "Genes",                0.1,   1,       T,           "text",     "prior_genes_type1col",                    "prior_genes_type2",
 
-    "harm",    "Score",                0.5,   5,       T,           "bar",      "harm_mean_sc_col",                        "harm_mean_sc",
+    "harm",    "Score",                0.5,   4,       T,           "bar",      "harm_mean_sc_col",                        "harm_mean_sc",
 
     "corr",    "Correlation",          0.5,   1,       T,           "circle",   "rank_correlation_sc_col",                 "rank_correlation_sc",
     "edge",    "Edge flip",            0.1,   1,       T,           "circle",   "rank_edge_flip_sc_col",                   "rank_edge_flip_sc",
@@ -128,17 +128,17 @@ axis <-
     "line",    "Linear",               0.5,   1,       T,           "circle",   "trajtype_directed_linear_sc_col",         "trajtype_directed_linear_sc",
     "bifu",    "Bifurcation",          0.1,   1,       T,           "circle",   "trajtype_bifurcation_sc_col",             "trajtype_bifurcation_sc",
     "conv",    "Convergence",          0.1,   1,       T,           "circle",   "trajtype_convergence_sc_col",             "trajtype_convergence_sc",
-    "cycl",    "Cycle",                0.1,   1,       T,           "circle",   "trajtype_directed_cycle_sc_col",          "trajtype_directed_cycle_sc",
     "mult",    "Multifurcation",       0.1,   1,       T,           "circle",   "trajtype_multifurcation_sc_col",          "trajtype_multifurcation_sc",
     "root",    "Rooted tree",          0.1,   1,       T,           "circle",   "trajtype_rooted_tree_sc_col",             "trajtype_rooted_tree_sc",
     "dagg",    "DAG",                  0.1,   1,       T,           "circle",   "trajtype_directed_acyclic_graph_sc_col",  "trajtype_directed_acyclic_graph_sc",
+    "cycl",    "Cycle",                0.1,   1,       T,           "circle",   "trajtype_directed_cycle_sc_col",          "trajtype_directed_cycle_sc",
     "grap",    "Graph",                0.1,   1,       T,           "circle",   "trajtype_directed_graph_sc_col",          "trajtype_directed_graph_sc",
 
     "time",    "Average time",         0.5,   1,       T,           "rect",     "rank_time_method_sc_col",                 "rank_time_method_sc",
     "erro",    "% Errored",            0.1,   1,       T,           "pie",      list(error_colours),                       list(c("pct_error_inside", "pct_memory_exceeded", "pct_time_exceeded")),
 
-    "qcsc",    "Score",                0.5,   5,       T,           "bar",      "qc_score_sc_col",                         "qc_score_sc",
-    "qcav",    "Availability",         0.1,   1,       T,           "circle",   "qc_availability_sc_col",                  "qc_availability_sc",
+    "qcsc",    "Score",                0.5,   4,       T,           "bar",      "qc_score_sc_col",                         "qc_score_sc",
+    "qcav",    "Availability",         0.5,   1,       T,           "circle",   "qc_availability_sc_col",                  "qc_availability_sc",
     "qcbe",    "Behaviour",            0.1,   1,       T,           "circle",   "qc_behaviour_sc_col",                     "qc_behaviour_sc",
     "qcca",    "Code assurance",       0.1,   1,       T,           "circle",   "qc_code_assurance_sc_col",                "qc_code_assurance_sc",
     "qccq",    "Code quality",         0.1,   1,       T,           "circle",   "qc_code_quality_sc_col",                  "qc_code_quality_sc",
@@ -245,12 +245,12 @@ leg_topinf <- data_frame(
   explanation = c("inferred by algorithm", "determined by parameter", "fixed by algorithm")
 )
 leg_prior <- data_frame(
-  label = c("/", "id", "#", "id", "#"),
-  type1 = c("_", "optional_", "optional_", "required_", "required_"),
+  label = c("id", "#", "id", "#"),
+  type1 = c("optional_", "optional_", "required_", "required_"),
   col = prior_type1cols[type1],
   x = 1,
   y = seq_along(type1),
-  explanation = c("none", "optional cell/gene ids", "optional amount", "required cell/gene ids", "required amount")
+  explanation = c("optional cell/gene ids", "optional amount", "required cell/gene ids", "required amount")
 )
 
 make_scale_legend <- function(scale, range_labels) {
@@ -326,39 +326,46 @@ g1 <- ggplot(method_tib) +
   # geom_rect(aes(xmin = axtr$prio$xmin, xmax = axtr$prio$xmax, ymin = method_ymin, ymax = method_ymax, alpha = prior_replace_id, fill = "#ABCDEF"), colour = "black", size = .25) +
 
   # RESERVE SPACE
-  expand_limits(x = c(max(axis$xmax)+2), y = legy_start - 4.8) +
+  expand_limits(x = c(max(axis$xmax)+2), y = legy_start - 4.1) +
 
   # LEGEND: TOPOLOGY
-  geom_text(aes(5, legy_start - 1, label = "Topology constraints"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  geom_text(aes(5.5, legy_start - 1 - y * .7, label = label, colour = col), leg_topinf, hjust = 0, vjust = 0) +
-  geom_text(aes(8.5, legy_start - 1 - y * .7, label = explanation), leg_topinf, hjust = 0, vjust = 0) +
+  geom_text(aes(3, legy_start - 1, label = "Topology constraints"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  geom_text(aes(3.5, legy_start - 1 - y * .7, label = label, colour = col), leg_topinf, hjust = 0, vjust = 0) +
+  geom_text(aes(6.5, legy_start - 1 - y * .7, label = explanation), leg_topinf, hjust = 0, vjust = 0) +
 
   # LEGEND: PRIOR
-  geom_text(aes(15, legy_start - 1, label = "Prior"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  geom_text(aes(15.5, legy_start - 1 - y * .7, label = label, colour = col), leg_prior, hjust = 0, vjust = 0) +
-  geom_text(aes(17, legy_start - 1- y * .7, label = explanation), leg_prior, hjust = 0, vjust = 0) +
+  geom_text(aes(12.5, legy_start - 1, label = "Prior"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  geom_text(aes(13, legy_start - 1 - y * .7, label = label, colour = col), leg_prior, hjust = 0, vjust = 0) +
+  geom_text(aes(14.5, legy_start - 1- y * .7, label = explanation), leg_prior, hjust = 0, vjust = 0) +
 
   # LEGEND: BENCHMARK
-  geom_text(aes(23, legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggimage::geom_subview(x = 25.5, y = legy_start - 2, subview = bench_leg, width = 3, height = 1) +
+  geom_text(aes(20, legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  ggimage::geom_subview(x = 22, y = legy_start - 2, subview = bench_leg, width = 3, height = 1) +
 
   # LEGEND: EXECUTION TIME
-  geom_text(aes(29, legy_start - 1, label = "Execution time"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggimage::geom_subview(x = 31.5, y = legy_start - 2, subview = time_leg, width = 3, height = 1) +
+  geom_text(aes(25, legy_start - 1, label = "Execution time"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  ggimage::geom_subview(x = 27, y = legy_start - 2, subview = time_leg, width = 3, height = 1) +
 
   # LEGEND: PCT ERRORED
-  geom_text(aes(35, legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggforce::geom_arc_bar(aes(x0 = 35.5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = fill), size = .25, error_leg_df) +
-  ggforce::geom_arc_bar(aes(x0 = 35.5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = NA), size = .25, error_leg_df) +
-  geom_text(aes(x = 35.5 + lab_x + .5, y = legy_start - 2.5 + lab_y, label = label, vjust = vjust, hjust = hjust), error_leg_df) +
-  geom_segment(aes(x = 35.5, xend = 35.5, y = legy_start - 2.5, yend = legy_start - 2.5 + row_height*.75), data = data_frame(z = 1), size = .25) +
+  geom_text(aes(30, legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  ggforce::geom_arc_bar(aes(x0 = 30.5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = fill), size = .25, error_leg_df) +
+  ggforce::geom_arc_bar(aes(x0 = 30.5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = NA), size = .25, error_leg_df) +
+  geom_text(aes(x = 30.5 + lab_x + .5, y = legy_start - 2.5 + lab_y, label = label, vjust = vjust, hjust = hjust), error_leg_df) +
+  geom_segment(aes(x = 30.5, xend = 30.5, y = legy_start - 2.5, yend = legy_start - 2.5 + row_height*.75), data = data_frame(z = 1), size = .25) +
 
   # LEGEND: QC SCORE
-  geom_text(aes(44.5, legy_start - 1, label = "QC score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggimage::geom_subview(x = 47, y = legy_start - 2, subview = qc_leg, width = 3, height = 1)
+  geom_text(aes(38, legy_start - 1, label = "QC score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  ggimage::geom_subview(x = 40, y = legy_start - 2, subview = qc_leg, width = 3, height = 1)
 
 
 # WRITE FILES
 overview_fig_file <- figure_file("overview.svg")
-ggsave(overview_fig_file, g1, width = 17, height = 14.5)
+ggsave(overview_fig_file, g1, width = 16, height = 14.8)
 xml2::read_xml(overview_fig_file) %>% replace_svg(minis) %>% xml2::write_xml(overview_fig_file)
+
+
+
+ggplot(method_tib, aes(harm_mean, qc_score)) +
+  geom_point() +
+  ggrepel::geom_text_repel(aes(label = method_name), nudge_y = .015)
+
