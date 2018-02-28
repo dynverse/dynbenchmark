@@ -4,56 +4,80 @@ library(dynplot)
 
 experiment("9-main_figure")
 
-method_tib <- read_rds(result_file("method_tib.rds"))
+list2env(read_rds(result_file("aggregated_data.rds", "9-main_figure")), environment())
 
 method_ord <- method_tib %>% arrange(desc(harm_mean)) %>% .$method_name
 
 # determine palettes
-continuous_scale <- viridisLite::viridis(101, option = "B")
 sc_fun <- function(x) {
   x / max(x, na.rm = T)
 }
-sc_col_fun <- function(x) {
-  sc <- sc_fun(x)
-  ifelse(is.na(sc), "darkgray", continuous_scale[round(sc * 100)+1])
+sc_col_fun <- function(palette) {
+  function(x) {
+    sc <- sc_fun(x)
+    ifelse(is.na(sc), "#444444", palette[cut(sc, length(palette))])
+  }
 }
+brewer_names <- RColorBrewer::brewer.pal.info %>% rownames()
+scale_brewer_funs <- map(setNames(brewer_names, brewer_names), ~ sc_col_fun(colorRampPalette(RColorBrewer::brewer.pal(9, .))(101)))
+viridis_names <- c("viridis", "magma", "plasma", "inferno", "cividis")
+scale_viridis_funs <- map(setNames(viridis_names, viridis_names), ~ sc_col_fun(viridisLite::viridis(101, option = .)))
 
-error_colours <- setNames(RColorBrewer::brewer.pal(3, "Set2"), c("pct_inside", "pct_memory_exceeded", "pct_time_exceeded"))
-
+error_colours <- setNames(RColorBrewer::brewer.pal(3, "Set3"), c("pct_error_inside", "pct_memory_exceeded", "pct_time_exceeded"))
 prior_colours <- setNames(RColorBrewer::brewer.pal(5, "Set1"), c("grouping_assignment", "grouping_assignment;start_cells;n_end_states", "marker_feature_ids", "n_end_states", "start_cells"))
-
-topinf_colours <- setNames(RColorBrewer::brewer.pal(3, "Set3"), c("free", "parameter", "fixed"))
-
-trafo_colours <- setNames(RColorBrewer::brewer.pal(6, "Set3")[4:6], c("minimal", "moderate", "extensive"))
-
+topinf_colours <- setNames(RColorBrewer::brewer.pal(9, "Reds")[c(4,7,9)], c("free", "parameter", "fixed"))
+trafo_colours <- setNames(RColorBrewer::brewer.pal(9, "Blues")[c(4,7,9)], c("minimal", "moderate", "extensive"))
 maxtraj_colours <- setNames(trajectory_types$color, trajectory_types$id)
 
 # coord calculation
 row_height <- .95
 
+colbench <- scale_viridis_funs$magma
+colqc <- scale_viridis_funs$viridis
+# colrem <- scale_brewer_funs$Greys
+coltime <- scale_viridis_funs$cividis
+
 method_tib <- method_tib %>%
+  left_join(minis %>% select(maximal_trajectory_types = trajectory_type, maxtraj_replace_id = replace_id), by = "maximal_trajectory_types") %>%
+  left_join(minis %>% select(prior_mini_id, prior_replace_id = replace_id), by = "prior_mini_id") %>%
   mutate(
-    method_name_f = factor(method_name, levels = method_ord),
-    method_y = -as.integer(method_name_f),
+    method_name_f = factor(method_name, levels = method_ord)
+  ) %>%
+  arrange(method_name_f) %>%
+  mutate(
+    method_i = seq_len(n()),
+    do_spacing = method_i != 1 & method_i %% 5 == 1,
+    spacing = ifelse(do_spacing, .15, 0.05),
+    method_y = -method_i - cumsum(spacing),
     method_ymin = method_y - row_height / 2,
     method_ymax = method_y + row_height / 2,
-    scalability_nfeat = ifelse(complexity_inferred == "nothing", NA, ifelse(grepl("nfeat2", complexity_inferred), 1, ifelse(grepl("nfeat", complexity_inferred), 2, 3))),
-    scalability_ncell = ifelse(complexity_inferred == "nothing", NA, ifelse(grepl("ncell2", complexity_inferred), 1, ifelse(grepl("ncell", complexity_inferred), 2, 3))),
+    scalability_nfeat = ifelse(complexity_inferred == "nothing", NA, ifelse(grepl("nfeat2", complexity_inferred), "2", ifelse(grepl("nfeat", complexity_inferred), "1", "0"))),
+    scalability_ncell = ifelse(complexity_inferred == "nothing", NA, ifelse(grepl("ncell2", complexity_inferred), "2", ifelse(grepl("ncell", complexity_inferred), "1", "0"))),
     rank_time_method = percent_rank(-time_method),
     rank_mean_var = percent_rank(-mean_var),
     rank_sets_seeds = ifelse(sets_seeds, 1, 2),
-    rank_citations = percent_rank(Citations),
-    trafo = str_replace(output_transformation, ":.*", "")
+    rank_citations = percent_rank(n_citations),
+    trafo = str_replace(output_transformation, ":.*", ""),
+    pct_error_inside = pct_errored - pct_memory_exceeded - pct_time_exceeded,
+    topinf_lab = c("free" = "free", "fixed" = "algo", "parameter" = "param")[topology_inference_type],
+    trafo_lab = c("minimal" = "mild", "moderate" = "fair", "extensive" = "major")[trafo]
   ) %>%
   mutate_at(
     c(
-      "harm_mean", "rank_correlation", "rank_edge_flip", "rank_rf_mse", "source_real", "source_synthetic",
+      "harm_mean", "rank_correlation", "rank_edge_flip", "rank_rf_mse",
+      "source_real", "source_synthetic",
       "trajtype_bifurcation", "trajtype_convergence", "trajtype_directed_acyclic_graph", "trajtype_directed_cycle",
-      "trajtype_directed_graph", "trajtype_directed_linear", "trajtype_multifurcation", "trajtype_rooted_tree",
-      "qc_score", "qc_availability", "qc_behaviour", "qc_code_assurance", "qc_code_quality", "qc_documentation", "qc_paper",
-      "rank_time_method", "scalability_nfeat", "scalability_ncell", "rank_mean_var", "rank_sets_seeds", "rank_citations"
+      "trajtype_directed_graph", "trajtype_directed_linear", "trajtype_multifurcation", "trajtype_rooted_tree"
     ),
-    funs(sc = sc_fun, sc_col = sc_col_fun)
+    funs(sc = sc_fun, sc_col = colbench)
+  ) %>%
+  mutate_at(
+    c("qc_score", "qc_availability", "qc_behaviour", "qc_code_assurance", "qc_code_quality", "qc_documentation", "qc_paper"),
+    funs(sc = sc_fun, sc_col = colqc)
+  ) %>%
+  mutate_at(
+    c("rank_time_method", "rank_time_method"),
+    funs(sc = sc_fun, sc_col = coltime)
   ) %>%
   mutate(
     prior_colour = prior_colours[prior_str],
@@ -62,66 +86,45 @@ method_tib <- method_tib %>%
     maxtraj_colour = maxtraj_colours[maximal_trajectory_types]
   )
 
-error_reasons <-
-  method_tib %>%
-  select(method_short_name, method_y, pct_errored, pct_memory_exceeded, pct_time_exceeded) %>%
-  mutate(pct_inside = pct_errored - pct_memory_exceeded - pct_time_exceeded) %>%
-  select(-pct_errored) %>%
-  gather(reason, percentage, -method_short_name, -method_y) %>%
-  arrange(method_short_name, reason) %>%
-  group_by(method_short_name) %>%
-  mutate(
-    rad = percentage * 2 * pi,
-    rad_end = cumsum(rad),
-    rad_start = rad_end - rad
-  ) %>%
-  ungroup() %>%
-  mutate(
-    error_colour = error_colours[reason]
-  )
-
-# axis info
+# AXIS INFO
 axis <-
   tribble(
-    ~id,       ~label,              ~xsep, ~xwidth, ~line,  ~ticks,
-    "harm",    "Score",             0.0,   5,       TRUE,   list(),
+    ~id,       ~label,                 ~xsep, ~xwidth, ~show_label, ~geom,      ~col,                                      ~value,
+    "name",    "Name",                 0.0,   5,       F,           "custom",   NA,                                        NA,
 
-    "corr",    "Correlation",       0.5,   1,       FALSE,  list(),
-    "edge",    "Edge flip",         0.1,   1,       FALSE,  list(),
-    "rfms",    "RF MSE",            0.1,   1,       FALSE,  list(),
+    "maxt",    "Max. trajectory type", 0.1,   2,       T,           "custom",   "maxtraj_colour",                          NA,
+    "topo",    "Topology constraints", 0.1,   1.5,     T,           "text",     "topinf_colour",                           "topinf_lab",
+    "traf",    "Transformation",       0.1,   1.5,     T,           "text",     "trafo_colour",                            "trafo_lab",
+    "prio",    "Required prior",       0.1,   2,       T,           "custom",   "prior_colour",                            NA,
 
-    "real",    "Real",              0.5,   1,       FALSE,  list(),
-    "synt",    "Synthetic",         0.1,   1,       FALSE,  list(),
+    "harm",    "Score",                0.5,   5,       T,           "bar",      "harm_mean_sc_col",                        "harm_mean_sc",
 
-    "line",    "Linear",            0.5,   1,       FALSE,  list(),
-    "bifu",    "Bifurcation",       0.1,   1,       FALSE,  list(),
-    "conv",    "Convergence",       0.1,   1,       FALSE,  list(),
-    "cycl",    "Cycle",             0.1,   1,       FALSE,  list(),
-    "mult",    "Multifurcation",    0.1,   1,       FALSE,  list(),
-    "root",    "Rooted tree",       0.1,   1,       FALSE,  list(),
-    "dagg",    "DAG",               0.1,   1,       FALSE,  list(),
-    "grap",    "Graph",             0.1,   1,       FALSE,  list(),
+    "corr",    "Correlation",          0.5,   1,       T,           "circle",   "rank_correlation_sc_col",                 "rank_correlation_sc",
+    "edge",    "Edge flip",            0.1,   1,       T,           "circle",   "rank_edge_flip_sc_col",                   "rank_edge_flip_sc",
+    "rfms",    "RF MSE",               0.1,   1,       T,           "circle",   "rank_rf_mse_sc_col",                      "rank_rf_mse_sc",
 
-    "time",    "Execution time",    0.5,   1,       FALSE,  list(),
-    "nfea",    "Gene scalability",  0.1,   1,       FALSE,  list(),
-    "ncel",    "Cell scalability",  0.1,   1,       FALSE,  list(),
+    "real",    "Real",                 0.5,   1,       T,           "circle",   "source_real_sc_col",                      "source_real_sc",
+    "synt",    "Synthetic",            0.1,   1,       T,           "circle",   "source_synthetic_sc_col",                 "source_synthetic_sc",
 
-    "vari",    "Robustness" ,       0.5,   1,       FALSE,  list(),
-    "seed",    "Set no seeds",      0.1,   1,       FALSE,  list(),
-    "erro",    "% Errored",         0.1,   1,       FALSE,  list(),
-    "prio",    "Required prior",    0.1,   1,       FALSE,  list(),
-    "topo",    "Topology inference", .1,   1,       FALSE,  list(),
-    "traf",    "Transformation",    0.1,   1,       FALSE,  list(),
-    "maxt",    "Maximal traj. type", .1,   1,       FALSE,  list(),
-    "cite",    "# Citations",       0.1,   1,       FALSE,  list(),
+    "line",    "Linear",               0.5,   1,       T,           "circle",   "trajtype_directed_linear_sc_col",        "trajtype_directed_linear_sc",
+    "bifu",    "Bifurcation",          0.1,   1,       T,           "circle",   "trajtype_bifurcation_sc_col",            "trajtype_bifurcation_sc",
+    "conv",    "Convergence",          0.1,   1,       T,           "circle",   "trajtype_convergence_sc_col",            "trajtype_convergence_sc",
+    "cycl",    "Cycle",                0.1,   1,       T,           "circle",   "trajtype_directed_cycle_sc_col",         "trajtype_directed_cycle_sc",
+    "mult",    "Multifurcation",       0.1,   1,       T,           "circle",   "trajtype_multifurcation_sc_col",         "trajtype_multifurcation_sc",
+    "root",    "Rooted tree",          0.1,   1,       T,           "circle",   "trajtype_rooted_tree_sc_col",            "trajtype_rooted_tree_sc",
+    "dagg",    "DAG",                  0.1,   1,       T,           "circle",   "trajtype_directed_acyclic_graph_sc_col", "trajtype_directed_acyclic_graph_sc",
+    "grap",    "Graph",                0.1,   1,       T,           "circle",   "trajtype_directed_graph_sc_col",         "trajtype_directed_graph_sc",
 
-    "qcsc",    "Score",             0.5,   5,       FALSE,  list(),
-    "qcav",    "Availability",      0.1,   1,       FALSE,  list(),
-    "qcbe",    "Behaviour",         0.1,   1,       FALSE,  list(),
-    "qcca",    "Code assurance",    0.1,   1,       FALSE,  list(),
-    "qccq",    "Code quality",      0.1,   1,       FALSE,  list(),
-    "qcdo",    "Documentation",     0.1,   1,       FALSE,  list(),
-    "qcpa",    "Paper",             0.1,   1,       FALSE,  list()
+    "time",    "Average time",         0.5,   1,       T,           "rect",     "rank_time_method_sc_col",                "rank_time_method_sc",
+    "erro",    "% Errored",            0.1,   1,       T,           "pie",      list(error_colours),                      list(c("pct_error_inside", "pct_memory_exceeded", "pct_time_exceeded")),
+
+    "qcsc",    "Score",                0.5,   5,       T,           "bar",      "qc_score_sc_col",                        "qc_score_sc",
+    "qcav",    "Availability",         0.1,   1,       T,           "circle",   "qc_availability_sc_col",                 "qc_availability_sc",
+    "qcbe",    "Behaviour",            0.1,   1,       T,           "circle",   "qc_behaviour_sc_col",                    "qc_behaviour_sc",
+    "qcca",    "Code assurance",       0.1,   1,       T,           "circle",   "qc_code_assurance_sc_col",               "qc_code_assurance_sc",
+    "qccq",    "Code quality",         0.1,   1,       T,           "circle",   "qc_code_quality_sc_col",                 "qc_code_quality_sc",
+    "qcdo",    "Documentation",        0.1,   1,       T,           "circle",   "qc_documentation_sc_col",                "qc_documentation_sc",
+    "qcpa",    "Paper",                0.1,   1,       T,           "circle",   "qc_paper_sc_col",                        "qc_paper_sc"
   ) %>%
   mutate(
     xmax = cumsum(xwidth + xsep),
@@ -134,29 +137,96 @@ axtr <- map(
 ) %>%
   setNames(axis$id)
 
-axis
-
+# define grouping information
 grouping <-
   tribble(
     ~label, ~y, ~xmin, ~xmax,
-    "Benchmark pipeline", 3, axtr$harm$xmin, axtr$ncel$xmax,
+    "Method characterisation", 3, axtr$name$xmin, axtr$prio$xmax,
+    "Benchmark pipeline", 3, axtr$harm$xmin, axtr$erro$xmax,
     "Per metric", 2, axtr$corr$xmin, axtr$rfms$xmax,
     "Per source", 2, axtr$real$xmin, axtr$synt$xmax,
     "Per trajectory type", 2, axtr$line$xmin, axtr$grap$xmax,
-    "Timings", 2, axtr$time$xmin, axtr$ncel$xmax,
-    "Varia", 3, axtr$vari$xmin, axtr$cite$xmax,
+    "Execution", 2, axtr$time$xmin, axtr$erro$xmax,
     "Quality control", 3, axtr$qcsc$xmin, axtr$qcpa$xmax
   ) %>%
   mutate(
     x = (xmin + xmax) / 2
   )
 
+# PROCESS CIRCLES DATA
+circle_data <- map_df(seq_len(nrow(axis)), function(i) {
+  if (axis$geom[[i]] != "circle") return(NULL)
+  axis_l <- axis %>% dynutils::extract_row_to_list(i)
+  method_tib %>%
+    select_(y0 = "method_y", col = axis_l$col, value = axis_l$value) %>%
+    mutate(
+      size = .5 * value,
+      x0 = axis_l$x
+    )
+})
+rect_data <- map_df(seq_len(nrow(axis)), function(i) {
+  if (axis$geom[[i]] != "rect") return(NULL)
+  axis_l <- axis %>% dynutils::extract_row_to_list(i)
+  method_tib %>%
+    select_(ymin = "method_ymin", ymax = "method_ymax", col = axis_l$col) %>%
+    mutate(
+      xmin = axis_l$xmin,
+      xmax = axis_l$xmax
+    )
+})
+bar_data <- map_df(seq_len(nrow(axis)), function(i) {
+  if (axis$geom[[i]] != "bar") return(NULL)
+  axis_l <- axis %>% dynutils::extract_row_to_list(i)
+  method_tib %>%
+    select_(ymin = "method_ymin", ymax = "method_ymax", col = axis_l$col, value = axis_l$value) %>%
+    mutate(
+      xmin = axis_l$xmin,
+      xmax = axis_l$xmin + value * axis_l$xwidth
+    )
+})
+pie_data <- map_df(seq_len(nrow(axis)), function(i) {
+  if (axis$geom[[i]] != "pie") return(NULL)
+  axis_l <- axis %>% dynutils::extract_row_to_list(i)
+  cols <- axis_l$col[[1]]
+  values <- axis_l$value[[1]]
+  method_tib %>%
+    select(method_short_name, y0 = method_y, one_of(values)) %>%
+    gather(piece, value, one_of(values)) %>%
+    arrange(method_short_name, piece) %>%
+    group_by(method_short_name) %>%
+    mutate(
+      col = cols[piece],
+      x0 = axis_l$x,
+      rad = value * 2 * pi,
+      rad_end = cumsum(rad),
+      rad_start = rad_end - rad,
+      r0 = 0,
+      r = .5
+    )
+})
+text_data <- map_df(seq_len(nrow(axis)), function(i) {
+  if (axis$geom[[i]] != "text") return(NULL)
+  axis_l <- axis %>% dynutils::extract_row_to_list(i)
+  method_tib %>%
+    select_(y = "method_y", col = axis_l$col, label = axis_l$value) %>%
+    mutate(
+      x = axis_l$x
+    )
+})
+
 # MAKE PLOT
 g <- ggplot(method_tib) +
 
+  # THEME SETTINGS
+  coord_equal(expand = FALSE) +
+  scale_alpha_identity() +
+  scale_colour_identity() +
+  scale_fill_identity() +
+  cowplot::theme_nothing() +
+
   # METRIC AXIS
-  geom_segment(aes(x = x, xend = x, y = -.3, yend = -.1), axis, size = .5) +
-  geom_text(aes(x = x, y = 0, label = label), axis, angle = 30, vjust = 0, hjust = 0) +
+  geom_segment(aes(x = x, xend = x, y = -.3, yend = -.1), axis %>% filter(show_label), size = .5) +
+  geom_text(aes(x = x, y = 0, label = label), axis %>% filter(show_label), angle = 30, vjust = 0, hjust = 0) +
   expand_limits(y = 2) +
 
   # GROUPING AXIS
@@ -165,61 +235,33 @@ g <- ggplot(method_tib) +
   expand_limits(y = 4) +
 
   # METHOD NAMES
-  geom_text(aes(x = -.1, y = method_y, label = method_name), hjust = 1, vjust = .5) +
+  geom_text(aes(x = axtr$name$xmax, y = method_y, label = method_name), hjust = 1, vjust = .5) +
 
-  # OVERALL
-  geom_rect(aes(xmin = axtr$harm$xmin, xmax = axtr$harm$xmin + harm_mean_sc * axtr$harm$xwidth, ymin = method_ymin, ymax = method_ymax, fill = harm_mean_sc_col)) +
+  # SEPARATOR LINES
+  geom_segment(aes(x = axtr$name$xmin, xend = axtr$qcpa$xmax, y = method_ymax+(spacing/2), yend = method_ymax+(spacing*.65)), method_tib %>% filter(do_spacing), size = .25, linetype = "dashed", colour = "darkgray") +
 
-  # PER METRIC
-  geom_rect(aes(xmin = axtr$corr$xmin, xmax = axtr$corr$xmax, ymin = method_ymin, ymax = method_ymax, fill = rank_correlation_sc_col)) +
-  geom_rect(aes(xmin = axtr$edge$xmin, xmax = axtr$edge$xmax, ymin = method_ymin, ymax = method_ymax, fill = rank_edge_flip_sc_col)) +
-  geom_rect(aes(xmin = axtr$rfms$xmin, xmax = axtr$rfms$xmax, ymin = method_ymin, ymax = method_ymax, fill = rank_rf_mse_sc_col)) +
+  # BARS
+  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), bar_data, colour = "black", size = .25) +
+  # RECTANGLES
+  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), rect_data, colour = "black", size = .25) +
+  # CIRCLES
+  ggforce::geom_circle(aes(x0 = x0, y0 = y0, fill = col, r = size), circle_data, size = .25) +
+  # STARS
+  ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = col), data = pie_data, size = .25) +
+  ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = NA), data = pie_data, size = .25) +
+  geom_segment(aes(x = x0, xend = x0, y = y0 + r0, yend = y0 + r), data = pie_data, size = .25) +
+  # TEXT
+  geom_text(aes(x = x, y = y, label = label, colour = col), data = text_data, vjust = .5, hjust = .5) +
 
-  # PER SOURCE
-  geom_rect(aes(xmin = axtr$real$xmin, xmax = axtr$real$xmax, ymin = method_ymin, ymax = method_ymax, fill = source_real_sc_col)) +
-  geom_rect(aes(xmin = axtr$synt$xmin, xmax = axtr$synt$xmax, ymin = method_ymin, ymax = method_ymax, fill = source_synthetic_sc_col)) +
+  # TRAJ TYPES
+  geom_rect(aes(xmin = axtr$maxt$xmin, xmax = axtr$maxt$xmax, ymin = method_ymin, ymax = method_ymax, alpha = maxtraj_replace_id, fill = "#ABCDEF"), colour = "black", size = .25) +
 
-  # PER TRAJ TYPE
-  geom_rect(aes(xmin = axtr$line$xmin, xmax = axtr$line$xmax, ymin = method_ymin, ymax = method_ymax, fill = trajtype_directed_linear_sc_col)) +
-  geom_rect(aes(xmin = axtr$bifu$xmin, xmax = axtr$bifu$xmax, ymin = method_ymin, ymax = method_ymax, fill = trajtype_bifurcation_sc_col)) +
-  geom_rect(aes(xmin = axtr$conv$xmin, xmax = axtr$conv$xmax, ymin = method_ymin, ymax = method_ymax, fill = trajtype_convergence_sc_col)) +
-  geom_rect(aes(xmin = axtr$cycl$xmin, xmax = axtr$cycl$xmax, ymin = method_ymin, ymax = method_ymax, fill = trajtype_directed_cycle_sc_col)) +
-  geom_rect(aes(xmin = axtr$mult$xmin, xmax = axtr$mult$xmax, ymin = method_ymin, ymax = method_ymax, fill = trajtype_multifurcation_sc_col)) +
-  geom_rect(aes(xmin = axtr$root$xmin, xmax = axtr$root$xmax, ymin = method_ymin, ymax = method_ymax, fill = trajtype_rooted_tree_sc_col)) +
-  geom_rect(aes(xmin = axtr$dagg$xmin, xmax = axtr$dagg$xmax, ymin = method_ymin, ymax = method_ymax, fill = trajtype_directed_acyclic_graph_sc_col)) +
-  geom_rect(aes(xmin = axtr$grap$xmin, xmax = axtr$grap$xmax, ymin = method_ymin, ymax = method_ymax, fill = trajtype_directed_graph_sc_col)) +
-
-  # TIMINGS
-  geom_rect(aes(xmin = axtr$time$xmin, xmax = axtr$time$xmax, ymin = method_ymin, ymax = method_ymax, fill = rank_time_method_sc_col)) +
-  geom_rect(aes(xmin = axtr$nfea$xmin, xmax = axtr$nfea$xmax, ymin = method_ymin, ymax = method_ymax, fill = scalability_nfeat_sc_col)) +
-  geom_rect(aes(xmin = axtr$ncel$xmin, xmax = axtr$ncel$xmax, ymin = method_ymin, ymax = method_ymax, fill = scalability_ncell_sc_col)) +
-
-  # VARIA
-  geom_rect(aes(xmin = axtr$vari$xmin, xmax = axtr$vari$xmax, ymin = method_ymin, ymax = method_ymax, fill = rank_mean_var_sc_col)) +
-  geom_rect(aes(xmin = axtr$seed$xmin, xmax = axtr$seed$xmax, ymin = method_ymin, ymax = method_ymax, fill = rank_sets_seeds_sc_col)) +
-  ggforce::geom_arc_bar(aes(x0 = axtr$erro$x, y0 = method_y, r0 = 0, r = .45, start = rad_start, end = rad_end, fill = error_colour), data = error_reasons) +
-  geom_rect(aes(xmin = axtr$prio$xmin, xmax = axtr$prio$xmax, ymin = method_ymin, ymax = method_ymax, fill = prior_colour)) +
-  geom_rect(aes(xmin = axtr$topo$xmin, xmax = axtr$topo$xmax, ymin = method_ymin, ymax = method_ymax, fill = topinf_colour)) +
-  geom_rect(aes(xmin = axtr$traf$xmin, xmax = axtr$traf$xmax, ymin = method_ymin, ymax = method_ymax, fill = trafo_colour)) +
-  geom_rect(aes(xmin = axtr$maxt$xmin, xmax = axtr$maxt$xmax, ymin = method_ymin, ymax = method_ymax, fill = maxtraj_colour)) +
-  geom_rect(aes(xmin = axtr$cite$xmin, xmax = axtr$cite$xmax, ymin = method_ymin, ymax = method_ymax, fill = rank_citations_sc_col)) +
-
-  # QUALITY CONTROL
-  geom_rect(aes(xmin = axtr$qcsc$xmin, xmax = axtr$qcsc$xmin + qc_score_sc * axtr$qcsc$xwidth, ymin = method_ymin, ymax = method_ymax, fill = qc_score_sc_col)) +
-  geom_rect(aes(xmin = axtr$qcav$xmin, xmax = axtr$qcav$xmax, ymin = method_ymin, ymax = method_ymax, fill = qc_availability_sc_col)) +
-  geom_rect(aes(xmin = axtr$qcbe$xmin, xmax = axtr$qcbe$xmax, ymin = method_ymin, ymax = method_ymax, fill = qc_behaviour_sc_col)) +
-  geom_rect(aes(xmin = axtr$qcca$xmin, xmax = axtr$qcca$xmax, ymin = method_ymin, ymax = method_ymax, fill = qc_code_assurance_sc_col)) +
-  geom_rect(aes(xmin = axtr$qccq$xmin, xmax = axtr$qccq$xmax, ymin = method_ymin, ymax = method_ymax, fill = qc_code_quality_sc_col)) +
-  geom_rect(aes(xmin = axtr$qcdo$xmin, xmax = axtr$qcdo$xmax, ymin = method_ymin, ymax = method_ymax, fill = qc_documentation_sc_col)) +
-  geom_rect(aes(xmin = axtr$qcpa$xmin, xmax = axtr$qcpa$xmax, ymin = method_ymin, ymax = method_ymax, fill = qc_paper_sc_col)) +
+  # PRIORS
+  geom_rect(aes(xmin = axtr$prio$xmin, xmax = axtr$prio$xmax, ymin = method_ymin, ymax = method_ymax, alpha = prior_replace_id, fill = "#ABCDEF"), colour = "black", size = .25) +
 
   # RESERVE SPACE
-  expand_limits(x = c(-6, 47)) +
+  expand_limits(x = c(56))
 
-  # THEME SETTINGS
-  coord_equal(expand = FALSE) +
-  scale_fill_identity() +
-  cowplot::theme_nothing()
-
-ggsave(figure_file("overview.pdf"), g, width = 16, height = 10)
-
+overview_fig_file <- figure_file("overview.svg")
+ggsave(overview_fig_file, g, width = 16, height = 10)
+xml2::read_xml(overview_fig_file) %>% replace_svg(minis) %>% xml2::write_xml(overview_fig_file)
