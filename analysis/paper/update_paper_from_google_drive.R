@@ -36,16 +36,16 @@ browseURL("analysis/paper/paper.html")
 
 # create pdfs and pngs for every svg, svg conversion is not really good in pandoc
 files <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg")
-tofiles <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg") %>% gsub("\\.svg", "\\.png", .)
-walk2(files, tofiles, ~system(glue::glue("inkscape {.} --export-png={.y}")))
-tofiles <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg") %>% gsub("\\.svg", "\\.pdf", .)
+# tofiles <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg") %>% gsub("\\.svg", "\\.tmp\\.png", .)
+# parallel::mclapply(purrr::transpose(list(files, tofiles)), function(.) system(glue::glue("inkscape {.[[1]]} --export-png={.[[2]]}")), mc.cores=8)
+tofiles <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg") %>% gsub("\\.svg", "\\.tmp\\.pdf", .)
 parallel::mclapply(purrr::transpose(list(files, tofiles)), function(.) system(glue::glue("inkscape {.[[1]]} --export-pdf={.[[2]]}")), mc.cores=8)
 
 # generate pdfs
 file.remove("analysis/paper/paper.pdf")
 
 # create pdf
-read_file("analysis/paper/paper.Rmd") %>% gsub("\\.svg", "\\.pdf", .) %>% write_file("analysis/paper/paper_latex.Rmd")
+read_file("analysis/paper/paper.Rmd") %>% gsub("\\.svg", "\\.tmp\\.pdf", .) %>% write_file("analysis/paper/paper_latex.Rmd")
 params <- list(table_format="latex")
 render(
   "analysis/paper/paper_latex.Rmd",
@@ -60,9 +60,11 @@ render(
   output_file = "paper.pdf",
   clean=F
 )
+unlink(tofiles) # remove tmp pdfs
 
 # upload to google drive
 drive_update("dynverse/paper.pdf", "analysis/paper/paper.pdf")
+
 
 
 # for conversion to pdf:
