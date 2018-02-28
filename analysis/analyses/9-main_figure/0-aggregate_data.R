@@ -25,7 +25,10 @@ complexities <- read_rds(derived_file("dimensionality_versus_timings_data.rds", 
 variances <- read_rds(derived_file("variance_results.rds", "5-optimise_parameters/4-plots"))
 
 # read method meta info
-meta <- read_rds(derived_file("methods_evaluated.rds", "4-method_characterisation"))
+meta <- read_rds(derived_file("methods_evaluated.rds", "4-method_characterisation")) %>%
+  mutate(
+    prior_mini_id = paste0("prior_mini_", group_indices(group_by_at(., vars(!!priors$prior_id))))
+  )
 
 # read qc scores
 qc_category_scores <- read_rds(derived_file("implementation_qc_category_scores.rds", "4-method_characterisation"))
@@ -33,7 +36,7 @@ qc_application_scores <- read_rds(derived_file("implementation_qc_application_sc
 
 
 ## START GATHERING COLUMNS
-part1 <-
+part_overall_mean <-
   eval_param_outputs$outputs_summtrajtype_totalsx2 %>%
   filter(trajectory_type == "overall", task_source == "mean") %>%
   select(
@@ -41,38 +44,38 @@ part1 <-
     num_files_created, num_setseed_calls, pct_errored, pct_time_exceeded, pct_memory_exceeded
   )
 
-part1b <-
+part_sources <-
   eval_param_outputs$outputs_summtrajtype_totalsx2 %>%
   filter(trajectory_type == "overall", task_source != "mean") %>%
   select(method_short_name, task_source, harm_mean) %>%
   mutate(task_source = paste0("source_", task_source)) %>%
   spread(task_source, harm_mean)
 
-part1c <-
+part_trajtypes <-
   eval_param_outputs$outputs_summtrajtype_totalsx2 %>%
   filter(trajectory_type != "overall", task_source == "mean") %>%
   select(method_short_name, trajectory_type, harm_mean) %>%
   mutate(trajectory_type = paste0("trajtype_", trajectory_type)) %>%
   spread(trajectory_type, harm_mean)
 
-part2 <-
+part_complexities <-
   complexities$complexity %>%
   select(
     method_short_name, complexity_inferred = feature, complexity_inferred2 = feature2, complexity_sign = sign, complexity_rsq = rsq
   )
 
-part3 <-
+part_variances <-
   variances$vardf %>%
   select(
     method_short_name, mean_var, var_rank_correlation, var_rank_edge_flip, var_rank_rf_mse, sets_seeds
   )
 
-part4 <-
+part_priors <-
   eval_param_outputs$outputs_ind %>%
   select(method_short_name, prior_str) %>%
   distinct()
 
-part5 <-
+part_method_characterisation <-
   meta %>%
   select(
     method_short_name = method_id,
@@ -85,11 +88,12 @@ part5 <-
     earliest_date = date,
     pub_date = PubDate,
     preprint_date = Preprint,
-    Citations,
-    qc_score
+    n_citations = Citations,
+    qc_score,
+    prior_mini_id
   )
 
-part6 <-
+part_qc_category <-
   qc_category_scores %>%
   mutate(category = paste0("qc_", category)) %>%
   spread(category, qc_score) %>%
@@ -98,7 +102,34 @@ part6 <-
   select(-implementation_id)
 
 ## COMBINE_COLUMNS
+part_list <- lst(part_overall_mean, part_sources, part_trajtypes, part_complexities, part_variances, part_priors, part_method_characterisation, part_qc_category)
 reduce_fun <- function(a, b) inner_join(a, b, by = "method_short_name")
-method_tib <- Reduce("reduce_fun", list(part1, part1b, part1c, part2, part3, part4, part5, part6))
+method_tib <- Reduce("reduce_fun", part_list)
 
-write_rds(method_tib, result_file("method_tib.rds"))
+# method name check
+method_short_names <- part_list %>% map(~.$method_short_name) %>% Reduce("union", .)
+for (n in names(part_list)) {
+  dff <- setdiff(method_short_names, part_list[[n]]$method_short_name)
+  if (length(dff) > 0) {
+    cat(n, " missing methods: ", paste(dff, collapse = ", "), "\n", sep = "")
+  }
+}
+
+# construct minis
+priors_mini <- meta %>%
+  group_by_at(vars(!!priors$prior_id, prior_mini_id)) %>%
+  summarise() %>%
+  ungroup() %>%
+  gather(prior_id, prior_usage, -prior_mini_id) %>%
+  {split(., .$prior_mini_id)} %>%
+  map_chr(generate_prior_mini) %>%
+  {tibble(prior_mini_id = names(.), svg=.)}
+
+trajectory_types_mini <- map(trajectory_types$id, ~xml2::read_xml(figure_file(paste0("mini/", ., ".svg"), "trajectory_types"))) %>%
+  map_chr(as.character) %>%
+  {tibble(trajectory_type = trajectory_types$id, svg=.)}
+
+minis <- bind_rows(priors_mini, trajectory_types_mini) %>% create_replacers()
+
+# write output
+write_rds(lst(method_tib, minis), result_file("aggregated_data.rds"))
