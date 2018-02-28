@@ -203,7 +203,7 @@ pie_data <- map_df(seq_len(nrow(axis)), function(i) {
       r0 = 0,
       r = .5
     )
-})
+}) %>% filter(rad_end != rad_start)
 text_data <- map_df(seq_len(nrow(axis)), function(i) {
   if (axis$geom[[i]] != "text") return(NULL)
   axis_l <- axis %>% dynutils::extract_row_to_list(i)
