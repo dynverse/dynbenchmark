@@ -21,6 +21,21 @@
   <defs
      id="defs2">
     <linearGradient
+       id="linearGradient1982"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#3ad1d1;stop-opacity:1;"
+         offset="0"
+         id="stop1980" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient1970">
+      <stop
+         style="stop-color:#3ad1d1;stop-opacity:1;"
+         offset="0"
+         id="stop1968" />
+    </linearGradient>
+    <linearGradient
        id="linearGradient7042"
        osb:paint="solid">
       <stop
@@ -32,7 +47,7 @@
        id="linearGradient7024"
        osb:paint="solid">
       <stop
-         style="stop-color:#e8ef04;stop-opacity:1;"
+         style="stop-color:#e0ab00;stop-opacity:1;"
          offset="0"
          id="stop7022" />
     </linearGradient>
@@ -600,8 +615,7 @@
          id="stop3111" />
     </linearGradient>
     <linearGradient
-       id="linearGradient1673"
-       osb:paint="solid">
+       id="linearGradient1673">
       <stop
          style="stop-color:#3ad1d1;stop-opacity:1;"
          offset="0"
@@ -1224,6 +1238,42 @@
        x2="18.229877"
        y2="96.072426"
        gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1982"
+       id="linearGradient1972"
+       x1="4.8191967"
+       y1="28.57019"
+       x2="6.5200891"
+       y2="28.57019"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1982"
+       id="linearGradient1974"
+       x1="12.000744"
+       y1="28.570196"
+       x2="13.701637"
+       y2="28.570196"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1982"
+       id="linearGradient1976"
+       x1="15.804129"
+       y1="-31.523127"
+       x2="17.505022"
+       y2="-31.523127"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1982"
+       id="linearGradient1984"
+       gradientUnits="userSpaceOnUse"
+       x1="15.804129"
+       y1="25.617252"
+       x2="17.505022"
+       y2="25.617252" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -1232,9 +1282,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.6374888"
-     inkscape:cx="21.529486"
-     inkscape:cy="114.15741"
+     inkscape:zoom="1.2860465"
+     inkscape:cx="-81.06527"
+     inkscape:cy="84.600444"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"

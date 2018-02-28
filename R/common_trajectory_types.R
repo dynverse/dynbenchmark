@@ -77,7 +77,7 @@ trajectory_types <- {
     "directed_linear", "#0278dd",
     "bifurcation" , "#3ad1d1",
     "convergence", "#1f8888",
-    "rooted_tree" , "#e8ef04",
+    "rooted_tree" , "#e0ab00",
     "rooted_binary_tree" , "#00b009",
     "multifurcation" , "#7fbe00",
     "directed_cycle" , "#003d76",

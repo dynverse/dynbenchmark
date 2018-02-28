@@ -2,11 +2,17 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 <svg xmlns:osb="http://www.openswatchbook.org/uri/2009/osb" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="60.598293" height="341.4989" viewBox="0 0 16.033298 90.354919" version="1.1" id="svg8" inkscape:version="0.92.2 (unknown)" sodipodi:docname="trajectory_types.svg">
   <defs id="defs2">
+    <linearGradient id="linearGradient1982" osb:paint="solid">
+      <stop style="stop-color:#3ad1d1;stop-opacity:1;" offset="0" id="stop1980"/>
+    </linearGradient>
+    <linearGradient id="linearGradient1970">
+      <stop style="stop-color:#3ad1d1;stop-opacity:1;" offset="0" id="stop1968"/>
+    </linearGradient>
     <linearGradient id="linearGradient7042" osb:paint="solid">
       <stop style="stop-color:#ca0565;stop-opacity:1;" offset="0" id="stop7040"/>
     </linearGradient>
     <linearGradient id="linearGradient7024" osb:paint="solid">
-      <stop style="stop-color:#e8ef04;stop-opacity:1;" offset="0" id="stop7022"/>
+      <stop style="stop-color:#e0ab00;stop-opacity:1;" offset="0" id="stop7022"/>
     </linearGradient>
     <marker inkscape:stockid="Arrow2Send" orient="auto" refY="0" refX="0" id="marker17849" style="overflow:visible" inkscape:isstock="true">
       <path id="path17847" style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1" d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z" transform="matrix(-0.3,0,0,-0.3,0.69,0)" inkscape:connector-curvature="0"/>
@@ -170,7 +176,7 @@
     <linearGradient id="linearGradient3113" osb:paint="solid">
       <stop style="stop-color:#a7e921;stop-opacity:1;" offset="0" id="stop3111"/>
     </linearGradient>
-    <linearGradient id="linearGradient1673" osb:paint="solid">
+    <linearGradient id="linearGradient1673">
       <stop style="stop-color:#3ad1d1;stop-opacity:1;" offset="0" id="stop1671"/>
     </linearGradient>
     <linearGradient id="linearGradient1583" osb:paint="solid">
@@ -296,8 +302,12 @@
     <linearGradient inkscape:collect="always" xlink:href="#linearGradient7042" id="linearGradient7056" x1="13.819366" y1="95.934105" x2="15.520258" y2="95.934105" gradientUnits="userSpaceOnUse"/>
     <linearGradient inkscape:collect="always" xlink:href="#linearGradient7042" id="linearGradient7058" x1="14.970002" y1="99.374405" x2="16.670895" y2="99.374405" gradientUnits="userSpaceOnUse"/>
     <linearGradient inkscape:collect="always" xlink:href="#linearGradient7042" id="linearGradient7060" x1="16.528984" y1="96.072426" x2="18.229877" y2="96.072426" gradientUnits="userSpaceOnUse"/>
+    <linearGradient inkscape:collect="always" xlink:href="#linearGradient1982" id="linearGradient1972" x1="4.8191967" y1="28.57019" x2="6.5200891" y2="28.57019" gradientUnits="userSpaceOnUse"/>
+    <linearGradient inkscape:collect="always" xlink:href="#linearGradient1982" id="linearGradient1974" x1="12.000744" y1="28.570196" x2="13.701637" y2="28.570196" gradientUnits="userSpaceOnUse"/>
+    <linearGradient inkscape:collect="always" xlink:href="#linearGradient1982" id="linearGradient1976" x1="15.804129" y1="-31.523127" x2="17.505022" y2="-31.523127" gradientUnits="userSpaceOnUse"/>
+    <linearGradient inkscape:collect="always" xlink:href="#linearGradient1982" id="linearGradient1984" gradientUnits="userSpaceOnUse" x1="15.804129" y1="25.617252" x2="17.505022" y2="25.617252"/>
   </defs>
-  <sodipodi:namedview id="base" pagecolor="#ffffff" bordercolor="#666666" borderopacity="1.0" inkscape:pageopacity="0.0" inkscape:pageshadow="2" inkscape:zoom="3.6374888" inkscape:cx="21.529486" inkscape:cy="268.53128" inkscape:document-units="mm" inkscape:current-layer="layer1" showgrid="false" inkscape:window-width="1920" inkscape:window-height="1028" inkscape:window-x="0" inkscape:window-y="0" inkscape:window-maximized="1" fit-margin-top="0" fit-margin-left="0" fit-margin-right="0" fit-margin-bottom="0" units="px">
+  <sodipodi:namedview id="base" pagecolor="#ffffff" bordercolor="#666666" borderopacity="1.0" inkscape:pageopacity="0.0" inkscape:pageshadow="2" inkscape:zoom="1.2860465" inkscape:cx="-81.06527" inkscape:cy="238.97431" inkscape:document-units="mm" inkscape:current-layer="layer1" showgrid="false" inkscape:window-width="1600" inkscape:window-height="1173" inkscape:window-x="1920" inkscape:window-y="0" inkscape:window-maximized="1" fit-margin-top="0" fit-margin-left="0" fit-margin-right="0" fit-margin-bottom="0" units="px">
     <inkscape:grid type="xygrid" id="grid1904"/>
   </sodipodi:namedview>
   <metadata id="metadata5">
