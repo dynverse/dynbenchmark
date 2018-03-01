@@ -10,8 +10,8 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="283.10419mm"
-   height="169.55675mm"
-   viewBox="0 0 283.10417 169.55675"
+   height="173.43216mm"
+   viewBox="0 0 283.10417 173.43216"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.2 (unknown)"
@@ -359,9 +359,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.979899"
-     inkscape:cx="196.11698"
-     inkscape:cy="100.48825"
+     inkscape:zoom="3.959798"
+     inkscape:cx="713.40697"
+     inkscape:cy="58.652334"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -379,8 +379,8 @@
     <inkscape:grid
        type="xygrid"
        id="grid817"
-       originx="-5.2916658"
-       originy="-132.29166" />
+       originx="-5.2916653"
+       originy="-128.41624" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -403,9 +403,9 @@
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.39999998;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:3.4000001;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        id="rect14299"
        width="283.10419"
-       height="169.33333"
+       height="173.20874"
        x="5.2916679"
-       y="-4.6250148" />
+       y="-4.6250153" />
     <g
        id="g3681"
        transform="translate(-13.229172,31.750005)">
@@ -1331,17 +1331,28 @@
          id="tspan14295-6"
          x="185.73039"
          y="162.3772"
-         style="text-align:start;text-anchor:start;fill:#030303;fill-opacity:1;stroke:none;stroke-width:0.40000001">†  Low performance</tspan></text>
+         style="text-align:start;text-anchor:start;fill:#030303;fill-opacity:1;stroke:none;stroke-width:0.40000001">↘ Low performance</tspan></text>
     <text
        xml:space="preserve"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:sans-serif;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#a3a3a3;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.40000001;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:3.4000001;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        x="7.8091989"
-       y="162.06712"
+       y="166.69733"
        id="date"><tspan
          sodipodi:role="line"
          id="tspan1315"
          x="7.8091989"
-         y="162.06712"
+         y="166.69733"
          style="text-align:start;text-anchor:start;fill:#a3a3a3;fill-opacity:1;stroke:none;stroke-width:0.40000001">DATE</tspan></text>
+    <text
+       xml:space="preserve"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:100%;font-family:sans-serif;-inkscape-font-specification:sans-serif;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#c5c5c5;stroke-width:0.40000001;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:3.4000001;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       x="185.73039"
+       y="166.78714"
+       id="text14297-3-9"><tspan
+         sodipodi:role="line"
+         id="tspan14295-6-3"
+         x="185.73039"
+         y="166.78714"
+         style="text-align:start;text-anchor:start;fill:#030303;fill-opacity:1;stroke:none;stroke-width:0.40000001">†  Not evaluated</tspan></text>
   </g>
 </svg>
