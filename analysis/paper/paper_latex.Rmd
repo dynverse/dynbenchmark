@@ -150,7 +150,8 @@ Although trajectory inference methods use a variety of algorithms and steps to r
 <!-- Common framework of TI, different components, naturally progressing towards the need for an evaluation -->
 
 
-Given this plethora of available trajectory inference methods, it is important that methods are compared, so that users can use the most optimal methods available for their problem. Moreover, new methods need to be rigorously tested, so that development can focus on improving the current state-of-the-art. In this study, we therefore present the first comprehensive evaluation framework for trajectory inference methods. We compared `r sum(methods$evaluated)` methods both on synthetic data, for which the gold standard is known, and real data, for which a gold standard has to be extracted from expert knowledge. <!-- We include a rigorous parameter optimisation, making sure that parameters are optimized while avoiding overfitting on characteristics of specific datasets. --> To make our framework reusable and extendable, we make use of continuous analysis [@beaulieu-jones_reproducibility_2017], which allows the developers of new methods to easily test their methods and compare them against the state-of-the-art.
+Given this plethora of available trajectory inference methods, it is important that methods are compared, so that users can use the most optimal methods available for their problem. Moreover, new methods need to be rigorously tested, so that development can focus on improving the current state-of-the-art. In this study, we therefore present the first comprehensive evaluation framework for trajectory inference methods. We compared `r sum(methods$evaluated)` methods both on synthetic data, for which the gold standard is known, and real data, for which a gold standard has to be extracted from expert knowledge. 
+<!-- We include a rigorous parameter optimisation, making sure that parameters are optimized while avoiding overfitting on characteristics of specific datasets. --> To make our framework reusable and extendable, we make use of continuous analysis [@beaulieu-jones_reproducibility_2017], which allows the developers of new methods to easily test their methods and compare them against the state-of-the-art.
 
 
 # Results
@@ -181,7 +182,7 @@ add_sfig({
 
 
 Overall, we find that slingshot predicts the most accurate trajectories across different data sources, trajectory types and metrics, followed by TSCAN and Monocle DDRTree CREF. These results are consistent between real and synthetic datasets CREF, confirming both the relevance of the synthetic data and the accuracy of the real datasets' gold and silver standards. However, results are more variable when comparing the three different evaluation metrics, 
-## Detectable trajectory topologies
+## 
 
 
 The main distinguishable feature among TI methods is the extent to which a method can adapt its trajectory topology to a dataset. In some 
@@ -242,7 +243,7 @@ read_rds(figure_file("qc_checks.rds","4-method_characterisation"))[[params$table
 
 
 `r anchor("fig", "implementation_overview")`
-![](`r figure_file("implementation_overview.tmp.pdf", experiment_id="4-method_characterisation")`)
+![](`r figure_file("method_components.tmp.pdf", experiment_id="4-method_characterisation")`)
 `r ref("fig", "implementation_overview", anchor=TRUE)` First characterization of each method.
 
 
@@ -303,6 +304,14 @@ Trajectory inference is unique among most other categories of single-cell analys
 
 
 <!-- Results  -->
+Based on the results of our benchmark, we created a set of practical guidelines for method users `r ref("fig", "user_guidelines")`. The main consideration for the choice of a method is based on the user's existing knowledge about what type of trajectory is expected in the data. If the user expects a linear, cyclic or bifurcating trajectory, a specific set of methods .
+
+
+`r anchor("fig", "user_guidelines")`
+![](`r figure_file("tree.tmp.pdf", experiment_id="7-user_guidelines")`)
+`r ref("fig", "user_guidelines", anchor=TRUE)` Practical guidelines for method users.
+
+
 
 
 <!-- Our common output model, advantages & limitations -->
