@@ -95,14 +95,22 @@ part_method_characterisation <-
 
 part_qc_category <-
   qc_category_scores %>%
-  mutate(category = paste0("qc_", category)) %>%
+  mutate(category = paste0("qc_cat_", category)) %>%
   spread(category, qc_score) %>%
   right_join(meta %>% select(implementation_id, method_id), by = "implementation_id") %>%
   select(method_short_name = method_id, everything()) %>%
   select(-implementation_id)
 
+part_qc_application <-
+  qc_application_scores %>%
+  mutate(application = paste0("qc_app_", application)) %>%
+  spread(application, score) %>%
+  right_join(meta %>% select(implementation_id, method_id), by = "implementation_id") %>%
+  select(method_short_name = method_id, everything()) %>%
+  select(-implementation_id)
+
 ## COMBINE_COLUMNS
-part_list <- lst(part_overall_mean, part_sources, part_trajtypes, part_complexities, part_variances, part_priors, part_method_characterisation, part_qc_category)
+part_list <- lst(part_overall_mean, part_sources, part_trajtypes, part_complexities, part_variances, part_priors, part_method_characterisation, part_qc_category, part_qc_application)
 reduce_fun <- function(a, b) inner_join(a, b, by = "method_short_name")
 method_tib <- Reduce("reduce_fun", part_list)
 

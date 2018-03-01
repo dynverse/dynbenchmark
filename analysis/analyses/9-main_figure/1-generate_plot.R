@@ -29,8 +29,6 @@ topinf_colours <- setNames(c("#00ab1b", "#edb600", "#cc2400"), c("free", "parame
 trafo_colours <- setNames(RColorBrewer::brewer.pal(9, "Blues")[c(5,7,9)], c("minimal", "moderate", "extensive"))
 maxtraj_colours <- setNames(trajectory_types$color, trajectory_types$id)
 
-
-
 colbench <- "magma"
 colbench_fun <- scale_viridis_funs[[colbench]]
 colqc <- "viridis"
@@ -91,7 +89,9 @@ method_tib <- method_tib %>%
     funs(type1 = prior_type1_fun, type2 = prior_type2_fun, type1col = prior_type1col_fun)
   ) %>%
   mutate_at(
-    c("qc_score", "qc_availability", "qc_behaviour", "qc_code_assurance", "qc_code_quality", "qc_documentation", "qc_paper"),
+    c(
+      "qc_score", "qc_cat_availability", "qc_cat_behaviour", "qc_cat_code_assurance", "qc_cat_code_quality",
+      "qc_cat_documentation", "qc_cat_paper", "qc_app_developer_friendly", "qc_app_good_science", "qc_app_user_friendly"),
     funs(sc = sc_fun, sc_col = colqc_fun)
   ) %>%
   mutate_at(
@@ -142,12 +142,17 @@ axis <-
     "erro",    "% Errored",            0.1,   1,       T,           "pie",      F,               list(error_colours),                       list(c("pct_error_inside", "pct_memory_exceeded", "pct_time_exceeded")),
 
     "qcsc",    "Score",                0.5,   4,       T,           "bar",      F,               "qc_score_sc_col",                         "qc_score_sc",
-    "qcav",    "Availability",         0.5,   1,       T,           "circle",   F,               "qc_availability_sc_col",                  "qc_availability_sc",
-    "qcbe",    "Behaviour",            0.1,   1,       T,           "circle",   F,               "qc_behaviour_sc_col",                     "qc_behaviour_sc",
-    "qcca",    "Code assurance",       0.1,   1,       T,           "circle",   F,               "qc_code_assurance_sc_col",                "qc_code_assurance_sc",
-    "qccq",    "Code quality",         0.1,   1,       T,           "circle",   F,               "qc_code_quality_sc_col",                  "qc_code_quality_sc",
-    "qcdo",    "Documentation",        0.1,   1,       T,           "circle",   F,               "qc_documentation_sc_col",                 "qc_documentation_sc",
-    "qcpa",    "Paper",                0.1,   1,       T,           "circle",   F,               "qc_paper_sc_col",                         "qc_paper_sc"
+
+    "qcdf",    "Developer friendly",   0.5,   1,       T,           "circle",   F,               "qc_app_developer_friendly_sc_col",        "qc_app_developer_friendly_sc",
+    "qcuf",    "User friendly",        0.1,   1,       T,           "circle",   F,               "qc_app_user_friendly_sc_col",             "qc_app_user_friendly_sc",
+    "qcgs",    "Future-proof",         0.1,   1,       T,           "circle",   F,               "qc_app_good_science_sc_col",              "qc_app_good_science_sc",
+
+    "qcav",    "Availability",         0.5,   1,       T,           "circle",   F,               "qc_cat_availability_sc_col",              "qc_cat_availability_sc",
+    "qcbe",    "Behaviour",            0.1,   1,       T,           "circle",   F,               "qc_cat_behaviour_sc_col",                 "qc_cat_behaviour_sc",
+    "qcca",    "Code assurance",       0.1,   1,       T,           "circle",   F,               "qc_cat_code_assurance_sc_col",            "qc_cat_code_assurance_sc",
+    "qccq",    "Code quality",         0.1,   1,       T,           "circle",   F,               "qc_cat_code_quality_sc_col",              "qc_cat_code_quality_sc",
+    "qcdo",    "Documentation",        0.1,   1,       T,           "circle",   F,               "qc_cat_documentation_sc_col",             "qc_cat_documentation_sc",
+    "qcpa",    "Paper",                0.1,   1,       T,           "circle",   F,               "qc_cat_paper_sc_col",                     "qc_cat_paper_sc"
   ) %>%
   mutate(
     xmax = cumsum(xwidth + xsep),
@@ -171,7 +176,9 @@ grouping <-
     "Per source", 2, axtr$real$xmin, axtr$synt$xmax,
     "Per trajectory type", 2, axtr$line$xmin, axtr$grap$xmax,
     "Execution", 2, axtr$time$xmin, axtr$erro$xmax,
-    "Quality control", 3, axtr$qcsc$xmin, axtr$qcpa$xmax
+    "Quality control", 3, axtr$qcsc$xmin, axtr$qcpa$xmax,
+    "Practicality", 2, axtr$qcdf$xmin, axtr$qcgs$xmax,
+    "Categories", 2, axtr$qcav$xmin, axtr$qcpa$xmax
   ) %>%
   mutate(
     x = (xmin + xmax) / 2
@@ -391,7 +398,7 @@ g1 <- ggplot(method_tib) +
 
 # WRITE FILES
 overview_fig_file <- figure_file("overview.svg")
-ggsave(overview_fig_file, g1, width = 16, height = 14.8)
+ggsave(overview_fig_file, g1, width = 17, height = 14)
 xml2::read_xml(overview_fig_file) %>% replace_svg(minis) %>% xml2::write_xml(overview_fig_file)
 
 
