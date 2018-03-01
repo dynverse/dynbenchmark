@@ -5,13 +5,13 @@ library(dynplot)
 experiment("5-optimise_parameters/3-evaluate_parameters")
 
 # Rsync latest results!
-PRISM:::rsync_remote(
-  remote_src = "prism",
-  path_src = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
-  remote_dest = "",
-  path_dest = derived_file(),
-  verbose=T
-)
+# PRISM:::rsync_remote(
+#   remote_src = "prism",
+#   path_src = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
+#   remote_dest = "",
+#   path_dest = derived_file(),
+#   verbose=T
+# )
 
 ############################################################
 ############### PART THREE: GENERATE FIGURES ###############

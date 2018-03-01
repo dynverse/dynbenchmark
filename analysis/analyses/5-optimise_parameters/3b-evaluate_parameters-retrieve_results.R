@@ -71,7 +71,7 @@ error_message_interpret <- function(error_message) {
   map_chr(
     error_message,
     function(err) {
-      if (grepl("MemoryError", err)) {
+      if (grepl("MemoryError", err) | grepl("OOM when allocating", err)) {
         "Memory limit exceeded"
       } else {
         err
@@ -85,6 +85,7 @@ outputs_ind <- outputs %>%
   filter(task_source != "toy") %>%
   mutate(
     error_message_int = error_message_interpret(error_message),
+    time_method = ifelse(error_message_int == "Time limit exceeded", timeout_per_execution, time_method),
     pct_errored = (error_message_int != "") + 0,
     pct_time_exceeded = (error_message_int == "Time limit exceeded") + 0,
     pct_memory_exceeded = (error_message_int == "Memory limit exceeded") + 0,
