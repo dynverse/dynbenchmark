@@ -95,29 +95,29 @@ figure_file("methods_timeline.svg", "4-method_characterisation"),
 <!-- history of Ti, different methods -->
 ```{r}
 fixed_linear <- implementations %>%
- filter(
-   fixes_topology != 'free', 
-   maximal_trajectory_type == 'directed_linear'
- ) %>%
- .$implementation_id
+filter(
+  fixes_topology != 'free', 
+  maximal_trajectory_type == 'directed_linear'
+) %>%
+.$implementation_id
 fixed_bifurcating <- implementations %>%
- filter(
-   fixes_topology != 'free', 
-   maximal_trajectory_type == 'bifurcation'
- ) %>%
- .$implementation_id
+filter(
+  fixes_topology != 'free', 
+  maximal_trajectory_type == 'bifurcation'
+) %>%
+.$implementation_id
 fixed_other <- implementations %>%
- filter(
-   fixes_topology != 'free', 
-   !maximal_trajectory_type %in% c('directed_linear', 'bifurcation')
- ) %>%
- .$implementation_id
+filter(
+  fixes_topology != 'free', 
+  !maximal_trajectory_type %in% c('directed_linear', 'bifurcation')
+) %>%
+.$implementation_id
 fixed_algorithm <- implementations %>%
- filter(fixes_topology == 'algorithm') %>%
- .$implementation_id
+filter(fixes_topology == 'algorithm') %>%
+.$implementation_id
 fixed_parameters <- implementations %>%
- filter(fixes_topology == 'parameter') %>%
- .$implementation_id
+filter(fixes_topology == 'parameter') %>%
+.$implementation_id
 	
 
 ```
@@ -131,15 +131,14 @@ Dozens of trajectory inference methods have been developed over the last years, 
 
 ```{r}
 uses_priors <- implementations %>% 
-  gather(prior_id, prior_usage, !!priors$prior_id) %>% 
-  filter(prior_usage %in% c("can_use", "can_root")) %>% 
-  pull(implementation_id) %>% unique()
-
+ gather(prior_id, prior_usage, !!priors$prior_id) %>% 
+ filter(prior_usage %in% c("can_use", "can_root")) %>% 
+ pull(implementation_id) %>% unique()
 
 requires_priors <- implementations %>% 
-  gather(prior_id, prior_usage, !!priors$prior_id) %>% 
-  filter(prior_usage %in% c("required", "required_default")) %>% 
-  pull(implementation_id) %>% unique()
+ gather(prior_id, prior_usage, !!priors$prior_id) %>% 
+ filter(prior_usage %in% c("required", "required_default")) %>% 
+ pull(implementation_id) %>% unique()
 	
 
 ```
@@ -155,10 +154,54 @@ Given this plethora of available trajectory inference methods, it is important t
 
 
 # Results
+
+
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods  (`r ref("fig", "evaluation_overview", "a")`), and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability, the presence of a programming interface, and the time they were published (`r ref("table", "implementations")`). Currently, only methods published before june 2017 are included in the current evaluation, while more recent methods will be included in the next version of the evaluation. We characterised and benchmarked each method in six different ways: its detectable trajectory topology, its performance on real and synthetic datasets, its running time and scalability, its requirements for prior information, the underlying algorithm, and the quality of the tools. Based on these results, we develop a set of guidelines both for the method users, as well as for method developers.
+
+
+## Performance on real and synthetic data
+We compared the accuracy of each method by comparing its output with a gold standard (`r ref("fig", "evaluation_overview", "b")`). To make the heterogenous output of each method comparable, we created wrappers around each method so that it was converted into a common probabilistic model (`r ref("fig", "evaluation_overview", "e")` and `r ref("sfig", "wrapping")`. In this model the overall topology is represented by a network between "milestones", and the cells are placed within the space formed by each set of connected milestones (`r ref("fig", "evaluation_overview", "c")`). This common trajectory format allowed us to compare the output of each method against gold standard trajectories. We compared the results of each TI method with both synthetic datasets, which offer the most exact gold standard, and real datasets, which offer the highest biological relevance. These synthetic datasets were generated using a realistic model of gene regulation [@schaffter_genenetweaversilicobenchmark_2011], and for each synthetic dataset a real dataset was used as reference to match the statistical properties of both datasets as best as possible (`r ref("fig", "evaluation_overview", "d")`). We used both large and smaller real datasets, from a variety of platforms, organisms and containing all different trajectory types (`r ref("fig", "evaluation_overview", "f")`). We further divided the datasets into gold and silver standard, depending on whether the gold standard was extracted from only external knowledge (gold) or including the expression data itself (silver). To compare the predictions of a method with a gold or silver standard, we developed three different score metrics, each assessing a different aspect of the trajectory: the cell ordering, the cell neighbourhood and topology (`r ref("fig", "evaluation_overview", "f")`). To calculate a final ordering, we combined metrics and datasets so that each metric, trajectory type and dataset source had equal weight.
+
+
+```{r}
+add_sfig({
+        figure_file('wrapping.svg', '4-method_characterisation')
+}, 
+"wrapping", 
+"Our wrapping workflow", 
+15, 
+7.5
+)
+```
+
+
+`r anchor("fig", "results_overview")`
+![](`r figure_file("overview.svg", experiment_id="9-main_figure")`)
+`r ref("fig", "results_overview")` HERE ARE THE RESULTS
+
+
+Overall, we find that slingshot predicts the most accurate trajectories across different data sources, trajectory types and metrics, followed by TSCAN and Monocle DDRTree CREF. These results are consistent between real and synthetic datasets CREF, confirming both the relevance of the synthetic data and the accuracy of the real datasets' gold and silver standards. However, results are more variable when comparing the three different evaluation metrics, 
+## Detectable trajectory topologies
+
+
+The main distinguishable feature among TI methods is the extent to which a method can adapt its trajectory topology to a dataset. In some 
+## Prior information
+
+
+
+
+
+
+## Running time and scalability
+
+
+## Algorithm components
+
+
 ## Method quality control
 
 
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` TI methods  (`r ref("fig", "evaluation_overview", "a")`), and selected a subset of `r sum(methods$evaluated)` for evaluation, primarily based on their free availability, the presence of a programming interface, and the time they were published (`r ref("table", "implementations")`). We characterised all methods in four different ways: possible trajectory topologies, implementation quality, prior information and the underlying algorithm (`r ref("fig", "implementation_overview")`).
+We characterised all methods in four different ways: possible trajectory topologies, implementation quality, prior information and the underlying algorithm (`r ref("fig", "implementation_overview")`).
 
 
 `r ref("table", "implementations", anchor=TRUE)` Overview of current trajectory inference methods, and whether they were included in this current evaluation study
@@ -228,21 +271,6 @@ figure_file("method_components.svg","4-method_characterisation"),
 )
 ```
 ## Evaluating the accuracy of the inferred trajectory
-
-
-We compared the accuracy of each method by comparing its output with a gold standard (`r ref("fig", "evaluation_overview", "b")`). To make the heterogenous output of each method comparable, we created wrappers around each method so that it was converted into a common probabilistic model (`r ref("fig", "evaluation_overview", "e")` and `r ref("sfig", "wrapping")`. In this model the overall topology is represented by a network between "milestones", and the cells are placed within the space formed by each set of connected milestones (`r ref("fig", "evaluation_overview", "c")`). This common trajectory format allowed us to compare the output of each method against gold standard trajectories. We compared the results of each TI method with both synthetic datasets, which offer the most exact gold standard, and real datasets, which offer the highest biological relevance. These synthetic datasets were generated using a realistic model of gene regulation [@schaffter_genenetweaversilicobenchmark_2011], and for each synthetic dataset a real dataset was used as reference to match the statistical properties of both datasets as best as possible (`r ref("fig", "evaluation_overview", "d")`). We used both large and smaller real datasets, from a variety of platforms, organisms and containing all different trajectory types (`r ref("fig", "evaluation_overview", "f")`). We further divided the datasets into gold and silver standard, depending on whether the gold standard was extracted from only external knowledge (gold) or including the expression data itself (silver). To compare the predictions of a method with a gold or silver standard, we developed three different score metrics, each assessing a different aspect of the trajectory: the cell ordering, the cell neighbourhood and topology (`r ref("fig", "evaluation_overview", "f")`). To calculate a final ordering, we combined metrics and datasets so that each metric, trajectory type and dataset source had equal weight.
-
-
-```{r}
-add_sfig({
-        figure_file('wrapping.svg', '4-method_characterisation')
-}, 
-"wrapping", 
-"Our wrapping workflow", 
-15, 
-7.5
-)
-```
 
 
 When looking across all datasets, we find that slingshot predicts the most accurate trajectories across different data sources, trajectory types and metrics. Over time, new methods 
@@ -631,9 +659,7 @@ For example, I talked with Abhishek the other day and his view was really flow o
 Love this figure! It's a great summary of the /whole/ study methodology
 I have several comments (that I might address myself if I get to it first). I'll post them as separate comments, so they can get resolved individually.
 I would include a part for the method wrappers; that is the way that linear, cellcluster, cellgraph and generic TI's get translated to the probabilistic trajectory model
-part c: I would explicitly show that the probabilistic trajectory models are being used for both the tasks and for the method outputs
-The spacing is a bit variable; e.g. part b takes up a lot of real estate while parts d and e seem to be packed very tightly together
-part f: I'd explicitly mention that each column is to be interpreted separately; there is no connection horizontally. JUST TO MAKE SURE.
+This is complex though to put into this figure :p. Have a look at 4-method_characteristics/wrapping.svg I think it is the least crucial of all parts of the figure now, so.. But feel free to try it yourself :p
 a handful of the most recent methods
 Repetition of most: put "The majority of" instead?
 ..
