@@ -127,10 +127,10 @@ extract_top_methods <- function(leaf_id, n_top) {
   scores$method_name <- ifelse(scores$score < 0.4, paste0(scores$method_name, " †"), scores$method_name)
 
   # fix NA method name
-  scores$method_name <- ifelse(is.na(scores$method_name), "?", scores$method_name)
+  scores$method_name[which(is.na(scores$method_name))] <- "?"
 
   # add question mark if method not evaluated
-  scores$method_name[which(!scores$evaluated)] <- paste0(scores$method_name[which(!scores$evaluated)], " ?")
+  scores$method_name[which(!scores$evaluated)] <- paste0(scores$method_name[which(!scores$evaluated)], " †")
 
   # add style
   scores$method_name_style <- paste0("font-size: ", c(4, 3, 2.5, 2)[seq_len(nrow(scores))])
