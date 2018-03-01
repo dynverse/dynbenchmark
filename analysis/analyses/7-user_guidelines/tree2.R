@@ -60,7 +60,7 @@ score_indicator <- function(score) {
 extract_top_methods <- function(leaf_id, n_top) {
   if(leaf_id == "other_fixed") {
     # for now hardcode this other_fixed
-    scores <- tibble(method_position = c(1,2), score=c(1, Inf), method_id = c("?", "elpigraph"))
+    scores <- tibble(method_position = c(2), score=c( Inf), method_id = c("elpigraph"))
   } else {
     # get trajectory types to score
     trajectory_type <- gsub("(.*)\\*", "\\1", leaf_id)
@@ -86,16 +86,16 @@ extract_top_methods <- function(leaf_id, n_top) {
       mutate(method_position = row_number())
 
     # add ? if no high scoring methods
-    if(nrow(scores) == 1 | max(scores$score) < 0.5) {
-      scores <- bind_rows(
-        tibble(method_id = "?", score=1, method_position=1),
-        scores %>% mutate(method_position = method_position+1)
-      )
-    }
+    # if(nrow(scores) == 1 | max(scores$score) < 0.5) {
+    #   scores <- bind_rows(
+    #     tibble(method_id = "?", score=1, method_position=1),
+    #     scores %>% mutate(method_position = method_position+1)
+    #   )
+    # }
 
     # add not-evaluated methods if not enough methods in top
     if(nrow(scores) < n_top) {
-      n_extra_methods <- n_top-nrow(scores)
+      n_extra_methods <- n_top-nrow(scores)+1
       extra_methods <- applicable_methods %>% discard(~.%in%scores$method_id) %>% discard(~is.na(.)) %>% head(n_extra_methods)
       n_extra_methods <- length(n_extra_methods)
       scores <- bind_rows(
@@ -124,16 +124,18 @@ extract_top_methods <- function(leaf_id, n_top) {
   }
 
   # add dagger if low score
-  scores$method_name <- ifelse(scores$score < 0.4, paste0(scores$method_name, " †"), scores$method_name)
+  scores <- scores %>% filter(score > 0.4)
+  # scores$method_name <- ifelse(scores$score < 0.4, paste0(scores$method_name, " ↘"), scores$method_name)
 
   # fix NA method name
   scores$method_name[which(is.na(scores$method_name))] <- "?"
 
   # add question mark if method not evaluated
-  scores$method_name[which(!scores$evaluated)] <- paste0(scores$method_name[which(!scores$evaluated)], " †")
+  scores$method_name[which(!scores$evaluated)] <- paste0(scores$method_name[which(!scores$evaluated)], " §")
 
   # add style
-  scores$method_name_style <- paste0("font-size: ", c(4, 3, 2.5, 2)[seq_len(nrow(scores))])
+  # scores$method_name_style <- paste0("font-size: ", c(4, 3, 2.5, 2)[seq_len(nrow(scores))])
+  scores$method_name_style <- ""
   scores$method_name_style[which(!scores$evaluated)] <- paste0(scores$method_name_style[which(!scores$evaluated)], "; fill:#999999")
 
   scores
@@ -150,14 +152,20 @@ leaf_methods <- map(leaf_ids, function(leaf_id) {
   print(leaf_id)
 
   scores <- extract_top_methods(leaf_id, n_top = n_top)
+  n_methods <- nrow(scores)
 
   # method name
   method_node <- svg %>% xml_find_first(pritt(".//svg:text[@id='{leaf_id}']"))
 
   spans <- method_node %>% xml_children()
 
-  xml_text(spans)[seq_len(nrow(scores))] <- scores$method_name
-  xml_text(spans)[seq_len(length(spans)-nrow(scores))+nrow(scores)] <- ""
+  xml_text(spans)[seq_len(n_methods)] <- scores$method_name
+  xml_text(spans)[seq_len(length(spans)-n_methods)+n_methods] <- ""
+
+  # vertical align
+  line_diff <- first(diff(as.numeric(xml_attr(spans, "y"))))
+  y_change <- line_diff/2 * (length(spans) - n_methods) # by how much should the y be changed
+  xml_attr(method_node, "y") <- as.numeric(xml_attr(method_node, "y")) + y_change
 
   # user friendliness indicators
   user_friendly_node <- xml_add_sibling(method_node, method_node, .copy=T)
@@ -166,9 +174,9 @@ leaf_methods <- map(leaf_ids, function(leaf_id) {
   xml_attr(spans, "x") <- 272+1
   xml_attr(user_friendly_node, "x") <- 272+1
 
-  xml_text(spans)[seq_len(nrow(scores))] <- map_chr(scores$user_friendly,"txt")
+  xml_text(spans)[seq_len(n_methods)] <- map_chr(scores$user_friendly,"txt")
   xml_add_style(spans,map_chr(scores$user_friendly, "style"))
-  xml_text(spans)[seq_len(length(spans)-nrow(scores))+nrow(scores)] <- ""
+  xml_text(spans)[seq_len(length(spans)-n_methods)+n_methods] <- ""
 
   # good science indicators
   good_science_node <- xml_add_sibling(method_node, method_node, .copy=T)
@@ -177,9 +185,9 @@ leaf_methods <- map(leaf_ids, function(leaf_id) {
   xml_attr(good_science_node, "x") <- 280+1
   xml_attr(spans, "x") <- 280+1
 
-  xml_text(spans)[seq_len(nrow(scores))] <- map_chr(scores$good_science,"txt")
+  xml_text(spans)[seq_len(n_methods)] <- map_chr(scores$good_science,"txt")
   xml_add_style(spans,map_chr(scores$good_science, "style"))
-  xml_text(spans)[seq_len(length(spans)-nrow(scores))+nrow(scores)] <- ""
+  xml_text(spans)[seq_len(length(spans)-n_methods)+n_methods] <- ""
 
   # method_size
   spans <- method_node %>% xml_children()
