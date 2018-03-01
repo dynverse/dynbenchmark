@@ -95,12 +95,15 @@ extract_top_methods <- function(leaf_id, n_top) {
 
     # add not-evaluated methods if not enough methods in top
     if(nrow(scores) < n_top) {
+      n_extra_methods <- n_top-nrow(scores)
+      extra_methods <- applicable_methods %>% discard(~.%in%scores$method_id) %>% discard(~is.na(.)) %>% head(n_extra_methods)
+      n_extra_methods <- length(n_extra_methods)
       scores <- bind_rows(
         scores,
         tibble(
-          method_id = applicable_methods %>% discard(~.%in%scores$method_id) %>% discard(~is.na(.)),
+          method_id = extra_methods,
           score=Inf,
-          method_position = seq_len(nrow(scores)) + nrow(scores)
+          method_position = seq_len(n_extra_methods) + nrow(scores)
         )
       )
     }
