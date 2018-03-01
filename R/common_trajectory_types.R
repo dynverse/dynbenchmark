@@ -147,7 +147,7 @@ trajectory_type_ancestors <- trajectory_type_dag %>% igraph::ego(99999999, mode=
 
 trajectory_types$ancestors <- trajectory_type_ancestors[trajectory_types$id]
 
-trajectory_types <- trajectory_types %>% arrange(map_int(ancestors, length)) # order according to number of ancestors
+trajectory_types <- trajectory_types %>% arrange(unlist(map(ancestors, length))) # order according to number of ancestors
 
 ##  ............................................................................
 ##  Orders                                                                  ####
