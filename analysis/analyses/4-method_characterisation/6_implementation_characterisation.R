@@ -267,7 +267,7 @@ table <- map(c("latex", "html"), function(format) {
           label_long(maximal_trajectory_type),
           format,
           background=toupper(set_names(trajectory_types$color, trajectory_types$id)[maximal_trajectory_type]),
-          color=ifelse(maximal_trajectory_type == "rooted_tree", "#333333", "#FFFFFF"),
+          color="#FFFFFF",
         ),
       implementation_name = kableExtra::cell_spec(
         implementation_name,
@@ -320,7 +320,7 @@ implementation_small_history <- implementation_small_history_data %>%
     direction="y", max.iter=10000, ylim=c(0, NA), force=10, min.segment.length = 0) +
   # ggrepel::geom_label_repel(aes(fill=maximal_trajectory_type, label=implementation_id, fontface=fontface, size=size), direction="y", max.iter=10000, ylim=c(0, NA), force=10, min.segment.length = 999999) +
   scale_color_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
-  scale_fill_manual(values=setNames(trajectory_types$background_color, trajectory_types$id)) +
+  scale_fill_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
   scale_alpha_manual(values=c(`TRUE`=1, `FALSE`=0.6)) +
   scale_x_date(label_long("publishing_date"), limits=c(as.Date("2014-01-01"), as.Date("2018-04-01")), date_breaks="1 year", date_labels="%Y") +
   scale_y_continuous(NULL, breaks=NULL, limits=c(0, 1), expand=c(0, 0)) +
@@ -344,7 +344,11 @@ children[xml_name(children) == "rect"] %>% xml_remove()
 
 # text color
 texts <- xml_children(svg) %>% {xml_children(.)} %>% {.[xml_name(.) == "text"]} %>% {.[str_detect(xml_attr(., "style"), "fill:")]}
-xml_attr(texts, "style") <- xml_attr(texts, "style") %>% gsub("fill: #[A-Z0-9]*;", "fill: #000;", .)
+walk(texts, function(text) {
+  # xml_attr(text, "style") <- xml_attr(text, "style") %>% gsub(pritt("fill: {toupper(trajectory_types$color[trajectory_types$id == 'rooted_tree'])};"), "fill: #000;", .)
+  xml_attr(text, "style") <- xml_attr(text, "style") %>% gsub("fill: #[A-Z0-9]{6};", "fill: #FFF;", .)
+})
+
 
 xml2::write_xml(svg, figure_file("implementation_small_history.svg"))
 
