@@ -41,11 +41,11 @@ coltime_fun <- scale_viridis_funs[[coltime]]
 prior_type1cols <- c("required_" = "#cc2400", "optional_" = "#00aaed", "_" = "#00ab1b")
 prior_type1_fun <- function(x) ifelse(is.na(x), "", gsub("_.*", "", x))
 prior_type1col_fun <- function(x) prior_type1cols[paste0(prior_type1_fun(x), "_")]
-prior_type2_fun <- function(x) ifelse(is.na(x), "-", gsub(".*_", "", x))
+prior_type2_fun <- function(x) ifelse(is.na(x), "", gsub(".*_", "", x))
 
 # PROCESS COORDINATES AND COLOURS
 row_height <- 1
-row_spacing <- .2
+row_spacing <- .1
 
 method_tib <- method_tib %>%
   left_join(minis %>% select(maximal_trajectory_types = trajectory_type, maxtraj_replace_id = replace_id), by = "maximal_trajectory_types") %>%
@@ -71,7 +71,9 @@ method_tib <- method_tib %>%
     trafo = str_replace(output_transformation, ":.*", ""),
     pct_error_inside = pct_errored - pct_memory_exceeded - pct_time_exceeded,
     topinf_lab = c("free" = "free", "fixed" = "fixed", "parameter" = "param")[topology_inference_type],
-    trafo_lab = c("minimal" = "mild", "moderate" = "fair", "extensive" = "major")[trafo]
+    trafo_lab = c("minimal" = "mild", "moderate" = "fair", "extensive" = "major")[trafo],
+    avg_time_lab = ifelse(time_method < 60, paste0(round(time_method), "s"), ifelse(time_method < 3600, paste0(round(time_method / 60), "m"), paste0(round(time_method / 3600), "h"))),
+    remove_results = pct_errored > .49
   ) %>%
   mutate_at(
     c(
@@ -100,50 +102,52 @@ method_tib <- method_tib %>%
     prior_colour = prior_colours[prior_str],
     topinf_colour = topinf_colours[topology_inference_type],
     trafo_colour = trafo_colours[trafo],
-    maxtraj_colour = maxtraj_colours[maximal_trajectory_types]
+    maxtraj_colour = maxtraj_colours[maximal_trajectory_types],
+    avg_time_lab_colour = ifelse(rank_time_method_sc < .75, "white", "black")
   )
 
 # AXIS INFO
 axis <-
   tribble(
-    ~id,       ~label,                 ~xsep, ~xwidth, ~show_label, ~geom,      ~col,                                      ~value,
-    "name",    "Name",                 0.0,   4,       F,           "custom",   NA,                                        NA,
+    ~id,       ~label,                 ~xsep, ~xwidth, ~show_label, ~geom,      ~filter_removed, ~col,                                      ~value,
+    "name",    "Name",                 0.0,   4,       F,           "custom",   F,               NA,                                        NA,
 
-    "maxt",    "Type",                 0.1,   2,       T,           "custom",   "maxtraj_colour",                          NA,
-    "topo",    "Topo. constr.",        0.1,   1,       T,           "text",     "topinf_colour",                           "topinf_lab",
-    "prst",    "Start",                0.1,   1,       T,           "text",     "prior_start_type1col",                    "prior_start_type2",
-    "pren",    "End",                  0.1,   1,       T,           "text",     "prior_end_type1col",                      "prior_end_type2",
-    "prgr",    "States",               0.1,   1,       T,           "text",     "prior_states_type1col",                   "prior_states_type2",
-    "prge",    "Genes",                0.1,   1,       T,           "text",     "prior_genes_type1col",                    "prior_genes_type2",
+    "maxt",    "Type",                 0.1,   2,       T,           "custom",   F,               "maxtraj_colour",                          NA,
+    "topo",    "Topo. constr.",        0.1,   1,       T,           "text",     F,               "topinf_colour",                           "topinf_lab",
+    "prst",    "Start",                0.1,   1,       T,           "text",     F,               "prior_start_type1col",                    "prior_start_type2",
+    "pren",    "End",                  0.1,   1,       T,           "text",     F,               "prior_end_type1col",                      "prior_end_type2",
+    "prgr",    "States",               0.1,   1,       T,           "text",     F,               "prior_states_type1col",                   "prior_states_type2",
+    "prge",    "Genes",                0.1,   1,       T,           "text",     F,               "prior_genes_type1col",                    "prior_genes_type2",
 
-    "harm",    "Score",                0.5,   4,       T,           "bar",      "harm_mean_sc_col",                        "harm_mean_sc",
+    "harm",    "Score",                0.5,   4,       T,           "bar",      T,               "harm_mean_sc_col",                        "harm_mean_sc",
 
-    "corr",    "Correlation",          0.5,   1,       T,           "circle",   "rank_correlation_sc_col",                 "rank_correlation_sc",
-    "edge",    "Edge flip",            0.1,   1,       T,           "circle",   "rank_edge_flip_sc_col",                   "rank_edge_flip_sc",
-    "rfms",    "RF MSE",               0.1,   1,       T,           "circle",   "rank_rf_mse_sc_col",                      "rank_rf_mse_sc",
+    "corr",    "Correlation",          0.5,   1,       T,           "circle",   T,               "rank_correlation_sc_col",                 "rank_correlation_sc",
+    "edge",    "Edge flip",            0.1,   1,       T,           "circle",   T,               "rank_edge_flip_sc_col",                   "rank_edge_flip_sc",
+    "rfms",    "RF MSE",               0.1,   1,       T,           "circle",   T,               "rank_rf_mse_sc_col",                      "rank_rf_mse_sc",
 
-    "real",    "Real",                 0.5,   1,       T,           "circle",   "source_real_sc_col",                      "source_real_sc",
-    "synt",    "Synthetic",            0.1,   1,       T,           "circle",   "source_synthetic_sc_col",                 "source_synthetic_sc",
+    "real",    "Real",                 0.5,   1,       T,           "circle",   T,               "source_real_sc_col",                      "source_real_sc",
+    "synt",    "Synthetic",            0.1,   1,       T,           "circle",   T,               "source_synthetic_sc_col",                 "source_synthetic_sc",
 
-    "line",    "Linear",               0.5,   1,       T,           "circle",   "trajtype_directed_linear_sc_col",         "trajtype_directed_linear_sc",
-    "bifu",    "Bifurcation",          0.1,   1,       T,           "circle",   "trajtype_bifurcation_sc_col",             "trajtype_bifurcation_sc",
-    "conv",    "Convergence",          0.1,   1,       T,           "circle",   "trajtype_convergence_sc_col",             "trajtype_convergence_sc",
-    "mult",    "Multifurcation",       0.1,   1,       T,           "circle",   "trajtype_multifurcation_sc_col",          "trajtype_multifurcation_sc",
-    "root",    "Rooted tree",          0.1,   1,       T,           "circle",   "trajtype_rooted_tree_sc_col",             "trajtype_rooted_tree_sc",
-    "dagg",    "DAG",                  0.1,   1,       T,           "circle",   "trajtype_directed_acyclic_graph_sc_col",  "trajtype_directed_acyclic_graph_sc",
-    "cycl",    "Cycle",                0.1,   1,       T,           "circle",   "trajtype_directed_cycle_sc_col",          "trajtype_directed_cycle_sc",
-    "grap",    "Graph",                0.1,   1,       T,           "circle",   "trajtype_directed_graph_sc_col",          "trajtype_directed_graph_sc",
+    "line",    "Linear",               0.5,   1,       T,           "circle",   T,               "trajtype_directed_linear_sc_col",         "trajtype_directed_linear_sc",
+    "bifu",    "Bifurcation",          0.1,   1,       T,           "circle",   T,               "trajtype_bifurcation_sc_col",             "trajtype_bifurcation_sc",
+    "conv",    "Convergence",          0.1,   1,       T,           "circle",   T,               "trajtype_convergence_sc_col",             "trajtype_convergence_sc",
+    "mult",    "Multifurcation",       0.1,   1,       T,           "circle",   T,               "trajtype_multifurcation_sc_col",          "trajtype_multifurcation_sc",
+    "root",    "Rooted tree",          0.1,   1,       T,           "circle",   T,               "trajtype_rooted_tree_sc_col",             "trajtype_rooted_tree_sc",
+    "dagg",    "DAG",                  0.1,   1,       T,           "circle",   T,               "trajtype_directed_acyclic_graph_sc_col",  "trajtype_directed_acyclic_graph_sc",
+    "cycl",    "Cycle",                0.1,   1,       T,           "circle",   T,               "trajtype_directed_cycle_sc_col",          "trajtype_directed_cycle_sc",
+    "grap",    "Graph",                0.1,   1,       T,           "circle",   T,               "trajtype_directed_graph_sc_col",          "trajtype_directed_graph_sc",
 
-    "time",    "Average time",         0.5,   1,       T,           "rect",     "rank_time_method_sc_col",                 "rank_time_method_sc",
-    "erro",    "% Errored",            0.1,   1,       T,           "pie",      list(error_colours),                       list(c("pct_error_inside", "pct_memory_exceeded", "pct_time_exceeded")),
+    "time",    "Average time",         0.5,   1,       T,           "rect",     F,               "rank_time_method_sc_col",                 "rank_time_method_sc",
+    "timl",    "Average time label",    -1,   1,       F,           "text",     F,               "avg_time_lab_colour",                     "avg_time_lab",
+    "erro",    "% Errored",            0.1,   1,       T,           "pie",      F,               list(error_colours),                       list(c("pct_error_inside", "pct_memory_exceeded", "pct_time_exceeded")),
 
-    "qcsc",    "Score",                0.5,   4,       T,           "bar",      "qc_score_sc_col",                         "qc_score_sc",
-    "qcav",    "Availability",         0.5,   1,       T,           "circle",   "qc_availability_sc_col",                  "qc_availability_sc",
-    "qcbe",    "Behaviour",            0.1,   1,       T,           "circle",   "qc_behaviour_sc_col",                     "qc_behaviour_sc",
-    "qcca",    "Code assurance",       0.1,   1,       T,           "circle",   "qc_code_assurance_sc_col",                "qc_code_assurance_sc",
-    "qccq",    "Code quality",         0.1,   1,       T,           "circle",   "qc_code_quality_sc_col",                  "qc_code_quality_sc",
-    "qcdo",    "Documentation",        0.1,   1,       T,           "circle",   "qc_documentation_sc_col",                 "qc_documentation_sc",
-    "qcpa",    "Paper",                0.1,   1,       T,           "circle",   "qc_paper_sc_col",                         "qc_paper_sc"
+    "qcsc",    "Score",                0.5,   4,       T,           "bar",      F,               "qc_score_sc_col",                         "qc_score_sc",
+    "qcav",    "Availability",         0.5,   1,       T,           "circle",   F,               "qc_availability_sc_col",                  "qc_availability_sc",
+    "qcbe",    "Behaviour",            0.1,   1,       T,           "circle",   F,               "qc_behaviour_sc_col",                     "qc_behaviour_sc",
+    "qcca",    "Code assurance",       0.1,   1,       T,           "circle",   F,               "qc_code_assurance_sc_col",                "qc_code_assurance_sc",
+    "qccq",    "Code quality",         0.1,   1,       T,           "circle",   F,               "qc_code_quality_sc_col",                  "qc_code_quality_sc",
+    "qcdo",    "Documentation",        0.1,   1,       T,           "circle",   F,               "qc_documentation_sc_col",                 "qc_documentation_sc",
+    "qcpa",    "Paper",                0.1,   1,       T,           "circle",   F,               "qc_paper_sc_col",                         "qc_paper_sc"
   ) %>%
   mutate(
     xmax = cumsum(xwidth + xsep),
@@ -174,65 +178,78 @@ grouping <-
   )
 
 # PROCESS CIRCLES DATA
-circle_data <- map_df(seq_len(nrow(axis)), function(i) {
-  if (axis$geom[[i]] != "circle") return(NULL)
-  axis_l <- axis %>% dynutils::extract_row_to_list(i)
-  method_tib %>%
-    select_(y0 = "method_y", col = axis_l$col, value = axis_l$value) %>%
-    mutate(
-      size = row_height / 2 * value,
-      x0 = axis_l$x
-    )
-})
-rect_data <- map_df(seq_len(nrow(axis)), function(i) {
-  if (axis$geom[[i]] != "rect") return(NULL)
-  axis_l <- axis %>% dynutils::extract_row_to_list(i)
-  method_tib %>%
-    select_(ymin = "method_ymin", ymax = "method_ymax", col = axis_l$col) %>%
-    mutate(
-      xmin = axis_l$xmin,
-      xmax = axis_l$xmax
-    )
-})
-bar_data <- map_df(seq_len(nrow(axis)), function(i) {
-  if (axis$geom[[i]] != "bar") return(NULL)
-  axis_l <- axis %>% dynutils::extract_row_to_list(i)
-  method_tib %>%
-    select_(ymin = "method_ymin", ymax = "method_ymax", col = axis_l$col, value = axis_l$value) %>%
-    mutate(
-      xmin = axis_l$xmin,
-      xmax = axis_l$xmin + value * axis_l$xwidth
-    )
-})
-pie_data <- map_df(seq_len(nrow(axis)), function(i) {
-  if (axis$geom[[i]] != "pie") return(NULL)
-  axis_l <- axis %>% dynutils::extract_row_to_list(i)
-  cols <- axis_l$col[[1]]
-  values <- axis_l$value[[1]]
-  method_tib %>%
-    select(method_short_name, y0 = method_y, one_of(values)) %>%
-    gather(piece, value, one_of(values)) %>%
-    arrange(method_short_name, piece) %>%
-    group_by(method_short_name) %>%
-    mutate(
-      col = cols[piece],
-      x0 = axis_l$x,
-      rad = value * 2 * pi,
-      rad_end = cumsum(rad),
-      rad_start = rad_end - rad,
-      r0 = 0,
-      r = row_height / 2
-    )
-}) %>% filter(rad_end != rad_start)
-text_data <- map_df(seq_len(nrow(axis)), function(i) {
-  if (axis$geom[[i]] != "text") return(NULL)
-  axis_l <- axis %>% dynutils::extract_row_to_list(i)
-  method_tib %>%
-    select_(y = "method_y", col = axis_l$col, label = axis_l$value) %>%
-    mutate(
-      x = axis_l$x
-    )
-})
+geom_data_processor <- function(geom_type, fun) {
+  map_df(seq_len(nrow(axis)), function(i) {
+    if (axis$geom[[i]] != geom_type) return(NULL)
+    axis_l <- axis %>% dynutils::extract_row_to_list(i)
+    z <- method_tib
+    if (axis_l$filter_removed) {
+      z <- z %>% filter(!remove_results)
+    }
+    fun(axis_l, z)
+  })
+}
+circle_data <- geom_data_processor(
+  "circle",
+  function(axis_l, method_tib_filt) {
+    method_tib_filt %>%
+      select_(y0 = "method_y", col = axis_l$col, value = axis_l$value) %>%
+      mutate(
+        size = row_height / 2 * value,
+        x0 = axis_l$x
+      )
+  })
+rect_data <- geom_data_processor(
+  "rect",
+  function(axis_l, method_tib_filt) {
+    method_tib_filt %>%
+      select_(ymin = "method_ymin", ymax = "method_ymax", col = axis_l$col) %>%
+      mutate(
+        xmin = axis_l$xmin,
+        xmax = axis_l$xmax
+      )
+  })
+bar_data <- geom_data_processor(
+  "bar",
+  function(axis_l, method_tib_filt) {
+    method_tib_filt %>%
+      select_(ymin = "method_ymin", ymax = "method_ymax", col = axis_l$col, value = axis_l$value) %>%
+      mutate(
+        xmin = axis_l$xmin,
+        xmax = axis_l$xmin + value * axis_l$xwidth
+      )
+  })
+text_data <- geom_data_processor(
+  "text",
+  function(axis_l, method_tib_filt) {
+    method_tib_filt %>%
+      select_(y = "method_y", col = axis_l$col, label = axis_l$value) %>%
+      mutate(
+        x = axis_l$x
+      )
+  })
+pie_data <- geom_data_processor(
+  "pie",
+  function(axis_l, method_tib_filt) {
+    cols <- axis_l$col[[1]]
+    values <- axis_l$value[[1]]
+    method_tib_filt %>%
+      select(method_short_name, y0 = method_y, one_of(values)) %>%
+      gather(piece, value, one_of(values)) %>%
+      arrange(method_short_name, piece) %>%
+      group_by(method_short_name) %>%
+      mutate(
+        col = cols[piece],
+        x0 = axis_l$x,
+        rad = value * 2 * pi,
+        rad_end = cumsum(rad),
+        rad_start = rad_end - rad,
+        r0 = 0,
+        r = row_height / 2
+      ) %>%
+      filter(rad_end != rad_start)
+  })
+
 
 # CREATE LEGENDS
 legy_start <- min(method_tib$method_ymin)
@@ -252,6 +269,12 @@ leg_prior <- data_frame(
   y = seq_along(type1),
   explanation = c("optional cell/gene ids", "optional amount", "required cell/gene ids", "required amount")
 )
+leg_circles <- data_frame(
+  r = c(.05, .1, .2, .4, .6, .8, 1)/2,
+  x = cumsum(c(0, (.05 + r[-1] + r[-length(r)]))),
+  colbench = colbench_fun(r*2),
+  colqc = colqc_fun(r*2)
+)
 
 make_scale_legend <- function(scale, range_labels) {
   g <-
@@ -263,9 +286,9 @@ make_scale_legend <- function(scale, range_labels) {
   cowplot::get_legend(g)
 }
 
-bench_leg <- make_scale_legend(viridisLite::viridis(101, option = colbench), range_labels = c(0, 1))
+bench_leg <- make_scale_legend(viridisLite::viridis(101, option = colbench), range_labels = c("low", "high"))
 time_leg <- make_scale_legend(viridisLite::viridis(101, option = coltime), range_labels = c("long", "short"))
-qc_leg <- make_scale_legend(viridisLite::viridis(101, option = colqc), range_labels = c(0, 1))
+qc_leg <- make_scale_legend(viridisLite::viridis(101, option = colqc), range_labels = c("low", "high"))
 
 error_leg_df <- data_frame(
   rad_start = seq(0, pi, length.out = 4)[-4],
@@ -290,6 +313,10 @@ g1 <- ggplot(method_tib) +
   scale_fill_identity() +
   cowplot::theme_nothing() +
 
+  # SEPARATOR LINES
+  # geom_segment(aes(x = axtr$name$xmin, xend = axtr$qcpa$xmax, y = method_ymax+(spacing/2), yend = method_ymax+(spacing/2)), method_tib %>% filter(do_spacing), size = .25, linetype = "dashed", colour = "darkgray") +
+  geom_rect(aes(xmin = axtr$name$xmin, xmax = axtr$qcpa$xmax, ymin = method_ymin-(spacing/2), ymax = method_ymax+(spacing/2)), method_tib %>% filter(method_i %% 2 == 1), fill = "#EEEEEE") +
+
   # METRIC AXIS
   geom_segment(aes(x = x, xend = x, y = -.3, yend = -.1), axis %>% filter(show_label), size = .5) +
   geom_text(aes(x = x, y = 0, label = label), axis %>% filter(show_label), angle = 30, vjust = 0, hjust = 0) +
@@ -303,8 +330,8 @@ g1 <- ggplot(method_tib) +
   # METHOD NAMES
   geom_text(aes(x = axtr$name$xmax, y = method_y, label = method_name), hjust = 1, vjust = .5) +
 
-  # SEPARATOR LINES
-  # geom_segment(aes(x = axtr$name$xmin, xend = axtr$qcpa$xmax, y = method_ymax+(spacing/2), yend = method_ymax+(spacing/2)), method_tib %>% filter(do_spacing), size = .25, linetype = "dashed", colour = "darkgray") +
+  # INSUFFICIENT DATA LABEL
+  geom_text(aes(x = axtr$line$x, y = method_y, label = "insufficient data"), method_tib %>% filter(remove_results), hjust = .5, vjust = .5) +
 
   # BARS
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), bar_data, colour = "black", size = .25) +
@@ -319,10 +346,10 @@ g1 <- ggplot(method_tib) +
   # TEXT
   geom_text(aes(x = x, y = y, label = label, colour = col), data = text_data, vjust = .5, hjust = .5) +
 
-  # TRAJ TYPES
+  # TRAJ TYPE MINIS
   geom_rect(aes(xmin = axtr$maxt$xmin, xmax = axtr$maxt$xmax, ymin = method_ymin, ymax = method_ymax, alpha = maxtraj_replace_id, fill = "#ABCDEF"), colour = "black", size = .25) +
 
-  # PRIORS
+  # PRIORS MINIS
   # geom_rect(aes(xmin = axtr$prio$xmin, xmax = axtr$prio$xmax, ymin = method_ymin, ymax = method_ymax, alpha = prior_replace_id, fill = "#ABCDEF"), colour = "black", size = .25) +
 
   # RESERVE SPACE
@@ -340,7 +367,9 @@ g1 <- ggplot(method_tib) +
 
   # LEGEND: BENCHMARK
   geom_text(aes(20, legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggimage::geom_subview(x = 22, y = legy_start - 2, subview = bench_leg, width = 3, height = 1) +
+  ggforce::geom_circle(aes(x0 = 20.8 + x, y0 = legy_start - 2.3 + r, r = r, fill = colbench), size = .25, leg_circles) +
+  geom_text(aes(x = 20.8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% slice(c(1, n()))) +
+  # ggimage::geom_subview(x = 22, y = legy_start - 2, subview = bench_leg, width = 3, height = 1) +
 
   # LEGEND: EXECUTION TIME
   geom_text(aes(25, legy_start - 1, label = "Execution time"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
@@ -355,7 +384,9 @@ g1 <- ggplot(method_tib) +
 
   # LEGEND: QC SCORE
   geom_text(aes(38, legy_start - 1, label = "QC score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggimage::geom_subview(x = 40, y = legy_start - 2, subview = qc_leg, width = 3, height = 1)
+  # ggimage::geom_subview(x = 40, y = legy_start - 2, subview = qc_leg, width = 3, height = 1)
+  ggforce::geom_circle(aes(x0 = 38.8 + x, y0 = legy_start - 2.3 + r, r = r, fill = colqc), size = .25, leg_circles) +
+  geom_text(aes(x = 38.8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% slice(c(1, n())))
 
 
 # WRITE FILES
@@ -363,9 +394,4 @@ overview_fig_file <- figure_file("overview.svg")
 ggsave(overview_fig_file, g1, width = 16, height = 14.8)
 xml2::read_xml(overview_fig_file) %>% replace_svg(minis) %>% xml2::write_xml(overview_fig_file)
 
-
-
-ggplot(method_tib, aes(harm_mean, qc_score)) +
-  geom_point() +
-  ggrepel::geom_text_repel(aes(label = method_name), nudge_y = .015)
 
