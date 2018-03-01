@@ -35,6 +35,8 @@ trajectory_type_edges_undirected_to_directed <- tibble(
 trajectory_type_edges_directed <- tribble(
   ~to, ~from, ~prop_changes,
   "bifurcation", "directed_linear", "",
+  "bifurcation", "convergence", "",
+  "convergence", "bifurcation", "",
   "convergence", "directed_linear", "",
   "multifurcation", "bifurcation", "",
   "rooted_binary_tree", "bifurcation", "",
@@ -44,9 +46,7 @@ trajectory_type_edges_directed <- tribble(
   "directed_acyclic_graph", "convergence", "",
   "directed_graph", "directed_acyclic_graph", "",
   "disconnected_directed_graph", "directed_graph", "",
-  "directed_graph", "directed_cycle", "",
-  "bifurcation", "convergence", "",
-  "convergence", "bifurcation", ""
+  "directed_graph", "directed_cycle", ""
 ) %>% mutate(prop_changes = as.list(prop_changes))
 
 
@@ -110,7 +110,10 @@ trajectory_types <- {
   }
   trajectory_type_colors$background_color <- lighten(trajectory_type_colors$color, 0.3)
 
-  trajectory_types <- left_join(trajectory_types, trajectory_type_colors, "id") %>% group_by(id) %>% filter(row_number() == 1) %>% ungroup()
+  trajectory_types <- left_join(trajectory_types, trajectory_type_colors, "id") %>%
+    group_by(id) %>%
+    filter(row_number() == 1) %>%
+    ungroup()
 
   trajectory_types
 }
@@ -143,6 +146,8 @@ trajectory_type_dag <- {
 trajectory_type_ancestors <- trajectory_type_dag %>% igraph::ego(99999999, mode="out") %>% map(names) %>% setNames(names(igraph::V(trajectory_type_dag)))
 
 trajectory_types$ancestors <- trajectory_type_ancestors[trajectory_types$id]
+
+trajectory_types <- trajectory_types %>% arrange(map_int(ancestors, length)) # order according to number of ancestors
 
 ##  ............................................................................
 ##  Orders                                                                  ####
