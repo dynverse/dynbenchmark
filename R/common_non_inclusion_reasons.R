@@ -13,4 +13,4 @@ non_inclusion_reasons <- tribble(
   "user_input", "Requires additional user input during the algorithm (not prior information)",
   "date", "Published later than 2017-05-01 to be included in the current version of the evaluation",
   "not_published", "This method is not published in preprint or a peer-reviewed journal"
-) %>% mutate(footnote = seq_along(id))
+) %>% mutate(footnote = letters[seq_along(id)])
