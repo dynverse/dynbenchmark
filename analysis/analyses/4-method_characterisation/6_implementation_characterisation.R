@@ -216,7 +216,7 @@ methods_timeline %>% save_plot(figure_file("methods_timeline.png"), ., base_widt
 ##  implementations table                                                           ####
 implementations$non_inclusion_reasons_footnotes <- implementations$non_inclusion_reasons_split %>%
   map(function(reasons) {
-    slice(non_inclusion_reasons, match(reasons, id))$footnote
+    slice(non_inclusion_reasons, match(reasons, id))$footnote %>% sort()
   })
 
 superscript <- c(latex = function(x) pritt("\\textsuperscript{{{x}}}"), html=function(x) pritt("<sup>{x}</sup>"))
@@ -286,7 +286,7 @@ table <- map(c("latex", "html"), function(format) {
   table <- implementations_table %>%
     knitr::kable(format, escape=F) %>%
     kableExtra::kable_styling(bootstrap_options = c("striped", "hover","condensed"), font_size=ifelse(format == "latex", 7, 12)) %>%
-    kableExtra::add_footnote(non_inclusion_reasons$long, "number")
+    kableExtra::add_footnote(non_inclusion_reasons$long, "alphabet")
   table
 }) %>% set_names(c("latex", "html"))
 table
