@@ -106,7 +106,6 @@ dataset_characterisation_plot <- cowplot::plot_grid(
 )
 dataset_characterisation_plot
 
-
 cowplot::save_plot(figure_file("dataset_characterisation.svg"), dataset_characterisation_plot, base_height = 12, base_width = 8)
 
 
@@ -214,3 +213,72 @@ plots <- seq_len(nrow(tasks_real)) %>% map(function(task_i) {
       ggtitle(label_dataset(task$id))
 })
 cowplot::plot_grid(plotlist=plots[1:10], ncol=5)
+
+
+
+
+
+##  ............................................................................
+##  Small pies                                                              ####
+##  ............................................................................
+##  Pie charts                                                              ####
+pie <- function(tasks=tasks_real, what = "technology") {
+  tasks$variable_of_interest <- tasks[[what]]
+
+  # first extract the variable
+  pie_data <- tasks %>%
+    count(variable_of_interest) %>%
+    arrange(n)
+
+  label_legend <- function(x) {
+    map_chr(x, ~pritt("{label_short(., Inf)}: {sum(pie_data$n[pie_data$variable_of_interest == .])}"))
+  }
+
+  # change labels, fill or order depending on variable
+  label <-"{label_short(variable_of_interest, 15)}: {n}"
+  fill_scale <- scale_fill_grey(start = 0.6, end = 0.9)
+  text_position <- 0.5
+  if (what == "technology") {
+    fill_scale <- scale_fill_manual(
+      "",
+      values = technology_colors[pie_data$variable_of_interest],
+      labels = label_legend(pie_data$variable_of_interest),
+      breaks = pie_data$variable_of_interest
+    )
+  } else if (what == "trajectory_type") {
+    pie_data <- pie_data %>% arrange(
+      -match(as.character(variable_of_interest), trajectory_types$id)
+    )
+    fill_scale <- scale_fill_manual(
+      "",
+      values = setNames(trajectory_types$color,trajectory_types$id)[pie_data$variable_of_interest],
+      labels = label_legend(pie_data$variable_of_interest),
+      breaks = pie_data$variable_of_interest
+    )
+    label <- "{n}"
+    text_position <- 0.9
+  }
+
+  # now calcualte positions
+  pie_data <- pie_data %>% mutate(odd = row_number()%%2, row_number = row_number()) %>%
+    mutate(start = lag(cumsum(n), 1, 0), end = cumsum(n), mid = start + (end - start)/2)
+
+  pie <- pie_data %>%
+    ggplot(aes(ymin=0, ymax=1)) +
+    geom_rect(aes(xmin=start, xmax=end, fill=variable_of_interest), stat="identity", color="white", size=0.5) +
+    theme_void() +
+    scale_x_continuous(expand=c(0, 0)) +
+    scale_y_continuous(expand=c(0, 0)) +
+    fill_scale +
+    coord_polar()
+
+  pie
+}
+
+dataset_characterisation_pies <- c("technology", "trajectory_type") %>% map(pie, tasks = tasks_real) %>% cowplot::plot_grid(plotlist=., nrow =1)
+dataset_characterisation_pies
+dataset_characterisation_pies %>% write_rds(figure_file("dataset_characterisation_pies.rds"))
+
+dataset_characterisation_pies %>% ggsave(figure_file("dataset_characterisation_pies_small.svg"), ., width=6, height=3)
+
+
