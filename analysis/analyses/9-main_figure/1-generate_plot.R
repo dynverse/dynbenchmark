@@ -310,6 +310,9 @@ error_leg_df <- data_frame(
   vjust = c(.25, .5, .75)
 )
 
+# Stamp
+stamp <- paste0("Generated on ", Sys.Date())
+
 # MAKE PLOT
 g1 <- ggplot(method_tib) +
 
@@ -393,7 +396,11 @@ g1 <- ggplot(method_tib) +
   geom_text(aes(38, legy_start - 1, label = "QC score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
   # ggimage::geom_subview(x = 40, y = legy_start - 2, subview = qc_leg, width = 3, height = 1)
   ggforce::geom_circle(aes(x0 = 38.8 + x, y0 = legy_start - 2.3 + r, r = r, fill = colqc), size = .25, leg_circles) +
-  geom_text(aes(x = 38.8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% slice(c(1, n())))
+  geom_text(aes(x = 38.8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% slice(c(1, n()))) +
+
+  # GENERATION SENTENCE
+  geom_text(aes(1, legy_start - 4, label = stamp), colour = "#cccccc", hjust = 0, vjust = 0) +
+  expand_limits(y = legy_start - 4.3)
 
 
 # WRITE FILES
