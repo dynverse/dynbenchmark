@@ -41,9 +41,9 @@ tofiles <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep
 parallel::mclapply(purrr::transpose(list(files, tofiles)), function(.) system(glue::glue("inkscape {.[[1]]} --export-pdf={.[[2]]}")), mc.cores=8)
 
 # generate pdfs
-file.remove("analysis/paper/paper.pdf")
 
-# create pdf
+# create pdf. 1. remove all temp files 2. make sure pdfs are used for all figures
+file.remove(list.files("analysis/paper/", "paper_latex*", full.names = T))
 read_file("analysis/paper/paper.Rmd") %>% gsub("\\.svg", "\\.tmp\\.pdf", .) %>% write_file("analysis/paper/paper_latex.Rmd")
 params <- list(table_format="latex")
 render(
@@ -56,7 +56,7 @@ render(
     pandoc_args=c("--csl=nature-biotechnology.csl")
   ),
   output_dir = "analysis/paper/",
-  output_file = "paper.pdf",
+  output_file = "paper_latex.pdf",
   clean=F
 )
 unlink(tofiles) # remove tmp pdfs
