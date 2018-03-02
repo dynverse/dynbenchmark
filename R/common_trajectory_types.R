@@ -165,3 +165,18 @@ trajectory_types <- trajectory_types %>% arrange(unlist(map(ancestors, length)))
 ##  Orders                                                                  ####
 # undirected_trajectory_type_order <- trajectory_types %>% filter(directedness == "undirected") %>% pull(id) %>% keep(~.!="unknown")
 # directed_trajectory_type_order <- trajectory_types %>% filter(directedness == "directed") %>% pull(id) %>% keep(~.!="unknown")
+
+
+
+##  ............................................................................
+##  Simplify trajectory type                                                ####
+#' Convert trajectory type
+#' @param trajectory_types_oi trajectory types to simplify
+#' @export
+simplify_trajectory_type <- function(trajectory_types_oi) {
+  set_names(trajectory_types$simplified, trajectory_types$id)[trajectory_types_oi]
+}
+
+#' Simplified traj types
+#' @export
+trajectory_types_simplified <- trajectory_types %>% filter(directedness == "directed") %>% group_by(simplified) %>% filter(row_number() == 1)
