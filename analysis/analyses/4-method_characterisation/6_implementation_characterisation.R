@@ -207,8 +207,8 @@ saveRDS(trajectory_components_over_time, figure_file("trajectory_components_over
 n_methods_over_time <- read_rds(figure_file("n_implementations_over_time.rds", experiment_id="4-method_characterisation"))
 trajectory_components_over_time <- read_rds(figure_file("trajectory_components_over_time.rds", experiment_id="4-method_characterisation"))
 
-methods_timeline <- cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over_time), nrow=2, rel_heights = c(0.7, 0.3), labels="auto")
-methods_timeline %>% save_plot(figure_file("methods_timeline.svg"), ., base_width=15, base_height=10)
+methods_timeline <- cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over_time), nrow=2, rel_heights = c(0.7, 0.5), labels="auto")
+methods_timeline %>% save_plot(figure_file("methods_timeline.svg"), ., base_width=15, base_height=12)
 
 ##  .............................................................................
 ##  Create simpler methods over time                                         ####
