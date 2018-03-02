@@ -1,5 +1,6 @@
 library(tidyverse)
 library(xml2)
+library(dynalysis)
 
 experiment("7-user_guidelines")
 
@@ -33,37 +34,39 @@ xml_add_style <- function(x, value) {
 }
 
 
-score_indicator <- function(score) {
+score_indicator <- function(score, cutoffs = c(0.9, 0.8, 0.65, 0.5)) {
   style = ""
   if (is.na(score)) {
     txt <- ""
-  } else if(score > 0.9) {
+  } else if(score > cutoffs[[1]]) {
     txt <- "++"
     style = "fill:green"
-  } else if(score > 0.8) {
+  } else if(score > cutoffs[[2]]) {
     txt <- "+"
     style = "fill:green"
-  } else if (score > 0.65) {
+  } else if (score > cutoffs[[3]]) {
     txt <- "±"
     style = "fill:orange"
-  } else if(score > 0.5) {
+  } else if(score > cutoffs[[4]]) {
     txt <- "-"
     style = "fill:red"
-  } else {
+  } else if (score >= 0) {
     txt <- "--"
     style = "fill:red"
+  } else {
+    txt <- ""
   }
   lst(txt, style)
 }
 
 
 extract_top_methods <- function(leaf_id, n_top) {
+  trajectory_type <- gsub("(.*)\\*", "\\1", leaf_id)
   if(leaf_id == "other_fixed") {
     # for now hardcode this other_fixed
-    scores <- tibble(method_position = c(2), score=c( Inf), method_id = c("elpigraph"))
+    scores <- tibble(method_position = c(2), score=c(NA), method_id = c("elpigraph"))
   } else {
     # get trajectory types to score
-    trajectory_type <- gsub("(.*)\\*", "\\1", leaf_id)
     if (str_sub(leaf_id, -1) == "*") {
       trajectory_types_to_score <- trajectory_types$ancestors[[which(trajectory_types$id == trajectory_type)]]
     } else {
@@ -75,13 +78,13 @@ extract_top_methods <- function(leaf_id, n_top) {
 
     # now get top methods and order them
     scores <- trajtype_scores %>%
+      rename(score = harm_mean) %>%
       filter(method_id %in% applicable_methods) %>%
       filter(trajectory_type %in% trajectory_types_to_score) %>%
       group_by(method_id) %>%
-      summarise(harm_mean = mean(harm_mean)) %>%
-      top_n(n_top, harm_mean) %>%
-      select(method_id, harm_mean) %>%
-      rename(score = harm_mean) %>%
+      summarise(score = mean(score)) %>%
+      top_n(n_top, score) %>%
+      select(method_id, score) %>%
       arrange(-score) %>%
       mutate(method_position = row_number())
 
@@ -102,7 +105,7 @@ extract_top_methods <- function(leaf_id, n_top) {
         scores,
         tibble(
           method_id = extra_methods,
-          score=Inf,
+          score=NA,
           method_position = seq_len(n_extra_methods) + nrow(scores)
         )
       )
@@ -114,9 +117,6 @@ extract_top_methods <- function(leaf_id, n_top) {
 
   scores <- scores %>% left_join(methods, "method_id")
 
-  # user friendly and good science indicators
-  scores <- scores %>% mutate_at(vars(c("user_friendly", "good_science")), ~map(., score_indicator))
-
   # add footnotes
   if (str_sub(leaf_id, -1) != "*" & trajectory_type %in% c("directed_cycle", "directed_linear", "bifurcation")) {
     scores$method_name[which(scores$topology_inference_type == "free")] <-
@@ -124,8 +124,12 @@ extract_top_methods <- function(leaf_id, n_top) {
   }
 
   # add dagger if low score
-  scores <- scores %>% filter(score > 0.4)
+  scores <- scores %>% filter(score > 0.4 | is.na(score))
   # scores$method_name <- ifelse(scores$score < 0.4, paste0(scores$method_name, " ↘"), scores$method_name)
+
+  # user friendly and performance indicators
+  scores$user_friendly_indicator <- map(scores$user_friendly, score_indicator)
+  scores$score_indicator <- map(scores$score - max(scores$score, na.rm=T), score_indicator, c(-0.0001, -0.05, -0.2, -1))
 
   # fix NA method name
   scores$method_name[which(is.na(scores$method_name))] <- "?"
@@ -146,7 +150,7 @@ n_top <- 4
 svg <- read_xml(figure_file("tree_raw.svg"))
 
 leaf_nodeset <- svg %>% xml_find_all(".//svg:text[@class='methods']")
-leaf_ids <- xml_attr(method_nodeset, "id")
+leaf_ids <- xml_attr(leaf_nodeset, "id")
 
 leaf_methods <- map(leaf_ids, function(leaf_id) {
   print(leaf_id)
@@ -174,19 +178,19 @@ leaf_methods <- map(leaf_ids, function(leaf_id) {
   xml_attr(spans, "x") <- 272+1
   xml_attr(user_friendly_node, "x") <- 272+1
 
-  xml_text(spans)[seq_len(n_methods)] <- map_chr(scores$user_friendly,"txt")
-  xml_add_style(spans,map_chr(scores$user_friendly, "style"))
+  xml_text(spans)[seq_len(n_methods)] <- map_chr(scores$user_friendly_indicator,"txt")
+  xml_add_style(spans,map_chr(scores$user_friendly_indicator, "style"))
   xml_text(spans)[seq_len(length(spans)-n_methods)+n_methods] <- ""
 
-  # good science indicators
-  good_science_node <- xml_add_sibling(method_node, method_node, .copy=T)
+  # performance indicators
+  performance_node <- xml_add_sibling(method_node, method_node, .copy=T)
 
-  spans <- good_science_node %>% xml_children()
-  xml_attr(good_science_node, "x") <- 280+1
+  spans <- performance_node %>% xml_children()
+  xml_attr(performance_node, "x") <- 280+1
   xml_attr(spans, "x") <- 280+1
 
-  xml_text(spans)[seq_len(n_methods)] <- map_chr(scores$good_science,"txt")
-  xml_add_style(spans,map_chr(scores$good_science, "style"))
+  xml_text(spans)[seq_len(n_methods)] <- map_chr(scores$score_indicator,"txt")
+  xml_add_style(spans,map_chr(scores$score_indicator, "style"))
   xml_text(spans)[seq_len(length(spans)-n_methods)+n_methods] <- ""
 
   # method_size
@@ -199,7 +203,7 @@ leaf_methods <- map(leaf_ids, function(leaf_id) {
 })
 
 date <- xml_child(xml_find_first(svg, ".//svg:text[@id='date']"))
-xml_text(date) <- paste0("Generated at ", as.character(Sys.time()))
+xml_text(date) <- paste0("Generated at ", as.character(Sys.Date()))
 
 svg %>% write_xml(figure_file("tree.svg"))
 
