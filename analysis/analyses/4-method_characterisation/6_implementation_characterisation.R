@@ -191,7 +191,7 @@ trajectory_components_over_time <- trajectory_components_gathered %>%
   geom_area(aes(date, n_implementations), stat="identity", fill="#BBBBBB") +
   geom_area(aes(date, n_implementations_oi, fill=trajectory_type), stat="identity") +
   scale_fill_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
-  facet_grid(.~trajectory_type, labeller = label_facet()) +
+  facet_wrap(~trajectory_type, labeller = label_facet(), nrow = 2) +
   theme(legend.position = "none") +
   scale_x_date(label_long("publication_date"), limits=c(start_date, end_date), breaks=c(start_date, end_date), labels=c("", ""), expand=c(0, 0)) +
   scale_y_continuous(label_long("n_implementations"), expand=c(0, 0))
@@ -209,7 +209,27 @@ trajectory_components_over_time <- read_rds(figure_file("trajectory_components_o
 
 methods_timeline <- cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over_time), nrow=2, rel_heights = c(0.7, 0.3), labels="auto")
 methods_timeline %>% save_plot(figure_file("methods_timeline.svg"), ., base_width=15, base_height=10)
-methods_timeline %>% save_plot(figure_file("methods_timeline.png"), ., base_width=15, base_height=10)
+
+##  .............................................................................
+##  Create simpler methods over time                                         ####
+df <- implementations %>% filter(is_ti) %>% mutate(year = format(date, format = "%Y")) %>% group_by(year) %>% summarise(n = n()) %>% mutate(year_i = as.integer(year))
+
+g <- ggplot(df, aes(year_i, n, group = year)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = n), vjust = 0, hjust = 0, nudge_y = .5) +
+  geom_text(aes(year_i, -1, label = year), vjust = 0, hjust = 1, nudge_y = .5) +
+  labs(x = NULL, y = NULL, title = "Number of new TI methods published each year") +
+  scale_y_continuous(breaks = NULL) +
+  scale_x_reverse(breaks = NULL) +
+  coord_flip() +
+  expand_limits(y = -1.5) +
+  theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+
+ggsave(figure_file("ti_methods_per_year.svg"), g, width = 5, height = 2)
 
 
 ##  ............................................................................
