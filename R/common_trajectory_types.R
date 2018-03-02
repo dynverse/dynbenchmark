@@ -69,7 +69,6 @@ trajectory_types <- {
     )
   )
 
-
   ##  ............................................................................
   ##  Simplified names                                                        ####
   trajectory_types <- trajectory_types %>%
