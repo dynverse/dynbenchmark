@@ -91,7 +91,10 @@ trajtype_handle_comparison <- method_trajtypes_scores %>%
   facet_grid(score_id~trajectory_type, labeller = label_facet(label_simple_trajectory_types))+
   scale_fill_identity() +
   scale_color_identity() +
-  scale_y_continuous(label_long("score_on_datasets_with_trajectory_type"), limits=c(0, 1.2)) +
-  scale_x_discrete(label_long("can_handle_trajectory_type"), labels=label_long)
+  scale_y_continuous(label_long("score_on_datasets_with_trajectory_type"), limits=c(0, 1.2), breaks=c(0, 0.25, 0.5, 0.75, 1)) +
+  scale_x_discrete(label_long("can_handle_trajectory_type"), labels=label_long) +
+  annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf)+
+  annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf) +
+  theme(panel.spacing=unit(0, "cm"))
 trajtype_handle_comparison
 trajtype_handle_comparison %>% ggsave(figure_file("trajtype_handle_comparison.svg"), ., width=15, height=4)
