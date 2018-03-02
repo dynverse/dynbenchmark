@@ -8,11 +8,10 @@ system(pritt("sed -i '1s/^.//' {drive$local_path}")) # remove first character, b
 system(pritt("cat {drive$local_path} > analysis/paper/paper.Rmd"))
 
 # add wip
-read_file("analysis/paper/paper.Rmd") %>% gsub("§(.*?)\n", "<p class='wip'>\\1</p>", .) %>% write_file("analysis/paper/paper.Rmd")
-
-# remove comments
-read_file("analysis/paper/paper.Rmd") %>% gsub("\\[[a-z]\\]", "", .) %>% write_file("analysis/paper/paper.Rmd")
-
+read_file("analysis/paper/paper.Rmd") %>%
+  str_replace_all("§(.*?)\n", "<p class='wip'>\\1</p>") %>%
+  str_replace_all("\\[[a-z]\\]", "") %>%
+  write_file("analysis/paper/paper.Rmd")
 
 ##  ............................................................................
 ##  HTML                                                                    ####
