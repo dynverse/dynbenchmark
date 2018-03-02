@@ -60,5 +60,5 @@ label_facet <- function(label_func = label_long) {function(df) {mutate_all(df, l
 #' @param trajectory_types_oi Trajectory types
 #' @export
 label_simple_trajectory_types <- function(trajectory_types_oi) {
-  trajectory_types$simplified[match(trajectory_types_oi, trajectory_types$id)]
+  trajectory_types$simplified[match(trajectory_types_oi, trajectory_types$id)] %>% label_long()
 }
