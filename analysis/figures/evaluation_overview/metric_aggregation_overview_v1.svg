@@ -151,8 +151,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
-     inkscape:cx="816.05858"
-     inkscape:cy="307.19805"
+     inkscape:cx="1275.8203"
+     inkscape:cy="175.91677"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -1073,7 +1073,7 @@
          id="tspan3169"
          x="101.38193"
          y="68.049751"
-         style="stroke-width:0.26458332">Percentile rank tranform</tspan><tspan
+         style="stroke-width:0.26458332">1. Percentile rank tranform</tspan><tspan
          sodipodi:role="line"
          x="101.38193"
          y="75.987251"
@@ -1353,7 +1353,7 @@
          style="stroke-width:0.26458332"
          y="144.61584"
          x="101.38193"
-         sodipodi:role="line">Calculate arithmetic mean</tspan><tspan
+         sodipodi:role="line">2. Calculate arithmetic mean</tspan><tspan
          style="stroke-width:0.26458332"
          y="152.55334"
          x="101.38193"
@@ -1369,7 +1369,7 @@
          sodipodi:role="line"
          x="101.38193"
          y="185.58473"
-         style="stroke-width:0.26458332">Add harmonic mean</tspan><tspan
+         style="stroke-width:0.26458332">3. Add harmonic mean</tspan><tspan
          sodipodi:role="line"
          x="101.38193"
          y="193.52223"
@@ -6975,7 +6975,7 @@
          style="stroke-width:0.26458332"
          y="107.53265"
          x="372.76886"
-         sodipodi:role="line">Arithmetic mean per</tspan><tspan
+         sodipodi:role="line">4. Arithmetic mean per</tspan><tspan
          style="stroke-width:0.26458332"
          y="115.47015"
          x="372.76886"
@@ -7470,7 +7470,7 @@
          x="372.76886"
          y="190.8764"
          style="stroke-width:0.26458332"
-         id="tspan10678">Calculate arithmetic mean,</tspan><tspan
+         id="tspan10678">5. Calculate arithmetic mean,</tspan><tspan
          sodipodi:role="line"
          x="372.76886"
          y="198.8139"
