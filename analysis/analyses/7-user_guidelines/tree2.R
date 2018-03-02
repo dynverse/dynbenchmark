@@ -203,7 +203,7 @@ leaf_methods <- map(leaf_ids, function(leaf_id) {
 })
 
 date <- xml_child(xml_find_first(svg, ".//svg:text[@id='date']"))
-xml_text(date) <- paste0("Generated at ", as.character(Sys.time()))
+xml_text(date) <- paste0("Generated at ", as.character(Sys.Date()))
 
 svg %>% write_xml(figure_file("tree.svg"))
 
