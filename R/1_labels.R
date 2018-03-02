@@ -17,7 +17,9 @@ labels <- tibble::tribble(
   "qc_score", "QC score", "QC score",
   "component_id", "Component", "Component",
   "p_value", "p-value", "p-value",
-  "q_value", "Adjusted p-value", "p-value (adj.)"
+  "q_value", "Adjusted p-value", "p-value (adj.)",
+  TRUE, "Yes", "Yes",
+  FALSE, "No", "No"
 )
 
 #' Short labelling function
@@ -60,5 +62,11 @@ label_facet <- function(label_func = label_long) {function(df) {mutate_all(df, l
 #' @param trajectory_types_oi Trajectory types
 #' @export
 label_simple_trajectory_types <- function(trajectory_types_oi) {
-  trajectory_types$simplified[match(trajectory_types_oi, trajectory_types$id)] %>% label_long()
+  ifelse(
+    trajectory_types_oi %in% trajectory_types$id,
+    trajectory_types$simplified[match(trajectory_types_oi, trajectory_types$id)] %>% label_long(),
+    label_long(trajectory_types_oi)
+  )
+
+
 }
