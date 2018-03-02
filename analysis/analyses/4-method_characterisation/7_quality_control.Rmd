@@ -61,35 +61,45 @@ table <- map(c("latex", "html"), function(format) {
       weight = cell_spec(
         weight %>% {pritt(invisible_grouper[[format]])}, # add an invisible grouping indicator
         format,
-        background = spec_color(weight, end=0.9,option="A",direction=-1),
-        escape=FALSE,
-        color="white"
+        color = spec_color(weight,option="viridis",direction=-1),
+        escape=FALSE
       )
     ) %>%
     mutate(
       references = map_chr(references, citation_format[[format]])
     ) %>% 
-    select(aspect, weight, references, item, item_weight) %>% 
+    mutate(
+      category = cell_spec(
+        label_long(category),
+        format,
+        color = set_names(qc_categories$color, qc_categories$category)[category],
+        escape=FALSE
+      )
+    ) %>% 
+    select(category, aspect, weight, references, item, item_weight) %>% 
     rename_all(label_long) %>% 
     knitr::kable(format, escape=FALSE) %>% 
-    kable_styling(bootstrap_options = "striped", latex_options = c("striped", "scale_down")) %>% 
+    kable_styling(bootstrap_options = "striped", latex_options = c("scale_down")) %>% 
     landscape() %>% 
-    collapse_rows(1:3)
-  # 
-  # for (category in unique(checks$category)) {
-  #   color <- qc_categories %>% filter(category == !!category) %>% pull(color)
-  #   table <- table %>% 
-  #     group_rows(
-  #       label_long(category), 
-  #       min(which(checks$category == category)), 
-  #       max(which(checks$category == category)),
-  #       label_row_css = pritt("background-color: {color}; color: #fff;")
-  #   )
+    collapse_rows(1:4)
+
+  # if (format == "html") {
+  #   for (category in unique(checks$category)) {
+  #     color <- qc_categories %>% filter(category == !!category) %>% pull(color)
+  #     table <- table %>%
+  #       group_rows(
+  #         label_long(category),
+  #         min(which(checks$category == category)),
+  #         max(which(checks$category == category)),
+  #         label_row_css = pritt("background-color: {color}; color: #fff;")
+  #     )
+  #   }
   # }
+
   
   table
 }) %>% set_names(c("latex", "html"))
-  
+table
 table %>% write_rds(figure_file("qc_checks.rds"))
 ```
 
