@@ -42,7 +42,8 @@ subchunkify <- function(ref_id, caption, width=5, height=7) {
                          "```{{r {ref_id}, echo=FALSE}}",
                          "stables %>% filter(ref_id == !!ref_id) %>% pull(table) %>% .[[1]]",
                          "```",
-                         "---",
+                         "",
+                         "------",
                          "",
                          "", .sep = "\n")
 
