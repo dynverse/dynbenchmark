@@ -1,1 +1,6 @@
 .scratch/
+*.bcf
+*.run.xml
+*.pdf
+*.tex
+*.md
