@@ -49,7 +49,6 @@ trajectory_type_edges_directed <- tribble(
   "directed_graph", "directed_cycle", ""
 ) %>% mutate(prop_changes = as.list(prop_changes))
 
-
 ##  ............................................................................
 ##  Create trajectory types                                                 ####
 #' Trajectory types
@@ -69,6 +68,20 @@ trajectory_types <- {
       directedness = "unknown"
     )
   )
+
+
+  ##  ............................................................................
+  ##  Simplified names                                                        ####
+  trajectory_types <- trajectory_types %>%
+    mutate(
+      simplified =
+        gsub("undirected_", "", id) %>%
+        gsub("directed_", "", .) %>%
+        gsub("unrooted_", "", .) %>%
+        gsub("rooted_", "", .) %>%
+        gsub("simple_fork", "bifurcation", .) %>%
+        gsub("complex_fork", "multifurcation", .)
+    )
 
 
   ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
