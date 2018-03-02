@@ -1,5 +1,6 @@
 library(tidyverse)
 library(xml2)
+library(dynalysis)
 
 experiment("7-user_guidelines")
 
@@ -146,7 +147,7 @@ n_top <- 4
 svg <- read_xml(figure_file("tree_raw.svg"))
 
 leaf_nodeset <- svg %>% xml_find_all(".//svg:text[@class='methods']")
-leaf_ids <- xml_attr(method_nodeset, "id")
+leaf_ids <- xml_attr(leaf_nodeset, "id")
 
 leaf_methods <- map(leaf_ids, function(leaf_id) {
   print(leaf_id)
