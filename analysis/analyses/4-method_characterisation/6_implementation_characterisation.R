@@ -159,7 +159,6 @@ platforms
 saveRDS(platforms, figure_file("platforms.rds"))
 
 
-
 ##  ............................................................................
 ##  Trajectory types over time                                              ####
 directed_trajectory_type_order <- trajectory_types %>% filter(directedness == "directed") %>% pull(id) %>% keep(~.!="unknown")
@@ -191,7 +190,7 @@ trajectory_components_over_time <- trajectory_components_gathered %>%
   geom_area(aes(date, n_implementations), stat="identity", fill="#BBBBBB") +
   geom_area(aes(date, n_implementations_oi, fill=trajectory_type), stat="identity") +
   scale_fill_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
-  facet_wrap(~trajectory_type, labeller = label_facet(), nrow = 2) +
+  facet_wrap(~trajectory_type, labeller = label_facet(label_simple_trajectory_types), nrow = 2) +
   theme(legend.position = "none") +
   scale_x_date(label_long("publication_date"), limits=c(start_date, end_date), breaks=c(start_date, end_date), labels=c("", ""), expand=c(0, 0)) +
   scale_y_continuous(label_long("n_implementations"), expand=c(0, 0))
@@ -201,14 +200,54 @@ trajectory_components_over_time
 saveRDS(trajectory_components_over_time, figure_file("trajectory_components_over_time.rds"))
 
 
+##  ............................................................................
+##  Topology fixation over time                                             ####
+topology_inference_timeline_data <- implementations_evaluated %>%
+  select(date, topology_inference_type) %>%
+  mutate(topology_inference_type = factor(topology_inference_type, levels=c("fixed", "parameter", "free"))) %>%
+  mutate(topology_inference_type_follows = TRUE)
+topology_inference_timeline_data <- topology_inference_timeline_data %>%
+  bind_rows(
+    topology_inference_timeline_data %>% mutate(date = date-0.2, topology_inference_type_follows=F),
+    tibble(date=end_date, topology_inference_type = factor(levels(topology_inference_timeline_data$topology_inference_type)), topology_inference_type_follows=F)
+  )
+
+topology_inference_timeline_data <- topology_inference_timeline_data %>%
+  complete(topology_inference_type, date, fill=list(topology_inference_type_follows=FALSE)) %>%
+  arrange(date, topology_inference_type) %>%
+  ungroup() %>%
+  group_by(topology_inference_type) %>%
+  mutate(y = cumsum(topology_inference_type_follows)) %>%
+  ungroup()
+
+topology_inference_timeline <- topology_inference_timeline_data %>% ggplot() +
+  geom_area(aes(date, y, fill=fct_rev(topology_inference_type)), stat = "identity") +
+  geom_text(aes(end_date-50, y-(y-lag(y, 1, 0))/2, label=topology_inference_type), data=topology_inference_timeline_data %>% filter(date == end_date) %>% mutate(y=cumsum(y)), hjust=1, color="white", size=5) +
+  scale_fill_manual(label_long("topology_inference_type"), values = setNames(c("#00ab1b", "#edb600", "#cc2400"), c("free", "parameter", "fixed"))) +
+  scale_x_date(expand=c(0,0), limits=c(start_date, end_date)) +
+  scale_y_continuous(label_long("n_implementations"), expand=c(0,0)) +
+  theme(legend.position="none")
+topology_inference_timeline
+saveRDS(topology_inference_timeline, figure_file("topology_inference_timeline.rds"))
 
 ##  ............................................................................
 ##  Create timeline overview figure                                         ####
 n_methods_over_time <- read_rds(figure_file("n_implementations_over_time.rds", experiment_id="4-method_characterisation"))
 trajectory_components_over_time <- read_rds(figure_file("trajectory_components_over_time.rds", experiment_id="4-method_characterisation"))
+topology_inference_timeline <- read_rds(figure_file("topology_inference_timeline.rds", experiment_id="4-method_characterisation"))
 
-methods_timeline <- cowplot::plot_grid(plotlist=list(n_methods_over_time, trajectory_components_over_time), nrow=2, rel_heights = c(0.7, 0.5), labels="auto")
-methods_timeline %>% save_plot(figure_file("methods_timeline.svg"), ., base_width=15, base_height=12)
+methods_timeline <- cowplot::plot_grid(
+  plotlist=list(
+    n_methods_over_time,
+    trajectory_components_over_time,
+    topology_inference_timeline
+  ),
+  nrow=3,
+  rel_heights = c(0.7, 0.5, 0.8),
+  labels="auto"
+)
+methods_timeline
+methods_timeline %>% save_plot(figure_file("methods_timeline.svg"), ., base_width=15, base_height=20)
 
 ##  .............................................................................
 ##  Create simpler methods over time                                         ####
@@ -284,7 +323,7 @@ table <- map(c("latex", "html"), function(format) {
       date = strftime(date, "%d/%m/%Y"),
       maximal_trajectory_type =
         kableExtra::cell_spec(
-          label_long(maximal_trajectory_type),
+          label_simple_trajectory_types(maximal_trajectory_type),
           format,
           background=toupper(set_names(trajectory_types$color, trajectory_types$id)[maximal_trajectory_type]),
           color="#FFFFFF",
