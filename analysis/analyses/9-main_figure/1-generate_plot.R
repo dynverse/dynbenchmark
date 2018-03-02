@@ -23,7 +23,7 @@ scale_brewer_funs <- map(setNames(brewer_names, brewer_names), ~ sc_col_fun(colo
 viridis_names <- c("viridis", "magma", "plasma", "inferno", "cividis")
 scale_viridis_funs <- map(setNames(viridis_names, viridis_names), ~ sc_col_fun(viridisLite::viridis(101, option = .)))
 
-error_colours <- setNames(RColorBrewer::brewer.pal(3, "Set3"), c("pct_error_inside", "pct_memory_exceeded", "pct_time_exceeded"))
+error_colours <- setNames(RColorBrewer::brewer.pal(4, "Set3"), c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic"))
 prior_colours <- setNames(RColorBrewer::brewer.pal(5, "Set1"), c("grouping_assignment", "grouping_assignment;start_cells;n_end_states", "marker_feature_ids", "n_end_states", "start_cells"))
 topinf_colours <- setNames(c("#00ab1b", "#edb600", "#cc2400"), c("free", "parameter", "fixed"))
 trafo_colours <- setNames(RColorBrewer::brewer.pal(9, "Blues")[c(5,7,9)], c("minimal", "moderate", "extensive"))
@@ -67,7 +67,6 @@ method_tib <- method_tib %>%
     rank_sets_seeds = ifelse(sets_seeds, 1, 2),
     rank_citations = percent_rank(n_citations),
     trafo = str_replace(output_transformation, ":.*", ""),
-    pct_error_inside = pct_errored - pct_memory_exceeded - pct_time_exceeded,
     topinf_lab = c("free" = "free", "fixed" = "fixed", "parameter" = "param")[topology_inference_type],
     trafo_lab = c("minimal" = "mild", "moderate" = "fair", "extensive" = "major")[trafo],
     avg_time_lab = ifelse(time_method < 60, paste0(round(time_method), "s"), ifelse(time_method < 3600, paste0(round(time_method / 60), "m"), paste0(round(time_method / 3600), "h"))),
@@ -139,7 +138,7 @@ axis <-
 
     "time",    "Average time",         0.5,   1,       T,           "rect",     F,               "rank_time_method_sc_col",                 "rank_time_method_sc",
     "timl",    "Average time label",    -1,   1,       F,           "text",     F,               "avg_time_lab_colour",                     "avg_time_lab",
-    "erro",    "% Errored",            0.1,   1,       T,           "pie",      F,               list(error_colours),                       list(c("pct_error_inside", "pct_memory_exceeded", "pct_time_exceeded")),
+    "erro",    "% Errored",            0.1,   1,       T,           "pie",      F,               list(error_colours),                       list(c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic")),
 
     "qcsc",    "Score",                0.5,   4,       T,           "bar",      F,               "qc_score_sc_col",                         "qc_score_sc",
 
@@ -298,16 +297,16 @@ time_leg <- make_scale_legend(viridisLite::viridis(101, option = coltime), range
 qc_leg <- make_scale_legend(viridisLite::viridis(101, option = colqc), range_labels = c("low", "high"))
 
 error_leg_df <- data_frame(
-  rad_start = seq(0, pi, length.out = 4)[-4],
-  rad_end = seq(0, pi, length.out = 4)[-1],
+  rad_start = seq(0, pi, length.out = 5)[-5],
+  rad_end = seq(0, pi, length.out = 5)[-1],
   rad = (rad_start + rad_end) / 2,
-  label = c("Error produced by method", "Memory limit exceeded", "Time limit exceeded"),
-  fill = error_colours[c("pct_error_inside", "pct_memory_exceeded", "pct_time_exceeded")],
-  colour = c("black", "black", "black"),
+  label = c("Memory limit exceeded", "Time limit exceeded", "Dataset-specific error", "Stochastic error"),
+  fill = error_colours[c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic")],
+  colour = rep("black", length(rad)),
   lab_x = row_height * sin(rad),
   lab_y = row_height * cos(rad),
-  hjust = c(0, 0, 0),
-  vjust = c(.25, .5, .75)
+  hjust = rep(0, length(rad)),
+  vjust = seq(0, 1, length.out = length(rad)+2)[c(-1,-(length(rad)+2))]
 )
 
 # Stamp

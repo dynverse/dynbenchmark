@@ -41,7 +41,7 @@ part_overall_mean <-
   filter(trajectory_type == "overall", task_source == "mean") %>%
   select(
     method_short_name, harm_mean, rank_correlation, rank_edge_flip, rank_rf_mse, time_method, rank_time_method,
-    num_files_created, num_setseed_calls, pct_errored, pct_time_exceeded, pct_memory_exceeded
+    num_files_created, num_setseed_calls, pct_errored, pct_time_exceeded, pct_memory_exceeded, pct_allerrored, pct_stochastic
   )
 
 part_sources <-
