@@ -89,6 +89,7 @@ outputs_ind <- outputs %>%
     pct_errored = (error_message_int != "") + 0,
     pct_time_exceeded = (error_message_int == "Time limit exceeded") + 0,
     pct_memory_exceeded = (error_message_int == "Memory limit exceeded") + 0,
+    pct_other_error = pct_errored - pct_time_exceeded - pct_memory_exceeded,
     prior_str = sapply(prior_df, function(prdf) ifelse(is.null(prdf) || nrow(prdf) == 0, "", paste(prdf$prior_names, collapse = ";"))),
     trajectory_type_f = factor(trajectory_type, levels = trajtypes$id)
   ) %>%
@@ -108,6 +109,8 @@ outputs_summrepl <- outputs_ind %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
   mutate(
+    pct_allerrored = (pct_other_error == 1)+0,
+    pct_stochastic = pct_other_error - pct_allerrored,
     harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean)
   )
 
