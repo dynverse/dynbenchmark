@@ -24,6 +24,9 @@ scale_viridis_funs <- map(setNames(viridis_names, viridis_names), ~ sc_col_fun(v
 error_colours <- setNames(RColorBrewer::brewer.pal(4, "Set3"), c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic"))
 maxtraj_colours <- setNames(trajectory_types$color, trajectory_types$id)
 
+colbench <- "magma"
+colqc <- "viridis"
+coltime <-  "cividis"
 colbench_fun <- scale_viridis_funs[["magma"]]
 colqc_fun <- scale_viridis_funs[["viridis"]]
 coltime_fun <- scale_viridis_funs[["cividis"]]
@@ -153,17 +156,17 @@ axtr <- map(
 # define grouping information
 grouping <-
   tribble(
-    ~label, ~y, ~xmin, ~xmax,
-    "Method characterisation", 3, axtr$name$xmin, axtr$prge$xmax,
-    "Priors", 2, axtr$prst$xmin, axtr$prge$xmax,
-    "Benchmark pipeline", 3, axtr$harm$xmin, axtr$erro$xmax,
-    "Per metric", 2, axtr$corr$xmin, axtr$rfms$xmax,
-    "Per source", 2, axtr$real$xmin, axtr$synt$xmax,
-    "Per trajectory type", 2, axtr$line$xmin, axtr$grap$xmax,
-    "Execution", 2, axtr$time$xmin, axtr$erro$xmax,
-    "Quality control", 3, axtr$qcsc$xmin, axtr$qcpa$xmax,
-    "Practicality", 2, axtr$qcdf$xmin, axtr$qcgs$xmax,
-    "Categories", 2, axtr$qcav$xmin, axtr$qcpa$xmax
+    ~label,                        ~y, ~xmin,          ~xmax,          ~key,
+    "Method characterisation",     3,  axtr$name$xmin, axtr$prge$xmax, "a",
+    "Priors",                      2,  axtr$prst$xmin, axtr$prge$xmax, "",
+    "Benchmark",                   3,  axtr$harm$xmin, axtr$erro$xmax, "b",
+    "Per metric",                  2,  axtr$corr$xmin, axtr$rfms$xmax, "",
+    "Per source",                  2,  axtr$real$xmin, axtr$synt$xmax, "",
+    "Per trajectory type",         2,  axtr$line$xmin, axtr$grap$xmax, "",
+    "Execution",                   2,  axtr$time$xmin, axtr$erro$xmax, "",
+    "Quality control",             3,  axtr$qcsc$xmin, axtr$qcpa$xmax, "c",
+    "Practicality",                2,  axtr$qcdf$xmin, axtr$qcgs$xmax, "",
+    "Categories",                  2,  axtr$qcav$xmin, axtr$qcpa$xmax, ""
   ) %>%
   mutate(
     x = (xmin + xmax) / 2
@@ -314,12 +317,11 @@ g1 <- ggplot(method_tib) +
   # METRIC AXIS
   geom_segment(aes(x = x, xend = x, y = -.3, yend = -.1), axis %>% filter(show_label), size = .5) +
   geom_text(aes(x = x, y = 0, label = label), axis %>% filter(show_label), angle = 30, vjust = 0, hjust = 0) +
-  expand_limits(y = 2) +
 
   # GROUPING AXIS
   geom_segment(aes(x = xmin, xend = xmax, y = y, yend = y), grouping, size = 1) +
-  geom_text(aes(x = x, y = y+.2, label = label), grouping, vjust = 0, hjust = 0.5, fontface = "bold") +
-  expand_limits(y = 4) +
+  geom_text(aes(x = x, y = y+.7, label = label), grouping, vjust = 1, hjust = 0.5, fontface = "bold") +
+  geom_text(aes(x = xmin, y = y+.7, label = key), grouping %>% filter(key != ""), vjust = 1, hjust = 0, fontface = "bold") +
 
   # METHOD NAMES
   geom_text(aes(x = axtr$name$xmax, y = method_y, label = method_name), hjust = 1, vjust = .5) +
