@@ -9,3 +9,11 @@ analysis_output.tar
 .rds
 .httr-oauth
 *.html
+analysis/paper/paper*.md
+analysis/paper/paper*.tex
+*.aux
+*.out
+*.bbl
+*.run.xml
+*tmp.pdf
+*tmp.png
