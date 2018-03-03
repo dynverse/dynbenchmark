@@ -11,6 +11,10 @@ priors <- tribble(
   "time",                 "Time",
   "timecourse",           "Timecourse"
 )
+labels <- bind_rows(
+  labels,
+  priors %>% mutate(id=prior_id, long=prior_name, short=prior_name) %>% select(id, long, short)
+)
 
 #' The prior usages
 #' @export
