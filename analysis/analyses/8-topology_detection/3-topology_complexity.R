@@ -5,12 +5,13 @@ library(dynalysis)
 library(tidygraph)
 library(ggraph)
 
-experiment("5-optimise_parameters/")
-
+experiment("8-compare_topology")
 
 #   ____________________________________________________________________________
 #   Preparation                                                             ####
 # calculate statistics of milestone network
+label_facet_methods <- function(x) {tibble(method_id=methods$method_name[match(x$method_id, methods$method_id)])}
+
 calculate_n_edges <- function(milestone_network) {
   milestone_network %>%
     nrow()
@@ -107,17 +108,17 @@ trajectory_type_comparison <- milestone_networks %>%
   complete(trajectory_type_gold, trajectory_type_predicted, method_id, fill=list(n=0)) %>%
   group_by(trajectory_type_gold, method_id) %>%
   mutate(n=n/sum(n)) %>%
-  ggplot(aes(trajectory_type_gold, trajectory_type_predicted)) +
+  ggplot(aes(trajectory_type_predicted, trajectory_type_gold)) +
   geom_tile(aes(fill=n)) +
-  geom_tile(fill=NA, color="white", size=2) +
-  geom_tile(aes(simplified, simplified, color=color), fill=NA, data=trajectory_types_simplified %>% filter(simplified %in% levels(milestone_networks$trajectory_type_predicted)), size=2) +
-  scale_x_discrete(label_long("trajectory_type_gold"), label=label_long) +
-  scale_y_discrete(label_long("trajectory_type_predicted"), label=label_long) +
+  geom_tile(fill=NA, color="white", size=1) +
+  geom_tile(aes(simplified, simplified, color=color), fill=NA, data=trajectory_types_simplified %>% filter(simplified %in% levels(milestone_networks$trajectory_type_predicted)), size=1) +
+  scale_x_discrete(label_long("trajectory_type_predicted"), label=label_long) +
+  scale_y_discrete(label_long("trajectory_type_gold"), label=label_long) +
   theme(axis.text.x = element_text(angle=45, hjust=1)) +
   scale_color_identity() +
   scale_fill_distiller(limits=c(0, 1), direction = 1, palette="Greys") +
   coord_equal() +
-  facet_grid(.~method_id)
+  facet_grid(.~method_id, labeller=label_facet_methods)
 trajectory_type_comparison
 
 
@@ -125,7 +126,7 @@ trajectory_type_comparison
 ### Compare complexity distributions                                        ####
 
 bw <- 1.5
-arrow_y <- 10.5
+arrow_y <- 10
 trajectory_type_colors <- c(set_names(trajectory_types_simplified$color, trajectory_types_simplified$simplified), "all_trajectory_types"="#333333")
 complexity_difference_limits <- with(milestone_networks, c(min(complexity_predicted - complexity_gold, na.rm=T)-bw, max(complexity_predicted - complexity_gold, na.rm=T)+bw))
 complexity_difference_distribution <- milestone_networks %>%
@@ -134,7 +135,7 @@ complexity_difference_distribution <- milestone_networks %>%
     bind_rows(
     .,
     mutate(., trajectory_type_gold = "all_trajectory_types")
-    ) %>% mutate(trajectory_type_gold = factor(trajectory_type_gold, levels=c("all_trajectory_types", trajectory_types_simplified$simplified)))
+    ) %>% mutate(trajectory_type_gold = factor(trajectory_type_gold, levels=c(trajectory_types_simplified$simplified, "all_trajectory_types")))
   } %>%
   ggplot(aes(complexity_difference, y=trajectory_type_gold, fill=trajectory_type_gold)) +
   ggridges::geom_density_ridges2(
@@ -146,11 +147,11 @@ complexity_difference_distribution <- milestone_networks %>%
   ) +
   geom_vline(xintercept = 0, color="black", linetype = "dashed") +
   scale_fill_manual(values=trajectory_type_colors) +
-  facet_grid(.~method_id, labeller=function(x) {tibble(method_id=methods$method_name[match(x$method_id, methods$method_id)])}) +
-  scale_y_discrete(label_long("trajectory_type_gold"), expand = c(0, 0), labels=label_long) +
+  facet_grid(.~method_id, labeller=label_facet_methods) +
+  scale_y_discrete(label_long("trajectory_type_gold"), expand = c(0,0), labels=label_long) +
   scale_x_continuous(label_long("Difference in topological complexity (= # nodes + # edges)\nbetween prediction and gold standard"), expand = c(0, 0), limits = complexity_difference_limits) +
-  annotate("segment", x = 0, xend = complexity_difference_limits[[2]] - bw, y = arrow_y, yend = arrow_y, colour = "#333333", arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
-  annotate("text", x = 0, y = arrow_y, colour = "#333333", label="More complex prediction", hjust=-0.2, vjust=-0.2) +
+  annotate("segment", x = complexity_difference_limits[[2]]/3, xend = complexity_difference_limits[[2]], y = arrow_y, yend = arrow_y, colour = "#333333", arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
+  annotate("text", x = complexity_difference_limits[[2]], y = arrow_y, colour = "#333333", label="More complex", hjust=1, vjust=1.5, lineheight = 0.8, size=3) +
   theme(legend.position = "none", axis.text.y=element_text(vjust=0))
 complexity_difference_distribution
 
@@ -158,8 +159,13 @@ complexity_difference_distribution
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
 ### Common plot                                                             ####
-plot_grid(
+topology_complexity_comparison <- plot_grid(
   trajectory_type_comparison,
   complexity_difference_distribution,
-  ncol=1
+  ncol=1,
+  align="v",
+  axis="lr"
 )
+
+topology_complexity_comparison
+topology_complexity_comparison %>% ggsave(figure_file("topology_complexity_comparison.svg"), ., width=12, height=8)

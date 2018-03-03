@@ -69,6 +69,13 @@ label_simple_trajectory_types <- function(trajectory_types_oi) {
     trajectory_types$simplified[match(trajectory_types_oi, trajectory_types$id)] %>% label_long(),
     label_long(trajectory_types_oi)
   )
-
-
 }
+
+
+#' Labels only the extrema (and zero)
+#' @param x The values
+label_extrema <- function(x) {
+  ifelse(x %in% c(0, min(x), max(x)), x, "")
+}
+
+

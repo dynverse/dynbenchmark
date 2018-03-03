@@ -5,7 +5,7 @@ library(dynalysis)
 library(tidygraph)
 library(ggraph)
 
-experiment("5-optimise_parameters/6-topology_freedom")
+experiment("8-compare_topology")
 
 methods <- read_rds(derived_file("methods.rds", experiment_id = "4-method_characterisation"))
 method_trajtypes <- methods %>%
@@ -44,6 +44,7 @@ topology_sensitivity <- ind_scores %>%
   scale_fill_identity() +
   scale_color_identity() +
   # scale_fill_manual(values=set_names(trajectory_types$color, trajectory_types$id)) +
-  scale_y_continuous(breaks=-seq_along(method_order), labels=set_names(methods$method_name, methods$method_id)[method_order], expand=c(0.01,0.01)) +
-  scale_x_continuous(breaks=c(0.5,1),labels = scales::percent)
+  scale_y_continuous(breaks=-seq_along(method_order), labels=set_names(methods$method_name, methods$method_id)[method_order], expand=c(0.005,0.005)) +
+  scale_x_continuous("% of cases where topology was predicted correctly", breaks=c(0.5,1),labels = scales::percent)
 topology_sensitivity
+topology_sensitivity %>% ggsave(figure_file("topology_sensitivity.svg"), ., width=12, height=12)
