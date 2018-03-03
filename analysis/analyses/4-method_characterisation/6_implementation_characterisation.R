@@ -340,7 +340,7 @@ imp_table <- map(c("latex", "html"), function(format) {
         escape = FALSE
       ),
       fixes_topology = kableExtra::cell_spec(
-        ifelse(is.na(topology_inference_type), "TBD", topology_inference_type),
+        ifelse(is.na(topology_inference_type), "TBD", label_long(topology_inference_type)),
         format,
         color = ifelse(is.na(topology_inference_type), "gray", topinf_colours[topology_inference_type]),
         escape = FALSE
