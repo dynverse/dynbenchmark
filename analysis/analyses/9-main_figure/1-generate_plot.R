@@ -320,8 +320,8 @@ g1 <- ggplot(method_tib) +
 
   # GROUPING AXIS
   geom_segment(aes(x = xmin, xend = xmax, y = y, yend = y), grouping, size = 1) +
-  geom_text(aes(x = x, y = y+.7, label = label), grouping, vjust = 1, hjust = 0.5, fontface = "bold") +
-  geom_text(aes(x = xmin, y = y+.7, label = key), grouping %>% filter(key != ""), vjust = 1, hjust = 0, fontface = "bold") +
+  geom_text(aes(x = x, y = y+.5, label = label), grouping, vjust = 1, hjust = 0.5, fontface = "bold") +
+  geom_text(aes(x = xmin, y = y+.7, label = key), grouping %>% filter(key != ""), vjust = 1, hjust = 0, fontface = "bold", size = 5) +
 
   # METHOD NAMES
   geom_text(aes(x = axtr$name$xmax, y = method_y, label = method_name), hjust = 1, vjust = .5) +
@@ -391,7 +391,7 @@ g1 <- ggplot(method_tib) +
 
 # WRITE FILES
 overview_fig_file <- figure_file("overview.svg")
-ggsave(overview_fig_file, g1, width = 17, height = 14)
+ggsave(overview_fig_file, g1, width = 17, height = 13.5)
 xml2::read_xml(overview_fig_file) %>% replace_svg(minis) %>% xml2::write_xml(overview_fig_file)
 
 
