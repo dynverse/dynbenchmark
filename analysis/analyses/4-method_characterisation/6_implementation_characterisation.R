@@ -307,6 +307,26 @@ citation_format <- c(
   }
 )
 
+# process priors
+prdf <- implementations %>%
+  select(implementation_id, start_cells:marker_feature_ids) %>%
+  gather(prior_id, value, -implementation_id) %>%
+  left_join(priors, by = "prior_id")
+pr_required <- prdf %>%
+  filter(!is.na(value)) %>%
+  mutate(required = grepl("required", value)) %>%
+  group_by(implementation_id) %>%
+  summarise(prior_required = ifelse(any(required), paste(prior_name[required], collapse = ", "), "none"))
+pr_optional <- prdf %>%
+  filter(!is.na(value)) %>%
+  mutate(optional = grepl("can_use", value)) %>%
+  group_by(implementation_id) %>%
+  summarise(prior_optional = ifelse(any(optional), paste(prior_name[optional], collapse = ", "), "none"))
+
+implementations <- implementations %>%
+  left_join(pr_required, by = "implementation_id") %>%
+  left_join(pr_optional, by = "implementation_id")
+
 imp_table <- map(c("latex", "html"), function(format) {
   implementations_table <-
     implementations %>%
@@ -344,9 +364,21 @@ imp_table <- map(c("latex", "html"), function(format) {
         format,
         color = ifelse(is.na(topology_inference_type), "gray", topinf_colours[topology_inference_type]),
         escape = FALSE
+      ),
+      prior_required = kableExtra::cell_spec(
+        ifelse(is.na(prior_required), "TBD", prior_required),
+        format,
+        color = ifelse(is.na(prior_required), "gray", "black"),
+        escape = FALSE
+      ),
+      prior_optional = kableExtra::cell_spec(
+        ifelse(is.na(prior_optional), "TBD", prior_optional),
+        format,
+        color = ifelse(is.na(prior_optional), "gray", "black"),
+        escape = FALSE
       )
     ) %>%
-    select(method = implementation_name, date, maximal_trajectory_type, fixes_topology, evaluated, reference) %>%
+    select(method = implementation_name, date, maximal_trajectory_type, fixes_topology, prior_required, prior_optional, evaluated, reference) %>%
     rename_all(label_long)
 
   table <- implementations_table %>%
