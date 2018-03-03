@@ -45,8 +45,8 @@ publication_cumulative_by_type <- implementation_publication_data %>%
   mutate(n_implementations = cumsum(counter)) %>%
   ungroup()
 # add first and last
-earliest_date <- min(publication_cumulative_by_type$publication_date)
-latest_date <- Sys.Date() + 100
+earliest_date <- start_date
+latest_date <- end_date
 earliest <- publication_cumulative_by_type %>%
   group_by(publication_type) %>%
   arrange(publication_date) %>%
@@ -239,15 +239,15 @@ topology_inference_timeline <- read_rds(figure_file("topology_inference_timeline
 methods_timeline <- cowplot::plot_grid(
   plotlist=list(
     n_methods_over_time,
-    trajectory_components_over_time,
-    topology_inference_timeline
+    topology_inference_timeline,
+    trajectory_components_over_time
   ),
   nrow=3,
-  rel_heights = c(0.7, 0.5, 0.8),
+  rel_heights = c(0.7, 0.5, 0.5),
   labels="auto"
 )
 methods_timeline
-methods_timeline %>% save_plot(figure_file("methods_timeline.svg"), ., base_width=15, base_height=20)
+methods_timeline %>% save_plot(figure_file("methods_timeline.svg"), ., base_width=10, base_height=12)
 
 ##  .............................................................................
 ##  Create simpler methods over time                                         ####
@@ -273,11 +273,6 @@ ggsave(figure_file("ti_methods_per_year.svg"), g, width = 5, height = 2)
 
 ##  ............................................................................
 ##  implementations table                                                           ####
-implementations$non_inclusion_reasons_footnotes <- implementations$non_inclusion_reasons_split %>%
-  map(function(reasons) {
-    slice(non_inclusion_reasons, match(reasons, id))$footnote %>% sort()
-  })
-
 superscript <- c(latex = function(x) pritt("\\textsuperscript{{{x}}}"), html=function(x) pritt("<sup>{x}</sup>"))
 
 citation_format <- c(
@@ -326,6 +321,12 @@ pr_optional <- prdf %>%
 implementations <- implementations %>%
   left_join(pr_required, by = "implementation_id") %>%
   left_join(pr_optional, by = "implementation_id")
+
+# add non inclusion footnotes
+implementations$non_inclusion_reasons_footnotes <- implementations$non_inclusion_reasons_split %>%
+  map(function(reasons) {
+    slice(non_inclusion_reasons, match(reasons, id))$footnote %>% sort()
+  })
 
 imp_table <- map(c("latex", "html"), function(format) {
   implementations_table <-
@@ -381,6 +382,13 @@ imp_table <- map(c("latex", "html"), function(format) {
     select(method = implementation_name, date, maximal_trajectory_type, fixes_topology, prior_required, prior_optional, evaluated, reference) %>%
     rename_all(label_long)
 
+  # force newline most complex trajectory type -_-
+  if(format == "latex") {
+    implementations_table <- implementations_table %>%
+      rename_at(label_long("maximal_trajectory_type"), ~paste0("\\pbox{20cm}{", label_wrap(., 20, "\\\\[-0.5em]"), "}")) %>%
+      mutate_all(~gsub("\\#", "\\\\#", .)) # craze regular expressions :p
+  }
+
   table <- implementations_table %>%
     knitr::kable(format, escape=F) %>%
     kableExtra::kable_styling(bootstrap_options = c("striped", "hover","condensed"), font_size = ifelse(format == "latex", 7, 12)) %>%
@@ -419,7 +427,7 @@ implementation_small_history <- implementation_small_history_data %>%
   scale_color_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
   scale_fill_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
   scale_alpha_manual(values=c(`TRUE`=1, `FALSE`=0.6)) +
-  scale_x_date(label_long("publishing_date"), limits=c(as.Date("2014-01-01"), as.Date("2018-04-01")), date_breaks="1 year", date_labels="%Y") +
+  scale_x_date(label_long("publishing_date"), limits=c(start_date, end_date), date_breaks="1 year", date_labels="%Y") +
   scale_y_continuous(NULL, breaks=NULL, limits=c(0, 1), expand=c(0, 0)) +
   scale_size_identity() +
   theme(legend.position="none")
