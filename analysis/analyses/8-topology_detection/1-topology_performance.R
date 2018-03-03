@@ -104,7 +104,7 @@ trajtype_handle_comparison <- method_trajtypes_scores %>%
   annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf) +
   theme(panel.spacing=unit(0, "cm"))
 trajtype_handle_comparison
-trajtype_handle_comparison %>% ggsave(figure_file("trajtype_handle_comparison.svg"), ., width=15, height=4)
+trajtype_handle_comparison %>% ggsave(figure_file("trajtype_handle_comparison.svg"), ., width=15, height=8)
 
 
 
