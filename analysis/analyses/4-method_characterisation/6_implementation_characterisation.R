@@ -110,6 +110,17 @@ publication_cumulative_text <- implementation_publication_data %>%
   ungroup() %>%
   mutate(n_implementations_cumulative = seq_len(n()))
 
+# now calculate new methods per year
+implementations_per_year <- implementations %>%
+  filter(is_ti) %>%
+  mutate(year=lubridate::year(date)) %>%
+  count(year) %>%
+  mutate(
+    min = as.Date(paste0(year, "-01-01")),
+    max = lead(min, default = as.Date(end_date)),
+    date = map2(min, max, ~mean.Date(c(.x, .y))) %>% unlist() %>% as.Date(origin = "1970-01-01")
+  )
+
 
 n_implementations_over_time <- publication_cumulative_by_type_interpolated %>%
   mutate(publication_type = c(PubDate="peer_reviewed", Preprint = "preprint")[publication_type]) %>%
@@ -128,11 +139,13 @@ n_implementations_over_time <- publication_cumulative_by_type_interpolated %>%
       vjust=0.5,
       hjust=0,
       fontface = "bold",
-      size=3
+      size=2.5
     ) +
-    theme(legend.position = c(0.05, 0.95)) +
-  scale_y_continuous(label_long("n_implementations"), expand=c(0, 0)) +
-  scale_x_date(label_long("publication_date"), expand=c(0.05, 0.05), limits=c(start_date, end_date))
+    theme(legend.position = c(0.05, 0.8)) +
+  scale_y_continuous(label_long("n_implementations"), expand=c(0, 0), limits=c(0, sum(implementations$is_ti)+2)) +
+  scale_x_date(label_long("publication_date"), expand=c(0.05, 0.05), limits=c(start_date, end_date)) +
+  geom_text(aes(date, sum(implementations$is_ti)+1, label=ifelse(year == "2018", pritt("{year}: +{n} so far"), pritt("{year}: +{n}"))), data=implementations_per_year) +
+  geom_vline(aes(xintercept = min), data=implementations_per_year, linetype="dashed", color="grey")
 n_implementations_over_time
 # ggsave(figure_file("n_implementations_over_time.png"), n_implementations_over_time, width = 15, height = 8)
 write_rds(n_implementations_over_time %>% ggdraw(), figure_file("n_implementations_over_time.rds"))
