@@ -159,7 +159,7 @@ trajectory_type_ancestors <- trajectory_type_dag %>% igraph::ego(99999999, mode=
 
 trajectory_types$ancestors <- trajectory_type_ancestors[trajectory_types$id]
 
-trajectory_types <- trajectory_types %>% arrange(unlist(map(ancestors, length))) # order according to number of ancestors
+trajectory_types <- trajectory_types %>% arrange(unlist(map(ancestors, length)), id) # order according to number of ancestors
 
 ##  ............................................................................
 ##  Orders                                                                  ####
@@ -179,4 +179,4 @@ simplify_trajectory_type <- function(trajectory_types_oi) {
 
 #' Simplified traj types
 #' @export
-trajectory_types_simplified <- trajectory_types %>% filter(directedness == "directed") %>% group_by(simplified) %>% filter(row_number() == 1)
+trajectory_types_simplified <- trajectory_types %>% filter(directedness == "directed") %>% group_by(simplified) %>% filter(row_number() == n())
