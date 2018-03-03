@@ -135,7 +135,7 @@ n_implementations_over_time <- publication_cumulative_by_type_interpolated %>%
   scale_x_date(label_long("publication_date"), expand=c(0.05, 0.05), limits=c(start_date, end_date))
 n_implementations_over_time
 # ggsave(figure_file("n_implementations_over_time.png"), n_implementations_over_time, width = 15, height = 8)
-saveRDS(n_implementations_over_time %>% ggdraw(), figure_file("n_implementations_over_time.rds"))
+write_rds(n_implementations_over_time %>% ggdraw(), figure_file("n_implementations_over_time.rds"))
 
 
 ##  ............................................................................
@@ -156,7 +156,7 @@ platforms <- implementations %>% separate_rows(platform=platforms, sep=", ") %>%
     coord_flip() +
     coord_polar("y")
 platforms
-saveRDS(platforms, figure_file("platforms.rds"))
+write_rds(platforms, figure_file("platforms.rds"))
 
 
 ##  ............................................................................
@@ -197,7 +197,7 @@ trajectory_components_over_time <- trajectory_components_gathered %>%
 
 trajectory_components_over_time
 
-saveRDS(trajectory_components_over_time, figure_file("trajectory_components_over_time.rds"))
+write_rds(trajectory_components_over_time, figure_file("trajectory_components_over_time.rds"))
 
 
 ##  ............................................................................
@@ -223,12 +223,12 @@ topology_inference_timeline_data <- topology_inference_timeline_data %>%
 topology_inference_timeline <- topology_inference_timeline_data %>% ggplot() +
   geom_area(aes(date, y, fill=fct_rev(topology_inference_type)), stat = "identity") +
   geom_text(aes(end_date-50, y-(y-lag(y, 1, 0))/2, label=topology_inference_type), data=topology_inference_timeline_data %>% filter(date == end_date) %>% mutate(y=cumsum(y)), hjust=1, color="white", size=5) +
-  scale_fill_manual(label_long("topology_inference_type"), values = setNames(c("#00ab1b", "#edb600", "#cc2400"), c("free", "parameter", "fixed"))) +
+  scale_fill_manual(label_long("topology_inference_type"), values = topinf_colours) +
   scale_x_date(expand=c(0,0), limits=c(start_date, end_date)) +
   scale_y_continuous(label_long("n_implementations"), expand=c(0,0)) +
   theme(legend.position="none")
 topology_inference_timeline
-saveRDS(topology_inference_timeline, figure_file("topology_inference_timeline.rds"))
+write_rds(topology_inference_timeline, figure_file("topology_inference_timeline.rds"))
 
 ##  ............................................................................
 ##  Create timeline overview figure                                         ####
@@ -307,8 +307,9 @@ citation_format <- c(
   }
 )
 
-table <- map(c("latex", "html"), function(format) {
-  implementations_table <- implementations %>%
+imp_table <- map(c("latex", "html"), function(format) {
+  implementations_table <-
+    implementations %>%
     filter(is_ti) %>%
     arrange(date) %>%
     mutate(
@@ -316,8 +317,8 @@ table <- map(c("latex", "html"), function(format) {
       evaluated = kableExtra::cell_spec(
         evaluated,
         format,
-        background=ifelse(evaluated == "Yes", "#AAAAAA", "white"),
-        color="black",
+        background = ifelse(evaluated == "Yes", "#AAAAAA", "white"),
+        color = "black",
         escape = F
       ),
       date = strftime(date, "%d/%m/%Y"),
@@ -326,7 +327,7 @@ table <- map(c("latex", "html"), function(format) {
           label_simple_trajectory_types(maximal_trajectory_type),
           format,
           background=toupper(set_names(trajectory_types$color, trajectory_types$id)[maximal_trajectory_type]),
-          color="#FFFFFF",
+          color = "#FFFFFF"
         ),
       implementation_name = kableExtra::cell_spec(
         implementation_name,
@@ -336,21 +337,21 @@ table <- map(c("latex", "html"), function(format) {
       reference = kableExtra::cell_spec(
         map_chr(bibtex, citation_format[[format]]),
         format,
-        escape=F
+        escape = F
       ),
+      fixes_topology = ifelse(is.na(topology_inference_type), "?", topology_inference_type)
     ) %>%
-    select(implementation_name, date, maximal_trajectory_type, evaluated, reference) %>%
+    select(method = implementation_name, date, maximal_trajectory_type, fixes_topology, evaluated, reference) %>%
     rename_all(label_long)
 
   table <- implementations_table %>%
     knitr::kable(format, escape=F) %>%
-    kableExtra::kable_styling(bootstrap_options = c("striped", "hover","condensed"), font_size=ifelse(format == "latex", 7, 12)) %>%
+    kableExtra::kable_styling(bootstrap_options = c("striped", "hover","condensed"), font_size = ifelse(format == "latex", 7, 12)) %>%
     kableExtra::add_footnote(non_inclusion_reasons$long, "alphabet")
   table
 }) %>% set_names(c("latex", "html"))
-table
-table %>%
-  saveRDS(figure_file("implementations_table.rds"))
+imp_table
+write_rds(imp_table, figure_file("implementations_table.rds"))
 
 
 

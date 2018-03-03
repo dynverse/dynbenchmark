@@ -24,17 +24,11 @@ viridis_names <- c("viridis", "magma", "plasma", "inferno", "cividis")
 scale_viridis_funs <- map(setNames(viridis_names, viridis_names), ~ sc_col_fun(viridisLite::viridis(101, option = .)))
 
 error_colours <- setNames(RColorBrewer::brewer.pal(4, "Set3"), c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic"))
-prior_colours <- setNames(RColorBrewer::brewer.pal(5, "Set1"), c("grouping_assignment", "grouping_assignment;start_cells;n_end_states", "marker_feature_ids", "n_end_states", "start_cells"))
-topinf_colours <- setNames(c("#00ab1b", "#edb600", "#cc2400"), c("free", "parameter", "fixed"))
-trafo_colours <- setNames(RColorBrewer::brewer.pal(9, "Blues")[c(5,7,9)], c("minimal", "moderate", "extensive"))
 maxtraj_colours <- setNames(trajectory_types$color, trajectory_types$id)
 
-colbench <- "magma"
-colbench_fun <- scale_viridis_funs[[colbench]]
-colqc <- "viridis"
-colqc_fun <- scale_viridis_funs[[colqc]]
-coltime <- "cividis"
-coltime_fun <- scale_viridis_funs[[coltime]]
+colbench_fun <- scale_viridis_funs[["magma"]]
+colqc_fun <- scale_viridis_funs[["viridis"]]
+coltime_fun <- scale_viridis_funs[["cividis"]]
 
 prior_type1cols <- c("required_" = "#cc2400", "optional_" = "#00aaed", "_" = "#00ab1b")
 prior_type1_fun <- function(x) ifelse(is.na(x), "", gsub("_.*", "", x))
@@ -98,9 +92,7 @@ method_tib <- method_tib %>%
     funs(sc = sc_fun, sc_col = coltime_fun)
   ) %>%
   mutate(
-    prior_colour = prior_colours[prior_str],
     topinf_colour = topinf_colours[topology_inference_type],
-    trafo_colour = trafo_colours[trafo],
     maxtraj_colour = maxtraj_colours[maximal_trajectory_types],
     avg_time_lab_colour = ifelse(rank_time_method_sc < .75, "white", "black")
   )
