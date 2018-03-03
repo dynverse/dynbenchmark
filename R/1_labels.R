@@ -79,3 +79,12 @@ label_extrema <- function(x) {
 }
 
 
+#' Label p_value
+#' @param p_values P values
+#' @param cutoffs Cutoffs for number of asterisks
+label_pvalue <- function(p_values, cutoffs=c(0.05, 0.01, 1e-5)) {
+  breaks <- c(Inf, cutoffs, -Inf)
+  labels <- rev(c("NS", map_chr(seq_len(length(cutoffs)), ~glue::collapse(rep("*", .)))))
+  p_values %>% cut(breaks, labels) %>% as.character()
+}
+
