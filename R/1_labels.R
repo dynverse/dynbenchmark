@@ -21,7 +21,7 @@ labels <- tibble::tribble(
   TRUE, "Yes", "Yes",
   FALSE, "No", "No",
   "trajectory_type_gold", "Gold standard trajectory type", "Gold trajectory type",
-  "trajectory_type_predicted", "Predicted trajectory type", "Predicted trajectory type",
+  "trajectory_type_predicted", "Predicted trajectory type", "Predicted trajectory type"
 )
 
 #' Short labelling function
@@ -36,6 +36,7 @@ label_short <- function(x, width=10) {
     pull(short)
 }
 
+#' @export
 label_wrap <- function(x, width=10, collapse="\n") {
   map_chr(strwrap(x, width, simplify=FALSE), paste0, collapse=collapse)
 }
