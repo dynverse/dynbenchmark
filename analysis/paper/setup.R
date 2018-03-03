@@ -17,7 +17,7 @@ library(cowplot)
 
 # refering to figures & supplementary figures
 refs <- tibble(ref_id = character(), name = character(), ref_type = character())
-ref <- function(ref_type, ref_id, suffix="", anchor=FALSE) {
+ref <- function(ref_type, ref_id, suffix="", anchor=FALSE, pattern = "[**{ref_full_name}**](#{ref_type}_{ref_id})") {
   if(nrow(refs %>% filter(ref_id == !!ref_id)) == 0) {
     refs <<- refs %>% bind_rows(tibble(
       name = create_names[[ref_type]](sum(refs$ref_type == ref_type) + 1),
@@ -25,10 +25,10 @@ ref <- function(ref_type, ref_id, suffix="", anchor=FALSE) {
       ref_id = ref_id
     ))
   }
-  ref <- refs %>% filter(ref_id == !!ref_id) %>%
-    pull(name) %>%
-    {pritt("[**{.}{glue::collapse(suffix, ',')}**](#{ref_type}_{ref_id})")}
-
+  ref_name <- refs %>% filter(ref_id == !!ref_id) %>%
+    pull(name)
+  ref_full_name <- paste0(ref_name, glue::collapse(suffix, ','))
+  ref <- pritt(pattern)
   if (anchor)  ref <- pritt("{ref}{anchor(ref_type, ref_id)}")
   ref
 }
@@ -70,4 +70,24 @@ implementations <- read_rds(derived_file("implementations.rds", experiment_id="4
 # citate
 cite_methods <- function(method_ids) {
   implementations %>% filter(implementation_id %in% !!method_ids) %>% pull(bibtex) %>% discard(is.na) %>% {glue::glue("@{.}")} %>% glue::collapse("; ") %>% glue::glue("[", ., "]")
+}
+
+# add caption to table
+add_caption_latex <- function(table, caption="hi") {
+  table %>% gsub("(egin\\{table\\}\\[H\\])", paste0("\\1\n\\\\caption{", caption, "}"), .)
+}
+
+# table
+add_table <- function(ref_id, table, caption) {
+  if (params$table_format == "latex") {
+    caption_latex <- paste0("\\\\textbf{", ref('stable', ref_id, pattern = "{ref_full_name}"), "} ", caption)
+    table_output <- paste("", "", table[["latex"]] %>% add_caption_latex(caption_latex), "", "", sep="\n")
+  } else {
+    table_output <- paste0(
+      paste0(ref("table", "implementations", anchor=TRUE), " ", caption),
+      table[["html"]],
+      collapse="\n"
+    )
+  }
+  cat(table_output)
 }
