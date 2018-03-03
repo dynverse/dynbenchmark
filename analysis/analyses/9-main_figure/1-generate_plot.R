@@ -9,9 +9,7 @@ list2env(read_rds(result_file("aggregated_data.rds", "9-main_figure")), environm
 method_ord <- method_tib %>% arrange(desc(harm_mean)) %>% .$method_name
 
 # determine palettes
-sc_fun <- function(x) {
-  x / max(x, na.rm = T)
-}
+sc_fun <- function(x) x / max(x, na.rm = T)
 sc_col_fun <- function(palette) {
   function(x) {
     sc <- sc_fun(x)
@@ -49,7 +47,6 @@ method_tib <- method_tib %>%
   mutate(
     method_i = seq_len(n()),
     do_spacing = method_i != 1 & method_i %% 5 == 1,
-    # spacing = ifelse(do_spacing, row_spacing * 2, row_spacing),
     spacing = row_spacing,
     method_y = - (method_i * row_height + cumsum(spacing)),
     method_ymin = method_y - row_height / 2,
@@ -62,7 +59,6 @@ method_tib <- method_tib %>%
     rank_citations = percent_rank(n_citations),
     trafo = str_replace(output_transformation, ":.*", ""),
     topinf_lab = c("free" = "free", "fixed" = "fixed", "parameter" = "param")[topology_inference_type],
-    trafo_lab = c("minimal" = "mild", "moderate" = "fair", "extensive" = "major")[trafo],
     avg_time_lab = ifelse(time_method < 60, paste0(round(time_method), "s"), ifelse(time_method < 3600, paste0(round(time_method / 60), "m"), paste0(round(time_method / 3600), "h"))),
     remove_results = pct_errored > .49
   ) %>%
@@ -76,9 +72,7 @@ method_tib <- method_tib %>%
     funs(sc = sc_fun, sc_col = colbench_fun)
   ) %>%
   mutate_at(
-    c(
-      "prior_start", "prior_end", "prior_states", "prior_genes"
-    ),
+    c("prior_start", "prior_end", "prior_states", "prior_genes"),
     funs(type1 = prior_type1_fun, type2 = prior_type2_fun, type1col = prior_type1col_fun)
   ) %>%
   mutate_at(
@@ -88,7 +82,7 @@ method_tib <- method_tib %>%
     funs(sc = sc_fun, sc_col = colqc_fun)
   ) %>%
   mutate_at(
-    c("rank_time_method", "rank_time_method"),
+    c("rank_time_method", "rank_time_method"), # need to mention it twice, other strange things happen :/
     funs(sc = sc_fun, sc_col = coltime_fun)
   ) %>%
   mutate(
@@ -315,7 +309,6 @@ g1 <- ggplot(method_tib) +
   cowplot::theme_nothing() +
 
   # SEPARATOR LINES
-  # geom_segment(aes(x = axtr$name$xmin, xend = axtr$qcpa$xmax, y = method_ymax+(spacing/2), yend = method_ymax+(spacing/2)), method_tib %>% filter(do_spacing), size = .25, linetype = "dashed", colour = "darkgray") +
   geom_rect(aes(xmin = axtr$name$xmin, xmax = axtr$qcpa$xmax, ymin = method_ymin-(spacing/2), ymax = method_ymax+(spacing/2)), method_tib %>% filter(method_i %% 2 == 1), fill = "#EEEEEE") +
 
   # METRIC AXIS
