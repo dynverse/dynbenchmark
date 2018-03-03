@@ -1,13 +1,15 @@
 #' The priors
 #' @export
 priors <- tribble(
-  ~prior_id,
-  "grouping_assignment",
-  "marker_feature_ids",
-  "end_cells",
-  "n_branches",
-  "start_cells",
-  "n_end_states"
+  ~prior_id,              ~prior_name,
+  "grouping_assignment",  "Groupings",
+  "marker_feature_ids",   "Marker genes",
+  "end_cells",            "End cell(s)",
+  "n_branches",           "# branches",
+  "start_cells",          "Start cell(s)",
+  "n_end_states",         "# end states",
+  "time",                 "Time",
+  "timecourse",           "Timecourse"
 )
 
 #' The prior usages
