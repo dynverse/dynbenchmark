@@ -5,9 +5,9 @@ library(tidytext)
 
 experiment("4-method_characterisation")
 
-methods <- read_rds(derived_file("methods.rds"))
+implementations <- read_rds(derived_file("implementations.rds"))
 
-method_components <- methods %>% select(method_id, components) %>%
+implementation_components <- implementations %>% select(implementation_id, components) %>%
   mutate(components = gsub("\\(.*?\\)", "", components)) %>%  # remove anything between ()
   unnest_tokens(component_id, components, "regex", pattern = "[\\{\\}\\[\\]\\|\\+\\=]", to_lower = FALSE) %>%
   mutate(component_id = trimws(component_id)) %>%
@@ -21,12 +21,13 @@ component_categories <- tribble(
   "MST", "graph building",
   "k-medoids", "clustering",
   "ICA", "dimensionality reduction",
+  "GPLVM", "generative model",
   "GPLVM", "dimensionality reduction",
   "GPLVM", "ordering",
   "any multiple dimensionality reductions", "dimensionality reduction",
   "any dimensionality reduction", "dimensionality reduction",
   "diffusion map", "dimensionality reduction",
-  "kmeans", "clustering",
+  "k-means", "clustering",
   "LLE", "dimensionality reduction",
   "MDS", "dimensionality reduction",
   "DDRTree", "graph building",
@@ -41,19 +42,38 @@ component_categories <- tribble(
   "EM clustering", "clustering",
   "consensus clustering", "clustering",
   "weighted cluster graphs", "graph building",
-  "maximum likelihood ordering", "ordering"
+  "maximum likelihood ordering", "ordering",
+  "LDA", "generative model",
+  "Bayesian hierarchical mixture of factor analyzers", "generative model",
+  "TSP", "graph building",
+  "TSP", "graph building",
+  "hierarchical clustering", "clustering",
+  "SST", "graph building",
+  "IMC", "graph building",
+  "longest shortest path", "ordering",
+  "cell projection to tree backbone", "ordering",
+  "find landmarks/waypoints", "graph building",
+  "mixture OU process", "generative model",
+  "Morphing Gaussian Mixture", "generative model",
+  "shortest path to start", "ordering",
+  "latent variable model", "generative model",
+  "PQ tree", "graph building"
 ) %>% group_by(component_id) %>%
   filter(row_number() == 1)
 
-write_rds(method_components, derived_file("method_components.rds"))
-write_rds(component_categories, derived_file("component_categories.rds"))
+categories <- component_categories$category %>% unique() %>% discard(is.na)
 
-method_component_counts <- method_components %>%
+component_category_colors <- RColorBrewer::brewer.pal(length(categories), "Set2") %>% set_names(categories)
+
+write_rds(implementation_components, derived_file("implementation_components.rds"))
+write_rds(component_categories, derived_file("component_categories.rds"))
+write_rds(component_category_colors, derived_file("component_category_colors.rds"))
+
+implementation_component_counts <- implementation_components %>%
   count(component_id) %>%
   left_join(component_categories, "component_id")
 
-
-method_components_wordcloud_plot <- method_component_counts %>%
+implementation_components_wordcloud_plot <- implementation_component_counts %>%
   filter(n > 1 | !is.na(category)) %>%
   ggplot() +
     ggrepel::geom_text_repel(aes(1, 1, size=n, label=component_id, color=category), segment.size = 0) +
@@ -62,10 +82,10 @@ method_components_wordcloud_plot <- method_component_counts %>%
     theme_void() +
     labs(x = '', y = '') +
     scale_size(range = c(3, 15), guide = FALSE) +
-    scale_color_discrete(guide=F)
-method_components_wordcloud_plot
+    scale_color_manual(guide=F, values=component_category_colors)
+implementation_components_wordcloud_plot
 
-method_components_ordering_plot <- method_component_counts %>%
+implementation_components_ordering_plot <- implementation_component_counts %>%
   arrange(n) %>%
   filter(n > 1 | !is.na(category)) %>%
   mutate(component_id = forcats::fct_inorder(component_id)) %>%
@@ -73,37 +93,45 @@ method_components_ordering_plot <- method_component_counts %>%
     geom_bar(stat="identity") +
     geom_text(aes(y=0, label=pritt("{component_id}: {n}")), stat="identity", hjust=0) +
     scale_x_discrete(breaks=c(), expand=c(0, 0), name="") +
-    scale_y_continuous(expand=c(0, 0), name="# methods") +
+    scale_y_continuous(label_long("n_implementations"), expand=c(0, 0), breaks=seq_len(500)) +
+    scale_fill_manual(values=component_category_colors) +
     coord_flip() +
     theme(legend.position="top")
-method_components_ordering_plot
+implementation_components_ordering_plot
 
-n_methods <- length(unique(method_components$method_id))
-category_counts <- method_components %>%
+n_implementations <- length(unique(implementation_components$implementation_id))
+category_counts <- implementation_components %>%
   left_join(component_categories, "component_id") %>%
-  group_by(method_id, category) %>%
+  group_by(implementation_id, category) %>%
   summarise() %>%
   group_by(category) %>%
   count() %>%
   filter(!is.na(category))
 
-method_components_categories_plot <- bind_rows(
+implementation_components_categories_plot <- bind_rows(
   category_counts %>% mutate(included = category),
-  category_counts %>% mutate(included = "not", n = n_methods - n)
+  category_counts %>% mutate(included = "unknown", n = n_implementations - n)
 ) %>%
-  ggplot(aes(1, n, fill=included)) +
-    geom_bar(stat="identity") +
-    facet_wrap(~category, labeller=label_facet()) +
-    coord_polar("y")
-method_components_categories_plot
+  mutate(included = fct_inorder(included)) %>%
+  ggplot(aes(1, n)) +
+    geom_bar(aes(fill=included), stat="identity") +
+    geom_text(aes(label=n, y=n_implementations - n/2), fill=NA, category_counts) +
+    facet_grid(.~category, labeller=label_facet()) +
+    scale_fill_manual(values=component_category_colors %>% c(unknown="grey")) +
+    coord_polar("y") +
+    theme_void() +
+    theme(legend.position="none")
+implementation_components_categories_plot
 
 
 
 
 ##  ............................................................................
-##  Method components plot                                                  ####
-method_components_plot <- cowplot::plot_grid(method_components_wordcloud_plot, method_components_ordering_plot)
-method_components_plot
+##  implementation components plot                                                  ####
+implementation_components_plot <-
+  cowplot::plot_grid(implementation_components_wordcloud_plot, implementation_components_ordering_plot) %>%
+  cowplot::plot_grid(., implementation_components_categories_plot, ncol=1, rel_heights = c(0.6, 0.4))
+implementation_components_plot
 
-save_plot(figure_file("method_components.svg"), method_components_plot, base_width=15, base_height=7.5)
+save_plot(figure_file("implementation_components.svg"), implementation_components_plot, base_width=15, base_height=7.5)
 
