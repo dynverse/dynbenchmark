@@ -36,7 +36,19 @@ trajectory_type_capabilities <- map(
   map(~as_tibble(as.list(setNames(., trajectory_types$id)))) %>%
   bind_rows()
 
+# process unhandable trajectory types
+trajectory_type_disabilities <- implementations$unhandable_trajectory_types %>%
+  str_split("[ ]?,[ ]?") %>%
+  map(~colnames(trajectory_type_capabilities) %in% .) %>%
+  map(~as_tibble(as.list(setNames(., trajectory_types$id)))) %>%
+  bind_rows()
+
+trajectory_type_capabilities <- (trajectory_type_capabilities & !trajectory_type_disabilities) %>% as_tibble()
+
+# add capabilities to implementations
 implementations <- implementations %>% bind_cols(trajectory_type_capabilities)
+
+
 
 ## Non inclusion reasons ------------------------
 implementations$non_inclusion_reasons_split <- implementations$non_inclusion_reasons %>% str_split("[ ]?,[ ]?")
