@@ -4,17 +4,33 @@ library(dynalysis)
 
 experiment("6-developer_guidelines")
 outputs_list <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_parameters/3-evaluate_parameters"))
-method_components <- read_rds(derived_file("method_components.rds", experiment_id = "4-method_characterisation"))
+implementation_components <- read_rds(derived_file("implementation_components.rds", experiment_id = "4-method_characterisation"))
 methods <- read_rds(derived_file("methods.rds", experiment_id = "4-method_characterisation"))
+method_components <- implementation_components %>% left_join(methods %>% select(method_id, implementation_id)) %>% drop_na() %>% select(-implementation_id)
 component_categories <- read_rds(derived_file("component_categories.rds", experiment_id = "4-method_characterisation"))
 
 #   ____________________________________________________________________________
 #   Component importance                                                    ####
 
 
-method_components_category <- method_components %>% left_join(component_categories, "component_id") %>% filter(!is.na(category)) %>% group_by(method_id, category) %>% summarise() %>% ungroup() %>% rename(component_id = category)
+# join categories as regular components
+method_components_category <- method_components %>%
+  left_join(component_categories, "component_id") %>%
+  filter(!is.na(category)) %>%
+  group_by(method_id, category) %>%
+  summarise() %>%
+  ungroup() %>%
+  rename(component_id = category) %>%
+  mutate(component_id = paste0("any ", component_id))
 
-method_components <- bind_rows(method_components, method_components_category)
+method_components <- bind_rows(
+  method_components,
+  method_components_category
+)
+component_categories <- bind_rows(
+  component_categories,
+  tibble(category = unique(component_categories$category), component_id = paste0("any ", category))
+)
 
 components <- tibble(component_id = unique(method_components$component_id))
 
@@ -30,16 +46,16 @@ method_features_components <- method_components %>%
   spread("component_id", "contains", FALSE, drop=F) %>%
   slice(match(names(method_scores), method_id))
 
-is_variable_feature <- function(x) sum(table(x) > 1) >= 2
+is_variable_feature <- function(x) sum(table(x) > 1) >= 4
 method_features <- method_features_components %>%
-  select_if(is_variable_feature) %>%
   mutate(method_id = method_features_components$method_id)
 
 method_data <- bind_cols(method_features, tibble(score = method_scores[method_features_components$method_id]))
 
 components <- components %>%
   filter(component_id %in% colnames(method_features)) %>%
-  filter(colSums(method_features[,component_id]) > 2)
+  mutate(n = colSums(method_features[,component_id])) %>%
+  filter(n >= 4)
 
 components$method_ids <- map(components$component_id, ~as.character(method_data$method_id[which(method_data[[.]])]))
 
@@ -83,7 +99,7 @@ table <- map(c("latex", "html"), function(format) {
         background = spec_color(inc_node_purity,option="magma",direction=1)
       ),
       effect = cell_spec(
-        ifelse(difference > 0, "↗ High performance", "↘ Low performance"),
+        ifelse(difference > 0, "↗ Higher performance", "↘ Lower performance"),
         color = ifelse(difference > 0, "darkred", "darkblue")
       ),
       methods = cell_spec(
@@ -106,8 +122,10 @@ method_components_scores_data <- method_data %>%
   gather("component_id", "uses_component", -method_id, -score) %>%
   right_join(components, by="component_id") %>%
   left_join(component_categories, by="component_id") %>%
-  arrange(inc_node_purity) %>%
+  arrange(q_value) %>%
   mutate(component_id = forcats::fct_inorder(component_id))
+components <- components %>% mutate(effect = ifelse(difference < 0, "↘", "↗")) %>%
+  mutate(component_id = factor(component_id, levels(method_components_scores_data$component_id)))
 
 
 empty_left_theme <- theme(
@@ -130,19 +148,21 @@ xmax <- length(levels(method_components_scores_data$component_id))+1
 method_components_scores_dots <- method_components_scores_data %>% ggplot() +
   # geom_segment(aes(x = score, xend=score, y=0, yend=ymax), color="darkgrey") +
   geom_vline(aes(xintercept = as.numeric(component_id)), color="grey") +
-  geom_violin(aes(as.numeric(component_id), score, group=component_id), data=filter(method_components_scores_data, uses_component)) +
-  geom_point(aes(as.numeric(component_id), score), color="black", shape=3, size=3) +
-  geom_point(aes(as.numeric(component_id), score, color=category), size=4, data=filter(method_components_scores_data, uses_component)) +
-  ggrepel::geom_label_repel(
-    aes(1, score, label=method_id),
+  geom_violin(aes(as.numeric(component_id), score, group=component_id, fill=category), data=filter(method_components_scores_data, uses_component)) +
+  ggrepel::geom_text_repel(
+    aes(1, score, label=set_names(methods$method_name, methods$method_id)[method_id]),
     direction = "y",
     nudge_x = -1,
     data=
       method_components_scores_data %>%
       group_by(method_id) %>%
       filter(row_number() == 1),
-    color="#333333"
+    color="#888888",
+    size=3,
+    segment.size=0.2
   ) +
+  geom_point(aes(as.numeric(component_id), score), color="#666666", shape=3, size=3) +
+  geom_point(aes(as.numeric(component_id), score), color="black", size=3, data=filter(method_components_scores_data, uses_component)) +
   scale_x_continuous(
     "",
     breaks=seq_along(levels(method_components_scores_data$component_id)),
@@ -150,24 +170,12 @@ method_components_scores_dots <- method_components_scores_data %>% ggplot() +
     limits=c(-1, xmax),
     expand=c(0,0)
   ) +
+  geom_label(aes(as.numeric(component_id), max(method_components_scores_data$score) * 1.1, label=paste0(effect, " ", label_pvalue(q_value))), data=components, size=6) +
   scale_y_continuous() +
-  theme(legend.position="top")
+  scale_fill_manual(values=component_category_colors, label=label_long) +
+  theme(legend.position="top", axis.text.x = element_text(angle=45, hjust=1))
 method_components_scores_dots
 
 
-method_components_scores_tests <- method_components_scores_data %>%
-  group_by(component_id) %>%
-  filter(row_number() == 1) %>%
-  ggplot() +
-    geom_text(aes(0, as.numeric(component_id), label=round(inc_node_purity, 2)), hjust="left") +
-    geom_text(aes(1, as.numeric(component_id), label=round(p_value, 2)), hjust="left") +
-    geom_text(aes(2, as.numeric(component_id), label=ifelse(difference > 0, "↗", "↘")), hjust="right") +
-    scale_x_continuous("", breaks=c(0, 1,2), labels=label_long(c("inc_node_purity", "pvalue", "tendency")), position="top") +
-    scale_y_continuous("", limits=c(-1, ymax), expand=c(0,0)) +
-    empty_left_theme +
-    no_margin
 
-method_components_scores_plot <- cowplot::plot_grid(method_components_scores_tests, method_components_scores_dots, rel_widths = c(0.2, 0.8),  ncol=2, align="hv", axis="bt")
-method_components_scores_plot
-method_components_scores_plot %>% write_rds(figure_file("method_components_scores_plot.rds"))
-
+method_components_scores_dots %>% ggsave(figure_file("method_components_scores.svg"),., width=12, height=10)
