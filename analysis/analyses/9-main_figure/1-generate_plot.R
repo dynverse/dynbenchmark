@@ -9,9 +9,7 @@ list2env(read_rds(result_file("aggregated_data.rds", "9-main_figure")), environm
 method_ord <- method_tib %>% arrange(desc(harm_mean)) %>% .$method_name
 
 # determine palettes
-sc_fun <- function(x) {
-  x / max(x, na.rm = T)
-}
+sc_fun <- function(x) x / max(x, na.rm = T)
 sc_col_fun <- function(palette) {
   function(x) {
     sc <- sc_fun(x)
@@ -26,6 +24,9 @@ scale_viridis_funs <- map(setNames(viridis_names, viridis_names), ~ sc_col_fun(v
 error_colours <- setNames(RColorBrewer::brewer.pal(4, "Set3"), c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic"))
 maxtraj_colours <- setNames(trajectory_types$color, trajectory_types$id)
 
+colbench <- "magma"
+colqc <- "viridis"
+coltime <-  "cividis"
 colbench_fun <- scale_viridis_funs[["magma"]]
 colqc_fun <- scale_viridis_funs[["viridis"]]
 coltime_fun <- scale_viridis_funs[["cividis"]]
@@ -49,7 +50,6 @@ method_tib <- method_tib %>%
   mutate(
     method_i = seq_len(n()),
     do_spacing = method_i != 1 & method_i %% 5 == 1,
-    # spacing = ifelse(do_spacing, row_spacing * 2, row_spacing),
     spacing = row_spacing,
     method_y = - (method_i * row_height + cumsum(spacing)),
     method_ymin = method_y - row_height / 2,
@@ -62,7 +62,6 @@ method_tib <- method_tib %>%
     rank_citations = percent_rank(n_citations),
     trafo = str_replace(output_transformation, ":.*", ""),
     topinf_lab = c("free" = "free", "fixed" = "fixed", "parameter" = "param")[topology_inference_type],
-    trafo_lab = c("minimal" = "mild", "moderate" = "fair", "extensive" = "major")[trafo],
     avg_time_lab = ifelse(time_method < 60, paste0(round(time_method), "s"), ifelse(time_method < 3600, paste0(round(time_method / 60), "m"), paste0(round(time_method / 3600), "h"))),
     remove_results = pct_errored > .49
   ) %>%
@@ -76,9 +75,7 @@ method_tib <- method_tib %>%
     funs(sc = sc_fun, sc_col = colbench_fun)
   ) %>%
   mutate_at(
-    c(
-      "prior_start", "prior_end", "prior_states", "prior_genes"
-    ),
+    c("prior_start", "prior_end", "prior_states", "prior_genes"),
     funs(type1 = prior_type1_fun, type2 = prior_type2_fun, type1col = prior_type1col_fun)
   ) %>%
   mutate_at(
@@ -88,7 +85,7 @@ method_tib <- method_tib %>%
     funs(sc = sc_fun, sc_col = colqc_fun)
   ) %>%
   mutate_at(
-    c("rank_time_method", "rank_time_method"),
+    c("rank_time_method", "rank_time_method"), # need to mention it twice, other strange things happen :/
     funs(sc = sc_fun, sc_col = coltime_fun)
   ) %>%
   mutate(
@@ -159,17 +156,17 @@ axtr <- map(
 # define grouping information
 grouping <-
   tribble(
-    ~label, ~y, ~xmin, ~xmax,
-    "Method characterisation", 3, axtr$name$xmin, axtr$prge$xmax,
-    "Priors", 2, axtr$prst$xmin, axtr$prge$xmax,
-    "Benchmark pipeline", 3, axtr$harm$xmin, axtr$erro$xmax,
-    "Per metric", 2, axtr$corr$xmin, axtr$rfms$xmax,
-    "Per source", 2, axtr$real$xmin, axtr$synt$xmax,
-    "Per trajectory type", 2, axtr$line$xmin, axtr$grap$xmax,
-    "Execution", 2, axtr$time$xmin, axtr$erro$xmax,
-    "Quality control", 3, axtr$qcsc$xmin, axtr$qcpa$xmax,
-    "Practicality", 2, axtr$qcdf$xmin, axtr$qcgs$xmax,
-    "Categories", 2, axtr$qcav$xmin, axtr$qcpa$xmax
+    ~label,                        ~y, ~xmin,          ~xmax,          ~key,
+    "Method characterisation",     3,  axtr$name$xmin, axtr$prge$xmax, "a",
+    "Priors",                      2,  axtr$prst$xmin, axtr$prge$xmax, "",
+    "Benchmark",                   3,  axtr$harm$xmin, axtr$erro$xmax, "b",
+    "Per metric",                  2,  axtr$corr$xmin, axtr$rfms$xmax, "",
+    "Per source",                  2,  axtr$real$xmin, axtr$synt$xmax, "",
+    "Per trajectory type",         2,  axtr$line$xmin, axtr$grap$xmax, "",
+    "Execution",                   2,  axtr$time$xmin, axtr$erro$xmax, "",
+    "Quality control",             3,  axtr$qcsc$xmin, axtr$qcpa$xmax, "c",
+    "Practicality",                2,  axtr$qcdf$xmin, axtr$qcgs$xmax, "",
+    "Categories",                  2,  axtr$qcav$xmin, axtr$qcpa$xmax, ""
   ) %>%
   mutate(
     x = (xmin + xmax) / 2
@@ -315,18 +312,16 @@ g1 <- ggplot(method_tib) +
   cowplot::theme_nothing() +
 
   # SEPARATOR LINES
-  # geom_segment(aes(x = axtr$name$xmin, xend = axtr$qcpa$xmax, y = method_ymax+(spacing/2), yend = method_ymax+(spacing/2)), method_tib %>% filter(do_spacing), size = .25, linetype = "dashed", colour = "darkgray") +
   geom_rect(aes(xmin = axtr$name$xmin, xmax = axtr$qcpa$xmax, ymin = method_ymin-(spacing/2), ymax = method_ymax+(spacing/2)), method_tib %>% filter(method_i %% 2 == 1), fill = "#EEEEEE") +
 
   # METRIC AXIS
   geom_segment(aes(x = x, xend = x, y = -.3, yend = -.1), axis %>% filter(show_label), size = .5) +
   geom_text(aes(x = x, y = 0, label = label), axis %>% filter(show_label), angle = 30, vjust = 0, hjust = 0) +
-  expand_limits(y = 2) +
 
   # GROUPING AXIS
   geom_segment(aes(x = xmin, xend = xmax, y = y, yend = y), grouping, size = 1) +
-  geom_text(aes(x = x, y = y+.2, label = label), grouping, vjust = 0, hjust = 0.5, fontface = "bold") +
-  expand_limits(y = 4) +
+  geom_text(aes(x = x, y = y+.5, label = label), grouping, vjust = 1, hjust = 0.5, fontface = "bold") +
+  geom_text(aes(x = xmin, y = y+.7, label = key), grouping %>% filter(key != ""), vjust = 1, hjust = 0, fontface = "bold", size = 5) +
 
   # METHOD NAMES
   geom_text(aes(x = axtr$name$xmax, y = method_y, label = method_name), hjust = 1, vjust = .5) +
@@ -396,7 +391,7 @@ g1 <- ggplot(method_tib) +
 
 # WRITE FILES
 overview_fig_file <- figure_file("overview.svg")
-ggsave(overview_fig_file, g1, width = 17, height = 14)
+ggsave(overview_fig_file, g1, width = 17, height = 13.5)
 xml2::read_xml(overview_fig_file) %>% replace_svg(minis) %>% xml2::write_xml(overview_fig_file)
 
 

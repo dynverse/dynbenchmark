@@ -317,29 +317,34 @@ imp_table <- map(c("latex", "html"), function(format) {
       evaluated = kableExtra::cell_spec(
         evaluated,
         format,
-        background = ifelse(evaluated == "Yes", "#AAAAAA", "white"),
-        color = "black",
-        escape = F
+        background = ifelse(evaluated == "Yes", "#666666", "white"),
+        color = ifelse(evaluated == "Yes", "white", "black"),
+        escape = FALSE
       ),
       date = strftime(date, "%d/%m/%Y"),
       maximal_trajectory_type =
         kableExtra::cell_spec(
           label_simple_trajectory_types(maximal_trajectory_type),
           format,
-          background=toupper(set_names(trajectory_types$color, trajectory_types$id)[maximal_trajectory_type]),
+          background = toupper(set_names(trajectory_types$color, trajectory_types$id)[maximal_trajectory_type]),
           color = "#FFFFFF"
         ),
       implementation_name = kableExtra::cell_spec(
         implementation_name,
         format,
-        link=Code
+        link = Code
       ),
       reference = kableExtra::cell_spec(
         map_chr(bibtex, citation_format[[format]]),
         format,
-        escape = F
+        escape = FALSE
       ),
-      fixes_topology = ifelse(is.na(topology_inference_type), "?", topology_inference_type)
+      fixes_topology = kableExtra::cell_spec(
+        ifelse(is.na(topology_inference_type), "TBD", label_long(topology_inference_type)),
+        format,
+        color = ifelse(is.na(topology_inference_type), "gray", topinf_colours[topology_inference_type]),
+        escape = FALSE
+      )
     ) %>%
     select(method = implementation_name, date, maximal_trajectory_type, fixes_topology, evaluated, reference) %>%
     rename_all(label_long)
