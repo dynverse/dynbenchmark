@@ -20,8 +20,8 @@ labels <- tibble::tribble(
   "q_value", "Adjusted p-value", "p-value (adj.)",
   TRUE, "Yes", "Yes",
   FALSE, "No", "No",
-  "trajectory_type_gold", "Trajectory type of gold standard", "Gold trajectory type",
-  "trajectory_type_predicted", "Trajectory type of prediction", "Prediction trajectory type",
+  "trajectory_type_gold", "Gold standard trajectory type", "Gold trajectory type",
+  "trajectory_type_predicted", "Predicted trajectory type", "Predicted trajectory type",
 )
 
 #' Short labelling function
