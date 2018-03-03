@@ -42,7 +42,7 @@ parallel::mclapply(purrr::transpose(list(files, tofiles)), function(.) system(gl
 
 # generate pdfs
 
-# create pdf. 1. remove all temp files 2. make sure pdfs are used for all figures
+# create pdf. 1. remove all temp files 2. make sure pdfs are used for all figures 3. Global parameters
 file.remove(list.files("analysis/paper/", "paper_latex*", full.names = T))
 read_file("analysis/paper/paper.Rmd") %>% gsub("\\.svg", "\\.tmp\\.pdf", .) %>% write_file("analysis/paper/paper_latex.Rmd")
 params <- list(table_format="latex")
@@ -62,9 +62,4 @@ render(
 unlink(tofiles) # remove tmp pdfs
 
 # upload to google drive
-drive_update("dynverse/paper.pdf", "analysis/paper/paper.pdf")
-
-
-
-# for conversion to pdf:
-# system(pritt("cd analysis/paper; pandoc paper.html +RTS -K1024M -RTS --pdf-engine=xelatex -o paper.pdf"))
+drive_update("dynverse/paper.pdf", "analysis/paper/paper_latex.pdf")
