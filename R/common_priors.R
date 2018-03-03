@@ -5,9 +5,9 @@ priors <- tribble(
   "grouping_assignment",  "Groupings",
   "marker_feature_ids",   "Marker genes",
   "end_cells",            "End cell(s)",
-  "n_branches",           "Num. branches",
+  "n_branches",           "# branches",
   "start_cells",          "Start cell(s)",
-  "n_end_states",         "Num. end states",
+  "n_end_states",         "# end states",
   "time",                 "Time",
   "timecourse",           "Timecourse"
 )
