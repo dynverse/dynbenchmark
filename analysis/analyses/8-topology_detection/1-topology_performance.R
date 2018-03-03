@@ -12,7 +12,12 @@ outputs_list <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_p
 
 overall_scores <- outputs_list$outputs_summmethod_totals %>% filter(task_source=="mean") %>% rename(method_id = method_short_name)
 trajtype_scores <- outputs_list$outputs_summtrajtype_totals %>% filter(task_source=="mean") %>% rename(method_id = method_short_name)
-ind_scores <- outputs_list$outputs_ind %>% rename(method_id = method_short_name)
+indrep_scores <- outputs_list$outputs_summrepl %>%
+  rename(method_id = method_short_name) %>%
+  filter(method_id %in% methods$method_id)
+ind_scores <- outputs_list$outputs_ind %>%
+  rename(method_id = method_short_name) %>%
+  filter(method_id %in% methods$method_id)
 method_order <- outputs_list$outputs_summmethod_totals %>%
   rename(method_id = method_short_name) %>%
   filter(task_source=="mean") %>%
@@ -107,6 +112,55 @@ trajtype_handle_comparison
 trajtype_handle_comparison %>% ggsave(figure_file("trajtype_handle_comparison.svg"), ., width=15, height=8)
 
 
+##  ............................................................................
+##  Balance between ordering and topology                                   ####
+
+scores <- c("harm_mean", "rank_edge_flip", "rank_correlation", "rank_rf_mse")
+# scores <- c("harm_mean", "edge_flip", "correlation", "rf_mse")
+linear_split_scores <- indrep_scores %>%
+  left_join(methods, by="method_id") %>%
+  mutate(
+    is_linear_restricted = ifelse(maximal_trajectory_type %in% c("directed_cycle", "directed_linear"), "linear_method", "non-linear_method"),
+    trajectory_type_linear = ifelse(trajectory_type %in% c("directed_cycle", "directed_linear"), "linear_dataset", "more_complex_than_linear_dataset")
+  ) %>%
+  group_by(task_id, is_linear_restricted, trajectory_type_linear) %>%
+  summarise_at(
+    scores,
+    max
+  ) %>%
+  ungroup() %>%
+  gather(score_id, score_value, !!scores)
+
+linear_split_tests <- linear_split_scores %>%
+  group_by(trajectory_type_linear, score_id) %>%
+  summarise(
+    test = wilcox.test(
+      score_value[is_linear_restricted == "linear_method"],
+      score_value[is_linear_restricted != "linear_method"],
+      conf.int = T,
+      paired=T
+    ) %>% list()
+  ) %>% mutate(
+    p_value = map_dbl(test, "p.value"),
+    q_value = p.adjust(p_value, "BH"),
+    estimate = map_dbl(test, "estimate"),
+    effect = ifelse(estimate > 0, "↘", "↗")
+  )
+linear_split_tests
+
+linear_split_comparison <- linear_split_scores %>%
+  ggplot(aes(is_linear_restricted, score_value)) +
+  geom_violin(aes(fill = is_linear_restricted)) +
+  ggbeeswarm::geom_quasirandom(alpha=0.8, size=0.5) +
+  geom_text(aes(label=paste0(effect, ": ", label_pvalue(q_value))), x=1.5, y=1.1, linear_split_tests, size=5) +
+  facet_grid(score_id~trajectory_type_linear, scales = "free_y", labeller = label_facet(function(x) label_short(x, 15))) +
+  scale_y_continuous(label_long("maximal_score_on_dataset"), limits=c(NA, 1), expand=c(0, 0.2)) +
+  scale_x_discrete(label_long("method_restriction"), label = label_short) +
+  scale_fill_manual(values = set_names(trajectory_types$color[match(c("directed_linear", "rooted_tree"), trajectory_types$id)], c("linear_method", "non-linear_method"))) +
+  theme(legend.position="none", strip.text.y = element_text(angle=0))
+linear_split_comparison
+ggsave(figure_file("linear_split_comparison.svg"), linear_split_comparison, width=6, height=8)
+
 
 ##  ............................................................................
 ##  Edge flip distributions                                                 ####
@@ -130,3 +184,5 @@ edge_flip_distributions <- ind_scores %>%
   scale_x_continuous(label_long("edge_flip"), expand = c(0, 0), breaks=c(0, 0.5, 1), label=round) +
   theme(legend.position = "none", axis.text.y=element_text(vjust=0))
 edge_flip_distributions
+
+
