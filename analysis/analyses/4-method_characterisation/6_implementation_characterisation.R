@@ -311,12 +311,12 @@ pr_required <- prdf %>%
   filter(!is.na(value)) %>%
   mutate(required = grepl("required", value)) %>%
   group_by(implementation_id) %>%
-  summarise(prior_required = ifelse(any(required), paste(prior_name[required], collapse = ", "), "none"))
+  summarise(prior_required = ifelse(any(required), paste(prior_name[required], collapse = ", "), "None"))
 pr_optional <- prdf %>%
   filter(!is.na(value)) %>%
   mutate(optional = grepl("can_use", value)) %>%
   group_by(implementation_id) %>%
-  summarise(prior_optional = ifelse(any(optional), paste(prior_name[optional], collapse = ", "), "none"))
+  summarise(prior_optional = ifelse(any(optional), paste(prior_name[optional], collapse = ", "), "None"))
 
 implementations <- implementations %>%
   left_join(pr_required, by = "implementation_id") %>%
