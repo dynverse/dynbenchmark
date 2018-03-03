@@ -48,3 +48,12 @@ topology_sensitivity <- ind_scores %>%
   scale_x_continuous("% of cases where topology was predicted correctly", breaks=c(0.5,1),labels = scales::percent)
 topology_sensitivity
 topology_sensitivity %>% ggsave(figure_file("topology_sensitivity.svg"), ., width=12, height=12)
+
+
+# table for correct topology prediction
+ind_scores %>%
+  group_by(method_id, trajectory_type) %>%
+  summarise(perc_perfect = mean(perfect_edge_flip)) %>%
+  filter(method_id %in% method_order[1:5]) %>%
+  View
+therefore

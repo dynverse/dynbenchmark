@@ -116,9 +116,11 @@ trajectory_type_comparison <- milestone_networks %>%
   scale_y_discrete(label_long("trajectory_type_gold"), label=label_long) +
   theme(axis.text.x = element_text(angle=45, hjust=1)) +
   scale_color_identity() +
-  scale_fill_distiller(limits=c(0, 1), direction = 1, palette="Greys") +
+  scale_fill_distiller("% cases", limits=c(0, 1), direction = 1, palette="Greys", label=scales::percent, breaks=c(0, 0.5, 1)) +
   coord_equal() +
-  facet_grid(.~method_id, labeller=label_facet_methods)
+  facet_grid(.~method_id, labeller=label_facet_methods) +
+  theme(legend.position="top")
+
 trajectory_type_comparison
 
 
@@ -164,7 +166,8 @@ topology_complexity_comparison <- plot_grid(
   complexity_difference_distribution,
   ncol=1,
   align="v",
-  axis="lr"
+  axis="lr",
+  labels="auto"
 )
 
 topology_complexity_comparison
