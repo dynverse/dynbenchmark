@@ -9,9 +9,9 @@ experiment("8-compare_topology")
 
 #   ____________________________________________________________________________
 #   Preparation                                                             ####
-# calculate statistics of milestone network
 label_facet_methods <- function(x) {tibble(method_id=methods$method_name[match(x$method_id, methods$method_id)])}
 
+# functions to calculate statistics of milestone network
 calculate_n_edges <- function(milestone_network) {
   milestone_network %>%
     nrow()
