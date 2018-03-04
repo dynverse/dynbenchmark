@@ -50,3 +50,22 @@ g <- ggplot(cross_df) +
 g
 
 ggsave(figure_file("metrics_comparison.svg"), g, width = 14, height = 5)
+
+df <- outputs_list$outputs_summtrajtype_totalsx2 %>%
+  filter(task_source == "mean") %>%
+  mutate(
+    trajectory_type_l = factor(label_long(trajectory_type_f), levels = label_long(levels(trajectory_type_f)))
+  )
+
+h <- ggplot(df) +
+  geom_point(aes(pct_errored, harm_mean, colour = trajectory_type)) +
+  facet_wrap(~ trajectory_type_l, nrow = 2) +
+  theme_bw() +
+  coord_equal() +
+  labs(x = "Percentage errored", y = "Overall score") +
+  scale_color_manual(values=set_names(c("black", "black", trajectory_types$color), c("all", "overall", trajectory_types$id))) +
+  theme(legend.position = "none", panel.grid = element_blank()) +
+  scale_x_continuous(breaks = c(0, 1)) +
+  scale_y_continuous(breaks = c(0, 1))
+
+ggsave(figure_file("errormetric_comparison.svg"), h, width = 10, height = 5)
