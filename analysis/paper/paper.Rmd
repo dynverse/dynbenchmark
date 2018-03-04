@@ -143,6 +143,7 @@ In this study, we perform a comprehensive evaluation for `r sum(methods$evaluate
 
 # Results
 ## Evaluation overview
+WIP
 The inclusion criterion for TI methods was primarily based on their free availability, the presence of a programming interface, and the time they were published (`r ref("table", "implementations")`). Currently, only methods published before june 2017 are included in the evaluation, while more recent methods will be included in the next version. We characterised and benchmarked each method in six different ways: its detectable trajectory topology, its performance on real and synthetic datasets, its running time and scalability, its requirements for prior information, the underlying algorithm, and the quality of the tools. 
 
 
@@ -150,10 +151,22 @@ We evaluated the accuracy of each method by comparing its output with a gold sta
 
 
 `r anchor("fig", "evaluation_overview")`
-![](`r figure_file("ti_evaluation_overview_v2.svg", experiment_id="evaluation_overview")`)
+![](`r figure_file("ti_evaluation_overview_v3.svg", experiment_id="evaluation_overview")`)
 `r ref("fig", "evaluation_overview")` Overview of the evaluation
 
 
+
+
+```{r}
+add_sfig({
+        figure_file('expanded_ti_evaluation_overview_v1.svg', 'evaluation_overview')
+}, 
+"wrapping", 
+"Extended overview ", 
+15, 
+7.5
+)
+```
 
 
 ```{r}
@@ -268,37 +281,55 @@ add_sfig({
 ### Algorithm components
 
 
-The underlying algorithm of each method can be divided into several steps, and these frequently contain soms clustering, dimensionality reduction and/or graph building. Interestingly, steps are frequently shared between different algorithms (`r ref("sfig", "method_components")`). MST in particular, used in the first single-cell RNA-seq trajectory inference methods [@trapnell_dynamicsregulatorscell_2014], is used in almost half of all methods we evaluated  (`r ref("sfig", "method_components", "b")`).
+The underlying algorithm of each method can be divided into several steps, and these frequently contain soms clustering, dimensionality reduction and/or graph building. Interestingly, steps are frequently shared between different algorithms (`r ref("sfig", "implementation_components")`). MST in particular, used in the first single-cell RNA-seq trajectory inference methods [@trapnell_dynamicsregulatorscell_2014], is used in almost half of all methods we evaluated  (`r ref("sfig", "implementation_components", "b")`).
 
 
 ```{r}
 add_sfig(
-figure_file("method_components.svg","4-method_characterisation"), 
-"method_components", 
+figure_file("implementation_components.svg","4-method_characterisation"), 
+"implementation_components", 
 "TI methods frequently share steps"
 )
 ```
 
 
-We assessed whether the components of an algorithm can be predictive for method performance, using both random forest regression and statistical testing. Methods which include principal curves and clustering (k-means in particular) tend to perform better
+We assessed whether the components of an algorithm can be predictive for method performance, using both random forest classification and statistical testing. Methods which include principal curves (which include Slingshot and SCORPIUS), k-means (which include Slingshot and several other top scoring methods) and some graph building (which include almost every top scoring method) tended to have a slightly higher performance (`r ref("sfig", "method_components_scores")` and `r ref("stable", "component_importance")`). On the other hand, methods using t-SNE and ICA for their dimensionality reduction were ranked lower, although this was not statistically significant.
 
 
+```{r}
+add_sfig(
+figure_file("method_components_scores.svg","6-developer_guidelines"), 
+"method_components_scores", 
+"Score of methods containing particular algorithmic components"
+)
+```
+
+
+```{r}
+add_stable(
+read_rds(figure_file("component_importance.rds","6-developer_guidelines"))[[params$table_format]], 
+"component_importance", 
+"Importance values for algorithmic components"
+)
+```
 ## Method quality control
 
 
-While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is also an important evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or which purpose(s) they serve (user friendliness, developer friendliness or good science). These categorisations can help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
+While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is also an important evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or which purpose(s) they serve (user friendliness, developer friendliness or future proof). These categorisations can help current developers to improve their tool, and guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
 
 
 ```{r}
 add_stable(
 read_rds(figure_file("qc_checks.rds","4-method_characterisation"))[[params$table_format]], 
 "qc_checks", 
-"QC checks"
+"Scoring scheme for method quality control"
 )
 ```
 
 
-Most methods fulfill most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "results_overview", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "results_overview", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "implementation_qc_check")` and `r ref("fig", "results_overview", "c")`), notwithstanding several studies pinpointing these as good practices [@wilson_best_2014; @artaza_top10metrics_2016].
+
+
+We found that most methods fulfilled the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "results_overview", "b")`). Recent methods tended to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects were consistently lacking for the majority of the methods (`r ref("fig", "results_overview", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "implementation_qc_check")` and `r ref("fig", "results_overview", "c")`), notwithstanding several studies pinpointing these as good practices [@wilson_best_2014; @artaza_top10metrics_2016].
 
 
 ```{r}
@@ -308,6 +339,8 @@ figure_file("qc_over_time.svg","4-method_characterisation"),
 "Quality control scores and number of citations over time"
 )
 ```
+
+
 ## Practical guidelines
 
 
@@ -417,46 +450,25 @@ conversion <- function(conversion_oi) {
 Special conversions were necessary for certain methods:
 
 
-* DPT: We projected the cells onto the cluster network, consisting of a central milestone (this cluster contains the cells which were assigned to the "unknown" branch) and three terminal milestones, each corresponding to a tip point. This was then processed as described above.
-* Sincell: To constrain the number of milestones this method creates, we merged two cell clusters iteratively until the percentage of leaf nodes was below a certain cutoff, default at 25%.  This was then processed as described above.
-* SLICER: Although this method returns a branch network and a global pseudotime, it was not clear to us how to assign cells to individual branches in the network. We therefore used the cell graph provided by the method to calculate the shortest paths between the start and end cells found by the method, and then used this graph as the backbone for all other cells, creating a local pseudotime for every cell within its branch. The output was then further processed as above.
-* SLICE: As discussed in the vignette of SLICE, we ran principal curves one by one for every edge detected by SLICE. This local pseudotime was then processed as above.
-* MFA: We used the branch assignment as state probabilities, which together with the global pseudotime were processed as described above.
+* **DPT** We projected the cells onto the cluster network, consisting of a central milestone (this cluster contains the cells which were assigned to the "unknown" branch) and three terminal milestones, each corresponding to a tip point. This was then processed as described above.
+* **Sincell** To constrain the number of milestones this method creates, we merged two cell clusters iteratively until the percentage of leaf nodes was below a certain cutoff, default at 25%.  This was then processed as described above.
+* **SLICER** Although this method returns a branch network and a global pseudotime, the method did not return a position of each cell on the individual branches. We therefore used the cell graph provided by the method to calculate the shortest paths between the start and end cells found by the method, and then used this graph as the backbone for all other cells, creating a local pseudotime for every cell within its branch. The output was then further processed as above.
+* **SLICE** As discussed in the vignette of SLICE, we ran principal curves one by one for every edge detected by SLICE. This local pseudotime was then processed as above.
+* **MFA** We used the branch assignment as state probabilities, which together with the global pseudotime were processed as described above.
 
 
 ### Prior information
 
 
-TODO: describe which prior information was given and how it was extracted.
+All evaluated methods required or could use one of 7 types of prior information. This prior information was extracted from the gold/silver standards as follows:
 
 
-## Benchmark
-### Pipeline
-* Look at dyneval methods to write this paragraph
-### Method execution
-* Look at dynmethods::execute_method to write this paragraph
-
-
-## Method quality control
-
-
-```{r}
-qc_references <- readRDS(derived_file("checks.rds", "4-method_characterisation"))$references %>% 
-  str_split("[, \n]+") %>% 
-  unlist() %>% 
-  unique() %>% 
-  discard(is.na) %>%
-  glue::collapse(., ";") %>%
-  paste0("[", ., "]")
-```
-
-
-
-
-We created a transparent scoring scheme to check the quality of each method (`r ref("stable", "qc_checks")`), based on several existing tool quality and programming guidelines in literature and online `r qc_references` . The goal of this quality control in the first place is to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed the certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of dataset on which the usefulness of the method was shown, and the scope of method evaluation in the paper.
-
-
-Each quality aspect received a weight by how frequently it was found in several papers and online sources which discuss tool quality (`r ref("table", "implementations")`). This was to make sure that more important aspect, such as the open source availability of the method, outweigh other aspects, such as the availability of a graphical user interface. For calculating the final score, we weighed each of the six categories equally.
+* **Start cells** The identity of one or more start cells. For both real and synthetic data, a cell was chosen which was the closest (in geodesic distance) from each milestone with only outgoing edges. For ties, we chose one random cell. For cyclic datasets, a random cell was chosen.
+* **End cells** The identity of one or more end cells. Similar as the start cells, but now for every state with only ingoing edges.
+* **# end states** Number of terminal states. Number of milestones with only ingoing edges.
+* **Grouping** For each cell a label to which state/cluster/branch it belongs. For real data, the states from the gold/silver standard. For synthetic data, each milestone was seen as one group, and cells were assigned to its closed milestone.
+* **# branches** Number of branches/intermediate states. For real data, the number of states in the gold/silver standard. For synthetic data, the number of milestones.
+* **Time course** For each cell a time point from which it was sampled. If available, directly extracted from the gold standard. For synthetic data: the simulation time.
 
 
 ## Real datasets
@@ -597,6 +609,49 @@ For each dataset we sampled the same number of cells as were present in the refe
 We used a standard single-cell RNA-seq preprocessing pipeline which applies parts of the scran and scater Bioconductor packages [@lun_stepbystepworkflowlowlevel_2016]. The advantages of this pipeline is that it works both with and without spike-ins, and includes a harsh cell filtering which looks at abnormalities in library sizes, mitochondrial gene expression, and number of genes expressed using median absolute deviations (set to 3). We required that a gene has to be expressed in at least 5% of the cells, and that it should have an average expression higher than 0.05. Furthermore, we used the pipeline to select the most highly variable genes, using a false discovery rate of 5% and a biological component higher than 0.5. As a final filter, we removed both all zero genes and cells until convergence.
 
 
+## Benchmark
+
+
+### Pipeline
+* Look at dyneval methods to write this paragraph
+
+
+### Method execution
+* Look at dynmethods::execute_method to write this paragraph
+
+
+### Effect of prior information
+
+
+To assess the effect of prior information on the performance of a method, we compared the performance of methods which do or do not require the prior information using a 
+
+
+### Effect of algorithm components
+To assess the effect of algorithm components on the performance of a method, we used (1) a two-tailed Mann–Whitney U test, as implemented in the `wilcox.test` R function, and (2) increase in node purity importance scores using random forest classification, as implemented in the R randomForest package, predicting whether a method scored better than the median score. To evaluate whether a method increased or decreased performance, we used the estimate of the location parameter of the Mann–Whitney U test. We only investigated algorithm components which were part of at least 4 different methods in our evaluation study.
+
+
+## Method quality control
+
+
+```{r}
+qc_references <- readRDS(derived_file("checks.rds", "4-method_characterisation"))$references %>% 
+  str_split("[, \n]+") %>% 
+  unlist() %>% 
+  unique() %>% 
+  discard(is.na) %>%
+  glue::collapse(., ";") %>%
+  paste0("[", ., "]")
+```
+
+
+
+
+We created a transparent scoring scheme to check the quality of each method (`r ref("stable", "qc_checks")`), based on several existing tool quality and programming guidelines in literature and online `r qc_references` . The goal of this quality control in the first place is to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed the certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of dataset on which the usefulness of the method was shown, and the scope of method evaluation in the paper.
+
+
+Each quality aspect received a weight by how frequently it was found in several papers and online sources which discuss tool quality (`r ref("table", "implementations")`). This was to make sure that more important aspect, such as the open source availability of the method, outweigh other aspects, such as the availability of a graphical user interface. For calculating the final score, we weighed each of the six categories equally.
+
+
 ## Evaluation metrics
 We used three different metrics to assess the performance of each TI method. The importance of using multiple metrics to compare complex models has been stated repeatedly REFS. Indeed, each of our metrics looks at the correspondence between prediction and gold standard in a different way: the correlation between geodesic distances assesses the overall ordering, the RF prediction error assesses the cell neighbourhood, and the edge flip score assesses the milestone network topology (`r ref("sfig", "score_aspects")`).
 
@@ -695,8 +750,9 @@ git2r::repository(".")
 This paragraph may be expanded
 Rephrase -_-
 Define in paragraph 1
-I would include a part for the method wrappers; that is the way that linear, cellcluster, cellgraph and generic TI's get translated to the probabilistic trajectory model
-This is complex though to put into this figure :p. Have a look at 4-method_characteristics/wrapping.svg I think it is the least crucial of all parts of the figure now, so.. But feel free to try it yourself :p
+WIP
+... wip ...
+mention timecourse prior
 Op zoek naar een betere formulering hiervoor, mischien:
 "In most cases, being able to detect a trajectory type leads to a better score on data containing this particular trajectory type"
 😉
@@ -704,7 +760,6 @@ For V2/3: we should check what happens if wrong or noise prior information is gi
 I wish we were writing V2 instead of this temporary, half-decent version :p
 In V2, "randomise" the prior information so that the positive effect of giving it to a method can be directly assessed, instead of this indirect evidence
 Should we create a separate github containing a readme, referencing to the google doc, for this?
-..
 TODO
 TODO
 to do: add metric figure
