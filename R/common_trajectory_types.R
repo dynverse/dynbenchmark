@@ -34,19 +34,19 @@ trajectory_type_edges_undirected_to_directed <- tibble(
 # TODO: the following prop_changes are incomplete!!
 trajectory_type_edges_directed <- tribble(
   ~to, ~from, ~prop_changes,
-  "bifurcation", "directed_linear", "",
+  "bifurcation", "directed_linear", "num_branch_nodes == 0",
   "bifurcation", "convergence", "",
   "convergence", "bifurcation", "",
-  "convergence", "directed_linear", "",
-  "multifurcation", "bifurcation", "",
-  "rooted_binary_tree", "bifurcation", "",
-  "rooted_tree", "multifurcation", "",
-  "rooted_tree", "rooted_binary_tree", "",
-  "directed_acyclic_graph", "rooted_tree", "",
-  "directed_acyclic_graph", "convergence", "",
-  "directed_graph", "directed_acyclic_graph", "",
-  "disconnected_directed_graph", "directed_graph", "",
-  "directed_graph", "directed_cycle", ""
+  "convergence", "directed_linear", "num_branch_nodes == 0",
+  "multifurcation", "bifurcation", "max_degree == 3",
+  "rooted_binary_tree", "bifurcation", "num_branch_nodes == 1",
+  "rooted_tree", "multifurcation", "num_branch_nodes == 1",
+  "rooted_tree", "rooted_binary_tree", "max_degree == 3",
+  "directed_acyclic_graph", "rooted_tree", "max_indegree == 1",
+  "directed_acyclic_graph", "convergence", c("max_branch_nodes == 1", "max_out_degree == 1", "max_degree == 3"),
+  "directed_graph", "directed_acyclic_graph", "num_cycles == 0",
+  "disconnected_directed_graph", "directed_graph", "num_components == 1",
+  "directed_graph", "directed_cycle", c("num_branch_nodes == 0", "num_cycles == 1")
 ) %>% mutate(prop_changes = as.list(prop_changes))
 
 ##  ............................................................................
@@ -180,3 +180,4 @@ simplify_trajectory_type <- function(trajectory_types_oi) {
 #' Simplified traj types
 #' @export
 trajectory_types_simplified <- trajectory_types %>% filter(directedness == "directed") %>% group_by(simplified) %>% filter(row_number() == n())
+
