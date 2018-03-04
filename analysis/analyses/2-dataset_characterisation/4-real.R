@@ -32,11 +32,11 @@ pie <- function(tasks=tasks_real, what = "technology") {
     fill_scale <- scale_fill_manual(values=technology_colors)
   } else if (what == "trajectory_type") {
     fill_scale <- scale_fill_manual(values=setNames(trajectory_types$background_color,trajectory_types$id))
-    pie_data <- pie_data %>% arrange(
-      -match(as.character(variable_of_interest), trajectory_types$id)
-    )
-    label <- "{n}"
-    text_position <- 0.9
+    # pie_data <- pie_data %>% arrange(
+    #   -match(as.character(variable_of_interest), trajectory_types$id)
+    # )
+    # label <- "{n}"
+    # text_position <- 0.9
   }
 
   # now calcualte positions

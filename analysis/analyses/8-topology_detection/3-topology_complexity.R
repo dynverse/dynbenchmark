@@ -116,7 +116,7 @@ trajectory_type_comparison <- milestone_networks %>%
   scale_y_discrete(label_long("trajectory_type_gold"), label=label_long) +
   theme(axis.text.x = element_text(angle=45, hjust=1)) +
   scale_color_identity() +
-  scale_fill_distiller("% cases", limits=c(0, 1), direction = 1, palette="Greys", label=scales::percent, breaks=c(0, 0.5, 1)) +
+  scale_fill_distiller("% datasets", limits=c(0, 1), direction = 1, palette="Greys", label=scales::percent, breaks=c(0, 0.5, 1)) +
   #coord_equal() +
   facet_grid(.~method_id, labeller=label_facet_methods) +
   theme(legend.position="top")
