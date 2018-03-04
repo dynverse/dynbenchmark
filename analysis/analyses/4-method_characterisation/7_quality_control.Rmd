@@ -18,7 +18,181 @@ experiment("4-method_characterisation")
 implementation_qc <- readRDS(derived_file("implementation_qc.rds"))
 implementations_evaluated <- readRDS(derived_file("implementations_evaluated.rds"))
 checks <- readRDS(derived_file("checks.rds"))
+
+implementation_order <- implementations_evaluated %>%
+  arrange(-qc_score) %>% 
+  pull(implementation_id)
+
+label_implementation <- function(implementation_id) {implementations_evaluated$implementation_name[match(implementation_id, implementations_evaluated$implementation_id)]}
 ```
+
+Calculate the overall qc scores for each implementation
+```{r}
+# set the ordering of implementation_ids to this ordering
+implementation_ordering_plot <- implementations_evaluated %>%
+  mutate(implementation_id = factor(implementation_id, implementation_order)) %>% 
+  ggplot(aes(implementation_id, qc_score)) +
+    geom_bar(aes(fill=qc_score), stat="identity") +
+    geom_text(aes(y=0.025, label=label_implementation(implementation_id), color=ifelse(qc_score > 0.5, "black", "white")), angle=90, hjust=0, size=5) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    scale_y_continuous(NULL, expand=c(0, 0), limits=c(0, 1)) +
+    scale_x_discrete(NULL, breaks=c(0, 100), expand=c(0, 0)) +
+    viridis::scale_fill_viridis(label_long("qc_score"), option="D", guide=guide_colorbar(title.position = "top", title.hjust=0.5, barwidth = unit(2, "inches"))) +
+    scale_color_identity() +
+    annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf)+
+    theme(legend.position="top")
+
+implementation_ordering_plot
+implementation_ordering_plot %>% write_rds(figure_file("implementation_qc_ordering.rds"))
+```
+
+```{r, fig.width=10, fig.height=12}
+qc_checks <- implementation_qc %>%
+  filter(implementation_id == "scorpius") %>%
+  group_by(category) %>% 
+  mutate(normalised_weight = weight/sum(weight))
+
+aspect_position <- qc_checks %>% 
+  arrange(aspect_id) %>%
+  group_by(aspect_id) %>%
+  summarise(
+    aspect_width = sum(item_weight * normalised_weight),
+    name = first(name)
+  ) %>%
+  mutate(
+    aspect_end = cumsum(aspect_width),
+    aspect_start = lag(aspect_end, 1, default=0),
+    aspect_mid = aspect_start + (aspect_end - aspect_start)/2
+  )
+
+check_position <- qc_checks %>%
+  arrange(aspect_id, check_id) %>%
+  group_by(check_id) %>%
+  summarise(
+    check_width = item_weight * normalised_weight,
+    aspect_id = first(aspect_id)
+  ) %>%
+  left_join(aspect_position, by="aspect_id") %>%
+  group_by(aspect_id) %>%
+  mutate(
+    check_start = aspect_start + lag(cumsum(check_width), default=0),
+    check_end = aspect_start + cumsum(check_width)
+  )
+
+hline_check <- geom_hline(aes(yintercept=check_end), data=check_position, color="#444444", alpha=0.25)
+hline_aspect <- geom_hline(aes(yintercept=aspect_end), data=aspect_position, color="#444444")
+
+implementation_qc_checks <- implementation_qc %>% 
+  mutate(implementation_id = factor(implementation_id, implementation_order)) %>% 
+  left_join(check_position, by=c("check_id", "name", "aspect_id")) %>%
+  mutate(answer = ifelse(is.na(answer), 0, answer))
+
+check_heatmap_plot <- implementation_qc_checks %>% 
+  ggplot() +
+    geom_rect(aes(ymax=check_start, ymin=check_end, xmin=as.integer(implementation_id), xmax=as.integer(implementation_id) + 1, fill=category, alpha=answer)) +
+  hline_check + hline_aspect +
+    geom_vline(aes(xintercept = as.integer(implementation_id)), color="white", alpha=0.2) +
+    scale_y_reverse(NULL, breaks = aspect_position$aspect_mid, labels = aspect_position$name, expand = c(0, 0)) +
+    # scale_x_continuous("", breaks = seq_along(levels(implementation_qc_checks$implementation_id))+0.5, labels = label_implementation(levels(implementation_qc_checks$implementation_id)), expand = c(0, 0), position="right") +
+    scale_x_continuous("", breaks=NULL, expand = c(0, 0)) +
+    scale_fill_manual("Category", values=set_names(qc_categories$color, qc_categories$category), label=label_long, guide=guide_legend(ncol=2)) +
+    scale_alpha_continuous("Score", guide=guide_legend(ncol=5, label.position = "bottom")) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), axis.text.y = element_text(size=12), legend.position="bottom")
+
+check_heatmap_plot
+```
+
+```{r}
+check_scores <- implementation_qc_checks %>% group_by(check_id) %>% summarise(score = mean(answer))
+aspect_scores <- implementation_qc_checks %>% group_by(aspect_id) %>% summarise(score = mean(answer))
+
+check_difficulty_data <- checks %>% 
+  left_join(check_scores, "check_id") %>% 
+  left_join(check_position, "check_id")
+
+check_difficulty_heatmap <- check_difficulty_data %>% 
+  ggplot() + 
+    geom_rect(aes(ymin=check_start, ymax=check_end, xmin=0, xmax=1), fill="#DDDDDD") +
+    geom_rect(aes(ymin=check_start, ymax=check_end, xmin=0, xmax=1, fill=score)) +
+    ggrepel::geom_label_repel(
+      aes(
+        1, 
+        (check_end+check_start)/2,
+        label=label_wrap(item, 35)
+      ), 
+      nudge_x = 6, 
+      direction="y", 
+      data=check_difficulty_data %>% 
+        filter(score <= 0.5), 
+      size=5, 
+      lineheight=0.8, 
+      min.segment.length = 0
+    ) +
+    geom_segment(aes(x=0, xend=1, y=check_end, yend=check_end), data=check_position, color="#444444", alpha=0.25) +
+    geom_segment(aes(x=0, xend=1, y=aspect_end, yend=aspect_end), data=aspect_position, color="#444444") +
+    # hline_check + hline_aspect +
+    # scale_fill_manual(values=set_names(qc_categories$color, qc_categories$category)) +
+    # scale_fill_distiller("QC\ndifficulty", palette="Spectral", limits=c(0,1), breaks=c(0,0.5, 1), direction=1) +
+    scale_fill_gradientn("Average QC score across methods", colors = c("#9e0142", "#d53e4f", "#f46d43", "#fee08b", "#abdda4", "#1a9850"), limits=c(0,1), breaks=c(0,0.5, 1), guide=guide_colorbar(title.position = "bottom", title.hjust=0.5, barwidth = unit(2, "inches"))) +
+    # viridis::scale_fill_viridis("QC\ndifficulty", limits=c(0,1), breaks=c(0,0.5, 1)) +
+    scale_x_continuous(NULL, breaks=NULL, limits=c(0, 12), expand=c(0,0)) +
+    scale_y_reverse(NULL, breaks=NULL, expand=c(0,0)) +
+    annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf)+
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), legend.position = "bottom")
+  
+check_difficulty_heatmap
+```
+
+
+Combined plot
+```{r, fig.width=10, fig.height=12}
+empty_x <- theme(
+  axis.title.x=element_blank(),
+  axis.text.x=element_blank(),
+  axis.ticks.x=element_blank()
+)
+empty_y <- theme(
+  axis.title.y=element_blank(),
+  axis.text.y=element_blank(),
+  axis.ticks.y=element_blank(),
+  axis.line.y = element_blank()
+)
+empty_margin <- theme(plot.margin = margin(0.05, 0.05, 0.05, 0.05, unit="inches"))
+
+a <- cowplot::plot_grid(
+  implementation_ordering_plot + empty_margin,
+  NULL,
+  check_heatmap_plot + empty_margin, 
+  NULL,
+  nrow=2, ncol=2,
+  align = "v", 
+  axis = "rl", 
+  rel_heights = c(0.2, 0.8),
+  rel_widths = c(0.8, 0.3)#,
+  # labels = c("a", "", "b", "c")
+)
+a
+b <- cowplot::plot_grid(
+  NULL,
+  NULL,
+  check_heatmap_plot + empty_margin, 
+  check_difficulty_heatmap +empty_y + empty_margin,
+  nrow=2, ncol=2,
+  align = "h", 
+  axis = "bt", 
+  rel_heights = c(0.2, 0.8),
+  rel_widths = c(0.8, 0.3)#,
+  # labels = c("a", "", "b", "c")
+)
+b
+
+g <- ggdraw(b)+draw_plot(a)
+
+g
+
+g %>% save_plot(figure_file("implementation_qc_overview.svg"), ., base_width=15, base_height=18)
+```
+
 
 Table for the different checks
 ```{r, results="asis"}
@@ -109,16 +283,14 @@ Comparing qc and citations overtime
 g1 <- ggplot(implementations_evaluated, aes(date, qc_score)) +
     geom_smooth(span=2) +
     geom_point() +
-    ggrepel::geom_label_repel(aes(label = implementation_name)) +
-    cowplot::theme_cowplot() +
+    ggrepel::geom_text_repel(aes(label = label_implementation(implementation_id))) +
     labs(x = label_long("publication_date"), y = "QC score", title = "Code quality score over time")
 g1
 
 g2 <- ggplot(implementations_evaluated %>% mutate(Citations = ifelse(Citations == 0, 0.5, Citations)), aes(date, Citations)) +
     geom_smooth(span=2) +
     geom_point() +
-    ggrepel::geom_label_repel(aes(label = implementation_name)) +
-    cowplot::theme_cowplot() +
+    ggrepel::geom_text_repel(aes(label = label_implementation(implementation_id))) +
     scale_y_log10() +
     labs(x = "Time", y = "Citations", title = "Citations over time")
 g2
@@ -126,8 +298,7 @@ g2
 g3 <- ggplot(implementations_evaluated %>% mutate(Citations = ifelse(Citations == 0, 0.5, Citations)), aes(Citations, qc_score)) +
     geom_smooth(span=2) +
     geom_point() +
-    ggrepel::geom_label_repel(aes(label = implementation_name)) +
-    cowplot::theme_cowplot() +
+    ggrepel::geom_text_repel(aes(label = label_implementation(implementation_id))) +
     scale_x_log10() +
     labs(x = "Citations", y = "QC score", title = "QC score over # citations")
 g3
@@ -135,92 +306,6 @@ g3
 cowplot::plot_grid(g1, g3, g2, ncol=2, nrow=2, labels = "auto") %>% 
   save_plot(figure_file("qc_over_time.svg"), ., base_width=10, base_height=10)
 ```
-
-
-Calculate the overall qc scores for each implementation
-```{r}
-# set the ordering of implementation_ids to this ordering
-implementation_ordering_plot <- implementations_evaluated %>%
-  arrange(-qc_score) %>% 
-  mutate(implementation_name = factor(implementation_name, levels=implementation_name)) %>% 
-  ggplot(aes(implementation_name, qc_score)) +
-    geom_bar(aes(fill=qc_score), stat="identity") +
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
-    scale_y_continuous(expand=c(0, 0), limits=c(0, 1)) +
-    viridis::scale_fill_viridis(option="A", limits=c(0, 1)) +
-    labs(y=label_long("qc_score"), x=label_long("implementation_name")) +
-    theme(legend.position="none")
-
-implementation_ordering_plot
-implementation_ordering_plot %>% write_rds(figure_file("implementation_qc_ordering.rds"))
-```
-
-
-
-```{r, fig.width=10, fig.height=12}
-qc_checks <- implementation_qc %>%
-  filter(implementation_id == "scorpius") %>%
-  group_by(category) %>% 
-  mutate(normalised_weight = weight/sum(weight))
-
-aspect_position <- qc_checks %>% 
-  arrange(aspect_id) %>%
-  group_by(aspect_id) %>%
-  summarise(
-    aspect_width = sum(item_weight * normalised_weight),
-    name = first(name)
-  ) %>%
-  mutate(
-    aspect_end = cumsum(aspect_width),
-    aspect_start = lag(aspect_end, 1, default=0),
-    aspect_mid = aspect_start + (aspect_end - aspect_start)/2
-  )
-
-check_position <- qc_checks %>%
-  arrange(aspect_id, check_id) %>%
-  group_by(check_id) %>%
-  summarise(
-    check_width = item_weight * normalised_weight,
-    aspect_id = first(aspect_id)
-  ) %>%
-  left_join(aspect_position, by="aspect_id") %>%
-  group_by(aspect_id) %>%
-  mutate(
-    check_start = aspect_start + lag(cumsum(check_width), default=0),
-    check_end = aspect_start + cumsum(check_width)
-  )
-
-
-check_heatmap_plot <- implementation_qc %>%
-  left_join(check_position, by="check_id") %>%
-  mutate(implementation_id = factor(implementation_id)) %>%
-  mutate(answer = ifelse(is.na(answer), 0, answer)) %>%
-  ggplot() +
-    geom_rect(aes(xmax=check_start, xmin=check_end, ymin=as.integer(implementation_id), ymax=as.integer(implementation_id) + 1, fill=category, alpha=answer)) +
-    geom_vline(aes(xintercept=check_end), data=check_position, color="#444444", alpha=0.25) +
-    geom_vline(aes(xintercept=aspect_end), data=aspect_position, color="#444444") +
-    scale_x_reverse("Check", breaks = aspect_position$aspect_mid, labels = aspect_position$name, expand = c(0, 0)) +
-    scale_y_continuous("implementation", breaks = seq_along(levels(implementation_qc$implementation_id))+0.5, labels = levels(implementation_qc$implementation_id), expand = c(0, 0)) +
-    scale_fill_manual(values=set_names(qc_categories$color, qc_categories$category)) +
-    coord_flip() +
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
-
-check_heatmap_plot
-```
-
-Combined plot
-```{r, fig.width=10, fig.height=12}
-empty_x <- theme(
-  axis.title.x=element_blank(),
-  axis.text.x=element_blank(),
-  axis.ticks.x=element_blank()
-)
-
-implementation_qc_check_plot <- cowplot::plot_grid(implementation_ordering_plot + empty_x, check_heatmap_plot, nrow=2, align = "v", axis = "rl", rel_heights = c(0.2, 0.9))
-
-implementation_qc_check_plot %>% saveRDS(figure_file("implementation_qc_check.rds"))
-```
-
 
 ## Order checks
 
