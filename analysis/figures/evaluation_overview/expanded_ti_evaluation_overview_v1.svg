@@ -11,9 +11,9 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="198.83754mm"
+   width="119.46252mm"
    height="108.87917mm"
-   viewBox="0 0 198.83753 108.87915"
+   viewBox="0 0 119.46251 108.87915"
    version="1.1"
    id="svg16049"
    sodipodi:docname="expanded_ti_evaluation_overview_v1.svg"
@@ -1470,7 +1470,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="2.0127832"
      inkscape:cx="407.04666"
-     inkscape:cy="320.06377"
+     inkscape:cy="320.06379"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -1490,8 +1490,8 @@
     <inkscape:grid
        type="xygrid"
        id="grid67483"
-       originx="-155.90413"
-       originy="-16.997927" />
+       originx="-155.90411"
+       originy="-16.997916" />
   </sodipodi:namedview>
   <metadata
      id="metadata16046">
@@ -2492,5 +2492,37 @@
        height="10.583331"
        x="294.10364"
        y="86.072716" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="125.44006"
+       y="31.287483"
+       id="text4070"><tspan
+         sodipodi:role="line"
+         id="tspan4068"
+         x="125.44006"
+         y="31.287483"
+         style="stroke-width:0.26458332">Large figure for</tspan><tspan
+         sodipodi:role="line"
+         x="125.44006"
+         y="44.516651"
+         style="stroke-width:0.26458332"
+         id="tspan4072">Supplementary</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="246.50687"
+       y="31.287483"
+       id="text4076"><tspan
+         sodipodi:role="line"
+         id="tspan4074"
+         x="246.50687"
+         y="31.287483"
+         style="stroke-width:0.26458332">Small figure</tspan><tspan
+         sodipodi:role="line"
+         x="246.50687"
+         y="44.516651"
+         style="stroke-width:0.26458332"
+         id="tspan4078">for Figure 1</tspan></text>
   </g>
 </svg>
