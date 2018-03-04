@@ -8,6 +8,7 @@ implementation_components <- read_rds(derived_file("implementation_components.rd
 methods <- read_rds(derived_file("methods.rds", experiment_id = "4-method_characterisation"))
 method_components <- implementation_components %>% left_join(methods %>% select(method_id, implementation_id)) %>% drop_na() %>% select(-implementation_id)
 component_categories <- read_rds(derived_file("component_categories.rds", experiment_id = "4-method_characterisation"))
+component_category_colors <- read_rds(derived_file("component_category_colors.rds", experiment_id = "4-method_characterisation"))
 
 #   ____________________________________________________________________________
 #   Component importance                                                    ####
@@ -85,28 +86,49 @@ components$inc_node_purity <- importances %>% slice(match(components$component_i
 
 ##  ............................................................................
 ##  Table                                                                   ####
+wrap_pbox <- function(x, width=20, box_width="4cm") {
+  paste0("\\pbox{", box_width, "}{", label_wrap(x, width, "\\\\[-0.5em]"), "}")
+}
 library(kableExtra)
 table <- map(c("latex", "html"), function(format) {
-  components %>%
+  components_data <- components %>%
+    left_join(component_categories, "component_id") %>%
     arrange(q_value) %>%
     mutate(
+      category = cell_spec(
+        category,
+        format,
+        color = component_category_colors[category]
+      ),
       q_value = cell_spec(
         round(q_value, 5),
-        background = spec_color(p_value,option="viridis",direction=-1)
+        format,
+        background = spec_color(p_value,option="viridis",direction=-1),
+        color = ifelse(p_value < mean(inc_node_purity), "black", "white")
       ),
       inc_node_purity = cell_spec(
         round(inc_node_purity, 3),
-        background = spec_color(inc_node_purity,option="magma",direction=1)
+        format,
+        background = spec_color(inc_node_purity,option="magma",direction=1),
+        color = ifelse(inc_node_purity > mean(inc_node_purity), "black", "white")
       ),
       effect = cell_spec(
-        ifelse(difference > 0, "↗ Higher performance", "↘ Lower performance"),
-        color = ifelse(difference > 0, "darkred", "darkblue")
+        ifelse(difference > 0, "Higher performance", "Lower performance"),
+        format,
+        color = ifelse(difference > 0, "#800000", "#000058")
       ),
       methods = cell_spec(
-        map(method_ids, ~glue::collapse(setNames(methods$method_name, methods$method_id)[.], ", "))
+        map(method_ids, ~glue::collapse(setNames(methods$method_name, methods$method_id)[.], ", ")),
+        format
       )
     ) %>%
-    select(component_id, q_value, inc_node_purity, effect, methods) %>%
+    select(component_id, q_value, inc_node_purity, effect, methods, category)
+
+  if(format == "latex") {
+    components_data$methods <- map_chr(components_data$methods, wrap_pbox, width=20, box_width="20cm")
+  }
+
+  components_data %>%
     rename_all(label_long) %>%
     knitr::kable(format, escape=F) %>%
     kable_styling(bootstrap_options = "striped", latex_options = c("scale_down"))
