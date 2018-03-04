@@ -2,7 +2,7 @@ library(dynalysis)
 library(tidyverse)
 library(dynplot)
 
-experiment("5-optimise_parameters/9-main_figure")
+experiment("9-main_figure")
 
 list2env(read_rds(result_file("aggregated_data.rds", "9-main_figure")), environment())
 
