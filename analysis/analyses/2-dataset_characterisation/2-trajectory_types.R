@@ -50,7 +50,7 @@ trajectory_type_tree_changes_individual <- map(c("undirected", "directed"), func
     ggrepel::geom_label_repel(aes(x=x+(xend-x)/2, y = y+(yend - y)/2, label=label_prop_changes(prop_changes)), data = get_edges(), min.segment.length=Inf, force=0.1) +
     scale_fill_manual(values=set_names(trajectory_types$color, trajectory_types$id)) +
     theme_graph() +
-    theme(legend.position="none") +
+    theme(legend.position="none", plot.title=element_text(family="Open Sans", hjust=0.5)) +
     scale_x_continuous(expand=c(0.2, 0.2)) +
     ggtitle(label_long(directedness))
   trajectory_type_tree_changes
@@ -69,7 +69,7 @@ trajectory_type_tree_overall <- trajectory_type_tree_data %>%
   ggraph(layout = "kk") +
   geom_edge_link(aes(edge_linetype = directed_change)) +
   geom_edge_link(aes(xend = x+(xend-x)/2, yend = y+(yend - y)/2, edge_linetype = directed_change), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
-  geom_node_label(aes(label=label_long(name) %>% gsub(" ", "\n", .), fill=name)) +
+  geom_node_label(aes(label=label_long(name) %>% gsub(" ", "\n", .), fill=name), color="white") +
   theme_graph() +
   theme(legend.position="top") +
   scale_x_continuous(expand=c(0.2, 0.2)) +
@@ -89,4 +89,4 @@ less_complex_annotation <- ggplot() +
 
 trajectory_type_trees <- cowplot::plot_grid(trajectory_type_tree_changes, trajectory_type_tree_overall, ncol=1, labels="auto")
 trajectory_type_trees
-save_plot(figure_file("trajectory_type_trees.svg"), trajectory_type_trees, base_width=15, base_height=15)
+save_plot(figure_file("trajectory_type_trees.svg"), trajectory_type_trees, base_width=15, base_height=18)
