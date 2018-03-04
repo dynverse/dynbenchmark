@@ -89,4 +89,4 @@ less_complex_annotation <- ggplot() +
 
 trajectory_type_trees <- cowplot::plot_grid(trajectory_type_tree_changes, trajectory_type_tree_overall, ncol=1, labels="auto")
 trajectory_type_trees
-save_plot(figure_file("trajectory_type_trees.svg"), trajectory_type_trees, base_width=15, base_height=10)
+save_plot(figure_file("trajectory_type_trees.svg"), trajectory_type_trees, base_width=15, base_height=15)
