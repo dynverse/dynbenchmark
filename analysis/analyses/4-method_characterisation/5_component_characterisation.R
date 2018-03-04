@@ -115,7 +115,7 @@ implementation_components_categories_plot <- bind_rows(
   mutate(included = fct_inorder(included)) %>%
   ggplot(aes(1, n)) +
     geom_bar(aes(fill=included), stat="identity") +
-    geom_text(aes(label=n, y=n_implementations - n/2), fill=NA, category_counts) +
+    geom_text(aes(label=n, y=n_implementations - 4), fill=NA, category_counts, size=5) +
     facet_grid(.~category, labeller=label_facet()) +
     scale_fill_manual(values=component_category_colors %>% c(unknown="grey")) +
     coord_polar("y") +
@@ -129,9 +129,9 @@ implementation_components_categories_plot
 ##  ............................................................................
 ##  implementation components plot                                                  ####
 implementation_components_plot <-
-  cowplot::plot_grid(implementation_components_wordcloud_plot, implementation_components_ordering_plot) %>%
-  cowplot::plot_grid(., implementation_components_categories_plot, ncol=1, rel_heights = c(0.6, 0.4))
+  cowplot::plot_grid(implementation_components_wordcloud_plot, implementation_components_ordering_plot, rel_widths = c(0.6, 0.4), labels="auto") %>%
+  cowplot::plot_grid(., implementation_components_categories_plot, ncol=1, rel_heights = c(0.6, 0.4), labels = c("", "c"))
 implementation_components_plot
 
-save_plot(figure_file("implementation_components.svg"), implementation_components_plot, base_width=15, base_height=7.5)
+save_plot(figure_file("implementation_components.svg"), implementation_components_plot, base_width=15, base_height=12)
 
