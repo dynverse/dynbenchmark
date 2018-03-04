@@ -53910,8 +53910,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="16"
-     inkscape:cx="204.5515"
-     inkscape:cy="425.7949"
+     inkscape:cx="238.87378"
+     inkscape:cy="405.52745"
      inkscape:document-units="mm"
      inkscape:current-layer="g29643"
      showgrid="false"
@@ -55231,7 +55231,7 @@
            sodipodi:role="line">gene regulation</tspan></text>
       <path
          style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:url(#linearGradient1290);stroke-width:0.40000001;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker75821-6);paint-order:normal"
-         d="m -150.85291,67.65562 c 0,0.959115 0,1.768814 0,2.612335 0,0.778795 0,1.703671 0,2.679322"
+         d="m -150.85291,67.65562 c 0.008,0.520898 0,2.612335 0,2.612335 v 2.679322"
          id="path73679-6"
          inkscape:connector-curvature="0"
          sodipodi:nodetypes="csc" />
@@ -55513,7 +55513,7 @@
            y="440.11172"
            style="text-align:center;text-anchor:middle;fill:none;stroke:#000000;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10" /></flowRegion><flowPara
          id="flowPara77886"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:center;text-anchor:middle">How many edges need to be added or removed in order to transform one topology into another?</flowPara></flowRoot>    <flowRoot
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:center;text-anchor:middle" /></flowRoot>    <flowRoot
        transform="matrix(0.26458333,0,0,0.26458333,-128.11772,41.439488)"
        style="font-style:normal;font-weight:normal;font-size:9.33333302px;line-height:1.25;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;display:inline;fill:#000000;fill-opacity:1;stroke:none"
        id="flowRoot77905"
@@ -55527,9 +55527,7 @@
            width="140.36078"
            id="rect77899" /></flowRegion><flowPara
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:center;text-anchor:middle"
-         id="flowPara77915">Correlation of shortest path</flowPara><flowPara
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:center;text-anchor:middle"
-         id="flowPara87061">distances between cells</flowPara></flowRoot>    <flowRoot
+         id="flowPara87061" /></flowRoot>    <flowRoot
        xml:space="preserve"
        id="flowRoot77913"
        style="font-style:normal;font-weight:normal;font-size:9.33333302px;line-height:1.25;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;display:inline;fill:#000000;fill-opacity:1;stroke:none"
@@ -55543,9 +55541,7 @@
            y="440.11172"
            style="text-align:center;text-anchor:middle;fill:none;stroke:#000000;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10" /></flowRegion><flowPara
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:center;text-anchor:middle"
-         id="flowPara77939">Predict cell positions using</flowPara><flowPara
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:center;text-anchor:middle"
-         id="flowPara87059">a regression model</flowPara></flowRoot>    <text
+         id="flowPara87059" /></flowRoot>    <text
        id="text33997"
        y="122.91987"
        x="-167.81206"
@@ -56838,10 +56834,8 @@
            height="39.774784"
            width="123.21336"
            id="rect50798" /></flowRegion><flowPara
-         id="flowPara50804"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:center;text-anchor:middle">Train regression model to predict X and Y from A,B,C,D</flowPara><flowPara
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:center;text-anchor:middle"
-         id="flowPara50810">and calculate out of bag MSE</flowPara></flowRoot>    <g
+         id="flowPara50810" /></flowRoot>    <g
        id="g62473"
        transform="translate(0,2.9059754)">
       <g
@@ -57199,5 +57193,84 @@
          d="m -172.36799,158.76377 c 1.45731,0 1.86456,0.71812 3.03386,3.05673"
          style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker57721);paint-order:normal" />
     </g>
+    <text
+       id="text64587"
+       y="131.1925"
+       x="-215.93433"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;line-height:125%;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';stroke-width:0.26458332px"
+         y="131.1925"
+         x="-215.93433"
+         id="tspan64585"
+         sodipodi:role="line">Correlation of shortest path</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';stroke-width:0.26458332px"
+         y="134.27931"
+         x="-215.93433"
+         sodipodi:role="line"
+         id="tspan64591">distances between cells</tspan></text>
+    <text
+       id="text64595"
+       y="167.71638"
+       x="-167.5741"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;line-height:125%;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';stroke-width:0.26458332px"
+         y="167.71638"
+         x="-167.23166"
+         id="tspan64593"
+         sodipodi:role="line">Train regression model to </tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';stroke-width:0.26458332px"
+         y="170.80319"
+         x="-167.5741"
+         sodipodi:role="line"
+         id="tspan64605">predict X and Y from A,B,C,D</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';stroke-width:0.26458332px"
+         y="173.89"
+         x="-167.5741"
+         sodipodi:role="line"
+         id="tspan64603">and calculate out of bag MSE</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;line-height:125%;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-167.5741"
+       y="131.1925"
+       id="text64599"><tspan
+         sodipodi:role="line"
+         id="tspan64597"
+         x="-167.5741"
+         y="131.1925"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';stroke-width:0.26458332px">Predict cell positions using</tspan><tspan
+         sodipodi:role="line"
+         x="-167.5741"
+         y="134.27931"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';stroke-width:0.26458332px"
+         id="tspan64609">a regression model</tspan></text>
+    <text
+       id="text64615"
+       y="131.1925"
+       x="-119.74721"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;line-height:125%;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         id="tspan64613"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';stroke-width:0.26458332px"
+         y="131.1925"
+         x="-119.40476"
+         sodipodi:role="line">How many edges need to be </tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';stroke-width:0.26458332px"
+         y="134.27931"
+         x="-119.40476"
+         sodipodi:role="line"
+         id="tspan64621">added or removed in order to </tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';stroke-width:0.26458332px"
+         y="137.36612"
+         x="-119.40476"
+         sodipodi:role="line"
+         id="tspan64625">transform one topology </tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944451px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';stroke-width:0.26458332px"
+         y="140.45293"
+         x="-119.74721"
+         sodipodi:role="line"
+         id="tspan64627">into another?</tspan></text>
   </g>
 </svg>
