@@ -343,7 +343,8 @@ g1 <- ggplot(method_tib) +
   # CIRCLES
   ggforce::geom_circle(aes(x0 = x0, y0 = y0, fill = col, r = size), circle_data, size = .25) +
   # STARS
-  ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = col), data = pie_data %>% filter(), size = .25) +
+  ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = col), data = pie_data %>% filter(pct <= (1-1e-10)), size = .25) +
+  ggforce::geom_circle(aes(x0 = x0, y0 = y0, r = r, fill = col), data = pie_data %>% filter(pct > (1-1e-10)), size = .25) +
   # ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = NA), data = pie_data, size = .25) +
   # geom_segment(aes(x = x0, xend = x0, y = y0 + r0, yend = y0 + r), data = pie_data, size = .25) +
   # TEXT
@@ -369,17 +370,13 @@ g1 <- ggplot(method_tib) +
   geom_text(aes(14.5, legy_start - 1- y * .7, label = explanation), leg_prior, hjust = 0, vjust = 0) +
 
   # LEGEND: BENCHMARK
-  geom_text(aes(20, legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggforce::geom_circle(aes(x0 = 20.8 + x, y0 = legy_start - 2.3 + r, r = r, fill = colbench), size = .25, leg_circles) +
-  geom_text(aes(x = 20.8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% slice(c(1, n()))) +
+  geom_text(aes(20.5, legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  ggforce::geom_circle(aes(x0 = 21.3 + x, y0 = legy_start - 2.3 + r, r = r, fill = colbench), size = .25, leg_circles) +
+  geom_text(aes(x = 21.3 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% slice(c(1, n()))) +
   # ggimage::geom_subview(x = 22, y = legy_start - 2, subview = bench_leg, width = 3, height = 1) +
 
-  # LEGEND: EXECUTION TIME
-  geom_text(aes(25, legy_start - 1, label = "Execution time"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggimage::geom_subview(x = 27, y = legy_start - 2, subview = time_leg, width = 3, height = 1) +
-
   # LEGEND: PCT ERRORED
-  geom_text(aes(30, legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  geom_text(aes(27, legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
   ggforce::geom_arc_bar(aes(x0 = 30.5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = fill), size = .25, error_leg_df) +
   ggforce::geom_arc_bar(aes(x0 = 30.5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = NA), size = .25, error_leg_df) +
   geom_text(aes(x = 30.5 + lab_x + .5, y = legy_start - 2.5 + lab_y, label = label, vjust = vjust, hjust = hjust), error_leg_df) +
@@ -398,7 +395,7 @@ g1 <- ggplot(method_tib) +
 
 # WRITE FILES
 overview_fig_file <- figure_file("overview.svg")
-ggsave(overview_fig_file, g1, width = 17, height = 13.5)
+ggsave(overview_fig_file, g1, width = 17.5, height = 13.5)
 xml2::read_xml(overview_fig_file) %>% replace_svg(minis) %>% xml2::write_xml(overview_fig_file)
 
 
