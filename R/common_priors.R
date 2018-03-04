@@ -2,14 +2,14 @@
 #' @export
 priors <- tribble(
   ~prior_id,              ~prior_name,
-  "grouping_assignment",  "Groupings",
+  "grouping_assignment",  "Cell grouping",
   "marker_feature_ids",   "Marker genes",
   "end_cells",            "End cell(s)",
   "n_branches",           "# branches",
   "start_cells",          "Start cell(s)",
   "n_end_states",         "# end states",
   "time",                 "Time",
-  "timecourse",           "Timecourse"
+  "timecourse",           "Time course"
 )
 labels <- bind_rows(
   labels,
