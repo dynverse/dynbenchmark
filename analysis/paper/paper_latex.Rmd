@@ -143,6 +143,7 @@ In this study, we perform a comprehensive evaluation for `r sum(methods$evaluate
 
 # Results
 ## Evaluation overview
+WIP
 The inclusion criterion for TI methods was primarily based on their free availability, the presence of a programming interface, and the time they were published (`r ref("table", "implementations")`). Currently, only methods published before june 2017 are included in the evaluation, while more recent methods will be included in the next version. We characterised and benchmarked each method in six different ways: its detectable trajectory topology, its performance on real and synthetic datasets, its running time and scalability, its requirements for prior information, the underlying algorithm, and the quality of the tools. 
 
 
@@ -268,25 +269,41 @@ add_sfig({
 ### Algorithm components
 
 
-The underlying algorithm of each method can be divided into several steps, and these frequently contain soms clustering, dimensionality reduction and/or graph building. Interestingly, steps are frequently shared between different algorithms (`r ref("sfig", "method_components")`). MST in particular, used in the first single-cell RNA-seq trajectory inference methods [@trapnell_dynamicsregulatorscell_2014], is used in almost half of all methods we evaluated  (`r ref("sfig", "method_components", "b")`).
+The underlying algorithm of each method can be divided into several steps, and these frequently contain soms clustering, dimensionality reduction and/or graph building. Interestingly, steps are frequently shared between different algorithms (`r ref("sfig", "implementation_components")`). MST in particular, used in the first single-cell RNA-seq trajectory inference methods [@trapnell_dynamicsregulatorscell_2014], is used in almost half of all methods we evaluated  (`r ref("sfig", "implementation_components", "b")`).
 
 
 ```{r}
 add_sfig(
-figure_file("method_components.tmp.pdf","4-method_characterisation"), 
-"method_components", 
+figure_file("implementation_components.tmp.pdf","4-method_characterisation"), 
+"implementation_components", 
 "TI methods frequently share steps"
 )
 ```
 
 
-We assessed whether the components of an algorithm can be predictive for method performance, using both random forest regression and statistical testing. Methods which include principal curves and clustering (k-means in particular) tend to perform better
+We assessed whether the components of an algorithm can be predictive for method performance, using both random forest regression and statistical testing. Methods which include principal curves (which include Slingshot and SCORPIUS), k-means (which include Slingshot and several other top scoring methods) and some graph building (which include almost every top scoring method) tended to have a slightly higher performance (`r ref("sfig", "method_components_scores")` and `r ref("stable", "component_importance")`). On the other hand, methods using t-SNE and ICA for their dimensionality reduction were ranked lower, although this was not significant.
 
 
+```{r}
+add_sfig(
+figure_file("method_components_scores.tmp.pdf","6-developer_guidelines"), 
+"method_components_scores", 
+"Score of methods containing particular algorithmic components"
+)
+```
+
+
+```{r}
+add_stable(
+read_rds(figure_file("component_importance.rds","6-developer_guidelines"))[[params$table_format]], 
+"component_importance", 
+"Importance values for algorithmic components"
+)
+```
 ## Method quality control
 
 
-While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is also an important evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or which purpose(s) they serve (user friendliness, developer friendliness or good science). These categorisations can help current developers to improve their tool, and to guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
+While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is also an important evaluation metric, because good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or which purpose(s) they serve (user friendliness, developer friendliness or future proof). These categorisations can help current developers to improve their tool, and guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
 
 
 ```{r}
@@ -298,7 +315,7 @@ read_rds(figure_file("qc_checks.rds","4-method_characterisation"))[[params$table
 ```
 
 
-Most methods fulfill most of the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "results_overview", "b")`). Recent methods tend to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects are consistently lacking for the majority of the methods (`r ref("fig", "results_overview", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "implementation_qc_check")` and `r ref("fig", "results_overview", "c")`), notwithstanding several studies pinpointing these as good practices [@wilson_best_2014; @artaza_top10metrics_2016].
+We found that most methods fulfilled the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "results_overview", "b")`). Recent methods tended to have higher code quality (`r ref("sfig", "qc_over_time")`). However, several aspects were consistently lacking for the majority of the methods (`r ref("fig", "results_overview", "e")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas (`r ref("sfig", "implementation_qc_check")` and `r ref("fig", "results_overview", "c")`), notwithstanding several studies pinpointing these as good practices [@wilson_best_2014; @artaza_top10metrics_2016].
 
 
 ```{r}
@@ -308,6 +325,8 @@ figure_file("qc_over_time.tmp.pdf","4-method_characterisation"),
 "Quality control scores and number of citations over time"
 )
 ```
+
+
 ## Practical guidelines
 
 
@@ -695,6 +714,8 @@ git2r::repository(".")
 This paragraph may be expanded
 Rephrase -_-
 Define in paragraph 1
+WIP
+... wip ...
 I would include a part for the method wrappers; that is the way that linear, cellcluster, cellgraph and generic TI's get translated to the probabilistic trajectory model
 This is complex though to put into this figure :p. Have a look at 4-method_characteristics/wrapping.tmp.pdf I think it is the least crucial of all parts of the figure now, so.. But feel free to try it yourself :p
 Op zoek naar een betere formulering hiervoor, mischien:
