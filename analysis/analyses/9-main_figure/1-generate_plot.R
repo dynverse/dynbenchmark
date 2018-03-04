@@ -63,7 +63,9 @@ method_tib <- method_tib %>%
     trafo = str_replace(output_transformation, ":.*", ""),
     topinf_lab = c("free" = "free", "fixed" = "fixed", "parameter" = "param")[topology_inference_type],
     avg_time_lab = ifelse(time_method < 60, paste0(round(time_method), "s"), ifelse(time_method < 3600, paste0(round(time_method / 60), "m"), paste0(round(time_method / 3600), "h"))),
-    remove_results = pct_errored > .49
+    remove_results = pct_errored > .49,
+    pct_succeeded = 1 - pct_errored,
+    pct_errored_lab = paste0(round(pct_errored * 100), "%")
   ) %>%
   mutate_at(
     c(
@@ -85,13 +87,14 @@ method_tib <- method_tib %>%
     funs(sc = sc_fun, sc_col = colqc_fun)
   ) %>%
   mutate_at(
-    c("rank_time_method", "rank_time_method"), # need to mention it twice, other strange things happen :/
+    c("rank_time_method", "pct_succeeded"),
     funs(sc = sc_fun, sc_col = coltime_fun)
   ) %>%
   mutate(
     topinf_colour = topinf_colours[topology_inference_type],
     maxtraj_colour = maxtraj_colours[maximal_trajectory_types],
-    avg_time_lab_colour = ifelse(rank_time_method_sc < .75, "white", "black")
+    avg_time_lab_colour = ifelse(rank_time_method_sc < .75, "white", "black"),
+    pct_errored_lab_colour = ifelse(pct_succeeded < .75, "white", "black")
   )
 
 # AXIS INFO
@@ -127,7 +130,9 @@ axis <-
 
     "time",    "Average time",         0.5,   1,       T,           "rect",     F,               "rank_time_method_sc_col",                 "rank_time_method_sc",
     "timl",    "Average time label",    -1,   1,       F,           "text",     F,               "avg_time_lab_colour",                     "avg_time_lab",
-    "erro",    "% Errored",            0.1,   1,       T,           "pie",      F,               list(error_colours),                       list(c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic")),
+    "erpc",    "% Errored",            0.1,   1,       T,           "rect",     F,               "pct_succeeded_sc_col",                    "pct_succeeded_sc",
+    "erpl",    "% Errored label",       -1,   1,       F,           "text",     F,               "pct_errored_lab_colour",                  "pct_errored_lab",
+    "erro",    "Error reason",         0.1,   1,       T,           "pie",      F,               list(error_colours),                       list(c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic")),
 
     "qcsc",    "Score",                0.5,   4,       T,           "bar",      F,               "qc_score_sc_col",                         "qc_score_sc",
 
@@ -236,13 +241,15 @@ pie_data <- geom_data_processor(
       mutate(
         col = cols[piece],
         x0 = axis_l$x,
-        rad = value * 2 * pi,
+        pct = value / sum(value),
+        rad = pct * 2 * pi,
         rad_end = cumsum(rad),
         rad_start = rad_end - rad,
         r0 = 0,
         r = row_height / 2
       ) %>%
-      filter(rad_end != rad_start)
+      filter(rad_end != rad_start) %>%
+      ungroup()
   })
 
 
@@ -336,9 +343,9 @@ g1 <- ggplot(method_tib) +
   # CIRCLES
   ggforce::geom_circle(aes(x0 = x0, y0 = y0, fill = col, r = size), circle_data, size = .25) +
   # STARS
-  ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = col), data = pie_data, size = .25) +
-  ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = NA), data = pie_data, size = .25) +
-  geom_segment(aes(x = x0, xend = x0, y = y0 + r0, yend = y0 + r), data = pie_data, size = .25) +
+  ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = col), data = pie_data %>% filter(), size = .25) +
+  # ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = NA), data = pie_data, size = .25) +
+  # geom_segment(aes(x = x0, xend = x0, y = y0 + r0, yend = y0 + r), data = pie_data, size = .25) +
   # TEXT
   geom_text(aes(x = x, y = y, label = label, colour = col), data = text_data, vjust = .5, hjust = .5) +
 
