@@ -42,7 +42,7 @@ row_spacing <- .1
 
 method_tib <- method_tib %>%
   left_join(minis %>% select(maximal_trajectory_types = trajectory_type, maxtraj_replace_id = replace_id), by = "maximal_trajectory_types") %>%
-  left_join(minis %>% select(prior_mini_id, prior_replace_id = replace_id), by = "prior_mini_id") %>%
+  # left_join(minis %>% select(prior_mini_id, prior_replace_id = replace_id), by = "prior_mini_id") %>%
   mutate(
     method_name_f = factor(method_name, levels = method_ord)
   ) %>%
