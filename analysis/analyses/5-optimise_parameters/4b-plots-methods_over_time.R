@@ -13,11 +13,6 @@ methods <- read_rds(derived_file("methods_evaluated.rds", "4-method_characterisa
     date_preprint = as.POSIXct(Preprint),
     date_earliest = as.POSIXct(ifelse(is.na(date_preprint), as.integer(date_pub), as.integer(date_preprint)), origin = "1970-01-01")
   )
-methods <- map_df(seq_len(nrow(methods)), function(mi) {
-  msel <- methods %>% slice(mi)
-  method_ids <- str_split(msel$method_ids, ", ?")[[1]]
-  msel %>% crossing(method_id = method_ids)
-})
 
 overall_score <- outputs_summtrajtype_totalsx2 %>%
   filter(task_source == "mean", trajectory_type == "overall")
@@ -35,8 +30,8 @@ leading <- comb %>%
 g <- ggplot(comb, aes(date_earliest, harm_mean)) +
   geom_step(data = leading, colour = "red") +
   geom_point() +
-  geom_text(aes(label = method_short_name), nudge_y = .015) +
+  ggrepel::geom_text_repel(aes(label = set_names(methods$method_name, methods$method_id)[method_short_name]), nudge_y = .005) +
   labs(x = "Time", y = "Overall score") +
   cowplot::theme_cowplot()
-
-ggsave(figure_file("leading_method.pdf"), g, width = 10, height = 6)
+g
+ggsave(figure_file("leading_method.svg"), g, width = 10, height = 6)
