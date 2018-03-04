@@ -2,9 +2,6 @@ library(cowplot)
 library(tidyverse)
 library(dynalysis)
 
-library(tidygraph)
-library(ggraph)
-
 experiment("10-prior_information")
 
 scores <- c("harm_mean", "rank_correlation", "rank_edge_flip", "rank_rf_mse")
