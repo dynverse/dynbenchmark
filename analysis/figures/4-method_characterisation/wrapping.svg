@@ -26,16 +26,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.979899"
-     inkscape:cx="461.17681"
-     inkscape:cy="315.30993"
+     inkscape:cx="858.16676"
+     inkscape:cy="215.8099"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="3840"
-     inkscape:window-height="2031"
-     inkscape:window-x="0"
-     inkscape:window-y="55"
-     inkscape:window-maximized="1"
+     inkscape:window-width="2135"
+     inkscape:window-height="1309"
+     inkscape:window-x="2144"
+     inkscape:window-y="291"
+     inkscape:window-maximized="0"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
@@ -1096,7 +1096,7 @@
          y="220.6149"
          x="717.55048"
          sodipodi:role="line"
-         id="tspan8988">network of clusters</tspan></text>
+         id="tspan8988">cluster assignment</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:18.20875168px;line-height:1;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#2ecc40;fill-opacity:1;stroke:none;stroke-width:0.45521879"
@@ -1112,7 +1112,7 @@
          x="920.67676"
          y="220.6149"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.56700134px;line-height:1;font-family:'Open Sans';-inkscape-font-specification:'Open Sans';text-align:center;text-anchor:middle;fill:#2ecc40;fill-opacity:1;stroke-width:0.45521879"
-         id="tspan8992">project to nearest branch</tspan></text>
+         id="tspan8992">projection to nearest branch</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
