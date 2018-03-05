@@ -26,7 +26,6 @@ mainfont: Open Sans
 <!--
 Tips for working in this document:
 * Go to tools -> perferences and remove Use smart quotes
-* Add extra enters after every paragraph (this is markdown!)
 * Enable automatic zotero syncing to bibtex
 * Make sure to pin the zotero bibtex references after first using them!
 
@@ -82,15 +81,15 @@ We believe this to be the first comprehensive assessment of trajectory inference
 
 # Introduction
 <!-- §1: Single-cell omics and TI --->
-Single-cell -omics technologies now make it possible to model biological systems more accurately than ever before. One area where single-cell data has been particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation [@etzrodt_quantitativesinglecellapproaches_2014]. When cells are profiled from a population in which cells are at different unknown points in the dynamic process, this process  processes can be modelled using trajectory inference (TI) methods  [@cannoodt_computational_2016]. These methods computationally order the cells along a trajectory topology, which can be linear, bifurcating, or more complex. TI methods offer an unbiased and transcriptome-wide understanding of dynamic process [@tanay_scaling_2017], and thus allow the objective identification of new (primed) subsets of cells [@schlitzer_identificationcdc1cdc2committed_2015], delineation of a differentiation tree [@velten_humanhaematopoieticstem_2017; @see_mappinghumandc_2017] and inference of regulatory interaction responsible for a bifurcation [@aibar_scenicsinglecellregulatory_2017]. 
+Single-cell -omics technologies now make it possible to model biological systems more accurately than ever before. One area where single-cell data has been particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation [@etzrodt_quantitativesinglecellapproaches_2014]. Such dynamic processes can be computationally modelled using trajectory inference (TI) methods (also known as pseudemporal ordering methods), by profiling cells from a population in which the cells are at different unknown points in the dynamic process  [@cannoodt_computational_2016]. These methods computationally order the cells along a trajectory topology, which can be linear, bifurcating, or more complex tree or graph structures. Because TI methods offer an unbiased and transcriptome-wide understanding of a dynamic process [@tanay_scaling_2017],  they allow the objective identification of new (primed) subsets of cells [@schlitzer_identificationcdc1cdc2committed_2015], delineation of a differentiation tree [@velten_humanhaematopoieticstem_2017; @see_mappinghumandc_2017] and inference of regulatory interaction responsible for a one or more bifurcations [@aibar_scenicsinglecellregulatory_2017]. 
 Current applications of TI focus on specific subsets of cells, but ongoing efforts to construct transcriptomic catalogues of whole organisms [@regev_scienceforumhuman_2017; @han_mappingmousecell_2018] underline the urgency for accurate, scalable[@aibar_scenicsinglecellregulatory_2017; @angerer_singlecellsmake_2017] and user-friendly TI methods.
 
 
 ```{r}
 add_sfig(
-figure_file("methods_timeline.tmp.pdf", "4-method_characterisation"),
-"methods_over_time", 
-"New TI methods over time. **a** Number of methods published or in preprint. **b** Number of methods which can handle a particular type of trajectory."
+  figure_file("methods_timeline.tmp.pdf", "4-method_characterisation"),
+  "methods_over_time", 
+  "New TI methods over time. a) Number of methods published or in preprint. b) Number of methods which can handle a particular type of trajectory."
 )
 ```
 
@@ -101,9 +100,9 @@ A plethora of TI methods has been developed over the last years, and even more a
 
 ```{r, results='asis' }
 add_table(
-"implementations",
-read_rds(figure_file("implementations_table.rds", "4-method_characterisation")),
-"Overview of current trajectory inference methods, and whether they were included in this current evaluation study"
+  "implementations",
+  read_rds(figure_file("implementations_table.rds", "4-method_characterisation")),
+  "Overview of current trajectory inference methods, and whether they were included in this current evaluation study."
 )
 ```
 <!-- §3: Topology inference -->
@@ -122,9 +121,9 @@ A reductionist approach to characterising TI methods is dissecting it into a set
 
 ```{r}
 add_sfig(
-figure_file("implementation_components.tmp.pdf","4-method_characterisation"), 
-"implementation_components", 
-"TI methods frequently share steps"
+  figure_file("implementation_components.tmp.pdf","4-method_characterisation"), 
+  "implementation_components", 
+  "TI methods frequently share steps."
 )
 ```
 
@@ -145,25 +144,23 @@ In order to make gold standard trajectories and predicted trajectories directly 
 
 ```{r}
 add_sfig(
-        figure_file('dataset_characterisation.tmp.pdf', '2-dataset_characterisation'),
-"dataset_characterisation",  
-"Characteristics of the real datasets used for the evaluation"
+  figure_file('dataset_characterisation.tmp.pdf', '2-dataset_characterisation'),
+  "dataset_characterisation",  
+  "Characteristics of the real datasets used for the evaluation."
 )
 ```
 
 
 ```{r}
 add_sfig(
-        figure_file('synthetic_data_generation.tmp.pdf', "2-dataset_characterisation/3-synthetic"),
-"synthetic_data_generation",  "Synthetic data generation workflow"
+  figure_file('synthetic_data_generation.tmp.pdf', "2-dataset_characterisation/3-synthetic"),
+  "synthetic_data_generation",
+  "Synthetic data generation workflow."
 )
 ```
 
 
-We not only assessed the accuracy of the predictions made by a trajectory, but also investigated the quality of the method's implementation. We scored each method using a checklist of important scientific and software development practices, including software packaging, documentation, automated code testing, and peer review. This allowed us to rank each method based on its user friendliness, developer friendliness, and potential broad applicability on new unseen datasets.
-
-
-Using both the benchmark and quality control results, we will finally present a flow chart with practical guidelines for selecting the most appropriate TI method for a given use case.
+We not only assessed the accuracy of the predictions made by a trajectory, but also investigated the quality of the method's implementation. To do this, we scored each method using a checklist of important scientific and software development practices, including software packaging, documentation, automated code testing, and peer review. This allowed us to rank each method based on its user friendliness, developer friendliness, and potential broad applicability on new unseen datasets. Finally, using both the benchmark results and quality control, we finally present a flow chart with practical guidelines for selecting the most appropriate TI method for a given use case.
 
 
 `r anchor("fig", "evaluation_overview")`
@@ -173,12 +170,13 @@ Using both the benchmark and quality control results, we will finally present a 
 `r ref("fig", "evaluation_overview")` **An overview of several key aspects of the evaluation.** a) . b) In order to make any two trajectories comparable with one another, a common trajectory model was used to represent gold standard trajectories from the real and synthetic datasets, as well as any predicted trajectories from TI methods. c) Three metrics were defined in order to assess the similarity in cell ordering, cell neighbourhood, and topology, for any two trajectories.
 
 
-
-
 ```{r}
 add_sfig(
-        {figure_file('expanded_ti_evaluation_overview_v1.tmp.pdf', 'evaluation_overview')}, 
-"extended_evaluation_overview", "Extended overview ", 15, 7.5
+  figure_file('expanded_ti_evaluation_overview_v1.tmp.pdf', 'evaluation_overview'),
+  "extended_evaluation_overview",
+  "Extended overview", 
+  15, 
+  7.5
 )
 ```
 
@@ -201,30 +199,32 @@ Ordering all methods by their overall benchmarking score, we found that Slingsho
 
 
 <!-- §3: real versus synthetic -->
-A high correlation can be observed between results originating from real datasets versus those originating from synthetic datasets (`r ref("sfig", "real_synthetic_comparison")`). This confirms both the relevance of the synthetic data and the accuracy of the real datasets. 
+We observed a high correlation (0.7-0.9) between results originating from real datasets versus those originating from synthetic datasets (`r ref("sfig", "real_synthetic_comparison")`). This confirms both the relevance of the synthetic data and the accuracy of the gold standard in the real datasets. However, this correlation was lower for converging and multifurcating datasets, potentially because only a small number of real datasets were available which contain such topologies (`r ref("stable", "datasets")`).
 
 
 ```{r}
 add_sfig(
-figure_file('real_synthetic_comparison.tmp.pdf', "5-optimise_parameters/5-real_synthetic_comparison"), 
-"real_synthetic_comparison", 
-"Comparison between performance on real and synthetic datasets across trajectory types."
+  figure_file(
+    "real_synthetic_comparison.tmp.pdf",
+    "5-optimise_parameters/5-real_synthetic_comparison"
+  ), 
+  "real_synthetic_comparison", 
+  "Comparison between performance on real and synthetic datasets across trajectory types."
 )
 ```
 
 
 <!-- §4: Compare metrics -->
-As the different metrics were selected to assess the correctness of a trajectory in various approaches, it is unsurprising to observe differences in rankings of TI methods amongst the different metrics. While there is no direct link between the edge flip scores versus the correlation or RF MSE metric, methods that obtain a high correlation score also seed to obtain a higher RF MSE score (`r ref("sfig", "metric_comparison")`). 
-In addition, methods able to detect more complex trajectory types seem to obtain higher edge flip scores, in comparison to methods whose trajectory topology was fixed to a simple trajectory topology. This issue will also be investigated in more detail in Section SEC_TRAJTYPE.
+As the different metrics were selected to assess the correctness of a trajectory in various approaches, it is expected to observe differences in rankings of TI methods amongst the different metrics. While we saw no direct link between the edge flip scores versus the correlation or RF MSE metric, methods that obtain a high correlation score also tended to obtain higher RF MSE scores (`r ref("sfig", "metric_comparison")`). In addition, methods able to detect more complex trajectory types seemed to obtain higher edge flip scores, in comparison to methods whose trajectory topology was fixed to a simple trajectory topology. We will explore this issue in more detail in a further section SEC_TRAJTYPE.
 
 
 
 
 ```{r}
 add_sfig(
-figure_file('metrics_comparison.tmp.pdf', "5-optimise_parameters/7-metric_comparison"), 
-"metric_comparison", 
-"Comparison between the different metrics across trajectory types."
+  figure_file('metrics_comparison.tmp.pdf', "5-optimise_parameters/7-metric_comparison"), 
+  "metric_comparison", 
+  "Comparison between the different metrics across trajectory types."
 )
 ```
 
@@ -243,9 +243,9 @@ Comparing the maximum overall score over time, it is encouraging to see multiple
 
 ```{r}
 add_sfig(
-figure_file('leading_method.tmp.pdf', "9-main_figure"), 
-"leading_method", 
-"Method performance compared to the time the method was published. The red line indicates the optimal performance up to a point in time."
+  figure_file('leading_method.tmp.pdf', "9-main_figure"), 
+  "leading_method", 
+  "Method performance compared to the time the method was published. The red line indicates the optimal performance up to a point in time."
 )
 ```
 
@@ -261,21 +261,19 @@ To further investigate, we divided all methods in two groups: linear methods (re
 
 
 ```{r}
-add_sfig({
-        figure_file('trajtype_handle_comparison.tmp.pdf', "8-compare_topology")
-}, 
-"trajtype_handle_comparison", 
-""
+add_sfig(
+  figure_file('trajtype_handle_comparison.tmp.pdf', "8-compare_topology"), 
+  "trajtype_handle_comparison", 
+  "ADD CAPTION"
 )
 ```
 
 
 ```{r}
-add_sfig({
-        figure_file('linear_split_comparison.tmp.pdf', "8-compare_topology")
-}, 
-"linear_split_comparison", 
-"Linear methods have a higher correlation score on non-linear datasets. Methods were split in linear methods (those which can either only detect cyclic or linear trajectories) and non-linear methods. "
+add_sfig(
+  figure_file('linear_split_comparison.tmp.pdf', "8-compare_topology"), 
+  "linear_split_comparison", 
+  "Linear methods have a higher correlation score on non-linear datasets. Methods were split in linear methods (those which can either only detect cyclic or linear trajectories) and non-linear methods."
 )
 ```
 
@@ -285,15 +283,16 @@ Despite their similar overall performance, the topologies predicted by the top m
 
 `r anchor("fig", "topology_complexity_comparison")`
 ![](`r figure_file("topology_complexity_comparison.tmp.pdf","8-compare_topology")`)
-`r ref("fig", "topology_complexity_comparison")` 
+
+
+`r ref("fig", "topology_complexity_comparison")` **INSERT CAPTION.** Caption subdetails.
 
 
 ```{r}
-add_sfig({
-        figure_file('topology_sensitivity.tmp.pdf', "8-compare_topology")
-}, 
-"topology_sensitivity", 
-""
+add_sfig(
+  figure_file('topology_sensitivity.tmp.pdf', "8-compare_topology"), 
+  "topology_sensitivity", 
+  "ADD CAPTION"
 )
 ```
 
@@ -306,11 +305,10 @@ In the current version of the evaluation, we only provided prior information whe
 
 
 ```{r}
-add_sfig({
-        figure_file('required_priors_performance_comparison.tmp.pdf', "10-prior_information")
-}, 
-"required_priors_performance_comparison", 
-"Comparison of method performance "
+add_sfig(
+  figure_file('required_priors_performance_comparison.tmp.pdf', "10-prior_information"), 
+  "required_priors_performance_comparison", 
+  "Comparison of method performance."
 )
 ```
 
@@ -322,18 +320,21 @@ We assessed whether the components of an algorithm can be predictive for method 
 
 ```{r}
 add_sfig(
-figure_file("method_components_scores.tmp.pdf","6-developer_guidelines"), 
-"method_components_scores", 
-"Score of methods containing particular algorithmic components. NS: Not significant. *: "
+  figure_file("method_components_scores.tmp.pdf","6-developer_guidelines"), 
+  "method_components_scores", 
+  "Score of methods containing particular algorithmic components. NS: Not significant. *: "
 )
 ```
 
 
 ```{r}
 add_stable(
-read_rds(figure_file("component_importance.rds","6-developer_guidelines"))[[params$table_format]], 
-"component_importance", 
-"Importance values for algorithmic components"
+  read_rds(figure_file(
+    "component_importance.rds",
+    "6-developer_guidelines"
+  ))[[params$table_format]], 
+  "component_importance", 
+  "Importance values for algorithmic components."
 )
 ```
 
@@ -345,9 +346,12 @@ While not directly related to the accuracy of the inferred trajectory, the quali
 
 ```{r}
 add_stable(
-read_rds(figure_file("qc_checks.rds","4-method_characterisation"))[[params$table_format]], 
-"qc_checks", 
-"Scoring scheme for method quality control"
+  read_rds(figure_file(
+    "qc_checks.rds",
+    "4-method_characterisation"
+  ))[[params$table_format]], 
+  "qc_checks", 
+  "Scoring scheme for method quality control."
 )
 ```
 
@@ -357,14 +361,16 @@ We found that most methods fulfilled the basic criteria, such as free availabili
 
 `r anchor("fig", "implementation_qc_overview")`
 ![](`r figure_file("implementation_qc_overview.tmp.pdf","4-method_characterisation")`)
-`r ref("fig", "implementation_qc_overview")` Overview of the quality control results for every method. 
+
+
+`r ref("fig", "implementation_qc_overview")` **Overview of the quality control results for every method.** 
 
 
 ```{r}
 add_sfig(
-figure_file("qc_over_time.tmp.pdf","4-method_characterisation"), 
-"qc_over_time", 
-"Quality control scores and number of citations over time"
+  figure_file("qc_over_time.tmp.pdf","4-method_characterisation"), 
+  "qc_over_time", 
+  "Quality control scores and number of citations over time."
 )
 ```
 We observed no clear relation between method quality and method performance (`r ref("fig", "results_overview")` and `r ref("sfig", "qc_performance_comparison")`). We could also not find any quality aspect which was significantly associated with method performance.
@@ -372,9 +378,12 @@ We observed no clear relation between method quality and method performance (`r 
 
 ```{r}
 add_sfig(
-figure_file("qc_performance_comparison.tmp.pdf","5-optimise_parameters/6-qc_performance_comparison"), 
-"qc_performance_comparison", 
-"Comparison between method qc (x-axis) and method performance (y-axis)."
+  figure_file(
+    "qc_performance_comparison.tmp.pdf",
+    "5-optimise_parameters/6-qc_performance_comparison"
+  ), 
+  "qc_performance_comparison", 
+  "Comparison between method qc (x-axis) and method performance (y-axis)."
 )
 ```
 
@@ -417,17 +426,15 @@ The use of synthetic data to evaluate methods can be problematic, because the mo
 ## Trajectory inference methods
 
 ### Method selection
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods (`r ref("table", "implementations")`), by searching in literature for "trajectory inference" and "pseudotemporal ordering" and based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018; @gitter_singlecellpseudotimeoverviewalgorithms_2018]. We believe this to be the most complete list to data, but are welcome to include additional methods through e-mail or an issue on our github [https://github.com/dynverse/dynalysis/issues](github.com/dynverse/dynalysis/issues). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "implementations")`).
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods (`r ref("table", "implementations")`), by searching in literature for "trajectory inference" and "pseudotemporal ordering" and based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018; @gitter_singlecellpseudotimeoverviewalgorithms_2018]. We believe this to be the most complete list to data, but are welcome to include additional methods through e-mail or an issue on our github [https://github.com/dynverse/dynalysis/issues](github.com/dynverse/dynverse/issues). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "implementations")`).
 
 
 
 ### Method input
-
-
 As input, we provided for each method either the raw count data (after cell and gene filtering) or normalised expression values, based on the description in the methods documentation or from the study describing the method. Furthermore, when required, we also provided a maximum of 7 types of prior information. This prior information was extracted from the gold/silver standards as follows:
 
 
-* **Start cells** The identity of one or more start cells. For both real and synthetic data, a cell was chosen which was the closest (in geodesic distance) from each milestone with only outgoing edges. For ties, we chose one random cell. For cyclic datasets, a random cell was chosen.
+* **Start cells** The identity of one or more start cells. For both real and synthetic data, a cell was chosen which was the closest (in geodesic distance) from each milestone with only outgoing edges. For ties, one random cell was chosen. For cyclic datasets, a random cell was chosen.
 * **End cells** The identity of one or more end cells. Similar as the start cells, but now for every state with only ingoing edges.
 * **# end states** Number of terminal states. Number of milestones with only ingoing edges.
 * **Grouping** For each cell a label to which state/cluster/branch it belongs. For real data, the states from the gold/silver standard. For synthetic data, each milestone was seen as one group, and cells were assigned to its closed milestone.
@@ -444,8 +451,11 @@ Due to the absence of a common format for trajectory models, most methods return
 
 ```{r}
 add_sfig(
-        {figure_file('wrapping.tmp.pdf', '4-method_characterisation')},
-"wrapping",  "Our wrapping workflow", 15, 7.5
+  figure_file('wrapping.tmp.pdf', '4-method_characterisation'),
+  "wrapping", 
+  "Our wrapping workflow.", 
+  15, 
+  7.5
 )
 ```
 
@@ -468,8 +478,6 @@ conversion <- function(conversion_oi) {
    pull(text) %>% 
    list_sentence()
 }
-	
-
 ```
 
 
@@ -497,9 +505,9 @@ We gathered a list of real datasets by searching for "single-cell" at the Gene E
 
 ```{r}
 add_stable(
-read_rds(figure_file("datasets.rds","2-dataset_characterisation"))[[params$table_format]], 
-"datasets", 
-"Real datasets used in this study"
+  read_rds(figure_file("datasets.rds","2-dataset_characterisation"))[[params$table_format]], 
+  "datasets", 
+  "Real datasets used in this study."
 )
 ```
 
@@ -523,13 +531,15 @@ From these module networks we generated gene regulatory networks in two steps: g
 
 
 ```{r}
-add_sfig({
-read_rds(figure_file("modulenets.rds", experiment_id="2-dataset_characterisation/3-synthetic"))
-}, 
-"modulenets", 
-"Module networks, milestone networks and the module dynamics for each of the different types of synthetic data", 
-15, 
-5
+add_sfig(
+  read_rds(figure_file(
+    "modulenets.rds",
+     experiment_id = "2-dataset_characterisation/3-synthetic"
+   )), 
+  "modulenets", 
+  "Module networks, milestone networks and the module dynamics for each of the different types of synthetic data", 
+  15, 
+  5
 )
 ```
 
@@ -608,9 +618,12 @@ Similar to [@schaffter_genenetweaversilicobenchmark_2011], we sample the differe
 
 ```{r}
 add_stable(
-read_rds(figure_file("samplers.rds","2-dataset_characterisation/3-synthetic"))[[params$table_format]], 
-"samplers", 
-"Distributions from which each parameter in the thermodynamic model was sampled"
+  read_rds(figure_file(
+    "samplers.rds",
+    "2-dataset_characterisation/3-synthetic")
+  )[[params$table_format]], 
+  "samplers", 
+  "Distributions from which each parameter in the thermodynamic model was sampled."
 )
 ```
 
@@ -622,14 +635,14 @@ These SDEs were simulated using the Euler–Maruyama approximation, with time-st
 ### Simulation of the single-cell RNA-seq experiment
 
 
-For each dataset we sampled the same number of cells as were present in the reference real dataset, limited to the simulation steps after burn-in. Next, we used the Splatter package [@zappia_splattersimulationsinglecell_2017] to estimate the different characteristics of a real dataset, such as the distributions of average gene expression, library sizes and dropout probabilities. We used Splatter to simulate the expression levels $\lambda_{i,j}$ of housekeeping genes $i$ (to match the number of genes in the reference dataset) in every cell $j$. These were combined with the expression levels of the genes simulated within a trajectory. Next, true counts were simulated using $Y'_{i,j} \sim \text{Poi}(\lambda_{i,j})$. Finally, we simulated dropouts by setting true counts to zero by sampling from a Bernouilli distribution using a dropout probability $\pi^D_{i,j} =\frac{1}{1+e^{-k(\text{ln}(\lambda_{i,j})-x_0)}}$.
+For each dataset we sampled the same number of cells as were present in the reference real dataset, limited to the simulation steps after burn-in. Next, we used the Splatter package [@zappia_splattersimulationsinglecell_2017] to estimate the different characteristics of a real dataset, such as the distributions of average gene expression, library sizes and dropout probabilities. We used Splatter to simulate the expression levels $\lambda_{i,j}$ of housekeeping genes $i$ (to match the number of genes in the reference dataset) in every cell $j$. These were combined with the expression levels of the genes simulated within a trajectory. Next, true counts were simulated using $Y'_{i,j} \sim \text{Poi}(\lambda_{i,j})$. Finally, we simulated dropouts by setting true counts to zero by sampling from a Bernoulli distribution using a dropout probability $\pi^D_{i,j} =\frac{1}{1+e^{-k(\text{ln}(\lambda_{i,j})-x_0)}}$.
 
 
 
 ### Gold standard extraction
 
 
-Because each cellular simulations follows the trajectory it its own speed, knowing the exact position of a cell within the trajectory toplogy is not straightforward. Furthermore, the speed by which simulated cells made a decision between two or more alternative paths was highly variable. To estimate a cell's position during a simulation within the trajectory topology, we therefore used the known progression of the modules, given in `r ref("sfig", "modulenets", "c")`,  as a backbone. We smoothed the expression in each simulation using a rolling mean with a window of 50 time steps, and then calculated the average module expression along the simulation. We used dynamic time warping, implemented in the dtw R package [@giorgino_computingvisualizingdynamic_2009; @tormene_matchingincompletetime_2009], with an open end to align a simulation to all possible module progressions, and then picked the alignment which minimised the normalised distance between the simulation and the backbone. In case of cyclical trajectory topologies, the number of possible milestones a backbone could progress through was limited to 20.
+Because each cellular simulations follows the trajectory it its own speed, knowing the exact position of a cell within the trajectory topology is not straightforward. Furthermore, the speed by which simulated cells made a decision between two or more alternative paths was highly variable. To estimate a cell's position during a simulation within the trajectory topology, we therefore used the known progression of the modules, given in `r ref("sfig", "modulenets", "c")`,  as a backbone. We smoothed the expression in each simulation using a rolling mean with a window of 50 time steps, and then calculated the average module expression along the simulation. We used dynamic time warping, implemented in the dtw R package [@giorgino_computingvisualizingdynamic_2009; @tormene_matchingincompletetime_2009], with an open end to align a simulation to all possible module progressions, and then picked the alignment which minimised the normalised distance between the simulation and the backbone. In case of cyclical trajectory topologies, the number of possible milestones a backbone could progress through was limited to 20.
 
 
 
@@ -644,12 +657,14 @@ We used three different metrics to assess the performance of each TI method (`r 
 
 ```{r}
 add_sfig({
-read_rds(figure_file("score_aspects.rds", experiment_id="3-score_rules/5-score_aspects"))
-}, 
-"score_aspects", 
-"Different scores assess different aspects of the correspondence between a prediction and gold standard trajectory.", 
-15, 
-8
+  read_rds(figure_file(
+    "score_aspects.rds", 
+    experiment_id="3-score_rules/5-score_aspects"))
+  }, 
+  "score_aspects", 
+  "Different scores assess different aspects of the correspondence between a prediction and gold standard trajectory.",
+  15, 
+  8
 )
 ```
 
@@ -682,17 +697,16 @@ Although the correlation between geodesic distances directly assesses the positi
 ### Edge flip score
 
 
-As a third independent score, we assessed the similarity between the milestone network topology. We first simplified each network, by merging consecutive linear edges into one edge, by adding new milestones within self loops such that A->A would be converted A->B->C->D, by adding an intermediate node to linear networks. Because we are interested , the network was made undirected. Next, we define the edge flip score as the minimal number of edges which should be added or removed to convert one network into the other, divided by the total number of edges in both networks. This problem is equivalent to the maximum common edge subgraph problem, a known NP-hard problem with no scalable solutions [@bahiense_maximumcommonedge_2012]. We implemented a branch & bound approach for this problem, by first enumerating all possible edge additions and removals with the minimal number of edges (the edge difference between the two networks) and if none of the new networks was isomorphic, try out all solutions with an additional two edge changes. To further limit the search space, we make sure the degree distributions between the two networks are similar, before assessing whether the two networks are isomorphic using the BLISS algorithm [@junttila_engineeringefficientcanonical_2007], as implemented in the R *igraph* package.
+As a third independent score, we assessed the similarity between the milestone network topology. We first simplified each network, by merging consecutive linear edges into one edge, by adding new milestones within self loops such that $A \rightarrow A$ would be converted $A \rightarrow B \rightarrow C \rightarrow D$, by adding an intermediate node to linear networks. Because we are interested , the network was made undirected. Next, we define the edge flip score as the minimal number of edges which should be added or removed to convert one network into the other, divided by the total number of edges in both networks. This problem is equivalent to the maximum common edge subgraph problem, a known NP-hard problem with no scalable solutions [@bahiense_maximumcommonedge_2012]. We implemented a branch & bound approach for this problem, by first enumerating all possible edge additions and removals with the minimal number of edges (the edge difference between the two networks) and if none of the new networks was isomorphic, try out all solutions with an additional two edge changes. To further limit the search space, we make sure the degree distributions between the two networks are similar, before assessing whether the two networks are isomorphic using the BLISS algorithm [@junttila_engineeringefficientcanonical_2007], as implemented in the R *igraph* package.
 
 
 ```{r}
-add_sfig({
-figure_file("edge_flip_comparison.tmp.pdf", experiment_id="3-score_rules/4-edge_flip")
-}, 
-"edge_flip_comparison", 
-paste0("Edge flip score values for common trajectory topologies, defined in ", ref("sfig", "modulenets")), 
-15, 
-5
+add_sfig(
+  figure_file("edge_flip_comparison.tmp.pdf", experiment_id="3-score_rules/4-edge_flip"), 
+  "edge_flip_comparison", 
+  paste0("Edge flip score values for common trajectory topologies, defined in ", ref("sfig", "modulenets")), 
+  15, 
+  5
 )
 ```
 
@@ -700,13 +714,12 @@ paste0("Edge flip score values for common trajectory topologies, defined in ", r
 
 ### Aggregation of scores
 ```{r}
-add_sfig({
-figure_file("metric_aggregation_overview_v1.tmp.pdf", experiment_id="evaluation_overview")
-}, 
-"aggregation_of_results", 
-"Aggregation methodology of metric scores", 
-15, 
-5
+add_sfig(
+  figure_file("metric_aggregation_overview_v1.tmp.pdf", experiment_id="evaluation_overview"), 
+  "aggregation_of_results", 
+  "Aggregation methodology of metric scores.", 
+  15, 
+  5
 )
 ```
 
@@ -715,7 +728,7 @@ figure_file("metric_aggregation_overview_v1.tmp.pdf", experiment_id="evaluation_
 
 
 ### Pipeline
-* Look at dyneval methods to write this paragraph
+<!-- Look at dyneval methods to write this paragraph -->
 
 
 
@@ -742,7 +755,8 @@ To assess the effect of algorithm components on the performance of a method, we 
 
 
 ```{r}
-qc_references <- readRDS(derived_file("checks.rds", "4-method_characterisation"))$references %>% 
+qc_references <- readRDS(derived_file("checks.rds", "4-method_characterisation")) %>% 
+  .$references %>% 
   str_split("[, \n]+") %>% 
   unlist() %>% 
   unique() %>% 
@@ -772,11 +786,11 @@ We classified all possible trajectory topologies into distinct trajectory types,
 
 ```{r}
 add_sfig(
-figure_file("trajectory_type_trees.tmp.pdf","2-dataset_characterisation/2-trajectory_types"), 
-"trajectory_type_tree", 
-"Different trajectory types can be classified in a directed acyclic graph structure, in which certain types are a generalisation of other trajectory types.", 
-15, 
-10
+  figure_file("trajectory_type_trees.tmp.pdf","2-dataset_characterisation/2-trajectory_types"), 
+  "trajectory_type_tree", 
+  "Different trajectory types can be classified in a directed acyclic graph structure, in which certain types are a generalisation of other trajectory types.", 
+  15, 
+  10
 )
 ```
 
@@ -824,7 +838,11 @@ LINK TO
 ### Trajectory types and topology complexity
 It's already a bit better, though could be improved still!
 Expand, but maybe it should be moved to discussion anyway
+ADD CAPTION
 😉
+TODO
+ADD CAPTION
+FILL IN SIGNIFICANCE LEVELS
 to do: add metric figure
 needs to be updated with waypoints
 this is not used anymore

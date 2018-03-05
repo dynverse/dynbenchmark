@@ -175,8 +175,8 @@ leaf_methods <- map(leaf_ids, function(leaf_id) {
   user_friendly_node <- xml_add_sibling(method_node, method_node, .copy=T)
 
   spans <- user_friendly_node %>% xml_children()
-  xml_attr(spans, "x") <- 272+1
-  xml_attr(user_friendly_node, "x") <- 272+1
+  xml_attr(spans, "x") <- 990+1
+  xml_attr(user_friendly_node, "x") <- 990+1
 
   xml_text(spans)[seq_len(n_methods)] <- map_chr(scores$user_friendly_indicator,"txt")
   xml_add_style(spans,map_chr(scores$user_friendly_indicator, "style"))
@@ -186,8 +186,8 @@ leaf_methods <- map(leaf_ids, function(leaf_id) {
   performance_node <- xml_add_sibling(method_node, method_node, .copy=T)
 
   spans <- performance_node %>% xml_children()
-  xml_attr(performance_node, "x") <- 280+1
-  xml_attr(spans, "x") <- 280+1
+  xml_attr(performance_node, "x") <- 1019+1
+  xml_attr(spans, "x") <- 1019+1
 
   xml_text(spans)[seq_len(n_methods)] <- map_chr(scores$score_indicator,"txt")
   xml_add_style(spans,map_chr(scores$score_indicator, "style"))
