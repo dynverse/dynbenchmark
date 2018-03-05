@@ -55,7 +55,7 @@ implementations$non_inclusion_reasons_split <- implementations$non_inclusion_rea
 
 ## implementation conversions ------------------------
 implementations$conversion_split <- implementations$conversion %>% str_split("[ ]?,[ ]?")
-allowed_conversions <- c("branching_local", "linear", "branching_cluster", "branching_global", "branching_local_projection", "special", NA)
+allowed_conversions <- c("trajectory", "linear", "end_state_probability", "dimred_projection", "cluster_graph", "cell_graph", "special", NA)
 if(!implementations$conversion_split %>% map_lgl(~all(. %in% allowed_conversions)) %>% all()) {
   stop("Some conversions are invalid!")
 }
