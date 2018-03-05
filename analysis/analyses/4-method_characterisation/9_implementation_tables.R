@@ -147,7 +147,7 @@ label_tbd <- function(x) ifelse(is.na(x), "TBD", label_long(x))
 
 direct <- function(x) x
 url <- function(url, text=url) ifelse(is.na(url), "", pritt("=HYPERLINK('{url}', '{text}')"))
-cite <- function(doi) url(pritt("https://doi.org/{doi}"), doi)
+cite <- function(doi) ifelse(is.na(doi), "", url(pritt("https://doi.org/{doi}"), doi))
 date <- function(x) x
 columns <- tribble(
   ~sheet_id, ~local_id, ~processor,
