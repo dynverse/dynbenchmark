@@ -256,11 +256,11 @@ methods_timeline <- cowplot::plot_grid(
     trajectory_components_over_time
   ),
   nrow=3,
-  rel_heights = c(0.7, 0.5, 0.5),
+  rel_heights = c(0.8, 0.5, 0.5),
   labels="auto"
 )
 methods_timeline
-methods_timeline %>% save_plot(figure_file("methods_timeline.svg"), ., base_width=10, base_height=12)
+methods_timeline %>% save_plot(figure_file("methods_timeline.svg"), ., base_width=10, base_height=10)
 
 ##  .............................................................................
 ##  Create simpler methods over time                                         ####
