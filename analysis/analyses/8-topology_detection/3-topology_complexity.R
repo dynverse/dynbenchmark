@@ -173,3 +173,4 @@ topology_complexity_comparison <- plot_grid(
 
 topology_complexity_comparison
 topology_complexity_comparison %>% ggsave(figure_file("topology_complexity_comparison.svg"), ., width=12, height=8)
+
