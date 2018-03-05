@@ -46,7 +46,7 @@ pie <- function(tasks=tasks_real, what = "technology") {
   pie <- pie_data %>%
     ggplot(aes(ymin=0, ymax=1)) +
     geom_rect(aes(xmin=start, xmax=end, fill=variable_of_interest), stat="identity", color="white", size=0.5) +
-    geom_text(aes(mid, text_position, label = pritt(label), vjust=0.5), color="black", hjust=0.5, size=5) +
+    geom_text(aes(mid, text_position, label = pritt(label), vjust=0.5), color="black", hjust=0.5, size=4) +
     fill_scale +
     ggtitle(label_long(what)) +
     theme_void() +
@@ -106,7 +106,7 @@ dataset_characterisation_plot <- cowplot::plot_grid(
 )
 dataset_characterisation_plot
 
-cowplot::save_plot(figure_file("dataset_characterisation.svg"), dataset_characterisation_plot, base_height = 12, base_width = 8)
+cowplot::save_plot(figure_file("dataset_characterisation.svg"), dataset_characterisation_plot, base_height = 10, base_width = 10)
 
 
 
