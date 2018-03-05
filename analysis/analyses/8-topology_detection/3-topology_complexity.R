@@ -92,7 +92,8 @@ milestone_networks <- pbapply::pblapply(cl=4, method_order[1:5], function(method
   bind_rows() %>%
   mutate_at(vars(trajectory_type_predicted, trajectory_type_gold), simplify_trajectory_type) %>%
   mutate_at(vars(trajectory_type_predicted, trajectory_type_gold), factor, trajectory_types_simplified_order) %>%
-  mutate(method_id = forcats::fct_inorder(method_id))
+  mutate(method_id = forcats::fct_inorder(method_id)) %>%
+  drop_na() # drop_na = drop the errors
 
 
 
