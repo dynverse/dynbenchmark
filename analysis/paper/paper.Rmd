@@ -64,24 +64,23 @@ source(paste0(dynalysis::get_dynalysis_folder(), "/analysis/paper/setup.R"))
 ¹ Data mining and Modelling for Biomedicine, VIB Center for Inflammation Research, Ghent, Belgium.  
 ² Department of Applied Mathematics, Computer Science and Statistics, Ghent University, Ghent, Belgium.  
 ³ Center for Medical Genetics, Ghent University Hospital, Ghent, Belgium.  
-⁴ CIRI, Centre International de Recherche en Infectiologie, Inserm, Lyon, France.  
-⁵ Université Claude Bernard Lyon 1, Lyon, France.  
+⁴ Centre International de Recherche en Infectiologie, Inserm, U1111, Université Claude Bernard Lyon 1, CNRS, UMR5308, École Normale Supérieure de Lyon, Univ Lyon, F-69007, LYON, France
 
 
 
 # Abstract
 
 
-Using single-cell transcriptomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Since 2014, more than 50 trajectory inference methods have been developed, each with its own set of methodological characteristics. As a result, comparing between trajectory inference methods is often challenging, and a comprehensive assessment of the performance and robustness of each method is still lacking. We developed a common data structure for trajectory inference methods in order to make their results comparable to each other and to a gold standard. Using this framework, we compare the results from a total of  `r sum(methods$evaluated)` trajectory inference methods, on a large collection of real datasets and realistic synthetic datasets. We employ several metrics, including accuracy of the inferred ordering, correctness of the network topology, code quality and user friendliness. We conclude with practical guidelines for users to select appropriate methods for a given use case. We believe our evaluation framework can be used to spearhead the development for new methods. Our evaluation pipeline is available at [github.com/dynverse/dynverse](https://www.github.com/dynverse/dynverse).
+Using single-cell transcriptomics or proteomics data, it is now possible to computationally order cells along trajectories, allowing the unbiased transcriptome-wide study of cellular dynamic processes. Since 2014, more than 50 trajectory inference methods have been developed, each with its own set of methodological characteristics. As a result, choosing a method to infer trajectories is often challenging, since a comprehensive assessment of the performance and robustness of each method is still lacking. In order to facilitate the comparison of the results of these methods to each other and to a gold standard, we developed a global framework to benchmark trajectory inference tools. . Using this framework, we compared the results from a total of  `r sum(methods$evaluated)` trajectory inference methods, on a large collection of real and synthetic datasets. We evaluate methods using several metrics, including accuracy of the inferred ordering, correctness of the network topology, code quality and user friendliness. 
 
 
-We believe this to be the first comprehensive assessment of trajectory inference methods. For now, we only evaluated the methods on default parameters, but plan to add a detailed parameter tuning procedure in the future.  We gladly welcome any discussion and feedback on key decisions made as part of this study, including the metrics used in the benchmark, the quality control checklist, and the implementation of the method wrappers. These discussions can be held at [github.com/dynverse/dynverse/issues](https://www.github.com/dynverse/dynverse/issues).
+To our knowledge, this is the first comprehensive assessment of trajectory inference methods. For now, we exclusively evaluated the methods on their default parameters, but plan to add a detailed parameter tuning procedure in the future.  We gladly welcome any discussion and feedback on key decisions made as part of this study, including the metrics used in the benchmark, the quality control checklist, and the implementation of the method wrappers. These discussions can be held at [github.com/dynverse/dynverse/issues](https://www.github.com/dynverse/dynverse/issues).
 
 
 
 # Introduction
 <!-- §1: Single-cell omics and TI --->
-Single-cell -omics technologies now make it possible to model biological systems more accurately than ever before. One area where single-cell data has been particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation [@etzrodt_quantitativesinglecellapproaches_2014]. Such dynamic processes can be computationally modelled using trajectory inference (TI) methods (also known as pseudemporal ordering methods), by profiling cells from a population in which the cells are at different unknown points in the dynamic process  [@cannoodt_computational_2016]. These methods computationally order the cells along a trajectory topology, which can be linear, bifurcating, or more complex tree or graph structures. Because TI methods offer an unbiased and transcriptome-wide understanding of a dynamic process [@tanay_scaling_2017],  they allow the objective identification of new (primed) subsets of cells [@schlitzer_identificationcdc1cdc2committed_2015], delineation of a differentiation tree [@velten_humanhaematopoieticstem_2017; @see_mappinghumandc_2017] and inference of regulatory interaction responsible for a one or more bifurcations [@aibar_scenicsinglecellregulatory_2017]. 
+Single-cell -omics technologies now make it possible to model biological systems more accurately than ever before [@tanay_scaling_2017]. One area where single-cell data has been particularly useful is in the study of cellular dynamic processes, such as the cell cycle, cell differentiation and cell activation [@etzrodt_quantitativesinglecellapproaches_2014]. Such dynamic processes can be computationally modelled using trajectory inference (TI) methods (also known as pseudemporal ordering methods), which use single-cell profiles from a population in which the cells are at different unknown points in the dynamic process  [@trapnell_definingcelltypes_2015; @cannoodt_computational_2016; @moon_manifoldlearningbasedmethods_2018]. These methods computationally order the cells along a trajectory topology, which can be linear, bifurcating, or more complex tree or graph structures. Because TI methods offer an unbiased and transcriptome-wide understanding of a dynamic process [@tanay_scaling_2017],  they allow the objective identification of new (primed) subsets of cells [@schlitzer_identificationcdc1cdc2committed_2015], delineation of a differentiation tree [@velten_humanhaematopoieticstem_2017; @see_mappinghumandc_2017] and inference of regulatory interaction responsible for one or more bifurcations [@aibar_scenicsinglecellregulatory_2017]. 
 Current applications of TI focus on specific subsets of cells, but ongoing efforts to construct transcriptomic catalogues of whole organisms [@regev_scienceforumhuman_2017; @han_mappingmousecell_2018] underline the urgency for accurate, scalable[@aibar_scenicsinglecellregulatory_2017; @angerer_singlecellsmake_2017] and user-friendly TI methods.
 
 
@@ -102,21 +101,21 @@ A plethora of TI methods has been developed over the last years, and even more a
 add_table(
   "implementations",
   read_rds(figure_file("implementations_table.rds", "4-method_characterisation")),
-  "Overview of current trajectory inference methods, and whether they were included in this current evaluation study."
+  "Overview of the trajectory inference methods included in this study, and several characteristics thereof. This table will be continuously updated at https://goo.gl/FnsTxG."
 )
 ```
 <!-- §3: Topology inference -->
 One distinctive characteristic of TI methods is whether the topology of the trajectory is inferred computationally, or was fixed by design.
-Early TI methods typically fixed the topology algorithmically (e.g. linear [@bendall_singlecelltrajectorydetection_2014; @schlitzer_identificationcdc1cdc2committed_2015; @shin_singlecellrnaseqwaterfall_2015; @campbell_bayesiangaussianprocess_2015] or bifurcating [@haghverdi_diffusionpseudotimerobustly_2016; @setty_wishboneidentifiesbifurcating_2016]) or through parameters provided by the user [@trapnell_dynamicsregulatorscell_2014; @matsumoto_scoupprobabilisticmodel_2016]. The focus of these methods was therefore mainly to correctly order the cells along this fixed topology. 
-Other methods attempt to infer the topology computationally, which increases the difficulty of the problem at hand, but allows a method to be more broadly applicable on more use cases. Methods that perform topology inference are still in the minority, though current trends suggest this will soon change (`r ref("sfig", "methods_over_time", "c")`). Most noticeable of these methods is AGA[@wolf_graphabstractionreconciles_2017], which is the only TI method currently able to predict disconnected graphs. 
+Early TI methods typically fixed the topology algorithmically (e.g. linear [@bendall_singlecelltrajectorydetection_2014; @schlitzer_identificationcdc1cdc2committed_2015; @shin_singlecellrnaseqwaterfall_2015; @campbell_bayesiangaussianprocess_2015] or bifurcating [@haghverdi_diffusionpseudotimerobustly_2016; @setty_wishboneidentifiesbifurcating_2016]), or through parameters provided by the user [@trapnell_dynamicsregulatorscell_2014; @matsumoto_scoupprobabilisticmodel_2016]. These methods therefore mainly focused on correctly ordering the cells along this fixed topology. 
+Other methods attempt to infer the topology computationally, which increases the difficulty of the problem at hand, but allows these methods  to be broadly applicable on more use cases. Methods that perform topology inference are still in the minority, though current trends suggest this will soon change (`r ref("sfig", "methods_over_time", "c")`).  A particularly interesting development is presented in the AGA method [@wolf_graphabstractionreconciles_2017] which is the only TI method currently able to deal with disconnected graphs. 
 
 
 <!-- §4: Prior information -->
-Another key characteristic is the selection of prior information that a method requires or can optionally exploit. Examples of prior informations are supplying a starting cell from which the trajectory will originate, a set of important marker genes, or even a grouping of cells into cell states. Giving prior information to a TI method can be both a blessing and a curse. In one way, prior information can help the method to find the correct trajectory among many, equally likely, alternatives. On the other hand, incorrect or noisy prior information can bias the trajectory towards current knowledge. Moreover, prior information is not always easily available, and its subjectivity can therefore lead to multiple equally plausible solutions, limiting the applicability of such TI methods to only well studied systems.
+Another key characteristic of TI methods is the selection of prior information that a method requires or can optionally exploit. Prior information can be supplied as  a starting cell from which the trajectory will originate, a set of important marker genes, or even a grouping of cells into cell states. Providing prior information to a TI method can be both a blessing and a curse. In one way, prior information can help the method to find the correct trajectory among many, equally likely, alternatives. On the other hand, incorrect or noisy prior information can bias the trajectory towards current knowledge. Moreover, prior information is not always easily available, and its subjectivity can therefore lead to multiple equally plausible solutions, restricting the applicability of such TI methods to well studied systems.
 
 
 <!-- §5: Components -->
-A reductionist approach to characterising TI methods is dissecting it into a set of algorithmic components, as any one component can have a significant impact on the performance, scalability, and output data structures. Across all TI methods, these components can be broadly grouped into two stages; (i) conversion to a simplified representation using dimensionality reduction, clustering or graph building and (ii) ordering the cells along the simplified representation [@cannoodt_computational_2016]. Interestingly, components are frequently shared between different algorithms (`r ref("sfig", "implementation_components")`). MST in particular, used in the first single-cell RNA-seq trajectory inference methods [@trapnell_dynamicsregulatorscell_2014], is used in almost half of all methods we evaluated  (`r ref("sfig", "implementation_components", "b")`).
+A reductionist approach to characterising TI methods consists in dissecting them into a set of algorithmic components, as any component can have a significant impact on the performance, scalability, and output data structures. Across all TI methods, these components can be broadly grouped into two stages; (i) conversion to a simplified representation using dimensionality reduction, clustering or graph building and (ii) ordering the cells along the simplified representation [@cannoodt_computational_2016]. Interestingly, components are frequently shared between different algorithms (`r ref("sfig", "implementation_components")`). For example, minimal spanning trees (MST), used in the first single-cell RNA-seq trajectory inference methods [@trapnell_dynamicsregulatorscell_2014], is shared by almost half of the methods we evaluated  (`r ref("sfig", "implementation_components", "b")`).
 
 
 ```{r}
@@ -129,17 +128,17 @@ add_sfig(
 
 
 <!-- §6: Problem statement -->
-Given this diversity in TI methods, an important issue to address is a quantitative assessment of the performance and robustness of the existing TI methods. Many attempts at addressing this issue has already been made[@haghverdi_diffusionpseudotimerobustly_2016; @ji_tscanpseudotimereconstruction_2016; @welch_slicerinferringbranched_2016; @matsumoto_scoupprobabilisticmodel_2016; @duverle_celltreebioconductorpackage_2016; @cannoodt_scorpiusimprovestrajectory_2016; @lonnberg_singlecellrnaseqcomputational_2017; @campbell_probabilisticmodelingbifurcations_2017], but due to the high number of TI methods available today and the great diversity in the outputted data structures, performing a comprehensive benchmarking evaluation of TI methods is still lacking.
-This is problematic, as new users to the field are confronted with a wide array of TI methods without a clue as to what the most optimal method available for their problem could be. 
-Moreover, the strengths and weakness of existing methods need to be assessed, so that new developments in the field can focus on improving the current state-of-the-art.
+Given the  diversity in TI methods, an important issue to address is a quantitative assessment of the performance and robustness of the existing TI methods. Many attempts at tackling  this issue have already been made[@haghverdi_diffusionpseudotimerobustly_2016; @ji_tscanpseudotimereconstruction_2016; @welch_slicerinferringbranched_2016; @matsumoto_scoupprobabilisticmodel_2016; @duverle_celltreebioconductorpackage_2016; @cannoodt_scorpiusimprovestrajectory_2016; @lonnberg_singlecellrnaseqcomputational_2017; @campbell_probabilisticmodelingbifurcations_2017], but due to the high number of TI methods available today and the great diversity in the outputted data structures, a comprehensive benchmarking evaluation of TI methods is still lacking.
+This is problematic, as new users to the field are confronted with a wide array of TI methods, without a clear idea about what method would be the most optimal for their problem. 
+Moreover, the strengths and weaknesses of existing methods need to be assessed, so that new developments in the field can focus on improving the current state-of-the-art.
 
 
 
 # Results
-In this study, we performed a comprehensive evaluation for `r sum(methods$evaluated)` TI methods (Overview: `r ref("fig", "evaluation_overview", "a")`, Extended overview: `r ref("sfig", "extended_evaluation_overview")`). The inclusion criterion for TI methods was primarily based on their free availability, the presence of a programming interface, and the time they were published (`r ref("table", "implementations")`). Currently, only methods published before june 2017 are included in the current version of the evaluation, while more recent methods will be included in the next version. The evaluation comprises of three core aspects: (i) source-code and literature-based characterisation of TI methods, (ii) the assessment of the accuracy and scalability of TI methods by comparing predicted trajectories with a gold standard, and (iii) a quality control of the provided software and documentation.
+In this study, we performed a comprehensive evaluation for `r sum(methods$evaluated)` TI methods (Overview: `r ref("fig", "evaluation_overview", "a")`, Extended overview: `r ref("sfig", "extended_evaluation_overview")`). The inclusion criterion for TI methods was primarily based on their free availability, the presence of a programming interface, and the date of publication  (`r ref("table", "implementations")`). Only methods published before june 2017 are included in the current version of the evaluation, while more recent methods will be added in the next version. The evaluation comprised three core aspects: (i) source-code and literature-based characterisation of TI methods, (ii) assessment of the accuracy and scalability of TI methods by comparing predicted trajectories with a gold standard, and (iii) a quality control of the provided software and documentation.
 
 
-In order to make gold standard trajectories and predicted trajectories directly comparable to one another, we developed a common probabilistic model for representing trajectories from all possible sources (`r ref("fig", "evaluation_overview", "b")`). In this model the overall topology is represented by a network of "milestones", and the cells are placed within the space formed by each set of connected milestones. We defined a set of metrics for comparing the likeness of such trajectories, each assessing a different aspect of the trajectory: the similarity in cell ordering, the cell neighbourhood and the topology (`r ref("fig", "evaluation_overview", "c")`). The data compendium consisted of both synthetic datasets, which offer the most exact gold standard, and real datasets, which offer the highest biological relevance. These real datasets come from a variety of single-cell technologies, organisms, and dynamic processes, and contain several types of trajectory topologies (`r ref("sfig", "dataset_characterisation")` and `r ref("stable", "datasets")`). To generate synthetic datasets, we simulated a gene regulatory networks using a thermodynamic model [@schaffter_genenetweaversilicobenchmark_2011], and subsequently simulated a single cell profiling experiment of different single-cell RNA-seq technologies (`r ref("sfig", "synthetic_data_generation")`).
+In order to make gold standard trajectories and predicted trajectories directly comparable to one another, we developed a common probabilistic model for representing trajectories from all possible sources (`r ref("fig", "evaluation_overview", "b")`). In this model, the overall topology is represented by a network of "milestones", and the cells are placed within the space formed by each set of connected milestones. We defined a set of metrics for comparing the likeness of such trajectories, each assessing a different aspect of the trajectory: the similarity in cell ordering, the cell neighbourhood and the topology (`r ref("fig", "evaluation_overview", "c")`). The data compendium consisted of both synthetic datasets, which offer the most exact gold standard, and real datasets, which offer the highest biological relevance. These real datasets come from a variety of single-cell technologies, organisms, and dynamic processes, and contain several types of trajectory topologies (`r ref("sfig", "dataset_characterisation")` and `r ref("stable", "datasets")`). To generate synthetic datasets, we simulated a gene regulatory networks using a thermodynamic model [@schaffter_genenetweaversilicobenchmark_2011], and subsequently simulated a single cell profiling experiment of different single-cell RNA-seq technologies (`r ref("sfig", "synthetic_data_generation")`).
 
 
 ```{r}
@@ -160,7 +159,7 @@ add_sfig(
 ```
 
 
-We not only assessed the accuracy of the predictions made by a trajectory, but also investigated the quality of the method's implementation. To do this, we scored each method using a checklist of important scientific and software development practices, including software packaging, documentation, automated code testing, and peer review. This allowed us to rank each method based on its user friendliness, developer friendliness, and potential broad applicability on new unseen datasets. Finally, using both the benchmark results and quality control, we finally present a flow chart with practical guidelines for selecting the most appropriate TI method for a given use case.
+As the aim of this study is to provide both guidelines for the use of TI methods and a base for the development of new TI methods, we not only assessed the accuracy of the predictions made by a trajectory, but also investigated the quality of the method's implementation. To do this, we scored each method using a checklist of important scientific and software development practices, including software packaging, documentation, automated code testing, and peer review. This allowed us to rank each method based on its user friendliness, developer friendliness, and potential broad applicability on new unseen datasets. Finally, using both the benchmark results and quality control, we  produced a flow chart with practical guidelines for selecting the most appropriate TI method for a given use case.
 
 
 `r anchor("fig", "evaluation_overview")`
@@ -168,6 +167,9 @@ We not only assessed the accuracy of the predictions made by a trajectory, but a
 
 
 `r ref("fig", "evaluation_overview")` **An overview of several key aspects of the evaluation.** a) . b) In order to make any two trajectories comparable with one another, a common trajectory model was used to represent gold standard trajectories from the real and synthetic datasets, as well as any predicted trajectories from TI methods. c) Three metrics were defined in order to assess the similarity in cell ordering, cell neighbourhood, and topology, for any two trajectories.
+
+
+----
 
 
 ```{r}
@@ -194,12 +196,15 @@ An overview of the main results from this study is shown in `r ref("fig", "resul
 `r ref("fig", "results_overview")` **Overview of the results on the evaluation of `r sum(methods$evaluated)` TI methods.** a) The methods were characterised according to the maximum complexity trajectory they can infer, whether or not the inferred topology is constrained by the algorithm or a parameter, and which prior information a method requires or can optionally make use of. b) The methods are ordered according to the overall score achieved in the benchmark evaluation. Also shown are the aggregated scores per metric, source and trajectory type, as well as the average execution time across all datasets and the percentage of executions in which no output was produced. c) Overall performance in the quality control evaluation is highly variable, even amongst the highest ranked methods according to the benchmark evaluation. Also listed are the quality control scores aggregated according to practicality and the different categories. 
 
 
+-------
+
+
 <!-- §2: Overall and topology types -->
-Ordering all methods by their overall benchmarking score, we found that Slingshot predicts the most accurate trajectories, followed by TSCAN and Monocle DDRTree. Observing the benchmark scores per trajectory type, Slingshot seems to be the only method that performs well across most trajectory types. However, several methods are seemingly specialised in predicting specific trajectory types; for example SCORPIUS for linear trajectories, reCAT for cycles, Monocle DDRTree for rooted trees, and, surprisingly Wishbone for multifurcations. We will discuss the effect of topology types and constraints on inferrable trajectory types placed by the method in Section SEC_TRAJTYPE. 
+Having ordered all methods by their overall benchmarking score, we found that Slingshot predicted the most accurate trajectories, followed by TSCAN and Monocle DDRTree. When we looked at the benchmark scores per trajectory type, Slingshot was to be the only method that performs well across most trajectory types. However, we found that several methods were specialised in predicting specific trajectory types; for example SCORPIUS for linear trajectories, reCAT for cycles, Monocle DDRTree for rooted trees, and Wishbone for multifurcations. This last result is unexpected, as Wishbone is not able to output any multifurcating topologies. We will discuss the effect of topology types and constraints on inferrable trajectory types placed by the method in Section SEC_TRAJTYPE. 
 
 
 <!-- §3: real versus synthetic -->
-We observed a high correlation (0.7-0.9) between results originating from real datasets versus those originating from synthetic datasets (`r ref("sfig", "real_synthetic_comparison")`). This confirms both the relevance of the synthetic data and the accuracy of the gold standard in the real datasets. However, this correlation was lower for converging and multifurcating datasets, potentially because only a small number of real datasets were available which contain such topologies (`r ref("stable", "datasets")`).
+We observed a high correlation (0.7-0.9) between results originating from real datasets versus those originating from synthetic datasets (`r ref("sfig", "real_synthetic_comparison")`). This confirms both the relevance of the synthetic data and the accuracy of the gold standard in the real datasets. However, this correlation was lower for converging and multifurcating datasets, potentially because only a small number of real datasets were available for such topologies (`r ref("stable", "datasets")`).
 
 
 ```{r}
@@ -215,7 +220,7 @@ add_sfig(
 
 
 <!-- §4: Compare metrics -->
-As the different metrics were selected to assess the correctness of a trajectory in various approaches, it is expected to observe differences in rankings of TI methods amongst the different metrics. While we saw no direct link between the edge flip scores versus the correlation or RF MSE metric, methods that obtain a high correlation score also tended to obtain higher RF MSE scores (`r ref("sfig", "metric_comparison")`). In addition, methods able to detect more complex trajectory types seemed to obtain higher edge flip scores, in comparison to methods whose trajectory topology was fixed to a simple trajectory topology. We will explore this issue in more detail in a further section SEC_TRAJTYPE.
+As the different metrics were selected to assess the correctness of a trajectory in various approaches, it is expected to observe differences in rankings of TI methods amongst the different metrics. While we saw no direct link between the edge flip scores versus the correlation or RF MSE metric, methods that obtained a high correlation score also tended to obtain higher RF MSE scores (`r ref("sfig", "metric_comparison")`). In addition, the methods that were able to detect more complex trajectory types also obtained higher edge flip scores, in comparison to methods whose trajectory topology was fixed to a simple trajectory topology. We will explore this issue in more detail in a further section SEC_TRAJTYPE.
 
 
 
@@ -231,33 +236,15 @@ add_sfig(
 
 
 
-During the execution of a method on a dataset, if the time limit (>6h) or memory limit (32GB) was exceeded (>6h) or an error was produced, a zero score would be returned for that execution. If a method consistently generated errors on this dataset across all replicates, the error is called “data-specific”, otherwise “stochastic”. Several methods obtained a high overall score despite having 5 to 10% of failed executions (e.g. Monocle DDRTree, SLICE, Wishbone), meaning these methods could rank even higher if not for the failed executions. Methods that do not scale well with respect to the number of cells or genes will exceed the time or memory limits for the largests of datasets (reCAT, SCOUP, StemID). For a few methods, the time or memory limits were exceeded to frequently that insufficient results were generated to compare it to other methods (SCIMITAR, Ouija, Pseudogp).
-
-
-
-
-Comparing the maximum overall score over time, it is encouraging to see multiple incremental improvements over the state-of-the-art (`r ref("sfig", "leading_method")`). We hope the identifications of the main strengths and weaknesses of existing TI methods will lead to the next few state-of-the-art improvements.
-
-
-
-
-```{r}
-add_sfig(
-  figure_file('leading_method.svg', "9-main_figure"), 
-  "leading_method", 
-  "Method performance compared to the time the method was published. The red line indicates the optimal performance up to a point in time."
-)
-```
-
-
+During the execution of a method on a dataset, if the time limit (>6h) or memory limit (32GB) was exceeded, or an error was produced, a zero score was returned for that execution. If a method consistently generated errors on this dataset across all replicates, the error is called “data-specific”, otherwise “stochastic”. Several methods obtained a high overall score despite having 5 to 10% of failed executions (e.g. Monocle DDRTree, SLICE, Wishbone), meaning these methods could rank even higher if not for the failed executions. Methods that do not scale well with respect to the number of cells or genes will exceed the time or memory limits for the largest datasets (reCAT, SCOUP, StemID). For a few methods, the time or memory limits were exceeded too often, making the benchmarking results uncomparable to those of other methods (SCIMITAR, Ouija, Pseudogp).
 
 
 
 ### Trajectory types and topology complexity
 
 
-In most cases, methods which can handle a particular trajectory type also performed better on data containing this particular trajectory type (`r ref("sfig", "trajtype_handle_comparison")`). These methods had typically better edge flip scores - as can be expected - and RF MSE scores compared to methods not able to handle the particular trajectory type. However, the correlation score typically followed the opposite pattern, where methods restricted to linear trajectory types, such as embeddr, SCORPIUS and phenopath, produced the best ordering, irrespective of whether the dataset contained a linear trajectory or more complex trajectories.
-To further investigate, we divided all methods in two groups: linear methods (restricted to linear and cyclic topologies) and non-linear methods. While there were no significant differences on linear datasets, non-linear methods had significantly higher edge flip scores but lower correlation scores on datasets containing more complex trajectory types  (`r ref("sfig", "linear_split_comparison")`). Together, this indicates that current non-linear methods potentially contain less accurate ordering algorithms. A combination of the ordering methods from the top linear methods, combined with the topology inference from top non-linear methods, could therefore be a possibility for future research. 
+In most cases, the methods which were specifically designed to  handle a particular trajectory type, also performed better on data containing this particular trajectory type (`r ref("sfig", "trajtype_handle_comparison")`). These methods had typically better edge flip scores - as can be expected - and RF MSE scores, compared to methods not able to handle the particular trajectory type. However, the correlation score typically followed the opposite pattern, where methods restricted to linear trajectory types, such as embeddr, SCORPIUS and phenopath, produced the best ordering, irrespective of whether the dataset contained a linear trajectory or more complex trajectories.
+To further investigate the effect of trajectory complexity on performance, we divided them in two groups: linear methods (restricted to linear and cyclic topologies) and non-linear methods. While there were no significant differences in performance on linear datasets, non-linear methods had significantly higher edge flip scores but lower correlation scores on datasets containing more complex trajectory types  (`r ref("sfig", "linear_split_comparison")`). Together, this indicates that current non-linear methods potentially contain less accurate ordering algorithms. A combination of the ordering methods from the top linear methods, combined with the topology inference from top non-linear methods, could therefore be a possibility for future research. 
 
 
 ```{r}
@@ -278,7 +265,7 @@ add_sfig(
 ```
 
 
-Despite their similar overall performance, the topologies predicted by the top methods differed considerably. Trajectories detected by the default parameters of slingshot and cellTree tended to be simpler, while those detected by TSCAN and Monocle DDRTree gravitated towards more complex topologies (`r ref("fig", "topology_complexity_comparison")`). Monocle DDRTree for example, frequently predicted a tree topology, even when only cyclic, linear or bifurcating topology was present in the data (`r ref("fig", "topology_complexity_comparison", "a")`). Trajectories generated by Monocle DDRTree (at default parameters) tend to contain more nodes and edges (`r ref("fig", "topology_complexity_comparison", "b")`), which could give this method an edge on datasets with complex tree topologies, but could also explain its relatively low performance on linear and bifurcating datasets. Indeed, when we assessed how often a method can infer the correct topology, slingshot and TSCAN were good at correctly predicting linear, bifurcating and converging trajectories, while Monocle DDRTree was by far the best method to infer tree topologies. Nonetheless, the overall accuracy of topology prediction was very low, with Slingshot correctly predicting bifurcating and converging topologies for half of the datasets, and Monocle DDRTree predicting the correct tree topology in 12% of the cases (`r ref("sfig", "topology_sensitivity")`). Therefore, inferring the correct topology without parameter tuning is still an open challenge. Conversely, when the data contains a complex trajectory structure, TI currently will still require a considerable guidance by the end user, to either optimise the parameters or to choose the method with which the output best fits the user's expert knowledge.
+Despite their similar overall performance, the topologies predicted by the top methods differed considerably. Trajectories detected using the default parameters of slingshot and cellTree tended to be simpler, while those detected by TSCAN and Monocle DDRTree gravitated towards more complex topologies (`r ref("fig", "topology_complexity_comparison")`). Monocle DDRTree, for example frequently predicted a tree topology, even when only a cyclic, linear or bifurcating topology was present in the data (`r ref("fig", "topology_complexity_comparison", "a")`). Trajectories generated by Monocle DDRTree (at default parameters) tended to contain more nodes and edges (`r ref("fig", "topology_complexity_comparison", "b")`), which could give this method an advantage on datasets with complex tree topologies, but could also explain its relatively low performance on linear and bifurcating datasets. Indeed, when we assessed how often a method can infer the correct topology, slingshot and TSCAN were good at correctly predicting linear, bifurcating and converging trajectories, while Monocle DDRTree was by far the best method to infer tree topologies. Nonetheless, the overall accuracy of topology prediction was very low, with Slingshot correctly predicting bifurcating and converging topologies for half of the datasets, and Monocle DDRTree predicting the correct tree topology in 12% of the cases (`r ref("sfig", "topology_sensitivity")`). Inferring the correct topology without parameter tuning therefore still is an open challenge. Conversely, when the data contains a complex trajectory structure, TI will currently still require a considerable guidance by the end user, to either optimise the parameters or to choose the method with which the output best fits the user's expert knowledge.
 
 
 `r anchor("fig", "topology_complexity_comparison")`
@@ -286,6 +273,9 @@ Despite their similar overall performance, the topologies predicted by the top m
 
 
 `r ref("fig", "topology_complexity_comparison")` **INSERT CAPTION.** Caption subdetails.
+
+
+----
 
 
 ```{r}
@@ -299,7 +289,7 @@ add_sfig(
 ### Effect of prior information
 
 
-In the current version of the evaluation, we only provided prior information when it was required by a method. We did not observe a major difference in method performance between methods which did and did not receive prior information (`r ref("sfig", "required_priors_performance_comparison")`). Rather, methods who received prior information were on average positioned in the middle of the ranking.  Furthermore, we could not find any dataset where methods which received prior information performed significantly better than other methods.
+In the current version of the evaluation, we only provided prior information when a method required it . We did not observe a major difference in method performance between methods which did and did not receive prior information (`r ref("sfig", "required_priors_performance_comparison")`). Rather, methods which received prior information were on average positioned in the middle of the ranking.  Furthermore, we could not find any dataset where methods which received prior information performed significantly better than other methods.
 
 
 
@@ -341,7 +331,7 @@ add_stable(
 ## Method quality control
 
 
-While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is also an important evaluation metric, since good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, behaviour and the paper) or which purpose(s) they serve (user friendliness, developer friendliness or future proof). These categorisations can help current developers to improve their tool, and guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
+While not directly related to the accuracy of the inferred trajectory, the quality of the implementation is also an important evaluation metric, since good unit testing makes sure the implementation is correct, good documentation makes it easier for potential users to apply the method on their data, and overall good code quality makes it possible for other developers to adapt the method and extend it further. We therefore looked at the implementation of each method, and assessed their quality using a transparent scoring scheme (`r ref("stable", "qc_checks")`). The individual quality checks can be grouped in two ways: what aspect of the method they investigate (availability, code quality, code assurance, documentation, method behaviour and the depth by which the method was presented in its study) or which purpose(s) they serve (user friendliness, developer friendliness or future proof). These categorisations can help current developers to improve their tool, and guide the selection of users and developers to use these tools for their purpose. After publishing this preprint, we will contact the authors of each method, allowing them to improve their method before the final publishing of the evaluation.
 
 
 ```{r}
@@ -364,6 +354,9 @@ We found that most methods fulfilled the basic criteria, such as free availabili
 
 
 `r ref("fig", "implementation_qc_overview")` **Overview of the quality control results for every method.** 
+
+
+----
 
 
 ```{r}
@@ -392,7 +385,7 @@ add_sfig(
 ## Practical guidelines
 
 
-Based on the results of our benchmark, we created a set of practical guidelines for method users `r ref("fig", "user_guidelines")`. As method's performance is heavily dependent on the trajectory type being studied, the choice of method will by primarily driven by the prior knowledge of the user about what trajectory topology is expected in the data. For the majority of use cases, the user will know very little about the expected trajectory, except perhaps whether the data is expected to contain multiple trajectories, cycles or a complex tree structure. In each such use case, a different set of methods performed optimally, with Monocle DDRTree performing best when the data contains a complex tree, and Slingshot performing better when the trajectory could as well be less complex. For the use case where the data is expected to contain multiple trajectories or cycles, no methods were included in the current version of the evaluation, although AGA`r cite_methods("aga")` for disconnected trajectories, and Waddington-OT`r cite_methods("wadot")` and AGA`r cite_methods("aga")` for regular graphs are currently the only methods in literature able to handle these types of trajectories. If the user knows the exact topology, our evaluation suggests reCAT for cycles, SCORPIUS for linear trajectories, and Slingshot for bifurcating trajectories, although in the last case other topologies could also be returned by the method if it better fits the data. The most difficult use case is when the topology is known but more complex than a bifurcating or cyclic trajectory. Here, to our knowledge, only ElPiGraph.R [https://github.com/Albluca/ElPiGraph.R](github.com/Albluca/ElPiGraph.R), which is not yet published, can be used.
+Based on the results of our benchmark, we created a set of practical guidelines for method users `r ref("fig", "user_guidelines")`. As method's performance is heavily dependent on the trajectory type being studied, the choice of method will by primarily driven by the prior knowledge of the user about what trajectory topology is expected in the data. For the majority of use cases, the user will know very little about the expected trajectory, except perhaps whether the data is expected to contain multiple trajectories, cycles or a complex tree structure. In each such use case, a different set of methods performed optimally, with Monocle DDRTree performing best when the data contains a complex tree, and Slingshot performing better when the trajectory could as well be less complex. For the use case where the data is expected to contain multiple trajectories or cycles, no methods were included in the current version of the evaluation, although AGA`r cite_methods("aga")` for disconnected trajectories, and Waddington-OT`r cite_methods("wadot")` and AGA`r cite_methods("aga")` for regular graphs are currently the only methods in literature able to handle these types of trajectories. If the user knows the exact topology, our evaluation suggests reCAT for cycles, SCORPIUS for linear trajectories, and Slingshot for bifurcating trajectories, although in the last case other topologies could also be returned by the method if it better fits the data. The most difficult use case is when the topology is known but more complex than a bifurcating or cyclic trajectory. Here, to our knowledge, only ElPiGraph.R [github.com/Albluca/ElPiGraph.R](https://github.com/Albluca/ElPiGraph.R), which is not yet published, can be used.
 
 
 `r anchor("fig", "user_guidelines")`
@@ -402,13 +395,44 @@ Based on the results of our benchmark, we created a set of practical guidelines 
 `r ref("fig", "user_guidelines", anchor=TRUE)` **Practical guidelines for method users.**
 
 
+----
+
+
 
 # Discussion
 <!-- The context -->
-Trajectory inference is unique among most other categories of single-cell analysis methods, such as clustering, normalisation and differential expression, because it models the data in a way that was almost impossible using bulk data. Indeed, for no other single-cell analysis types have so many tools been developed, according to several repositories such as omictools.org [@henry_omictoolsinformativedirectory_2014], the "awesome single cell software" list [@davis_awesomesinglecelllistsoftware_2018] and scRNA-tools.org [@zappia_exploringsinglecellrnaseq_2017] . It is therefore critical that these methods, now reaching `r sum(methods$is_ti, na.rm=TRUE)`, are evaluated to guide the users in their choice. In this preprint, we summarise the initial version of our evaluation of these methods, focusing on the quality control and the accuracy of their model using the default parameters on real and synthetic data.
+Trajectory inference is unique among most other categories of single-cell analysis methods, such as clustering, normalisation and differential expression, because it models the data in a way that was almost impossible using bulk data. Indeed, for no other single-cell analysis types have so many tools been developed, according to several repositories such as omictools.org [@henry_omictoolsinformativedirectory_2014], the "awesome single cell software" list [@davis_awesomesinglecelllistsoftware_2018] and scRNA-tools.org [@zappia_exploringsinglecellrnaseq_2017]. It is therefore critical that these methods, now reaching `r sum(methods$is_ti, na.rm=TRUE)`, are evaluated to guide the users in their choice. In this preprint, we summarise the initial version of our evaluation of these methods, focusing on the quality control and the accuracy of their model using the default parameters on real and synthetic data. Comparing the maximum overall score over time, it is encouraging to see multiple incremental improvements over the state-of-the-art (`r ref("sfig", "leading_method")`). We believe that the benchmarking presented in this study will pave the way to the next few state-of-the-art improvements.
 
 
-<!-- The implications of the results -->
+
+
+```{r}
+add_sfig(
+  figure_file('leading_method.svg', "9-main_figure"), 
+  "leading_method", 
+  "Method performance compared to the time the method was published. The red line indicates the optimal performance up to a point in time."
+)
+```
+
+
+<!-- Future work -->
+In this study, we presented our first version of evaluation of TI methods. We are convinced that these results are already useful for both method users and tool developers, as we provide clear practical guidelines for users depending on their current knowledge of the trajectory, as well as an objective benchmark on which new methods can be tested. Nonetheless, our evaluation can be expanded on several points, all of which we will try to tackle in the near future:
+
+
+* Inclusion of more recent methods, especially those which can detect more complex trajectory types such as general graphs `r cite_methods(c("wadot", "calista"))` and disconnected graphs `r cite_methods("aga")`.
+* A parameter tuning for each method, both across all trajectory types, as well as on specific trajectory types.
+* A test of robustness on noise, parameter changes and dataset size
+* An evaluation of the stability of method's results when running the same parameter setting on the same dataset multiple times
+* Evaluate the methods when given optional priors, and compare with performance without priors
+* Assess the effect of noisy or incorrect prior information
+* Test methods on datasets with no clear trajectory present
+* Include feedback on the quality control scoring scheme, and update the scoring when method get updated
+* Test the scalability of each method, both in the number of cells and the number of features
+* Include more real datasets with complex trajectory types, as they become available
+* Evaluate methods on other single-cell -omics datasets, such as proteomics and epigenomics data
+
+
+<!-- Are certain methods better than others? -->
 Our evaluation indicated a large difference between current TI methods, with Slingshot, followed by TSCAN and Monocle DDRTree, towering above all other methods. Nonetheless, we found that methods which did not perform well across all settings, can still be useful in certain specific use cases. Indeed, on data containing more than one bifurcations, Monocle DDRTree clearly performed better than other methods. We found that this was mainly because the default parameters of Monocle DDRTree prefer are more likely to detect tree topologies, while those of Slingshot prefer to find linear and bifurcation trajectories. 
 
 
@@ -426,7 +450,11 @@ The use of synthetic data to evaluate methods can be problematic, because the mo
 ## Trajectory inference methods
 
 ### Method selection
-We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods (`r ref("table", "implementations")`, als), by searching in literature for "trajectory inference" and "pseudotemporal ordering", and based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018; @gitter_singlecellpseudotimeoverviewalgorithms_2018]. We welcome any contributions by creating an issue at [https://github.com/dynverse/dynalysis/issues](github.com/dynverse/dynverse/issues). Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "implementations")`).
+We gathered a list of `r sum(methods$is_ti, na.rm=TRUE)` trajectory inference methods (`r ref("table", "implementations")`), by searching in literature for "trajectory inference" and "pseudotemporal ordering", and based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018; @gitter_singlecellpseudotimeoverviewalgorithms_2018].
+A continuously updated list can also be found [online](https://goo.gl/FnsTxG)). We welcome any contributions by creating an issue at [github.com/dynverse/dynverse/issues](https://github.com/dynverse/dynalysis/issues). 
+
+
+Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation (`r ref("table", "implementations")`).
 
 
 
@@ -441,10 +469,8 @@ As input, we provided for each method either the raw count data (after cell and 
 * **# branches** Number of branches/intermediate states. For real data, the number of states in the gold/silver standard. For synthetic data, the number of milestones.
 * **Time course** For each cell a time point from which it was sampled. If available, directly extracted from the gold standard. For synthetic data: the simulation time.
 
-### Common output model
-
-
-Due to the absence of a common format for trajectory models, most methods return a unique set of output formats with rarely any overlap. We therefore created wrappers around each method in R (available at [https://www.github.com/dynverse/dynmethods](github.com/dynverse/dynmethods)) and postprocessed its output into a common probabilistic trajectory model (`r ref("sfig", "wrapping")`). This model consisted of two parts. The milestone network represents the overall network topology, and contains edges between different milestones and the length of the edge between them. The milestone percentages contain for each cell its position between two or more milestones, and sums for each cell to one.
+### Common trajectory model
+Due to the absence of a common format for trajectory models, most methods return a unique set of output formats with few overlap. We therefore created wrappers around each method (available at [github.com/dynverse/dynmethods](https://www.github.com/dynverse/dynmethods)) and postprocessed its output into a common probabilistic trajectory model (`r ref("sfig", "wrapping", "a")`). This model consisted of three parts. (i) The milestone network represents the overall network topology, and contains edges between different milestones and the length of the edge between them. (ii) The milestone percentages contain for each cell its position between milestones, and sums for each cell to one. (iii) The trajectory model also allows for regions of delayed commitment, where cells are allowed to be positioned between three or more connected milestones. Regions must be explicitly defined in the trajectory model. Per region, one milestone must be directly connected to all other milestones in the network.
 
 
 
@@ -453,16 +479,14 @@ Due to the absence of a common format for trajectory models, most methods return
 add_sfig(
   figure_file('wrapping.svg', '4-method_characterisation'),
   "wrapping", 
-  "Our wrapping workflow.", 
+  "**A common interface for TI methods.** a) The input and output of each TI method is standardised. As input, each TI method receives either raw or normalised counts, several parameters, and a selection of prior information. After its execution, a method uses one of the five wrapper functions to transform its output to the common trajectory model. This common model then allows to perform common analysis functions on trajectory models produced by any TI method. b) The specific transformations performed by each of the wrapper functions is explained in more detail.", 
   15, 
   7.5
 )
 ```
 
 
-
-
-Depending on the output of a method, we used different strategies to convert the output to our model (in some cases combined with a special conversion denoted by a \*):
+Depending on the output of a method, we used different strategies to convert the output to our model (`r ref("sfig", "wrapping", "b")`). Special conversions are denoted by an \*.
 
 
 ```{r}
@@ -481,11 +505,11 @@ conversion <- function(conversion_oi) {
 ```
 
 
-* Methods returning a single pseudotime value: `r conversion("linear")`. A single edge between two milestones, its percentage proportional to the pseudotime.
-* Methods which assign each cell to a branch together with a pseudotime value and a branch network: `r conversion("branching_local")`. Similarly, the branch network is used as the milestone network, the percentages of a cell are proportional with its branch pseudotime.
-* Methods returning both a global pseudotime value and a probability for every end state: `r conversion("branching_global")`. We use a single start state and add an edge to every end milestone each representing an end state. The global pseudotime then determines the distance from the begin milestone, the rest of the cell's position is calculated by distributing the residual percentage over the end states, proportionally to the end state probabilities.
-* Methods returning a cluster assignment and a cluster network:  `r conversion("branching_cluster")`. The cluster network was used as milestone network, each cell received percentage 1 or 0 based on its cluster assignment.
-* Methods returning a cluster assignment, cluster network and dimensionality reduction: `r conversion("branching_local_projection")`. We projected each cell on the closest point on the edges between its own cluster and neighbouring clusters within the dimensionality reduction. This projection allowed us to give each cell a pseudotime within the edge, which was then converted into our model as described above, using the cluster network as milestone network.
+* **Type 1, direct:** Methods which assign each cell to a branch together with a pseudotime value and a branch network: `r conversion("branching_local")`. The branch network is used as the milestone network, the percentages of a cell are proportional with its branch pseudotime.
+* **Type 2, linear pseudotime:** Methods returning a single pseudotime value: `r conversion("linear")`. A single edge between two milestones, its percentage proportional to the pseudotime.
+* **Type 3, end state probability:** Methods returning both a global pseudotime value and a probability for every end state: `r conversion("branching_global")`. We use a single start state and add an edge to every end milestone each representing an end state. The global pseudotime then determines the distance from the begin milestone, the rest of the cell's position is calculated by distributing the residual percentage over the end states, proportionally to the end state probabilities.
+* **Type 4, cluster assignment:** Methods returning a cluster assignment and a cluster network:  `r conversion("branching_cluster")`. The cluster network was used as milestone network, each cell received percentage 1 or 0 based on its cluster assignment.
+* **Type 5, projection onto nearest branch:** Methods returning a cluster assignment, cluster network and dimensionality reduction: `r conversion("branching_local_projection")`. We projected each cell on the closest point on the edges between its own cluster and neighbouring clusters within the dimensionality reduction. This projection allowed us to give each cell a pseudotime within the edge, which was then converted into our model as described above, using the cluster network as milestone network.
 
 
 Special conversions were necessary for certain methods:
@@ -500,7 +524,7 @@ Special conversions were necessary for certain methods:
 
 
 ## Real datasets
-We gathered a list of real datasets by searching for "single-cell" at the Gene Expression Omnibus and selecting those datasets in which the cells are sampled from different stages in a dynamic process (`r ref("stable", "datasets")` and `r ref("sfig", "dataset_characterisation")`). The scripts to download and process these datasets will be made available n our repository ([http://www.github.com/dynverse/dynalysis](github.com/dynverse/dynalysis)). When available, we preferred to start from the raw counts data. These raw counts were all normalised and filtered using a common pipeline, discussed later. We determined a reference standard for every dataset using labelling provided by the author's, and classified the standards into gold and silver based on whether this labelling was determined by the expert using the expression (silver standard) or using other external information (such as FACS or the origin of the sample, gold standard) (`r ref("stable", "datasets")`).
+We gathered a list of real datasets by searching for "single-cell" at the Gene Expression Omnibus and selecting those datasets in which the cells are sampled from different stages in a dynamic process (`r ref("stable", "datasets")` and `r ref("sfig", "dataset_characterisation")`). The scripts to download and process these datasets will be made available n our repository ([github.com/dynverse/dynalysis](http://www.github.com/dynverse/dynalysis)). When available, we preferred to start from the raw counts data. These raw counts were all normalised and filtered using a common pipeline, discussed later. We determined a reference standard for every dataset using labelling provided by the author's, and classified the standards into gold and silver based on whether this labelling was determined by the expert using the expression (silver standard) or using other external information (such as FACS or the origin of the sample, gold standard) (`r ref("stable", "datasets")`).
 
 
 ```{r}
@@ -826,23 +850,25 @@ The current Git commit details are:
 ```{r}
 git2r::repository(".")
 ```
-This paragraph may be expanded
-Done (stolen from results section)
-🤔
+I would avoid making "absolute" statements like this one.
 Add the timecourse prior to the figure
+Changed the tenses here to past (results usually only include past tense, except when referring to figures or later in the text)
+why surprisingly?
+because wishbone is only able to detect bifurcations. Should mention this in the text :)
+Added an explanation in the following sentence
+But still more should be added, I think this simply indicates that none of the methods are performing well on multifurcating datasets. But we should show this, eg. looking at the raw performance on multifurcating datasets versus other datasets. If we don't have the time to show this, then we should not mention wishbone here
 LINK TO 
 
 ### Trajectory types and topology complexity
 LINK TO 
 
 ### Trajectory types and topology complexity
-It's already a bit better, though could be improved still!
-Expand, but maybe it should be moved to discussion anyway
 ADD CAPTION
-😉
 TODO
 ADD CAPTION
 FILL IN SIGNIFICANCE LEVELS
+? Unclear what you mean by this.
+It's already a bit better, though could be improved still!
 to do: add metric figure
 needs to be updated with waypoints
 this is not used anymore
