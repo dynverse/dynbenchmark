@@ -81,10 +81,9 @@ plots <- map(modulenet_names, function(modulenet_name) {
 })
 
 modulenet_plots <- map(plots, ~cowplot::plot_grid(plotlist=., ncol=3, align = "v"))
-modulenet_plots[[1]] <- cowplot::plot_grid(plotlist=plots[[1]], ncol=3, labels="auto", align = "v")
 
-write_rds(modulenet_plots, figure_file("modulenets.rds"))
-
+ggrid <- cowplot::plot_grid(plotlist = modulenet_plots, ncol = 1)
+ggsave(figure_file("modulenets.svg"), ggrid, width = 12, height = 35)
 
 
 
