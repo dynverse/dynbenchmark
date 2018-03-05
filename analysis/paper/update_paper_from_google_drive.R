@@ -12,7 +12,22 @@ read_file("analysis/paper/paper.Rmd") %>%
   str_replace_all("§(.*?)\n", "<p class='wip'>\\1</p>") %>%
   str_replace_all("\\[[a-z]\\]", "") %>%
   str_replace_all("→", "-->") %>%
+  str_replace_all("\n#", "\n\n#") %>% # add double new line before (sub)titles
   write_file("analysis/paper/paper.Rmd")
+
+# process all svgs
+files <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg")
+walk(files, function(file) {
+  svg <- xml2::read_xml(file)
+  if (is.null(xml2::xml_attr(svg, "width"))) {
+    viewBox <- xml2::xml_attr(svg, "viewBox") %>% str_split(" ") %>% first() %>% as.numeric()
+    if (length(viewBox) > 1) {
+      svg %>% xml2::xml_set_attr("width", viewBox[[3]])
+      svg %>% xml2::xml_set_attr("height", viewBox[[4]])
+      svg %>% xml2::write_xml(file)
+    }
+  }
+})
 
 ##  ............................................................................
 ##  HTML                                                                    ####
