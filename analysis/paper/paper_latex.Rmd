@@ -138,7 +138,7 @@ Moreover, the strengths and weaknesses of existing methods need to be assessed, 
 In this study, we performed a comprehensive evaluation for `r sum(methods$evaluated)` TI methods (Overview: `r ref("fig", "evaluation_overview", "a")`, Extended overview: `r ref("sfig", "extended_evaluation_overview")`). The inclusion criterion for TI methods was primarily based on their free availability, the presence of a programming interface, and the date of publication  (`r ref("table", "implementations")`). Only methods published before june 2017 are included in the current version of the evaluation, while more recent methods will be added in the next version. The evaluation comprised three core aspects: (i) source-code and literature-based characterisation of TI methods, (ii) assessment of the accuracy and scalability of TI methods by comparing predicted trajectories with a gold standard, and (iii) a quality control of the provided software and documentation.
 
 
-In order to make gold standard trajectories and predicted trajectories directly comparable to one another, we developed a common probabilistic model for representing trajectories from all possible sources (`r ref("fig", "evaluation_overview", "b")`). In this model, the overall topology is represented by a network of "milestones", and the cells are placed within the space formed by each set of connected milestones. We defined a set of metrics for comparing the likeness of such trajectories, each assessing a different aspect of the trajectory: the similarity in cell ordering, the cell neighbourhood and the topology (`r ref("fig", "evaluation_overview", "c")`). The data compendium consisted of both synthetic datasets, which offer the most exact gold standard, and real datasets, which offer the highest biological relevance. These real datasets come from a variety of single-cell technologies, organisms, and dynamic processes, and contain several types of trajectory topologies (`r ref("sfig", "dataset_characterisation")` and `r ref("stable", "datasets")`). To generate synthetic datasets, we simulated a gene regulatory network using a thermodynamic model of gene regulation [@schaffter_genenetweaversilicobenchmark_2011], and subsequently simulated a single cell profiling experiment of different single-cell RNA-seq technologies (`r ref("sfig", "synthetic_data_generation")`).
+In order to make gold standard trajectories and predicted trajectories directly comparable to one another, we developed a common probabilistic model for representing trajectories from all possible sources 
 
 
 ```{r}
@@ -236,7 +236,7 @@ add_sfig(
 
 
 
-During the execution of a method on a dataset, if the time limit (>6h) or memory limit (32GB) was exceeded, or an error was produced, a zero score was returned for that execution. If a method consistently generated errors on this dataset across all replicates, the error is called “data-specific”, otherwise “stochastic”. Several methods obtained a high overall score despite having 5 to 10% of failed executions (e.g. Monocle DDRTree, SLICE, Wishbone), meaning these methods could rank even higher if not for the failed executions. Methods that do not scale well with respect to the number of cells or genes will exceed the time or memory limits for the largest datasets (reCAT, SCOUP, StemID). For a few methods, the time or memory limits were exceeded too often, making the benchmarking results uncomparable to those of other methods (SCIMITAR, Ouija, Pseudogp).
+During the execution of a method on a dataset, if the time limit (>6h) or memory limit (32GB) was exceeded, or an error
 
 
 
@@ -812,8 +812,7 @@ This report was generated on `r Sys.time()` using `r devtools:::platform_info()$
 ```{r colophon, cache = FALSE}
 devtools::session_info()$packages %>% knitr::kable()
 ```
-Maybe add a figure here showing the real outputs of some methods(which are very method specific and not so easy to compare), and how they can nicely be compared when using your common visualisation tool?
-We will do that in V2 for sure! Thanks!
-And maybe maybe if someone finds the time this evening :)
-In the next version of the paper, an overview of all the errors produced by a method and an overview of all of the timings should be provided.
-For the next version of the paper, explain the different metrics (and the common trajectory format) with one supplementary figure, like figure evaluation_overview/metric_geodesic.tmp.pdf
+
+
+
+
