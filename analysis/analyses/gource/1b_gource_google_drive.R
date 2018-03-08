@@ -29,11 +29,20 @@ stop("Login in google!!!")
 
 links <- tribble(
   ~id, ~link,
-  "manuscript_1", "https://docs.google.com/document/d/1BCCaP21N2PXfzhj9H09yEpZz9lLY2HXd_LxTSsJ_wro/edit#heading=h.wngcelge211g",
-  "methods", "https://docs.google.com/spreadsheets/d/1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE/edit?usp=sharing",
-  "manuscript_0", "https://docs.google.com/document/d/1DNuhEHJR03yT8yaAXHc8LYpV7EJDOMOTMdGl76J3zLg/edit",
+  "claims", "https://docs.google.com/document/d/1Poe2NfubYgotXk8x2Wak_IY32-K6xCM5yJOgyax6vD0/edit",
+  "synthetic_data_methodology", "https://docs.google.com/document/d/1Wko6pMy0pl6DOY-pjiHXoM2zscqOi3pMFot26UfuopM/edit",
+  "trajectory_structures", "https://docs.google.com/spreadsheets/d/1mGjj20cCk2OUTZ1oy1gkl-HVHEve6Kg7pRyprMpLIZ4/edit?usp=drive_web&ouid=105833423392613772145",
+  "dyngen_data_generation", "https://docs.google.com/document/d/1khvUfXobom5Cdb_K-1QCXuU8EesSqI23iG8bbVQum3A/edit",
+  "good_scientific_code", "https://docs.google.com/document/d/1hO0wuBfBvMfmFPSbhVsKolzi7J1M9wp3XgbD2QY4esU/edit",
+  "quality_control_terms", "https://docs.google.com/spreadsheets/d/1QKeUlMWlnTYgejtZKQ6PBZaHbLmHhNX323cicHsAOxs/edit?usp=drive_web&ouid=105833423392613772145",
+  "dynverse_ideas", "https://docs.google.com/document/d/18PuTgnpUtbGwZvbTyiTsJQCaGRXratjbmsjv9JsnYUc/edit",
+  "manuscript_v0", "https://docs.google.com/document/d/1DNuhEHJR03yT8yaAXHc8LYpV7EJDOMOTMdGl76J3zLg/edit",
   "real_datasets", "https://docs.google.com/spreadsheets/d/1SALZ2jt7TZJQJMEvvOwSR2r5yIl50qcGAZ-K5AC4DJo/edit#gid=0",
-  "hypotheses", "https://docs.google.com/spreadsheets/d/13jHFuMwie7oIxGcyLO95-onFri4M_GJjqgMEUnZliQI/edit?usp=drive_web&ouid=101203131788757899666"
+  "hypotheses_and_tasks", "https://docs.google.com/spreadsheets/d/13jHFuMwie7oIxGcyLO95-onFri4M_GJjqgMEUnZliQI/edit#gid=0",
+  "trajectory_inference_methods_public", "https://docs.google.com/spreadsheets/d/1xeRtfa4NZR-FBZOosPv6nY-alfoGE1ZCEP2ceQg6GH0/edit?usp=drive_web&ouid=105833423392613772145",
+  "trajectory_inference_methods_private", "https://docs.google.com/spreadsheets/d/1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE/edit?usp=drive_web&ouid=105833423392613772145",
+  "manuscript_v1_overview", "https://docs.google.com/document/d/12xrM1GDq4Lk3mHHQzazgL5eYq7yttrKFtUakgU2AvGs/edit",
+  "manuscript_v1", "https://docs.google.com/document/d/1BCCaP21N2PXfzhj9H09yEpZz9lLY2HXd_LxTSsJ_wro/edit"
 )
 
 warning("Now leave this browser window alone!!!!!! >:)")
@@ -64,4 +73,53 @@ links$source <- pmap(links %>% as.list, function(id, link, ...) {
 })
 
 
-links %>% write_rds(derived_file("google_drive_revisions.rds"))
+# links %>% write_rds(derived_file("google_drive_revisions.rds"))
+
+# todo: also parse years
+process <- function(data, docname) {
+  # per role="rowgroup", process class='docs-revisions-sidebar-date-group' separate from 'docs-revisions-tile'
+  id_or_class_xp <- "//div[@class='docs-revisions-tile']//text()"
+  values <- xpathSApply( data, id_or_class_xp, xmlValue)
+
+  values <- xpathSApply( data, "//div[@class='docs-revisions-tile']//text()", function(xx) {
+    zz <- xpathSApply( xx, "//div[@class='docs-revisions-sidebar-date-group']", xmlValue)
+    paste0(paste0(xmlValue(xx), collapse = ";"), "||", paste0(zz, collapse = ";"))
+  })
+
+
+  ## almost
+  values <- xpathApply( data, "//div[@role='rowgroup']/@valie", function(xx) {
+    zz <- xpathSApply( xx, "//div[@class='docs-revisions-sidebar-date-group']/@value", xmlValue)
+    print(zz)
+    NULL
+    # zz <- xpathSApply( xx, "//div[@class='docs-revisions-tile']//text()", xmlValue)
+    # paste(zz, collapse="|")
+  })
+
+ n ames <- c("Helena Todorov", "Yvan Saeys", "Robrecht Cannoodt", "Wouter Saelens")
+  names_ix <- which(values %in% names)
+  dates_ix <- names_ix - 1
+  while (any(values[dates_ix] %in% names)) {
+    mehix <- values[dates_ix] %in% names
+    dates_ix[mehix] <- dates_ix[mehix] - 1
+  }
+
+  df <- data_frame(
+    person = values[names_ix],
+    date = values[dates_ix]
+  ) %>% mutate(
+    #posix = as.POSIXct(date, format = "%d %B, %H:%M"),
+    posix = as.POSIXct(date, format = "%B %d, %I:%M %p"),
+    time = as.integer(posix),
+    docname
+  ) %>% arrange(time) %>% mutate(
+    action = ifelse(seq_len(n()) == 1, "A", "M"),
+    final = paste0(time, "|", person, "|", action, "|", docname)
+  )
+}
+
+df <- seq_len(nrow(links)) %>% map_df(function(i) {
+  process(links$source[[i]], links$name[[i]])
+}) %>% na.omit
+
+write_lines(df$final, derived_file("google_drive.txt"))
