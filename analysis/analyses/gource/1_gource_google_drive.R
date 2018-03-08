@@ -5,8 +5,11 @@ library(XML)
 
 experiment("gource")
 
+links <- read_rds(derived_file("google_drive_revisions.rds")) %>%
+  mutate(name = paste0("/google_drive/", id))
+
 # todo: also parse years
-process <- function(file, docname) {
+process <- function(xml, docname) {
   data <- xmlParse(file)
 
   id_or_class_xp <- "//div[@class='docs-revisions-tile']//text()"
@@ -34,10 +37,14 @@ process <- function(file, docname) {
   )
 }
 
-files <- list.files(raw_file("google_drive/"), pattern = "*.xml", full.names = T)
-df <- files %>% map_df(function(fn) {
-  output_name <- gsub("^.*/[0-9]*_([0-9A-Za-z\\.\\-]*)\\.xml$", "\\1", fn) %>% paste0("/google_drive/", .)
-  process(fn, output_name)
+links %>%
+  rowwise() %>%
+  mutate(
+    output_df = l
+  )
+
+df <- seq_len(nrow(links)) %>% map_df(function(i) {
+  process(links$source[[i]], links$name[[i]])
 }) %>% na.omit
 
 write_lines(df$final, derived_file("google_drive.txt"))
