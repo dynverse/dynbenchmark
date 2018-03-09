@@ -8,8 +8,7 @@ curl::curl_download("https://chromedriver.storage.googleapis.com/2.35/chromedriv
 system(glue::glue("unzip -o {derived_file('chrome_driver.zip')} -d {derived_file()}"))
 
 command <- glue::glue("java -Dwebdriver.chrome.driver='{derived_file('chromedriver')}' -jar {derived_file('selenium-server-standalone.jar')} -port 4449")
-clipr::write_clip(command)
-# system(glue::glue(command, " &"))
+system(glue::glue("tmux new-session -d '{command}'"))
 
 # run server
 
@@ -73,8 +72,6 @@ links$source <- pmap(links %>% as.list, function(id, link, ...) {
 })
 
 
-# links %>% write_rds(derived_file("google_drive_revisions.rds"))
-
 # todo: also parse years
 process <- function(data, docname) {
   # per role="rowgroup", process class='docs-revisions-sidebar-date-group' separate from 'docs-revisions-tile'
@@ -96,7 +93,7 @@ process <- function(data, docname) {
     # paste(zz, collapse="|")
   })
 
- n ames <- c("Helena Todorov", "Yvan Saeys", "Robrecht Cannoodt", "Wouter Saelens")
+  names <- c("Helena Todorov", "Yvan Saeys", "Robrecht Cannoodt", "Wouter Saelens")
   names_ix <- which(values %in% names)
   dates_ix <- names_ix - 1
   while (any(values[dates_ix] %in% names)) {
