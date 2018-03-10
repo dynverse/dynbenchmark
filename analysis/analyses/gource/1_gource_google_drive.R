@@ -81,11 +81,13 @@ revisions_df <- map_df(seq_len(nrow(links)), function(i) {
     if (length(xml_children(rowgroup)) > 0 ) {
       history_specifier <- xml_node(rowgroup, ".docs-revisions-sidebar-date-group") %>% xml_text()
 
-      tile <- xml_nodes(rowgroup, ".docs-revisions-tile-content-wrapper")
-      date <- tile %>% xml_node(".docs-revisions-tile-text-box") %>% xml_text()
-      collaborators <- tile %>% xml_nodes(".docs-revisions-tile-collaborator-name") %>% xml_text()
+      tiles <- xml_nodes(rowgroup, ".docs-revisions-tile-content-wrapper")
+      map_df(tiles, function(tile) {
+        date <- tile %>% xml_node(".docs-revisions-tile-text-box") %>% xml_text()
+        collaborators <- tile %>% xml_nodes(".docs-revisions-tile-collaborator-name") %>% xml_text()
 
-      tibble(id, link, history_specifier, date, collaborator = unique(collaborators))
+        tibble(id, link, history_specifier, date, collaborator = unique(collaborators))
+      })
     } else {
       NULL
     }
