@@ -102,11 +102,14 @@ revisions_df <- map_df(seq_len(nrow(links)), function(i) {
 
 rev_proc <- revisions_df %>%
   mutate(
-    daymonth = str_replace(date, "^([0-9]+ [A-Za-z]+), .*$", "\\1"),
+    daymonth = str_replace(date, "^([0-9]+ [^ ,]+).*$", "\\1"),
     hourminute = str_replace(date, "^.*, ([0-9][0-9]:[0-9][0-9])$", "\\1"),
-    year = ifelse(str_detect(date, "[0-9]+,"), str_replace(date, ".* ([0-9]+), .*", "\\1"), format(Sys.Date(), format = "%Y")),
+    year1 = ifelse(str_detect(date, "[0-9]+,"), str_replace(date, ".* ([0-9]+), .*", "\\1"), NA),
+    year2 = ifelse(str_detect(history_specifier, "[0-9]+$"), str_replace_all(history_specifier, "[^\\d]", ""), NA),
+    year3 = format(Sys.Date(), format = "%Y"),
+    year = ifelse(!is.na(year1), year1, ifelse(!is.na(year2), year2, year3)),
     new_date = paste0(daymonth, " ", year, ", ", hourminute),
-    posix = as.POSIXct(new_date, format = "%d %B %Y, %H:%M"),
+    posix = as.POSIXct(new_date, format = "%d %B %Y, %H:%M", origin = "1970-01-01"),
     time = as.integer(posix),
     docname = paste0("/google_drive/", id)
   ) %>%
@@ -117,9 +120,9 @@ rev_proc <- revisions_df %>%
     gource = paste0(time, "|", collaborator, "|", action, "|", docname)
   ) %>%
   ungroup() %>%
-  arrange(time) %>%
-  na.omit()
+  arrange(time)
 
 write_rds(rev_proc, derived_file("rev_proc.rds"))
 
 write_lines(rev_proc$gource, derived_file("google_drive.txt"))
+
