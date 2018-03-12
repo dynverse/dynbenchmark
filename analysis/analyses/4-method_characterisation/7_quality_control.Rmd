@@ -95,7 +95,7 @@ check_heatmap_plot <- implementation_qc_checks %>%
     scale_y_reverse(NULL, breaks = aspect_position$aspect_mid, labels = aspect_position$name, expand = c(0, 0)) +
     # scale_x_continuous("", breaks = seq_along(levels(implementation_qc_checks$implementation_id))+0.5, labels = label_implementation(levels(implementation_qc_checks$implementation_id)), expand = c(0, 0), position="right") +
     scale_x_continuous("", breaks=NULL, expand = c(0, 0)) +
-    scale_fill_manual("Category", values=set_names(qc_categories$color, qc_categories$category), label=label_long, guide=guide_legend(ncol=2)) +
+    scale_fill_manual("Category", values=set_names(qc_categories$color, qc_categories$category), labels=set_names(qc_categories$label, qc_categories$category), guide=guide_legend(ncol=2)) +
     scale_alpha_continuous("Score", guide=guide_legend(ncol=5, label.position = "bottom")) +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), axis.text.y = element_text(size=12), legend.position="bottom")
 
