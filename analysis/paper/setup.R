@@ -85,7 +85,7 @@ add_caption_latex <- function(table, caption="hi") {
 # table
 add_table <- function(ref_id, table, caption) {
   if (params$table_format == "latex") {
-    caption_latex <- paste0("\\\\textbf{", ref('stable', ref_id, pattern = "{ref_full_name}"), "} ", caption)
+    caption_latex <- paste0("\\\\textbf{", ref('table', ref_id, pattern = "{ref_full_name}"), "} ", caption)
     table_output <- paste("", "", table[["latex"]] %>% add_caption_latex(caption_latex), "", "", sep="\n")
   } else {
     table_output <- paste0(
@@ -95,4 +95,13 @@ add_table <- function(ref_id, table, caption) {
     )
   }
   cat(table_output)
+}
+
+# url
+url <- function(url, text) {
+  if(params$table_format == "latex") {
+    pritt("\\\\href{{{url}}}{{{text}}}")
+  } else {
+    pritt("[{text}]({url})")
+  }
 }
