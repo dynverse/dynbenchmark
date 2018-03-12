@@ -36,7 +36,11 @@ links <- tribble(
   "trajectory_inference_methods_public", "https://docs.google.com/spreadsheets/d/1xeRtfa4NZR-FBZOosPv6nY-alfoGE1ZCEP2ceQg6GH0/edit?usp=drive_web&ouid=105833423392613772145",
   "trajectory_inference_methods_private", "https://docs.google.com/spreadsheets/d/1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE/edit?usp=drive_web&ouid=105833423392613772145",
   "manuscript_v1_overview", "https://docs.google.com/document/d/12xrM1GDq4Lk3mHHQzazgL5eYq7yttrKFtUakgU2AvGs/edit",
-  "manuscript_v1", "https://docs.google.com/document/d/1BCCaP21N2PXfzhj9H09yEpZz9lLY2HXd_LxTSsJ_wro/edit"
+  "manuscript_v1", "https://docs.google.com/document/d/1BCCaP21N2PXfzhj9H09yEpZz9lLY2HXd_LxTSsJ_wro/edit",
+  "manuscript_v2", "https://docs.google.com/document/d/14ZzuesLq5u5l-Gp_r5tSkvwOpxxz9LuXS_HG6GAYfxw/edit",
+  "stemid_feedback" = "https://docs.google.com/document/d/1YweBb_8Q20FGT7MO5f5KnXdsrDmONWjmmUXfN49BIWQ/edit",
+  "journal_rejection_letter" = "https://docs.google.com/document/d/1QeyQNPH-0LmSo501KfHUGHtfaRiejaDMYAEotYCO7J4/edit",
+  "action_plan" = "https://docs.google.com/document/d/13soQw70c6gFGxnn0MUperC4Xnmydt1Bdi-7z431n4MU/edit#heading=h.oj9omuyq6ow8"
 )
 
 library(xml2)
@@ -98,20 +102,23 @@ revisions_df <- map_df(seq_len(nrow(links)), function(i) {
 
 rev_proc <- revisions_df %>%
   mutate(
-    new_date = paste0(str_replace(date, "^([\\d]* ).*", "\\1"), history_specifier, str_replace(date, ".*(, [\\d:]*)", "\\1")),
+    daymonth = str_replace(date, "^([0-9]+ [A-Za-z]+), .*$", "\\1"),
+    hourminute = str_replace(date, "^.*, ([0-9][0-9]:[0-9][0-9])$", "\\1"),
+    year = ifelse(str_detect(date, "[0-9]+,"), str_replace(date, ".* ([0-9]+), .*", "\\1"), format(Sys.Date(), format = "%Y")),
+    new_date = paste0(daymonth, " ", year, ", ", hourminute),
     posix = as.POSIXct(new_date, format = "%d %B %Y, %H:%M"),
     time = as.integer(posix),
     docname = paste0("/google_drive/", id)
   ) %>%
-  arrange(time) %>%
   group_by(id) %>%
+  arrange(time) %>%
   mutate(
     action = ifelse(seq_len(n()) == 1, "A", "M"),
     gource = paste0(time, "|", collaborator, "|", action, "|", docname)
   ) %>%
   ungroup() %>%
-  arrange(time)
-
+  arrange(time) %>%
+  na.omit()
 
 write_rds(rev_proc, derived_file("rev_proc.rds"))
 
