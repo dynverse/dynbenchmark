@@ -662,7 +662,7 @@ The importance of using multiple metrics to compare complex models has been stat
 
 ```{r}
 add_sfig(
-  figure_file("score_aspects.svg", experiment_id="3-score_rules/5-score_aspects"), 
+  figure_file("score_aspects_v1.svg", experiment_id="3-score_rules/5-score_aspects"), 
   "score_aspects", 
   "Different scores assess different aspects of the correspondence between a prediction and gold standard trajectory.",
   15, 
@@ -738,7 +738,7 @@ add_sfig(
 ## Benchmark
 
 ### Method execution
-Each execution of a method on a dataset was performed in a separate task as part of a gridengine job. Each task was allocated one CPU core of an Intel(R) Xeon(R) CPU E5-2665 0 @ 2.40GHz, and was provided a maximum of 32GB in memory and 6 hours of wall time. One R session was started for each task, with the environment variable `R_MAX_NUM_DLLS` set to 500. The `base::set.seed` was overridden in order to prevent stochastic TI methods from pretending to be deterministic and/or robust. Timings of methods were measured for different steps along the executions, including preprocessing, postprocessing, each of the different metrics, and the method itself.
+Each execution of a method on a dataset was performed in a separate task as part of a gridengine job. Each task was allocated one CPU core of an Intel(R) Xeon(R) CPU E5-2665 @ 2.40GHz, and was provided a maximum of 32GB in memory and 6 hours of wall time. One R session was started for each task, with the environment variable `R_MAX_NUM_DLLS` set to 500. The `base::set.seed` was overridden in order to prevent stochastic TI methods from pretending to be deterministic and/or robust. Timings of methods were measured for different steps along the executions, including preprocessing, postprocessing, each of the different metrics, and the method itself.
 
 ### Effect of prior information
 To assess the effect of prior information on the performance of a method, we compared the performance of methods which do or do not require the prior information using a two-tailed Mann–Whitney U test. P-values were controlled for multiple testing using Benjamini-Hochberg correction.
