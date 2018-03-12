@@ -30,6 +30,15 @@ system(pritt(
 ))
 
 changes_df <- changes %>%
-  mutate(posix = as.POSIXct(time, origin = "1970-01-01"))
+  mutate(
+    posix = as.POSIXct(time, origin = "1970-01-01"),
+    is_doc = grepl("google_drive|dyndocs", path)
+  )
 
-ggplot(changes_df, aes(x = as.factor(format(posix, format = "%y/%m")))) + geom_bar(aes(fill = user))
+ggplot(changes_df, aes(x = as.factor(format(posix, format = "%y/%m")), alpha = is_doc)) +
+  geom_bar(aes(fill = user)) +
+  cowplot::theme_cowplot()
+
+ggplot(changes_df) +
+  ggridges::geom_density_ridges(aes(posix, y = user, fill = user)) +
+  cowplot::theme_cowplot()
