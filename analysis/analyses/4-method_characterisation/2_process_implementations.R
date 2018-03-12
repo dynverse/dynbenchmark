@@ -16,6 +16,16 @@ implementations <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
 implementations$date <- implementations$Preprint
 implementations$date[is.na(implementations$date)] <- implementations$PubDate[is.na(implementations$date)]
 
+# Altmetrics ----------------------------
+implementations_altmetrics <- map(implementations$DOI, function(doi) {
+  tryCatch(
+    rAltmetric::altmetrics(doi=doi) %>% rAltmetric::altmetric_data() %>% select(ends_with("_count")) %>% mutate_all(as.numeric),
+    error = function(x) tibble(cited_by_posts_count=0)
+  )
+}) %>% bind_rows()
+implementations_altmetrics[is.na(implementations_altmetrics)] <- 0
+implementations <- bind_cols(implementations, implementations_altmetrics)
+
 # Trajectory components --------------------------
 # split maximal trajectory types
 implementations <- implementations %>%
@@ -47,8 +57,6 @@ trajectory_type_capabilities <- (trajectory_type_capabilities & !trajectory_type
 
 # add capabilities to implementations
 implementations <- implementations %>% bind_cols(trajectory_type_capabilities)
-
-
 
 ## Non inclusion reasons ------------------------
 implementations$non_inclusion_reasons_split <- implementations$non_inclusion_reasons %>% str_split("[ ]?,[ ]?")
