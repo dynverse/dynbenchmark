@@ -112,10 +112,16 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
 
   readr::write_lines(as.character(Sys.time()), dataset_file(dataset_id = dataset_id, filename = "date.txt"))
 
+  # convert symbols
   conversion_out <- convert_to_symbol(counts)
   original_counts <- conversion_out$counts
   feature_info <- feature_info[conversion_out$filtered, ] %>% mutate(feature_id = colnames(original_counts))
 
+  # add intermediate nodes to bifurcating regions
+  milestone_network <- add_bifurcating_intermediate_nodes(milestone_network, milestone_ids)
+  milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
+
+  # normalise and filter expression
   norm_out <- dynnormaliser::normalise_filter_counts(original_counts, verbose = TRUE)
 
   normalisation_info <- norm_out$info
@@ -129,6 +135,7 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   feature_info <- feature_info %>% slice(match(colnames(counts), feature_id))
   milestone_percentages <- milestone_percentages %>% filter(cell_id %in% cell_ids)
 
+  # extract divergence regions
   part1 <- progressions %>%
     group_by(cell_id) %>%
     filter(n() > 1) %>%
@@ -190,4 +197,21 @@ convert_to_symbol <- function(counts) {
   counts <- counts[, filtered] # remove duplicates
 
   lst(counts, filtered)
+}
+
+
+add_bifurcating_intermediate_nodes <- function(milestone_network, milestone_ids) {
+  map(milestone_ids, function(milestone_id) {
+    milestone_network_from <- milestone_network %>% filter(from == milestone_id)
+    milestone_network_to <- milestone_network %>% filter(to == milestone_id)
+    if(nrow(milestone_network_to) == 0 && milestone_network_from >= 2) {
+      intermediate_node <- paste0("INTERMEDIATE_", dynutils::random_time_string())
+      bind_rows(
+        tibble(from = milestone_id, to = intermediate_node, length=1e-10, directed=TRUE),
+        milestone_network_from %>% mutate(from = intermediate_node)
+      )
+    } else {
+      milestone_network_from
+    }
+  }) %>% bind_rows()
 }
