@@ -2,6 +2,8 @@ library(cowplot)
 library(tidyverse)
 library(dynalysis)
 
+experiment("11-evaluation_robustness")
+
 scores <- c("harm_mean", "rank_correlation", "rank_edge_flip", "rank_rf_mse")
 
 methods <- read_rds(derived_file("methods.rds", experiment_id = "4-method_characterisation"))
@@ -17,8 +19,6 @@ method_order <- method_scores %>%
   arrange(-harm_mean) %>%
   filter(method_id %in% methods$method_id) %>%
   pull(method_id)
-
-
 
 
 ##  ............................................................................
@@ -37,12 +37,12 @@ performance_variability_tests <- map(method_order[2:4], function(to) {
 
 ymax <- max(indrep_scores$harm_mean)
 indrep_scores %>%
-  mutate(method_id = factor(method_id, method_order)) %>%
+  mutate(method_id = factor(method_id, (method_order))) %>%
   ggplot(aes(method_id, harm_mean)) +
-    geom_boxplot() +
-    geom_segment(aes(x = method_order[[1]], xend = to, y=ymax+i/10, yend=ymax+i/10), data=performance_variability_tests) +
-    geom_text(aes(x = rev(i)/2+1, y = ymax+i/10, label=label_pvalue(p_value)), data=performance_variability_tests, vjust=0) +
-    coord_flip()
+  geom_violin() +
+  geom_point(data=method_scores) +
+  geom_segment(aes(x = method_order[[1]], xend = to, y=ymax+i/10, yend=ymax+i/10), data=performance_variability_tests) +
+  geom_label(aes(x = rev(i)/2+1, y = ymax+i/10, label=label_pvalue(p_value)), data=performance_variability_tests, vjust=0)
 
 performance_variability_tests <- combn(method_order, 2) %>% t %>% as_data_frame() %>% magrittr::set_colnames(c("from", "to")) %>%
   mutate(test = map2(from, to, function(from, to) {
@@ -83,8 +83,8 @@ for (i in seq_len(nrow(first_significant))) {
 
 first_significant %>%
   ggplot() +
-    geom_segment(aes(x=x, xend=x, y=ystart, yend=yend), alpha=0.5) +
-    geom_segment(aes(x=x-0.5, xend=x, y=ystart, yend=ystart), alpha=0.5) +
-    geom_segment(aes(x=x-0.5, xend=x, y=yend, yend=yend), alpha=0.5) +
-    scale_y_continuous(breaks=seq_along(method_order), label=method_order)
+  geom_segment(aes(x=x, xend=x, y=ystart, yend=yend), alpha=0.5) +
+  geom_segment(aes(x=x-0.5, xend=x, y=ystart, yend=ystart), alpha=0.5) +
+  geom_segment(aes(x=x-0.5, xend=x, y=yend, yend=yend), alpha=0.5) +
+  scale_y_continuous(breaks=seq_along(method_order), label=method_order)
 
