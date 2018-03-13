@@ -22,7 +22,8 @@ labels <- tibble::tribble(
   FALSE, "No", "No",
   "trajectory_type_gold", "Gold standard trajectory type", "Gold trajectory type",
   "trajectory_type_predicted", "Predicted trajectory type", "Predicted trajectory type",
-  "harm_mean", "Harmonic mean", "Harmonic mean"
+  "harm_mean", "Harmonic mean", "Harmonic mean",
+  "task_source", "Dataset source", "Dataset source"
 )
 
 #' Short labelling function
