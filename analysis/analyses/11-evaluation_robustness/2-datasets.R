@@ -8,6 +8,9 @@ scores <- c("harm_mean", "rank_correlation", "rank_edge_flip", "rank_rf_mse")
 
 methods <- read_rds(derived_file("methods.rds", experiment_id = "4-method_characterisation"))
 outputs_list <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_parameters/3-evaluate_parameters"))
+outputs_ind <- outputs_list$outputs_ind %>%
+  mutate(method_id = method_short_name) %>%
+  filter(method_id %in% methods$method_id)
 method_scores <- outputs_list$outputs_summmethod_totals %>%
   rename(method_id = method_short_name) %>%
   filter(method_id %in% methods$method_id) %>%
@@ -23,27 +26,23 @@ method_order <- method_scores %>%
 
 ##  ............................................................................
 ##  Dataset variability                                                     ####
-
-performance_variability_tests <- map(method_order[2:4], function(to) {
-  test <- wilcox.test(indrep_scores$harm_mean[indrep_scores$method_id == method_order[1]], indrep_scores$harm_mean[indrep_scores$method_id == to], paired = T)
-  tibble(
-    to = to,
-    p_value = test$p.value
-  )
-}) %>% bind_rows() %>%
-  mutate(q_value = p.adjust(p_value, "BH")) %>%
-  mutate(i = rev(row_number()))
-
-
 ymax <- max(indrep_scores$harm_mean)
-indrep_scores %>%
+performance_datasets_variability <- indrep_scores %>%
   mutate(method_id = factor(method_id, (method_order))) %>%
+  arrange(runif(n())) %>%
   ggplot(aes(method_id, harm_mean)) +
-  geom_violin() +
+  ggbeeswarm::geom_quasirandom(aes(color=task_source)) +
+  # geom_boxplot(outlier.size=0.5) +
   geom_point(data=method_scores) +
-  geom_segment(aes(x = method_order[[1]], xend = to, y=ymax+i/10, yend=ymax+i/10), data=performance_variability_tests) +
-  geom_label(aes(x = rev(i)/2+1, y = ymax+i/10, label=label_pvalue(p_value)), data=performance_variability_tests, vjust=0)
+  scale_y_continuous(label_long("overall_performance_on_dataset")) +
+  scale_x_discrete("", label=set_names(methods$method_name, methods$method_id)[method_order]) +
+  scale_color_brewer(label_long("task_source"), palette="Dark2") +
+  theme(axis.text.x = element_text(angle = 45, hjust=1))
+performance_datasets_variability
 
+
+##  ............................................................................
+##  Significant performance                                                 ####
 performance_variability_tests <- combn(method_order, 2) %>% t %>% as_data_frame() %>% magrittr::set_colnames(c("from", "to")) %>%
   mutate(test = map2(from, to, function(from, to) {
     wilcox.test(indrep_scores$harm_mean[indrep_scores$method_id == to], indrep_scores$harm_mean[indrep_scores$method_id == from], paired = T, conf.int=T, alternative="less")
@@ -59,11 +58,12 @@ performance_variability_tests <- combn(method_order, 2) %>% t %>% as_data_frame(
     from = factor(from, method_order),
     to = factor(to, method_order)
   )
+
+
 performance_variability_tests %>%
   ggplot() +
   geom_tile(aes(to, from, fill=q_value)) +
   scale_fill_gradientn(colors=RColorBrewer::brewer.pal(6, "YlGnBu"), values=c(0, 0.0001, 0.001, 0.01, 0.1, 1))
-
 
 
 first_significant <- performance_variability_tests %>%
@@ -72,19 +72,163 @@ first_significant <- performance_variability_tests %>%
   filter(row_number() == 1) %>%
   ungroup() %>%
   mutate(ystart = as.numeric(from), yend = as.numeric(to)) %>%
-  mutate(x=0)
+  mutate(ystep = ystart - yend) %>%
+  mutate(x=0) %>%
+  arrange(-ystep)
 
 for (i in seq_len(nrow(first_significant))) {
   row <- extract_row_to_list(first_significant, i)
-  overlapping <- first_significant$ystart <= row$yend & row$ystart <= first_significant$yend
+  overlapping <- first_significant$ystart < row$yend & row$ystart < first_significant$yend
   x <- which(!((1:1000 %in% first_significant$x[overlapping]))) %>% first()
   first_significant$x[i] <- x
 }
 
-first_significant %>%
-  ggplot() +
-  geom_segment(aes(x=x, xend=x, y=ystart, yend=yend), alpha=0.5) +
-  geom_segment(aes(x=x-0.5, xend=x, y=ystart, yend=ystart), alpha=0.5) +
-  geom_segment(aes(x=x-0.5, xend=x, y=yend, yend=yend), alpha=0.5) +
-  scale_y_continuous(breaks=seq_along(method_order), label=method_order)
+first_significant <- first_significant %>%
+  gather("y_pos", "y_value", ystart, yend) %>%
+  arrange(as.numeric(to), -as.numeric(from)) %>%
+  group_by(y_value) %>%
+  mutate(y_value2 = y_value+0.1 * (row_number()-1) - (n()-1) * 0.1 / 2) %>%
+  # mutate(y_value2 = y_value) %>%
+  ungroup() %>%
+  select(-y_value) %>%
+  spread(y_pos, y_value2)
 
+first_significant_bars <- first_significant %>%
+  ggplot() +
+  geom_segment(aes(x=x/10, xend=x/10, y=ystart, yend=yend), alpha=0.5) +
+  geom_segment(aes(x=x/10, xend=0, y=ystart, yend=ystart), alpha=0.5) +
+  geom_segment(aes(x=0, xend=x/10, y=yend, yend=yend), alpha=0.5) +
+  scale_y_continuous("", breaks=seq_along(method_order), expand=c(0,0),limits=c(0.5, length(method_order)+0.5)) +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 45, hjust=1))
+first_significant_bars
+
+
+
+##  ............................................................................
+##  Combined dataset variability and significance plot                      ####
+performance_dataset_variability_combined <- plot_grid(
+  first_significant_bars + theme_void(),
+  performance_datasets_variability,
+  ncol=1,
+  align="v",
+  axis="lr",
+  rel_heights = c(0.2, 0.8)
+)
+performance_dataset_variability_combined
+save_plot(figure_file("performance_dataset_variability_combined.svg"), performance_dataset_variability_combined, base_width=20, base_height=5)
+
+
+##  ............................................................................
+##  Subsample datasets                                                      ####
+rank_methods <- function(outputs_ind) {
+  outputs_summrepl <- outputs_ind %>%
+    group_by(method_name, method_short_name, task_id, paramset_id, trajectory_type, task_source, prior_str, trajectory_type_f) %>%
+    summarise_if(is.numeric, mean) %>%
+    ungroup() %>%
+    mutate(
+      harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean)
+    )
+
+  outputs_summtrajtype <- outputs_summrepl %>%
+    group_by(method_name, method_short_name, task_source, paramset_id, trajectory_type, trajectory_type_f) %>%
+    mutate(n = n()) %>%
+    summarise_if(is.numeric, mean) %>%
+    ungroup()
+
+  outputs_summmethod <- outputs_summtrajtype %>%
+    group_by(method_name, method_short_name, task_source, paramset_id) %>%
+    mutate(n = n()) %>%
+    summarise_if(is.numeric, mean) %>%
+    ungroup()
+
+    outputs_summmethod %>%
+      group_by(method_name, method_short_name, paramset_id) %>%
+      summarise_if(is.numeric, mean) %>%
+      ungroup() %>%
+      mutate(task_source = "mean") %>%
+      mutate(method_id = method_short_name)
+}
+
+
+# subsample datasets, calculate harm_mean
+all_task_ids <- unique(outputs_ind$task_id)
+
+task_sample_scores <- pbapply::pblapply(cl=8, 1:length(all_task_ids), function(n_tasks) {
+  map(1:100, function(tasks_sample_i) {
+    task_ids <- sample(all_task_ids, n_tasks)
+    method_scores <- rank_methods(outputs_ind %>% filter(task_id %in% task_ids)) %>%
+      mutate(n_tasks = n_tasks, tasks_sample_i = tasks_sample_i)
+  }) %>% bind_rows()
+}) %>% bind_rows()
+
+# plot harm mean correlations across subsamples
+task_sample_correlations <- task_sample_scores %>%
+  group_by(n_tasks, tasks_sample_i) %>%
+  slice(match(method_scores$method_id, method_id)) %>%
+  do(cor = cor(.$harm_mean, method_scores$harm_mean, method="spearman")) %>%
+  ungroup() %>%
+  mutate(cor = unlist(cor)) %>%
+  mutate(n_tasks_perc = n_tasks / length(all_task_ids))
+write_rds(task_sample_correlations, result_file("task_sample_correlations.rds"))
+
+task_sample_correlations_boxplot <- task_sample_correlations %>%
+  ggplot(aes(n_tasks, cor, group=n_tasks)) +
+    geom_boxplot() +
+    geom_hline(yintercept=1) +
+    scale_y_continuous(label_long("correlation_between_method_ordering"), expand=c(0, 0), limits=c(0,1)) +
+    scale_x_continuous(label_long("n_datasets"), expand=c(0, 0), breaks=c(1, seq(10, length(all_task_ids)-10, 10), length(all_task_ids)))
+task_sample_correlations_boxplot
+
+# calculate rank variability of each method
+task_sample_ranks <- task_sample_scores %>%
+  group_by(n_tasks, tasks_sample_i) %>%
+  mutate(harm_mean_rank = rank(-harm_mean)) %>%
+  ungroup()
+
+task_sample_ranks_match <- task_sample_ranks %>%
+  group_by(method_id, n_tasks) %>%
+  summarise(rank_match = mean(harm_mean_rank == match(method_id, method_order)))
+write_rds(task_sample_ranks_match, result_file("task_sample_ranks_match.rds"))
+
+task_sample_ranks_match %>%
+  ggplot() +
+    geom_line(aes(n_tasks, rank_match, color=method_id))
+
+# calculate n times a method is in the top
+task_sample_n_top <- task_sample_ranks %>%
+  group_by(n_tasks, method_id) %>%
+  summarise(n_top = sum(harm_mean_rank == 1)) %>%
+  mutate(method_id = factor(method_id, method_order)) %>%
+  ungroup()
+
+task_sample_n_top %>%
+  filter(n_tasks <= 10) %>%
+  ggplot(aes(method_id, n_top)) +
+    geom_bar(stat="identity")
+
+# calculate the maximal subset of datasets at which a method is top
+task_sample_max_tasks_top <- task_sample_n_top %>%
+  filter(n_top > 1) %>%
+  group_by(method_id) %>%
+  summarise(max_n_tasks_top = max(n_tasks)) %>%
+  complete(method_id, fill=list(max_n_tasks_top=0))
+
+# plot rank variability of methods
+map(method_order[1:3], function(method_id) {
+  task_sample_scores %>%
+    group_by(n_tasks, tasks_sample_i) %>%
+    mutate(harm_mean_rank = rank(-harm_mean)) %>%
+    filter(method_id == !!method_id) %>%
+    ggplot(aes(n_tasks, harm_mean_rank, group=n_tasks)) +
+      geom_violin()
+})
+
+
+
+
+
+
+
+rank_methods(outputs_ind) %>% slice(match(method_scores$method_id, method_id))
+method_scores
