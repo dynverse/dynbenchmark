@@ -135,6 +135,8 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   feature_info <- feature_info %>% slice(match(colnames(counts), feature_id))
   milestone_percentages <- milestone_percentages %>% filter(cell_id %in% cell_ids)
 
+  progressions <- dynwrap::convert_milestone_percentages_to_progressions(cell_ids, milestone_ids, milestone_network, milestone_percentages)
+
   # extract divergence regions
   part1 <- progressions %>%
     group_by(cell_id) %>%
@@ -160,7 +162,7 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     divergence_regions <- NULL
   }
 
-  wrap_data(
+  dataset <- dynwrap::wrap_data(
     id = dataset_id,
     cell_ids = cell_ids,
     cell_info = cell_info,
@@ -168,12 +170,12 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     cell_grouping = cell_grouping,
     normalisation_info = normalisation_info,
     creation_date = Sys.time()
-  ) %>% add_trajectory_to_wrapper(
+  ) %>% dynwrap::add_trajectory_to_wrapper(
     milestone_ids = milestone_ids,
     milestone_network = milestone_network,
     divergence_regions = divergence_regions,
     progressions = progressions
-  ) %>% add_expression_to_wrapper(
+  ) %>% dynwrap::add_expression_to_wrapper(
     counts = counts,
     expression = expression,
     feature_info = feature_info
