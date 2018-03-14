@@ -117,10 +117,6 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   original_counts <- conversion_out$counts
   feature_info <- feature_info[conversion_out$filtered, ] %>% mutate(feature_id = colnames(original_counts))
 
-  # add intermediate nodes to bifurcating regions
-  milestone_network <- add_bifurcating_intermediate_nodes(milestone_network, milestone_ids)
-  milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
-
   # normalise and filter expression
   norm_out <- dynnormaliser::normalise_filter_counts(original_counts, verbose = TRUE)
 
@@ -135,6 +131,15 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   feature_info <- feature_info %>% slice(match(colnames(counts), feature_id))
   milestone_percentages <- milestone_percentages %>% filter(cell_id %in% cell_ids)
 
+  # cut out unrepresented milestones
+  milestone_network <- cut_unrepresented_milestones(milestone_network, milestone_percentages)
+  milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
+
+  # add intermediate nodes to bifurcating regions
+  milestone_network <- add_bifurcating_intermediate_nodes(milestone_network, milestone_ids)
+  milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
+
+  # get progressions
   progressions <- dynwrap::convert_milestone_percentages_to_progressions(cell_ids, milestone_ids, milestone_network, milestone_percentages)
 
   # extract divergence regions
@@ -199,6 +204,30 @@ convert_to_symbol <- function(counts) {
   counts <- counts[, filtered] # remove duplicates
 
   lst(counts, filtered)
+}
+
+
+cut_unrepresented_milestones <- function(milestone_network, milestone_percentages) {
+  unrepresented_milestones <- setdiff(milestone_ids, milestone_percentages$milestone_id)
+
+  for(milestone_id in unrepresented_milestones) {
+    milestone_network_from <- milestone_network %>% filter(from == milestone_id)
+    milestone_network_to <- milestone_network %>% filter(to == milestone_id)
+    if (nrow(milestone_network_from) > 0 & nrow(milestone_network_to) > 0) {
+      milestone_network <- bind_rows(
+        milestone_network,
+        crossing(milestone_network_from, milestone_network_to) %>%
+          mutate(length = length + length1) %>%
+          mutate(from = from1) %>%
+          select(from, to, length, directed)
+      )
+    }
+
+    milestone_network <- milestone_network %>%
+      filter(from != milestone_id & to != milestone_id)
+  }
+
+  milestone_network
 }
 
 
