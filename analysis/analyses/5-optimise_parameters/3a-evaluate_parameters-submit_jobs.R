@@ -8,7 +8,7 @@ methods <- get_descriptions() %>% filter(short_name != "manual")
 metrics <- c("correlation", "rf_mse", "edge_flip")
 timeout_per_execution <- 60 * 60 * 6
 num_repeats <- 4
-max_memory_per_execution <- "32G"
+max_memory_per_execution <- "8G"
 execute_before <- "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500; export DYNALYSIS_PATH=/group/irc/shared/dynalysis/"
 verbose <- TRUE
 
@@ -20,19 +20,19 @@ remote_output_folder <- paste0("/scratch/irc/shared/dynverse_derived/", getOptio
 task_ids <- read_rds(paste0(local_tasks_folder, "/task_ids.rds"))
 
 # use previous output to determine method ordering based on its running time
-# #read_rds("analysis/data/derived_data/5-optimise_parameters-previousresults/180220-derived_data/3-evaluate_parameters/outputs_postprocessed.rds")
-# read_rds("analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/outputs_postprocessed.rds") %>%
+# read_rds("analysis/data/derived_data/5-optimise_parameters-previousresults/180226-derived_data/3-evaluate_parameters/outputs_postprocessed.rds") %>%
+# # read_rds("analysis/data/derived_data/5-optimise_parameters/3-evaluate_parameters/outputs_postprocessed.rds") %>%
 #   .$outputs_summmethod %>%
 #   group_by(method_short_name) %>%
 #   summarise_if(is.numeric, sum) %>%
-#   arrange(time_method_mean) %>%
+#   arrange(time_method) %>%
 #   .$method_short_name %>%
 #   paste("\"", ., "\"", collapse = ", ", sep = "") %>%
 #   cat
 methods_order <- c(
-  "identity", "scimitar", "shuffle", "random", "manual", "slngsht", "mpath", "waterfll", "sincell", "tscan", "scorpius",
-  "embeddr", "dpt", "wndrlst", "mnclddr", "wishbone", "slice", "mnclica", "ctvem", "ouijaflw", "slicer", "recat", "gpfates",
-  "topslam", "scuba", "phenopth", "ctmaptpx", "mfa", "stemid", "ctgibbs", "scoup", "pseudogp", "ouija"
+  "identity", "shuffle", "random", "manual_wouters", "manual_robrechtc", "slngsht", "mpath", "waterfll", "tscan", "sincell",
+  "scorpius", "embeddr", "wndrlst", "wishbone", "mnclddr", "dpt", "mnclica", "slice", "ctvem", "ouijaflw", "slicer", "scuba",
+  "topslam", "gpfates", "phenopth", "ctmaptpx", "mfa", "recat", "stemid", "scoup", "ctgibbs", "scimitar", "ouija", "pseudogp"
 )
 methods <- methods %>% slice(c(match(methods_order, methods$short_name), which(!methods$short_name %in% methods_order)))
 methods$short_name
