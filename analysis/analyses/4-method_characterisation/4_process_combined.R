@@ -1,5 +1,6 @@
 library(tidyverse)
 library(dynalysis)
+library(googlesheets)
 
 experiment("4-method_characterisation")
 
@@ -35,3 +36,8 @@ write_rds(implementations, derived_file("implementations.rds"))
 write_rds(implementations_evaluated, derived_file("implementations_evaluated.rds"))
 write_rds(methods, derived_file("methods.rds"))
 write_rds(methods_evaluated, derived_file("methods_evaluated.rds"))
+
+write_rds(implementations, result_file("implementations.rds"))
+write_rds(implementations_evaluated, result_file("implementations_evaluated.rds"))
+write_rds(methods, result_file("methods.rds"))
+write_rds(methods_evaluated, result_file("methods_evaluated.rds"))

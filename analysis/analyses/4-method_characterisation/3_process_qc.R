@@ -67,6 +67,7 @@ implementation_qc <- implementation_qc_processed
 
 write_rds(implementation_qc_processed, derived_file("implementation_qc.rds"))
 write_rds(checks, derived_file("checks.rds"))
+write_rds(checks, result_file("checks.rds"))
 
 ##  ............................................................................
 ##  Calculate final qc scores                                               ####
