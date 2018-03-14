@@ -134,6 +134,7 @@ performance_dataset_variability_combined <- plot_grid(
 )
 performance_dataset_variability_combined
 save_plot(figure_file("performance_dataset_variability_combined.svg"), performance_dataset_variability_combined, base_width=20, base_height=5)
+write_rds(performance_dataset_variability_combined, figure_file("performance_dataset_variability_combined.rds"))
 
 
 ##  ............................................................................
