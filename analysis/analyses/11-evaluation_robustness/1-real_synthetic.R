@@ -5,7 +5,7 @@ library(dynalysis)
 library(tidygraph)
 library(ggraph)
 
-experiment("5-optimise_parameters/5-real_synthetic_comparison")
+experiment("11-evaluation_robustness")
 
 extra_methods <- tibble(
   method_id = c("manual_robrechtc", "manual_wouters", "identity", "shuffle", "random"),
@@ -42,7 +42,7 @@ trajtype_source_scores <- bind_rows(
   source_score
 ) %>%
   left_join(methods, "method_id") #%>%
-  # filter(method_type == "algorithm")
+# filter(method_type == "algorithm")
 
 # set order
 trajtype_source_scores <- trajtype_source_scores %>%
@@ -55,19 +55,19 @@ trajtype_source_score_cors <- trajtype_source_scores %>%
 
 real_synthetic_comparison <- trajtype_source_scores %>%
   ggplot(aes(real, synthetic)) +
-    geom_abline(intercept = 0, slope = 1) +
-    geom_point(aes(color=trajectory_type)) +
-    geom_text(aes(label=round(cor, 2)), x=0.1, y=0.9, data=trajtype_source_score_cors, size=5) +
-    facet_wrap(~trajectory_type, labeller = label_facet(), nrow=2) +
-    scale_color_manual(values=set_names(c("black", "black", trajectory_types$color), c("all", "overall", trajectory_types$id))) +
-    scale_x_continuous(breaks=c(0,1))+
-    scale_y_continuous(breaks=c(0,1))+
-    coord_equal() +
-    labs(x="Real", y="Synthetic")+
-    theme_bw() +
-    theme(
-      legend.position="none", panel.grid = element_blank()
-    )
+  geom_abline(intercept = 0, slope = 1) +
+  geom_point(aes(color=trajectory_type)) +
+  geom_text(aes(label=round(cor, 2)), x=0.1, y=0.9, data=trajtype_source_score_cors, size=5) +
+  facet_wrap(~trajectory_type, labeller = label_facet(), nrow=2) +
+  scale_color_manual(values=set_names(c("black", "black", trajectory_types$color), c("all", "overall", trajectory_types$id))) +
+  scale_x_continuous(breaks=c(0,1))+
+  scale_y_continuous(breaks=c(0,1))+
+  coord_equal() +
+  labs(x="Real", y="Synthetic")+
+  theme_bw() +
+  theme(
+    legend.position="none", panel.grid = element_blank()
+  )
 real_synthetic_comparison
 real_synthetic_comparison %>% write_rds(figure_file("real_synthetic_comparison.rds"))
 real_synthetic_comparison %>% ggsave(figure_file("real_synthetic_comparison.svg"), ., width=15, height=5)
