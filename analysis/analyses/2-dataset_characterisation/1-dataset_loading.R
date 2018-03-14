@@ -76,7 +76,7 @@ tasks_synthetic <- map(seq_len(nrow(tasks_synthetic)), function(task_i) {
   environment(task$geodesic_dist) <- env
 
   task
-}) %>% dynutils::list_as_tibble() %>% mutate(id = paste0("synthetic/", id))
+}) %>% dynutils::list_as_tibble()
 
 
 ##  ............................................................................
