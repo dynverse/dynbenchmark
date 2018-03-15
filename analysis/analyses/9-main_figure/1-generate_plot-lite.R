@@ -6,6 +6,7 @@ experiment("9-main_figure")
 
 list2env(read_rds(result_file("aggregated_data.rds", "9-main_figure")), environment())
 
+method_tib <- method_tib %>% filter(pct_errored < .5)
 method_ord <- method_tib %>% arrange(desc(harm_mean)) %>% .$method_name
 
 # determine palettes
@@ -94,7 +95,7 @@ method_tib <- method_tib %>%
     topinf_colour = topinf_colours[topology_inference_type],
     maxtraj_colour = maxtraj_colours[maximal_trajectory_types],
     avg_time_lab_colour = ifelse(rank_time_method_sc < .75, "white", "black"),
-    pct_errored_lab_colour = ifelse(pct_succeeded < .75, "white", "black")
+    pct_errored_lab_colour = ifelse(pct_succeeded < .82, "white", "black")
   )
 
 # AXIS INFO
@@ -121,7 +122,6 @@ axis <-
     "timl",    "Average time label",    -1,   1,       F,           "text",     F,               "avg_time_lab_colour",                     "avg_time_lab",
     "erpc",    "% Errored",            0.1,   1,       T,           "rect",     F,               "pct_succeeded_sc_col",                    "pct_succeeded_sc",
     "erpl",    "% Errored label",       -1,   1,       F,           "text",     F,               "pct_errored_lab_colour",                  "pct_errored_lab",
-    "erro",    "Error reason",         0.1,   1,       T,           "pie",      F,               list(error_colours),                       list(c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic")),
 
     "qcsc",    "Score",                1.0,   4,       T,           "bar",      F,               "qc_score_sc_col",                         "qc_score_sc",
 
@@ -148,9 +148,9 @@ grouping <-
   tribble(
     ~label,                        ~y, ~xmin,          ~xmax,          ~key,
     "Method characterisation",     3,  axtr$name$xmin, axtr$topo$xmax, "a",
-    "Benchmark",                   3,  axtr$harm$xmin, axtr$erro$xmax, "b",
+    "Benchmark",                   3,  axtr$harm$xmin, axtr$erpl$xmax, "b",
     "Per trajectory type",         2,  axtr$line$xmin, axtr$grap$xmax, "",
-    "Execution",                   2,  axtr$time$xmin, axtr$erro$xmax, "",
+    "Execution",                   2,  axtr$time$xmin, axtr$erpl$xmax, "",
     "Quality control",             3,  axtr$qcsc$xmin, axtr$qcpa$xmax, "c",
     "Categories",                  2,  axtr$qcav$xmin, axtr$qcpa$xmax, ""
   ) %>%
@@ -208,29 +208,6 @@ text_data <- geom_data_processor(
       mutate(
         x = axis_l$x
       )
-  })
-pie_data <- geom_data_processor(
-  "pie",
-  function(axis_l, method_tib_filt) {
-    cols <- axis_l$col[[1]]
-    values <- axis_l$value[[1]]
-    method_tib_filt %>%
-      select(method_short_name, y0 = method_y, one_of(values)) %>%
-      gather(piece, value, one_of(values)) %>%
-      arrange(method_short_name, piece) %>%
-      group_by(method_short_name) %>%
-      mutate(
-        col = cols[piece],
-        x0 = axis_l$x,
-        pct = value / sum(value),
-        rad = pct * 2 * pi,
-        rad_end = cumsum(rad),
-        rad_start = rad_end - rad,
-        r0 = 0,
-        r = row_height / 2
-      ) %>%
-      filter(rad_end != rad_start) %>%
-      ungroup()
   })
 
 
@@ -314,20 +291,12 @@ g1 <- ggplot(method_tib) +
   # METHOD NAMES
   geom_text(aes(x = axtr$name$xmax, y = method_y, label = method_name), hjust = 1, vjust = .5) +
 
-  # INSUFFICIENT DATA LABEL
-  geom_text(aes(x = axtr$line$x, y = method_y, label = "insufficient data"), method_tib %>% filter(remove_results), hjust = .5, vjust = .5) +
-
   # BARS
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), bar_data, colour = "black", size = .25) +
   # RECTANGLES
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), rect_data, colour = "black", size = .25) +
   # CIRCLES
   ggforce::geom_circle(aes(x0 = x0, y0 = y0, fill = col, r = size), circle_data, size = .25) +
-  # STARS
-  ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = col), data = pie_data %>% filter(pct <= (1-1e-10)), size = .25) +
-  ggforce::geom_circle(aes(x0 = x0, y0 = y0, r = r, fill = col), data = pie_data %>% filter(pct > (1-1e-10)), size = .25) +
-  # ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = NA), data = pie_data, size = .25) +
-  # geom_segment(aes(x = x0, xend = x0, y = y0 + r0, yend = y0 + r), data = pie_data, size = .25) +
   # TEXT
   geom_text(aes(x = x, y = y, label = label, colour = col), data = text_data, vjust = .5, hjust = .5) +
 
@@ -341,33 +310,31 @@ g1 <- ggplot(method_tib) +
   expand_limits(x = c(max(axis$xmax)+2), y = legy_start - 4.1) +
 
   # LEGEND: TOPOLOGY
-  geom_text(aes(3, legy_start - 1, label = "Topology constraints"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  geom_text(aes(3.5, legy_start - 1 - y * .7, label = label, colour = col), leg_topinf, hjust = 0, vjust = 0) +
-  geom_text(aes(6.5, legy_start - 1 - y * .7, label = explanation), leg_topinf, hjust = 0, vjust = 0) +
+  geom_text(aes(1, legy_start - 1, label = "Topology constraints"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  geom_text(aes(1.5, legy_start - 1 - y * .7, label = label, colour = col), leg_topinf, hjust = 0, vjust = 0) +
+  geom_text(aes(4.5, legy_start - 1 - y * .7, label = explanation), leg_topinf, hjust = 0, vjust = 0) +
 
   # LEGEND: PRIOR
-  geom_text(aes(12.5, legy_start - 1, label = "Prior"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  geom_text(aes(13, legy_start - 1 - y * .7, label = label, colour = col), leg_prior, hjust = 0, vjust = 0) +
-  geom_text(aes(14.5, legy_start - 1- y * .7, label = explanation), leg_prior, hjust = 0, vjust = 0) +
+  geom_text(aes(9.5, legy_start - 1, label = "Prior"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  geom_text(aes(10, legy_start - 1 - y * .7, label = label, colour = col), leg_prior, hjust = 0, vjust = 0) +
+  geom_text(aes(11.5, legy_start - 1- y * .7, label = explanation), leg_prior, hjust = 0, vjust = 0) +
 
   # LEGEND: BENCHMARK
-  geom_text(aes(20.5, legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggforce::geom_circle(aes(x0 = 21.3 + x, y0 = legy_start - 2.3 + r, r = r, fill = colbench), size = .25, leg_circles) +
-  geom_text(aes(x = 21.3 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% slice(c(1, n()))) +
-  # ggimage::geom_subview(x = 22, y = legy_start - 2, subview = bench_leg, width = 3, height = 1) +
+  geom_text(aes(16.5, legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  ggforce::geom_circle(aes(x0 = 17.3 + x, y0 = legy_start - 2.3 + r, r = r, fill = colbench), size = .25, leg_circles) +
+  geom_text(aes(x = 17.3 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% slice(c(1, n()))) +
 
   # LEGEND: PCT ERRORED
-  geom_text(aes(26, legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggforce::geom_arc_bar(aes(x0 = 26.5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = fill), size = .25, error_leg_df) +
-  ggforce::geom_arc_bar(aes(x0 = 26.5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = NA), size = .25, error_leg_df) +
-  geom_text(aes(x = 26.5 + lab_x + .5, y = legy_start - 2.5 + lab_y, label = label, vjust = vjust, hjust = hjust), error_leg_df) +
-  geom_segment(aes(x = 26.5, xend = 26.5, y = legy_start - 2.5, yend = legy_start - 2.5 + row_height*.75), data = data_frame(z = 1), size = .25) +
+  geom_text(aes(22, legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  ggforce::geom_arc_bar(aes(x0 = 22.5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = fill), size = .25, error_leg_df) +
+  ggforce::geom_arc_bar(aes(x0 = 22.5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = NA), size = .25, error_leg_df) +
+  geom_text(aes(x = 22.5 + lab_x + .5, y = legy_start - 2.5 + lab_y, label = label, vjust = vjust, hjust = hjust), error_leg_df) +
+  geom_segment(aes(x = 22.5, xend = 22.5, y = legy_start - 2.5, yend = legy_start - 2.5 + row_height*.75), data = data_frame(z = 1), size = .25) +
 
   # LEGEND: QC SCORE
-  geom_text(aes(34, legy_start - 1, label = "QC score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  # ggimage::geom_subview(x = 40, y = legy_start - 2, subview = qc_leg, width = 3, height = 1)
-  ggforce::geom_circle(aes(x0 = 34.8 + x, y0 = legy_start - 2.3 + r, r = r, fill = colqc), size = .25, leg_circles) +
-  geom_text(aes(x = 34.8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% slice(c(1, n()))) +
+  geom_text(aes(29, legy_start - 1, label = "QC score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  ggforce::geom_circle(aes(x0 = 29.8 + x, y0 = legy_start - 2.3 + r, r = r, fill = colqc), size = .25, leg_circles) +
+  geom_text(aes(x = 29.8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% slice(c(1, n()))) +
 
   # GENERATION SENTENCE
   geom_text(aes(1, legy_start - 4, label = stamp), colour = "#cccccc", hjust = 0, vjust = 0) +
