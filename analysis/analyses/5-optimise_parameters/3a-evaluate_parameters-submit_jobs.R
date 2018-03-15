@@ -31,8 +31,8 @@ task_ids <- read_rds(paste0(local_tasks_folder, "/task_ids.rds"))
 #   cat
 methods_order <- c(
   "identity", "shuffle", "random", "manual_wouters", "manual_robrechtc", "slngsht", "mpath", "waterfll", "tscan", "sincell",
-  "scorpius", "embeddr", "wndrlst", "wishbone", "mnclddr", "dpt", "mnclica", "slice", "ctvem", "ouijaflw", "slicer", "scuba",
-  "topslam", "gpfates", "phenopth", "ctmaptpx", "mfa", "recat", "stemid", "scoup", "ctgibbs", "scimitar", "ouija", "pseudogp"
+  "scorpius", "scorspar", "embeddr", "wndrlst", "wishbone", "mnclddr", "dpt", "mnclica", "slice", "ctvem", "ouijaflw", "slicer", "scuba",
+  "topslam", "gpfates", "phenopth", "ctmaptpx", "mfa", "stemid2", "recat", "comp1", "stemid", "scoup", "ctgibbs", "scimitar", "ouija", "pseudogp"
 )
 methods <- methods %>% slice(c(match(methods_order, methods$short_name), which(!methods$short_name %in% methods_order)))
 methods$short_name
