@@ -53,9 +53,28 @@ topology_sensitivity %>% ggsave(figure_file("topology_sensitivity.svg"), ., widt
 
 
 # table for correct topology prediction
-ind_scores %>%
-  group_by(method_id, trajectory_type) %>%
-  summarise(perc_perfect = mean(perfect_edge_flip)) %>%
-  filter(method_id %in% method_order[1:5]) %>%
-  View
-therefore
+topology_sensitivity_table <- map(c("html", "latex"), function(format) {
+  ind_scores %>%
+    mutate(trajectory_type = factor(trajectory_type, trajectory_types$id)) %>%
+    mutate(method_id = factor(method_id, method_order)) %>%
+    arrange(method_id) %>%
+    group_by(method_id, trajectory_type) %>%
+    summarise(perc_perfect = mean(perfect_edge_flip)) %>%
+    spread(trajectory_type, perc_perfect) %>%
+    ungroup() %>%
+    mutate_at(
+      vars(-method_id),
+      ~kableExtra::cell_spec(
+        scales::percent(.),
+        format,
+        background=kableExtra::spec_color(., scale_from=c(0, 1)),
+        color = ifelse(. > 0.5, "black", "white")
+    )) %>%
+    mutate(method_id = methods$method_name[match(method_id, methods$method_id)]) %>%
+    rename_at(vars(-method_id), ~trajectory_types$simplified[match(., trajectory_types$id)]) %>%
+    rename_all(label_long) %>%
+    knitr::kable(format, escape = F) %>%
+    kableExtra::kable_styling()
+})
+topology_sensitivity_table
+write_rds(topology_sensitivity_table, figure_file("topology_sensitivity_table.rds"))

@@ -3,7 +3,7 @@ library(tidyverse)
 library(rmarkdown)
 library(dynutils)
 
-drive <- drive_download(as_id("1BCCaP21N2PXfzhj9H09yEpZz9lLY2HXd_LxTSsJ_wro"), type="text/plain", overwrite=TRUE, path = tempfile())
+drive <- drive_download(as_id("14ZzuesLq5u5l-Gp_r5tSkvwOpxxz9LuXS_HG6GAYfxw"), type="text/plain", overwrite=TRUE, path = tempfile())
 system(pritt("sed -i '1s/^.//' {drive$local_path}")) # remove first character, because this is some strange unicode character
 system(pritt("cat {drive$local_path} > analysis/paper/paper.Rmd"))
 
