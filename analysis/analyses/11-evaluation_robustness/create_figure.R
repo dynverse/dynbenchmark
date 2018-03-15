@@ -9,6 +9,6 @@ robustness_overview <- cowplot::plot_grid(
   read_rds(figure_file("performance_dataset_variability_combined.rds")),
   ncol = 1,
   labels = "auto",
-  rel_heights = c(1, 2.3, 2)
+  rel_heights = c(1, 2, 2)
 )
-ggsave(figure_file("robustness.svg"), robustness_overview, width = 16, height = 16)
+ggsave(figure_file("robustness.svg"), robustness_overview, width = 16, height = 14)
