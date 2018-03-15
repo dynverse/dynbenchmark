@@ -10,8 +10,8 @@ system(pritt("cat {drive$local_path} > analysis/paper/paper.Rmd"))
 # add wip
 read_file("analysis/paper/paper.Rmd") %>%
   str_replace_all("§(.*?)\n", "<p class='wip'>\\1</p>") %>%
-  str_replace_all("\n\\[[a-z]\\]{1,2}[^\n]*", "") %>%
-  str_replace_all("\\[[a-z]\\]{1,2}", "") %>%
+  str_replace_all("\n\\[[a-z]{1,2}\\][^\n]*", "") %>%
+  str_replace_all("\\[[a-z]{1,2}\\]", "") %>%
   str_replace_all("→", "-->") %>%
   str_replace_all("\n#", "\n\n#") %>% # add double new line before (sub)titles
   write_file("analysis/paper/paper.Rmd")
