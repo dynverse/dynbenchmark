@@ -1,5 +1,6 @@
 library(tidyverse)
 library(dynalysis)
+library(dynwrap)
 
 dataset_preprocessing("real/conquer_varia")
 
@@ -67,12 +68,12 @@ conquer_infos <- list(
       "H7hESC", "H7_derived_APS",
       "H7hESC", "H7_derived_MPS",
       "H7_derived_APS", "H7_derived_DLL1pPXM",
-      "H7_derived_DLL1pPXM", "H7_derived_ESMT",
-      "H7_derived_ESMT", "H7_derived_Sclrtm",
+      "H7_derived_DLL1pPXM", "H7_dreived_D2.25_Smtmrs",
+      "H7_dreived_D2.25_Smtmrs", "H7_derived_ESMT",
       "H7_derived_ESMT", "H7_derived_D5CntrlDrmmtm",
+      "H7_derived_ESMT", "H7_derived_Sclrtm",
       "H7_derived_MPS", "H7_derived_D2LtM",
-      "H7_derived_D2LtM", "H7_derived_D3GARPpCrdcM",
-      "H7_derived_D2LtM", "H7_dreived_D2.25_Smtmrs"
+      "H7_derived_D2LtM", "H7_derived_D3GARPpCrdcM"
     ) %>% addcols
   ),
   list(
