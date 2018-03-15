@@ -13,7 +13,11 @@ get_dynalysis_folder <- function() {
   }
 
   if (!file.exists(pritt("{pwd}/dynalysis.Rproj"))) {
-    stop("dynalysis folder could not be found. Either set it as the working directory, or export a DYNALYSIS_PATH variable.")
+    if(exists(".dynalysis_path")) {
+      pwd <- .dynalysis_path
+    } else {
+      stop("dynalysis folder could not be found. Either set it as the working directory, or export a DYNALYSIS_PATH variable.")
+    }
   }
 
   pwd
