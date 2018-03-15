@@ -1,14 +1,14 @@
 library(tidyverse)
 library(dynalysis)
-library(cowplot)
 
 experiment("11-evaluation_robustness")
 
-robustness_overview <- plot_grid(
+robustness_overview <- cowplot::plot_grid(
   read_rds(figure_file("real_synthetic_comparison.rds")),
+  # read_rds(figure_file("metrics_comparison.rds")),
   read_rds(figure_file("performance_dataset_variability_combined.rds")),
-  ncol=1,
+  ncol = 1,
   labels = "auto",
-  rel_heights = c(1, 3)
+  rel_heights = c(1,  2)
 )
-save_plot(figure_file("robustness.svg"), robustness_overview)
+ggsave(figure_file("robustness.svg"), robustness_overview, width = 16, height = 8)

@@ -24,7 +24,7 @@ tasks <- bind_rows(
 # compute waypoints for tasks
 tasks <-
   seq_len(nrow(tasks)) %>% map(function(i) {
-    tasks %>% dynutils::extract_row_to_list(i) %>% dynutils::add_cell_waypoints_to_wrapper(num_cells_selected = 100)
+    tasks %>% dynutils::extract_row_to_list(i) %>% dynwrap::add_cell_waypoints_to_wrapper(num_cells_selected = 100)
   }) %>%
   dynutils::list_as_tibble()
 

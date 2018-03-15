@@ -14,7 +14,8 @@ Depends:
   dyngen,
   dynmethods,
   dyntoy,
-  dynutils
+  dynutils,
+  dynwrap
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -38,10 +39,11 @@ Imports:
   tidygraph,
   ggraph
 Remotes:
-  rcannood/dyneval,
-  rcannood/dynmethods,
-  rcannood/dynnormaliser,
-  rcannood/dynutils,
-  Zouter/dyntoy,
+  dynverse/dyneval,
+  dynverse/dynmethods,
+  dynverse/dynnormaliser,
+  dynverse/dynutils,
+  dynverse/dyntoy,
+  dynverse/dynwrap,
   Zouter/dyngen
 RoxygenNote: 6.0.1
