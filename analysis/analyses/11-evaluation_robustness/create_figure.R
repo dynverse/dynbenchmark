@@ -11,4 +11,4 @@ robustness_overview <- cowplot::plot_grid(
   labels = "auto",
   rel_heights = c(1,  2)
 )
-ggsave(figure_file("robustness.svg"), robustness_overview, width = 16, height = 10)
+ggsave(figure_file("robustness.svg"), robustness_overview, width = 16, height = 8)
