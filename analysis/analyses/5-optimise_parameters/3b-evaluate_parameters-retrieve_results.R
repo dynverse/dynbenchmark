@@ -24,8 +24,7 @@ tasks_info <- map_df(
 trajtypes <-
   dynalysis::trajectory_types %>%
   filter(id %in% unique(tasks_info$trajectory_type)) %>%
-  add_row(id = "overall", directedness = "directed", color = "#AAAAAA", background_color = "E6A1A1") %>%
-  slice(match(c("overall", "directed_linear", "bifurcation", "convergence", "multifurcation", "rooted_tree", "directed_acyclic_graph", "directed_graph", "directed_cycle", "disconnected_directed_graph"), id))
+  add_row(id = "overall", directedness = "directed", color = "#AAAAAA", background_color = "E6A1A1", .before = 1)
 
 # print task errors
 task_errors <- outputs %>%
@@ -66,6 +65,10 @@ outputs <- outputs %>%
     method_name = ifelse(method_short_name == "manual", paste0("manual by ", paramset_id), method_name),
     method_short_name = ifelse(method_short_name == "manual", paste0("manual_", paramset_id), method_short_name)
   )
+
+# filter disconnected
+outputs <- outputs %>% filter(task_id != "real/blastocyst-monkey_nakamura")
+trajtypes <- trajtypes %>% filter(id != "disconnected_directed_graph")
 
 error_message_interpret <- function(error_message) {
   map_chr(
