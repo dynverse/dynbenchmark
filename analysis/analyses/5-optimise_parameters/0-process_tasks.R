@@ -16,7 +16,7 @@ real_tasks <- pbapply::pblapply(real_names, load_dataset) %>% list_as_tibble()
 
 # combine tasks
 tasks <- bind_rows(
-  toy_tasks,
+  # toy_tasks,
   synthetic_tasks,
   real_tasks
 )

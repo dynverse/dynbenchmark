@@ -8,9 +8,15 @@ methods <- get_descriptions() %>% filter(short_name != "manual")
 metrics <- c("correlation", "rf_mse", "edge_flip")
 timeout_per_execution <- 60 * 60 * 6
 num_repeats <- 4
-max_memory_per_execution <- "8G"
+
 execute_before <- "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500; export DYNALYSIS_PATH=/group/irc/shared/dynalysis/"
 verbose <- TRUE
+
+# max_memory_per_execution <- "8G"
+# needs_32gb <- c("mnclica", "recat", "ctgibbs", "scimitar", "ouijaflow")
+max_memory_per_execution <- "32G"
+needs_32gb <- c()
+
 
 # define important folders
 local_tasks_folder <- derived_file("tasks", "5-optimise_parameters/0-process_tasks")
@@ -30,12 +36,14 @@ task_ids <- read_rds(paste0(local_tasks_folder, "/task_ids.rds"))
 #   paste("\"", ., "\"", collapse = ", ", sep = "") %>%
 #   cat
 methods_order <- c(
-  "identity", "shuffle", "random", "manual_wouters", "manual_robrechtc", "slngsht", "mpath", "waterfll", "tscan", "sincell",
+  "identity", "shuffle", "random", "manual_wouters", "manual_robrechtc", "aga", "slngsht", "mpath", "waterfll", "tscan", "sincell",
   "scorpius", "scorspar", "embeddr", "wndrlst", "wishbone", "mnclddr", "dpt", "mnclica", "slice", "ctvem", "ouijaflw", "slicer", "scuba",
   "topslam", "gpfates", "phenopth", "ctmaptpx", "mfa", "stemid2", "recat", "comp1", "stemid", "scoup", "ctgibbs", "scimitar", "ouija", "pseudogp"
 )
 methods <- methods %>% slice(c(match(methods_order, methods$short_name), which(!methods$short_name %in% methods_order)))
 methods$short_name
+
+methods <- methods %>% filter(!short_name %in% needs_32gb)
 
 # extract the default parameters
 parameters <- lapply(methods$short_name, function(mn) {
