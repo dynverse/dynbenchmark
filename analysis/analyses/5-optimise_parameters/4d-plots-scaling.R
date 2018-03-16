@@ -110,26 +110,26 @@ complexity <- oi_lm %>%
 # generate direct comparison plots per method
 mns <- unique(oi$method_short_name)
 
-pdf(figure_file("dimensionality_versus_timings_permethod.pdf"), 16, 12)
-for (m in mns) {
-  cat("Processing ", m, "\n", sep = "")
-  oim <- oi_datas %>% filter(method_short_name == m) %>% gather(feature, value, -method_name:-time_method)
-  lm_fits <- oi_lm %>% filter(method_short_name == m) %>% mutate(feature = as.character(feature))
-
-  slope <- oim %>%
-    left_join(lm_fits, by = "feature") %>%
-    mutate(y = time_method * slope + intercept)
-
-  g <- ggplot() +
-    geom_point(aes(time_method, value), oim ) +
-    geom_abline(aes(intercept = intercept, slope = slope), lm_fits, colour = "red", linetype = "dashed") +
-    theme_bw() +
-    facet_wrap(~feature, scales = "free_y", nrow = 3) +
-    scale_color_brewer(palette = "Dark2") +
-    labs(y = "Feature value", x = "Execution time (s)", title = m)
-  print(g)
-}
-dev.off()
+# pdf(figure_file("dimensionality_versus_timings_permethod.pdf"), 16, 12)
+# for (m in mns) {
+#   cat("Processing ", m, "\n", sep = "")
+#   oim <- oi_datas %>% filter(method_short_name == m) %>% gather(feature, value, -method_name:-time_method)
+#   lm_fits <- oi_lm %>% filter(method_short_name == m) %>% mutate(feature = as.character(feature))
+#
+#   slope <- oim %>%
+#     left_join(lm_fits, by = "feature") %>%
+#     mutate(y = time_method * slope + intercept)
+#
+#   g <- ggplot() +
+#     geom_point(aes(time_method, value), oim ) +
+#     geom_abline(aes(intercept = intercept, slope = slope), lm_fits, colour = "red", linetype = "dashed") +
+#     theme_bw() +
+#     facet_wrap(~feature, scales = "free_y", nrow = 3) +
+#     scale_color_brewer(palette = "Dark2") +
+#     labs(y = "Feature value", x = "Execution time (s)", title = m)
+#   print(g)
+# }
+# dev.off()
 
 
 
