@@ -67,8 +67,8 @@ outputs <- outputs %>%
   )
 
 # filter disconnected
-outputs <- outputs %>% filter(task_id != "real/blastocyst-monkey_nakamura")
-trajtypes <- trajtypes %>% filter(id != "disconnected_directed_graph")
+# outputs <- outputs %>% filter(task_id != "real/blastocyst-monkey_nakamura")
+# trajtypes <- trajtypes %>% filter(id != "disconnected_directed_graph")
 
 error_message_interpret <- function(error_message) {
   map_chr(
@@ -81,6 +81,10 @@ error_message_interpret <- function(error_message) {
       }
     }
   )
+}
+
+max_trafo <- function(x) {
+  ifelse(x > 1e100, 0, 1 - x / max(x[x < 1e100]))
 }
 
 outputs_ind <- outputs %>%
@@ -98,11 +102,20 @@ outputs_ind <- outputs %>%
   ) %>%
   group_by(task_id) %>%
   mutate(
+    rf_mse = ifelse(rf_mse > 1e100, 1, rf_mse),
     rank_correlation = percent_rank(correlation),
     rank_rf_mse = percent_rank(-rf_mse),
     rank_rf_rsq = percent_rank(rf_rsq),
     rank_edge_flip = percent_rank(edge_flip),
-    rank_time_method = percent_rank(-time_method)
+    # rank_correlation = correlation,
+    # rank_edge_flip = edge_flip,
+    # rank_rf_mse = max_trafo(rf_mse),
+    # rank_rf_mse = 1 - rf_mse,
+    # rank_rf_rsq = (rf_rsq / max(rf_rsq)),
+    # rank_correlation = mad(correlation),
+    # rank_edge_flip = mad(edge_flip),
+    # rank_rf_mse = mad(1-rf_mse),
+    rank_time_method = 1 - (time_method / max(time_method))
   ) %>%
   ungroup()
 
