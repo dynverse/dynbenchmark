@@ -10,6 +10,7 @@ method_ord <- method_tib %>% arrange(desc(harm_mean)) %>% .$method_name
 
 # determine palettes
 sc_fun <- function(x) x / max(x, na.rm = T)
+sc_fun <- function(x) (x - min(x, na.rm = T)) / (max(x, na.rm = T) - min(x, na.rm = T))
 sc_col_fun <- function(palette) {
   function(x) {
     sc <- sc_fun(x)
@@ -72,8 +73,8 @@ method_tib <- method_tib %>%
       "harm_mean", "rank_correlation", "rank_edge_flip", "rank_rf_mse",
       "source_real", "source_synthetic",
       "trajtype_bifurcation", "trajtype_convergence", "trajtype_directed_acyclic_graph", "trajtype_directed_cycle",
-      "trajtype_directed_graph", "trajtype_directed_linear", "trajtype_multifurcation", "trajtype_rooted_tree",
-      "trajtype_disconnected_directed_graph"
+      "trajtype_directed_graph", "trajtype_directed_linear", "trajtype_multifurcation", "trajtype_rooted_tree"#,
+      # "trajtype_disconnected_directed_graph"
     ),
     funs(sc = sc_fun, sc_col = colbench_fun)
   ) %>%
@@ -128,7 +129,7 @@ axis <-
     "dagg",    "DAG",                  0.1,   1,       T,           "circle",   T,               "trajtype_directed_acyclic_graph_sc_col",  "trajtype_directed_acyclic_graph_sc",
     "cycl",    "Cycle",                0.1,   1,       T,           "circle",   T,               "trajtype_directed_cycle_sc_col",          "trajtype_directed_cycle_sc",
     "grap",    "Graph",                0.1,   1,       T,           "circle",   T,               "trajtype_directed_graph_sc_col",          "trajtype_directed_graph_sc",
-    "digr",    "Disconnected Graph",   0.1,   1,       T,           "circle",   T,               "trajtype_disconnected_directed_graph_sc_col", "trajtype_disconnected_directed_graph_sc",
+    # "digr",    "Disconnected Graph",   0.1,   1,       T,           "circle",   T,               "trajtype_disconnected_directed_graph_sc_col", "trajtype_disconnected_directed_graph_sc",
 
     "time",    "Average time",         0.5,   1,       T,           "rect",     F,               "rank_time_method_sc_col",                 "rank_time_method_sc",
     "timl",    "Average time label",    -1,   1,       F,           "text",     F,               "avg_time_lab_colour",                     "avg_time_lab",
@@ -169,8 +170,8 @@ grouping <-
     "Benchmark",                   3,  axtr$harm$xmin, axtr$erro$xmax, "b",
     "Per metric",                  2,  axtr$corr$xmin, axtr$rfms$xmax, "",
     "Per source",                  2,  axtr$real$xmin, axtr$synt$xmax, "",
-    # "Per trajectory type",         2,  axtr$line$xmin, axtr$grap$xmax, "",
-    "Per trajectory type",         2,  axtr$line$xmin, axtr$digr$xmax, "",
+    "Per trajectory type",         2,  axtr$line$xmin, axtr$grap$xmax, "",
+    # "Per trajectory type",         2,  axtr$line$xmin, axtr$digr$xmax, "",
     "Execution",                   2,  axtr$time$xmin, axtr$erro$xmax, "",
     "Quality control",             3,  axtr$qcsc$xmin, axtr$qcpa$xmax, "c",
     "Practicality",                2,  axtr$qcdf$xmin, axtr$qcgs$xmax, "",
