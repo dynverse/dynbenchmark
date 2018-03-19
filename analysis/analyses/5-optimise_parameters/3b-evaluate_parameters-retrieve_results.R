@@ -66,7 +66,7 @@ outputs <- outputs %>%
     method_short_name = ifelse(method_short_name == "manual", paste0("manual_", paramset_id), method_short_name)
   )
 
-outputs <- outputs %>% filter(!grepl("Control", method_name))
+outputs <- outputs %>% filter(!grepl("Control", method_name), method_short_name != "scorspar")
 
 outputs <- outputs %>% mutate(rf_mse = ifelse(rf_mse > 1e100, 1, rf_mse))
 
@@ -91,6 +91,7 @@ medquan_trafo <- function (x, invert = FALSE) {
   y <- (x - median(x)) / diff(quantile(x, c(.05, .95)))
   if (invert) y <- -y
   2 * sigmoid::sigmoid(y) - 1
+  # sigmoid::sigmoid(y)
 }
 
 outputs_ind <- outputs %>%
@@ -128,7 +129,8 @@ outputs_summrepl <- outputs_ind %>%
     pct_allerrored = (pct_other_error == 1)+0,
     pct_stochastic = pct_other_error - pct_allerrored,
     # harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean)
-    harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse) / 2 + .5, 1, mean) * 2 - 1
+    harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse) / 2 + .5, 1, psych::harmonic.mean) * 2 - 1
+    # harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, mean)
   )
 
 # process trajtype grouped evaluation
