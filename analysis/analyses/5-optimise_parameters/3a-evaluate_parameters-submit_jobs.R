@@ -13,7 +13,7 @@ execute_before <- "source /scratch/irc/shared/dynverse/module_load_R.sh; export 
 verbose <- TRUE
 
 # max_memory_per_execution <- "8G"
-# needs_32gb <- c("mnclica", "recat", "ctgibbs", "scimitar", "ouijaflow")
+# needs_32gb <- c("mnclica", "recat", "ctgibbs", "scimitar", "ouijaflw")
 max_memory_per_execution <- "32G"
 needs_32gb <- c()
 

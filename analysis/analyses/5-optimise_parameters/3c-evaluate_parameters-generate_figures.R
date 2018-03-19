@@ -17,23 +17,23 @@ experiment("5-optimise_parameters/3-evaluate_parameters")
 ############### PART THREE: GENERATE FIGURES ###############
 ############################################################
 
-outputs_list <- read_rds(derived_file("outputs_postprocessed.rds"))
+olist <- read_rds(derived_file("outputs_postprocessed.rds"))
 
 # get ordering of methods
-method_ord <- outputs_list$outputs_summtrajtype_totalsx2 %>%
+method_ord <- olist$outputs_summtrajtype_totalsx2 %>%
   filter(task_source == "mean", trajectory_type == "overall") %>%
   arrange(desc(harm_mean)) %>%
   .$method_name
 
 # create method_name_f factor in all data structures
-for (oname in str_subset(names(outputs_list), "outputs")) {
-  outputs_list[[oname]] <- outputs_list[[oname]] %>%
+for (oname in str_subset(names(olist), "outputs")) {
+  olist[[oname]] <- olist[[oname]] %>%
     mutate(method_name_f = factor(method_name, levels = rev(method_ord)))
 }
 
 # load all outputs in environment and remove outputs_list
-list2env(outputs_list, environment())
-rm(outputs_list)
+list2env(olist, environment())
+rm(olist)
 
 # collect which methods use which prior information
 prior_df <- outputs_ind %>% select(method_name, prior_str) %>% distinct()
