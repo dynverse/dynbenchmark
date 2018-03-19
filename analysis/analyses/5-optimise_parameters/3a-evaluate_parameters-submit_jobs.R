@@ -12,10 +12,10 @@ num_repeats <- 4
 execute_before <- "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500; export DYNALYSIS_PATH=/group/irc/shared/dynalysis/"
 verbose <- TRUE
 
-# max_memory_per_execution <- "8G"
-# needs_32gb <- c("mnclica", "recat", "ctgibbs", "scimitar", "ouijaflw")
-max_memory_per_execution <- "32G"
-needs_32gb <- c()
+max_memory_per_execution <- "8G"
+needs_32gb <- c("mnclica", "recat", "ctgibbs", "scimitar", "ouijaflw")
+# max_memory_per_execution <- "32G"
+# needs_32gb <- c()
 
 
 # define important folders
@@ -36,9 +36,10 @@ task_ids <- read_rds(paste0(local_tasks_folder, "/task_ids.rds"))
 #   paste("\"", ., "\"", collapse = ", ", sep = "") %>%
 #   cat
 methods_order <- c(
-  "identity", "shuffle", "random", "manual_wouters", "manual_robrechtc", "aga", "slngsht", "mpath", "waterfll", "tscan", "sincell",
+  "identity", "shuffle", "random", "manual_wouters", "manual_robrechtc", "aga", "agapt", "slngsht", "mpath", "waterfll", "tscan", "sincell",
   "scorpius", "scorspar", "embeddr", "wndrlst", "wishbone", "mnclddr", "dpt", "mnclica", "slice", "ctvem", "ouijaflw", "slicer", "scuba",
-  "topslam", "gpfates", "phenopth", "ctmaptpx", "mfa", "stemid2", "recat", "comp1", "stemid", "scoup", "ctgibbs", "scimitar", "ouija", "pseudogp"
+  "topslam", "gpfates", "phenopth", "ctmaptpx", "mfa", "stemid2", "recat", "comp1", "acos", "periodpc", "stemid", "scoup", "ctgibbs",
+  "scimitar", "ouija", "pseudogp"
 )
 methods <- methods %>% slice(c(match(methods_order, methods$short_name), which(!methods$short_name %in% methods_order)))
 methods$short_name
