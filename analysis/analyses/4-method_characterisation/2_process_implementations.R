@@ -81,7 +81,7 @@ implementations$non_inclusion_reasons_split[date_filter] <- map(implementations$
 topology_fix <- function(maximal_trajectory_type, n_branches, n_end_states, fixes_topology_, ...) {
   if (any(is.na(c(maximal_trajectory_type, n_branches, n_end_states)))) {
     NA
-  } else if(maximal_trajectory_type == "directed_linear" | maximal_trajectory_type == "directed_cycle" | !is.na(fixes_topology_)) {
+  } else if(maximal_trajectory_type == "directed_linear" | maximal_trajectory_type == "directed_cycle") {
     "algorithm"
   } else if (n_branches == "required" || n_branches == "required_default" || n_end_states == "required" || n_end_states == "required_default") {
     "parameter"
