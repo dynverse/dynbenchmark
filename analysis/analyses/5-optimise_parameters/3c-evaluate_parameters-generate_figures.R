@@ -46,7 +46,6 @@ metr_lev <- c(
   "pct_errored", "pct_time_exceeded", "pct_memory_exceeded", "num_setseed_calls"
 )
 
-
 oc1 <-
   outputs_summtrajtype_totalsx2 %>%
   filter(task_source == "mean", trajectory_type_f == "overall") %>%
