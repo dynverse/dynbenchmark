@@ -12,10 +12,17 @@ num_repeats <- 4
 execute_before <- "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500; export DYNALYSIS_PATH=/group/irc/shared/dynalysis/"
 verbose <- TRUE
 
-max_memory_per_execution <- "8G"
-needs_32gb <- c("mnclica", "recat", "ctgibbs", "scimitar", "ouijaflw")
-# max_memory_per_execution <- "32G"
-# needs_32gb <- c()
+# run most methods
+# max_memory_per_execution <- "8G"
+# method_filter <- c("mnclica", "recat", "ctgibbs", "scimitar", "ouijaflw", "ouija", "pseudogp")
+
+# run methods that require more memory
+max_memory_per_execution <- "32G"
+method_filter <- c("ouija", "pseudogp")
+
+# # execute ouija and pseudogp last because they will jam up other methods
+# max_memory_per_execution <- "8G"
+# method_filter <- c()
 
 
 # define important folders
@@ -36,15 +43,15 @@ task_ids <- read_rds(paste0(local_tasks_folder, "/task_ids.rds"))
 #   paste("\"", ., "\"", collapse = ", ", sep = "") %>%
 #   cat
 methods_order <- c(
-  "identity", "shuffle", "random", "manual_wouters", "manual_robrechtc", "aga", "agapt", "slngsht", "mpath", "waterfll", "tscan", "sincell",
-  "scorpius", "scorspar", "embeddr", "wndrlst", "wishbone", "mnclddr", "dpt", "mnclica", "slice", "ctvem", "ouijaflw", "slicer", "scuba",
-  "topslam", "gpfates", "phenopth", "ctmaptpx", "mfa", "stemid2", "recat", "comp1", "acos", "periodpc", "stemid", "scoup", "ctgibbs",
-  "scimitar", "ouija", "pseudogp"
+  "identity", "shuffle", "random", "manual_wouters", "manual_robrechtc", "slngsht", "mpath",  "comp1", "acos", "periodpc", "gng",
+  "waterfll", "tscan", "sincell", "scorpius", "scorspar", "embeddr", "wndrlst", "wishbone", "mnclddr", "dpt", "mnclica", "slice",
+  "ctvem", "ouijaflw", "slicer", "scuba", "topslam", "gpfates", "aga", "agapt", "phenopth", "ctmaptpx", "mfa", "stemid2", "recat",
+  "stemid", "scoup", "ctgibbs", "scimitar", "ouija", "pseudogp"
 )
 methods <- methods %>% slice(c(match(methods_order, methods$short_name), which(!methods$short_name %in% methods_order)))
 methods$short_name
 
-methods <- methods %>% filter(!short_name %in% needs_32gb)
+methods <- methods %>% filter(!short_name %in% method_filter)
 
 # extract the default parameters
 parameters <- lapply(methods$short_name, function(mn) {

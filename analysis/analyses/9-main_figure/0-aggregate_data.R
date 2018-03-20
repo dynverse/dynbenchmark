@@ -58,17 +58,17 @@ part_trajtypes <-
   mutate(trajectory_type = paste0("trajtype_", trajectory_type)) %>%
   spread(trajectory_type, harm_mean)
 
-part_complexities <-
-  complexities$complexity %>%
-  select(
-    method_short_name, complexity_inferred = feature, complexity_inferred2 = feature2, complexity_sign = sign, complexity_rsq = rsq
-  )
-
-part_variances <-
-  variances$vardf %>%
-  select(
-    method_short_name, mean_var, var_rank_correlation, var_rank_edge_flip, var_rank_rf_mse, sets_seeds
-  )
+# part_complexities <-
+#   complexities$complexity %>%
+#   select(
+#     method_short_name, complexity_inferred = feature, complexity_inferred2 = feature2, complexity_sign = sign, complexity_rsq = rsq
+#   )
+#
+# part_variances <-
+#   variances$vardf %>%
+#   select(
+#     method_short_name, mean_var, var_rank_correlation, var_rank_edge_flip, var_rank_rf_mse, sets_seeds
+#   )
 
 part_priors <-
   eval_param_outputs$outputs_ind %>%
@@ -110,7 +110,17 @@ part_qc_application <-
   select(-implementation_id)
 
 ## COMBINE_COLUMNS
-part_list <- lst(part_overall_mean, part_sources, part_trajtypes, part_complexities, part_variances, part_priors, part_method_characterisation, part_qc_category, part_qc_application)
+part_list <- lst(
+  part_overall_mean,
+  part_sources,
+  part_trajtypes,
+  # part_complexities,
+  # part_variances,
+  part_priors,
+  part_method_characterisation,
+  part_qc_category,
+  part_qc_application
+)
 reduce_fun <- function(a, b) inner_join(a, b, by = "method_short_name")
 method_tib <- Reduce("reduce_fun", part_list)
 
@@ -142,3 +152,5 @@ minis <- trajectory_types_mini %>% create_replacers()
 
 # write output
 write_rds(lst(method_tib, minis), result_file("aggregated_data.rds"))
+
+method_tib$method_short_name %>% sort

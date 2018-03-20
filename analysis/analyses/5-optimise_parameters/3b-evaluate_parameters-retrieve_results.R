@@ -60,19 +60,19 @@ outputs %>% filter(!is.na(task_id)) %>% group_by(method_name) %>% summarise(n = 
 ############### CREATE AGGREGATIONS ###############
 ###################################################
 
-outputs <- outputs %>%
-  mutate(
-    method_name = ifelse(method_short_name == "manual", paste0("manual by ", paramset_id), method_name),
-    method_short_name = ifelse(method_short_name == "manual", paste0("manual_", paramset_id), method_short_name)
-  )
+# outputs <- outputs %>%
+#   mutate(
+#     method_name = ifelse(method_short_name == "manual", paste0("manual by ", paramset_id), method_name),
+#     method_short_name = ifelse(method_short_name == "manual", paste0("manual_", paramset_id), method_short_name)
+#   )
 
+# filter control methods
 outputs <- outputs %>% filter(!grepl("Control", method_name), method_short_name != "scorspar")
 
-outputs <- outputs %>% mutate(rf_mse = ifelse(rf_mse > 1e100, 1, rf_mse))
-
-# filter disconnected
+# filter disconnected as there is only 1 dataset
 outputs <- outputs %>% filter(task_id != "real/blastocyst-monkey_nakamura")
 trajtypes <- trajtypes %>% filter(id != "disconnected_directed_graph")
+
 
 error_message_interpret <- function(error_message) {
   map_chr(
@@ -109,14 +109,14 @@ outputs_ind <- outputs %>%
   ) %>%
   group_by(task_id) %>%
   mutate(
-    # rank_correlation = percent_rank(correlation),
-    # rank_rf_mse = percent_rank(-rf_mse),
-    # rank_edge_flip = percent_rank(edge_flip),
-    # rank_time_method = percent_rank(-time_method),
-    rank_correlation = medquan_trafo(correlation),
-    rank_edge_flip = medquan_trafo(edge_flip),
-    rank_rf_mse = medquan_trafo(rf_mse, invert = TRUE),
-    rank_time_method = 1 - (time_method / max(time_method))
+    rank_correlation = percent_rank(correlation),
+    rank_rf_mse = percent_rank(-rf_mse),
+    rank_edge_flip = percent_rank(edge_flip),
+    rank_time_method = percent_rank(-time_method)
+    # rank_correlation = medquan_trafo(correlation),
+    # rank_edge_flip = medquan_trafo(edge_flip),
+    # rank_rf_mse = medquan_trafo(rf_mse, invert = TRUE),
+    # rank_time_method = 1 - (time_method / max(time_method))
   ) %>%
   ungroup()
 
@@ -128,8 +128,8 @@ outputs_summrepl <- outputs_ind %>%
   mutate(
     pct_allerrored = (pct_other_error == 1)+0,
     pct_stochastic = pct_other_error - pct_allerrored,
-    # harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean)
-    harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse) / 2 + .5, 1, psych::harmonic.mean) * 2 - 1
+    harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean)
+    # harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse) / 2 + .5, 1, psych::harmonic.mean) * 2 - 1
     # harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, mean)
   )
 
@@ -208,3 +208,6 @@ write_rds(to_save, derived_file("outputs_postprocessed.rds"))
 #     )
 #   }
 # }
+
+
+outputs_ind %>% filter(method_short_name == "dpt", edge_flip == 1) %>% pull(trajectory_type) %>% table
