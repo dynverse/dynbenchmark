@@ -55,11 +55,11 @@ method_tib <- method_tib %>%
     method_y = - (method_i * row_height + cumsum(spacing)),
     method_ymin = method_y - row_height / 2,
     method_ymax = method_y + row_height / 2,
-    scalability_nfeat = ifelse(complexity_inferred == "nothing", NA, ifelse(grepl("nfeat2", complexity_inferred), "2", ifelse(grepl("nfeat", complexity_inferred), "1", "0"))),
-    scalability_ncell = ifelse(complexity_inferred == "nothing", NA, ifelse(grepl("ncell2", complexity_inferred), "2", ifelse(grepl("ncell", complexity_inferred), "1", "0"))),
+    # scalability_nfeat = ifelse(complexity_inferred == "nothing", NA, ifelse(grepl("nfeat2", complexity_inferred), "2", ifelse(grepl("nfeat", complexity_inferred), "1", "0"))),
+    # scalability_ncell = ifelse(complexity_inferred == "nothing", NA, ifelse(grepl("ncell2", complexity_inferred), "2", ifelse(grepl("ncell", complexity_inferred), "1", "0"))),
     rank_time_method = percent_rank(-time_method),
-    rank_mean_var = percent_rank(-mean_var),
-    rank_sets_seeds = ifelse(sets_seeds, 1, 2),
+    # rank_mean_var = percent_rank(-mean_var),
+    # rank_sets_seeds = ifelse(sets_seeds, 1, 2),
     rank_citations = percent_rank(n_citations),
     trafo = str_replace(output_transformation, ":.*", ""),
     topinf_lab = c("free" = "free", "fixed" = "fixed", "parameter" = "param")[topology_inference_type],
@@ -73,8 +73,9 @@ method_tib <- method_tib %>%
       "harm_mean", "rank_correlation", "rank_edge_flip", "rank_rf_mse",
       "source_real", "source_synthetic",
       "trajtype_bifurcation", "trajtype_convergence", "trajtype_directed_acyclic_graph", "trajtype_directed_cycle",
-      "trajtype_directed_graph", "trajtype_directed_linear", "trajtype_multifurcation", "trajtype_rooted_tree"#,
-      # "trajtype_disconnected_directed_graph"
+      "trajtype_directed_graph", "trajtype_directed_linear", "trajtype_multifurcation",
+      # "trajtype_disconnected_directed_graph",
+      "trajtype_rooted_tree"
     ),
     funs(sc = sc_fun, sc_col = colbench_fun)
   ) %>%
@@ -103,7 +104,7 @@ method_tib <- method_tib %>%
 axis <-
   tribble(
     ~id,       ~label,                 ~xsep, ~xwidth, ~show_label, ~geom,      ~filter_removed, ~col,                                      ~value,
-    "name",    "Name",                 0.0,   4,       F,           "custom",   F,               NA,                                        NA,
+    "name",    "Name",                 0.0,   6,       F,           "custom",   F,               NA,                                        NA,
 
     "maxt",    "Type",                 0.1,   2,       T,           "custom",   F,               "maxtraj_colour",                          NA,
     "topo",    "Topo. constr.",        0.1,   1,       T,           "text",     F,               "topinf_colour",                           "topinf_lab",
