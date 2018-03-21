@@ -62,6 +62,7 @@ overall_comp <-
 
 pdf(figure_file("1_overall_comparison.pdf"), 16, 12)
 ggplot(overall_comp) +
+  geom_hline(aes(yintercept = y), data_frame(y = .5, metric_f = factor(metr_lev[1:6], levels = metr_lev))) +
   geom_bar(aes(method_name_f, score, fill = metric_f), stat = "identity") +
   facet_wrap(~metric_f, scales = "free", ncol = 4, labeller = label_facet()) +
   coord_flip() +
@@ -134,103 +135,6 @@ ggplot(outputs_summtrajtype_totalsx2) +
   labs(
     x = NULL
   )
-
-
 dev.off()
 
 
-
-
-############### COMPARISON OF EXECUTION TIMES ###############
-step_levels <- c(
-  "sessionsetup", "preprocessing", "method", "postprocessing", "wrapping", "sessioncleanup",
-  "cellwaypoints", "waypointedgeodesic", "correlation", "mantel", "rf", "edge_flip"
-)
-
-time_ind <-
-  outputs_ind %>%
-  select(method_name, method_name_f, task_id, pct_errored, error_message, trajectory_type_f, starts_with("time_")) %>%
-  gather(step, time, starts_with("time")) %>%
-  mutate(
-    step = gsub("time_", "", step),
-    step_f = factor(step, levels = step_levels)
-  )
-
-timeind_task_ord <- time_ind %>%
-  group_by(task_id) %>%
-  summarise(time = sum(time, na.rm = T)) %>%
-  arrange(desc(time))
-
-timeind_meth_ord <- time_ind %>%
-  group_by(method_name, step_f) %>%
-  summarise(time = mean(time, na.rm = T)) %>%
-  summarise(time = sum(time, na.rm=T)) %>%
-  arrange(desc(time))
-
-time_ind <- time_ind %>% mutate(
-  task_id_f = factor(task_id, levels = timeind_task_ord$task_id),
-  method_name_f = factor(method_name, levels = timeind_meth_ord$method_name)
-)
-
-g <- time_ind %>%
-  group_by(method_name_f, step_f) %>%
-  summarise(time = mean(time, na.rm = T)) %>%
-  ungroup() %>%
-  ggplot() +
-  geom_bar(aes(method_name_f, time, fill = step_f), stat = "identity", position = position_stack(reverse = TRUE)) +
-  scale_fill_brewer(palette = "Set3") +
-  cowplot::theme_cowplot() +
-  coord_flip() +
-  labs(x = NULL, fill = "Time step")
-ggsave(figure_file("3_timeperstep_overall.pdf"), g, width = 10, height = 5)
-
-g <- time_ind %>%
-  group_by(trajectory_type_f, method_name, step_f) %>%
-  summarise(time = mean(time, na.rm = T)) %>%
-  ungroup() %>%
-  ggplot() +
-  geom_bar(aes(trajectory_type_f, time, fill = step_f), stat = "identity", position = position_stack(reverse = TRUE)) +
-  facet_wrap(~method_name, scales = "free") +
-  scale_fill_brewer(palette = "Set3") +
-  cowplot::theme_cowplot() +
-  coord_flip() +
-  labs(x = NULL, y = NULL, fill = "Time step")
-ggsave(figure_file("3_timeperstep_pertrajtype.pdf"), g, width = 20, height = 10)
-
-rm(g, time_ind, timeind_task_ord, timeind_meth_ord)
-
-
-
-
-
-############### COMPARISON OF SCORES BETWEEN TASK GROUPS ###############
-out_gath <- outputs_summtrajtype %>%
-  select(method_name, method_short_name, method_name_f, task_source, trajectory_type, trajectory_type_f, rank_correlation, rank_rf_mse, rank_edge_flip, harm_mean) %>%
-  gather(metric, value, rank_correlation, rank_rf_mse, rank_edge_flip, harm_mean) %>%
-  spread(task_source, value)
-
-one <-
-  ggplot(out_gath) +
-  geom_point(aes(real, synthetic, colour = trajectory_type)) +
-  coord_equal() +
-  theme_bw() +
-  scale_colour_brewer(palette = "Dark2") +
-  facet_wrap(~metric, nrow = 1)
-one
-
-
-out_gath <- outputs_summmethod %>%
-  select(method_name, method_short_name, method_name_f, task_source, rank_correlation, rank_rf_mse, rank_edge_flip, harm_mean) %>%
-  gather(metric, value, rank_correlation, rank_rf_mse, rank_edge_flip, harm_mean) %>%
-  spread(task_source, value)
-
-one <-
-  ggplot(out_gath) +
-  geom_point(aes(real, synthetic)) +
-  coord_equal() +
-  theme_bw() +
-  scale_colour_brewer(palette = "Dark2") +
-  facet_wrap(~metric, nrow = 1)
-one
-
-rm(out_gath, one)
