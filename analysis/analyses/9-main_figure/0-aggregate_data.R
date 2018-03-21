@@ -40,7 +40,7 @@ part_overall_mean <-
   eval_param_outputs$outputs_summtrajtype_totalsx2 %>%
   filter(trajectory_type == "overall", task_source == "mean") %>%
   select(
-    method_short_name, harm_mean, rank_correlation, rank_edge_flip, rank_rf_mse, time_method, rank_time_method,
+    method_short_name, harm_mean, norm_correlation, norm_edge_flip, norm_rf_mse, time_method, rank_time_method,
     num_files_created, num_setseed_calls, pct_errored, pct_time_exceeded, pct_memory_exceeded, pct_allerrored, pct_stochastic
   )
 
@@ -67,7 +67,7 @@ part_trajtypes <-
 # part_variances <-
 #   variances$vardf %>%
 #   select(
-#     method_short_name, mean_var, var_rank_correlation, var_rank_edge_flip, var_rank_rf_mse, sets_seeds
+#     method_short_name, mean_var, var_norm_correlation, var_norm_edge_flip, var_norm_rf_mse, sets_seeds
 #   )
 
 part_priors <-

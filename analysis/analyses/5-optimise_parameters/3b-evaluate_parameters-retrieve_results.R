@@ -99,6 +99,9 @@ scalesigmoid_trafo <- function (x, remove_errored = TRUE, determine_coeff = TRUE
   }
   sigmoid::sigmoid(y * coeff)
 }
+
+# previously:
+# trafo_fun <- percent_rank
 trafo_fun <- scalesigmoid_trafo
 
 outputs_ind <- outputs %>%
@@ -117,12 +120,9 @@ outputs_ind <- outputs %>%
   ) %>%
   group_by(task_id) %>%
   mutate(
-    # rank_correlation = percent_rank(correlation),
-    # rank_rf_mse = percent_rank(rf_mse_inv),
-    # rank_edge_flip = percent_rank(edge_flip),
-    rank_correlation = trafo_fun(correlation),
-    rank_edge_flip = trafo_fun(edge_flip),
-    rank_rf_mse = trafo_fun(rf_mse_inv),
+    norm_correlation = trafo_fun(correlation),
+    norm_edge_flip = trafo_fun(edge_flip),
+    norm_rf_mse = trafo_fun(rf_mse_inv),
     rank_time_method = percent_rank(-time_method)
     # rank_time_method = 1 - (time_method / max(time_method))
   ) %>%
@@ -136,9 +136,7 @@ outputs_summrepl <- outputs_ind %>%
   mutate(
     pct_allerrored = (pct_other_error == 1)+0,
     pct_stochastic = pct_other_error - pct_allerrored,
-    harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean)
-    # harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse) / 2 + .5, 1, psych::harmonic.mean) * 2 - 1
-    # harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, mean)
+    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
   )
 
 # process trajtype grouped evaluation
