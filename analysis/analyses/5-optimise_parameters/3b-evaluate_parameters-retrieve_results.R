@@ -60,6 +60,10 @@ outputs %>% filter(!is.na(task_id)) %>% group_by(method_name) %>% summarise(n = 
 ############### CREATE AGGREGATIONS ###############
 ###################################################
 
+gm_mean = function(x, na.rm=TRUE){
+  exp(sum(log(x), na.rm=na.rm) / length(x))
+}
+
 # outputs <- outputs %>%
 #   mutate(
 #     method_name = ifelse(method_short_name == "manual", paste0("manual by ", paramset_id), method_name),
@@ -136,7 +140,8 @@ outputs_summrepl <- outputs_ind %>%
   mutate(
     pct_allerrored = (pct_other_error == 1)+0,
     pct_stochastic = pct_other_error - pct_allerrored,
-    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
+    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean),
+    geom_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, gm_mean)
   )
 
 # process trajtype grouped evaluation
@@ -214,6 +219,3 @@ write_rds(to_save, derived_file("outputs_postprocessed.rds"))
 #     )
 #   }
 # }
-
-
-outputs_ind %>% filter(method_short_name == "dpt", edge_flip == 1) %>% pull(trajectory_type) %>% table
