@@ -69,15 +69,6 @@ ggplot(overall_comp) +
   theme_bw() +
   labs(x = NULL, y = NULL, fill = "Metric") +
   theme(legend.position = "none")
-
-ggplot(overall_comp %>% left_join(prior_df, by = "method_name")) +
-  geom_bar(aes(method_name_f, score, fill = prior_str), stat = "identity") +
-  facet_wrap(~metric_f, scales = "free", ncol = 4, labeller = label_facet()) +
-  coord_flip() +
-  theme_bw() +
-  scale_fill_brewer(palette = "Dark2") +
-  theme(legend.position = "bottom") +
-  labs(x = NULL, y = NULL, fill = "Prior")
 dev.off()
 
 rm(overall_comp)
