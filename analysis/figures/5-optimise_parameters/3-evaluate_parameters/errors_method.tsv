@@ -1,25 +1,25 @@
 method_name	error_message	n	example
 Mpath	Mpath only detected one landmark	203	real/cell-cycle_leng
-StemID2	replacement has length zero	104	real/stimulated-dendritic-cells-PAM_shalek
-StemID2	NA values in the dissimilarity matrix not allowed.	60	synthetic/bifurcating_10
+StemID2	replacement has length zero	112	real/stimulated-dendritic-cells-PAM_shalek
+StemID	missing value where TRUE/FALSE needed	49	real/aging-hsc-old_kowalczyk
 Monocle ICA	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	44	synthetic/bifurcating_10
 monocle with DDRTree	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	44	synthetic/bifurcating_10
-StemID	missing value where TRUE/FALSE needed	44	real/aging-hsc-old_kowalczyk
-GPfates	"ynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPclust/collapsed_mixture.py"", line 42, in __init__
-    self.phi, logphi, self.H = softmax_weave(self.phi_)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPclust/np_utilities.py"", line 27, in softmax_numpy
-    max_x_i = X.max(1)
-  File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/numpy/core/_methods.py"", line 26, in _amax
-    return umr_maximum(a, axis, None, out, keepdims)
-ValueError: zero-size array to reduction operation maximum which has no identity"	38	real/cell-cycle_buettner
+StemID2	Perplexity is too large.	38	real/distal-lung-epithelium_treutlein
 ouijaflow	"all(pg_check$sum >= 0 & pg_check$sum < (1 + 1e-08)) isn't true.
 Sum of milestone percentages per cell_id should be exactly one"	35	real/cell-cycle_buettner
-StemID2	Perplexity is too large.	28	real/distal-lung-epithelium_treutlein
+cellTree with gibbs	Time limit exceeded	33	real/aging-hsc-old_kowalczyk
 SLICE	replacement has 1 row, data has 0	27	real/cell-cycle_buettner
-SCOUP	Time limit exceeded	24	real/blastocyst-monkey_nakamura
-StemID	Number of clusters 'k' must be in {1,2, .., n-1}; hence n >= 2	17	synthetic/bifurcating_loop_8
+GPfates	"es/venv/lib/python3.5/site-packages/GPy/core/sparse_gp.py"", line 80, in parameters_changed
+    mean_function=self.mean_function)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/inference/latent_function_inference/var_dtc.py"", line 135, in inference
+    LB = jitchol(B)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/util/linalg.py"", line 61, in jitchol
+    raise linalg.LinAlgError(""not pd: non-positive diagonal elements"")
+numpy.linalg.linalg.LinAlgError: not pd: non-positive diagonal elements"	19	real/hematopoiesis-gates_olsson
+StemID2	Number of clusters 'k' must be in {1,2, .., n-1}; hence n >= 2	18	synthetic/bifurcating_loop_8
 Monocle ICA	evaluation nested too deeply: infinite recursion / options(expressions=)?	16	real/dentate-gyrus-neurogenesis_hochgerner
 StemID2	object 'x' not found	16	real/cell-cycle_buettner
+StemID	Number of clusters 'k' must be in {1,2, .., n-1}; hence n >= 2	13	synthetic/bifurcating_loop_8
 Wishbone	"ne/venv/lib/python3.5/site-packages/wishbone/wb.py"", line 1068, in run_wishbone
     s=s, k=k, l=k, num_waypoints=num_waypoints, branch=branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 54, in wishbone
@@ -28,119 +28,15 @@ Wishbone	"ne/venv/lib/python3.5/site-packages/wishbone/wb.py"", line 1068, in ru
     Y = np.zeros((len(RNK)))
 TypeError: object of type 'numpy.float64' has no len()"	13	real/macrophage-salmonella_saliba
 Mpath	more cluster centers than distinct data points.	12	real/epidermis-hair-uHF_joost
-sincell	Column `node` is unknown	12	real/cell-cycle_buettner
-StemID2	missing value where TRUE/FALSE needed	12	synthetic/converging_10
-GPfates	"es/venv/lib/python3.5/site-packages/GPy/core/sparse_gp.py"", line 80, in parameters_changed
-    mean_function=self.mean_function)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/inference/latent_function_inference/var_dtc.py"", line 135, in inference
-    LB = jitchol(B)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/util/linalg.py"", line 61, in jitchol
-    raise linalg.LinAlgError(""not pd: non-positive diagonal elements"")
-numpy.linalg.linalg.LinAlgError: not pd: non-positive diagonal elements"	11	synthetic/bifurcating_5
-StemID	0 (non-NA) cases	9	synthetic/bifurcating_10
+recat	Time limit exceeded	12	real/dentate-gyrus-neurogenesis_hochgerner
 embeddr	smoothing parameter value too small	8	real/olfactory-projection-neurons-DA1_horns
 Monocle ICA	vector size specified is too large	8	synthetic/consecutive_bifurcating_10
 monocle with DDRTree	initial centers are not distinct	8	synthetic/consecutive_bifurcating_10
+recat	NAs not allowed!	8	synthetic/cycle_10
+StemID	cannot allocate vector of size 1.1 Gb	8	real/dentate-gyrus-neurogenesis_hochgerner
 StemID2	0 (non-NA) cases	8	synthetic/bifurcating_loop_10
-AGA pseudotime	"bs[""cell_id""] == p[""start_cells""])[0]
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 879, in wrapper
-    res = na_op(values, other)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 783, in na_op
-    result = _comp_method_OBJECT_ARRAY(op, x, y)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 761, in _comp_method_OBJECT_ARRAY
-    result = lib.vec_compare(x, y, op)
-  File ""pandas/_libs/lib.pyx"", line 742, in pandas._libs.lib.vec_compare
-ValueError: Arrays were different lengths: 169 vs 2"	4	real/olfactory-projection-neurons-DC3_VA1d_horns
-AGA pseudotime	"bs[""cell_id""] == p[""start_cells""])[0]
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 879, in wrapper
-    res = na_op(values, other)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 783, in na_op
-    result = _comp_method_OBJECT_ARRAY(op, x, y)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 761, in _comp_method_OBJECT_ARRAY
-    result = lib.vec_compare(x, y, op)
-  File ""pandas/_libs/lib.pyx"", line 742, in pandas._libs.lib.vec_compare
-ValueError: Arrays were different lengths: 212 vs 2"	4	synthetic/converging_6
-AGA pseudotime	"bs[""cell_id""] == p[""start_cells""])[0]
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 879, in wrapper
-    res = na_op(values, other)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 783, in na_op
-    result = _comp_method_OBJECT_ARRAY(op, x, y)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 761, in _comp_method_OBJECT_ARRAY
-    result = lib.vec_compare(x, y, op)
-  File ""pandas/_libs/lib.pyx"", line 742, in pandas._libs.lib.vec_compare
-ValueError: Arrays were different lengths: 222 vs 2"	4	synthetic/converging_5
-AGA pseudotime	"bs[""cell_id""] == p[""start_cells""])[0]
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 879, in wrapper
-    res = na_op(values, other)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 783, in na_op
-    result = _comp_method_OBJECT_ARRAY(op, x, y)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 761, in _comp_method_OBJECT_ARRAY
-    result = lib.vec_compare(x, y, op)
-  File ""pandas/_libs/lib.pyx"", line 742, in pandas._libs.lib.vec_compare
-ValueError: Arrays were different lengths: 235 vs 2"	4	synthetic/converging_7
-AGA pseudotime	"bs[""cell_id""] == p[""start_cells""])[0]
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 879, in wrapper
-    res = na_op(values, other)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 783, in na_op
-    result = _comp_method_OBJECT_ARRAY(op, x, y)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 761, in _comp_method_OBJECT_ARRAY
-    result = lib.vec_compare(x, y, op)
-  File ""pandas/_libs/lib.pyx"", line 742, in pandas._libs.lib.vec_compare
-ValueError: Arrays were different lengths: 263 vs 2"	4	synthetic/converging_4
-AGA pseudotime	"bs[""cell_id""] == p[""start_cells""])[0]
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 879, in wrapper
-    res = na_op(values, other)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 783, in na_op
-    result = _comp_method_OBJECT_ARRAY(op, x, y)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 761, in _comp_method_OBJECT_ARRAY
-    result = lib.vec_compare(x, y, op)
-  File ""pandas/_libs/lib.pyx"", line 742, in pandas._libs.lib.vec_compare
-ValueError: Arrays were different lengths: 342 vs 2"	4	synthetic/converging_11
-AGA pseudotime	"bs[""cell_id""] == p[""start_cells""])[0]
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 879, in wrapper
-    res = na_op(values, other)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 783, in na_op
-    result = _comp_method_OBJECT_ARRAY(op, x, y)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 761, in _comp_method_OBJECT_ARRAY
-    result = lib.vec_compare(x, y, op)
-  File ""pandas/_libs/lib.pyx"", line 742, in pandas._libs.lib.vec_compare
-ValueError: Arrays were different lengths: 351 vs 2"	4	real/blastocyst-monkey_nakamura
-AGA pseudotime	"bs[""cell_id""] == p[""start_cells""])[0]
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 879, in wrapper
-    res = na_op(values, other)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 783, in na_op
-    result = _comp_method_OBJECT_ARRAY(op, x, y)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 761, in _comp_method_OBJECT_ARRAY
-    result = lib.vec_compare(x, y, op)
-  File ""pandas/_libs/lib.pyx"", line 742, in pandas._libs.lib.vec_compare
-ValueError: Arrays were different lengths: 493 vs 2"	4	synthetic/converging_3
-AGA pseudotime	"bs[""cell_id""] == p[""start_cells""])[0]
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 879, in wrapper
-    res = na_op(values, other)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 783, in na_op
-    result = _comp_method_OBJECT_ARRAY(op, x, y)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 761, in _comp_method_OBJECT_ARRAY
-    result = lib.vec_compare(x, y, op)
-  File ""pandas/_libs/lib.pyx"", line 742, in pandas._libs.lib.vec_compare
-ValueError: Arrays were different lengths: 691 vs 2"	4	synthetic/converging_9
-AGA pseudotime	"bs[""cell_id""] == p[""start_cells""])[0]
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 879, in wrapper
-    res = na_op(values, other)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 783, in na_op
-    result = _comp_method_OBJECT_ARRAY(op, x, y)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 761, in _comp_method_OBJECT_ARRAY
-    result = lib.vec_compare(x, y, op)
-  File ""pandas/_libs/lib.pyx"", line 742, in pandas._libs.lib.vec_compare
-ValueError: Arrays were different lengths: 871 vs 2"	4	synthetic/converging_2
-AGA pseudotime	"obs[""cell_id""] == p[""start_cells""])[0]
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 879, in wrapper
-    res = na_op(values, other)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 783, in na_op
-    result = _comp_method_OBJECT_ARRAY(op, x, y)
-  File ""/home/robrechtc/.local/lib/python3.5/site-packages/pandas/core/ops.py"", line 761, in _comp_method_OBJECT_ARRAY
-    result = lib.vec_compare(x, y, op)
-  File ""pandas/_libs/lib.pyx"", line 742, in pandas._libs.lib.vec_compare
-ValueError: Arrays were different lengths: 58 vs 2"	4	synthetic/converging_8
+StemID2	missing value where TRUE/FALSE needed	8	synthetic/converging_10
+StemID	0 (non-NA) cases	7	synthetic/bifurcating_10
 GPfates	"py"", line 49, in __call__
     self = super(ParametersChangedMeta, self).__call__(*args, **kw)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/kern/src/rbf.py"", line 23, in __init__
@@ -150,12 +46,14 @@ GPfates	"py"", line 49, in __call__
 AssertionError: Bad number of lengthscales"	4	synthetic/linear_long_11
 Growing Neural Gas	Memory limit exceeded	4	real/epidermis-hair-spatial_joost
 Growing Neural Gas	subscript out of bounds	4	synthetic/linear_long_11
-sincell	subscript out of bounds	4	real/cortical-interneuron-differentiation_frazer
+recat	cannot allocate vector of size 15.2 Gb	4	real/mESC-differentiation_hayashi
 slingshot	Lapack routine dgesv: system is exactly singular: U[1,1] = 0	4	synthetic/bifurcating_loop_8
-StemID	cannot allocate vector of size 1.1 Gb	4	real/dentate-gyrus-neurogenesis_hochgerner
 StemID	cannot allocate vector of size 1.6 Gb	4	real/oligodendrocyte-differentiation-clusters_marques
 StemID	NA values in the dissimilarity matrix not allowed.	4	synthetic/linear_long_11
-StemID	Time limit exceeded	4	real/oligodendrocyte-differentiation-subclusters_marques
+StemID2	"`cell_ids` not equal to rownames(dimred_cells).
+Lengths differ: 644 is not 640"	4	synthetic/consecutive_bifurcating_10
+StemID2	"`cell_ids` not equal to rownames(dimred_cells).
+Lengths differ: 695 is not 690"	4	synthetic/cycle_10
 Wanderlust	"ishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
@@ -195,7 +93,6 @@ cellTree with vem	"sort(unique(c(cell_graph$from, cell_graph$to))) not equal to 
 Lengths differ: 341 is not 342"	3	synthetic/converging_11
 GPfates	Time limit exceeded	3	real/oligodendrocyte-differentiation-subclusters_marques
 slingshot	system is computationally singular: reciprocal condition number = 8.68694e-18	3	synthetic/cycle_10
-StemID2	cannot allocate vector of size 749.1 Mb	3	real/oligodendrocyte-differentiation-subclusters_marques
 Wanderlust	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/Wishbone/venv/lib/python3.5/site-packages/wishbone/core.py"", line 263, in _trajectory_landmarks
@@ -368,452 +265,351 @@ cellTree with vem	"sort(unique(c(cell_graph$from, cell_graph$to))) not equal to 
 Lengths differ: 668 is not 680"	1	synthetic/converging_10
 cellTree with vem	"sort(unique(c(cell_graph$from, cell_graph$to))) not equal to sort(names(to_keep)).
 Lengths differ: 678 is not 680"	1	synthetic/converging_10
-GPfates	"
- 02m42s42  1020  -1.704960e+05   6.849200e+03 
- 02m43s54  1027  -1.704912e+05   1.608523e+05 
- 02m44s66  1034  -1.704964e+05   1.876726e+02 
- 02m45s76  1041  -1.704966e+05   1.872668e+02 
- 02m46s90  1048  -1.704968e+05   8.413395e+02 
- 02m47s99  1054  -1.704969e+05   3.331609e+03 
- 02m49s07  1060  -1.704971e+05   5.189028e+02 
- 02m50s11  1066  -1.704973e+05   2.484356e+02 
- 02m51s26  1073  -1.704967e+05   3.900521e+05 
- 02m52s33  1079  -1.704977e+05   2.308918e+02 
- 02m53s44  1085  -1.704978e+05   1.961911e+02 
- 02m54s53  1091  -1.704981e+05   8.495355e+02 
- 02m55s66  1097  -1.704983e+05   1."	1	real/epidermis-hair-spatial_joost
-GPfates	"
- 03m04s25  0453   2.449942e+06   6.074503e+05 
- 03m05s48  0456   2.449932e+06   5.942055e+04 
- 03m06s67  0459   2.449917e+06   2.323172e+05 
- 03m07s79  0462   2.449914e+06   1.402761e+05 
- 03m09s09  0466   2.449906e+06   5.225791e+05 
- 03m10s15  0469   2.449901e+06   5.217854e+05 
- 03m11s26  0472   2.449897e+06   1.945742e+05 
- 03m12s33  0475   2.449885e+06   9.817372e+05 
- 03m13s43  0478   2.449884e+06   7.696339e+04 
- 03m14s64  0481   2.449855e+06   2.405706e+05 
- 03m15s74  0484   2.449884e+06   1.702202e+07 
- 03m17s00  0487   2.449836e+06   3.484050e+04 
- 03m18s28  0490   2.449996e+06   2."	1	real/germline-human-male-weeks_li
-GPfates	"
- 03m07s78  0359   3.603687e+06   1.232380e+07 
- 03m09s28  0362   3.603586e+06   4.630471e+03 
- 03m10s73  0365   3.603586e+06   8.555065e+03 
- 03m11s84  0367   3.603584e+06   1.750886e+05 
- 03m12s92  0369   3.603577e+06   6.624668e+05 
- 03m14s03  0371   3.603567e+06   3.770129e+05 
- 03m15s60  0374   3.603565e+06   2.446515e+04 
- 03m17s08  0377   3.603570e+06   6.322842e+05 
- 03m18s53  0380   3.603560e+06   6.464476e+04 
- 03m20s07  0383   3.603545e+06   1.504499e+06 
- 03m21s25  0385   3.603538e+06   5.209442e+03 
- 03m22s38  0387   3.617964e+06   6.725406e+09 
- 03m23s48  0389   3.603538e+06   3."	1	real/aging-hsc-old_kowalczyk
-GPfates	"
- 03m14s40  0429   3.005306e+06   1.020765e+06 
- 03m15s77  0432   3.005275e+06   3.169194e+05 
- 03m17s06  0435   3.005255e+06   1.053521e+06 
- 03m18s50  0438   3.005229e+06   2.261689e+06 
- 03m19s91  0441   3.005215e+06   1.505910e+06 
- 03m21s33  0444   3.005210e+06   2.375157e+06 
- 03m22s75  0447   3.005167e+06   5.247790e+05 
- 03m24s17  0450   3.005156e+06   1.073345e+06 
- 03m25s58  0453   3.005128e+06   6.431102e+06 
- 03m26s99  0456   3.005108e+06   1.401081e+06 
- 03m28s44  0459   3.005086e+06   6.919197e+06 
- 03m29s93  0462   3.005074e+06   7.912376e+05 
- 03m31s43  0465   3.005063e+06   1."	1	real/germline-human-female_li
-GPfates	"
- 03m44s26  0151   5.169379e+06   4.289535e+07 
- 03m45s65  0152   5.169356e+06   8.174799e+06 
- 03m47s18  0153   5.169345e+06   1.671837e+06 
- 03m48s53  0154   5.169326e+06   8.357838e+06 
- 03m50s09  0155   5.169306e+06   2.600641e+07 
- 03m51s55  0156   5.169274e+06   3.559627e+07 
- 03m52s94  0157   5.169315e+06   1.164904e+08 
- 03m54s25  0158   5.169259e+06   5.780771e+07 
- 03m55s70  0159   5.169172e+06   1.673671e+06 
- 03m57s08  0160   5.169125e+06   5.056388e+06 
- 03m58s50  0161   5.169043e+06   5.396939e+07 
- 03m59s87  0162   5.168996e+06   5.144406e+07 
- 04m01s27  0163   5.192052e+06   2."	1	real/human-embryos_petropoulos
-GPfates	" 
- 02m39s09  0929   7.874770e+05   6.400844e+02 
- 02m40s17  0935   7.874769e+05   1.379885e+02 
- 02m41s25  0941   7.874768e+05   6.181693e+02 
- 02m42s33  0947   7.874765e+05   1.471176e+03 
- 02m43s38  0953   7.874763e+05   3.309246e+03 
- 02m44s41  0959   7.874762e+05   5.679933e+02 
- 02m45s48  0966   7.874759e+05   1.198554e+02 
- 02m46s60  0972   7.874758e+05   1.646886e+02 
- 02m47s62  0978   7.874757e+05   3.022004e+03 
- 02m48s77  0985   7.874756e+05   4.684315e+02 
- 02m49s83  0991   7.874755e+05   8.908027e+01 
- 02m50s88  0997   7.874754e+05   1.017080e+03 
- 02m51s91  1003   7.874752e+05   2"	1	synthetic/cycle_2
-GPfates	" 
- 02m40s24  0959   7.874329e+05   3.397790e+03 
- 02m41s30  0965   7.874321e+05   1.348262e+03 
- 02m42s32  0971   7.874318e+05   4.747735e+02 
- 02m43s34  0977   7.874314e+05   1.687164e+03 
- 02m44s35  0983   7.874309e+05   5.538603e+02 
- 02m45s51  0990   7.874298e+05   6.389295e+02 
- 02m46s53  0996   7.874293e+05   3.137491e+02 
- 02m47s55  1002   7.874285e+05   9.452985e+02 
- 02m48s58  1008   7.874298e+05   2.687110e+05 
- 02m49s67  1014   7.874278e+05   2.995260e+03 
- 02m50s69  1020   7.874274e+05   2.285602e+03 
- 02m51s84  1027   7.874270e+05   6.896254e+02 
- 02m52s84  1033   7.874263e+05   5"	1	synthetic/cycle_2
-GPfates	" 
- 02m42s27  0906   9.157387e+05   2.862912e+02 
- 02m43s28  0912   9.157385e+05   2.853168e+02 
- 02m44s29  0918   9.157383e+05   9.635656e+02 
- 02m45s46  0925   9.157380e+05   3.589652e+02 
- 02m46s62  0932   9.157376e+05   3.558637e+02 
- 02m47s63  0938   9.157373e+05   5.536989e+02 
- 02m48s63  0944   9.157371e+05   2.727996e+03 
- 02m49s64  0950   9.157370e+05   6.283727e+03 
- 02m50s66  0956   9.157369e+05   4.513030e+02 
- 02m51s66  0962   9.157367e+05   2.909836e+02 
- 02m52s67  0968   9.157367e+05   1.247692e+04 
- 02m53s71  0974   9.157364e+05   1.848381e+03 
- 02m54s77  0980   9.157363e+05   1"	1	synthetic/bifurcating_2
-GPfates	" 
- 02m42s63  0902   1.000961e+06   1.649825e+04 
- 02m43s65  0907   1.000959e+06   3.806205e+03 
- 02m44s67  0912   1.000958e+06   3.463947e+03 
- 02m45s75  0918   1.000956e+06   4.187846e+03 
- 02m46s87  0924   1.000953e+06   1.887412e+04 
- 02m47s97  0930   1.000952e+06   3.182048e+04 
- 02m49s08  0936   1.000950e+06   1.393785e+04 
- 02m50s18  0942   1.000949e+06   7.475819e+03 
- 02m51s28  0948   1.000948e+06   5.718445e+03 
- 02m52s38  0954   1.000946e+06   6.942430e+02 
- 02m53s47  0960   1.000945e+06   1.466705e+03 
- 02m54s50  0966   1.000944e+06   1.542947e+03 
- 02m55s65  0972   1.000943e+06   9"	1	synthetic/linear_2
-GPfates	" 
- 02m43s12  0829   9.157508e+05   4.213665e+02 
- 02m44s13  0834   9.157505e+05   6.319269e+02 
- 02m45s18  0839   9.157633e+05   1.329337e+06 
- 02m46s19  0844   9.157493e+05   5.294996e+02 
- 02m47s21  0849   9.157488e+05   5.779915e+03 
- 02m48s21  0854   9.157504e+05   3.045204e+05 
- 02m49s22  0859   9.157482e+05   3.864481e+02 
- 02m50s32  0864   9.157480e+05   7.691658e+02 
- 02m51s38  0870   9.157476e+05   1.709805e+02 
- 02m52s54  0877   9.157473e+05   3.240665e+03 
- 02m53s56  0883   9.157470e+05   6.646259e+02 
- 02m54s60  0889   9.157468e+05   2.715279e+02 
- 02m55s63  0895   9.157466e+05   3"	1	synthetic/bifurcating_2
-GPfates	" 
- 02m43s39  0949   7.874830e+05   6.591027e+02 
- 02m44s43  0955   7.874824e+05   3.714912e+02 
- 02m45s51  0962   7.874822e+05   3.091656e+03 
- 02m46s53  0968   7.874819e+05   1.556159e+03 
- 02m47s54  0974   7.874817e+05   3.750987e+02 
- 02m48s56  0980   7.874812e+05   3.580369e+02 
- 02m49s58  0986   7.874811e+05   3.857389e+02 
- 02m50s61  0992   7.874808e+05   1.861197e+03 
- 02m51s63  0998   7.874805e+05   1.849890e+02 
- 02m52s64  1004   7.874808e+05   1.376745e+03 
- 02m53s66  1010   7.874799e+05   6.494147e+02 
- 02m54s68  1016   7.874793e+05   2.464726e+03 
- 02m55s70  1022   7.874785e+05   1"	1	synthetic/cycle_2
-GPfates	" 
- 02m43s94  0961   7.874850e+05   1.287324e+03 
- 02m45s02  0967   7.874851e+05   3.015586e+04 
- 02m46s07  0973   7.874849e+05   2.044931e+05 
- 02m47s12  0979   7.874836e+05   1.613004e+03 
- 02m48s17  0985   7.874830e+05   9.644541e+02 
- 02m49s21  0991   7.874823e+05   1.025275e+03 
- 02m50s26  0997   7.874816e+05   9.170061e+02 
- 02m51s30  1003   7.874811e+05   2.001258e+03 
- 02m52s34  1009   7.874803e+05   2.866085e+03 
- 02m53s35  1015   7.874799e+05   6.129837e+03 
- 02m54s39  1021   7.874795e+05   4.002646e+03 
- 02m55s49  1028   7.874793e+05   4.873551e+04 
- 02m56s64  1034   7.874789e+05   1"	1	synthetic/cycle_2
-GPfates	" 
- 02m45s34  0885   1.000904e+06   1.206672e+04 
- 02m46s50  0891   1.000904e+06   5.136685e+04 
- 02m47s67  0897   1.000903e+06   7.572887e+02 
- 02m48s83  0903   1.000902e+06   1.762910e+03 
- 02m49s99  0909   1.000901e+06   5.920978e+02 
- 02m51s15  0915   1.000900e+06   4.076602e+02 
- 02m52s34  0921   1.000900e+06   1.438521e+04 
- 02m53s50  0927   1.000900e+06   2.478988e+03 
- 02m54s67  0933   1.000899e+06   1.002062e+05 
- 02m55s85  0939   1.000898e+06   3.423446e+03 
- 02m57s02  0945   1.000898e+06   1.797084e+03 
- 02m58s19  0951   1.000898e+06   7.336075e+02 
- 02m59s35  0957   1.000897e+06   3"	1	synthetic/linear_2
-GPfates	" 
- 03m02s89  0333   3.791121e+06   2.119367e+04 
- 03m04s06  0335   3.791103e+06   2.706454e+05 
- 03m05s25  0337   3.791100e+06   2.596872e+05 
- 03m06s47  0339   3.791143e+06   6.979218e+07 
- 03m07s66  0341   3.791098e+06   4.190397e+05 
- 03m08s84  0343   3.791097e+06   2.614353e+04 
- 03m10s00  0345   3.791096e+06   9.895397e+04 
- 03m11s17  0347   3.791101e+06   8.603123e+06 
- 03m12s35  0349   3.791087e+06   7.346716e+05 
- 03m13s51  0351   3.791077e+06   1.206079e+05 
- 03m14s66  0353   3.796111e+06   6.873100e+09 
- 03m15s82  0355   3.791071e+06   1.084135e+06 
- 03m16s97  0357   3.791069e+06   5"	1	real/pancreatic-beta-cell-maturation_zhang
-GPfates	" 
- 03m03s78  0355   3.033511e+06   1.185628e+07 
- 03m04s92  0357   3.033493e+06   4.548811e+06 
- 03m06s03  0359   3.033484e+06   7.957321e+05 
- 03m07s16  0361   3.033470e+06   1.107041e+05 
- 03m08s29  0363   3.033459e+06   6.353838e+05 
- 03m09s72  0366   3.033373e+06   4.065209e+06 
- 03m11s17  0369   3.034673e+06   1.630808e+09 
- 03m12s20  0371   3.033305e+06   1.737302e+06 
- 03m13s71  0374   3.033284e+06   8.959152e+05 
- 03m15s21  0377   3.033271e+06   8.815753e+05 
- 03m16s27  0379   3.033227e+06   2.743935e+05 
- 03m17s28  0381   3.033205e+06   4.867989e+05 
- 03m18s29  0383   3.033281e+06   1"	1	real/germline-human-female-weeks_li
-GPfates	" 03m03s05  0338   3.603475e+06   4.962916e+04 
- 03m04s29  0340   3.603474e+06   2.447938e+04 
- 03m05s54  0342   3.603474e+06   6.315502e+04 
- 03m06s78  0344   3.603474e+06   1.443289e+05 
- 03m08s02  0346   3.603472e+06   5.034930e+03 
- 03m09s27  0348   3.603472e+06   5.890479e+04 
- 03m10s50  0350   3.603501e+06   1.571388e+07 
- 03m11s77  0352   3.603471e+06   1.388430e+05 
- 03m13s06  0354   3.603467e+06   6.673469e+04 
- 03m14s31  0356   3.603532e+06   7.755971e+06 
- 03m15s56  0358   3.603466e+06   1.727142e+04 
- 03m16s80  0360   3.603465e+06   8.509341e+04 
- 03m18s05  0362   3.603462e+06   6.6"	1	real/aging-hsc-old_kowalczyk
-GPfates	"/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in notify_observers
+GPfates	"   [callble(self, which=which) for _, _, callble in self.observers]
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 500, in _pass_through_notify_observers
+    self.notify_observers(which=which)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in notify_observers
     [callble(self, which=which) for _, _, callble in self.observers]
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/par"	1	synthetic/consecutive_bifurcating_2
+GPfates	") # use the first two components to infer pseudotime
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPfates/GPfates.py"", line 41, in infer_pseudotime
+    self.time_model.rbf.variance.constrain_fixed(200., warning=False)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/constrainable.py"", line 62, in constrain_fixed
+    self[:] = value
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable_array.py"", line 119, in __setitem__
+ "	1	real/stimulated-dendritic-cells-LPS_shalek
+GPfates	"/lib64/R/library/GPfates/wrapper.py"", line 28, in <module>
+    m.infer_pseudotime(s_columns=[""bgplvm_"" + str(i) for i in range(p[""ndims""])]) # use the first two components to infer pseudotime
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPfates/GPfates.py"", line 41, in infer_pseudotime
+    self.time_model.rbf.variance.constrain_fixed(200., warning=False)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/constrainable.py"", line 62, in constrain_fixed
+    self[:] = value
+  File ""/scratch/"	1	real/stimulated-dendritic-cells-LPS_shalek
+GPfates	"/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
     [callble(self, which=which) for _, _, callble in self.observers]
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 500, in _pass_through_notify_observers
     self.notify_observers(which=which)
-  File ""/scra"	1	real/aging-hsc-young_kowalczyk
-GPfates	"+02 
- 02m37s94  0973  -7.389252e+04   4.818341e+03 
- 02m39s05  0979  -7.389457e+04   2.063766e+03 
- 02m40s12  0985  -7.389466e+04   3.067335e+03 
- 02m41s22  0991  -7.389510e+04   4.954984e+02 
- 02m42s29  0997  -7.389544e+04   5.594401e+02 
- 02m43s36  1003  -7.389594e+04   5.242157e+03 
- 02m44s45  1009  -7.389673e+04   6.829415e+03 
- 02m45s54  1015  -7.389767e+04   2.071654e+03 
- 02m46s60  1021  -7.389824e+04   7.215582e+03 
- 02m47s62  1027  -7.390007e+04   1.803742e+03 
- 02m48s73  1034  -7.389694e+04   2.469587e+06 
- 02m49s76  1040  -7.390372e+04   4.839821e+02 
- 02m50s91  1047  -7.390236e+04 "	1	real/epidermis-hair-IFE_joost
-GPfates	"+02 
- 02m45s76  0825   9.601477e+05   8.561104e+02 
- 02m46s91  0831   9.601469e+05   3.068895e+03 
- 02m47s94  0837   9.601464e+05   1.593641e+03 
- 02m48s95  0842   9.601458e+05   2.498190e+03 
- 02m50s16  0848   9.601454e+05   2.741164e+02 
- 02m51s21  0853   9.601453e+05   1.213870e+03 
- 02m52s28  0858   9.601449e+05   1.598220e+03 
- 02m53s31  0863   9.601446e+05   1.064173e+04 
- 02m54s32  0868   9.601441e+05   1.125422e+03 
- 02m55s34  0873   9.601438e+05   3.542997e+02 
- 02m56s54  0879   9.601435e+05   3.528658e+02 
- 02m57s60  0885   9.601429e+05   1.294120e+03 
- 02m58s65  0891   9.601426e+05 "	1	synthetic/linear_long_2
-GPfates	"+03 
- 02m41s63  0819   9.601482e+05   1.266063e+03 
- 02m42s68  0825   9.601477e+05   2.856256e+03 
- 02m43s75  0831   9.601472e+05   1.253187e+03 
- 02m44s80  0837   9.601465e+05   1.047520e+03 
- 02m45s87  0843   9.601457e+05   9.234183e+02 
- 02m47s01  0850   9.601453e+05   1.984571e+03 
- 02m48s03  0856   9.601447e+05   8.837206e+02 
- 02m49s19  0863   9.601434e+05   2.570564e+03 
- 02m50s22  0869   9.601428e+05   1.438272e+04 
- 02m51s25  0875   9.601425e+05   1.606022e+04 
- 02m52s30  0881   9.601418e+05   4.070152e+03 
- 02m53s32  0887   9.601410e+05   2.674887e+03 
- 02m54s34  0893   9.601405e+05 "	1	synthetic/linear_long_2
-GPfates	"+06 
- 05m13s83  0152  -9.074196e+05   4.159618e+06 
- 05m15s57  0153  -9.042119e+05   6.235493e+08 
- 05m17s62  0154  -9.074231e+05   8.034877e+06 
- 05m19s71  0155  -9.074575e+05   2.845346e+06 
- 05m21s80  0156  -9.074751e+05   2.614710e+05 
- 05m23s88  0157  -9.074835e+05   8.301263e+05 
- 05m25s97  0158  -9.074935e+05   2.393715e+06 
- 05m28s04  0159  -9.075117e+05   1.345411e+06 
- 05m30s11  0160  -8.997717e+05   1.703017e+10 
- 05m32s18  0161  -9.075145e+05   1.168030e+07 
- 05m34s10  0162  -9.075385e+05   5.353776e+06 
- 05m36s20  0163  -9.075624e+05   6.524241e+05 
- 05m38s39  0164  -9.075720e+05 "	1	real/dentate-gyrus-neurogenesis_hochgerner
-GPfates	"+07 
- 07m08s77  0151  -3.559535e+05   5.851311e+06 
- 07m11s42  0152  -3.559120e+05   7.108820e+07 
- 07m14s07  0153  -3.559759e+05   4.830551e+06 
- 07m16s75  0154  -3.560165e+05   8.395887e+06 
- 07m19s46  0155  -3.561780e+05   7.722230e+06 
- 07m22s13  0156  -3.534553e+05   2.205567e+09 
- 07m24s93  0157  -3.563860e+05   1.114706e+08 
- 07m27s71  0158  -3.565459e+05   8.552451e+07 
- 07m31s03  0159  -3.570638e+05   7.905758e+06 
- 07m34s21  0160  -3.571052e+05   4.501251e+06 
- 07m37s31  0161  -3.569622e+05   3.222383e+08 
- 07m40s84  0162  -3.571188e+05   9.060827e+06 
- 07m44s26  0163  -3.571409e+05 "	1	real/oligodendrocyte-differentiation-clusters_marques
-GPfates	"02 
- 02m35s19  1958   2.719217e+05   2.333209e+02 
- 02m36s25  1972   2.719198e+05   4.996399e+01 
- 02m37s31  1986   2.719187e+05   1.470029e+02 
- 02m38s33  1999   2.719172e+05   1.411497e+04 
- 02m38s54  2002   2.719169e+05   6.400398e+01 
-Runtime:  02m38s54
-Optimization status: Maximum number of f evaluations reached
-
-Store DR------------------------------------------------------
-Infer pseudotime----------------------------------------------
--- error --
-Traceback (most recent call last):
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/wrapper.py"", line 28, in <module>
-    m.infe"	1	synthetic/bifurcating_loop_2
-GPfates	"02 
- 02m46s04  0964   8.017304e+05   6.728202e+02 
- 02m47s18  0971   8.017295e+05   1.781629e+03 
- 02m48s30  0978   8.017286e+05   1.609416e+04 
- 02m49s45  0985   8.017274e+05   1.200546e+04 
- 02m50s57  0992   8.017265e+05   9.923610e+03 
- 02m51s72  0999   8.017258e+05   6.632800e+04 
- 02m52s83  1006   8.017245e+05   2.071532e+03 
- 02m53s95  1013   8.017251e+05   9.772111e+04 
- 02m55s08  1020   8.017242e+05   5.952413e+05 
- 02m56s19  1027   8.017228e+05   2.284456e+03 
- 02m57s33  1034   8.017222e+05   1.093807e+03 
- 02m58s45  1041   8.017222e+05   6.244774e+04 
- 02m59s58  1048   8.017214e+05  "	1	real/hepatoblast-differentiation_yang
-GPfates	"03 
- 02m45s59  0852   9.613693e+05   1.413072e+03 
- 02m46s73  0858   9.613680e+05   3.660046e+02 
- 02m47s81  0864   9.613682e+05   2.236748e+04 
- 02m48s82  0869   9.613673e+05   3.544254e+02 
- 02m49s99  0875   9.613667e+05   1.252147e+04 
- 02m51s09  0881   9.613663e+05   6.593011e+02 
- 02m52s17  0887   9.613660e+05   5.092875e+02 
- 02m53s25  0893   9.613656e+05   3.499174e+02 
- 02m54s34  0899   9.613648e+05   1.376649e+03 
- 02m55s44  0905   9.613640e+05   9.463279e+03 
- 02m56s52  0911   9.613636e+05   6.013634e+03 
- 02m57s58  0917   9.613630e+05   1.626400e+03 
- 02m58s65  0923   9.613628e+05  "	1	synthetic/bifurcating_converging_2
-GPfates	"05 
- 05m22s36  0151  -9.100315e+05   7.491036e+06 
- 05m24s66  0152  -9.100513e+05   3.695574e+06 
-
- 05m26s92  0153  -9.100801e+05   8.104848e+04 
- 05m29s20  0154  -9.101018e+05   3.119116e+06 
- 05m31s26  0155  -9.101191e+05   3.775459e+06 
- 05m33s23  0156  -9.099283e+05   9.790950e+07 
- 05m35s30  0157  -9.101217e+05   7.786344e+06 
- 05m37s45  0158  -9.101333e+05   1.681162e+06 
- 05m39s76  0159  -9.101377e+05   1.101752e+05 
- 05m42s09  0160  -9.101394e+05   9.581565e+05 
- 05m44s20  0161  -9.101418e+05   1.497596e+06 
- 05m46s16  0162  -9.101431e+05   9.599188e+06 
- 05m48s41  0163  -9.101492e+05 "	1	real/dentate-gyrus-neurogenesis_hochgerner
-GPfates	"06 
- 07m14s99  0151  -3.564417e+05   3.403988e+08 
- 07m17s76  0152  -3.582411e+05   8.353903e+06 
- 07m20s78  0153  -3.583046e+05   3.604934e+08 
- 07m23s98  0154  -3.584622e+05   4.863683e+06 
- 07m26s94  0155  -3.584726e+05   8.137627e+05 
- 07m29s54  0156  -3.584756e+05   8.378515e+05 
- 07m32s28  0157  -3.532155e+05   2.796170e+09 
- 07m35s14  0158  -3.584926e+05   1.289195e+07 
- 07m37s89  0159  -3.585294e+05   9.293099e+06 
- 07m40s58  0160  -3.587037e+05   2.612249e+06 
- 07m43s59  0161  -3.588630e+05   1.804687e+06 
- 07m46s90  0162  -3.583675e+05   6.628150e+06 
- 07m49s42  0163  -3.589121e+05  "	1	real/oligodendrocyte-differentiation-clusters_marques
-GPfates	"2 
- 02m35s36  1967   2.719048e+05   5.362629e+01 
- 02m36s41  1979   2.719045e+05   2.013587e+02 
- 02m37s46  1991   2.719044e+05   2.402402e+02 
- 02m38s41  2002   2.719039e+05   9.591258e+00 
-Runtime:  02m38s41
-Optimization status: Maximum number of f evaluations reached
-
-Store DR------------------------------------------------------
-Infer pseudotime----------------------------------------------
--- error --
-Traceback (most recent call last):
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/wrapper.py"", line 28, in <module>
-    m.infer_pseudotime(s_columns=[""bgplvm_"" + str(i) for i"	1	synthetic/bifurcating_loop_2
-GPfates	"2 
- 02m35s61  1907   2.719352e+05   9.914740e+01 
- 02m36s66  1919   2.719337e+05   1.127537e+02 
- 02m37s69  1931   2.719323e+05   5.880746e+01 
- 02m38s71  1943   2.719311e+05   5.411238e+01 
- 02m39s75  1955   2.720956e+05   5.199271e+06 
- 02m40s78  1967   2.719317e+05   4.321499e+04 
- 02m41s78  1980   2.719288e+05   2.158933e+02 
- 02m42s83  1994   2.719279e+05   1.111068e+03 
- 02m43s46  2002   2.719276e+05   9.107020e+01 
-Runtime:  02m43s46
-Optimization status: Maximum number of f evaluations reached
-
-Store DR------------------------------------------------------
-Infer pseudotime--------------"	1	synthetic/bifurcating_loop_2
-GPfates	"2 
- 02m41s80  0995   8.218016e+05   1.858077e+02 
- 02m42s95  1002   8.218014e+05   1.143032e+03 
- 02m44s11  1009   8.218014e+05   3.662777e+03 
- 02m45s26  1016   8.218013e+05   8.523019e+01 
- 02m46s42  1023   8.218012e+05   1.359366e+02 
- 02m47s57  1030   8.218013e+05   2.063592e+04 
- 02m48s72  1037   8.218011e+05   2.184506e+02 
- 02m49s87  1044   8.218010e+05   5.163511e+01 
- 02m51s03  1051   8.218010e+05   1.009471e+03 
- 02m52s14  1058   8.218009e+05   3.574751e+01 
- 02m53s20  1065   8.218008e+05   4.954213e+01 
- 02m54s24  1072   8.218008e+05   1.010978e+03 
- 02m55s25  1079   8.218007e+05   "	1	synthetic/consecutive_bifurcating_2
-GPfates	"3 
- 02m42s82  1043   7.480225e+05   2.630768e+03 
- 02m43s95  1051   7.480221e+05   5.531113e+04 
- 02m45s09  1059   7.480205e+05   1.121319e+03 
- 02m46s23  1067   7.480198e+05   1.892919e+04 
- 02m47s33  1075   7.480180e+05   1.911645e+03 
- 02m48s37  1082   7.480174e+05   6.986220e+02 
- 02m49s38  1089   7.480164e+05   5.362124e+03 
- 02m50s38  1096   7.480154e+05   3.980681e+03 
- 02m51s40  1103   7.480139e+05   4.094639e+03 
- 02m52s43  1110   7.480126e+05   1.852615e+03 
- 02m53s60  1118   7.480113e+05   5.597235e+03 
- 02m54s68  1125   7.480097e+05   1.577554e+03 
- 02m55s83  1134   7.480073e+05   "	1	synthetic/trifurcating_2
-GPfates	"3 
- 02m43s54  0986   7.480160e+05   1.040639e+04 
- 02m44s57  0993   7.480143e+05   3.211594e+04 
- 02m45s63  1000   7.480129e+05   8.202755e+02 
- 02m46s67  1007   7.480124e+05   2.164459e+03 
- 02m47s76  1015   7.480618e+05   1.306730e+07 
- 02m48s81  1022   7.480124e+05   2.846334e+05 
- 02m49s82  1029   7.480082e+05   3.704548e+03 
- 02m50s95  1037   7.480064e+05   1.838145e+03 
- 02m51s97  1044   7.480056e+05   1.925170e+03 
- 02m52s97  1051   7.480054e+05   4.575501e+04 
- 02m54s11  1059   7.480043e+05   1.282034e+04 
- 02m55s27  1067   7.480034e+05   1.383370e+04 
- 02m56s31  1074   7.480027e+05   "	1	synthetic/trifurcating_2
-GPfates	"3 
-Runtime:  02m47s19
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in notify_observers
+    [callble(self, which=whi"	1	synthetic/consecutive_bifurcating_2
+GPfates	"+05   9.463004e+03 
+ 02m32s09  1790   7.714230e+05   2.470309e+04 
+ 02m33s10  1802   7.714210e+05   1.010242e+03 
+ 02m34s12  1814   7.714180e+05   1.473978e+03 
+ 02m35s14  1826   7.714157e+05   1.028614e+04 
+ 02m36s16  1838   7.714131e+05   1.208430e+03 
+ 02m37s18  1850   7.714100e+05   9.335925e+02 
+ 02m38s20  1862   7.714077e+05   1.615391e+03 
+ 02m39s22  1874   7.714053e+05   4.402696e+04 
+ 02m40s24  1886   7.714037e+05   1.204589e+03 
+ 02m41s27  1898   7.714015e+05   5.143195e+02 
+ 02m42s29  1910   7.713996e+05   1.096725e+03 
+ 02m43s31  1922   7.713993e+05   6.110752e+04 
+ 02m44s33  1934 "	1	synthetic/converging_2
+GPfates	"+06   1.894058e+03 
+ 02m47s54  0604   3.603383e+06   1.317341e+04 
+ 02m48s67  0608   3.603380e+06   1.140477e+03 
+ 02m49s79  0612   3.603379e+06   1.490393e+03 
+ 02m50s92  0616   3.603378e+06   6.897780e+03 
+ 02m52s03  0620   3.603376e+06   2.280757e+03 
+ 02m53s15  0624   3.603374e+06   1.331357e+04 
+ 02m54s26  0628   3.603372e+06   9.737192e+02 
+ 02m55s37  0632   3.603372e+06   2.925398e+03 
+ 02m56s47  0636   3.603371e+06   2.578136e+04 
+ 02m57s57  0640   3.603370e+06   2.278255e+03 
+ 02m58s68  0644   3.603369e+06   3.058374e+04 
+ 02m59s78  0648   3.603369e+06   1.418131e+04 
+ 03m00s88  0652 "	1	real/aging-hsc-old_kowalczyk
+GPfates	"+06   3.994776e+06 
+ 02m42s29  0755   2.449131e+06   3.356956e+05 
+ 02m43s36  0760   2.449125e+06   2.750069e+04 
+ 02m44s43  0765   2.449118e+06   2.123836e+05 
+ 02m45s50  0770   2.449123e+06   3.862694e+06 
+ 02m46s57  0775   2.449112e+06   1.384526e+05 
+ 02m47s64  0780   2.449109e+06   1.698095e+04 
+ 02m48s71  0785   2.449106e+06   1.471965e+06 
+ 02m49s78  0790   2.449097e+06   7.923242e+04 
+ 02m50s85  0795   2.449092e+06   6.026175e+04 
+ 02m51s92  0800   2.449086e+06   1.865116e+04 
+ 02m52s99  0805   2.449078e+06   5.655634e+04 
+ 02m54s06  0810   2.449074e+06   1.477950e+04 
+ 02m55s13  0815 "	1	real/germline-human-male-weeks_li
+GPfates	"+06   5.192684e+04 
+ 02m53s04  0604   3.603352e+06   1.017401e+05 
+ 02m54s19  0608   3.603350e+06   1.029930e+04 
+ 02m55s34  0612   3.603557e+06   1.286168e+07 
+ 02m56s49  0616   3.603346e+06   1.844837e+05 
+ 02m57s64  0620   3.603575e+06   1.094948e+08 
+ 02m58s79  0624   3.603343e+06   1.872374e+03 
+ 02m59s94  0628   3.603337e+06   1.652267e+03 
+ 03m01s09  0632   3.603335e+06   9.723929e+03 
+ 03m02s24  0636   3.603335e+06   3.312749e+03 
+ 03m03s38  0640   3.603334e+06   1.954484e+04 
+ 03m04s53  0644   3.610982e+06   2.267476e+09 
+ 03m05s68  0648   3.603331e+06   1.686861e+06 
+ 03m06s83  0652 "	1	real/aging-hsc-old_kowalczyk
+GPfates	"06   5.011937e+05 
+ 03m15s19  0602   2.769601e+06   1.209068e+05 
+ 03m16s47  0606   2.769596e+06   1.421472e+05 
+ 03m17s76  0610   2.769603e+06   1.575796e+07 
+ 03m19s04  0614   2.769575e+06   8.580256e+05 
+ 03m20s33  0618   2.769565e+06   4.758701e+05 
+ 03m21s61  0622   2.769550e+06   8.054088e+05 
+ 03m22s90  0626   2.769538e+06   3.517821e+05 
+ 03m24s18  0630   2.769534e+06   2.387403e+05 
+ 03m25s47  0634   2.769529e+06   1.074323e+05 
+ 03m26s75  0638   2.769501e+06   5.242611e+05 
+ 03m28s04  0642   2.769492e+06   5.365954e+05 
+ 03m29s32  0646   2.769488e+06   1.154857e+05 
+ 03m30s61  0650  "	1	real/mESC-differentiation_hayashi
+GPfates	"06   7.512412e+05 
+ 04m11s14  0302   5.170619e+06   4.385788e+06 
+ 04m12s80  0304   5.170500e+06   1.082151e+07 
+ 04m14s44  0306   5.170322e+06   1.907740e+06 
+ 04m16s07  0308   5.170306e+06   2.199616e+06 
+ 04m17s72  0310   5.173330e+06   8.594424e+09 
+ 04m19s38  0312   5.170278e+06   6.548266e+05 
+ 04m21s03  0314   5.170267e+06   2.265785e+06 
+ 04m22s69  0316   5.170152e+06   1.434933e+06 
+ 04m24s35  0318   5.170010e+06   5.105146e+06 
+ 04m26s00  0320   5.169958e+06   5.588691e+05 
+ 04m27s66  0322   5.169912e+06   5.210490e+06 
+ 04m29s31  0324   5.172610e+06   7.844194e+09 
+ 04m30s97  0326  "	1	real/human-embryos_petropoulos
+GPfates	"06   8.493160e+05 
+ 02m42s78  0755   2.449286e+06   3.824997e+05 
+ 02m43s86  0760   2.449277e+06   9.175352e+04 
+ 02m44s94  0765   2.449266e+06   1.339021e+04 
+ 02m46s02  0770   2.449535e+06   3.480942e+08 
+ 02m47s09  0775   2.449244e+06   3.120159e+04 
+ 02m48s17  0780   2.449220e+06   1.048967e+05 
+ 02m49s25  0785   2.449202e+06   2.151342e+06 
+ 02m50s33  0790   2.449185e+06   3.003349e+04 
+ 02m51s41  0795   2.449179e+06   2.550102e+04 
+ 02m52s48  0800   2.449167e+06   1.393705e+06 
+ 02m53s56  0805   2.449155e+06   6.701240e+04 
+ 02m54s64  0810   2.449141e+06   1.036381e+05 
+ 02m55s72  0815  "	1	real/germline-human-male-weeks_li
+GPfates	"06   8.710377e+06 
+ 04m06s66  0302   5.167986e+06   2.195406e+06 
+ 04m08s30  0304   5.167859e+06   2.127637e+06 
+ 04m09s93  0306   5.167832e+06   6.067182e+07 
+ 04m11s56  0308   5.168016e+06   2.276667e+08 
+ 04m13s20  0310   5.167720e+06   1.551794e+06 
+ 04m14s83  0312   5.167432e+06   1.139384e+07 
+ 04m16s46  0314   5.167538e+06   2.203892e+08 
+ 04m18s10  0316   5.167138e+06   5.235715e+06 
+ 04m19s74  0318   5.167094e+06   1.392380e+06 
+ 04m21s37  0320   5.167069e+06   3.910776e+07 
+ 04m23s00  0322   5.166917e+06   3.431103e+06 
+ 04m24s64  0324   5.167539e+06   3.727970e+08 
+ 04m26s27  0326  "	1	real/human-embryos_petropoulos
+GPfates	"1e+05   1.090429e+03 
+ 02m40s40  1790   7.713907e+05   3.160057e+04 
+ 02m41s48  1802   7.713896e+05   5.252998e+03 
+ 02m42s56  1814   7.713887e+05   9.676924e+02 
+ 02m43s63  1826   7.713877e+05   7.782426e+02 
+ 02m44s71  1838   7.713871e+05   7.361745e+02 
+ 02m45s78  1850   7.713863e+05   2.224749e+02 
+ 02m46s86  1862   7.713855e+05   3.212215e+02 
+ 02m47s94  1874   7.713847e+05   2.224989e+03 
+ 02m49s00  1886   7.713841e+05   6.450783e+02 
+ 02m50s07  1898   7.713834e+05   4.773788e+02 
+ 02m51s14  1910   7.713826e+05   7.733651e+02 
+ 02m52s21  1922   7.713813e+05   1.310028e+03 
+ 02m53s28  193"	1	synthetic/converging_2
+GPfates	"2e+05   3.704508e+05 
+ 02m46s02  0151  -9.077825e+05   3.580278e+05 
+ 02m47s12  0152  -9.077944e+05   2.879111e+05 
+ 02m48s22  0153  -9.077474e+05   1.058808e+08 
+ 02m49s32  0154  -9.078057e+05   8.459023e+06 
+ 02m50s42  0155  -9.078352e+05   2.685189e+06 
+ 02m51s51  0156  -9.079262e+05   2.385492e+06 
+ 02m52s61  0157  -9.079680e+05   3.052711e+06 
+ 02m53s72  0158  -9.080386e+05   1.556439e+05 
+ 02m54s83  0159  -9.081122e+05   6.892022e+05 
+ 02m55s92  0160  -9.069433e+05   5.263777e+08 
+ 02m57s02  0161  -9.081216e+05   2.083193e+06 
+ 02m58s12  0162  -9.081655e+05   7.814209e+05 
+ 02m59s22  016"	1	real/dentate-gyrus-neurogenesis_hochgerner
+GPfates	"450e+05   3.846313e+07 
+ 07m09s26  0151  -3.788015e+05   2.761627e+06 
+ 07m12s11  0152  -3.790477e+05   4.966520e+07 
+ 07m14s94  0153  -3.792701e+05   4.687083e+06 
+ 07m17s79  0154  -3.794290e+05   1.475601e+07 
+ 07m20s62  0155  -3.795113e+05   1.527078e+07 
+ 07m23s46  0156  -3.797658e+05   1.730077e+07 
+ 07m26s29  0157  -1.242599e+05   1.111075e+11 
+ 07m29s12  0158  -3.797960e+05   9.854976e+07 
+ 07m32s01  0159  -3.803308e+05   4.011501e+06 
+ 07m34s88  0160  -3.796297e+05   2.624686e+09 
+ 07m59s70  0161  -3.804677e+05   2.403404e+08 
+ 08m02s55  0162  -3.807774e+05   4.750259e+07 
+ 08m05s37  0"	1	real/oligodendrocyte-differentiation-subclusters_marques
+GPfates	"480e+05   1.515237e+08 
+ 04m00s70  0151  -3.587057e+05   6.429333e+05 
+ 04m02s29  0152  -3.587268e+05   8.092006e+05 
+ 04m03s87  0153  -3.589262e+05   1.364033e+06 
+ 04m05s45  0154  -3.590263e+05   5.905720e+06 
+ 04m07s03  0155  -3.591489e+05   3.386089e+06 
+ 04m08s61  0156  -3.594151e+05   9.214567e+05 
+ 04m10s20  0157  -3.558904e+05   1.125453e+10 
+ 04m11s78  0158  -3.594219e+05   1.333064e+07 
+ 04m13s36  0159  -3.595398e+05   1.964894e+06 
+ 04m14s95  0160  -3.596111e+05   6.000947e+05 
+ 04m16s53  0161  -3.597099e+05   4.374603e+05 
+ 04m18s11  0162  -3.566141e+05   1.268283e+09 
+ 04m19s70  0"	1	real/oligodendrocyte-differentiation-clusters_marques
+GPfates	"6   3.807841e+05 
+ 03m05s09  0746   3.003702e+06   2.782933e+06 
+ 03m06s33  0751   3.003690e+06   3.174324e+05 
+ 03m07s57  0756   3.003683e+06   1.244946e+05 
+ 03m08s81  0761   3.003675e+06   1.494308e+05 
+ 03m10s05  0766   3.003660e+06   5.686546e+05 
+ 03m11s28  0771   3.003646e+06   2.121677e+06 
+ 03m12s52  0776   3.003638e+06   7.455033e+04 
+ 03m13s76  0781   3.003630e+06   7.879671e+04 
+ 03m15s00  0786   3.003618e+06   4.039352e+04 
+ 03m16s24  0791   3.003615e+06   6.494047e+04 
+ 03m17s48  0796   3.003610e+06   3.241379e+04 
+ 03m18s71  0801   3.003607e+06   3.660588e+04 
+ 03m19s95  0806   "	1	real/germline-human-female_li
+GPfates	"99e+05   1.690056e+02 
+ 02m42s28  1639   9.613197e+05   1.639888e+02 
+ 02m43s36  1650   9.613196e+05   9.912601e+01 
+ 02m44s46  1661   9.613195e+05   9.487118e+01 
+ 02m45s55  1672   9.613194e+05   1.280824e+04 
+ 02m46s64  1683   9.613193e+05   2.551480e+02 
+ 02m47s73  1694   9.613192e+05   3.089185e+01 
+ 02m48s81  1705   9.613191e+05   1.381186e+02 
+ 02m49s91  1716   9.613191e+05   3.134720e+03 
+ 02m50s60  1723   9.613190e+05   6.582833e+02 
+Runtime:  02m50s60
 Optimization status: Converged
+
+Store DR------------------------------------------------------
+Infer pseudotime------------------------"	1	synthetic/bifurcating_converging_2
+GPfates	"e.py"", line 500, in _pass_through_notify_observers
+    self.notify_observers(which=which)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in notify_observers
+    [callble(self, which=which) for _, _, callble in self.observers]
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
+    [callble(self, which=which) for _, _, callble in self.observers]
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/"	1	synthetic/consecutive_bifurcating_2
+GPfates	"e/R/lib64/R/library/GPfates/wrapper.py"", line 28, in <module>
+    m.infer_pseudotime(s_columns=[""bgplvm_"" + str(i) for i in range(p[""ndims""])]) # use the first two components to infer pseudotime
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPfates/GPfates.py"", line 41, in infer_pseudotime
+    self.time_model.rbf.variance.constrain_fixed(200., warning=False)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/constrainable.py"", line 62, in constrain_fixed
+    self[:] = value
+  File ""/scrat"	1	synthetic/linear_long_2
+GPfates	"e+05   1.265660e+08 
+
+ 02m43s84  0151  -9.086069e+05   5.076906e+06 
+ 02m44s91  0152  -9.086393e+05   9.407666e+05 
+ 02m45s99  0153  -9.086555e+05   4.912468e+05 
+ 02m47s08  0154  -9.086736e+05   4.038418e+05 
+ 02m48s15  0155  -9.085905e+05   1.308821e+08 
+ 02m49s23  0156  -9.086795e+05   4.182559e+06 
+ 02m50s31  0157  -9.086888e+05   1.104786e+06 
+ 02m51s39  0158  -9.086954e+05   1.591611e+05 
+ 02m52s48  0159  -9.086973e+05   1.591866e+05 
+ 02m53s56  0160  -9.087341e+05   8.462635e+05 
+ 02m54s64  0161  -9.087868e+05   3.129375e+05 
+ 02m55s71  0162  -9.087584e+05   7.365115e+06 
+ 02m56s80  016"	1	real/dentate-gyrus-neurogenesis_hochgerner
+GPfates	"e+05   4.528041e+06 
+ 03m56s18  0151  -3.489450e+05   2.656890e+06 
+ 03m57s74  0152  -3.491062e+05   6.268479e+06 
+ 03m59s30  0153  -3.493116e+05   2.485797e+06 
+ 04m00s87  0154  -3.496026e+05   1.279406e+07 
+ 04m02s43  0155  -3.469270e+05   2.684759e+09 
+ 04m03s99  0156  -3.496629e+05   2.712145e+07 
+ 04m05s55  0157  -3.499363e+05   1.170570e+07 
+ 04m07s12  0158  -3.503439e+05   1.524534e+06 
+ 04m08s69  0159  -3.506771e+05   2.591384e+06 
+ 04m10s25  0160  -3.508862e+05   9.055469e+06 
+ 04m11s81  0161  -3.499579e+05   2.001229e+09 
+ 04m13s37  0162  -3.508955e+05   3.522094e+06 
+ 04m14s94  0163"	1	real/oligodendrocyte-differentiation-clusters_marques
+GPfates	"e+05   5.046281e+06 
+ 04m06s28  0151  -3.560814e+05   7.588391e+06 
+ 04m07s87  0152  -3.561082e+05   5.118720e+06 
+ 04m09s45  0153  -3.554897e+05   1.725070e+09 
+ 04m11s04  0154  -3.561140e+05   5.353544e+06 
+ 04m12s63  0155  -3.561326e+05   9.191079e+06 
+ 04m14s22  0156  -3.562844e+05   1.020897e+07 
+ 04m15s80  0157  -3.538068e+05   2.087579e+09 
+ 04m17s39  0158  -3.564414e+05   5.621866e+07 
+ 04m18s98  0159  -3.566153e+05   9.438144e+06 
+ 04m20s57  0160  -3.566741e+05   1.971777e+06 
+
+ 04m22s16  0161  -3.567140e+05   7.578427e+05 
+ 04m23s75  0162  -3.567658e+05   6.914940e+05 
+ 04m25s34  016"	1	real/oligodendrocyte-differentiation-clusters_marques
+GPfates	"e+06   1.011365e+04 
+ 02m43s84  0755   2.449059e+06   2.563866e+04 
+ 02m44s92  0760   2.449058e+06   5.809646e+03 
+ 02m46s00  0765   2.449072e+06   2.848304e+06 
+ 02m47s09  0770   2.449056e+06   2.024175e+05 
+ 02m48s17  0775   2.449054e+06   3.135419e+04 
+ 02m49s26  0780   2.449050e+06   1.187803e+04 
+ 02m50s34  0785   2.449048e+06   2.482047e+04 
+ 02m51s42  0790   2.449044e+06   5.082559e+05 
+ 02m52s50  0795   2.449040e+06   1.651858e+04 
+ 02m53s58  0800   2.449039e+06   3.537199e+05 
+ 02m54s67  0805   2.449036e+06   6.080150e+03 
+ 02m55s75  0810   2.449035e+06   1.097693e+04 
+ 02m56s83  0815"	1	real/germline-human-male_li
+GPfates	"e+06   1.276140e+05 
+ 03m16s53  0598   3.790609e+06   2.333574e+05 
+ 03m17s63  0602   3.790608e+06   1.063630e+04 
+ 03m18s73  0606   3.790607e+06   5.908328e+04 
+ 03m19s83  0610   3.790606e+06   2.490664e+04 
+ 03m20s93  0614   3.790605e+06   1.692870e+06 
+ 03m22s03  0618   3.790601e+06   6.061176e+03 
+ 03m23s13  0622   3.790606e+06   1.132558e+07 
+ 03m24s23  0626   3.790598e+06   2.755570e+04 
+ 03m25s33  0630   3.790595e+06   4.484645e+03 
+ 03m26s43  0634   3.790607e+06   2.601194e+07 
+ 03m27s52  0638   3.790592e+06   6.512089e+03 
+ 03m28s63  0642   3.790589e+06   7.302605e+03 
+ 03m29s72  0646"	1	real/pancreatic-beta-cell-maturation_zhang
+GPfates	"e+06   3.986225e+06 
+ 04m07s08  0302   5.172666e+06   1.737109e+06 
+ 04m08s72  0304   5.172447e+06   8.697873e+06 
+ 04m10s36  0306   5.172266e+06   1.433245e+07 
+ 04m12s00  0308   5.172104e+06   1.318660e+07 
+ 04m13s64  0310   5.172052e+06   9.191265e+06 
+ 04m15s27  0312   5.188131e+06   1.424478e+10 
+ 04m16s91  0314   5.172015e+06   1.175331e+06 
+ 04m18s55  0316   5.171984e+06   2.101568e+06 
+ 04m20s19  0318   5.172214e+06   1.306862e+06 
+ 04m21s83  0320   5.421203e+06   6.410296e+11 
+ 04m23s46  0322   5.171904e+06   9.334972e+06 
+ 04m25s10  0324   5.171870e+06   6.097123e+06 
+ 04m26s74  0326"	1	real/human-embryos_petropoulos
+GPfates	"e+06   5.494853e+04 
+ 02m38s67  0755   2.449187e+06   1.742072e+04 
+ 02m39s72  0760   2.449177e+06   2.478210e+04 
+ 02m40s76  0765   2.449175e+06   2.016686e+04 
+ 02m41s81  0770   2.449168e+06   3.865533e+04 
+ 02m42s86  0775   2.449164e+06   3.018165e+06 
+ 02m43s91  0780   2.449160e+06   2.872744e+05 
+ 02m44s96  0785   2.449152e+06   1.837357e+04 
+ 02m46s01  0790   2.449150e+06   1.939469e+04 
+ 02m47s06  0795   2.449151e+06   6.966965e+05 
+ 02m48s11  0800   2.449139e+06   3.358757e+04 
+ 02m49s16  0805   2.449137e+06   1.275102e+04 
+ 02m50s20  0810   2.449134e+06   1.378271e+05 
+ 02m51s25  0815"	1	real/germline-human-male_li
+GPfates	"es/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
+    [callble(self, which=which) for _, _, callble in self.observers]
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 498, in _parameters_changed_notification
+    self.parameters_changed()
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/models/bayesian_gplvm.py"", line 85, in parameters_changed
+    super(BayesianGPLVM,self).parameters_changed()
+  File ""/scratch/irc/shared/dyn"	1	real/hepatoblast-differentiation_yang
+GPfates	"imization status: Converged
 
 Store DR------------------------------------------------------
 Infer pseudotime----------------------------------------------
@@ -821,292 +617,49 @@ Infer pseudotime----------------------------------------------
 Traceback (most recent call last):
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/wrapper.py"", line 28, in <module>
     m.infer_pseudotime(s_columns=[""bgplvm_"" + str(i) for i in range(p[""ndims""])]) # use the first two components to infer pseudotime
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPfates/GPfates.py"", line 41, in infer_pseudoti"	1	real/psc-astrocyte-maturation-glia_sloan
-GPfates	"4 
- 02m40s44  0983   7.716941e+05   5.907987e+03 
- 02m41s47  0990   7.717217e+05   7.183540e+06 
- 02m42s51  0997   7.716921e+05   6.067352e+02 
- 02m43s64  1005   7.716909e+05   5.815029e+02 
- 02m44s72  1012   7.716898e+05   4.388783e+03 
- 02m45s81  1019   7.716890e+05   5.748529e+03 
- 02m46s89  1026   7.716878e+05   1.220826e+04 
- 02m47s92  1033   7.716872e+05   5.116131e+03 
- 02m48s97  1040   7.716862e+05   2.530176e+03 
- 02m50s02  1047   7.716858e+05   1.906807e+04 
- 02m51s06  1054   7.716851e+05   3.883123e+03 
- 02m52s12  1061   7.716848e+05   3.309907e+02 
- 02m53s18  1068   7.716843e+05   "	1	synthetic/converging_2
-GPfates	"8 
- 13m23s82  0151  -3.799544e+05   1.166980e+08 
- 13m28s39  0152  -3.802778e+05   1.346452e+07 
- 13m32s51  0153  -3.805958e+05   1.186801e+07 
- 13m37s16  0154  -3.809652e+05   1.296547e+08 
- 13m41s69  0155  -3.813115e+05   7.705226e+06 
- 13m46s90  0156  -3.814305e+05   3.277660e+06 
- 13m51s89  0157  -3.815447e+05   7.018711e+07 
- 13m56s64  0158  -3.816396e+05   1.092541e+07 
- 14m01s45  0159  -3.817113e+05   5.371042e+06 
- 14m06s33  0160  -3.818916e+05   3.487363e+07 
- 14m10s96  0161  -3.822709e+05   1.243237e+08 
- 14m15s39  0162  -3.824903e+05   6.060533e+07 
- 14m19s81  0163  -3.825674e+05   "	1	real/oligodendrocyte-differentiation-subclusters_marques
-GPfates	"er_core.py"", line 498, in _parameters_changed_notification
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPfates/GPfates.py"", line 41, in infer_pseudotime
+    self.time_model.rb"	1	real/epidermis-hair-IFE_joost
+GPfates	"irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
+    [callble(self, which=which) for _, _, callble in self.observers]
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 498, in _parameters_changed_notification
     self.parameters_changed()
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/models/bayesian_gplvm.py"", line 85, in parameters_changed
-    super(BayesianGPLVM,self).parameters_changed()
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/core/sparse_gp_mpi.py"", line 122, in parameters_changed
-    super(SparseGP_MPI,self).parameters_changed()
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/"	1	synthetic/bifurcating_10
-GPfates	"ervers(which=which)
+    super(BayesianGPLVM,self).parameter"	1	real/fibroblast-reprogramming_treutlein
+GPfates	"kages/GPfates/GPfates.py"", line 41, in infer_pseudotime
+    self.time_model.rbf.variance.constrain_fixed(200., warning=False)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/constrainable.py"", line 62, in constrain_fixed
+    self[:] = value
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable_array.py"", line 119, in __setitem__
+    self.notify_observers()
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observab"	1	real/epidermis-hair-spatial_joost
+GPfates	"onstrainable.py"", line 62, in constrain_fixed
+    self[:] = value
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable_array.py"", line 119, in __setitem__
+    self.notify_observers()
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in notify_observers
+    [callble(self, which=which) for _, _, callble in self.observers]
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line "	1	real/epidermis-hair-spatial_joost
+GPfates	"rc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 500, in _pass_through_notify_observers
+    self.notify_observers(which=which)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in notify_observers
     [callble(self, which=which) for _, _, callble in self.observers]
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
-    [callble(self, which=which) for _, _, callble in self.observers]
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 500, in _"	1	synthetic/linear_9
-GPfates	"f.variance.constrain_fixed(200., warning=False)
+    [callble(self, which=which) for _,"	1	synthetic/linear_2
+GPfates	"seudotime
+    self.time_model.rbf.variance.constrain_fixed(200., warning=False)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/constrainable.py"", line 62, in constrain_fixed
     self[:] = value
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable_array.py"", line 119, in __setitem__
     self.notify_observers()
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in notify_observers
-    [callble(self, which=which) for _, _,"	1	synthetic/consecutive_bifurcating_9
-GPfates	"h=which) for _, _, callble in self.observers]
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
-    [callble(self, which=which) for _, _, callble in self.observers]
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 498, in _parameters_changed_notification
-    self.parameters_changed()
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/models/bayesian_gplvm.py"", line 85"	1	synthetic/linear_10
-GPfates	"le(self, which=which) for _, _, callble in self.observers]
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 500, in _pass_through_notify_observers
-    self.notify_observers(which=which)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in notify_observers
-    [callble(self, which=which) for _, _, callble in self.observers]
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/"	1	real/epidermis-hair-uHF_joost
-GPfates	"lf.observers]
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 500, in _pass_through_notify_observers
+    [call"	1	synthetic/cycle_2
+GPfates	"venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 500, in _pass_through_notify_observers
     self.notify_observers(which=which)
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in notify_observers
     [callble(self, which=which) for _, _, callble in self.observers]
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
-    [c"	1	real/epidermis-hair-uHF_joost
-GPfates	"meters_changed_notification
-    self.parameters_changed()
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/models/bayesian_gplvm.py"", line 85, in parameters_changed
-    super(BayesianGPLVM,self).parameters_changed()
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/core/sparse_gp_mpi.py"", line 122, in parameters_changed
-    super(SparseGP_MPI,self).parameters_changed()
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/core/sparse_gp.py"", line 80"	1	synthetic/bifurcating_loop_9
-GPfates	"onstrain_fixed
-    self[:] = value
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable_array.py"", line 119, in __setitem__
-    self.notify_observers()
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in notify_observers
     [callble(self, which=which) for _, _, callble in self.observers]
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
-    [callble("	1	synthetic/consecutive_bifurcating_9
-GPfates	"ry/GPfates/venv/lib/python3.5/site-packages/GPy/models/bayesian_gplvm.py"", line 85, in parameters_changed
-    super(BayesianGPLVM,self).parameters_changed()
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/core/sparse_gp_mpi.py"", line 122, in parameters_changed
-    super(SparseGP_MPI,self).parameters_changed()
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/core/sparse_gp.py"", line 80, in parameters_changed
-    mean_function=self.mean_function)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/l"	1	synthetic/linear_long_10
-GPfates	"scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 498, in _parameters_changed_notification
-    self.parameters_changed()
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/models/bayesian_gplvm.py"", line 85, in parameters_changed
-    super(BayesianGPLVM,self).parameters_changed()
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/core/sparse_gp_mpi.py"", line 122, in parameters_changed
-    super(SparseGP_MPI,self).parameters_"	1	real/aging-hsc-young_kowalczyk
-GPfates	"servable.py"", line 91, in notify_observers
-    [callble(self, which=which) for _, _, callble in self.observers]
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
-    [callble(self, which=which) for _, _, callble in self.observers]
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 500, in _pass_through_notify_observers
-    self.notify_observers(which=which)
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfate"	1	synthetic/linear_long_9
-GPfates	"v/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in notify_observers
-    [callble(self, which=which) for _, _, callble in self.observers]
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
-    [callble(self, which=which) for _, _, callble in self.observers]
-  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 500, in _pass_through_notify_observers
-    self.notify_observers(which=which)
-  File ""/scratch/"	1	synthetic/bifurcating_3
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.13.all.q/RtmpStiizv/scoupe21438192655/data /tmp/2549.13.all.q/RtmpStiizv/scoupe21438192655/init /tmp/2549.13.all.q/RtmpStiizv/scoupe21438192655/time_sp /tmp/2549.13.all.q/RtmpStiizv/scoupe21438192655/gpara /tmp/2549.13.all.q/RtmpStiizv/scoupe21438192655/cpara /tmp/2549.13.all.q/RtmpStiizv/scoupe21438192655/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	real/cell-cycle_buettner
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.14.all.q/Rtmp9SCRQZ/scoup1289917fd95e9/data /tmp/2549.14.all.q/Rtmp9SCRQZ/scoup1289917fd95e9/init /tmp/2549.14.all.q/Rtmp9SCRQZ/scoup1289917fd95e9/time_sp /tmp/2549.14.all.q/Rtmp9SCRQZ/scoup1289917fd95e9/gpara /tmp/2549.14.all.q/Rtmp9SCRQZ/scoup1289917fd95e9/cpara /tmp/2549.14.all.q/Rtmp9SCRQZ/scoup1289917fd95e9/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	real/cell-cycle_buettner
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.15.all.q/Rtmp7vk5CR/scoupe23c281fbe3e/data /tmp/2549.15.all.q/Rtmp7vk5CR/scoupe23c281fbe3e/init /tmp/2549.15.all.q/Rtmp7vk5CR/scoupe23c281fbe3e/time_sp /tmp/2549.15.all.q/Rtmp7vk5CR/scoupe23c281fbe3e/gpara /tmp/2549.15.all.q/Rtmp7vk5CR/scoupe23c281fbe3e/cpara /tmp/2549.15.all.q/Rtmp7vk5CR/scoupe23c281fbe3e/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	real/cell-cycle_buettner
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.16.all.q/RtmpBcI6Mq/scoupf1d1c4db961/data /tmp/2549.16.all.q/RtmpBcI6Mq/scoupf1d1c4db961/init /tmp/2549.16.all.q/RtmpBcI6Mq/scoupf1d1c4db961/time_sp /tmp/2549.16.all.q/RtmpBcI6Mq/scoupf1d1c4db961/gpara /tmp/2549.16.all.q/RtmpBcI6Mq/scoupf1d1c4db961/cpara /tmp/2549.16.all.q/RtmpBcI6Mq/scoupf1d1c4db961/ll 5310 264 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	real/cell-cycle_buettner
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.17.all.q/Rtmp8cvlFw/scoupf1fa23bdaafb/data /tmp/2549.17.all.q/Rtmp8cvlFw/scoupf1fa23bdaafb/init /tmp/2549.17.all.q/Rtmp8cvlFw/scoupf1fa23bdaafb/time_sp /tmp/2549.17.all.q/Rtmp8cvlFw/scoupf1fa23bdaafb/gpara /tmp/2549.17.all.q/Rtmp8cvlFw/scoupf1fa23bdaafb/cpara /tmp/2549.17.all.q/Rtmp8cvlFw/scoupf1fa23bdaafb/ll 3766 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	real/cell-cycle_leng
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.18.all.q/RtmpFJ0vgw/scoupd4eb74e0e5fa/data /tmp/2549.18.all.q/RtmpFJ0vgw/scoupd4eb74e0e5fa/init /tmp/2549.18.all.q/RtmpFJ0vgw/scoupd4eb74e0e5fa/time_sp /tmp/2549.18.all.q/RtmpFJ0vgw/scoupd4eb74e0e5fa/gpara /tmp/2549.18.all.q/RtmpFJ0vgw/scoupd4eb74e0e5fa/cpara /tmp/2549.18.all.q/RtmpFJ0vgw/scoupd4eb74e0e5fa/ll 3766 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	real/cell-cycle_leng
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.19.all.q/RtmpZS7xXH/scoup127dc5a4ca971/data /tmp/2549.19.all.q/RtmpZS7xXH/scoup127dc5a4ca971/init /tmp/2549.19.all.q/RtmpZS7xXH/scoup127dc5a4ca971/time_sp /tmp/2549.19.all.q/RtmpZS7xXH/scoup127dc5a4ca971/gpara /tmp/2549.19.all.q/RtmpZS7xXH/scoup127dc5a4ca971/cpara /tmp/2549.19.all.q/RtmpZS7xXH/scoup127dc5a4ca971/ll 3766 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	real/cell-cycle_leng
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.20.all.q/RtmpQNCe9c/scoupe26c23f26b59/data /tmp/2549.20.all.q/RtmpQNCe9c/scoupe26c23f26b59/init /tmp/2549.20.all.q/RtmpQNCe9c/scoupe26c23f26b59/time_sp /tmp/2549.20.all.q/RtmpQNCe9c/scoupe26c23f26b59/gpara /tmp/2549.20.all.q/RtmpQNCe9c/scoupe26c23f26b59/cpara /tmp/2549.20.all.q/RtmpQNCe9c/scoupe26c23f26b59/ll 3766 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	real/cell-cycle_leng
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.389.all.q/Rtmpq3hdef/scoupdfa32c520240/data /tmp/2549.389.all.q/Rtmpq3hdef/scoupdfa32c520240/init /tmp/2549.389.all.q/Rtmpq3hdef/scoupdfa32c520240/time_sp /tmp/2549.389.all.q/Rtmpq3hdef/scoupdfa32c520240/gpara /tmp/2549.389.all.q/Rtmpq3hdef/scoupdfa32c520240/cpara /tmp/2549.389.all.q/Rtmpq3hdef/scoupdfa32c520240/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_10
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.390.all.q/Rtmpz3n0KJ/scoupdfce6f408263/data /tmp/2549.390.all.q/Rtmpz3n0KJ/scoupdfce6f408263/init /tmp/2549.390.all.q/Rtmpz3n0KJ/scoupdfce6f408263/time_sp /tmp/2549.390.all.q/Rtmpz3n0KJ/scoupdfce6f408263/gpara /tmp/2549.390.all.q/Rtmpz3n0KJ/scoupdfce6f408263/cpara /tmp/2549.390.all.q/Rtmpz3n0KJ/scoupdfce6f408263/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_10
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.391.all.q/RtmpPJGLSd/scoupdff3318d12ac/data /tmp/2549.391.all.q/RtmpPJGLSd/scoupdff3318d12ac/init /tmp/2549.391.all.q/RtmpPJGLSd/scoupdff3318d12ac/time_sp /tmp/2549.391.all.q/RtmpPJGLSd/scoupdff3318d12ac/gpara /tmp/2549.391.all.q/RtmpPJGLSd/scoupdff3318d12ac/cpara /tmp/2549.391.all.q/RtmpPJGLSd/scoupdff3318d12ac/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_10
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.392.all.q/Rtmp64PNgL/scoupe01874c19468/data /tmp/2549.392.all.q/Rtmp64PNgL/scoupe01874c19468/init /tmp/2549.392.all.q/Rtmp64PNgL/scoupe01874c19468/time_sp /tmp/2549.392.all.q/Rtmp64PNgL/scoupe01874c19468/gpara /tmp/2549.392.all.q/Rtmp64PNgL/scoupe01874c19468/cpara /tmp/2549.392.all.q/Rtmp64PNgL/scoupe01874c19468/ll 5 695 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_10
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.393.all.q/RtmpGHR7yA/scoup132285110ca67/data /tmp/2549.393.all.q/RtmpGHR7yA/scoup132285110ca67/init /tmp/2549.393.all.q/RtmpGHR7yA/scoup132285110ca67/time_sp /tmp/2549.393.all.q/RtmpGHR7yA/scoup132285110ca67/gpara /tmp/2549.393.all.q/RtmpGHR7yA/scoup132285110ca67/cpara /tmp/2549.393.all.q/RtmpGHR7yA/scoup132285110ca67/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_11
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.394.all.q/RtmpRPvLEm/scoup133487920ba3f/data /tmp/2549.394.all.q/RtmpRPvLEm/scoup133487920ba3f/init /tmp/2549.394.all.q/RtmpRPvLEm/scoup133487920ba3f/time_sp /tmp/2549.394.all.q/RtmpRPvLEm/scoup133487920ba3f/gpara /tmp/2549.394.all.q/RtmpRPvLEm/scoup133487920ba3f/cpara /tmp/2549.394.all.q/RtmpRPvLEm/scoup133487920ba3f/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_11
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.395.all.q/RtmpJ4Qinb/scoupe04037470d97/data /tmp/2549.395.all.q/RtmpJ4Qinb/scoupe04037470d97/init /tmp/2549.395.all.q/RtmpJ4Qinb/scoupe04037470d97/time_sp /tmp/2549.395.all.q/RtmpJ4Qinb/scoupe04037470d97/gpara /tmp/2549.395.all.q/RtmpJ4Qinb/scoupe04037470d97/cpara /tmp/2549.395.all.q/RtmpJ4Qinb/scoupe04037470d97/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_11
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.396.all.q/Rtmp4fdeV2/scoup132532b6645d6/data /tmp/2549.396.all.q/Rtmp4fdeV2/scoup132532b6645d6/init /tmp/2549.396.all.q/Rtmp4fdeV2/scoup132532b6645d6/time_sp /tmp/2549.396.all.q/Rtmp4fdeV2/scoup132532b6645d6/gpara /tmp/2549.396.all.q/Rtmp4fdeV2/scoup132532b6645d6/cpara /tmp/2549.396.all.q/Rtmp4fdeV2/scoup132532b6645d6/ll 89 345 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_11
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.397.all.q/Rtmpdg356J/scoup1337d54329f2f/data /tmp/2549.397.all.q/Rtmpdg356J/scoup1337d54329f2f/init /tmp/2549.397.all.q/Rtmpdg356J/scoup1337d54329f2f/time_sp /tmp/2549.397.all.q/Rtmpdg356J/scoup1337d54329f2f/gpara /tmp/2549.397.all.q/Rtmpdg356J/scoup1337d54329f2f/cpara /tmp/2549.397.all.q/Rtmpdg356J/scoup1337d54329f2f/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_2
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.398.all.q/RtmpejRq4q/scoupe06c46dbe1e/data /tmp/2549.398.all.q/RtmpejRq4q/scoupe06c46dbe1e/init /tmp/2549.398.all.q/RtmpejRq4q/scoupe06c46dbe1e/time_sp /tmp/2549.398.all.q/RtmpejRq4q/scoupe06c46dbe1e/gpara /tmp/2549.398.all.q/RtmpejRq4q/scoupe06c46dbe1e/cpara /tmp/2549.398.all.q/RtmpejRq4q/scoupe06c46dbe1e/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_2
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.399.all.q/RtmpvMUuMV/scoup133bf37470d97/data /tmp/2549.399.all.q/RtmpvMUuMV/scoup133bf37470d97/init /tmp/2549.399.all.q/RtmpvMUuMV/scoup133bf37470d97/time_sp /tmp/2549.399.all.q/RtmpvMUuMV/scoup133bf37470d97/gpara /tmp/2549.399.all.q/RtmpvMUuMV/scoup133bf37470d97/cpara /tmp/2549.399.all.q/RtmpvMUuMV/scoup133bf37470d97/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_2
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.400.all.q/RtmpqsEBnS/scoup133be4def66c9/data /tmp/2549.400.all.q/RtmpqsEBnS/scoup133be4def66c9/init /tmp/2549.400.all.q/RtmpqsEBnS/scoup133be4def66c9/time_sp /tmp/2549.400.all.q/RtmpqsEBnS/scoup133be4def66c9/gpara /tmp/2549.400.all.q/RtmpqsEBnS/scoup133be4def66c9/cpara /tmp/2549.400.all.q/RtmpqsEBnS/scoup133be4def66c9/ll 746 873 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_2
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.401.all.q/RtmpLREtTk/scoup1327b6121614e/data /tmp/2549.401.all.q/RtmpLREtTk/scoup1327b6121614e/init /tmp/2549.401.all.q/RtmpLREtTk/scoup1327b6121614e/time_sp /tmp/2549.401.all.q/RtmpLREtTk/scoup1327b6121614e/gpara /tmp/2549.401.all.q/RtmpLREtTk/scoup1327b6121614e/cpara /tmp/2549.401.all.q/RtmpLREtTk/scoup1327b6121614e/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_3
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.402.all.q/RtmpfXTvAC/scoupe0913f065c26/data /tmp/2549.402.all.q/RtmpfXTvAC/scoupe0913f065c26/init /tmp/2549.402.all.q/RtmpfXTvAC/scoupe0913f065c26/time_sp /tmp/2549.402.all.q/RtmpfXTvAC/scoupe0913f065c26/gpara /tmp/2549.402.all.q/RtmpfXTvAC/scoupe0913f065c26/cpara /tmp/2549.402.all.q/RtmpfXTvAC/scoupe0913f065c26/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_3
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.403.all.q/RtmptNAmwn/scoup1329f1ab6be5c/data /tmp/2549.403.all.q/RtmptNAmwn/scoup1329f1ab6be5c/init /tmp/2549.403.all.q/RtmptNAmwn/scoup1329f1ab6be5c/time_sp /tmp/2549.403.all.q/RtmptNAmwn/scoup1329f1ab6be5c/gpara /tmp/2549.403.all.q/RtmptNAmwn/scoup1329f1ab6be5c/cpara /tmp/2549.403.all.q/RtmptNAmwn/scoup1329f1ab6be5c/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_3
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.404.all.q/RtmpMpm6G7/scoupe0c02afddd14/data /tmp/2549.404.all.q/RtmpMpm6G7/scoupe0c02afddd14/init /tmp/2549.404.all.q/RtmpMpm6G7/scoupe0c02afddd14/time_sp /tmp/2549.404.all.q/RtmpMpm6G7/scoupe0c02afddd14/gpara /tmp/2549.404.all.q/RtmpMpm6G7/scoupe0c02afddd14/cpara /tmp/2549.404.all.q/RtmpMpm6G7/scoupe0c02afddd14/ll 860 489 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_3
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.405.all.q/RtmpRz6Omg/scoup132c8f6a4bf4/data /tmp/2549.405.all.q/RtmpRz6Omg/scoup132c8f6a4bf4/init /tmp/2549.405.all.q/RtmpRz6Omg/scoup132c8f6a4bf4/time_sp /tmp/2549.405.all.q/RtmpRz6Omg/scoup132c8f6a4bf4/gpara /tmp/2549.405.all.q/RtmpRz6Omg/scoup132c8f6a4bf4/cpara /tmp/2549.405.all.q/RtmpRz6Omg/scoup132c8f6a4bf4/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_4
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.406.all.q/RtmpWrg3FI/scoupb5ef1b017cf0/data /tmp/2549.406.all.q/RtmpWrg3FI/scoupb5ef1b017cf0/init /tmp/2549.406.all.q/RtmpWrg3FI/scoupb5ef1b017cf0/time_sp /tmp/2549.406.all.q/RtmpWrg3FI/scoupb5ef1b017cf0/gpara /tmp/2549.406.all.q/RtmpWrg3FI/scoupb5ef1b017cf0/cpara /tmp/2549.406.all.q/RtmpWrg3FI/scoupb5ef1b017cf0/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_4
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.407.all.q/RtmpLxyUar/scoup132ea4a4943d4/data /tmp/2549.407.all.q/RtmpLxyUar/scoup132ea4a4943d4/init /tmp/2549.407.all.q/RtmpLxyUar/scoup132ea4a4943d4/time_sp /tmp/2549.407.all.q/RtmpLxyUar/scoup132ea4a4943d4/gpara /tmp/2549.407.all.q/RtmpLxyUar/scoup132ea4a4943d4/cpara /tmp/2549.407.all.q/RtmpLxyUar/scoup132ea4a4943d4/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_4
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.408.all.q/Rtmp777giJ/scoupe10828b66519/data /tmp/2549.408.all.q/Rtmp777giJ/scoupe10828b66519/init /tmp/2549.408.all.q/Rtmp777giJ/scoupe10828b66519/time_sp /tmp/2549.408.all.q/Rtmp777giJ/scoupe10828b66519/gpara /tmp/2549.408.all.q/Rtmp777giJ/scoupe10828b66519/cpara /tmp/2549.408.all.q/Rtmp777giJ/scoupe10828b66519/ll 171 263 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_4
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.409.all.q/RtmpEiEljJ/scoupe10628b66519/data /tmp/2549.409.all.q/RtmpEiEljJ/scoupe10628b66519/init /tmp/2549.409.all.q/RtmpEiEljJ/scoupe10628b66519/time_sp /tmp/2549.409.all.q/RtmpEiEljJ/scoupe10628b66519/gpara /tmp/2549.409.all.q/RtmpEiEljJ/scoupe10628b66519/cpara /tmp/2549.409.all.q/RtmpEiEljJ/scoupe10628b66519/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_5
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.410.all.q/Rtmp8c7xwc/scoup133f11b45fcd0/data /tmp/2549.410.all.q/Rtmp8c7xwc/scoup133f11b45fcd0/init /tmp/2549.410.all.q/Rtmp8c7xwc/scoup133f11b45fcd0/time_sp /tmp/2549.410.all.q/Rtmp8c7xwc/scoup133f11b45fcd0/gpara /tmp/2549.410.all.q/Rtmp8c7xwc/scoup133f11b45fcd0/cpara /tmp/2549.410.all.q/Rtmp8c7xwc/scoup133f11b45fcd0/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_5
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.411.all.q/RtmphbryyH/scoup13312697686/data /tmp/2549.411.all.q/RtmphbryyH/scoup13312697686/init /tmp/2549.411.all.q/RtmphbryyH/scoup13312697686/time_sp /tmp/2549.411.all.q/RtmphbryyH/scoup13312697686/gpara /tmp/2549.411.all.q/RtmphbryyH/scoup13312697686/cpara /tmp/2549.411.all.q/RtmphbryyH/scoup13312697686/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_5
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.412.all.q/RtmpKvBYal/scoup134172da3ebfb/data /tmp/2549.412.all.q/RtmpKvBYal/scoup134172da3ebfb/init /tmp/2549.412.all.q/RtmpKvBYal/scoup134172da3ebfb/time_sp /tmp/2549.412.all.q/RtmpKvBYal/scoup134172da3ebfb/gpara /tmp/2549.412.all.q/RtmpKvBYal/scoup134172da3ebfb/cpara /tmp/2549.412.all.q/RtmpKvBYal/scoup134172da3ebfb/ll 1214 222 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_5
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.413.all.q/RtmpSHyF28/scoupb616b65a10a/data /tmp/2549.413.all.q/RtmpSHyF28/scoupb616b65a10a/init /tmp/2549.413.all.q/RtmpSHyF28/scoupb616b65a10a/time_sp /tmp/2549.413.all.q/RtmpSHyF28/scoupb616b65a10a/gpara /tmp/2549.413.all.q/RtmpSHyF28/scoupb616b65a10a/cpara /tmp/2549.413.all.q/RtmpSHyF28/scoupb616b65a10a/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_6
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.414.all.q/RtmpcMyktP/scoup1333b7b586457/data /tmp/2549.414.all.q/RtmpcMyktP/scoup1333b7b586457/init /tmp/2549.414.all.q/RtmpcMyktP/scoup1333b7b586457/time_sp /tmp/2549.414.all.q/RtmpcMyktP/scoup1333b7b586457/gpara /tmp/2549.414.all.q/RtmpcMyktP/scoup1333b7b586457/cpara /tmp/2549.414.all.q/RtmpcMyktP/scoup1333b7b586457/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_6
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.415.all.q/RtmpjD5yPt/scoup1343928b66519/data /tmp/2549.415.all.q/RtmpjD5yPt/scoup1343928b66519/init /tmp/2549.415.all.q/RtmpjD5yPt/scoup1343928b66519/time_sp /tmp/2549.415.all.q/RtmpjD5yPt/scoup1343928b66519/gpara /tmp/2549.415.all.q/RtmpjD5yPt/scoup1343928b66519/cpara /tmp/2549.415.all.q/RtmpjD5yPt/scoup1343928b66519/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_6
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.416.all.q/RtmpLwfe3c/scoupe159597e8c81/data /tmp/2549.416.all.q/RtmpLwfe3c/scoupe159597e8c81/init /tmp/2549.416.all.q/RtmpLwfe3c/scoupe159597e8c81/time_sp /tmp/2549.416.all.q/RtmpLwfe3c/scoupe159597e8c81/gpara /tmp/2549.416.all.q/RtmpLwfe3c/scoupe159597e8c81/cpara /tmp/2549.416.all.q/RtmpLwfe3c/scoupe159597e8c81/ll 231 213 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_6
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.417.all.q/RtmpyczzT4/scoupe147597e8c81/data /tmp/2549.417.all.q/RtmpyczzT4/scoupe147597e8c81/init /tmp/2549.417.all.q/RtmpyczzT4/scoupe147597e8c81/time_sp /tmp/2549.417.all.q/RtmpyczzT4/scoupe147597e8c81/gpara /tmp/2549.417.all.q/RtmpyczzT4/scoupe147597e8c81/cpara /tmp/2549.417.all.q/RtmpyczzT4/scoupe147597e8c81/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_7
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.418.all.q/RtmpxaIiDb/scoup11bf64c2e8779/data /tmp/2549.418.all.q/RtmpxaIiDb/scoup11bf64c2e8779/init /tmp/2549.418.all.q/RtmpxaIiDb/scoup11bf64c2e8779/time_sp /tmp/2549.418.all.q/RtmpxaIiDb/scoup11bf64c2e8779/gpara /tmp/2549.418.all.q/RtmpxaIiDb/scoup11bf64c2e8779/cpara /tmp/2549.418.all.q/RtmpxaIiDb/scoup11bf64c2e8779/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_7
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.419.all.q/RtmpV9F7HY/scoup1335f36696b6b/data /tmp/2549.419.all.q/RtmpV9F7HY/scoup1335f36696b6b/init /tmp/2549.419.all.q/RtmpV9F7HY/scoup1335f36696b6b/time_sp /tmp/2549.419.all.q/RtmpV9F7HY/scoup1335f36696b6b/gpara /tmp/2549.419.all.q/RtmpV9F7HY/scoup1335f36696b6b/cpara /tmp/2549.419.all.q/RtmpV9F7HY/scoup1335f36696b6b/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_7
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.420.all.q/Rtmp3H6DWj/scoup11c1b7f2de9d/data /tmp/2549.420.all.q/Rtmp3H6DWj/scoup11c1b7f2de9d/init /tmp/2549.420.all.q/Rtmp3H6DWj/scoup11c1b7f2de9d/time_sp /tmp/2549.420.all.q/Rtmp3H6DWj/scoup11c1b7f2de9d/gpara /tmp/2549.420.all.q/Rtmp3H6DWj/scoup11c1b7f2de9d/cpara /tmp/2549.420.all.q/Rtmp3H6DWj/scoup11c1b7f2de9d/ll 492 236 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_7
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.421.all.q/RtmpHojL3u/scoupb63b7c0dce02/data /tmp/2549.421.all.q/RtmpHojL3u/scoupb63b7c0dce02/init /tmp/2549.421.all.q/RtmpHojL3u/scoupb63b7c0dce02/time_sp /tmp/2549.421.all.q/RtmpHojL3u/scoupb63b7c0dce02/gpara /tmp/2549.421.all.q/RtmpHojL3u/scoupb63b7c0dce02/cpara /tmp/2549.421.all.q/RtmpHojL3u/scoupb63b7c0dce02/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_8
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.422.all.q/RtmpO5OBef/scoup133876b982a72/data /tmp/2549.422.all.q/RtmpO5OBef/scoup133876b982a72/init /tmp/2549.422.all.q/RtmpO5OBef/scoup133876b982a72/time_sp /tmp/2549.422.all.q/RtmpO5OBef/scoup133876b982a72/gpara /tmp/2549.422.all.q/RtmpO5OBef/scoup133876b982a72/cpara /tmp/2549.422.all.q/RtmpO5OBef/scoup133876b982a72/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_8
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.423.all.q/RtmpE1Bt8x/scoupe181a0ca647/data /tmp/2549.423.all.q/RtmpE1Bt8x/scoupe181a0ca647/init /tmp/2549.423.all.q/RtmpE1Bt8x/scoupe181a0ca647/time_sp /tmp/2549.423.all.q/RtmpE1Bt8x/scoupe181a0ca647/gpara /tmp/2549.423.all.q/RtmpE1Bt8x/scoupe181a0ca647/cpara /tmp/2549.423.all.q/RtmpE1Bt8x/scoupe181a0ca647/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_8
-SCOUP	"Error running command: 
-'/scratch/irc/shared/dynverse/R/lib64/R/library/SCOUP/code/scoup' /tmp/2549.424.all.q/RtmpzNIEAR/scoup1346a7d3852d1/data /tmp/2549.424.all.q/RtmpzNIEAR/scoup1346a7d3852d1/init /tmp/2549.424.all.q/RtmpzNIEAR/scoup1346a7d3852d1/time_sp /tmp/2549.424.all.q/RtmpzNIEAR/scoup1346a7d3852d1/gpara /tmp/2549.424.all.q/RtmpzNIEAR/scoup1346a7d3852d1/cpara /tmp/2549.424.all.q/RtmpzNIEAR/scoup1346a7d3852d1/ll 105 65 -k 0 -m 100 -M 100 -a 0.1 -A 100 -t 0.001 -T 2 -s 0.1 -e 0.01
--- output --
--- error --"	1	synthetic/cycle_8
+  File ""/scrat"	1	synthetic/linear_long_2
 SCUBA	"""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/cluster/k_means_.py"", line 884, in fit
     X = self._check_fit_data(X)
   File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/cluster/k_means_.py"", line 858, in _check_fit_data
@@ -1124,9 +677,6 @@ ValueError: Found array with 0 feature(s) (shape=(1, 0)) while a minimum of 1 is
 slingshot	'x' must be an array of at least two dimensions	1	real/trophectoderm-monkey_nakamura
 slingshot	Lapack routine dgesv: system is exactly singular: U[3,3] = 0	1	synthetic/cycle_10
 slingshot	system is computationally singular: reciprocal condition number = 2.22814e-17	1	synthetic/linear_long_11
-StemID	"`cell_ids` not equal to rownames(dimred_cells).
-Lengths differ: 58 is not 57"	1	synthetic/converging_8
-StemID2	Time limit exceeded	1	real/oligodendrocyte-differentiation-subclusters_marques
 topslam	".565005e+06   1.057205e+07 
  14m22s89  0153   6.564626e+06   2.017631e+07 
  14m28s69  0154   6.564258e+06   2.603033e+07 

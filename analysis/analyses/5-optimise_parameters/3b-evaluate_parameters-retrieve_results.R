@@ -67,7 +67,7 @@ outputs %>% filter(!is.na(task_id)) %>% group_by(method_name) %>% summarise(n = 
 #   )
 
 # filter control methods
-outputs <- outputs %>% filter(!grepl("Control", method_name), method_short_name != "scorspar")
+outputs <- outputs %>% filter(!method_short_name %in% c("scorspar", "identity", "shuffle"))
 
 # filter disconnected as there is only 1 dataset
 outputs <- outputs %>% filter(task_id != "real/blastocyst-monkey_nakamura")
@@ -87,17 +87,25 @@ error_message_interpret <- function(error_message) {
   )
 }
 
-medquan_trafo <- function (x, invert = FALSE) {
-  y <- (x - median(x)) / diff(quantile(x, c(.05, .95)))
-  if (invert) y <- -y
-  2 * sigmoid::sigmoid(y) - 1
-  # sigmoid::sigmoid(y)
+scalesigmoid_trafo <- function (x, remove_errored = TRUE, determine_coeff = TRUE) {
+  xn <- x
+  if (remove_errored) xn <- xn[xn != 0]
+  y <- (x - mean(xn)) / var(xn)
+  if (determine_coeff) {
+    yn <- (xn - mean(xn)) / var(xn)
+    coeff <- 5 / max(abs(yn))
+  } else {
+    coeff <- 4
+  }
+  sigmoid::sigmoid(y * coeff)
 }
+trafo_fun <- scalesigmoid_trafo
 
 outputs_ind <- outputs %>%
   left_join(tasks_info, by = "task_id") %>%
   filter(task_source != "toy") %>%
   mutate(
+    rf_mse_inv = 1 - rf_mse,
     error_message_int = error_message_interpret(error_message),
     time_method = ifelse(error_message_int == "Time limit exceeded", timeout_per_execution, time_method),
     pct_errored = (error_message_int != "") + 0,
@@ -109,13 +117,13 @@ outputs_ind <- outputs %>%
   ) %>%
   group_by(task_id) %>%
   mutate(
-    rank_correlation = percent_rank(correlation),
-    rank_rf_mse = percent_rank(-rf_mse),
-    rank_edge_flip = percent_rank(edge_flip),
+    # rank_correlation = percent_rank(correlation),
+    # rank_rf_mse = percent_rank(rf_mse_inv),
+    # rank_edge_flip = percent_rank(edge_flip),
+    rank_correlation = trafo_fun(correlation),
+    rank_edge_flip = trafo_fun(edge_flip),
+    rank_rf_mse = trafo_fun(rf_mse_inv),
     rank_time_method = percent_rank(-time_method)
-    # rank_correlation = medquan_trafo(correlation),
-    # rank_edge_flip = medquan_trafo(edge_flip),
-    # rank_rf_mse = medquan_trafo(rf_mse, invert = TRUE),
     # rank_time_method = 1 - (time_method / max(time_method))
   ) %>%
   ungroup()
