@@ -14,7 +14,8 @@ implementations <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
 
 # Dates ------------------------------
 implementations$date <- implementations$Preprint
-implementations$date[is.na(implementations$date)] <- implementations$PubDate[is.na(implementations$date)]
+replace_date <- is.na(implementations$date) & !is.na(implementations$PubDate)
+implementations$date[replace_date] <- implementations$PubDate[replace_date]
 
 # Altmetrics ----------------------------
 implementations_altmetrics <- map(implementations$DOI, function(doi) {
