@@ -29,6 +29,7 @@ Wishbone	"ne/venv/lib/python3.5/site-packages/wishbone/wb.py"", line 1068, in ru
 TypeError: object of type 'numpy.float64' has no len()"	13	real/macrophage-salmonella_saliba
 Mpath	more cluster centers than distinct data points.	12	real/epidermis-hair-uHF_joost
 recat	Time limit exceeded	12	real/dentate-gyrus-neurogenesis_hochgerner
+SCOUP	Time limit exceeded	12	real/germline-human-female_li
 embeddr	smoothing parameter value too small	8	real/olfactory-projection-neurons-DA1_horns
 Monocle ICA	vector size specified is too large	8	synthetic/consecutive_bifurcating_10
 monocle with DDRTree	initial centers are not distinct	8	synthetic/consecutive_bifurcating_10
@@ -660,6 +661,7 @@ GPfates	"venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
     [callble(self, which=which) for _, _, callble in self.observers]
   File ""/scrat"	1	synthetic/linear_long_2
+SCOUP	SCOUP returned NaNs	1	synthetic/bifurcating_loop_7
 SCUBA	"""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/cluster/k_means_.py"", line 884, in fit
     X = self._check_fit_data(X)
   File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/cluster/k_means_.py"", line 858, in _check_fit_data
