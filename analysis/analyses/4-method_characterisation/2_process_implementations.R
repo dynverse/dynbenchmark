@@ -75,7 +75,7 @@ implementations$output_split <- implementations$output %>% str_split("[ ]?,[ ]?"
 
 # add extra reason for date cutoff
 date_cutoff <- as.Date("2017-06-01")
-date_filter <- implementations$date > date_cutoff
+date_filter <- implementations$date > date_cutoff & !is.na(implementations$date)
 implementations$non_inclusion_reasons_split[date_filter] <- map(implementations$non_inclusion_reasons_split[date_filter], c, "date") %>% map(unique)
 
 ## Infer whether the topology is fixed based on other columns -------------
