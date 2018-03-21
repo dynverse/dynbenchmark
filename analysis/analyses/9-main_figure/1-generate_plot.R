@@ -9,8 +9,8 @@ list2env(read_rds(result_file("aggregated_data.rds", "9-main_figure")), environm
 method_ord <- method_tib %>% arrange(desc(harm_mean)) %>% .$method_name
 
 # determine palettes
-sc_fun <- function(x) x / max(x, na.rm = T)
-sc_fun <- function(x) (x - min(x, na.rm = T)) / (max(x, na.rm = T) - min(x, na.rm = T))
+sc_fun <- scale_minmax
+sc_fun <- function(x) x / max(x, na.rm = TRUE)
 sc_col_fun <- function(palette) {
   function(x) {
     sc <- sc_fun(x)
@@ -43,7 +43,6 @@ row_spacing <- .1
 
 method_tib <- method_tib %>%
   left_join(minis %>% select(maximal_trajectory_types = trajectory_type, maxtraj_replace_id = replace_id), by = "maximal_trajectory_types") %>%
-  # left_join(minis %>% select(prior_mini_id, prior_replace_id = replace_id), by = "prior_mini_id") %>%
   mutate(
     method_name_f = factor(method_name, levels = method_ord)
   ) %>%
@@ -55,12 +54,7 @@ method_tib <- method_tib %>%
     method_y = - (method_i * row_height + cumsum(spacing)),
     method_ymin = method_y - row_height / 2,
     method_ymax = method_y + row_height / 2,
-    # scalability_nfeat = ifelse(complexity_inferred == "nothing", NA, ifelse(grepl("nfeat2", complexity_inferred), "2", ifelse(grepl("nfeat", complexity_inferred), "1", "0"))),
-    # scalability_ncell = ifelse(complexity_inferred == "nothing", NA, ifelse(grepl("ncell2", complexity_inferred), "2", ifelse(grepl("ncell", complexity_inferred), "1", "0"))),
     rank_time_method = percent_rank(-time_method),
-    # rank_mean_var = percent_rank(-mean_var),
-    # rank_sets_seeds = ifelse(sets_seeds, 1, 2),
-    rank_citations = percent_rank(n_citations),
     trafo = str_replace(output_transformation, ":.*", ""),
     topinf_lab = c("free" = "free", "fixed" = "fixed", "parameter" = "param")[topology_inference_type],
     avg_time_lab = ifelse(time_method < 60, paste0(round(time_method), "s"), ifelse(time_method < 3600, paste0(round(time_method / 60), "m"), paste0(round(time_method / 3600), "h"))),
@@ -70,7 +64,7 @@ method_tib <- method_tib %>%
   ) %>%
   mutate_at(
     c(
-      "harm_mean", "rank_correlation", "rank_edge_flip", "rank_rf_mse",
+      "harm_mean", "norm_correlation", "norm_edge_flip", "norm_rf_mse",
       "source_real", "source_synthetic",
       "trajtype_bifurcation", "trajtype_convergence", "trajtype_directed_acyclic_graph", "trajtype_directed_cycle",
       "trajtype_directed_graph", "trajtype_directed_linear", "trajtype_multifurcation",
@@ -96,7 +90,7 @@ method_tib <- method_tib %>%
   mutate(
     topinf_colour = topinf_colours[topology_inference_type],
     maxtraj_colour = maxtraj_colours[maximal_trajectory_types],
-    avg_time_lab_colour = ifelse(rank_time_method_sc < .75, "white", "black"),
+    avg_time_lab_colour = ifelse(rank_time_method_sc < .5, "white", "black"),
     pct_errored_lab_colour = ifelse(pct_errored_sc > .5, "white", "black")
   )
 
@@ -115,9 +109,9 @@ axis <-
 
     "harm",    "Score",                0.5,   4,       T,           "bar",      T,               "harm_mean_sc_col",                        "harm_mean_sc",
 
-    "corr",    "Correlation",          0.5,   1,       T,           "circle",   T,               "rank_correlation_sc_col",                 "rank_correlation_sc",
-    "edge",    "Edge flip",            0.1,   1,       T,           "circle",   T,               "rank_edge_flip_sc_col",                   "rank_edge_flip_sc",
-    "rfms",    "RF MSE",               0.1,   1,       T,           "circle",   T,               "rank_rf_mse_sc_col",                      "rank_rf_mse_sc",
+    "corr",    "Ordering",             0.5,   1,       T,           "circle",   T,               "norm_correlation_sc_col",                 "norm_correlation_sc",
+    "rfms",    "Neighbourhood",        0.1,   1,       T,           "circle",   T,               "norm_rf_mse_sc_col",                      "norm_rf_mse_sc",
+    "edge",    "Topology",             0.1,   1,       T,           "circle",   T,               "norm_edge_flip_sc_col",                   "norm_edge_flip_sc",
 
     "real",    "Real",                 0.5,   1,       T,           "circle",   T,               "source_real_sc_col",                      "source_real_sc",
     "synt",    "Synthetic",            0.1,   1,       T,           "circle",   T,               "source_synthetic_sc_col",                 "source_synthetic_sc",
@@ -169,7 +163,7 @@ grouping <-
     "Method characterisation",     3,  axtr$name$xmin, axtr$prge$xmax, "a",
     "Priors",                      2,  axtr$prst$xmin, axtr$prge$xmax, "",
     "Benchmark",                   3,  axtr$harm$xmin, axtr$erro$xmax, "b",
-    "Per metric",                  2,  axtr$corr$xmin, axtr$rfms$xmax, "",
+    "Per metric",                  2,  axtr$corr$xmin, axtr$edge$xmax, "",
     "Per source",                  2,  axtr$real$xmin, axtr$synt$xmax, "",
     "Per trajectory type",         2,  axtr$line$xmin, axtr$grap$xmax, "",
     # "Per trajectory type",         2,  axtr$line$xmin, axtr$digr$xmax, "",
