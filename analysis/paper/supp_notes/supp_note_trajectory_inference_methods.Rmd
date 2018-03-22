@@ -1,5 +1,5 @@
 ---
-title: "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
+title: "Supplementary Note: Trajectory Inference Wrappers"
 bibliography: ../references.bib
 csl: ../nature-biotechnology.csl
 header-includes:
@@ -19,13 +19,17 @@ header-includes:
 mainfont: Open Sans
 output: 
   pdf_document: 
-    latex_engine: xelatex
-    keep_tex: true
     citation_package: biblatex
+    fig_height: 6
+    fig_width: 10
+    keep_tex: yes
+    latex_engine: xelatex
+    toc: yes
+editor_options: 
+  chunk_output_type: console
 ---
 
 
-*`r format(Sys.time(), '%d %B, %Y')`*
 
 ```{r setup, include=FALSE}
 # knitr options
@@ -33,6 +37,8 @@ knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
+  out.width = "0.5\\textwidth",
+  fig.align = "center",
   fig.path = paste0(rprojroot::find_rstudio_root_file(), "/analysis/paper/supp_notes/.scratch/")
 )
 
@@ -43,35 +49,128 @@ library(dynplot)
 library(tidyverse)
 library(cowplot)
 ```
-Wouter Saelens* ¹ ², Robrecht Cannoodt* ¹ ² ³, Helena Todorov¹ ² ⁴, Yvan Saeys¹ ²
 
 
-\* Equal contribution  
-¹ Data mining and Modelling for Biomedicine, VIB Center for Inflammation Research, Ghent, Belgium.  
-² Department of Applied Mathematics, Computer Science and Statistics, Ghent University, Ghent, Belgium.  
-³ Center for Medical Genetics, Ghent University Hospital, Ghent, Belgium.  
-⁴ Centre International de Recherche en Infectiologie, Inserm, U1111, Université Claude Bernard Lyon 1, CNRS, UMR5308, École Normale Supérieure de Lyon, Univ Lyon, F-69007, Lyon, France
+# `aga`: AGA
+<insert description AGA>
 
-# Supplementary Note: Trajectory Inference Wrapppers
+## Parameters
 
-## `acos`: Arc cosine
-This is a control method for inferring cyclic trajectories in a very simple approach,
-consisting of a dimensionality reduction step and the computation of the arc cosine.
-
-### Parameters
-There is only one parameter, namely the dimensionality reduction method used.
 ```{r}
-par_set <- description_acos()$par_set
+method <- description_aga()
+par_set <- method$par_set
 par_set
 ```
 
 The default parameters are the following:
 ```{r}
-defprm <- ParamHelpers::dfRowToList(ParamHelpers::generateDesignOfDefaults(par_set, trafo = TRUE), par_set, 1)
+defprm <- ParamHelpers::dfRowToList(
+  ParamHelpers::generateDesignOfDefaults(par_set, trafo = TRUE),
+  par_set, 
+  i = 1
+)
 defprm
 ```
 
-### Example dataset
+## Example dataset
+We will be using a consecutive bifurcating toy dataset to demonstrate this method with.
+
+```{r}
+toy <- dyntoy::toy_tasks %>% filter(model == "consecutive_bifurcating") %>% extract_row_to_list(row_id = 1)
+expression <- toy$expression
+
+plot_default(toy)
+```
+
+## Wrapper
+
+Since AGA is implemented in Python, we created an R package for it. 
+```{r}
+aga_out <- aga::aga(
+  counts = expression,
+  start_cell = NULL,
+  grouping_assignment = NULL,
+  n_neighbours = defprm$n_neighbours,
+  n_pcs = defprm$n_pcs,
+  n_dcs = defprm$n_dcs,
+  resolution = defprm$resolution,
+  tree_based_confidence = defprm$tree_based_confidence,
+  verbose = FALSE,
+  num_cores = 1
+)
+```
+
+<Talk about aga_out$adj>
+```{r}
+aga_out$adj %>% head(6) %>% knitr::kable()
+```
+
+<Talk about aga_out$obs>
+```{r}
+aga_out$obs %>% head(6) %>% knitr::kable()
+```
+
+Reformat everything into milestone_network and milestone_percentages
+```{r}
+cell_ids <- rownames(expression)
+
+milestone_assignment_cells <- setNames(aga_out$obs$group_id, aga_out$obs$cell_id)
+
+milestone_network <- aga_out$adj %>%
+  mutate_at(vars(from, to), as.character) %>%
+  filter(aga_adjacency_tree_confidence > 0) %>%
+  mutate(
+    length = 1,
+    directed = TRUE
+  ) %>%
+  select(from, to, length, directed)
+
+milestone_ids <- sort(unique(milestone_assignment_cells))
+```
+
+
+The prediction is wrapped using the `add_trajectory_to_wrapper` function. 
+```{r}
+prediction <- wrap_prediction_model(
+  cell_ids = rownames(expression)
+) %>% add_cluster_graph_to_wrapper(
+  milestone_ids = milestone_ids,
+  milestone_network = milestone_network,
+  milestone_assignment_cells = milestone_assignment_cells,
+  aga_out = aga_out
+)
+
+plot_default(prediction)
+method$plot_fun(prediction)
+plot_strip_connections(toy, prediction)
+```
+
+
+
+# `atan`: Arc-tangent
+This is a control method for inferring cyclic trajectories in a very simple approach,
+consisting of a dimensionality reduction step and followed by calculating the arc-tangent
+between the first and the second component.
+
+## Parameters
+There is only one parameter, namely the dimensionality reduction method used.
+```{r}
+method <- description_atan()
+par_set <- method$par_set
+par_set
+```
+
+The default parameters are the following:
+```{r}
+defprm <- ParamHelpers::dfRowToList(
+  ParamHelpers::generateDesignOfDefaults(par_set, trafo = TRUE),
+  par_set, 
+  i = 1
+)
+defprm
+```
+
+## Example dataset
 We will be using a cyclic toy dataset to demonstrate this method with.
 
 ```{r}
@@ -81,7 +180,7 @@ expression <- toy$expression
 plot_default(toy)
 ```
 
-### Wrapper
+## Wrapper
 In the first step, a dimensionality reduction to two dimensions is computed. By default, this is PCA. 
 Here, it is assumed that the dimensionality reduction will be centered around the origin 0.
 
@@ -100,7 +199,10 @@ The ordering of the cells is computed by calculating the bearing of each cell wi
 pseudotimes <- atan2(dimred[,2], dimred[,1]) / 2 / pi + .5
 
 dimred_df <- dimred_df %>% mutate(pseudotime = pseudotimes[cell_id])
-ggplot(dimred_df) + geom_point(aes(Comp1, Comp2, colour = pseudotime)) + coord_equal() + viridis::scale_color_viridis()
+ggplot(dimred_df) +
+  geom_point(aes(Comp1, Comp2, colour = pseudotime)) +
+  coord_equal() + 
+  viridis::scale_color_viridis()
 ```
 
 The prediction is wrapped using the `add_cycling_trajectory_to_wrapper` function. 
@@ -115,12 +217,10 @@ prediction <- wrap_prediction_model(
 )
 
 plot_default(prediction)
-```
-
-The figure below shows a comparison of the orderings in the toy versus the prediction.
-```{r}
+method$plot_fun(prediction)
 plot_strip_connections(toy, prediction)
 ```
+
 
 # Colophon
 This report was generated on `r Sys.time()` using `r devtools:::platform_info()$version` and the following packages:
