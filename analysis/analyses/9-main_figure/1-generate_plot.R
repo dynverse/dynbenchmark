@@ -6,11 +6,9 @@ experiment("9-main_figure")
 
 list2env(read_rds(result_file("aggregated_data.rds", "9-main_figure")), environment())
 
-method_ord <- method_tib %>% arrange(desc(harm_mean)) %>% .$method_name
-
 # determine palettes
-sc_fun <- function(x) x / max(x, na.rm = T)
-sc_fun <- function(x) (x - min(x, na.rm = T)) / (max(x, na.rm = T) - min(x, na.rm = T))
+sc_fun <- scale_minmax
+sc_fun <- function(x) x / max(x, na.rm = TRUE)
 sc_col_fun <- function(palette) {
   function(x) {
     sc <- sc_fun(x)
@@ -25,12 +23,14 @@ scale_viridis_funs <- map(setNames(viridis_names, viridis_names), ~ sc_col_fun(v
 error_colours <- setNames(RColorBrewer::brewer.pal(4, "Set3"), c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic"))
 maxtraj_colours <- setNames(trajectory_types$color, trajectory_types$id)
 
+coloverall <- "inferno"
 colbench <- "magma"
 colqc <- "viridis"
 coltime <-  "cividis"
-colbench_fun <- scale_viridis_funs[["magma"]]
-colqc_fun <- scale_viridis_funs[["viridis"]]
-coltime_fun <- scale_viridis_funs[["cividis"]]
+coloverall_fun <- scale_viridis_funs[[coloverall]]
+colbench_fun <- scale_viridis_funs[[colbench]]
+colqc_fun <- scale_viridis_funs[[colqc]]
+coltime_fun <- scale_viridis_funs[[coltime]]
 
 prior_type1cols <- c("required_" = "#cc2400", "optional_" = "#00aaed", "_" = "#00ab1b")
 prior_type1_fun <- function(x) ifelse(is.na(x), "", gsub("_.*", "", x))
@@ -43,10 +43,6 @@ row_spacing <- .1
 
 method_tib <- method_tib %>%
   left_join(minis %>% select(maximal_trajectory_types = trajectory_type, maxtraj_replace_id = replace_id), by = "maximal_trajectory_types") %>%
-  # left_join(minis %>% select(prior_mini_id, prior_replace_id = replace_id), by = "prior_mini_id") %>%
-  mutate(
-    method_name_f = factor(method_name, levels = method_ord)
-  ) %>%
   arrange(method_name_f) %>%
   mutate(
     method_i = seq_len(n()),
@@ -55,22 +51,20 @@ method_tib <- method_tib %>%
     method_y = - (method_i * row_height + cumsum(spacing)),
     method_ymin = method_y - row_height / 2,
     method_ymax = method_y + row_height / 2,
-    # scalability_nfeat = ifelse(complexity_inferred == "nothing", NA, ifelse(grepl("nfeat2", complexity_inferred), "2", ifelse(grepl("nfeat", complexity_inferred), "1", "0"))),
-    # scalability_ncell = ifelse(complexity_inferred == "nothing", NA, ifelse(grepl("ncell2", complexity_inferred), "2", ifelse(grepl("ncell", complexity_inferred), "1", "0"))),
     rank_time_method = percent_rank(-time_method),
-    # rank_mean_var = percent_rank(-mean_var),
-    # rank_sets_seeds = ifelse(sets_seeds, 1, 2),
-    rank_citations = percent_rank(n_citations),
     trafo = str_replace(output_transformation, ":.*", ""),
     topinf_lab = c("free" = "free", "fixed" = "fixed", "parameter" = "param")[topology_inference_type],
     avg_time_lab = ifelse(time_method < 60, paste0(round(time_method), "s"), ifelse(time_method < 3600, paste0(round(time_method / 60), "m"), paste0(round(time_method / 3600), "h"))),
     remove_results = pct_errored > .49,
     pct_succeeded = 1 - pct_errored,
-    pct_errored_lab = paste0(round(pct_errored * 100), "%")
+    pct_errored_lab = paste0(round(pct_errored * 100), "%"),
+    missing_qc_reason = ifelse(!is_na_qc, "", ifelse(method_short_name %in% c("periodpc", "acos", "comp1", "random", "gng"), "Control", "Missing")),
+    black = "black"
   ) %>%
   mutate_at(
     c(
-      "harm_mean", "rank_correlation", "rank_edge_flip", "rank_rf_mse",
+      "overall_metric", "overall_source", "overall_trajtype", "overall_benchmark",
+      "harm_mean", "norm_correlation", "norm_edge_flip", "norm_rf_mse",
       "source_real", "source_synthetic",
       "trajtype_bifurcation", "trajtype_convergence", "trajtype_directed_acyclic_graph", "trajtype_directed_cycle",
       "trajtype_directed_graph", "trajtype_directed_linear", "trajtype_multifurcation",
@@ -80,11 +74,18 @@ method_tib <- method_tib %>%
     funs(sc = sc_fun, sc_col = colbench_fun)
   ) %>%
   mutate_at(
+    c(
+      "overall", "overall"
+    ),
+    funs(sc = sc_fun, sc_col = coloverall_fun)
+  ) %>%
+  mutate_at(
     c("prior_start", "prior_end", "prior_states", "prior_genes"),
     funs(type1 = prior_type1_fun, type2 = prior_type2_fun, type1col = prior_type1col_fun)
   ) %>%
   mutate_at(
     c(
+      "overall_qc", "overall_qccat", "overall_qcapp",
       "qc_score", "qc_cat_availability", "qc_cat_behaviour", "qc_cat_code_assurance", "qc_cat_code_quality",
       "qc_cat_documentation", "qc_cat_paper", "qc_app_developer_friendly", "qc_app_good_science", "qc_app_user_friendly"),
     funs(sc = sc_fun, sc_col = colqc_fun)
@@ -96,7 +97,7 @@ method_tib <- method_tib %>%
   mutate(
     topinf_colour = topinf_colours[topology_inference_type],
     maxtraj_colour = maxtraj_colours[maximal_trajectory_types],
-    avg_time_lab_colour = ifelse(rank_time_method_sc < .75, "white", "black"),
+    avg_time_lab_colour = ifelse(rank_time_method_sc < .5, "white", "black"),
     pct_errored_lab_colour = ifelse(pct_errored_sc > .5, "white", "black")
   )
 
@@ -113,11 +114,13 @@ axis <-
     "prgr",    "States",               0.1,   1,       T,           "text",     F,               "prior_states_type1col",                   "prior_states_type2",
     "prge",    "Genes",                0.1,   1,       T,           "text",     F,               "prior_genes_type1col",                    "prior_genes_type2",
 
-    "harm",    "Score",                0.5,   4,       T,           "bar",      T,               "harm_mean_sc_col",                        "harm_mean_sc",
+    "harm",    "Benchmark",            0.5,   4,       T,           "invbar",   T,               "overall_benchmark_sc_col",                "overall_benchmark_sc",
+    "qcsc",    "QC",                   0.0,   4,       T,           "bar",      F,               "overall_qc_sc_col",                       "overall_qc_sc",
+    "qcre",     "",                     -4,   4,       F,           "text",     F,               "black",                                   "missing_qc_reason",
 
-    "corr",    "Correlation",          0.5,   1,       T,           "circle",   T,               "rank_correlation_sc_col",                 "rank_correlation_sc",
-    "edge",    "Edge flip",            0.1,   1,       T,           "circle",   T,               "rank_edge_flip_sc_col",                   "rank_edge_flip_sc",
-    "rfms",    "RF MSE",               0.1,   1,       T,           "circle",   T,               "rank_rf_mse_sc_col",                      "rank_rf_mse_sc",
+    "corr",    "Ordering",             0.5,   1,       T,           "circle",   T,               "norm_correlation_sc_col",                 "norm_correlation_sc",
+    "rfms",    "Neighbourhood",        0.1,   1,       T,           "circle",   T,               "norm_rf_mse_sc_col",                      "norm_rf_mse_sc",
+    "edge",    "Topology",             0.1,   1,       T,           "circle",   T,               "norm_edge_flip_sc_col",                   "norm_edge_flip_sc",
 
     "real",    "Real",                 0.5,   1,       T,           "circle",   T,               "source_real_sc_col",                      "source_real_sc",
     "synt",    "Synthetic",            0.1,   1,       T,           "circle",   T,               "source_synthetic_sc_col",                 "source_synthetic_sc",
@@ -138,7 +141,7 @@ axis <-
     "erpl",    "% Errored label",       -1,   1,       F,           "text",     F,               "pct_errored_lab_colour",                  "pct_errored_lab",
     "erro",    "Error reason",         0.1,   1,       T,           "pie",      F,               list(error_colours),                       list(c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic")),
 
-    "qcsc",    "Score",                0.5,   4,       T,           "bar",      F,               "qc_score_sc_col",                         "qc_score_sc",
+    # "qcsc",    "QC Score",                0.5,   4,       T,           "bar",      F,               "overall_qc_sc_col",                         "overall_qc_sc",s
 
     "qcdf",    "Developer friendly",   0.5,   1,       T,           "circle",   F,               "qc_app_developer_friendly_sc_col",        "qc_app_developer_friendly_sc",
     "qcuf",    "User friendly",        0.1,   1,       T,           "circle",   F,               "qc_app_user_friendly_sc_col",             "qc_app_user_friendly_sc",
@@ -168,13 +171,14 @@ grouping <-
     ~label,                        ~y, ~xmin,          ~xmax,          ~key,
     "Method characterisation",     3,  axtr$name$xmin, axtr$prge$xmax, "a",
     "Priors",                      2,  axtr$prst$xmin, axtr$prge$xmax, "",
-    "Benchmark",                   3,  axtr$harm$xmin, axtr$erro$xmax, "b",
-    "Per metric",                  2,  axtr$corr$xmin, axtr$rfms$xmax, "",
+    "Overall score",               3,  axtr$harm$xmin, axtr$qcsc$xmax, "b",
+    "Benchmark",                   3,  axtr$corr$xmin, axtr$erro$xmax, "c",
+    "Per metric",                  2,  axtr$corr$xmin, axtr$edge$xmax, "",
     "Per source",                  2,  axtr$real$xmin, axtr$synt$xmax, "",
     "Per trajectory type",         2,  axtr$line$xmin, axtr$grap$xmax, "",
     # "Per trajectory type",         2,  axtr$line$xmin, axtr$digr$xmax, "",
     "Execution",                   2,  axtr$time$xmin, axtr$erro$xmax, "",
-    "Quality control",             3,  axtr$qcsc$xmin, axtr$qcpa$xmax, "c",
+    "Quality control",             3,  axtr$qcdf$xmin, axtr$qcpa$xmax, "d",
     "Practicality",                2,  axtr$qcdf$xmin, axtr$qcgs$xmax, "",
     "Categories",                  2,  axtr$qcav$xmin, axtr$qcpa$xmax, ""
   ) %>%
@@ -222,6 +226,16 @@ bar_data <- geom_data_processor(
       mutate(
         xmin = axis_l$xmin,
         xmax = axis_l$xmin + value * axis_l$xwidth
+      )
+  })
+invbar_data <- geom_data_processor(
+  "invbar",
+  function(axis_l, method_tib_filt) {
+    method_tib_filt %>%
+      select_(ymin = "method_ymin", ymax = "method_ymax", col = axis_l$col, value = axis_l$value) %>%
+      mutate(
+        xmin = axis_l$xmax - value * axis_l$xwidth,
+        xmax = axis_l$xmax
       )
   })
 text_data <- geom_data_processor(
@@ -343,6 +357,7 @@ g1 <- ggplot(method_tib) +
 
   # BARS
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), bar_data, colour = "black", size = .25) +
+  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), invbar_data, colour = "black", size = .25) +
   # RECTANGLES
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), rect_data, colour = "black", size = .25) +
   # CIRCLES
