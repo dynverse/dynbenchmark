@@ -5,7 +5,8 @@ library(tidytext)
 
 experiment("4-method_characterisation")
 
-implementations <- read_rds(derived_file("implementations.rds"))
+implementations <- read_rds(derived_file("implementations.rds")) %>%
+  filter(type == "algorithm") # only really interested in algorithms
 
 implementation_components <- implementations %>% select(implementation_id, components) %>%
   mutate(components = gsub("\\(.*?\\)", "", components)) %>%  # remove anything between ()
