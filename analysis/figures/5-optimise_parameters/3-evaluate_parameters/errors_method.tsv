@@ -1,9 +1,16 @@
 method_name	error_message	n	example
 Mpath	Mpath only detected one landmark	203	real/cell-cycle_leng
 StemID2	replacement has length zero	112	real/stimulated-dendritic-cells-PAM_shalek
+SCIMITAR	"verse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 104, in map_samples_to_pseudotime
+    covs = self.covariance(timepoints)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 64, in covariance
+    cov_matrices.append(self._calculate_covariance(t))
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 55, in _calculate_covariance
+    return np.dot(chol_matrix, chol_matrix.T)
+MemoryError"	56	real/cell-cycle_leng
 StemID	missing value where TRUE/FALSE needed	49	real/aging-hsc-old_kowalczyk
+Monocle DDRTree	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	44	synthetic/bifurcating_10
 Monocle ICA	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	44	synthetic/bifurcating_10
-monocle with DDRTree	Parametric dispersion fit failed. Try a local fit and/or a pooled estimation. (See '?estimateDispersions')	44	synthetic/bifurcating_10
 StemID2	Perplexity is too large.	38	real/distal-lung-epithelium_treutlein
 ouijaflow	"all(pg_check$sum >= 0 & pg_check$sum < (1 + 1e-08)) isn't true.
 Sum of milestone percentages per cell_id should be exactly one"	35	real/cell-cycle_buettner
@@ -16,6 +23,13 @@ GPfates	"es/venv/lib/python3.5/site-packages/GPy/core/sparse_gp.py"", line 80, i
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/util/linalg.py"", line 61, in jitchol
     raise linalg.LinAlgError(""not pd: non-positive diagonal elements"")
 numpy.linalg.linalg.LinAlgError: not pd: non-positive diagonal elements"	19	real/hematopoiesis-gates_olsson
+SCIMITAR	"rse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 117, in refine
+    prev_pseudotimes, prev_pt_probs = self.map_samples_to_pseudotime(data_array)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 104, in map_samples_to_pseudotime
+    covs = self.covariance(timepoints)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 65, in covariance
+    return np.array(cov_matrices)  
+MemoryError"	18	real/aging-hsc-old_kowalczyk
 StemID2	Number of clusters 'k' must be in {1,2, .., n-1}; hence n >= 2	18	synthetic/bifurcating_loop_8
 Monocle ICA	evaluation nested too deeply: infinite recursion / options(expressions=)?	16	real/dentate-gyrus-neurogenesis_hochgerner
 StemID2	object 'x' not found	16	real/cell-cycle_buettner
@@ -29,11 +43,36 @@ Wishbone	"ne/venv/lib/python3.5/site-packages/wishbone/wb.py"", line 1068, in ru
 TypeError: object of type 'numpy.float64' has no len()"	13	real/macrophage-salmonella_saliba
 Mpath	more cluster centers than distinct data points.	12	real/epidermis-hair-uHF_joost
 recat	Time limit exceeded	12	real/dentate-gyrus-neurogenesis_hochgerner
+SCIMITAR	"hon/2.7.14/lib/python2.7/site-packages/sklearn/manifold/locally_linear.py"", line 645, in _fit_transform
+    random_state=random_state, reg=self.reg, n_jobs=self.n_jobs)
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/sklearn/manifold/locally_linear.py"", line 310, in locally_linear_embedding
+    nbrs, n_neighbors=n_neighbors, reg=reg, n_jobs=n_jobs)
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/sklearn/manifold/locally_linear.py"", line 103, in barycenter_kneighbors_graph
+    data = barycenter_weights(X, X[ind], reg=reg)
+MemoryError"	12	real/dentate-gyrus-neurogenesis_hochgerner
+SCIMITAR	"package ‘graphics’ was built under R version 3.4.3 
+
+  warnings.warn(x, RRuntimeWarning)
+/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: 4: package ‘grDevices’ was built under R version 3.4.3 
+
+  warnings.warn(x, RRuntimeWarning)
+Traceback (most recent call last):
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 245, in state_interpolation
+    spl = UnivariateSpline(timepoints, sorted_chols[:, j, i], k=degree)
+MemoryError"	12	real/blastocyst-monkey_nakamura
 SCOUP	Time limit exceeded	12	real/germline-human-female_li
+SCIMITAR	Time limit exceeded	10	real/aging-hsc-young_kowalczyk
 embeddr	smoothing parameter value too small	8	real/olfactory-projection-neurons-DA1_horns
+Monocle DDRTree	initial centers are not distinct	8	synthetic/consecutive_bifurcating_10
 Monocle ICA	vector size specified is too large	8	synthetic/consecutive_bifurcating_10
-monocle with DDRTree	initial centers are not distinct	8	synthetic/consecutive_bifurcating_10
 recat	NAs not allowed!	8	synthetic/cycle_10
+SCIMITAR	"ges/scimitar/morphing_mixture.py"", line 396, in morphing_gaussian_from_embedding
+    pseudotimes, cov_estimator=cov_estimator, **kwargs)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 325, in morphing_mixture_from_pseudotime
+    timepoints=timepoints)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 202, in state_interpolation
+    sorted_chols = np.array([np.linalg.cholesky(c).tolist() for c in sorted_covariances])
+MemoryError"	8	real/pancreatic-alpha-cell-maturation_zhang
 StemID	cannot allocate vector of size 1.1 Gb	8	real/dentate-gyrus-neurogenesis_hochgerner
 StemID2	0 (non-NA) cases	8	synthetic/bifurcating_loop_10
 StemID2	missing value where TRUE/FALSE needed	8	synthetic/converging_10
@@ -48,6 +87,23 @@ AssertionError: Bad number of lengthscales"	4	synthetic/linear_long_11
 Growing Neural Gas	Memory limit exceeded	4	real/epidermis-hair-spatial_joost
 Growing Neural Gas	subscript out of bounds	4	synthetic/linear_long_11
 recat	cannot allocate vector of size 15.2 Gb	4	real/mESC-differentiation_hayashi
+SCIMITAR	"7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: 3: package ‘graphics’ was built under R version 3.4.3 
+
+  warnings.warn(x, RRuntimeWarning)
+/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: 4: package ‘grDevices’ was built under R version 3.4.3 
+
+  warnings.warn(x, RRuntimeWarning)
+Traceback (most recent call last):
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/scipy/interpolate/fitpack2.py"", line 185, in __init__
+    xb=bbox[0],xe=bbox[1],s=s)
+MemoryError"	4	real/blastocyst-monkey_nakamura
+SCIMITAR	"ackages/scimitar/morphing_mixture.py"", line 396, in morphing_gaussian_from_embedding
+    pseudotimes, cov_estimator=cov_estimator, **kwargs)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 309, in morphing_mixture_from_pseudotime
+    covariances.append(np.copy(corpcor.cov_shrink(data_array, weights=weights, **{'lambda':cov_reg})))
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/numpy/lib/function_base.py"", line 1497, in copy
+    return array(a, order=order, copy=True)
+MemoryError"	4	real/mESC-differentiation_hayashi
 slingshot	Lapack routine dgesv: system is exactly singular: U[1,1] = 0	4	synthetic/bifurcating_loop_8
 StemID	cannot allocate vector of size 1.6 Gb	4	real/oligodendrocyte-differentiation-clusters_marques
 StemID	NA values in the dissimilarity matrix not allowed.	4	synthetic/linear_long_11
@@ -93,6 +149,13 @@ KeyError: 15"	4	synthetic/bifurcating_converging_6
 cellTree with vem	"sort(unique(c(cell_graph$from, cell_graph$to))) not equal to sort(names(to_keep)).
 Lengths differ: 341 is not 342"	3	synthetic/converging_11
 GPfates	Time limit exceeded	3	real/oligodendrocyte-differentiation-subclusters_marques
+SCIMITAR	"scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 325, in morphing_mixture_from_pseudotime
+    timepoints=timepoints)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 245, in state_interpolation
+    spl = UnivariateSpline(timepoints, sorted_chols[:, j, i], k=degree)
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/scipy/interpolate/fitpack2.py"", line 185, in __init__
+    xb=bbox[0],xe=bbox[1],s=s)
+MemoryError"	3	real/cell-cycle_buettner
 slingshot	system is computationally singular: reciprocal condition number = 8.68694e-18	3	synthetic/cycle_10
 Wanderlust	"wishbone/core.py"", line 50, in wishbone
     traj, dist, iter_l, paths_l2l = _trajectory_landmarks( klnn, data, [s], num_waypoints, partial_order, verbose, metric, flock_waypoints, band_sample, branch)
@@ -113,6 +176,13 @@ Lengths differ: 679 is not 680"	2	synthetic/converging_10
 cellTree with vem	"sort(unique(c(cell_graph$from, cell_graph$to))) not equal to sort(names(to_keep)).
 Lengths differ: 693 is not 695"	2	synthetic/cycle_10
 Monocle ICA	Memory limit exceeded	2	synthetic/linear_long_10
+SCIMITAR	"scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 325, in morphing_mixture_from_pseudotime
+    timepoints=timepoints)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 245, in state_interpolation
+    spl = UnivariateSpline(timepoints, sorted_chols[:, j, i], k=degree)
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/scipy/interpolate/fitpack2.py"", line 175, in __init__
+    if not all(diff(x) > 0.0):
+MemoryError"	2	real/germline-human-female_li
 SCUBA	"/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/cluster/k_means_.py"", line 884, in fit
     X = self._check_fit_data(X)
   File ""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/cluster/k_means_.py"", line 858, in _check_fit_data
@@ -661,6 +731,91 @@ GPfates	"venv/lib/python3.5/site-packages/paramz/core/parameter_core.py"", line 
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/paramz/core/observable.py"", line 91, in <listcomp>
     [callble(self, which=which) for _, _, callble in self.observers]
   File ""/scrat"	1	synthetic/linear_long_2
+SCIMITAR	"
+/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: 4: package ‘grDevices’ was built under R version 3.4.3 
+
+  warnings.warn(x, RRuntimeWarning)
+Traceback (most recent call last):
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/scipy/interpolate/fitpack2.py"", line 175, in __init__
+    if not all(diff(x) > 0.0):
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/numpy/lib/function_base.py"", line 1923, in diff
+    slice2 = [slice(None)]*nd
+MemoryError"	1	real/germline-human-female-weeks_li
+SCIMITAR	"/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: 4: package ‘grDevices’ was built under R version 3.4.3 
+
+  warnings.warn(x, RRuntimeWarning)
+Traceback (most recent call last):
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/scipy/interpolate/fitpack2.py"", line 190, in __init__
+    self._reset_class()
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/scipy/interpolate/fitpack2.py"", line 207, in _reset_class
+    self._eval_args = t[:n],c[:n],k
+MemoryError"	1	real/germline-human-female_li
+SCIMITAR	"face/__init__.py:185: RRuntimeWarning: 3: package ‘graphics’ was built under R version 3.4.3 
+
+  warnings.warn(x, RRuntimeWarning)
+/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: 4: package ‘grDevices’ was built under R version 3.4.3 
+
+  warnings.warn(x, RRuntimeWarning)
+Traceback (most recent call last):
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/numpy/core/numeric.py"", line 583, in asanyarray
+    return array(a, dtype, copy=False, order=order, subok=True)
+MemoryError"	1	real/ICM-monkey_nakamura
+SCIMITAR	"m_embedding(expression.as_matrix().T, fit_type='spline', degree=p[""degree""], step_size=p[""step_size""],cov_estimator=p[""cov_estimator""], cov_reg=p[""cov_reg""])
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 396, in morphing_gaussian_from_embedding
+    pseudotimes, cov_estimator=cov_estimator, **kwargs)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 325, in morphing_mixture_from_pseudotime
+    timepoints=timepoints)
+MemoryError"	1	real/germline-human-female-weeks_li
+SCIMITAR	"oints=timepoints)
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 245, in state_interpolation
+    spl = UnivariateSpline(timepoints, sorted_chols[:, j, i], k=degree)
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/scipy/interpolate/fitpack2.py"", line 175, in __init__
+    if not all(diff(x) > 0.0):
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/numpy/core/fromnumeric.py"", line 2050, in all
+    return arr.all(axis=axis, out=out, **kwargs)
+MemoryError"	1	real/germline-human-both_guo
+SCIMITAR	"R/venv/lib/python2.7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: 1: package ‘stats’ was built under R version 3.4.3 
+
+  warnings.warn(x, RRuntimeWarning)
+/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: 2: package ‘utils’ was built under R version 3.4.3 
+
+  warnings.warn(x, RRuntimeWarning)
+/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: 3: package ‘graphics’ was built under R version 3.4.3 
+
+  w"	1	synthetic/cycle_4
+SCIMITAR	"raceback (most recent call last):
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 245, in state_interpolation
+    spl = UnivariateSpline(timepoints, sorted_chols[:, j, i], k=degree)
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/scipy/interpolate/fitpack2.py"", line 175, in __init__
+    if not all(diff(x) > 0.0):
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/numpy/lib/function_base.py"", line 1931, in diff
+    return a[slice1]-a[slice2]
+MemoryError"	1	real/germline-human-female-weeks_li
+SCIMITAR	"ratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: 4: 3 instances of variables with zero scale detected! 
+
+  warnings.warn(x, RRuntimeWarning)
+/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: 5: 2 instances of variables with zero scale detected! 
+
+  warnings.warn(x, RRuntimeWarning)
+/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: 6:"	1	synthetic/consecutive_bifurcating_11
+SCIMITAR	"sage:
+
+  warnings.warn(x, RRuntimeWarning)
+/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: package ‘methods’ was built under R version 3.4.3 
+
+  warnings.warn(x, RRuntimeWarning)
+/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: During startup - 
+  warnings.warn(x, RRuntimeWarning)
+/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning"	1	real/epidermis-hair-IFE_joost
+SCIMITAR	"site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: 4: package ‘grDevices’ was built under R version 3.4.3 
+
+  warnings.warn(x, RRuntimeWarning)
+Traceback (most recent call last):
+  File ""/scratch/irc/shared/dynverse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 245, in state_interpolation
+    spl = UnivariateSpline(timepoints, sorted_chols[:, j, i], k=degree)
+  File ""/software/shared/apps/x86_64/python/2.7.14/lib/python2.7/site-packages/scipy/interpolate/fitpack2.py"", line 175, in __init__
+    if not all(diff(x) > 0.0):
+MemoryError"	1	real/germline-human-both_guo
 SCOUP	SCOUP returned NaNs	1	synthetic/bifurcating_loop_7
 SCUBA	"""/software/shared/apps/x86_64/python/3.5.1/lib/python3.5/site-packages/sklearn/cluster/k_means_.py"", line 884, in fit
     X = self._check_fit_data(X)
