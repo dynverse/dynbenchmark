@@ -1,0 +1,130 @@
+---
+title: "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
+bibliography: ../references.bib
+csl: ../nature-biotechnology.csl
+header-includes:
+  - \usepackage{booktabs}
+  - \usepackage{longtable}
+  - \usepackage{array}
+  - \usepackage{multirow}
+  - \usepackage[table]{xcolor}
+  - \usepackage{float}
+  - \usepackage{colortbl}
+  - \usepackage{tabu}
+  - \usepackage[normalem]{ulem}
+  - \usepackage{lscape}
+  - \usepackage{pbox}
+  - \usepackage[labelformat=empty]{caption}
+  - \ExecuteBibliographyOptions{sorting=none,sortcites=true,autocite=superscript,autopunct=false}
+mainfont: Open Sans
+output: 
+  pdf_document: 
+    latex_engine: xelatex
+    dev: png
+    keep_tex: true
+    citation_package: biblatex
+---
+
+
+*`r format(Sys.time(), '%d %B, %Y')`*
+
+```{r setup, include=FALSE}
+# knitr options
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  fig.path = paste0(rprojroot::find_rstudio_root_file(), "/analysis/paper/supp_notes/.scratch/")
+)
+
+
+# load libraries
+library(dynalysis)
+library(dynplot)
+library(tidyverse)
+library(cowplot)
+```
+Wouter Saelens* ¹ ², Robrecht Cannoodt* ¹ ² ³, Helena Todorov¹ ² ⁴, Yvan Saeys¹ ²
+
+
+\* Equal contribution  
+¹ Data mining and Modelling for Biomedicine, VIB Center for Inflammation Research, Ghent, Belgium.  
+² Department of Applied Mathematics, Computer Science and Statistics, Ghent University, Ghent, Belgium.  
+³ Center for Medical Genetics, Ghent University Hospital, Ghent, Belgium.  
+⁴ Centre International de Recherche en Infectiologie, Inserm, U1111, Université Claude Bernard Lyon 1, CNRS, UMR5308, École Normale Supérieure de Lyon, Univ Lyon, F-69007, Lyon, France
+
+# Supplementary Note: Trajectory Inference Wrapppers
+
+## `acos`: Arc cosine
+This is a control method for inferring cyclic trajectories in a very simple approach,
+consisting of a dimensionality reduction step and the computation of the arc cosine.
+
+### Parameters
+There is only one parameter, namely the dimensionality reduction method used.
+```{r}
+par_set <- description_acos()$par_set
+par_set
+```
+
+The default parameters are the following:
+```{r}
+defprm <- ParamHelpers::dfRowToList(ParamHelpers::generateDesignOfDefaults(par_set, trafo = TRUE), par_set, 1)
+defprm
+```
+
+### Example dataset
+We will be using a cyclic toy dataset to demonstrate this method with.
+
+```{r}
+toy <- dyntoy::toy_tasks %>% filter(model == "cycle") %>% extract_row_to_list(row_id = 2)
+expression <- toy$expression
+
+plot_default(toy)
+```
+
+### Wrapper
+In the first step, a dimensionality reduction to two dimensions is computed. By default, this is PCA. 
+Here, it is assumed that the dimensionality reduction will be centered around the origin 0.
+
+```{r}
+dimred <- dynmethods:::dimred(expression, method = defprm$dimred, ndim = 2)
+
+# Plot dimred
+dimred_df <- data.frame(dimred) %>% rownames_to_column("cell_id")
+ggplot(dimred_df) + geom_point(aes(Comp1, Comp2)) + coord_equal()
+
+```
+
+The ordering of the cells is computed by calculating the bearing of each cell with respect to the origin. The bearing is transformed to a [0,1] range.
+
+```{r}
+pseudotimes <- atan2(dimred[,2], dimred[,1]) / 2 / pi + .5
+
+dimred_df <- dimred_df %>% mutate(pseudotime = pseudotimes[cell_id])
+ggplot(dimred_df) + geom_point(aes(Comp1, Comp2, colour = pseudotime)) + coord_equal() + viridis::scale_color_viridis()
+```
+
+The prediction is wrapped using the `add_cycling_trajectory_to_wrapper` function. 
+```{r}
+prediction <- wrap_prediction_model(
+  cell_ids = rownames(expression)
+) %>% add_cyclic_trajectory_to_wrapper(
+  pseudotimes = pseudotimes,
+  do_scale_minmax = FALSE
+) %>% add_dimred_to_wrapper(
+  dimred = dimred
+)
+
+plot_default(prediction)
+```
+
+The figure below shows a comparison of the orderings in the toy versus the prediction.
+```{r}
+plot_strip_connections(toy, prediction)
+```
+
+# Colophon
+This report was generated on `r Sys.time()` using `r devtools:::platform_info()$version` and the following packages:
+```{r colophon, cache = FALSE}
+devtools::session_info()$packages %>% knitr::kable()
+```
