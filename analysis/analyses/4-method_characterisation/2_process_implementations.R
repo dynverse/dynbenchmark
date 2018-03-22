@@ -76,7 +76,7 @@ methods$non_inclusion_reasons_split <- methods$non_inclusion_reasons %>% str_spl
 
 ## methods conversions ------------------------
 methods$conversion_split <- methods$conversion %>% str_split("[ ]?,[ ]?")
-allowed_conversions <- c("trajectory", "linear", "end_state_probability", "dimred_projection", "cluster_graph", "cell_graph", "special", NA)
+allowed_conversions <- c("trajectory", "linear", "end_state_probability", "dimred_projection", "cluster_graph", "cell_graph", "special", "cyclic", NA)
 if(!methods$conversion_split %>% map_lgl(~all(. %in% allowed_conversions)) %>% all()) {
   stop("Some conversions are invalid!")
 }

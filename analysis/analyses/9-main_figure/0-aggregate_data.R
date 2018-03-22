@@ -136,7 +136,8 @@ method_tib <- Reduce("reduce_fun", part_list) %>%
     overall_qc = apply(cbind(overall_qccat, overall_qcapp), 1, psych::harmonic.mean),
     overall_qc = ifelse(is_na_qc, 0, overall_qc),
     overall = apply(cbind(overall_metric, overall_source, overall_trajtype, overall_qccat, overall_qcapp), 1, psych::harmonic.mean)
-  )
+  ) %>%
+  filter(!method_short_name %in% c("gng"))
 
 
 ## CALCULATE FINAL RANKING
