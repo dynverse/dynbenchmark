@@ -40,23 +40,26 @@ part_overall_mean <-
   eval_param_outputs$outputs_summtrajtype_totalsx2 %>%
   filter(trajectory_type == "overall", task_source == "mean") %>%
   select(
-    method_short_name, harm_mean, rank_correlation, rank_edge_flip, rank_rf_mse, time_method, rank_time_method,
+    method_short_name, harm_mean, norm_correlation, norm_edge_flip, norm_rf_mse, time_method, rank_time_method,
     num_files_created, num_setseed_calls, pct_errored, pct_time_exceeded, pct_memory_exceeded, pct_allerrored, pct_stochastic
-  )
+  ) %>%
+  mutate(overall_metric = apply(.[,colnames(.)[grepl("^norm_", colnames(.))]], 1, mean))
 
 part_sources <-
   eval_param_outputs$outputs_summtrajtype_totalsx2 %>%
   filter(trajectory_type == "overall", task_source != "mean") %>%
   select(method_short_name, task_source, harm_mean) %>%
   mutate(task_source = paste0("source_", task_source)) %>%
-  spread(task_source, harm_mean)
+  spread(task_source, harm_mean) %>%
+  mutate(overall_source = apply(.[,colnames(.)[grepl("^source_", colnames(.))]], 1, mean))
 
 part_trajtypes <-
   eval_param_outputs$outputs_summtrajtype_totalsx2 %>%
   filter(trajectory_type != "overall", task_source == "mean") %>%
   select(method_short_name, trajectory_type, harm_mean) %>%
   mutate(trajectory_type = paste0("trajtype_", trajectory_type)) %>%
-  spread(trajectory_type, harm_mean)
+  spread(trajectory_type, harm_mean) %>%
+  mutate(overall_trajtype = apply(.[,colnames(.)[grepl("^trajtype_", colnames(.))]], 1, mean))
 
 # part_complexities <-
 #   complexities$complexity %>%
@@ -67,7 +70,7 @@ part_trajtypes <-
 # part_variances <-
 #   variances$vardf %>%
 #   select(
-#     method_short_name, mean_var, var_rank_correlation, var_rank_edge_flip, var_rank_rf_mse, sets_seeds
+#     method_short_name, mean_var, var_norm_correlation, var_norm_edge_flip, var_norm_rf_mse, sets_seeds
 #   )
 
 part_priors <-
@@ -96,18 +99,22 @@ part_method_characterisation <-
 part_qc_category <-
   qc_category_scores %>%
   mutate(category = paste0("qc_cat_", category)) %>%
+  mutate(qc_score = ifelse(implementation_id %in% c("aga"), NA, qc_score)) %>% # temporary fix
   spread(category, qc_score) %>%
   right_join(meta %>% select(implementation_id, method_id), by = "implementation_id") %>%
   select(method_short_name = method_id, everything()) %>%
-  select(-implementation_id)
+  select(-implementation_id) %>%
+  mutate(overall_qccat = apply(.[,colnames(.)[grepl("^qc_cat_", colnames(.))]], 1, mean))
 
 part_qc_application <-
   qc_application_scores %>%
   mutate(application = paste0("qc_app_", application)) %>%
+  mutate(score = ifelse(implementation_id %in% c("aga"), NA, score)) %>% # temporary fix
   spread(application, score) %>%
   right_join(meta %>% select(implementation_id, method_id), by = "implementation_id") %>%
   select(method_short_name = method_id, everything()) %>%
-  select(-implementation_id)
+  select(-implementation_id) %>%
+  mutate(overall_qcapp = apply(.[,colnames(.)[grepl("^qc_app_", colnames(.))]], 1, mean))
 
 ## COMBINE_COLUMNS
 part_list <- lst(
@@ -122,7 +129,21 @@ part_list <- lst(
   part_qc_application
 )
 reduce_fun <- function(a, b) inner_join(a, b, by = "method_short_name")
-method_tib <- Reduce("reduce_fun", part_list)
+method_tib <- Reduce("reduce_fun", part_list) %>%
+  mutate(
+    overall_benchmark = apply(cbind(overall_metric, overall_source, overall_trajtype), 1, psych::harmonic.mean),
+    is_na_qc = is.na(overall_qccat),
+    overall_qccat = ifelse(is_na_qc, mean(overall_qccat, na.rm = T), overall_qccat),
+    overall_qcapp = ifelse(is_na_qc, mean(overall_qcapp, na.rm = T), overall_qcapp),
+    overall_qc = apply(cbind(overall_qccat, overall_qcapp), 1, psych::harmonic.mean),
+    overall_qc = ifelse(is_na_qc, 0, overall_qc),
+    overall = apply(cbind(overall_metric, overall_source, overall_trajtype, overall_qccat, overall_qcapp), 1, psych::harmonic.mean)
+  )
+
+
+## CALCULATE FINAL RANKING
+method_name_ord <- method_tib %>% arrange(desc(overall)) %>% pull(method_name)
+method_tib <- method_tib %>% mutate(method_name_f = factor(method_name, levels = method_name_ord))
 
 # method name check
 method_short_names <- part_list %>% map(~.$method_short_name) %>% Reduce("union", .)

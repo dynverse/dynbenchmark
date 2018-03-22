@@ -60,11 +60,6 @@ outputs %>% filter(!is.na(task_id)) %>% group_by(method_name) %>% summarise(n = 
 ############### CREATE AGGREGATIONS ###############
 ###################################################
 
-# outputs <- outputs %>%
-#   mutate(
-#     method_name = ifelse(method_short_name == "manual", paste0("manual by ", paramset_id), method_name),
-#     method_short_name = ifelse(method_short_name == "manual", paste0("manual_", paramset_id), method_short_name)
-#   )
 
 # filter control methods
 outputs <- outputs %>% filter(!method_short_name %in% c("scorspar", "identity", "shuffle"))
@@ -99,6 +94,9 @@ scalesigmoid_trafo <- function (x, remove_errored = TRUE, determine_coeff = TRUE
   }
   sigmoid::sigmoid(y * coeff)
 }
+
+# previously:
+# trafo_fun <- percent_rank
 trafo_fun <- scalesigmoid_trafo
 
 outputs_ind <- outputs %>%
@@ -117,12 +115,9 @@ outputs_ind <- outputs %>%
   ) %>%
   group_by(task_id) %>%
   mutate(
-    # rank_correlation = percent_rank(correlation),
-    # rank_rf_mse = percent_rank(rf_mse_inv),
-    # rank_edge_flip = percent_rank(edge_flip),
-    rank_correlation = trafo_fun(correlation),
-    rank_edge_flip = trafo_fun(edge_flip),
-    rank_rf_mse = trafo_fun(rf_mse_inv),
+    norm_correlation = trafo_fun(correlation),
+    norm_edge_flip = trafo_fun(edge_flip),
+    norm_rf_mse = trafo_fun(rf_mse_inv),
     rank_time_method = percent_rank(-time_method)
     # rank_time_method = 1 - (time_method / max(time_method))
   ) %>%
@@ -136,9 +131,7 @@ outputs_summrepl <- outputs_ind %>%
   mutate(
     pct_allerrored = (pct_other_error == 1)+0,
     pct_stochastic = pct_other_error - pct_allerrored,
-    harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean)
-    # harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse) / 2 + .5, 1, psych::harmonic.mean) * 2 - 1
-    # harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, mean)
+    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
   )
 
 # process trajtype grouped evaluation
@@ -146,14 +139,20 @@ outputs_summtrajtype <- outputs_summrepl %>%
   group_by(method_name, method_short_name, task_source, paramset_id, trajectory_type, trajectory_type_f) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
-  ungroup()
+  ungroup() %>%
+  mutate(
+    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
+  )
 
 # process overall evaluation
 outputs_summmethod <- outputs_summtrajtype %>%
   group_by(method_name, method_short_name, task_source, paramset_id) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
-  ungroup()
+  ungroup() %>%
+  mutate(
+    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
+  )
 
 # adding mean per trajtype
 outputs_summtrajtype_totals <- bind_rows(
@@ -163,7 +162,10 @@ outputs_summtrajtype_totals <- bind_rows(
     summarise_if(is.numeric, mean) %>%
     ungroup() %>%
     mutate(task_source = "mean")
-)
+) %>%
+  mutate(
+    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
+  )
 
 # adding mean per method
 outputs_summmethod_totals <-
@@ -174,6 +176,9 @@ outputs_summmethod_totals <-
       summarise_if(is.numeric, mean) %>%
       ungroup() %>%
       mutate(task_source = "mean")
+  ) %>%
+  mutate(
+    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
   )
 
 # combine all aggregated data frames
@@ -181,7 +186,10 @@ outputs_summtrajtype_totalsx2 <- bind_rows(
   outputs_summmethod_totals %>% mutate(trajectory_type = "overall"),
   outputs_summtrajtype_totals
 ) %>%
-  mutate(trajectory_type_f = factor(trajectory_type, levels = trajtypes$id))
+  mutate(trajectory_type_f = factor(trajectory_type, levels = trajtypes$id)) %>%
+  mutate(
+    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
+  )
 
 # save data structures
 to_save <- environment() %>% as.list()
@@ -216,6 +224,3 @@ write_rds(to_save, derived_file("outputs_postprocessed.rds"))
 #     )
 #   }
 # }
-
-
-outputs_ind %>% filter(method_short_name == "dpt", edge_flip == 1) %>% pull(trajectory_type) %>% table

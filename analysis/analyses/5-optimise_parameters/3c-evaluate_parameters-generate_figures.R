@@ -41,7 +41,7 @@ prior_df <- outputs_ind %>% select(method_name, prior_str) %>% distinct()
 
 ############### OVERALL COMPARISON ###############
 metr_lev <- c(
-  "harm_mean", "rank_correlation", "rank_edge_flip", "rank_rf_mse",
+  "harm_mean", "norm_correlation", "norm_edge_flip", "norm_rf_mse",
   "real", "synthetic", "time_method", "rank_time_method",
   "pct_errored", "pct_time_exceeded", "pct_memory_exceeded", "num_setseed_calls"
 )
@@ -69,15 +69,6 @@ ggplot(overall_comp) +
   theme_bw() +
   labs(x = NULL, y = NULL, fill = "Metric") +
   theme(legend.position = "none")
-
-ggplot(overall_comp %>% left_join(prior_df, by = "method_name")) +
-  geom_bar(aes(method_name_f, score, fill = prior_str), stat = "identity") +
-  facet_wrap(~metric_f, scales = "free", ncol = 4, labeller = label_facet()) +
-  coord_flip() +
-  theme_bw() +
-  scale_fill_brewer(palette = "Dark2") +
-  theme(legend.position = "bottom") +
-  labs(x = NULL, y = NULL, fill = "Prior")
 dev.off()
 
 rm(overall_comp)
@@ -103,7 +94,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
   )
 
 ggplot(outputs_summtrajtype_totalsx2) +
-  geom_point(aes(method_name_f, rank_correlation, colour = method_name_f)) +
+  geom_point(aes(method_name_f, norm_correlation, colour = method_name_f)) +
   coord_flip() +
   theme_bw() +
   theme(legend.position = "none") +
@@ -115,7 +106,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
 
 
 ggplot(outputs_summtrajtype_totalsx2) +
-  geom_point(aes(method_name_f, rank_edge_flip, colour = method_name_f)) +
+  geom_point(aes(method_name_f, norm_edge_flip, colour = method_name_f)) +
   coord_flip() +
   theme_bw() +
   theme(legend.position = "none") +
@@ -126,7 +117,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
   )
 
 ggplot(outputs_summtrajtype_totalsx2) +
-  geom_point(aes(method_name_f, rank_rf_mse, colour = method_name_f)) +
+  geom_point(aes(method_name_f, norm_rf_mse, colour = method_name_f)) +
   coord_flip() +
   theme_bw() +
   theme(legend.position = "none") +
