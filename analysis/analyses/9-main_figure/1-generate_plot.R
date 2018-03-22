@@ -114,11 +114,12 @@ axis <-
     "prgr",    "States",               0.1,   1,       T,           "text",     F,               "prior_states_type1col",                   "prior_states_type2",
     "prge",    "Genes",                0.1,   1,       T,           "text",     F,               "prior_genes_type1col",                    "prior_genes_type2",
 
-    "harm",    "Benchmark",            0.5,   4,       T,           "invbar",   T,               "overall_benchmark_sc_col",                "overall_benchmark_sc",
+
+    "harm",    "Benchmark",            1.0,   4,       T,           "invbar",   T,               "overall_benchmark_sc_col",                "overall_benchmark_sc",
     "qcsc",    "QC",                   0.0,   4,       T,           "bar",      F,               "overall_qc_sc_col",                       "overall_qc_sc",
     "qcre",     "",                     -4,   4,       F,           "text",     F,               "black",                                   "missing_qc_reason",
 
-    "corr",    "Ordering",             0.5,   1,       T,           "circle",   T,               "norm_correlation_sc_col",                 "norm_correlation_sc",
+    "corr",    "Ordering",             1.0,   1,       T,           "circle",   T,               "norm_correlation_sc_col",                 "norm_correlation_sc",
     "rfms",    "Neighbourhood",        0.1,   1,       T,           "circle",   T,               "norm_rf_mse_sc_col",                      "norm_rf_mse_sc",
     "edge",    "Topology",             0.1,   1,       T,           "circle",   T,               "norm_edge_flip_sc_col",                   "norm_edge_flip_sc",
 
@@ -141,9 +142,7 @@ axis <-
     "erpl",    "% Errored label",       -1,   1,       F,           "text",     F,               "pct_errored_lab_colour",                  "pct_errored_lab",
     "erro",    "Error reason",         0.1,   1,       T,           "pie",      F,               list(error_colours),                       list(c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic")),
 
-    # "qcsc",    "QC Score",                0.5,   4,       T,           "bar",      F,               "overall_qc_sc_col",                         "overall_qc_sc",s
-
-    "qcdf",    "Developer friendly",   0.5,   1,       T,           "circle",   F,               "qc_app_developer_friendly_sc_col",        "qc_app_developer_friendly_sc",
+    "qcdf",    "Developer friendly",   1.0,   1,       T,           "circle",   F,               "qc_app_developer_friendly_sc_col",        "qc_app_developer_friendly_sc",
     "qcuf",    "User friendly",        0.1,   1,       T,           "circle",   F,               "qc_app_user_friendly_sc_col",             "qc_app_user_friendly_sc",
     "qcgs",    "Future-proof",         0.1,   1,       T,           "circle",   F,               "qc_app_good_science_sc_col",              "qc_app_good_science_sc",
 

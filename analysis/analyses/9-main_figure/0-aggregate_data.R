@@ -99,7 +99,6 @@ part_method_characterisation <-
 part_qc_category <-
   qc_category_scores %>%
   mutate(category = paste0("qc_cat_", category)) %>%
-  mutate(qc_score = ifelse(implementation_id %in% c("aga"), NA, qc_score)) %>% # temporary fix
   spread(category, qc_score) %>%
   right_join(meta %>% select(implementation_id, method_id), by = "implementation_id") %>%
   select(method_short_name = method_id, everything()) %>%
@@ -109,7 +108,6 @@ part_qc_category <-
 part_qc_application <-
   qc_application_scores %>%
   mutate(application = paste0("qc_app_", application)) %>%
-  mutate(score = ifelse(implementation_id %in% c("aga"), NA, score)) %>% # temporary fix
   spread(application, score) %>%
   right_join(meta %>% select(implementation_id, method_id), by = "implementation_id") %>%
   select(method_short_name = method_id, everything()) %>%
