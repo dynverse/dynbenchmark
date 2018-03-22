@@ -60,15 +60,6 @@ outputs %>% filter(!is.na(task_id)) %>% group_by(method_name) %>% summarise(n = 
 ############### CREATE AGGREGATIONS ###############
 ###################################################
 
-gm_mean = function(x, na.rm=TRUE){
-  exp(sum(log(x), na.rm=na.rm) / length(x))
-}
-
-# outputs <- outputs %>%
-#   mutate(
-#     method_name = ifelse(method_short_name == "manual", paste0("manual by ", paramset_id), method_name),
-#     method_short_name = ifelse(method_short_name == "manual", paste0("manual_", paramset_id), method_short_name)
-#   )
 
 # filter control methods
 outputs <- outputs %>% filter(!method_short_name %in% c("scorspar", "identity", "shuffle"))
@@ -140,8 +131,7 @@ outputs_summrepl <- outputs_ind %>%
   mutate(
     pct_allerrored = (pct_other_error == 1)+0,
     pct_stochastic = pct_other_error - pct_allerrored,
-    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean),
-    geom_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, gm_mean)
+    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
   )
 
 # process trajtype grouped evaluation
@@ -149,14 +139,20 @@ outputs_summtrajtype <- outputs_summrepl %>%
   group_by(method_name, method_short_name, task_source, paramset_id, trajectory_type, trajectory_type_f) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
-  ungroup()
+  ungroup() %>%
+  mutate(
+    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
+  )
 
 # process overall evaluation
 outputs_summmethod <- outputs_summtrajtype %>%
   group_by(method_name, method_short_name, task_source, paramset_id) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
-  ungroup()
+  ungroup() %>%
+  mutate(
+    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
+  )
 
 # adding mean per trajtype
 outputs_summtrajtype_totals <- bind_rows(
@@ -166,7 +162,10 @@ outputs_summtrajtype_totals <- bind_rows(
     summarise_if(is.numeric, mean) %>%
     ungroup() %>%
     mutate(task_source = "mean")
-)
+) %>%
+  mutate(
+    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
+  )
 
 # adding mean per method
 outputs_summmethod_totals <-
@@ -177,6 +176,9 @@ outputs_summmethod_totals <-
       summarise_if(is.numeric, mean) %>%
       ungroup() %>%
       mutate(task_source = "mean")
+  ) %>%
+  mutate(
+    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
   )
 
 # combine all aggregated data frames
@@ -184,7 +186,10 @@ outputs_summtrajtype_totalsx2 <- bind_rows(
   outputs_summmethod_totals %>% mutate(trajectory_type = "overall"),
   outputs_summtrajtype_totals
 ) %>%
-  mutate(trajectory_type_f = factor(trajectory_type, levels = trajtypes$id))
+  mutate(trajectory_type_f = factor(trajectory_type, levels = trajtypes$id)) %>%
+  mutate(
+    harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
+  )
 
 # save data structures
 to_save <- environment() %>% as.list()
