@@ -20,7 +20,6 @@ mainfont: Open Sans
 output: 
   pdf_document: 
     latex_engine: xelatex
-    dev: png
     keep_tex: true
     citation_package: biblatex
 ---

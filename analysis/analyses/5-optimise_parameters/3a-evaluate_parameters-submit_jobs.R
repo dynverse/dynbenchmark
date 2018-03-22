@@ -17,12 +17,12 @@ verbose <- TRUE
 # method_filter <- c("mnclica", "recat", "ctgibbs", "scimitar", "ouijaflw", "ouija", "pseudogp")
 
 # run methods that require more memory
-max_memory_per_execution <- "32G"
-method_filter <- c("ouija", "pseudogp")
+# max_memory_per_execution <- "32G"
+# method_filter <- c("ouija", "pseudogp")
 
 # # execute ouija and pseudogp last because they will jam up other methods
-# max_memory_per_execution <- "8G"
-# method_filter <- c()
+max_memory_per_execution <- "8G"
+method_filter <- c()
 
 
 # define important folders
