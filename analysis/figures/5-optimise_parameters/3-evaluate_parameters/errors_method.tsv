@@ -1,5 +1,4 @@
 method_name	error_message	n	example
-Arc-tangent	incorrect number of dimensions	544	real/aging-hsc-old_kowalczyk
 ouija	Time limit exceeded	426	real/aging-hsc-old_kowalczyk
 Mpath	Mpath only detected one landmark	203	real/cell-cycle_leng
 StemID2	replacement has length zero	112	real/stimulated-dendritic-cells-PAM_shalek

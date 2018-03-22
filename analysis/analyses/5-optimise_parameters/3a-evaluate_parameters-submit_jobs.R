@@ -4,7 +4,7 @@ library(tidyverse)
 experiment("5-optimise_parameters/3-evaluate_parameters")
 
 # settings
-methods <- get_descriptions() %>% filter(short_name != "manual")
+methods <- get_descriptions() %>% filter(!short_name %in% c("manual", "scorspar"))
 metrics <- c("correlation", "rf_mse", "edge_flip")
 timeout_per_execution <- 60 * 60 * 6
 num_repeats <- 4
@@ -13,16 +13,16 @@ execute_before <- "source /scratch/irc/shared/dynverse/module_load_R.sh; export 
 verbose <- TRUE
 
 # run most methods
-# max_memory_per_execution <- "8G"
-# method_filter <- c("mnclica", "recat", "ctgibbs", "scimitar", "ouijaflw", "ouija", "pseudogp")
+max_memory_per_execution <- "8G"
+method_filter <- c("mnclica", "recat", "ctgibbs", "scimitar", "ouijaflw", "ouija", "pseudogp")
 
 # run methods that require more memory
 # max_memory_per_execution <- "32G"
 # method_filter <- c("ouija", "pseudogp")
 
 # # execute ouija and pseudogp last because they will jam up other methods
-max_memory_per_execution <- "8G"
-method_filter <- c()
+# max_memory_per_execution <- "8G"
+# method_filter <- c()
 
 
 # define important folders
@@ -43,7 +43,7 @@ task_ids <- read_rds(paste0(local_tasks_folder, "/task_ids.rds"))
 #   paste("\"", ., "\"", collapse = ", ", sep = "") %>%
 #   cat
 methods_order <- c(
-  "identity", "shuffle", "random", "manual_wouters", "manual_robrechtc", "slngsht", "mpath",  "comp1", "acos", "periodpc", "gng",
+  "identity", "shuffle", "random", "manual_wouters", "manual_robrechtc", "slngsht", "mpath",  "comp1", "atan", "periodpc", "gng",
   "waterfll", "tscan", "sincell", "scorpius", "scorspar", "embeddr", "wndrlst", "wishbone", "mnclddr", "dpt", "mnclica", "slice",
   "ctvem", "ouijaflw", "slicer", "scuba", "topslam", "gpfates", "aga", "agapt", "phenopth", "ctmaptpx", "mfa", "stemid2", "recat",
   "stemid", "scoup", "ctgibbs", "scimitar", "ouija", "pseudogp"
