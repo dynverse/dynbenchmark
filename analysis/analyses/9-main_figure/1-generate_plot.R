@@ -364,16 +364,11 @@ g1 <- ggplot(method_tib) +
   # STARS
   ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = col), data = pie_data %>% filter(pct <= (1-1e-10)), size = .25) +
   ggforce::geom_circle(aes(x0 = x0, y0 = y0, r = r, fill = col), data = pie_data %>% filter(pct > (1-1e-10)), size = .25) +
-  # ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = NA), data = pie_data, size = .25) +
-  # geom_segment(aes(x = x0, xend = x0, y = y0 + r0, yend = y0 + r), data = pie_data, size = .25) +
   # TEXT
   geom_text(aes(x = x, y = y, label = label, colour = col), data = text_data, vjust = .5, hjust = .5) +
 
   # TRAJ TYPE MINIS
   geom_rect(aes(xmin = axtr$maxt$xmin, xmax = axtr$maxt$xmax, ymin = method_ymin, ymax = method_ymax, alpha = maxtraj_replace_id, fill = "#ABCDEF"), colour = "black", size = .25) +
-
-  # PRIORS MINIS
-  # geom_rect(aes(xmin = axtr$prio$xmin, xmax = axtr$prio$xmax, ymin = method_ymin, ymax = method_ymax, alpha = prior_replace_id, fill = "#ABCDEF"), colour = "black", size = .25) +
 
   # RESERVE SPACE
   expand_limits(x = c(max(axis$xmax)+2), y = legy_start - 4.1) +
@@ -392,7 +387,6 @@ g1 <- ggplot(method_tib) +
   geom_text(aes(20.5, legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
   ggforce::geom_circle(aes(x0 = 21.3 + x, y0 = legy_start - 2.3 + r, r = r, fill = colbench), size = .25, leg_circles) +
   geom_text(aes(x = 21.3 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% slice(c(1, n()))) +
-  # ggimage::geom_subview(x = 22, y = legy_start - 2, subview = bench_leg, width = 3, height = 1) +
 
   # LEGEND: PCT ERRORED
   geom_text(aes(26, legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
@@ -403,7 +397,6 @@ g1 <- ggplot(method_tib) +
 
   # LEGEND: QC SCORE
   geom_text(aes(34, legy_start - 1, label = "QC score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  # ggimage::geom_subview(x = 40, y = legy_start - 2, subview = qc_leg, width = 3, height = 1)
   ggforce::geom_circle(aes(x0 = 34.8 + x, y0 = legy_start - 2.3 + r, r = r, fill = colqc), size = .25, leg_circles) +
   geom_text(aes(x = 34.8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% slice(c(1, n()))) +
 
