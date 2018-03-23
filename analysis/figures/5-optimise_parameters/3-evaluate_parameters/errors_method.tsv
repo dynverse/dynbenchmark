@@ -1,4 +1,5 @@
 method_name	error_message	n	example
+pseudogp	Time limit exceeded	468	real/aging-hsc-old_kowalczyk
 ouija	Time limit exceeded	426	real/aging-hsc-old_kowalczyk
 Mpath	Mpath only detected one landmark	203	real/cell-cycle_leng
 StemID2	replacement has length zero	112	real/stimulated-dendritic-cells-PAM_shalek
@@ -43,6 +44,7 @@ Wishbone	"ne/venv/lib/python3.5/site-packages/wishbone/wb.py"", line 1068, in ru
     Y = np.zeros((len(RNK)))
 TypeError: object of type 'numpy.float64' has no len()"	13	real/macrophage-salmonella_saliba
 Mpath	more cluster centers than distinct data points.	12	real/epidermis-hair-uHF_joost
+pseudogp	attempt to set an attribute on NULL	12	real/dentate-gyrus-neurogenesis_hochgerner
 recat	Time limit exceeded	12	real/dentate-gyrus-neurogenesis_hochgerner
 SCIMITAR	"hon/2.7.14/lib/python2.7/site-packages/sklearn/manifold/locally_linear.py"", line 645, in _fit_transform
     random_state=random_state, reg=self.reg, n_jobs=self.n_jobs)
