@@ -42,139 +42,116 @@ knitr::opts_chunk$set(
   fig.path = paste0(rprojroot::find_rstudio_root_file(), "/analysis/paper/supp_notes/.scratch/")
 )
 
+source(paste0(dynalysis::get_dynalysis_folder(), "/analysis/paper/setup.R"))
+```
 
-# load libraries
-library(dynalysis)
+This document serves to provide insight into how each trajectory inference method was used and wrapped.
+
+
+
+```{r}
+library(dynmethods)
+library(dynwrap)
+library(dynutils)
 library(dynplot)
-library(tidyverse)
-library(cowplot)
 ```
 
 
-# `aga`: AGA
-<insert description AGA>
+
+<!-- ################################################## aga ################################################## -->
+See [https://github.com/dynverse/dynmethods/blob/master/vignettes/aga.Rmd](dynmethods).
+
+
+<!-- ################################################## agapt ################################################## -->
+
+# `agapt`: AGA pseudotime
+TODO: move to dynmethods.
+
+When a start cell is given, AGA supports ordering the cells along branches.
 
 ## Parameters
-
 ```{r}
-method <- description_aga()
-par_set <- method$par_set
-par_set
+method <- description_agapt()
+method$par_set
 ```
 
-The default parameters are the following:
-```{r}
-defprm <- ParamHelpers::dfRowToList(
-  ParamHelpers::generateDesignOfDefaults(par_set, trafo = TRUE),
-  par_set, 
-  i = 1
-)
-defprm
-```
 
 ## Example dataset
-We will be using a consecutive bifurcating toy dataset to demonstrate this method with.
+We will be using the same consecutive bifurcating toy dataset.
 
 ```{r}
-toy <- dyntoy::toy_tasks %>% filter(model == "consecutive_bifurcating") %>% extract_row_to_list(row_id = 1)
+toy <- dyntoy::toy_tasks %>% 
+  filter(model == "consecutive_bifurcating") %>% 
+  extract_row_to_list(row_id = 1)
 expression <- toy$expression
+start_cells <- toy$prior_information$start_cells
 
 plot_default(toy)
 ```
 
+
 ## Wrapper
 
-Since AGA is implemented in Python, we created an R package for it. 
+Since AGA is implemented in Python, we created an R package for it, available at [github.com/dynverse/aga](https://github.com/dynverse/aga).
+The R package will write the expression values and any parameters to a file, execute a python script, and read the results from output files produced by AGA.
 ```{r}
+defprm <- get_default_parameters(method)
+
+# sample one start cell
+start_cell <- sample(start_cells, 1)
+
 aga_out <- aga::aga(
-  counts = expression,
-  start_cell = NULL,
+  expression = expression,
+  start_cell = start_cell,
   grouping_assignment = NULL,
   n_neighbours = defprm$n_neighbours,
   n_pcs = defprm$n_pcs,
   n_dcs = defprm$n_dcs,
   resolution = defprm$resolution,
   tree_based_confidence = defprm$tree_based_confidence,
-  verbose = FALSE,
+  verbose = TRUE,
   num_cores = 1
 )
 ```
 
-<Talk about aga_out$adj>
+After building a kNN graph (not shown), the kNN graph is clustered into louvain groups:
+```{r}
+aga_out$obs %>% head(6) %>% knitr::kable()
+
+# cell_ids <- rownames(expression)
+# milestone_assignment_cells <- setNames(aga_out$obs$group_id, aga_out$obs$cell_id)
+```
+
+Several tests are used to assess which transitions exist between the louvain groups. 
+We use the `aga_adjacency_tree_confidence` to construct the milestone network.
 ```{r}
 aga_out$adj %>% head(6) %>% knitr::kable()
 ```
 
-<Talk about aga_out$obs>
-```{r}
-aga_out$obs %>% head(6) %>% knitr::kable()
-```
 
-Reformat everything into milestone_network and milestone_percentages
-```{r}
-cell_ids <- rownames(expression)
-
-milestone_assignment_cells <- setNames(aga_out$obs$group_id, aga_out$obs$cell_id)
-
-milestone_network <- aga_out$adj %>%
-  mutate_at(vars(from, to), as.character) %>%
-  filter(aga_adjacency_tree_confidence > 0) %>%
-  mutate(
-    length = 1,
-    directed = TRUE
-  ) %>%
-  select(from, to, length, directed)
-
-milestone_ids <- sort(unique(milestone_assignment_cells))
-```
-
-
-The prediction is wrapped using the `add_trajectory_to_wrapper` function. 
-```{r}
-prediction <- wrap_prediction_model(
-  cell_ids = rownames(expression)
-) %>% add_cluster_graph_to_wrapper(
-  milestone_ids = milestone_ids,
-  milestone_network = milestone_network,
-  milestone_assignment_cells = milestone_assignment_cells,
-  aga_out = aga_out
-)
-
-plot_default(prediction)
-method$plot_fun(prediction)
-plot_strip_connections(toy, prediction)
-```
-
-
+<!-- ################################################## atan ################################################## -->
 
 # `atan`: Arc-tangent
+TODO: move to dynmethods.
+
 This is a control method for inferring cyclic trajectories in a very simple approach,
 consisting of a dimensionality reduction step and followed by calculating the arc-tangent
 between the first and the second component.
 
+
 ## Parameters
-There is only one parameter, namely the dimensionality reduction method used.
 ```{r}
 method <- description_atan()
-par_set <- method$par_set
-par_set
-```
-
-The default parameters are the following:
-```{r}
-defprm <- ParamHelpers::dfRowToList(
-  ParamHelpers::generateDesignOfDefaults(par_set, trafo = TRUE),
-  par_set, 
-  i = 1
-)
-defprm
+method$par_set
 ```
 
 ## Example dataset
 We will be using a cyclic toy dataset to demonstrate this method with.
 
 ```{r}
-toy <- dyntoy::toy_tasks %>% filter(model == "cycle") %>% extract_row_to_list(row_id = 2)
+toy <- dyntoy::toy_tasks %>% 
+  filter(model == "cycle") %>% 
+  extract_row_to_list(row_id = 2)
 expression <- toy$expression
 
 plot_default(toy)
@@ -185,6 +162,8 @@ In the first step, a dimensionality reduction to two dimensions is computed. By 
 Here, it is assumed that the dimensionality reduction will be centered around the origin 0.
 
 ```{r}
+defprm <- get_default_parameters(method)
+
 dimred <- dynmethods:::dimred(expression, method = defprm$dimred, ndim = 2)
 
 # Plot dimred
