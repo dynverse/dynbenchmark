@@ -4,20 +4,26 @@ library(googlesheets)
 
 experiment("4-method_characterisation")
 
-implementations <- read_rds(derived_file("implementations.rds"))
-methods <- read_rds(derived_file("methods_tidy.rds"))
+implementations_tidy <- read_rds(derived_file("implementations_tidy.rds"))
+methods_tidy <- read_rds(derived_file("methods_tidy.rds"))
 
 # combine with qc scores
 implementation_qc_scores <- readRDS(derived_file("implementation_qc_scores.rds"))
 
 # merge qc scores with implementations tibble
-implementations <- implementations %>%
+implementations_tidy <- implementations_tidy %>%
   select(-matches("qc_score")) %>%
   left_join(implementation_qc_scores, "implementation_id")
 
 # merge implementations with methods
-methods <- methods %>%
-  left_join(implementations, "implementation_id")
+methods <- methods_tidy %>%
+  left_join(implementations_tidy, "implementation_id")
+
+implementations <- implementations_tidy %>%
+  left_join(methods_tidy, "implementation_id") %>%
+  group_by(implementation_id) %>%
+  filter(row_number() == n()) %>%
+  ungroup()
 
 methods_evaluated <- methods %>%
   filter(wrapper=="Done")

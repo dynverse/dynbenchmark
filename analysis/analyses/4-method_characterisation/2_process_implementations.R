@@ -106,4 +106,4 @@ methods$fixes_topology <- pmap_chr(methods, topology_fix)
 
 # Saving -------------------------
 write_rds(methods, derived_file("methods_tidy.rds"))
-write_rds(implementations, derived_file("implementations.rds"))
+write_rds(implementations, derived_file("implementations_tidy.rds"))
