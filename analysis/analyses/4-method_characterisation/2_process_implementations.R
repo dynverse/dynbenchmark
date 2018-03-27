@@ -1,4 +1,4 @@
-# This file will process the implementation characteristics google sheets
+# This file will process the implementation en method characteristics google sheets
 library(tidyverse)
 library(googlesheets)
 library(dynalysis)
@@ -14,13 +14,13 @@ experiment("4-method_characterisation")
 # gs_auth()
 
 implementations <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
-  gs_read(ws = "Implementations", col_types = cols(GScholarClusterID = "c"), skip = 1) %>%
+  gs_read(ws = "Implementations", col_types = cols(gscholar_cluster_id = "c"), skip = 1) %>%
   filter(contains_ti)
 
 # Dates ------------------------------
-implementations$date <- implementations$Preprint
-replace_date <- is.na(implementations$date) & !is.na(implementations$PubDate)
-implementations$date[replace_date] <- implementations$PubDate[replace_date]
+implementations$date <- implementations$preprint_date
+replace_date <- is.na(implementations$date) & !is.na(implementations$publication_date)
+implementations$date[replace_date] <- implementations$publication_date[replace_date]
 
 # Altmetrics ----------------------------
 implementations_altmetrics <- map(implementations$DOI, function(doi) {
@@ -32,10 +32,12 @@ implementations_altmetrics <- map(implementations$DOI, function(doi) {
 implementations_altmetrics[is.na(implementations_altmetrics)] <- 0
 implementations <- bind_cols(implementations, implementations_altmetrics)
 
+## Non inclusion reasons ------------------------
+implementations$non_inclusion_reasons_split <- implementations$non_inclusion_reasons %>% str_split("[ ]?,[ ]?")
+
 
 #   ____________________________________________________________________________
 #   Methods                                                                 ####
-
 methods <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
   gs_read(ws = "Methods", skip = 1)
 
@@ -71,9 +73,6 @@ trajectory_type_capabilities <- (trajectory_type_capabilities & !trajectory_type
 # add capabilities to implementations
 methods <- methods %>% bind_cols(trajectory_type_capabilities)
 
-## Non inclusion reasons ------------------------
-methods$non_inclusion_reasons_split <- methods$non_inclusion_reasons %>% str_split("[ ]?,[ ]?")
-
 ## methods conversions ------------------------
 methods$conversion_split <- methods$conversion %>% str_split("[ ]?,[ ]?")
 allowed_conversions <- c("trajectory", "linear", "end_state_probability", "dimred_projection", "cluster_graph", "cell_graph", "special", "cyclic", NA)
@@ -90,20 +89,31 @@ methods$output_split <- methods$output %>% str_split("[ ]?,[ ]?")
 # date_filter <- implementations$date > date_cutoff & !is.na(implementations$date)
 # implementations$non_inclusion_reasons_split[date_filter] <- map(implementations$non_inclusion_reasons_split[date_filter], c, "date") %>% map(unique)
 
-## Infer whether the topology is fixed based on other columns -------------
-topology_fix <- function(maximal_trajectory_type, n_branches, n_end_states, fixes_topology_, ...) {
-  if (any(is.na(c(maximal_trajectory_type, n_branches, n_end_states)))) {
-    NA
-  } else if(maximal_trajectory_type == "directed_linear" | maximal_trajectory_type == "directed_cycle") {
-    "algorithm"
-  } else if (n_branches == "required" || n_branches == "required_default" || n_end_states == "required" || n_end_states == "required_default") {
-    "parameter"
-  } else {
-    "free"
-  }
-}
-methods$fixes_topology <- pmap_chr(methods, topology_fix)
+## add extra prior information columns for robrecht
+methods$prior_start <- case_when(
+  methods$start_id == "required" ~ "required_id",
+  methods$start_id == "optional" ~ "optional_id"
+)
+methods$prior_end <- case_when(
+  methods$end_id == "required" ~ "required_id",
+  methods$end_id == "optional" ~ "optional_id",
+  methods$end_n == "required" ~ "required_n",
+  methods$end_n == "optional" ~ "optional_n"
+)
+methods$prior_states <- case_when(
+  methods$states_id == "required" ~ "required_id",
+  methods$states_id == "optional" ~ "optional_id",
+  methods$states_n == "required" ~ "required_n",
+  methods$states_n == "optional" ~ "optional_n",
+  methods$states_network == "required" ~ "required_network",
+  methods$states_network == "optional" ~ "optional_network"
+)
+methods$prior_genes <- case_when(
+  methods$genes_id == "required" ~ "required_id",
+  methods$genes_id == "optional" ~ "optional_id"
+)
 
 # Saving -------------------------
 write_rds(methods, derived_file("methods_tidy.rds"))
 write_rds(implementations, derived_file("implementations_tidy.rds"))
+

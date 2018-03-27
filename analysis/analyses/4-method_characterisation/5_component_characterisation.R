@@ -18,7 +18,7 @@ component_categories <- tribble(
   ~component_id, ~category,
   "principal curves", "ordering",
   "PCA", "dimensionality reduction",
-  "knn graph", "graph building",
+  "kNN", "graph building",
   "MST", "graph building",
   "k-medoids", "clustering",
   "ICA", "dimensionality reduction",
@@ -58,7 +58,7 @@ component_categories <- tribble(
   "Morphing Gaussian Mixture", "generative model",
   "shortest path to start", "ordering",
   "latent variable model", "generative model",
-  "PQ tree", "graph building"
+  "PQ tree", "graph building",
 ) %>% group_by(component_id) %>%
   filter(row_number() == 1)
 
