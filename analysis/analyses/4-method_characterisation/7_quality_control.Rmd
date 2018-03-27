@@ -287,7 +287,7 @@ g1 <- ggplot(implementations_evaluated, aes(date, qc_score)) +
     labs(x = label_long("publication_date"), y = "QC score", title = "Code quality score over time")
 g1
 
-g2 <- ggplot(implementations_evaluated %>% mutate(Citations = ifelse(Citations == 0, 0.5, Citations)), aes(date, Citations)) +
+g2 <- ggplot(implementations_evaluated %>% mutate(ncitations = ifelse(ncitations == 0, 0.5, ncitations)), aes(date, ncitations)) +
     geom_smooth(span=2) +
     geom_point() +
     ggrepel::geom_text_repel(aes(label = label_implementation(implementation_id))) +
@@ -295,7 +295,7 @@ g2 <- ggplot(implementations_evaluated %>% mutate(Citations = ifelse(Citations =
     labs(x = "Time", y = "Citations", title = "Citations over time")
 g2
 
-g3 <- ggplot(implementations_evaluated %>% mutate(Citations = ifelse(Citations == 0, 0.5, Citations)), aes(Citations, qc_score)) +
+g3 <- ggplot(implementations_evaluated %>% mutate(ncitations = ifelse(ncitations == 0, 0.5, ncitations)), aes(ncitations, qc_score)) +
     geom_smooth(span=2) +
     geom_point() +
     ggrepel::geom_text_repel(aes(label = label_implementation(implementation_id))) +

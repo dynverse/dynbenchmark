@@ -25,14 +25,23 @@ implementations <- implementations_tidy %>%
   filter(row_number() == n()) %>%
   ungroup()
 
+# filter evaluated
+methods$evaluated <- methods$wrapper == "Done"
+implementations$evaluated <- implementations$evaluation_inclusion == "TRUE"
+
 methods_evaluated <- methods %>%
-  filter(wrapper=="Done")
+  filter(evaluated)
+
+implementations_evaluated <- implementations %>%
+  filter(evaluated)
 
 # save
 write_rds(implementations, derived_file("implementations.rds"))
+write_rds(implementations_evaluated, derived_file("implementations_evaluated.rds"))
 write_rds(methods, derived_file("methods.rds"))
 write_rds(methods_evaluated, derived_file("methods_evaluated.rds"))
 
 write_rds(implementations, result_file("implementations.rds"))
+write_rds(implementations_evaluated, result_file("implementations_evaluated.rds"))
 write_rds(methods, result_file("methods.rds"))
 write_rds(methods_evaluated, result_file("methods_evaluated.rds"))

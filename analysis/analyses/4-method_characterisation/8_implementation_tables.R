@@ -7,12 +7,12 @@ experiment("4-method_characterisation")
 implementations <- read_rds(derived_file("implementations.rds"))
 
 implementations <- implementations %>%
-  filter(is_ti) %>%
+  filter(contains_ti) %>%
   arrange(date)
 
 # process priors
 prdf <- implementations %>%
-  select(implementation_id, start_cells:marker_feature_ids) %>%
+  select(implementation_id, !!priors$prior_id) %>%
   gather(prior_id, value, -implementation_id) %>%
   left_join(priors, by = "prior_id")
 pr_required <- prdf %>%
@@ -70,7 +70,6 @@ citation_format <- c(
 imp_table <- map(c("latex", "html"), function(format) {
   implementations_table <-
     implementations %>%
-    filter(is_ti) %>%
     arrange(date) %>%
     mutate(
       evaluated = ifelse(evaluated, "Yes", map_chr(non_inclusion_reasons_footnotes, ~paste0("No" , superscript[[format]](paste0(., collapse=" "))))),
@@ -86,13 +85,15 @@ imp_table <- map(c("latex", "html"), function(format) {
         kableExtra::cell_spec(
           label_simple_trajectory_types(maximal_trajectory_type),
           format,
-          background = toupper(set_names(trajectory_types$color, trajectory_types$id)[maximal_trajectory_type]),
+          background =
+            toupper(set_names(trajectory_types$color, trajectory_types$id)[maximal_trajectory_type]) %>%
+            map(~replace(., is.na(.), "#666666")),
           color = "#FFFFFF"
         ),
       implementation_name = kableExtra::cell_spec(
         implementation_name,
         format,
-        link = Code
+        link = code_location
       ),
       reference = kableExtra::cell_spec(
         map_chr(bibtex, citation_format[[format]]),
@@ -159,7 +160,7 @@ columns <- tribble(
   "Priors optional", "prior_optional", label_tbd,
   "Evaluated", "evaluated", label_long,
   "Reference" , "DOI", cite,
-  "Code/package", "Code", url
+  "Code/package", "code_location", url
 )
 
 # the order in the spreadsheet is the reference, as then conditional formatting is copied over :)
