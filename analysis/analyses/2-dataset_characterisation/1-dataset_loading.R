@@ -63,9 +63,9 @@ tasks_synthetic <- map(seq_len(nrow(tasks_synthetic)), function(task_i) {
   assign("synthetic_folder", synthetic_folder, env)
 
   # to re save
-  # task$expression %>% saveRDS(paste0(synthetic_folder, task_i, "_expression.rds"))
-  # task$counts %>% saveRDS(paste0(synthetic_folder, task_i, "_counts.rds"))
-  # task$geodesic_dist %>% saveRDS(paste0(synthetic_folder, task_i, "_geodesic_dist.rds"))
+  task$expression %>% saveRDS(paste0(synthetic_folder, task_i, "_expression.rds"))
+  task$counts %>% saveRDS(paste0(synthetic_folder, task_i, "_counts.rds"))
+  task$geodesic_dist %>% saveRDS(paste0(synthetic_folder, task_i, "_geodesic_dist.rds"))
 
   task$expression <- function() {readRDS(paste0(synthetic_folder, task_i, "_expression.rds"))}
   task$counts <- function() {readRDS(paste0(synthetic_folder, task_i, "_counts.rds"))}
@@ -93,12 +93,38 @@ tasks_control <- read_rds(dataset_file("tasks.rds", "control")) %>%
 
 ##  ............................................................................
 ##  Combine datasets                                                        ####
-tasks <- bind_rows(tasks_synthetic, tasks_real, tasks_toy, tasks_control)
+tasks <- bind_rows(tasks_synthetic, tasks_real, tasks_toy)
+
+
+##  ............................................................................
+##  Calculate waypoints                                                     ####
+tasks <-
+  map(seq_len(nrow(tasks)), function(i) {
+    print(i)
+    tasks %>% dynutils::extract_row_to_list(i) %>% dynwrap::add_cell_waypoints_to_wrapper(num_cells_selected = 100)
+  }) %>%
+  dynutils::list_as_tibble()
+
+tasks <- tasks %>%
+  rowwise() %>%
+  mutate(milenet_spr = milestone_percentages %>% reshape2::acast(cell_id ~ milestone_id, value.var = "percentage", fill = 0) %>% list()) %>%
+  ungroup()
+
+
 
 
 ##  ............................................................................
 ##  Add characteristics                                                     ####
-task_characteristics <- pbapply::pblapply(tasks_to_check$id, function(task_id) {
+load <- function(x) {
+  if(class(x) == "matrix") {
+    x
+  } else {
+    x()
+  }
+}
+
+
+task_characteristics <- pbapply::pblapply(tasks$id, function(task_id) {
   print(task_id)
   task <- extract_row_to_list(tasks, which(tasks$id == task_id))
   counts <- load(task$counts)
@@ -118,14 +144,6 @@ saveRDS(tasks, derived_file("tasks.rds"))
 #   ____________________________________________________________________________
 #   Check datasets                                                          ####
 
-load <- function(x) {
-  if(class(x) == "matrix") {
-    x
-  } else {
-    x()
-  }
-}
-
 tasks_to_check <-tasks# %>% filter(id == "real/mESC-differentiation_hayashi")
 task_checks <- pbapply::pblapply(tasks_to_check$id, function(task_id) {
   print(task_id)
@@ -135,7 +153,7 @@ task_checks <- pbapply::pblapply(tasks_to_check$id, function(task_id) {
 
   checks <- list(id = task_id)
 
-  checks$check_all_milestones_represented <- all(task$milestone_ids %in% task$prior_information$grouping_assignment$group_id)
+  checks$check_all_milestones_represented <- all(task$milestone_ids[!str_detect(task$milestone_ids, "INTERMEDIATE")] %in% task$prior_information$grouping_assignment$group_id)
 
   checks$check_marker_feature_ids_in_expression <- all(task$prior_information$marker_feature_ids %in% colnames(expression))
 
