@@ -96,7 +96,7 @@ middle <- function(x1, x2) {x1 + (x2-x1)/2}
 middle_offset <- function(x1, x2) {x1 + (x2-x1)/2.000001}
 
 cell_plots <- pmap(as.list(tasks), function(...) {
-  # task <- extract_row_to_list(tasks %>% filter(category == "real"), 21)
+  # task <- tasks %>% extract_row_to_list(which(tasks$id == "real/mesoderm-development_loh"))
   task <- list(...)
 
   task$expression <- load(task$expression)
@@ -105,7 +105,7 @@ cell_plots <- pmap(as.list(tasks), function(...) {
 
   plots <- list()
 
-  space <- dimred_pca(task$expression)
+  space <- dimred_ica(task$expression, ndim=2)
 
   plotdata_cells <- bind_cols(space %>% as.data.frame() %>% tibble::rownames_to_column("cell_id")) %>% left_join(task$cell_info, by="cell_id") %>% left_join(task$prior_information$grouping_assignment, by="cell_id")
   plotdata_cells$libsize <- rowMeans(task$expression)
@@ -140,7 +140,7 @@ cell_plots <- pmap(as.list(tasks), function(...) {
       viridis::scale_color_viridis(option="A")
   )
 
-  rm(task)
+  # rm(task)
 
   plots
 })
