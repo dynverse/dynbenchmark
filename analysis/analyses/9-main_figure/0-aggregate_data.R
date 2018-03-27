@@ -18,11 +18,11 @@ tasks <- map_df(
   }
 )
 
-# read complexities
-complexities <- read_rds(derived_file("dimensionality_versus_timings_data.rds", "5-optimise_parameters/4-plots"))
-
-# read variances
-variances <- read_rds(derived_file("variance_results.rds", "5-optimise_parameters/4-plots"))
+# # read complexities
+# complexities <- read_rds(derived_file("dimensionality_versus_timings_data.rds", "5-optimise_parameters/4-plots"))
+#
+# # read variances
+# variances <- read_rds(derived_file("variance_results.rds", "5-optimise_parameters/4-plots"))
 
 # read method meta info
 meta <- read_rds(derived_file("methods_evaluated.rds", "4-method_characterisation")) %>%
@@ -136,7 +136,8 @@ method_tib <- Reduce("reduce_fun", part_list) %>%
     overall_qc = apply(cbind(overall_qccat, overall_qcapp), 1, psych::harmonic.mean),
     overall_qc = ifelse(is_na_qc, 0, overall_qc),
     overall = apply(cbind(overall_metric, overall_source, overall_trajtype, overall_qccat, overall_qcapp), 1, psych::harmonic.mean)
-  )
+  ) %>%
+  filter(!method_short_name %in% c("gng"))
 
 
 ## CALCULATE FINAL RANKING

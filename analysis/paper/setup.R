@@ -1,14 +1,3 @@
-# knitr options
-knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  warning = FALSE,
-  message = FALSE,
-  echo = FALSE,
-  comment = "#>",
-  fig.path = paste0(rprojroot::find_rstudio_root_file(), "/analysis/paper/.scratch/")
-)
-
 
 # load libraries
 library(dynalysis)

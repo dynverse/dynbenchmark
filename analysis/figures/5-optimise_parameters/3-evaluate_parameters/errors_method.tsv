@@ -1,4 +1,6 @@
 method_name	error_message	n	example
+pseudogp	Time limit exceeded	468	real/aging-hsc-old_kowalczyk
+ouija	Time limit exceeded	426	real/aging-hsc-old_kowalczyk
 Mpath	Mpath only detected one landmark	203	real/cell-cycle_leng
 StemID2	replacement has length zero	112	real/stimulated-dendritic-cells-PAM_shalek
 SCIMITAR	"verse/R/lib64/R/library/SCIMITAR/venv/lib/python2.7/site-packages/scimitar/morphing_mixture.py"", line 104, in map_samples_to_pseudotime
@@ -42,6 +44,7 @@ Wishbone	"ne/venv/lib/python3.5/site-packages/wishbone/wb.py"", line 1068, in ru
     Y = np.zeros((len(RNK)))
 TypeError: object of type 'numpy.float64' has no len()"	13	real/macrophage-salmonella_saliba
 Mpath	more cluster centers than distinct data points.	12	real/epidermis-hair-uHF_joost
+pseudogp	attempt to set an attribute on NULL	12	real/dentate-gyrus-neurogenesis_hochgerner
 recat	Time limit exceeded	12	real/dentate-gyrus-neurogenesis_hochgerner
 SCIMITAR	"hon/2.7.14/lib/python2.7/site-packages/sklearn/manifold/locally_linear.py"", line 645, in _fit_transform
     random_state=random_state, reg=self.reg, n_jobs=self.n_jobs)
@@ -65,6 +68,8 @@ SCIMITAR	Time limit exceeded	10	real/aging-hsc-young_kowalczyk
 embeddr	smoothing parameter value too small	8	real/olfactory-projection-neurons-DA1_horns
 Monocle DDRTree	initial centers are not distinct	8	synthetic/consecutive_bifurcating_10
 Monocle ICA	vector size specified is too large	8	synthetic/consecutive_bifurcating_10
+ouija	a dimension is zero	8	real/macrophage-salmonella_saliba
+ouija	cannot allocate vector of size 1 Kb	8	real/human-embryos_petropoulos
 recat	NAs not allowed!	8	synthetic/cycle_10
 SCIMITAR	"ges/scimitar/morphing_mixture.py"", line 396, in morphing_gaussian_from_embedding
     pseudotimes, cov_estimator=cov_estimator, **kwargs)
@@ -84,7 +89,6 @@ GPfates	"py"", line 49, in __call__
   File ""/scratch/irc/shared/dynverse/R/lib64/R/library/GPfates/venv/lib/python3.5/site-packages/GPy/kern/src/stationary.py"", line 72, in __init__
     assert lengthscale.size in [1, input_dim], ""Bad number of lengthscales""
 AssertionError: Bad number of lengthscales"	4	synthetic/linear_long_11
-Growing Neural Gas	Memory limit exceeded	4	real/epidermis-hair-spatial_joost
 Growing Neural Gas	subscript out of bounds	4	synthetic/linear_long_11
 recat	cannot allocate vector of size 15.2 Gb	4	real/mESC-differentiation_hayashi
 SCIMITAR	"7/site-packages/rpy2/rinterface/__init__.py:185: RRuntimeWarning: 3: package ‘graphics’ was built under R version 3.4.3 

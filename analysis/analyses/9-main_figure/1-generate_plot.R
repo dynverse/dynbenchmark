@@ -58,7 +58,7 @@ method_tib <- method_tib %>%
     remove_results = pct_errored > .49,
     pct_succeeded = 1 - pct_errored,
     pct_errored_lab = paste0(round(pct_errored * 100), "%"),
-    missing_qc_reason = ifelse(!is_na_qc, "", ifelse(method_short_name %in% c("periodpc", "acos", "comp1", "random", "gng"), "Control", "Missing")),
+    missing_qc_reason = ifelse(!is_na_qc, "", ifelse(method_short_name %in% c("periodpc", "atan", "comp1", "random", "gng"), "Control", "Missing")),
     black = "black"
   ) %>%
   mutate_at(
@@ -115,25 +115,25 @@ axis <-
     "prge",    "Genes",                0.1,   1,       T,           "text",     F,               "prior_genes_type1col",                    "prior_genes_type2",
 
 
-    "harm",    "Benchmark",            1.0,   4,       T,           "invbar",   T,               "overall_benchmark_sc_col",                "overall_benchmark_sc",
+    "harm",    "Benchmark",            1.0,   4,       T,           "invbar",   F,               "overall_benchmark_sc_col",                "overall_benchmark_sc",
     "qcsc",    "QC",                   0.0,   4,       T,           "bar",      F,               "overall_qc_sc_col",                       "overall_qc_sc",
     "qcre",     "",                     -4,   4,       F,           "text",     F,               "black",                                   "missing_qc_reason",
 
-    "corr",    "Ordering",             1.0,   1,       T,           "circle",   T,               "norm_correlation_sc_col",                 "norm_correlation_sc",
-    "rfms",    "Neighbourhood",        0.1,   1,       T,           "circle",   T,               "norm_rf_mse_sc_col",                      "norm_rf_mse_sc",
-    "edge",    "Topology",             0.1,   1,       T,           "circle",   T,               "norm_edge_flip_sc_col",                   "norm_edge_flip_sc",
+    "corr",    "Ordering",             1.0,   1,       T,           "circle",   F,               "norm_correlation_sc_col",                 "norm_correlation_sc",
+    "rfms",    "Neighbourhood",        0.1,   1,       T,           "circle",   F,               "norm_rf_mse_sc_col",                      "norm_rf_mse_sc",
+    "edge",    "Topology",             0.1,   1,       T,           "circle",   F,               "norm_edge_flip_sc_col",                   "norm_edge_flip_sc",
 
-    "real",    "Real",                 0.5,   1,       T,           "circle",   T,               "source_real_sc_col",                      "source_real_sc",
-    "synt",    "Synthetic",            0.1,   1,       T,           "circle",   T,               "source_synthetic_sc_col",                 "source_synthetic_sc",
+    "real",    "Real",                 0.5,   1,       T,           "circle",   F,               "source_real_sc_col",                      "source_real_sc",
+    "synt",    "Synthetic",            0.1,   1,       T,           "circle",   F,               "source_synthetic_sc_col",                 "source_synthetic_sc",
 
-    "line",    "Linear",               0.5,   1,       T,           "circle",   T,               "trajtype_directed_linear_sc_col",         "trajtype_directed_linear_sc",
-    "bifu",    "Bifurcation",          0.1,   1,       T,           "circle",   T,               "trajtype_bifurcation_sc_col",             "trajtype_bifurcation_sc",
-    "conv",    "Convergence",          0.1,   1,       T,           "circle",   T,               "trajtype_convergence_sc_col",             "trajtype_convergence_sc",
-    "mult",    "Multifurcation",       0.1,   1,       T,           "circle",   T,               "trajtype_multifurcation_sc_col",          "trajtype_multifurcation_sc",
-    "root",    "Rooted tree",          0.1,   1,       T,           "circle",   T,               "trajtype_rooted_tree_sc_col",             "trajtype_rooted_tree_sc",
-    "dagg",    "DAG",                  0.1,   1,       T,           "circle",   T,               "trajtype_directed_acyclic_graph_sc_col",  "trajtype_directed_acyclic_graph_sc",
-    "cycl",    "Cycle",                0.1,   1,       T,           "circle",   T,               "trajtype_directed_cycle_sc_col",          "trajtype_directed_cycle_sc",
-    "grap",    "Graph",                0.1,   1,       T,           "circle",   T,               "trajtype_directed_graph_sc_col",          "trajtype_directed_graph_sc",
+    "line",    "Linear",               0.5,   1,       T,           "circle",   F,               "trajtype_directed_linear_sc_col",         "trajtype_directed_linear_sc",
+    "bifu",    "Bifurcation",          0.1,   1,       T,           "circle",   F,               "trajtype_bifurcation_sc_col",             "trajtype_bifurcation_sc",
+    "conv",    "Convergence",          0.1,   1,       T,           "circle",   F,               "trajtype_convergence_sc_col",             "trajtype_convergence_sc",
+    "mult",    "Multifurcation",       0.1,   1,       T,           "circle",   F,               "trajtype_multifurcation_sc_col",          "trajtype_multifurcation_sc",
+    "root",    "Rooted tree",          0.1,   1,       T,           "circle",   F,               "trajtype_rooted_tree_sc_col",             "trajtype_rooted_tree_sc",
+    "dagg",    "DAG",                  0.1,   1,       T,           "circle",   F,               "trajtype_directed_acyclic_graph_sc_col",  "trajtype_directed_acyclic_graph_sc",
+    "cycl",    "Cycle",                0.1,   1,       T,           "circle",   F,               "trajtype_directed_cycle_sc_col",          "trajtype_directed_cycle_sc",
+    "grap",    "Cyclic graph",         0.1,   1,       T,           "circle",   F,               "trajtype_directed_graph_sc_col",          "trajtype_directed_graph_sc",
     # "digr",    "Disconnected Graph",   0.1,   1,       T,           "circle",   T,               "trajtype_disconnected_directed_graph_sc_col", "trajtype_disconnected_directed_graph_sc",
 
     "time",    "Average time",         0.5,   1,       T,           "rect",     F,               "rank_time_method_sc_col",                 "rank_time_method_sc",
@@ -364,16 +364,11 @@ g1 <- ggplot(method_tib) +
   # STARS
   ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = col), data = pie_data %>% filter(pct <= (1-1e-10)), size = .25) +
   ggforce::geom_circle(aes(x0 = x0, y0 = y0, r = r, fill = col), data = pie_data %>% filter(pct > (1-1e-10)), size = .25) +
-  # ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = NA), data = pie_data, size = .25) +
-  # geom_segment(aes(x = x0, xend = x0, y = y0 + r0, yend = y0 + r), data = pie_data, size = .25) +
   # TEXT
   geom_text(aes(x = x, y = y, label = label, colour = col), data = text_data, vjust = .5, hjust = .5) +
 
   # TRAJ TYPE MINIS
   geom_rect(aes(xmin = axtr$maxt$xmin, xmax = axtr$maxt$xmax, ymin = method_ymin, ymax = method_ymax, alpha = maxtraj_replace_id, fill = "#ABCDEF"), colour = "black", size = .25) +
-
-  # PRIORS MINIS
-  # geom_rect(aes(xmin = axtr$prio$xmin, xmax = axtr$prio$xmax, ymin = method_ymin, ymax = method_ymax, alpha = prior_replace_id, fill = "#ABCDEF"), colour = "black", size = .25) +
 
   # RESERVE SPACE
   expand_limits(x = c(max(axis$xmax)+2), y = legy_start - 4.1) +
@@ -392,7 +387,6 @@ g1 <- ggplot(method_tib) +
   geom_text(aes(20.5, legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
   ggforce::geom_circle(aes(x0 = 21.3 + x, y0 = legy_start - 2.3 + r, r = r, fill = colbench), size = .25, leg_circles) +
   geom_text(aes(x = 21.3 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% slice(c(1, n()))) +
-  # ggimage::geom_subview(x = 22, y = legy_start - 2, subview = bench_leg, width = 3, height = 1) +
 
   # LEGEND: PCT ERRORED
   geom_text(aes(26, legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
@@ -403,7 +397,6 @@ g1 <- ggplot(method_tib) +
 
   # LEGEND: QC SCORE
   geom_text(aes(34, legy_start - 1, label = "QC score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  # ggimage::geom_subview(x = 40, y = legy_start - 2, subview = qc_leg, width = 3, height = 1)
   ggforce::geom_circle(aes(x0 = 34.8 + x, y0 = legy_start - 2.3 + r, r = r, fill = colqc), size = .25, leg_circles) +
   geom_text(aes(x = 34.8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% slice(c(1, n()))) +
 
@@ -414,7 +407,7 @@ g1 <- ggplot(method_tib) +
 
 # WRITE FILES
 overview_fig_file <- figure_file("overview.svg")
-ggsave(overview_fig_file, g1, width = 17.5, height = 13.5)
+ggsave(overview_fig_file, g1, width = 17.5, height = 15)
 xml2::read_xml(overview_fig_file) %>% replace_svg(minis) %>% xml2::write_xml(overview_fig_file)
 
 
