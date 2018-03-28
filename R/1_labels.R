@@ -77,6 +77,7 @@ label_simple_trajectory_types <- function(trajectory_types_oi) {
 
 #' Labels only the extrema (and zero)
 #' @param x The values
+#' @export
 label_extrema <- function(x) {
   ifelse(x %in% c(0, min(x), max(x)), x, "")
 }
@@ -85,6 +86,7 @@ label_extrema <- function(x) {
 #' Label p_value
 #' @param p_values P values
 #' @param cutoffs Cutoffs for number of asterisks
+#' @export
 label_pvalue <- function(p_values, cutoffs=c(0.1, 0.01, 1e-5)) {
   breaks <- c(Inf, cutoffs, -Inf)
   labels <- rev(c("NS", map_chr(seq_len(length(cutoffs)), ~glue::collapse(rep("*", .)))))
