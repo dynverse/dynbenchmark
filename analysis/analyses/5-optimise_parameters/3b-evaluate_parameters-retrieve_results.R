@@ -85,14 +85,12 @@ error_message_interpret <- function(error_message) {
 scalesigmoid_trafo <- function (x, remove_errored = TRUE, determine_coeff = TRUE) {
   xn <- x
   if (remove_errored) xn <- xn[xn != 0]
-  y <- (x - mean(xn)) / var(xn)
   if (determine_coeff) {
-    yn <- (xn - mean(xn)) / var(xn)
-    coeff <- 5 / max(abs(yn))
+    y <- (x - mean(xn)) / max(abs(xn - mean(xn))) * 5
   } else {
-    coeff <- 4
+    y <- (x - mean(xn)) / var(xn) * 5
   }
-  sigmoid::sigmoid(y * coeff)
+  sigmoid::sigmoid(y)
 }
 
 # previously:
