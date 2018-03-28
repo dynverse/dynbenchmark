@@ -15,7 +15,7 @@ load_dyneval_model <- function(method_short_name, model_id, auto_gc = TRUE, expe
 
   models <- read_rds(models_filename)
 
-  if (!model_id %in% names(models)) {
+  if (any(!model_id %in% names(models))) {
     stop("Model ", sQuote(model_id), " of method ", sQuote(method_short_name), " not found.", sep = "")
   }
 

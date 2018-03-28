@@ -3,21 +3,11 @@ library(dynalysis)
 
 experiment("11-evaluation_robustness")
 
-extra_methods <- tibble(
-  method_id = c("manual_robrechtc", "manual_wouters", "identity", "shuffle", "random"),
-  maximal_trajectory_type = "unknown",
-  method_type = c("manual", "manual", "control", "control", "control")
-)
 methods <- read_rds(derived_file("methods.rds", experiment_id = "4-method_characterisation")) %>%
-  mutate(method_type = "algorithm") %>%
-  bind_rows(extra_methods)
-
-
+  filter(type %in% c("algorithm", "control"))
 outputs_list <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_parameters/3-evaluate_parameters"))
 
-metrics_sel <- c("rank_correlation" = "Correlation", "rank_edge_flip" = "Edge flip", "rank_rf_mse" = "RF MSE")
-
-# create trajectory type
+# create metric scores
 trajtype_metric_scores <- outputs_list$outputs_summtrajtype_totalsx2 %>%
   filter(task_source == "mean") %>%
   rename(method_id = method_short_name) %>%

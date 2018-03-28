@@ -11,18 +11,10 @@ methods <- read_rds(derived_file("methods.rds", experiment_id = "4-method_charac
 method_trajtypes <- methods %>%
   gather(trajectory_type, can_handle_trajectory_type, !!trajectory_types$id[trajectory_types$directedness == "directed"])
 
-outputs_list <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_parameters/3-evaluate_parameters"))
+read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
-method_order <- outputs_list$outputs_summmethod_totals %>%
-  rename(method_id = method_short_name) %>%
-  filter(task_source=="mean") %>%
-  arrange(-harm_mean) %>%
-  filter(method_id %in% methods$method_id) %>%
-  pull(method_id)
-ind_scores <- outputs_list$outputs_ind %>%
-  mutate(perfect_edge_flip = edge_flip == 1) %>%
-  rename(method_id = method_short_name) %>%
-  filter(method_id %in% method_order)
+ind_scores <- ind_scores %>%
+  mutate(perfect_edge_flip = edge_flip == 1)
 
 w <- 0.9
 topology_sensitivity <- ind_scores %>%
