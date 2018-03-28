@@ -82,10 +82,10 @@ error_message_interpret <- function(error_message) {
   )
 }
 
-scalesigmoid_trafo <- function (x, remove_errored = TRUE, determine_coeff = TRUE) {
+scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = TRUE) {
   xn <- x
   if (remove_errored) xn <- xn[xn != 0]
-  if (determine_coeff) {
+  if (max_scale) {
     y <- (x - mean(xn)) / max(abs(xn - mean(xn))) * 5
   } else {
     y <- (x - mean(xn)) / var(xn) * 5
