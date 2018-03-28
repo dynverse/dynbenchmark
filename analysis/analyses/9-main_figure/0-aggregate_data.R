@@ -89,9 +89,9 @@ part_method_characterisation <-
     topology_inference_type,
     maximal_trajectory_types,
     earliest_date = date,
-    pub_date = PubDate,
-    preprint_date = Preprint,
-    n_citations = Citations,
+    publication_date,
+    preprint_date,
+    ncitations,
     qc_score,
     starts_with("prior_")
   )
@@ -137,7 +137,7 @@ method_tib <- Reduce("reduce_fun", part_list) %>%
     overall_qc = ifelse(is_na_qc, 0, overall_qc),
     overall = apply(cbind(overall_metric, overall_source, overall_trajtype, overall_qccat, overall_qcapp), 1, psych::harmonic.mean)
   ) %>%
-  filter(!method_short_name %in% c("gng"))
+  filter(!method_short_name %in% c("gng", "periodpc"))
 
 
 ## CALCULATE FINAL RANKING
