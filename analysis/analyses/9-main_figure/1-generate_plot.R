@@ -45,8 +45,8 @@ control_methods <- c("periodpc", "atan", "comp1", "random", "gng")
 
 method_tib <- method_tib %>%
   left_join(minis %>% select(maximal_trajectory_types = trajectory_type, maxtraj_replace_id = replace_id), by = "maximal_trajectory_types") %>%
-  arrange(method_short_name %in% control_methods, method_name_f) %>%
-  # arrange(method_name_f) %>%
+  # arrange(method_short_name %in% control_methods, method_name_f) %>%
+  arrange(method_name_f) %>%
   mutate(
     method_i = seq_len(n()),
     do_spacing = method_i != 1 & method_i %% 5 == 1,
@@ -357,9 +357,6 @@ g1 <- ggplot(method_tib) +
   # SEPARATOR LINES
   geom_rect(aes(xmin = axtr$name$xmin, xmax = axtr$qcpa$xmax, ymin = method_ymin-(spacing/2), ymax = method_ymax+(spacing/2)), method_tib %>% filter(method_i %% 2 == 1), fill = "#EEEEEE") +
 
-  # background linex
-  geom_segment(aes(x = x, xend = x, y = y, yend = yend), barguides_data, colour = "lightgray", linetype = "dashed") +
-
   # METRIC AXIS
   geom_segment(aes(x = x, xend = x, y = -.3, yend = -.1), axis %>% filter(show_label), size = .5) +
   geom_text(aes(x = x, y = 0, label = label), axis %>% filter(show_label), angle = 30, vjust = 0, hjust = 0) +
@@ -370,11 +367,10 @@ g1 <- ggplot(method_tib) +
   geom_text(aes(x = xmin, y = y+.7, label = key), grouping %>% filter(key != ""), vjust = 1, hjust = 0, fontface = "bold", size = 5) +
 
   # METHOD NAMES
-  geom_text(aes(x = axtr$name$xmax, y = method_y, label = method_name), hjust = 1, vjust = .5) +
+  geom_text(aes(x = axtr$name$xmax, y = method_y, label = method_name), method_tib, hjust = 1, vjust = .5) +
 
-  # INSUFFICIENT DATA LABEL
-  # geom_text(aes(x = axtr$line$x, y = method_y, label = "insufficient data"), method_tib %>% filter(remove_results), hjust = .5, vjust = .5) +
-
+  # BAR GUIDES
+  geom_segment(aes(x = x, xend = x, y = y, yend = yend), barguides_data, colour = "lightgray", linetype = "dashed") +
   # BARS
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), bind_rows(bar_data, invbar_data), colour = "black", size = .25) +
   # RECTANGLES
