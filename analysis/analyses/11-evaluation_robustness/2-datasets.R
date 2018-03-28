@@ -4,43 +4,35 @@ library(dynalysis)
 
 experiment("11-evaluation_robustness")
 
-scores <- c("harm_mean", "rank_correlation", "rank_edge_flip", "rank_rf_mse")
+read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
-methods <- read_rds(derived_file("methods.rds", experiment_id = "4-method_characterisation"))
-outputs_list <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_parameters/3-evaluate_parameters"))
 tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
-outputs_ind <- outputs_list$outputs_ind %>%
-  mutate(method_id = method_short_name) %>%
-  filter(method_id %in% methods$method_id)
-method_scores <- outputs_list$outputs_summmethod_totals %>%
-  rename(method_id = method_short_name) %>%
-  filter(method_id %in% methods$method_id) %>%
-  filter(task_source=="mean")
-indrep_scores <- outputs_list$outputs_summrepl %>%
-  rename(method_id = method_short_name) %>%
-  filter(method_id %in% methods$method_id)
-method_order <- method_scores %>%
-  arrange(-harm_mean) %>%
-  filter(method_id %in% methods$method_id) %>%
-  pull(method_id)
-method_names <- set_names(methods$method_name, methods$method_id)[method_order]
+
+source("analysis/analyses/11-evaluation_robustness/functions_rank_methods.R")
+method_scores <- rank_methods(ind_scores)
+
+method_names <- set_names(methods$method_name, methods$method_short_name)[method_order]
 
 
 ##  ............................................................................
 ##  Dataset variability                                                     ####
 ymax <- max(indrep_scores$harm_mean)
 performance_datasets_variability <- indrep_scores %>%
-  mutate(method_id = factor(method_id, (method_order))) %>%
-  arrange(runif(n())) %>%
-  ggplot(aes(method_id, harm_mean)) +
-  ggbeeswarm::geom_quasirandom(aes(color=task_source)) +
-  # geom_boxplot(outlier.size=0.5) +
-  geom_point(aes(color=task_source), data=method_scores, size=4, alpha=0.8) +
-  # geom_point(data=method_scores, shape=15, size=4) +
-  scale_y_continuous(label_long("overall_performance_on_dataset"), expand=c(0, 0.01)) +
-  scale_x_discrete("", label=method_names) +
-  scale_color_manual(label_long("task_source"), values=c(mean="black", synthetic="#39CCCC", real="#FF4136"), label=label_long) +
-  theme(axis.text.x = element_text(angle = 45, hjust=1), legend.position = "bottom", legend.justification = "center")
+  mutate(method_short_name = factor(method_short_name, (method_order))) %>%
+  ggplot(aes(method_short_name, harm_mean)) +
+    ggbeeswarm::geom_quasirandom(aes(color=task_source)) +
+    # geom_boxplot(outlier.size=0.5) +
+    geom_point(
+      aes(color=task_source),
+      data=method_scores %>% mutate(task_source = "mean") %>% mutate(method_short_name = factor(method_short_name, (method_order))),
+      size=4,
+      alpha=0.8
+    ) +
+    # geom_point(data=method_scores, shape=15, size=4) +
+    scale_y_continuous(label_long("overall_performance_on_dataset"), expand=c(0, 0.01)) +
+    scale_x_discrete("", label=method_names) +
+    scale_color_manual(label_long("task_source"), values=c(mean="black", synthetic="#39CCCC", real="#FF4136"), label=label_long) +
+    theme(axis.text.x = element_text(angle = 45, hjust=1), legend.position = "bottom", legend.justification = "center")
 performance_datasets_variability
 
 
@@ -48,7 +40,7 @@ performance_datasets_variability
 ##  Significant performance                                                 ####
 performance_variability_tests <- combn(method_order, 2) %>% t %>% as_data_frame() %>% magrittr::set_colnames(c("from", "to")) %>%
   mutate(test = map2(from, to, function(from, to) {
-    wilcox.test(indrep_scores$harm_mean[indrep_scores$method_id == to], indrep_scores$harm_mean[indrep_scores$method_id == from], paired = T, conf.int=T, alternative="less")
+    wilcox.test(indrep_scores$harm_mean[indrep_scores$method_short_name == to], indrep_scores$harm_mean[indrep_scores$method_short_name == from], paired = T, conf.int=T, alternative="less")
   })) %>%
   mutate(
     p_value = map_dbl(test, "p.value"),
@@ -139,44 +131,17 @@ write_rds(performance_dataset_variability_combined, figure_file("performance_dat
 
 ##  ............................................................................
 ##  Subsample datasets                                                      ####
-rank_methods <- function(outputs_ind) {
-  outputs_summrepl <- outputs_ind %>%
-    group_by(method_name, method_short_name, task_id, paramset_id, trajectory_type, task_source, prior_str, trajectory_type_f) %>%
-    summarise_if(is.numeric, mean) %>%
-    ungroup() %>%
-    mutate(
-      harm_mean = apply(cbind(rank_correlation, rank_edge_flip, rank_rf_mse), 1, psych::harmonic.mean)
-    )
 
-  outputs_summtrajtype <- outputs_summrepl %>%
-    group_by(method_name, method_short_name, task_source, paramset_id, trajectory_type, trajectory_type_f) %>%
-    mutate(n = n()) %>%
-    summarise_if(is.numeric, mean) %>%
-    ungroup()
+# subsample datasets, calculate overall benchmark score
+all_task_ids <- unique(ind_scores$task_id)
 
-  outputs_summmethod <- outputs_summtrajtype %>%
-    group_by(method_name, method_short_name, task_source, paramset_id) %>%
-    mutate(n = n()) %>%
-    summarise_if(is.numeric, mean) %>%
-    ungroup()
-
-    outputs_summmethod %>%
-      group_by(method_name, method_short_name, paramset_id) %>%
-      summarise_if(is.numeric, mean) %>%
-      ungroup() %>%
-      mutate(task_source = "mean") %>%
-      mutate(method_id = method_short_name)
-}
-
-
-# subsample datasets, calculate harm_mean
-all_task_ids <- unique(outputs_ind$task_id)
-
-n_samples <- 100
+n_samples <- 10
 task_sample_scores <- pbapply::pblapply(cl=8, 1:length(all_task_ids), function(n_tasks) {
   map(1:n_samples, function(tasks_sample_i) {
     task_ids <- sample(all_task_ids, n_tasks)
-    method_scores <- rank_methods(outputs_ind %>% filter(task_id %in% task_ids)) %>%
+    method_scores <- rank_methods(
+      ind_scores %>% filter(task_id %in% task_ids)
+    ) %>%
       mutate(n_tasks = n_tasks, tasks_sample_i = tasks_sample_i)
   }) %>% bind_rows()
 }) %>% bind_rows()
@@ -184,8 +149,8 @@ task_sample_scores <- pbapply::pblapply(cl=8, 1:length(all_task_ids), function(n
 # plot harm mean correlations across subsamples
 task_sample_correlations <- task_sample_scores %>%
   group_by(n_tasks, tasks_sample_i) %>%
-  slice(match(method_scores$method_id, method_id)) %>%
-  do(cor = cor(.$harm_mean, method_scores$harm_mean, method="spearman")) %>%
+  slice(match(method_scores$method_short_name, method_short_name)) %>%
+  do(cor = cor(.$overall_benchmark, method_scores$overall_benchmark, method="spearman")) %>%
   ungroup() %>%
   mutate(cor = unlist(cor)) %>%
   mutate(n_tasks_perc = n_tasks / length(all_task_ids))
@@ -206,33 +171,33 @@ task_sample_ranks <- task_sample_scores %>%
   ungroup()
 
 task_sample_ranks_match <- task_sample_ranks %>%
-  group_by(method_id, n_tasks) %>%
-  summarise(rank_match = mean(harm_mean_rank == match(method_id, method_order)))
+  group_by(method_short_name, n_tasks) %>%
+  summarise(rank_match = mean(harm_mean_rank == match(method_short_name, method_order)))
 write_rds(task_sample_ranks_match, result_file("task_sample_ranks_match.rds"))
 
 task_sample_ranks_match %>%
   ggplot() +
-    geom_line(aes(n_tasks, rank_match, color=method_id))
+    geom_line(aes(n_tasks, rank_match, color=method_short_name))
 
 # calculate n times a method is in the top
 task_sample_n_top <- task_sample_ranks %>%
-  group_by(n_tasks, method_id) %>%
+  group_by(n_tasks, method_short_name) %>%
   summarise(n_top = sum(harm_mean_rank == 1)) %>%
-  mutate(method_id = factor(method_id, method_order)) %>%
+  mutate(method_short_name = factor(method_short_name, method_order)) %>%
   ungroup()
 
 task_sample_n_top %>%
   filter(n_tasks <= 10) %>%
-  ggplot(aes(method_id, n_top)) +
+  ggplot(aes(method_short_name, n_top)) +
     geom_bar(stat="identity")
 
 # calculate the maximal subset of datasets at which a method is top
 # this is based on subsampling, see beneath for a smarter method
 task_sample_max_tasks_top <- task_sample_n_top %>%
   filter(n_top > 1) %>%
-  group_by(method_id) %>%
+  group_by(method_short_name) %>%
   summarise(max_n_tasks_top = max(n_tasks)) %>%
-  complete(method_id, fill=list(max_n_tasks_top=0))
+  complete(method_short_name, fill=list(max_n_tasks_top=0))
 
 
 
@@ -243,26 +208,26 @@ indrep_scores <- indrep_scores %>%
   mutate(harm_mean_rank = rank(-harm_mean)) %>%
   ungroup()
 
-binary_scorer <- function(method_id) {
+binary_scorer <- function(method_short_name) {
   function(include_tasks) {
     if(sum(include_tasks) == 0) {
       length(method_order)
     } else {
-      rank_methods(outputs_ind %>% filter(task_id %in% all_task_ids[include_tasks == 1])) %>%
-        mutate(harm_mean_rank = rank(-harm_mean)) %>%
-        filter(method_id == !!method_id) %>%
-        pull(harm_mean_rank)
+      rank_methods(ind_scores %>% filter(task_id %in% all_task_ids[include_tasks == 1])) %>%
+        mutate(overall_benchmark_rank = rank(-overall_benchmark)) %>%
+        filter(method_short_name == !!method_short_name) %>%
+        pull(overall_benchmark_rank)
     }
   }
 }
 
-task_sample_max_tasks_top <- pbapply::pblapply(cl=8, method_scores$method_id, function(method_id) {
+task_sample_max_tasks_top <- pbapply::pblapply(cl=8, method_scores$method_short_name, function(method_short_name) {
   task_removal_order <- indrep_scores %>%
-    filter(method_id == !!method_id) %>%
+    filter(method_short_name == !!method_short_name) %>%
     arrange(-harm_mean_rank) %>%
     pull(task_id)
 
-  scorer <- binary_scorer(method_id)
+  scorer <- binary_scorer(method_short_name)
 
   include_tasks <- rep(TRUE, length(all_task_ids)) %>% set_names(all_task_ids)
   for(remove_task_id in task_removal_order) {
@@ -274,7 +239,7 @@ task_sample_max_tasks_top <- pbapply::pblapply(cl=8, method_scores$method_id, fu
       break
     }
   }
-  tibble(method_id = method_id, max_n_tasks_top=sum(include_tasks), task_ids = list(names(include_tasks)[include_tasks]))
+  tibble(method_short_name = method_short_name, max_n_tasks_top=sum(include_tasks), task_ids = list(names(include_tasks)[include_tasks]))
 }) %>% bind_rows()
 
 task_sample_max_tasks_top <- task_sample_max_tasks_top %>% bind_rows()
@@ -282,10 +247,22 @@ task_sample_max_tasks_top <- task_sample_max_tasks_top %>% bind_rows()
 write_rds(task_sample_max_tasks_top, result_file("task_sample_max_tasks_top.rds"))
 
 task_sample_max_tasks_top %>%
-  mutate(method_id = factor(method_id, method_order)) %>%
-  ggplot(aes(method_id, max_n_tasks_top)) +
+  mutate(method_short_name = factor(method_short_name, method_order)) %>%
+  ggplot(aes(method_short_name, max_n_tasks_top)) +
     geom_bar(stat="identity") +
     geom_text(aes(label=max_n_tasks_top), vjust=0)
+
+task_sample_max_tasks_top_individual <- task_sample_max_tasks_top %>%
+  unnest(task_ids) %>%
+  rename(task_id = task_ids) %>%
+  left_join(tasks, c("task_id"="id"))
+
+task_sample_max_tasks_top_individual %>%
+  mutate(method_short_name = factor(method_short_name, method_order)) %>%
+  ggplot(aes(method_short_name, fill = trajectory_type)) +
+    geom_bar() +
+    scale_fill_manual(values=set_names(trajectory_types$color, trajectory_types$id))
+
 
 
 # GA
@@ -299,17 +276,17 @@ task_sample_max_tasks_top %>%
 ##  Dataset technology influence                                            ####
 method_scores_real <- outputs_list$outputs_summmethod_totals %>%
   filter(task_source == "real") %>%
-  rename(method_id = method_short_name)
+  rename(method_short_name = method_short_name)
 method_scores_technologies <- map(unique(tasks$technology) %>% discard(is.na), function(technology_id) {
-  method_ranking <- outputs_ind %>%
+  method_ranking <- ind_scores %>%
     filter(task_id %in% tasks$task_id[tasks$technology == technology_id]) %>%
     rank_methods() %>%
     mutate(technology_id = technology_id)
 }) %>% bind_rows()
 method_scores_technologies <- method_scores_technologies %>%
-  select(method_id, technology_id, harm_mean) %>%
+  select(method_short_name, technology_id, harm_mean) %>%
   rename(harm_mean_technology = harm_mean) %>%
-  left_join(method_scores_real %>% rename(harm_mean_overall = harm_mean), by="method_id")
+  left_join(method_scores_real %>% rename(harm_mean_overall = harm_mean), by="method_short_name")
 
 method_scores_technologies_cors <- method_scores_technologies %>%
   group_by(technology_id) %>%

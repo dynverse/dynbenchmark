@@ -7,30 +7,18 @@ library(ggraph)
 
 experiment("11-evaluation_robustness")
 
-extra_methods <- tibble(
-  method_id = c("manual_robrechtc", "manual_wouters", "identity", "shuffle", "random"),
-  maximal_trajectory_type = "unknown",
-  method_type = c("manual", "manual", "control", "control", "control")
-)
-methods <- read_rds(derived_file("methods.rds", experiment_id = "4-method_characterisation")) %>%
-  mutate(method_type = "algorithm") %>%
-  bind_rows(extra_methods)
-
-
-outputs_list <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_parameters/3-evaluate_parameters"))
+read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
 # create trajectory type
-trajtype_source_scores <- outputs_list$outputs_summtrajtype_totals %>%
+trajtype_source_scores <- trajtype_scores %>%
   filter(task_source %in% c("real", "synthetic")) %>%
-  rename(method_id = method_short_name) %>%
-  select(method_id, trajectory_type, task_source, harm_mean) %>%
+  select(method_short_name, trajectory_type, task_source, harm_mean) %>%
   spread("task_source", "harm_mean") %>%
   drop_na()
 
 # create overall
-source_score <- outputs_list$outputs_summmethod_totals %>%
-  rename(method_id = method_short_name) %>%
-  select(method_id, task_source, harm_mean) %>%
+source_scores <- source_scores %>%
+  select(method_short_name, task_source, harm_mean) %>%
   spread("task_source", "harm_mean") %>%
   drop_na() %>%
   mutate(trajectory_type = "overall")
@@ -39,9 +27,9 @@ source_score <- outputs_list$outputs_summmethod_totals %>%
 trajtype_source_scores <- bind_rows(
   trajtype_source_scores,
   trajtype_source_scores %>% mutate(trajectory_type = "all"),
-  source_score
+  source_scores
 ) %>%
-  left_join(methods, "method_id") #%>%
+  inner_join(methods, "method_short_name") #%>%
 # filter(method_type == "algorithm")
 
 # set order
@@ -58,12 +46,12 @@ real_synthetic_comparison <- trajtype_source_scores %>%
   geom_abline(intercept = 0, slope = 1) +
   geom_point(aes(color=trajectory_type)) +
   geom_text(aes(label=round(cor, 2)), x=0.1, y=0.9, data=trajtype_source_score_cors) +
-  facet_wrap(~trajectory_type, labeller = label_facet(), nrow=1) +
+  facet_wrap(~trajectory_type, labeller = label_facet(label_simple_trajectory_types), nrow=1) +
   scale_color_manual(values=set_names(c("black", "black", trajectory_types$color), c("all", "overall", trajectory_types$id))) +
-  scale_x_continuous(breaks=c(0,1))+
-  scale_y_continuous(breaks=c(0,1))+
+  scale_x_continuous(breaks=c(0,1), limits=c(0, 1))+
+  scale_y_continuous(breaks=c(0,1), limits=c(0, 1))+
   coord_equal() +
-  labs(x="Real", y="Synthetic")+
+  labs(x="Overall score on real data", y="Overall score on synthetic data")+
   theme_bw() +
   theme(
     legend.position="none", panel.grid = element_blank()
