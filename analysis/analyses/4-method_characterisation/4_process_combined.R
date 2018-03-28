@@ -25,9 +25,12 @@ implementations <- implementations_tidy %>%
   filter(row_number() == n()) %>%
   ungroup()
 
+# add method_short_name
+methods$method_short_name <- methods$method_id
+
 # filter evaluated
-methods$evaluated <- methods$wrapper == "Done"
-implementations$evaluated <- implementations$evaluation_inclusion == "TRUE"
+methods$evaluated <- (methods$wrapper == "Done") %>% coalesce(FALSE)
+implementations$evaluated <- (implementations$evaluation_inclusion == "TRUE") %>% coalesce(FALSE)
 
 methods_evaluated <- methods %>%
   filter(evaluated)
