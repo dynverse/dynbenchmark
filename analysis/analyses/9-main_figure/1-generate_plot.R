@@ -41,9 +41,12 @@ prior_type2_fun <- function(x) ifelse(is.na(x), "", gsub(".*_", "", x))
 row_height <- 1
 row_spacing <- .1
 
+control_methods <- c("periodpc", "atan", "comp1", "random", "gng")
+
 method_tib <- method_tib %>%
   left_join(minis %>% select(maximal_trajectory_types = trajectory_type, maxtraj_replace_id = replace_id), by = "maximal_trajectory_types") %>%
-  arrange(method_name_f) %>%
+  arrange(method_short_name %in% control_methods, method_name_f) %>%
+  # arrange(method_name_f) %>%
   mutate(
     method_i = seq_len(n()),
     do_spacing = method_i != 1 & method_i %% 5 == 1,
@@ -58,7 +61,7 @@ method_tib <- method_tib %>%
     remove_results = pct_errored > .49,
     pct_succeeded = 1 - pct_errored,
     pct_errored_lab = paste0(round(pct_errored * 100), "%"),
-    missing_qc_reason = ifelse(!is_na_qc, "", ifelse(method_short_name %in% c("periodpc", "atan", "comp1", "random", "gng"), "Control", "Missing")),
+    missing_qc_reason = ifelse(!is_na_qc, "", ifelse(method_short_name %in% control_methods, "Control", "Missing")),
     black = "black"
   ) %>%
   mutate_at(
@@ -105,7 +108,7 @@ method_tib <- method_tib %>%
 axis <-
   tribble(
     ~id,       ~label,                 ~xsep, ~xwidth, ~show_label, ~geom,      ~filter_removed, ~col,                                      ~value,
-    "name",    "Name",                 0.0,   6,       F,           "custom",   F,               NA,                                        NA,
+    "name",    "Name",                 0.0,   4.5,       F,           "custom",   F,               NA,                                        NA,
 
     "maxt",    "Type",                 0.1,   2,       T,           "custom",   F,               "maxtraj_colour",                          NA,
     "topo",    "Topo. constr.",        0.1,   1,       T,           "text",     F,               "topinf_colour",                           "topinf_lab",
@@ -165,36 +168,42 @@ axtr <- map(
   setNames(axis$id)
 
 # define grouping information
+level1 <- 3.5
+level2 <- 2.5
+
 grouping <-
   tribble(
-    ~label,                        ~y, ~xmin,          ~xmax,          ~key,
-    "Method characterisation",     3,  axtr$name$xmin, axtr$prge$xmax, "a",
-    "Priors",                      2,  axtr$prst$xmin, axtr$prge$xmax, "",
-    "Overall score",               3,  axtr$harm$xmin, axtr$qcsc$xmax, "b",
-    "Benchmark",                   3,  axtr$corr$xmin, axtr$erro$xmax, "c",
-    "Per metric",                  2,  axtr$corr$xmin, axtr$edge$xmax, "",
-    "Per source",                  2,  axtr$real$xmin, axtr$synt$xmax, "",
-    "Per trajectory type",         2,  axtr$line$xmin, axtr$grap$xmax, "",
-    # "Per trajectory type",         2,  axtr$line$xmin, axtr$digr$xmax, "",
-    "Execution",                   2,  axtr$time$xmin, axtr$erro$xmax, "",
-    "Quality control",             3,  axtr$qcdf$xmin, axtr$qcpa$xmax, "d",
-    "Practicality",                2,  axtr$qcdf$xmin, axtr$qcgs$xmax, "",
-    "Categories",                  2,  axtr$qcav$xmin, axtr$qcpa$xmax, ""
+    ~label,                        ~y,      ~xmin,          ~xmax,          ~key,
+    "Method characterisation",     level1,  axtr$name$xmin, axtr$prge$xmax, "a",
+    "Priors",                      level2,  axtr$prst$xmin, axtr$prge$xmax, "",
+    "Overall score",               level1,  axtr$harm$xmin, axtr$qcsc$xmax, "b",
+    "Benchmark",                   level1,  axtr$corr$xmin, axtr$erro$xmax, "c",
+    "Per metric",                  level2,  axtr$corr$xmin, axtr$edge$xmax, "",
+    "Per source",                  level2,  axtr$real$xmin, axtr$synt$xmax, "",
+    "Per trajectory type",         level2,  axtr$line$xmin, axtr$grap$xmax, "",
+    # "Per trajectory type",         level2,  axtr$line$xmin, axtr$digr$xmax, "",
+    "Execution",                   level2,  axtr$time$xmin, axtr$erro$xmax, "",
+    "Quality control",             level1,  axtr$qcdf$xmin, axtr$qcpa$xmax, "d",
+    "Practicality",                level2,  axtr$qcdf$xmin, axtr$qcgs$xmax, "",
+    "Categories",                  level2,  axtr$qcav$xmin, axtr$qcpa$xmax, ""
   ) %>%
   mutate(
     x = (xmin + xmax) / 2
   )
 
 # PROCESS CIRCLES DATA
-geom_data_processor <- function(geom_type, fun) {
+geom_data_processor <- function(geom_types, fun) {
   map_df(seq_len(nrow(axis)), function(i) {
-    if (axis$geom[[i]] != geom_type) return(NULL)
-    axis_l <- axis %>% dynutils::extract_row_to_list(i)
-    z <- method_tib
-    if (axis_l$filter_removed) {
-      z <- z %>% filter(!remove_results)
+    if (!axis$geom[[i]] %in% geom_types) {
+      NULL
+    } else {
+      axis_l <- axis %>% dynutils::extract_row_to_list(i)
+      z <- method_tib
+      if (axis_l$filter_removed) {
+        z <- z %>% filter(!remove_results)
+      }
+      fun(axis_l, z)
     }
-    fun(axis_l, z)
   })
 }
 circle_data <- geom_data_processor(
@@ -269,6 +278,15 @@ pie_data <- geom_data_processor(
       filter(rad_end != rad_start) %>%
       ungroup()
   })
+barguides_data <- geom_data_processor(
+  c("bar", "invbar"),
+  function(axis_l, method_tib_filt) {
+    data_frame(
+      x = seq(axis_l$xmin, axis_l$xmax, length.out = 2),
+      y = min(method_tib_filt$method_ymin),
+      yend = max(method_tib_filt$method_ymax)
+    )
+  })
 
 
 # CREATE LEGENDS
@@ -339,6 +357,9 @@ g1 <- ggplot(method_tib) +
   # SEPARATOR LINES
   geom_rect(aes(xmin = axtr$name$xmin, xmax = axtr$qcpa$xmax, ymin = method_ymin-(spacing/2), ymax = method_ymax+(spacing/2)), method_tib %>% filter(method_i %% 2 == 1), fill = "#EEEEEE") +
 
+  # background linex
+  geom_segment(aes(x = x, xend = x, y = y, yend = yend), barguides_data, colour = "lightgray", linetype = "dashed") +
+
   # METRIC AXIS
   geom_segment(aes(x = x, xend = x, y = -.3, yend = -.1), axis %>% filter(show_label), size = .5) +
   geom_text(aes(x = x, y = 0, label = label), axis %>% filter(show_label), angle = 30, vjust = 0, hjust = 0) +
@@ -355,8 +376,7 @@ g1 <- ggplot(method_tib) +
   # geom_text(aes(x = axtr$line$x, y = method_y, label = "insufficient data"), method_tib %>% filter(remove_results), hjust = .5, vjust = .5) +
 
   # BARS
-  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), bar_data, colour = "black", size = .25) +
-  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), invbar_data, colour = "black", size = .25) +
+  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), bind_rows(bar_data, invbar_data), colour = "black", size = .25) +
   # RECTANGLES
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), rect_data, colour = "black", size = .25) +
   # CIRCLES

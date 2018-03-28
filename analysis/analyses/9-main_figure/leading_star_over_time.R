@@ -49,4 +49,4 @@ g3 <- ggplot(method_tib, aes(earliest_date, overall_qc)) +
   labs(x = "Time", y = "QC score", title = "Best QC score over time") +
   cowplot::theme_cowplot()
 
-ggsave(figure_file("leading_method.svg"), cowplot::plot_grid(g1, g2, g3, ncol = 1), width = 10, height = 12)
+ggsave(figure_file("leading_method.svg"), cowplot::plot_grid(g1, g2, g3, ncol = 1), width = 12, height = 15)
