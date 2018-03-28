@@ -17,14 +17,17 @@ start_date <- as.Date("2014-01-01")
 end_date <- as.Date("2018-09-01")
 
 
+implementations$publication_date <- implementations$publication_date + runif(length(implementations$publication_date), 0, 1)
+
+
 #   ____________________________________________________________________________
 #   Figure generation                                                       ####
 
 ##  ............................................................................
 ##  Publication timeline of implementations                                         ####
 
-implementation_publication_data <- implementations %>% filter(is_ti) %>%
-  gather("publication_type", "publication_date", c(PubDate, Preprint)) %>%
+implementation_publication_data <- implementations %>%
+  gather("publication_type", "publication_date", c(publication_date, preprint_date)) %>%
   select(implementation_id, publication_type, publication_date) %>%
   drop_na() %>%
   mutate(counter = 1)
@@ -33,10 +36,10 @@ implementation_publication_data <- implementations %>% filter(is_ti) %>%
 implementation_publication_data <- implementation_publication_data %>%
   group_by(implementation_id) %>%
   filter(n() == 2) %>%
-  filter(publication_type == "PubDate") %>%
-  mutate(publication_type = "Preprint", counter = -1) %>%
+  filter(publication_type == "publication_date") %>%
+  mutate(publication_type = "preprint_date", counter = -1) %>%
   bind_rows(implementation_publication_data) %>%
-  mutate(publication_type = factor(publication_type, levels=c("PubDate", "Preprint")))
+  mutate(publication_type = factor(publication_type, levels=c("publication_date", "preprint_date")))
 
 # summarise by publication type how many implementations there are
 publication_cumulative_by_type <- implementation_publication_data %>%
@@ -110,9 +113,8 @@ publication_cumulative_text <- implementation_publication_data %>%
   ungroup() %>%
   mutate(n_implementations_cumulative = seq_len(n()))
 
-# now calculate new methods per year
+# now calculate new implementations per year
 implementations_per_year <- implementations %>%
-  filter(is_ti) %>%
   mutate(year=lubridate::year(date)) %>%
   count(year) %>%
   mutate(
@@ -123,7 +125,7 @@ implementations_per_year <- implementations %>%
 
 
 n_implementations_over_time <- publication_cumulative_by_type_interpolated %>%
-  mutate(publication_type = c(PubDate="peer_reviewed", Preprint = "preprint")[publication_type]) %>%
+  mutate(publication_type = c(publication_date="peer_reviewed", preprint_date = "preprint")[publication_type]) %>%
   ggplot() +
     geom_area(aes(publication_date, n_implementations_cumulative, fill=publication_type), position="identity") +
     scale_fill_manual("", labels=label_long, values=c(peer_reviewed="#334466", preprint="#445588")) +
@@ -142,9 +144,9 @@ n_implementations_over_time <- publication_cumulative_by_type_interpolated %>%
       size=2.5
     ) +
     theme(legend.position = c(0.05, 0.8)) +
-  scale_y_continuous(label_long("n_implementations"), expand=c(0, 0), limits=c(0, sum(implementations$is_ti)+2)) +
+  scale_y_continuous(label_long("n_implementations"), expand=c(0, 0), limits=c(0, nrow(implementations)+2)) +
   scale_x_date(label_long("publication_date"), expand=c(0.05, 0.05), limits=c(start_date, end_date)) +
-  geom_text(aes(date, sum(implementations$is_ti)+1, label=ifelse(year == "2018", pritt("{year}: +{n} so far"), pritt("{year}: +{n}"))), data=implementations_per_year) +
+  geom_text(aes(date, nrow(implementations)+1, label=ifelse(year == "2018", pritt("{year}: +{n} so far"), pritt("{year}: +{n}"))), data=implementations_per_year) +
   geom_vline(aes(xintercept = min), data=implementations_per_year, linetype="dashed", color="grey")
 n_implementations_over_time
 # ggsave(figure_file("n_implementations_over_time.png"), n_implementations_over_time, width = 15, height = 8)
@@ -176,14 +178,14 @@ write_rds(platforms, figure_file("platforms.rds"))
 ##  Trajectory types over time                                              ####
 directed_trajectory_type_order <- trajectory_types %>% filter(directedness == "directed") %>% pull(id) %>% keep(~.!="unknown")
 
-trajectory_components <- implementations %>% filter(is_ti)
+trajectory_components <- implementations %>% filter(!is.na(date))
 trajectory_components <- trajectory_components %>%
   arrange(date) %>%
   mutate(count = 1)
 
 add_step <- function(df) {
   df <- df %>%
-    mutate(date = date - 0.2, prefix=TRUE, count = 0) %>%
+    mutate(date = date - 10, prefix=TRUE, count = 0) %>%
     bind_rows(df)
   df %>% arrange(date)
 }
@@ -245,13 +247,13 @@ write_rds(topology_inference_timeline, figure_file("topology_inference_timeline.
 
 ##  ............................................................................
 ##  Create timeline overview figure                                         ####
-n_methods_over_time <- read_rds(figure_file("n_implementations_over_time.rds", experiment_id="4-method_characterisation"))
-trajectory_components_over_time <- read_rds(figure_file("trajectory_components_over_time.rds", experiment_id="4-method_characterisation"))
-topology_inference_timeline <- read_rds(figure_file("topology_inference_timeline.rds", experiment_id="4-method_characterisation"))
+n_implementations_over_time <- read_rds(figure_file("n_implementations_over_time.rds"))
+trajectory_components_over_time <- read_rds(figure_file("trajectory_components_over_time.rds"))
+topology_inference_timeline <- read_rds(figure_file("topology_inference_timeline.rds"))
 
-methods_timeline <- cowplot::plot_grid(
+implementations_timeline <- cowplot::plot_grid(
   plotlist=list(
-    n_methods_over_time,
+    n_implementations_over_time,
     topology_inference_timeline,
     trajectory_components_over_time
   ),
@@ -259,40 +261,15 @@ methods_timeline <- cowplot::plot_grid(
   rel_heights = c(0.8, 0.5, 0.5),
   labels="auto"
 )
-methods_timeline
-methods_timeline %>% save_plot(figure_file("methods_timeline.svg"), ., base_width=10, base_height=10)
-
-##  .............................................................................
-##  Create simpler methods over time                                         ####
-df <- implementations %>% filter(is_ti) %>% mutate(year = format(date, format = "%Y")) %>% group_by(year) %>% summarise(n = n()) %>% mutate(year_i = as.integer(year))
-
-g <- ggplot(df, aes(year_i, n, group = year)) +
-  geom_bar(stat = "identity") +
-  geom_text(aes(label = n), vjust = 0, hjust = 0, nudge_y = .5) +
-  geom_text(aes(year_i, -1, label = year), vjust = 0, hjust = 1, nudge_y = .5) +
-  labs(x = NULL, y = NULL, title = "Number of new TI methods published each year") +
-  scale_y_continuous(breaks = NULL) +
-  scale_x_reverse(breaks = NULL) +
-  coord_flip() +
-  expand_limits(y = -1.5) +
-  theme(
-    axis.line = element_blank(),
-    axis.ticks = element_blank()
-  )
-
-
-ggsave(figure_file("ti_methods_per_year.svg"), g, width = 5, height = 2)
-
+implementations_timeline
+implementations_timeline %>% save_plot(figure_file("implementations_timeline.svg"), ., base_width=10, base_height=10)
 
 ##  ............................................................................
 ##  Small implementation timeline                                                   ####
 implementation_small_history_data <- implementations %>%
-  filter(is_ti) %>%
   mutate(
     maximal_trajectory_type = ifelse(is.na(maximal_trajectory_type), "unknown", as.character(maximal_trajectory_type)),
-    y = runif(n(), 0, 0.0001),
-    fontface = ifelse(evaluated, "plain", "plain"),
-    size = ifelse(evaluated, 3.5, 3.5)
+    y = runif(n(), 0, 0.0001)
   ) %>%
   mutate() %>%
   arrange(-y)
@@ -302,9 +279,7 @@ implementation_small_history <- implementation_small_history_data %>%
     aes(
       fill=maximal_trajectory_type,
       color=maximal_trajectory_type,
-      label=implementation_id_to_name[implementation_id],
-      fontface=fontface,
-      size=size
+      label=implementation_id_to_name[implementation_id]
     ),
     direction="y", max.iter=10000, ylim=c(0, NA), force=10, min.segment.length = 0) +
   # ggrepel::geom_label_repel(aes(fill=maximal_trajectory_type, label=implementation_id, fontface=fontface, size=size), direction="y", max.iter=10000, ylim=c(0, NA), force=10, min.segment.length = 999999) +
@@ -347,7 +322,6 @@ xml2::write_xml(svg, figure_file("implementation_small_history.svg"))
 ##  Small trajectory type distribution                                      ####
 
 implementation_small_distribution <- implementations %>%
-  filter(is_ti) %>%
   gather(trajectory_type, can_handle, !!directed_trajectory_type_order) %>%
   mutate(trajectory_type = factor(trajectory_type, levels=directed_trajectory_type_order)) %>%
   filter(can_handle) %>%
@@ -356,7 +330,7 @@ implementation_small_distribution <- implementations %>%
   ggplot(aes(trajectory_type, n)) +
   geom_bar(aes(fill=trajectory_type, color=trajectory_type), stat="identity", width=0.95) +
   geom_text(aes(label=n), vjust=0) +
-  # geom_hline(yintercept = sum(implementations$is_ti, na.rm=TRUE), line) +
+  # geom_hline(yintercept = sum(implementations$contains_ti, na.rm=TRUE), line) +
   scale_fill_manual(values=setNames(trajectory_types$background_color, trajectory_types$id)) +
   scale_color_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
   scale_y_continuous(expand=c(0, 2)) +
@@ -367,7 +341,6 @@ ggsave(figure_file("implementation_small_distribution.svg"), implementation_smal
 
 
 implementations %>%
-  filter(is_ti) %>%
   gather(trajectory_type, can_handle, !!directed_trajectory_type_order) %>%
   mutate(trajectory_type = factor(trajectory_type, levels=directed_trajectory_type_order)) %>%
   filter(can_handle) %>%

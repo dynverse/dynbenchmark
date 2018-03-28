@@ -8,11 +8,12 @@ toy_tasks <- dyntoy::toy_tasks
 
 # get the synthetic data
 synthetic_tasks <- read_rds(dataset_file(filename = "tasks.rds", dataset_id = "synthetic/v6"))
-synthetic_tasks <- synthetic_tasks %>% left_join(synthetic_tasks$settings %>% map_df(as_data_frame) %>% mutate(id = synthetic_tasks$id), by = "id")
+synthetic_tasks <- synthetic_tasks %>%
+  left_join(synthetic_tasks$settings %>% map_df(as_data_frame) %>% mutate(id = synthetic_tasks$id), by = "id")
 
 # get the real data
 real_names <- list_datasets()
-real_tasks <- pbapply::pblapply(real_names, load_dataset) %>% list_as_tibble()
+real_tasks <- pbapply::pblapply(real_names, load_dataset) %>% list_as_tibble() %>% mutate(task_source="real")
 
 # combine tasks
 tasks <- bind_rows(
