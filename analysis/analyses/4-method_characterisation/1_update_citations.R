@@ -12,10 +12,10 @@ experiment("4-method_characterisation")
 sheet <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE")
 
 methods <- sheet %>%
-  gs_read(ws = "Software", col_types = cols(GScholarClusterID = "c"), skip = 1)
+  gs_read(ws = "Implementations", col_types = cols(gscholar_cluster_id = "c"), skip = 1)
 
-ncitations <- pbapply::pbsapply(methods$GScholarClusterID, dynutils::google_scholar_num_citations)
+ncitations <- pbapply::pbsapply(methods$gscholar_cluster_id, dynutils::google_scholar_num_citations)
 # ncitations <- pbapply::pbsapply(methods$DOI, rcrossref::cr_citation_count)
 ncitations[is.na(ncitations)] <- ""
 
-gs_edit_cells(sheet, input = ncitations, byrow = FALSE, anchor = which(colnames(methods) == "Citations") %>% {paste0(LETTERS[floor(./26)], LETTERS[. %% 26], "3")})
+gs_edit_cells(sheet, ws = "Implementations", input = ncitations, byrow = FALSE, anchor = which(colnames(methods) == "ncitations") %>% {paste0(LETTERS[floor(./26)], LETTERS[. %% 26], "3")})
