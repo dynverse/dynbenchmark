@@ -97,14 +97,14 @@ methods$prior_start <- case_when(
 methods$prior_end <- case_when(
   methods$end_id == "required" ~ "required_id",
   methods$end_id == "optional" ~ "optional_id",
-  methods$end_n == "required" ~ "required_n",
-  methods$end_n == "optional" ~ "optional_n"
+  methods$end_n == "required" ~ "required_#",
+  methods$end_n == "optional" ~ "optional_#"
 )
 methods$prior_states <- case_when(
   methods$states_id == "required" ~ "required_id",
   methods$states_id == "optional" ~ "optional_id",
-  methods$states_n == "required" ~ "required_n",
-  methods$states_n == "optional" ~ "optional_n",
+  methods$states_n == "required" ~ "required_#",
+  methods$states_n == "optional" ~ "optional_#",
   methods$states_network == "required" ~ "required_network",
   methods$states_network == "optional" ~ "optional_network"
 )
