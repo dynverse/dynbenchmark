@@ -124,7 +124,7 @@ extract_top_methods <- function(leaf_id, n_top) {
   }
 
   # add dagger if low score
-  scores <- scores %>% filter(score > 0.4 | is.na(score))
+  scores <- scores %>% filter(score > 0.3 | is.na(score))
   # scores$method_name <- ifelse(scores$score < 0.4, paste0(scores$method_name, " ↘"), scores$method_name)
 
   # user friendly and performance indicators
