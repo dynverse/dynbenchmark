@@ -28,7 +28,7 @@ calculate_statistics <- function(milestone_network) {
     milestone_network <- milestone_network %>%
       filter(to != "FILTERED_CELLS") %>%
       igraph::graph_from_data_frame() %>%
-      dynutils::simplify_igraph_network() %>%
+      dynwrap::simplify_igraph_network() %>%
       igraph::as_data_frame()
     tibble(
       n_edges = calculate_n_edges(milestone_network),
@@ -46,19 +46,12 @@ calculate_statistics <- function(milestone_network) {
 }
 
 # determine top methods
-methods <- read_rds(derived_file("methods.rds", experiment_id = "4-method_characterisation"))
-outputs_list <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_parameters/3-evaluate_parameters"))
-method_order <- outputs_list$outputs_summmethod_totals %>%
-  rename(method_id = method_short_name) %>%
-  filter(task_source=="mean") %>%
-  arrange(-harm_mean) %>%
-  filter(method_id %in% methods$method_id) %>%
-  pull(method_id)
+read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
 # load config and tasks
 config <- read_rds(derived_file("config.rds", "5-optimise_parameters/3-evaluate_parameters"))
 tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation")) %>% mutate(task_id = id)
-tasks$trajectory_type <- map(tasks$milestone_network, dynutils::classify_milestone_network) %>% map_chr("network_type")
+tasks$trajectory_type <- map(tasks$milestone_network, dynwrap::classify_milestone_network) %>% map_chr("network_type")
 tasks <- bind_cols(tasks, map_df(tasks$milestone_network, calculate_statistics))
 
 filter_errored_trajectory_types <- function(x) {
@@ -70,20 +63,23 @@ trajectory_types_simplified_order <- intersect(trajectory_types_simplified$simpl
 #   ____________________________________________________________________________
 #   Load models & generate statistics                                       ####
 milestone_networks <- pbapply::pblapply(cl=4, method_order[1:5], function(method_id) {
-  print(method_id)
-  output_models <- read_rds(derived_file(paste0("suite/", method_id, "/output_models.rds"), "5-optimise_parameters/3-evaluate_parameters")) %>%  list_as_tibble()
-  output_metrics <- read_rds(derived_file(paste0("suite/", method_id, "/output_metrics.rds"), "5-optimise_parameters/3-evaluate_parameters"))
+  ind_scores_oi <- ind_scores %>%
+    filter(method_short_name == !!method_id)
+
+  output_models <- load_dyneval_model(method_id, ind_scores_oi$model_id, experiment_id = "5-optimise_parameters/3-evaluate_parameters") %>% list_as_tibble()
 
   output_models <- bind_cols(output_models, map_df(output_models$milestone_network, calculate_statistics))
 
-  tasks <- tasks %>% filter(task_id %in% output_metrics$task_id)
+  tasks_oi <- tasks %>% slice(match(ind_scores_oi$task_id, task_id))
 
   milestone_networks <- output_models %>%
     select(milestone_network, trajectory_type, n_edges, n_milestones, complexity) %>%
     rename_all(~paste0(., "_predicted")) %>%
-    mutate(task_id = output_metrics$task_id) %>%
+    mutate(task_id = ind_scores_oi$task_id) %>%
     left_join(
-      tasks %>% select(task_id, milestone_network, trajectory_type, n_edges, n_milestones, complexity) %>% rename_at(vars(-task_id), ~paste0(., "_gold")),
+      tasks %>%
+        select(task_id, milestone_network, trajectory_type, n_edges, n_milestones, complexity) %>%
+        rename_at(vars(-task_id), ~paste0(., "_gold")),
       "task_id"
     ) %>%
     mutate(trajectory_type_predicted = filter_errored_trajectory_types(trajectory_type_predicted)) %>%
@@ -163,7 +159,6 @@ complexity_difference_distribution
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
 ### Common plot                                                             ####
 topology_complexity_comparison <- plot_grid(
-  trajectory_type_comparison,
   complexity_difference_distribution,
   ncol=1,
   align="v",
@@ -172,5 +167,5 @@ topology_complexity_comparison <- plot_grid(
 )
 
 topology_complexity_comparison
-topology_complexity_comparison %>% ggsave(figure_file("topology_complexity_comparison.svg"), ., width=12, height=8)
+topology_complexity_comparison %>% ggsave(figure_file("topology_complexity_comparison.svg"), ., width=12, height=4)
 
