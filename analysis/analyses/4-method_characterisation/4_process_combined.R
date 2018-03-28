@@ -26,8 +26,8 @@ implementations <- implementations_tidy %>%
   ungroup()
 
 # filter evaluated
-methods$evaluated <- methods$wrapper == "Done"
-implementations$evaluated <- implementations$evaluation_inclusion == "TRUE"
+methods$evaluated <- (methods$wrapper == "Done") %>% coalesce(FALSE)
+implementations$evaluated <- (implementations$evaluation_inclusion == "TRUE") %>% coalesce(FALSE)
 
 methods_evaluated <- methods %>%
   filter(evaluated)
