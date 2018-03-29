@@ -104,57 +104,62 @@ method_tib <- method_tib %>%
     pct_errored_lab_colour = ifelse(pct_errored_sc > .5, "white", "black")
   )
 
+hsp <- .5
+lsp <- .5
+ssp <- .1
+brw <- 4
+
 # AXIS INFO
 axis <-
   tribble(
     ~id,       ~label,                 ~xsep, ~xwidth, ~show_label, ~geom,      ~filter_removed, ~col,                                      ~value,
-    "name",    "Name",                 0.0,   4.5,       F,           "custom",   F,               NA,                                        NA,
+    "name",    "Name",                 0.0,   4.5,     F,           "custom",   F,               NA,                                        NA,
 
-    "maxt",    "Type",                 0.1,   2,       T,           "custom",   F,               "maxtraj_colour",                          NA,
-    "topo",    "Topo. constr.",        0.1,   1,       T,           "text",     F,               "topinf_colour",                           "topinf_lab",
-    "prst",    "Start",                0.1,   1,       T,           "text",     F,               "prior_start_type1col",                    "prior_start_type2",
-    "pren",    "End",                  0.1,   1,       T,           "text",     F,               "prior_end_type1col",                      "prior_end_type2",
-    "prgr",    "States",               0.1,   1,       T,           "text",     F,               "prior_states_type1col",                   "prior_states_type2",
-    "prge",    "Genes",                0.1,   1,       T,           "text",     F,               "prior_genes_type1col",                    "prior_genes_type2",
+    "maxt",    "Type",                 ssp,   2,       T,           "custom",   F,               "maxtraj_colour",                          NA,
+    "topo",    "Topology",             ssp,   1,       T,           "text",     F,               "topinf_colour",                           "topinf_lab",
+    "prst",    "Start",                ssp,   1,       T,           "text",     F,               "prior_start_type1col",                    "prior_start_type2",
+    "pren",    "End",                  ssp,   1,       T,           "text",     F,               "prior_end_type1col",                      "prior_end_type2",
+    "prgr",    "States",               ssp,   1,       T,           "text",     F,               "prior_states_type1col",                   "prior_states_type2",
+    "prge",    "Genes",                ssp,   1,       T,           "text",     F,               "prior_genes_type1col",                    "prior_genes_type2",
 
 
-    "harm",    "Benchmark",            1.0,   4,       T,           "invbar",   F,               "overall_benchmark_sc_col",                "overall_benchmark_sc",
-    "qcsc",    "QC",                   0.0,   4,       T,           "bar",      F,               "overall_qc_sc_col",                       "overall_qc_sc",
-    "qcre",     "",                     -4,   4,       F,           "text",     F,               "black",                                   "missing_qc_reason",
+    "harm",    "Benchmark",            hsp, brw,       T,           "invbar",   F,               "overall_benchmark_sc_col",                "overall_benchmark_sc",
+    "qcsc",    "QC",                   0.0, brw,       T,           "bar",      F,               "overall_qc_sc_col",                       "overall_qc_sc",
+    "qcre",     "",                   -brw, brw,       F,           "text",     F,               "black",                                   "missing_qc_reason",
 
-    "corr",    "Ordering",             1.0,   1,       T,           "circle",   F,               "norm_correlation_sc_col",                 "norm_correlation_sc",
-    "rfms",    "Neighbourhood",        0.1,   1,       T,           "circle",   F,               "norm_rf_mse_sc_col",                      "norm_rf_mse_sc",
-    "edge",    "Topology",             0.1,   1,       T,           "circle",   F,               "norm_edge_flip_sc_col",                   "norm_edge_flip_sc",
+    "corr",    "Ordering",             hsp,   1,       T,           "circle",   F,               "norm_correlation_sc_col",                 "norm_correlation_sc",
+    "rfms",    "Neighbourhood",        ssp,   1,       T,           "circle",   F,               "norm_rf_mse_sc_col",                      "norm_rf_mse_sc",
+    "edge",    "Topology",             ssp,   1,       T,           "circle",   F,               "norm_edge_flip_sc_col",                   "norm_edge_flip_sc",
 
-    "real",    "Real",                 0.5,   1,       T,           "circle",   F,               "source_real_sc_col",                      "source_real_sc",
-    "synt",    "Synthetic",            0.1,   1,       T,           "circle",   F,               "source_synthetic_sc_col",                 "source_synthetic_sc",
+    "real",    "Real",                 lsp,   1,       T,           "circle",   F,               "source_real_sc_col",                      "source_real_sc",
+    "synt",    "Synthetic",            ssp,   1,       T,           "circle",   F,               "source_synthetic_sc_col",                 "source_synthetic_sc",
 
-    "line",    "Linear",               0.5,   1,       T,           "circle",   F,               "trajtype_directed_linear_sc_col",         "trajtype_directed_linear_sc",
-    "bifu",    "Bifurcation",          0.1,   1,       T,           "circle",   F,               "trajtype_bifurcation_sc_col",             "trajtype_bifurcation_sc",
-    "conv",    "Convergence",          0.1,   1,       T,           "circle",   F,               "trajtype_convergence_sc_col",             "trajtype_convergence_sc",
-    "mult",    "Multifurcation",       0.1,   1,       T,           "circle",   F,               "trajtype_multifurcation_sc_col",          "trajtype_multifurcation_sc",
-    "root",    "Rooted tree",          0.1,   1,       T,           "circle",   F,               "trajtype_rooted_tree_sc_col",             "trajtype_rooted_tree_sc",
-    "dagg",    "DAG",                  0.1,   1,       T,           "circle",   F,               "trajtype_directed_acyclic_graph_sc_col",  "trajtype_directed_acyclic_graph_sc",
-    "cycl",    "Cycle",                0.1,   1,       T,           "circle",   F,               "trajtype_directed_cycle_sc_col",          "trajtype_directed_cycle_sc",
-    "grap",    "Cyclic graph",         0.1,   1,       T,           "circle",   F,               "trajtype_directed_graph_sc_col",          "trajtype_directed_graph_sc",
+    "line",    "Linear",               lsp,   1,       T,           "circle",   F,               "trajtype_directed_linear_sc_col",         "trajtype_directed_linear_sc",
+    "bifu",    "Bifurcation",          ssp,   1,       T,           "circle",   F,               "trajtype_bifurcation_sc_col",             "trajtype_bifurcation_sc",
+    "conv",    "Convergence",          ssp,   1,       T,           "circle",   F,               "trajtype_convergence_sc_col",             "trajtype_convergence_sc",
+    "mult",    "Multifurcation",       ssp,   1,       T,           "circle",   F,               "trajtype_multifurcation_sc_col",          "trajtype_multifurcation_sc",
+    "root",    "Rooted tree",          ssp,   1,       T,           "circle",   F,               "trajtype_rooted_tree_sc_col",             "trajtype_rooted_tree_sc",
+    "dagg",    "DAG",                  ssp,   1,       T,           "circle",   F,               "trajtype_directed_acyclic_graph_sc_col",  "trajtype_directed_acyclic_graph_sc",
+    "cycl",    "Cycle",                ssp,   1,       T,           "circle",   F,               "trajtype_directed_cycle_sc_col",          "trajtype_directed_cycle_sc",
+    "grap",    "Cyclic graph",         ssp,   1,       T,           "circle",   F,               "trajtype_directed_graph_sc_col",          "trajtype_directed_graph_sc",
     # "digr",    "Disconnected Graph",   0.1,   1,       T,           "circle",   T,               "trajtype_disconnected_directed_graph_sc_col", "trajtype_disconnected_directed_graph_sc",
 
-    "time",    "Average time",         0.5,   1,       T,           "rect",     F,               "rank_time_method_sc_col",                 "rank_time_method_sc",
+    "time",    "Average time",         lsp,   1,       T,           "rect",     F,               "rank_time_method_sc_col",                 "rank_time_method_sc",
     "timl",    "Average time label",    -1,   1,       F,           "text",     F,               "avg_time_lab_colour",                     "avg_time_lab",
-    "erpc",    "% Errored",            0.1,   1,       T,           "rect",     F,               "pct_succeeded_sc_col",                    "pct_succeeded_sc",
+    "erpc",    "% Errored",            ssp,   1,       T,           "rect",     F,               "pct_succeeded_sc_col",                    "pct_succeeded_sc",
     "erpl",    "% Errored label",       -1,   1,       F,           "text",     F,               "pct_errored_lab_colour",                  "pct_errored_lab",
-    "erro",    "Error reason",         0.1,   1,       T,           "pie",      F,               list(error_colours),                       list(c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic")),
+    "erro",    "Error reason",         ssp,   1,       T,           "pie",      F,               list(error_colours),                       list(c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic")),
 
-    "qcdf",    "Developer friendly",   1.0,   1,       T,           "circle",   F,               "qc_app_developer_friendly_sc_col",        "qc_app_developer_friendly_sc",
-    "qcuf",    "User friendly",        0.1,   1,       T,           "circle",   F,               "qc_app_user_friendly_sc_col",             "qc_app_user_friendly_sc",
-    "qcgs",    "Future-proof",         0.1,   1,       T,           "circle",   F,               "qc_app_good_science_sc_col",              "qc_app_good_science_sc",
+    "qcdf",    "Developer friendly",   hsp,   1,       T,           "circle",   F,               "qc_app_developer_friendly_sc_col",        "qc_app_developer_friendly_sc",
+    "qcuf",    "User friendly",        ssp,   1,       T,           "circle",   F,               "qc_app_user_friendly_sc_col",             "qc_app_user_friendly_sc",
+    "qcgs",    "Future-proof",         ssp,   1,       T,           "circle",   F,               "qc_app_good_science_sc_col",              "qc_app_good_science_sc",
 
-    "qcav",    "Availability",         0.5,   1,       T,           "circle",   F,               "qc_cat_availability_sc_col",              "qc_cat_availability_sc",
-    "qcbe",    "Behaviour",            0.1,   1,       T,           "circle",   F,               "qc_cat_behaviour_sc_col",                 "qc_cat_behaviour_sc",
-    "qcca",    "Code assurance",       0.1,   1,       T,           "circle",   F,               "qc_cat_code_assurance_sc_col",            "qc_cat_code_assurance_sc",
-    "qccq",    "Code quality",         0.1,   1,       T,           "circle",   F,               "qc_cat_code_quality_sc_col",              "qc_cat_code_quality_sc",
-    "qcdo",    "Documentation",        0.1,   1,       T,           "circle",   F,               "qc_cat_documentation_sc_col",             "qc_cat_documentation_sc",
-    "qcpa",    "Paper",                0.1,   1,       T,           "circle",   F,               "qc_cat_paper_sc_col",                     "qc_cat_paper_sc"
+    "qcav",    "Availability",         lsp,   1,       T,           "circle",   F,               "qc_cat_availability_sc_col",              "qc_cat_availability_sc",
+    "qcbe",    "Behaviour",            ssp,   1,       T,           "circle",   F,               "qc_cat_behaviour_sc_col",                 "qc_cat_behaviour_sc",
+    "qcca",    "Code assurance",       ssp,   1,       T,           "circle",   F,               "qc_cat_code_assurance_sc_col",            "qc_cat_code_assurance_sc",
+    "qccq",    "Code quality",         ssp,   1,       T,           "circle",   F,               "qc_cat_code_quality_sc_col",              "qc_cat_code_quality_sc",
+    "qcdo",    "Documentation",        ssp,   1,       T,           "circle",   F,               "qc_cat_documentation_sc_col",             "qc_cat_documentation_sc",
+    "qcpa",    "Paper",                ssp,   1,       T,           "circle",   F,               "qc_cat_paper_sc_col",                     "qc_cat_paper_sc"
   ) %>%
   mutate(
     xmax = cumsum(xwidth + xsep),
@@ -370,7 +375,7 @@ g1 <- ggplot(method_tib) +
   geom_text(aes(x = axtr$name$xmax, y = method_y, label = method_name), method_tib, hjust = 1, vjust = .5) +
 
   # BAR GUIDES
-  geom_segment(aes(x = x, xend = x, y = y, yend = yend), barguides_data, colour = "lightgray", linetype = "dashed") +
+  geom_segment(aes(x = x, xend = x, y = y, yend = yend), barguides_data, colour = "black", size = .5, linetype = "dashed") +
   # BARS
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), bind_rows(bar_data, invbar_data), colour = "black", size = .25) +
   # RECTANGLES
@@ -423,7 +428,7 @@ g1 <- ggplot(method_tib) +
 
 # WRITE FILES
 overview_fig_file <- figure_file("overview.svg")
-ggsave(overview_fig_file, g1, width = 17.5, height = 15)
+ggsave(overview_fig_file, g1, width = 16, height = 15)
 xml2::read_xml(overview_fig_file) %>% replace_svg(minis) %>% xml2::write_xml(overview_fig_file)
 
 
