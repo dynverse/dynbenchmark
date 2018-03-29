@@ -13,7 +13,7 @@ RUN sudo apt-get install python3-tk -y
 RUN . /etc/environment \
   && sudo apt-get update \
   && sudo apt-get install subversion -y \
-  && sudo apt-get install libudunits2-dev libgsl-dev libsdl1.2-dev libreadline-dev imagemagick libfftw3-dev libudunits2-dev -y
+  && sudo apt-get install libudunits2-dev libgsl-dev libsdl1.2-dev libreadline-dev imagemagick libfftw3-dev libudunits2-dev librsvg2-dev -y
 
 RUN python3 -m pip install numpy matplotlib pandas six jinja2 python-dateutil pytz pyparsing cycler tqdm python-igraph rpy2 Cython scipy statsmodels sklearn seaborn
 
