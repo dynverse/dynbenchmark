@@ -14,11 +14,13 @@ benchmark_fetch_results(derived_file("suite/"))
 outputs <- benchmark_bind_results(derived_file("suite/"), load_models = FALSE)
 
 # load tasks info
+not_list <- function(x) !is.list(x)
 list2env(read_rds(derived_file("config.rds")), environment())
 tasks_info <- map_df(
   paste0(local_tasks_folder, "/", task_ids, ".rds"),
-  ~ read_rds(.) %>% select(task_id = id, trajectory_type, task_source)
+  ~ read_rds(.) %>% select_if(not_list)
 )
+write_rds(tasks_info, result_file("tasks_info.rds"))
 
 # collect relevant trajectory types
 trajtypes <-
@@ -98,7 +100,7 @@ scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = TRUE) {
 trafo_fun <- scalesigmoid_trafo
 
 outputs_ind <- outputs %>%
-  left_join(tasks_info, by = "task_id") %>%
+  left_join(tasks_info %>% select(task_id = id, trajectory_type, task_source), by = "task_id") %>%
   filter(task_source != "toy") %>%
   mutate(
     rf_mse_inv = 1 - rf_mse,
