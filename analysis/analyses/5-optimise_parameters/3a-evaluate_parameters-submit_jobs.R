@@ -43,7 +43,7 @@ task_ids <- read_rds(paste0(local_tasks_folder, "/task_ids.rds"))
 #   paste("\"", ., "\"", collapse = ", ", sep = "") %>%
 #   cat
 methods_order <- c(
-  "identity", "shuffle", "random", "manual_wouters", "manual_robrechtc", "slngsht", "mpath",  "comp1", "atan", "periodpc", "gng",
+  "identity", "shuffle", "random", "manual_wouters", "manual_robrechtc", "slngsht", "mpath",  "comp1", "angle", "periodpc", "gng",
   "waterfll", "tscan", "sincell", "scorpius", "scorspar", "embeddr", "wndrlst", "wishbone", "mnclddr", "dpt", "mnclica", "slice",
   "ctvem", "ouijaflw", "slicer", "scuba", "topslam", "gpfates", "aga", "agapt", "phenopth", "ctmaptpx", "mfa", "stemid2", "recat",
   "stemid", "scoup", "ctgibbs", "scimitar", "ouija", "pseudogp"
