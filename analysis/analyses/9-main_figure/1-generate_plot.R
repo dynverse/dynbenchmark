@@ -100,8 +100,10 @@ method_tib <- method_tib %>%
   mutate(
     topinf_colour = topinf_colours[topology_inference_type],
     maxtraj_colour = maxtraj_colours[maximal_trajectory_types],
-    avg_time_lab_colour = ifelse(rank_time_method_sc < .5, "white", "black"),
-    pct_errored_lab_colour = ifelse(pct_errored_sc > .5, "white", "black")
+    # avg_time_lab_colour = ifelse(rank_time_method_sc < .5, "white", "black"),
+    # pct_errored_lab_colour = ifelse(pct_errored_sc > .5, "white", "black")
+    avg_time_lab_colour = "black",
+    pct_errored_lab_colour = "black"
   )
 
 hsp <- .5
@@ -144,10 +146,12 @@ axis <-
     "grap",    "Cyclic graph",         ssp,   1,       T,           "circle",   F,               "trajtype_directed_graph_sc_col",          "trajtype_directed_graph_sc",
     # "digr",    "Disconnected Graph",   0.1,   1,       T,           "circle",   T,               "trajtype_disconnected_directed_graph_sc_col", "trajtype_disconnected_directed_graph_sc",
 
-    "time",    "Average time",         lsp,   1,       T,           "rect",     F,               "rank_time_method_sc_col",                 "rank_time_method_sc",
-    "timl",    "Average time label",    -1,   1,       F,           "text",     F,               "avg_time_lab_colour",                     "avg_time_lab",
-    "erpc",    "% Errored",            ssp,   1,       T,           "rect",     F,               "pct_succeeded_sc_col",                    "pct_succeeded_sc",
-    "erpl",    "% Errored label",       -1,   1,       F,           "text",     F,               "pct_errored_lab_colour",                  "pct_errored_lab",
+    # "time",    "Average time",         lsp,   1,       T,           "rect",     F,               "rank_time_method_sc_col",                 "rank_time_method_sc",
+    # "timl",    "Average time label",    -1,   1,       F,           "text",     F,               "avg_time_lab_colour",                     "avg_time_lab",
+    # "erpc",    "% Errored",            ssp,   1,       T,           "rect",     F,               "pct_succeeded_sc_col",                    "pct_succeeded_sc",
+    # "erpl",    "% Errored label",       -1,   1,       F,           "text",     F,               "pct_errored_lab_colour",                  "pct_errored_lab",
+    "timl",    "Average time label",   ssp,   1,       T,           "text",     F,               "avg_time_lab_colour",                     "avg_time_lab",
+    "erpl",    "% Errored label",      ssp,   1,       T,           "text",     F,               "pct_errored_lab_colour",                  "pct_errored_lab",
     "erro",    "Error reason",         ssp,   1,       T,           "pie",      F,               list(error_colours),                       list(c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic")),
 
     "qcdf",    "Developer friendly",   hsp,   1,       T,           "circle",   F,               "qc_app_developer_friendly_sc_col",        "qc_app_developer_friendly_sc",
@@ -187,7 +191,7 @@ grouping <-
     "Per source",                  level2,  axtr$real$xmin, axtr$synt$xmax, "",
     "Per trajectory type",         level2,  axtr$line$xmin, axtr$grap$xmax, "",
     # "Per trajectory type",         level2,  axtr$line$xmin, axtr$digr$xmax, "",
-    "Execution",                   level2,  axtr$time$xmin, axtr$erro$xmax, "",
+    "Execution",                   level2,  axtr$timl$xmin, axtr$erro$xmax, "",
     "Quality control",             level1,  axtr$qcdf$xmin, axtr$qcpa$xmax, "d",
     "Practicality",                level2,  axtr$qcdf$xmin, axtr$qcgs$xmax, "",
     "Categories",                  level2,  axtr$qcav$xmin, axtr$qcpa$xmax, ""
@@ -379,7 +383,7 @@ g1 <- ggplot(method_tib) +
   # BARS
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), bind_rows(bar_data, invbar_data), colour = "black", size = .25) +
   # RECTANGLES
-  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), rect_data, colour = "black", size = .25) +
+  # geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), rect_data, colour = "black", size = .25) +
   # CIRCLES
   ggforce::geom_circle(aes(x0 = x0, y0 = y0, fill = col, r = size), circle_data, size = .25) +
   # STARS
