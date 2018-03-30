@@ -117,7 +117,7 @@ first_significant_bars
 ##  ............................................................................
 ##  Combined dataset variability and significance plot                      ####
 performance_dataset_variability_combined <- plot_grid(
-  first_significant_bars + theme_void(),
+  first_significant_bars + theme_void() + theme(plot.margin=margin(10, 0, 0, 0)),
   performance_datasets_variability,
   ncol=1,
   align="v",
@@ -232,13 +232,17 @@ task_sample_max_tasks_top <- pbapply::pblapply(cl=8, method_scores$method_short_
   scorer <- binary_scorer(method_short_name)
 
   include_tasks <- rep(TRUE, length(all_task_ids)) %>% set_names(all_task_ids)
-  for(remove_task_id in task_removal_order) {
-    include_tasks[remove_task_id] <- FALSE
+  rank <- scorer(include_tasks)
 
-    rank <- scorer(include_tasks)
+  if (rank != 1) {
+    for(remove_task_id in task_removal_order) {
+      include_tasks[remove_task_id] <- FALSE
 
-    if(rank == 1) {
-      break
+      rank <- scorer(include_tasks)
+
+      if(rank == 1) {
+        break
+      }
     }
   }
   tibble(method_short_name = method_short_name, max_n_tasks_top=sum(include_tasks), task_ids = list(names(include_tasks)[include_tasks]))
@@ -249,14 +253,18 @@ task_sample_max_tasks_top <- task_sample_max_tasks_top %>% bind_rows()
 write_rds(task_sample_max_tasks_top, result_file("task_sample_max_tasks_top.rds"))
 task_sample_max_tasks_top <- read_rds(result_file("task_sample_max_tasks_top.rds"))
 
-task_sample_max_tasks_top %>%
+task_sample_max_tasks_overview <- task_sample_max_tasks_top %>%
   mutate(method_short_name = factor(method_short_name, method_order)) %>%
   ggplot(aes(method_short_name, max_n_tasks_top)) +
     geom_bar(stat="identity") +
     geom_text(aes(label=max_n_tasks_top), vjust=0) +
+    geom_hline(yintercept=length(all_task_ids), linetype="dashed") +
+    geom_text(aes(y=length(all_task_ids), x=nrow(task_sample_max_tasks_top)), label="All datasets", hjust=1, vjust=1.5, data=tibble()) +
     scale_x_discrete("", labels=method_names) +
     theme(axis.text.x = element_text(angle=45, hjust=1)) +
     scale_y_continuous(label_short("largest_subset_of_datasets_at_which_method_ranks_first", 30), limits=c(0, length(all_task_ids)+10), expand=c(0, 0))
+task_sample_max_tasks_overview %>% write_rds(figure_file("task_sample_max_tasks_overview.rds"))
+
 
 task_sample_max_tasks_top_individual <- task_sample_max_tasks_top %>%
   unnest(task_ids) %>%
