@@ -41,7 +41,7 @@ prior_type2_fun <- function(x) ifelse(is.na(x), "", gsub(".*_", "", x))
 row_height <- 1
 row_spacing <- .1
 
-control_methods <- c("periodpc", "atan", "comp1", "random", "gng")
+control_methods <- c("periodpc", "angle", "comp1", "random", "gng")
 
 method_tib <- method_tib %>%
   left_join(minis %>% select(maximal_trajectory_types = trajectory_type, maxtraj_replace_id = replace_id), by = "maximal_trajectory_types") %>%
@@ -150,8 +150,8 @@ axis <-
     # "timl",    "Average time label",    -1,   1,       F,           "text",     F,               "avg_time_lab_colour",                     "avg_time_lab",
     # "erpc",    "% Errored",            ssp,   1,       T,           "rect",     F,               "pct_succeeded_sc_col",                    "pct_succeeded_sc",
     # "erpl",    "% Errored label",       -1,   1,       F,           "text",     F,               "pct_errored_lab_colour",                  "pct_errored_lab",
-    "timl",    "Average time label",   ssp,   1,       T,           "text",     F,               "avg_time_lab_colour",                     "avg_time_lab",
-    "erpl",    "% Errored label",      ssp,   1,       T,           "text",     F,               "pct_errored_lab_colour",                  "pct_errored_lab",
+    "timl",    "Average time",   ssp,   1,       T,           "text",     F,               "avg_time_lab_colour",                     "avg_time_lab",
+    "erpl",    "% Errored",      ssp,   1,       T,           "text",     F,               "pct_errored_lab_colour",                  "pct_errored_lab",
     "erro",    "Error reason",         ssp,   1,       T,           "pie",      F,               list(error_colours),                       list(c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic")),
 
     "qcdf",    "Developer friendly",   hsp,   1,       T,           "circle",   F,               "qc_app_developer_friendly_sc_col",        "qc_app_developer_friendly_sc",
