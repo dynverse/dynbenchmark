@@ -51,7 +51,7 @@ real_synthetic_comparison <- trajtype_source_scores %>%
   scale_x_continuous(breaks=c(0,1), limits=c(0, 1))+
   scale_y_continuous(breaks=c(0,1), limits=c(0, 1))+
   coord_equal() +
-  labs(x="Overall performance on real data", y="Overall performance on synthetic data")+
+  labs(x=label_wrap("Overall performance on real data", 100), y=label_wrap("Overall performance on synthetic data", 25))+
   theme_bw() +
   theme(
     legend.position="none", panel.grid = element_blank()

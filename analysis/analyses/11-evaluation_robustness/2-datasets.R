@@ -32,7 +32,7 @@ performance_datasets_variability <- indrep_scores %>%
     scale_y_continuous(label_long("overall_performance_on_dataset"), expand=c(0, 0.01)) +
     scale_x_discrete("", label=method_names) +
     scale_color_manual(label_long("task_source"), values=c(mean="black", synthetic="#39CCCC", real="#FF4136"), label=label_long) +
-    theme(axis.text.x = element_text(angle = 45, hjust=1), legend.position = "bottom", legend.justification = "center")
+    theme(axis.text.x = element_text(angle = 45, hjust=1), legend.position = "right", legend.justification = "center")
 performance_datasets_variability
 
 
