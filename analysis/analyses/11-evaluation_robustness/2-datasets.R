@@ -203,6 +203,8 @@ task_sample_max_tasks_top <- task_sample_n_top %>%
 
 ##  ............................................................................
 ##  Subset of datasets for which method is top                              ####
+all_task_ids <- unique(ind_scores$task_id)
+
 indrep_scores <- indrep_scores %>%
   group_by(task_id) %>%
   mutate(harm_mean_rank = rank(-harm_mean)) %>%
@@ -245,12 +247,16 @@ task_sample_max_tasks_top <- pbapply::pblapply(cl=8, method_scores$method_short_
 task_sample_max_tasks_top <- task_sample_max_tasks_top %>% bind_rows()
 
 write_rds(task_sample_max_tasks_top, result_file("task_sample_max_tasks_top.rds"))
+task_sample_max_tasks_top <- read_rds(result_file("task_sample_max_tasks_top.rds"))
 
 task_sample_max_tasks_top %>%
   mutate(method_short_name = factor(method_short_name, method_order)) %>%
   ggplot(aes(method_short_name, max_n_tasks_top)) +
     geom_bar(stat="identity") +
-    geom_text(aes(label=max_n_tasks_top), vjust=0)
+    geom_text(aes(label=max_n_tasks_top), vjust=0) +
+    scale_x_discrete("", labels=method_names) +
+    theme(axis.text.x = element_text(angle=45, hjust=1)) +
+    scale_y_continuous(label_short("largest_subset_of_datasets_at_which_method_ranks_first", 30), limits=c(0, length(all_task_ids)+10), expand=c(0, 0))
 
 task_sample_max_tasks_top_individual <- task_sample_max_tasks_top %>%
   unnest(task_ids) %>%
