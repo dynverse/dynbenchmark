@@ -34,10 +34,10 @@ xml_add_style <- function(x, value) {
 }
 
 
-score_indicator <- function(score, cutoffs = c(0.9, 0.8, 0.65, 0.5)) {
+score_indicator <- function(score, cutoffs = c(0.95, 0.85, 0.75, 0.65)) {
   style = ""
   if (is.na(score)) {
-    txt <- ""
+    txt <- "⠀"
   } else if(score > cutoffs[[1]]) {
     txt <- "++"
     style = "fill:green"
@@ -54,7 +54,7 @@ score_indicator <- function(score, cutoffs = c(0.9, 0.8, 0.65, 0.5)) {
     txt <- "––"
     style = "fill:red"
   } else {
-    txt <- ""
+    txt <- "⠀"
   }
   lst(txt, style)
 }
@@ -70,7 +70,7 @@ prior_indicator <- function(prior_usages) {
     }
 
   if (length(prior_indicator) == 0) {
-    "-"
+    "⠀"
   } else {
     prior_indicator
   }
@@ -82,16 +82,9 @@ extract_top_methods <- function(leaf_id, n_top) {
   trajectory_type <- gsub("(.*)\\*", "\\1", leaf_id)
   trajectory_type <- gsub("(.*)_fixed", "\\1", trajectory_type)
   if(endsWith(leaf_id, "_fixed")) {
-    if (trajectory_type == "multifurcation") {
-      trajectory_types_to_score <- "multifurcation"
-      applicable_methods <- methods %>%
-        filter(!is.na(end_n), multifurcation) %>%
-        pull(method_id)
-    } else {
-      # for now hardcode the other fixed
-      applicable_methods <- c("-")
-      trajectory_types_to_score <- c("directed_linear")
-    }
+    # for now hardcode the other fixed
+    applicable_methods <- c("????")
+    trajectory_types_to_score <- c("directed_linear")
 
   } else {
     # get trajectory types to score
@@ -144,13 +137,13 @@ extract_top_methods <- function(leaf_id, n_top) {
   scores <- scores %>% left_join(methods, "method_id")
 
   # add footnotes
-  if (str_sub(leaf_id, -1) != "*" & trajectory_type %in% c("directed_cycle", "directed_linear", "bifurcation")) {
+  if (str_sub(leaf_id, -1) != "*" & trajectory_type %in% c("directed_cycle", "directed_linear", "bifurcation", "multifurcation")) {
     scores$method_name[which(scores$topology_inference_type == "free")] <-
       paste0(scores$method_name[which(scores$topology_inference_type == "free")], " ∗")
   }
 
   # add dagger if low score
-  # scores <- scores %>% filter(score > 0.3 | is.na(score))
+  scores <- scores %>% filter(score > 0.3 | is.na(score))
   # scores$method_name <- ifelse(scores$score < 0.4, paste0(scores$method_name, " ↘"), scores$method_name)
 
   # user friendly and performance indicators
