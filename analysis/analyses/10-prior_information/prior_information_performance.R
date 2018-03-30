@@ -2,57 +2,45 @@ library(cowplot)
 library(tidyverse)
 library(dynalysis)
 
-experiment("10-prior_information")
+experiment("6-performance_predictors")
 
-scores <- c("harm_mean", "rank_correlation", "rank_edge_flip", "rank_rf_mse")
+read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
 methods <- read_rds(derived_file("methods.rds", experiment_id = "4-method_characterisation"))
-outputs_list <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_parameters/3-evaluate_parameters"))
-method_scores <- outputs_list$outputs_summmethod_totals %>%
-  rename(method_id = method_short_name) %>%
-  filter(method_id %in% methods$method_id) %>%
-  filter(task_source=="mean")
-indrep_scores <- outputs_list$outputs_summrepl %>%
-  rename(method_id = method_short_name) %>%
-  filter(method_id %in% methods$method_id)
-method_order <- method_scores %>%
-  arrange(-harm_mean) %>%
-  filter(method_id %in% methods$method_id) %>%
-  pull(method_id)
 
 method_priors <- methods %>%
-  filter(method_id %in% method_scores$method_id) %>%
+  filter(method_short_name %in% overall_scores$method_short_name) %>%
   gather(prior_id, prior_usage, !!priors$prior_id) %>%
-  select(method_id, prior_id, prior_usage) %>%
+  select(method_short_name, prior_id, prior_usage) %>%
   filter(prior_usage %in% c("required", "required_default")) %>%
-  drop_na(method_id) %>%
+  drop_na(method_short_name) %>%
   {
     bind_rows(
       .,
-      tibble(method_id = unique(.$method_id), prior_id = "any", prior_usage="required")
+      tibble(method_short_name = unique(.$method_short_name), prior_id = "any", prior_usage="required")
     )
   } %>%
   mutate(
-    method_id = factor(method_id, method_order),
+    method_short_name = factor(method_short_name, method_order),
     prior_id = factor(prior_id, unique(prior_id))
   )
-method_priors <- method_priors %>% complete(method_id, prior_id, fill = list(prior_usage="not_required"))
+method_priors <- method_priors %>% complete(method_short_name, prior_id, fill = list(prior_usage="not_required"))
 
 
 ##  ............................................................................
 ##  Overal prior comparison                                                 ####
 method_priors_scores <- method_priors %>%
-  left_join(method_scores, by="method_id") %>%
-  mutate(method_id = factor(method_id, method_order)) %>%
-  gather(score_id, score_value, !!scores)
+  left_join(overall_scores, by="method_short_name") %>%
+  mutate(method_short_name = factor(method_short_name, method_order)) %>%
+  gather(score_id, score_value, overall_benchmark)
 
 required_priors_performance_comparison <- method_priors_scores %>%
   ggplot(aes(prior_usage != "not_required", score_value)) +
     geom_violin(aes(fill=prior_usage != "not_required")) +
     geom_point() +
-    # geom_label(aes(label = method_id)) +
+    # geom_label(aes(label = method_short_name)) +
     ggrepel::geom_label_repel(
-      aes(label=set_names(methods$method_name, methods$method_id)[as.character(method_id)]),
+      aes(label=set_names(methods$method_name, methods$method_short_name)[as.character(method_short_name)]),
       nudge_y = 0.1,
       min.segment.length=0,
       data=method_priors_scores %>% filter(prior_usage != "not_required") %>% group_by(prior_id, score_id) %>% top_n(1, score_value)
@@ -60,7 +48,7 @@ required_priors_performance_comparison <- method_priors_scores %>%
     facet_grid(score_id~prior_id, labeller=label_facet()) +
     annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf) +
     annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf) +
-    scale_y_continuous(label_long("performance")) +
+    scale_y_continuous(label_long("overall_benchmark_performance")) +
     scale_x_discrete(label_long("Requires priors"), label=label_long) +
     scale_fill_discrete() +
     theme(panel.spacing=unit(0, "cm"), legend.position="none")
@@ -73,7 +61,7 @@ ggsave(figure_file("required_priors_performance_comparison.svg"), required_prior
 ##  ............................................................................
 ##  Individual datasets                                                     ####
 required_priors_dataset_testing <- indrep_scores %>%
-  left_join(method_priors, "method_id") %>%
+  left_join(method_priors, "method_short_name") %>%
   group_by(task_id, prior_id) %>%
   summarise(
     test =
