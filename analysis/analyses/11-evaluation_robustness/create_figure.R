@@ -7,8 +7,10 @@ robustness_overview <- cowplot::plot_grid(
   read_rds(figure_file("real_synthetic_comparison.rds")),
   # read_rds(figure_file("metrics_comparison.rds")),
   read_rds(figure_file("performance_dataset_variability_combined.rds")),
+  read_rds(figure_file("task_sample_max_tasks_overview.rds")),
   ncol = 1,
   labels = "auto",
-  rel_heights = c(1,  2)
+  rel_heights = c(1,  2, 1.5)
 )
-ggsave(figure_file("robustness.svg"), robustness_overview, width = 16, height = 8)
+robustness_overview
+ggsave(figure_file("robustness.svg"), robustness_overview, width = 16, height = 12)
