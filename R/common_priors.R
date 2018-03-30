@@ -2,7 +2,7 @@
 #' @export
 priors <- tribble(
   ~prior_id, ~prior_name,
-  "start_id", "Start cell(s)",
+  "start_id", "Start cell",
   "end_id", "End cell(s)",
   "end_n", "# end states",
   "states_id", "Cell clustering",
