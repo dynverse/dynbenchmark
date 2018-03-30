@@ -1,236 +1,250 @@
 library(cowplot)
 library(tidyverse)
 library(dynalysis)
-
-library(tidygraph)
-library(ggraph)
-library(igraph)
+library(xml2)
 
 experiment("7-user_guidelines")
 
-methods <- read_rds(derived_file("methods.rds", "4-method_characterisation"))
-outputs_list <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_parameters/3-evaluate_parameters"))
-trajtype_scores <- outputs_list$outputs_summtrajtype_totals %>% filter(task_source == "mean") %>% rename(method_id = method_short_name)
+read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
-decision_nodes_decisions <- tribble(
-  ~node_id, ~node_label, ~type,
-  "disconnected", "Do you expect multiple trajectories in the data?", "decision",
-  "disconnected_yes", "Yes: Multiple trajectories could be contained in the data", "decision",
-  "disconnected_directed_graph*", "≤ Disconnected directed graph", "topology",
-  "disconnected_no", "No: The data contains one trajectory", "decision",
-  "fixes_topology", "Do you expect a certain topology in the trajectory?", "decision",
-  "fixes_topology_yes", "Yes", "decision",
-  "fixes_topology_some", "Kind of: \nI know some characteristics of the topology", "decision",
-  "directed_linear", NA, "topology",
-  "bifurcation", NA, "topology",
-  "directed_cycle", NA, "topology",
-  "multifurcation*", "> Bifurcating", "topology",
-  "contains_cycles", "Will the topology contain\ncycles or convergences?", "decision",
-  "contains_cycles_no", "No", "decision",
-  "contains_cycles_yes", "Yes/not sure", "decision",
-  "at_least_bifurcations", "Do you expect the trajectory to contain at least 2 bifurcations?", "decision",
-  "at_least_bifurcations_no", "Not necessarily", "decision",
-  "at_least_bifurcations_yes", "Yes", "decision",
-  "rooted_tree*", "≤ Rooted tree", "topology",
-  "rooted_tree", NA, "topology",
-  "directed_graph*", "≤ Directed (acyclic) graph", "topology",
-  "fixes_topology_no", "No: \nI want to let the algorithm decide on the topology", "decision"
-) %>%
-  mutate(node_label = ifelse(is.na(node_label), label_long(node_id), node_label)) %>%
-  mutate(trajectory_type = gsub("(.*)\\*", "\\1", node_id))
-
-decision_edges_decisions <- tribble(
-  ~from, ~to,
-  "disconnected", "disconnected_yes",
-  "disconnected_yes", "disconnected_directed_graph*",
-  "disconnected", "disconnected_no",
-  "disconnected_no", "fixes_topology",
-  "fixes_topology", "fixes_topology_yes",
-  "fixes_topology_yes", "directed_linear",
-  "fixes_topology_yes", "bifurcation",
-  "fixes_topology_yes", "directed_cycle",
-  "fixes_topology_yes", "multifurcation*",
-  "fixes_topology", "fixes_topology_some",
-  "fixes_topology", "fixes_topology_no",
-  "fixes_topology_some", "contains_cycles",
-  "contains_cycles", "contains_cycles_no",
-  "contains_cycles_no", "at_least_bifurcations",
-  "at_least_bifurcations", "at_least_bifurcations_yes",
-  "at_least_bifurcations", "at_least_bifurcations_no",
-  "at_least_bifurcations_no", "rooted_tree*",
-  "at_least_bifurcations_yes", "rooted_tree",
-  "contains_cycles", "contains_cycles_yes",
-  "contains_cycles_yes", "directed_graph*",
-  "fixes_topology_no", "directed_graph*"
-) %>% mutate(type = "decision")
-
-if(!all(decision_edges_decisions %>% select(from, to) %>% unlist() %>% {. %in% decision_nodes_decisions$node_id})) stop("Not all nodes are present in dataframe")
+methods <-
+  left_join(
+    methods,
+    read_rds(derived_file("implementation_qc_application_scores.rds", "4-method_characterisation")) %>%
+      spread("application", "score"),
+    "implementation_id"
+  ) %>%
+  filter(type %in% c("algorithm", "control"))
 
 
-decision_tree <- tbl_graph(decision_nodes_decisions, decision_edges_decisions %>% mutate(from=match(from, decision_nodes_decisions$node_id), to=match(to, decision_nodes_decisions$node_id)))
-layout <- create_layout(decision_tree, "tree")
-layout %>% ggraph() +
-  geom_edge_link() +
-  geom_node_label(aes(label=label_wrap(node_label, 25), color=type)) +
-  theme_graph()
+xml_attr_multiple <- function(x, attr, value) {
+  walk2(
+    x,
+    value,
+    ~(xml_attr(.x, attr) <- .y)
+  )
+}
 
-##
+xml_add_style <- function(x, value) {
+  xml_attr_multiple(
+    x,
+    "style",
+    paste0(xml_attr(x, "style"), ";", value)
+  )
+}
 
-# get top methods per decision leaf
 
-# first do trajectory types
-trajectory_type_ids <- c("directed_linear", "bifurcation", "directed_cycle", "rooted_tree", "directed_graph*", "rooted_tree*", "disconnected_directed_graph*")
-decision_methods <- map(trajectory_type_ids, function(node_id) {
-  trajectory_type <- node_id %>% gsub("(.*)\\*", "\\1", .)
-  if (str_sub(node_id, -1) == "*") {
-    trajectory_types_to_score <- trajectory_types$ancestors[[which(trajectory_types$id == trajectory_type)]]
+score_indicator <- function(score, cutoffs = c(0.95, 0.85, 0.75, 0.65)) {
+  style = ""
+  if (is.na(score)) {
+    txt <- "⠀"
+  } else if(score > cutoffs[[1]]) {
+    txt <- "++"
+    style = "fill:green"
+  } else if(score > cutoffs[[2]]) {
+    txt <- "+"
+    style = "fill:green"
+  } else if (score > cutoffs[[3]]) {
+    txt <- "±"
+    style = "fill:orange"
+  } else if(score > cutoffs[[4]]) {
+    txt <- "–"
+    style = "fill:red"
+  } else if (score >= 0) {
+    txt <- "––"
+    style = "fill:red"
   } else {
-    trajectory_types_to_score <- trajectory_type
+    txt <- "⠀"
+  }
+  lst(txt, style)
+}
+
+prior_indicator <- function(prior_usages) {
+  prior_indicator <- prior_usages %>%
+    select(prior_id, prior_usage) %>%
+    left_join(priors, "prior_id") %>%
+    drop_na() %>%
+    filter(prior_usage == "required") %>%
+    {
+      glue::collapse(.$prior_name, ", ")
+    }
+
+  if (length(prior_indicator) == 0) {
+    "⠀"
+  } else {
+    prior_indicator
+  }
+}
+
+
+extract_top_methods <- function(leaf_id, n_top) {
+  ## Find applicable methods and trajectory types to score
+  trajectory_type <- gsub("(.*)\\*", "\\1", leaf_id)
+  trajectory_type <- gsub("(.*)_fixed", "\\1", trajectory_type)
+  if(endsWith(leaf_id, "_fixed")) {
+    # for now hardcode the other fixed
+    applicable_methods <- c("????")
+    trajectory_types_to_score <- c("directed_linear")
+
+  } else {
+    # get trajectory types to score
+    if (str_sub(leaf_id, -1) == "*") {
+      trajectory_types_to_score <- trajectory_types$ancestors[[which(trajectory_types$id == trajectory_type)]]
+    } else {
+      trajectory_types_to_score <- trajectory_type
+    }
+
+    # find methods which can detect these trajectory types
+    applicable_methods <- methods %>% filter(.data[[trajectory_type]]) %>% pull(method_id)
   }
 
-  linear_methods <- methods %>% filter(.data[[trajectory_type]]) %>% pull(method_id)
-  top_methods <- trajtype_scores %>%
-    filter(method_id %in% linear_methods) %>%
+
+  # now get top methods and order them
+  scores <- trajtype_scores %>%
+    rename(score = harm_mean) %>%
+    filter(method_id %in% applicable_methods) %>%
     filter(trajectory_type %in% trajectory_types_to_score) %>%
     group_by(method_id) %>%
-    summarise(harm_mean = mean(harm_mean)) %>%
-    top_n(5, harm_mean) %>%
-    select(method_id, harm_mean) %>%
-    mutate(origin = node_id) %>%
-    arrange(-harm_mean)
+    summarise(score = mean(score)) %>%
+    top_n(n_top, score) %>%
+    select(method_id, score) %>%
+    arrange(-score) %>%
+    mutate(method_position = row_number())
 
-  # if no top methods or if top method has low score: add ?
-  if(nrow(top_methods) == 0 | max(top_methods$harm_mean) < 0.2) {
-    top_methods <- top_methods %>% add_row(method_id = "?", harm_mean = 0.2, origin=node_id)
-  }
+  # add ? if no high scoring methods
+  # if(nrow(scores) == 1 | max(scores$score) < 0.5) {
+  #   scores <- bind_rows(
+  #     tibble(method_id = "?", score=1, method_position=1),
+  #     scores %>% mutate(method_position = method_position+1)
+  #   )
+  # }
 
-  top_methods <- top_methods %>%
-    arrange(-harm_mean) %>%
-    mutate(method_i = row_number() - 1)
-
-  top_methods
-
-}) %>% bind_rows() %>%
-  rename(score=harm_mean)
-
-# add other fixed topology
-decision_methods <- decision_methods %>% add_row(method_id = "?", score = 1, origin="multifurcation*", method_i = 0)
-
-# now sort the origin, to keep the same ordering of vertices (will be used later to layout the x in the same order)
-decision_methods$origin <- factor(decision_methods$origin, levels=intersect(decision_nodes_decisions$node_id, decision_methods$origin))
-decision_methods <- decision_methods %>% arrange(origin) %>% mutate(origin = as.character(origin))
-
-# create unique node_id
-decision_methods$node_id <- paste0(decision_methods$origin, "-", decision_methods$method_id)
-
-# create edges between methods
-decision_edges_methods <- decision_methods %>%
-  group_by(origin) %>%
-  arrange(-score) %>%
-  mutate(
-    from = c(origin[[1]], node_id[-length(method_id)]),
-    to = node_id,
-    type = c("to_method", rep("method", n()-1))
-  )
-
-
-
-##  ............................................................................
-##  Create tree                                                             ####
-
-
-
-
-
-## Create
-
-decision_nodes <- bind_rows(
-  decision_nodes_decisions,
-    decision_methods %>%
-      mutate(type = "method") %>%
-      left_join(methods %>% select(method_id, method_name), "method_id") %>%
-      mutate(node_label = method_name) %>%
-      mutate(node_label = ifelse(is.na(node_label), label_long(method_id), node_label))
-  )
-
-decision_edges <- bind_rows(
-    decision_edges_decisions,
-    decision_edges_methods
-  )
-
-
-decision_nodes <- decision_nodes %>%
-  mutate(
-    i = row_number()
-) %>% group_by(origin) %>%
-  mutate(
-    alpha = ifelse(
-      type == "method",
-      percent_rank(c(0, score))[-1],
-      1
-    )
-  ) %>%
-  ungroup()
-
-decision_nodes <- decision_nodes %>%
-  mutate(
-    fill =
-      recode(
-        type,
-        method = "black",
-        decision = "white",
-        topology = ifelse(
-          trajectory_type %in% trajectory_types$id,
-          trajectory_types$color[match(trajectory_type, trajectory_types$id)],
-          "#472000"
-        )
+  # add not-evaluated methods if not enough methods in top
+  if(nrow(scores) < n_top) {
+    n_extra_methods <- n_top-nrow(scores)+1
+    extra_methods <- applicable_methods %>% discard(~.%in%scores$method_id) %>% discard(~is.na(.)) %>% head(n_extra_methods)
+    n_extra_methods <- length(n_extra_methods)
+    scores <- bind_rows(
+      scores,
+      tibble(
+        method_id = extra_methods,
+        score=NA,
+        method_position = seq_len(n_extra_methods) + nrow(scores)
       )
     )
-decision_edges <- decision_edges %>% mutate(
-  from = decision_nodes$i[match(from, decision_nodes$node_id)],
-  to = decision_nodes$i[match(to, decision_nodes$node_id)]
-)
-if(any(is.na(decision_edges %>% select(from, to)))) stop("Not every edge in nodes")
+  }
 
+  scores <- scores %>% left_join(methods, "method_id")
 
-type_fills <- c(method = "#333333", decision = "white")
-type_colors <- c(method = "white", decision = "black", topology="white")
+  # add footnotes
+  if (str_sub(leaf_id, -1) != "*" & trajectory_type %in% c("directed_cycle", "directed_linear", "bifurcation", "multifurcation")) {
+    scores$method_name[which(scores$topology_inference_type == "free")] <-
+      paste0(scores$method_name[which(scores$topology_inference_type == "free")], " ∗")
+  }
 
-# create tree
-decision_tree <- tbl_graph(decision_nodes, decision_edges)
+  # add dagger if low score
+  scores <- scores %>% filter(score > 0.3 | is.na(score))
+  # scores$method_name <- ifelse(scores$score < 0.4, paste0(scores$method_name, " ↘"), scores$method_name)
 
-# create layout
-layout <- create_layout(decision_tree, "tree")
+  # user friendly and performance indicators
+  scores$user_friendly_indicator <- map(scores$user_friendly, score_indicator)
+  scores$score_indicator <- map(scores$score - max(scores$score, na.rm=T), score_indicator, c(-0.0001, -0.05, -0.4, -1))
 
-leaves <- V(decision_tree)[degree(decision_tree, mode="out") == 0] %>% as.integer()
-leaves2 <- map(as.integer(V(decision_tree)[degree(decision_tree, mode="in") == 2]), function(v) ego(decision_tree, 1, v, mode="in")[[1]][-c(1,2)]) %>% unlist()
-leaves <- unique(c(leaves, leaves2))
-# leaves <- leaves[order(layout$x[leaves])]
-leave_cols <- set_names(seq_along(leaves), leaves)
+  # add prior information
+  scores$prior_indicator <- scores %>%
+    gather(prior_id, prior_usage, !!priors$prior_id) %>%
+    {split(., fct_inorder(.$method_id))} %>%
+    map_chr(prior_indicator)
 
-layout$x <- layout$ggraph.index %>% map_dbl(function(i) {
-  leaves <- intersection(ego(decision_tree, 999999, i, "out")[[1]], leaves)
-  mean(leave_cols[as.character(leaves)])
+  # fix NA method name
+  scores$method_name[which(is.na(scores$method_name))] <- "No methods available"
+
+  # add question mark if method not evaluated
+  scores$method_name[which(!scores$evaluated)] <- paste0(scores$method_name[which(!scores$evaluated)], " §")
+
+  # add style
+  # scores$method_name_style <- paste0("font-size: ", c(4, 3, 2.5, 2)[seq_len(nrow(scores))])
+  scores$method_name_style <- ""
+  scores$method_name_style[which(!scores$evaluated)] <- paste0(scores$method_name_style[which(!scores$evaluated)], "; fill:#999999")
+
+  scores
+}
+
+n_top <- 4
+
+svg <- read_xml(figure_file("tree_raw2.svg"))
+
+leaf_nodeset <- svg %>% xml_find_all(".//svg:text[@class='methods']")
+leaf_ids <- xml_attr(leaf_nodeset, "id")
+
+extract_divider_position <- function(id) {
+  svg %>%
+    xml_find_first(paste0(".//svg:path[@id='" , id, "']")) %>%
+    xml_attr("d") %>%
+    str_replace("[^0-9]*([0-9\\.]*),.*", "\\1") %>%
+    as.numeric()
+}
+
+leaf_methods <- map(leaf_ids, function(leaf_id) {
+  print(leaf_id)
+
+  scores <- extract_top_methods(leaf_id, n_top = n_top)
+  n_methods <- nrow(scores)
+
+  # method name
+  method_node <- svg %>% xml_find_first(pritt(".//svg:text[@id='{leaf_id}']"))
+
+  spans <- method_node %>% xml_children()
+
+  xml_text(spans)[seq_len(n_methods)] <- scores$method_name
+  xml_text(spans)[seq_len(length(spans)-n_methods)+n_methods] <- ""
+
+  # method_size
+  spans <- method_node %>% xml_children()
+
+  xml_add_style(
+    spans,
+    scores$method_name_style
+  )
+
+  # vertical align
+  line_diff <- first(diff(as.numeric(xml_attr(spans, "y"))))
+  y_change <- line_diff/2 * (length(spans) - n_methods) # by how much should the y be changed
+  xml_attr(method_node, "y") <- as.numeric(xml_attr(method_node, "y")) + y_change
+
+  # user friendliness indicators
+  user_friendly_node <- xml_add_sibling(method_node, method_node, .copy=T)
+  spans <- user_friendly_node %>% xml_children()
+
+  xml_attr(spans, "x") <- xml_attr(user_friendly_node, "x") <- extract_divider_position("user_friendliness") + 1
+
+  xml_text(spans)[seq_len(n_methods)] <- map_chr(scores$user_friendly_indicator,"txt")
+  xml_add_style(spans,map_chr(scores$user_friendly_indicator, "style"))
+  xml_text(spans)[seq_len(length(spans)-n_methods)+n_methods] <- ""
+
+  # performance indicators
+  performance_node <- xml_add_sibling(method_node, method_node, .copy=T)
+  spans <- performance_node %>% xml_children()
+
+  xml_attr(spans, "x") <- xml_attr(performance_node, "x") <- extract_divider_position("performance") + 1
+
+  xml_text(spans)[seq_len(n_methods)] <- map_chr(scores$score_indicator,"txt")
+  xml_add_style(spans,map_chr(scores$score_indicator, "style"))
+  xml_text(spans)[seq_len(length(spans)-n_methods)+n_methods] <- ""
+
+  # prior information
+  prior_node <- xml_add_sibling(method_node, method_node, .copy=T)
+  spans <- prior_node %>% xml_children()
+
+  xml_text(spans)[seq_len(n_methods)] <- scores$prior_indicator
+  xml_text(spans)[seq_len(length(spans)-n_methods)+n_methods] <- ""
+
+  xml_attr(spans, "x") <- xml_attr(prior_node, "x") <- extract_divider_position("priors") + 1
 })
 
-layout$level[layout$type == "method"] <- -layout$method_i[layout$type == "method"] * 0.5
-layout$level[layout$type == "topology"] <- 1
-layout$level[layout$type == "decision"] <- layout$y[layout$type == "decision"] - min(layout$y[layout$type == "decision"]) + 2
-#
-# # change layout to level
-layout$y <- ifelse(is.na(layout$level), layout$y, layout$level)
+date <- xml_child(xml_find_first(svg, ".//svg:text[@id='date']"))
+xml_text(date) <- paste0("Generated at ", as.character(Sys.Date()))
 
-guidelines <- layout %>% ggraph() +
-  geom_edge_diagonal(aes(alpha=type), data = get_edges("short")(layout) %>% filter(type != "to_method")) +
-  geom_edge_link(aes(xend=x + (xend-x)/1.2, yend = y + (yend-y)/1.2, alpha=type), arrow=arrow(type="closed", length=unit(0.1, "inches")), data = get_edges("short")(layout) %>% filter(type == "to_method")) +
-  geom_node_label(aes(label=label_wrap(node_label, 25), fill=fill, color=type, alpha=alpha)) +
-  scale_color_manual(values=type_colors) +
-  scale_fill_identity() +
-  scale_alpha_identity() +
-  scale_edge_alpha_manual(values=c(method=0, decision=1, to_method=1)) +
-  theme_graph() +
-  scale_x_continuous(expand=c(0.2,0.2)) +
-  theme(legend.position="none", plot.margin=margin(0, 0, 0, 0))
-guidelines
+svg %>% write_xml(figure_file("tree.svg"))
 
-guidelines %>% ggdraw() %>% write_rds(figure_file("user_guidelines.rds"))
+system(pritt("inkscape {figure_file('tree.svg')} --export-png {figure_file('tree.png')} -d 300"))
