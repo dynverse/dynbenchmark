@@ -71,6 +71,19 @@ render(
   output_file = "paper_latex.pdf",
   clean = F
 )
+render(
+  "analysis/paper/supplementary_latex.Rmd",
+  output_format = rmarkdown::pdf_document(
+    latex_engine = "xelatex",
+    dev = "png",
+    keep_tex = TRUE,
+    citation_package = "biblatex",
+    pandoc_args = c("--csl=nature-biotechnology.csl")
+  ),
+  output_dir = "analysis/paper/",
+  output_file = "supplementary_latex.pdf",
+  clean = F
+)
 unlink(tofiles) # remove tmp pdfs
 
 # upload to google drive
