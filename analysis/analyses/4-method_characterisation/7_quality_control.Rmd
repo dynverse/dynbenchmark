@@ -21,6 +21,7 @@ checks <- readRDS(derived_file("checks.rds"))
 
 implementation_order <- implementations_evaluated %>%
   arrange(-qc_score) %>% 
+  filter(!is.na(qc_score)) %>% 
   pull(implementation_id)
 
 label_implementation <- function(implementation_id) {implementations_evaluated$implementation_name[match(implementation_id, implementations_evaluated$implementation_id)]}
@@ -31,12 +32,12 @@ Calculate the overall qc scores for each implementation
 # set the ordering of implementation_ids to this ordering
 implementation_ordering_plot <- implementations_evaluated %>%
   mutate(implementation_id = factor(implementation_id, implementation_order)) %>% 
-  ggplot(aes(implementation_id, qc_score)) +
+  ggplot(aes(as.numeric(implementation_id), qc_score)) +
     geom_bar(aes(fill=qc_score), stat="identity") +
     geom_text(aes(y=0.025, label=label_implementation(implementation_id), color=ifelse(qc_score > 0.5, "black", "white")), angle=90, hjust=0, size=5) +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
     scale_y_continuous(NULL, expand=c(0, 0), limits=c(0, 1)) +
-    scale_x_discrete(NULL, breaks=c(0, 100), expand=c(0, 0)) +
+    scale_x_continuous("", breaks=NULL, expand = c(0, 0)) +
     viridis::scale_fill_viridis(label_long("qc_score"), option="D", guide=guide_colorbar(title.position = "top", title.hjust=0.5, barwidth = unit(2, "inches"))) +
     scale_color_identity() +
     annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf)+
@@ -120,13 +121,14 @@ check_difficulty_heatmap <- check_difficulty_data %>%
         (check_end+check_start)/2,
         label=label_wrap(item, 35)
       ), 
-      nudge_x = 6, 
+      nudge_x = 0.5, 
       direction="y", 
       data=check_difficulty_data %>% 
         filter(score <= 0.5), 
       size=5, 
       lineheight=0.8, 
-      min.segment.length = 0
+      min.segment.length = 0,
+      hjust=0
     ) +
     geom_segment(aes(x=0, xend=1, y=check_end, yend=check_end), data=check_position, color="#444444", alpha=0.25) +
     geom_segment(aes(x=0, xend=1, y=aspect_end, yend=aspect_end), data=aspect_position, color="#444444") +
