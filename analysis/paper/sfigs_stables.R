@@ -1,3 +1,5 @@
+cat("# Supplementary Material \n")
+
 cat("\n\n")
 cat("## Supplementary Figures \n")
 cat("\n\n")
