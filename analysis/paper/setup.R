@@ -69,7 +69,7 @@ plot_fig <- function(ref_type, ref_id, fig_path, caption_main, caption_text, wid
   if (params$table_format == "latex") {
     fig_name <- ref(ref_type, ref_id, pattern = "{ref_full_name}")
     subchunk <- glue::glue(
-      "\\Begin{{myfigure}}{{{ifelse(ref_type == 'fig', '!htb', 'H')}}}\n",
+      "\\Begin{{myfigure}}{{{ifelse(ref_type == 'fig', '!htbp', 'H')}}}\n",
       "\\Begin{{center}}\n",
       "{fig_anch}\n",
       "\\includegraphics{{{fig_path}}}\n\n",
