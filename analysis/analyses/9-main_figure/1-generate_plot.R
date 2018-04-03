@@ -60,7 +60,7 @@ method_tib <- method_tib %>%
     avg_time_lab = ifelse(time_method < 60, paste0(round(time_method), "s"), ifelse(time_method < 3600, paste0(round(time_method / 60), "m"), paste0(round(time_method / 3600), "h"))),
     remove_results = pct_errored > .49,
     pct_succeeded = 1 - pct_errored,
-    pct_errored_lab = paste0(round(pct_errored * 100), "%"),
+    pct_errored_lab = case_when(pct_errored >= .01 ~ paste0(ceiling(pct_errored * 100), "%"), pct_errored > 0 ~ "<1%", TRUE ~ "0%"),
     missing_qc_reason = ifelse(!is_na_qc, "", ifelse(method_short_name %in% control_methods, "Control", "Missing")),
     black = "black"
   ) %>%
