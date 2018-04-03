@@ -32,7 +32,6 @@ walk(files, function(file) {
 
 ##  ............................................................................
 ##  HTML                                                                    ####
-
 file.remove("analysis/paper/paper.html")
 
 params <- list(table_format="html")
@@ -41,7 +40,7 @@ render(
   output_format = bookdown::gitbook(split_by="none", number_sections=FALSE, config=list(toc=list(scroll_highlight = "yes")), css="style.css", lib_dir = ".scratch/"),
   output_dir = "analysis/paper/",
   output_file = "paper.html",
-  params = c(table_format="html")
+  params = c(table_format = "html")
 )
 browseURL("analysis/paper/paper.html")
 
@@ -50,9 +49,7 @@ browseURL("analysis/paper/paper.html")
 
 # create pdfs and pngs for every svg, svg conversion is not really good in pandoc
 files <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg")
-# tofiles <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg") %>% gsub("\\.svg", "\\.tmp\\.png", .)
-# parallel::mclapply(purrr::transpose(list(files, tofiles)), function(.) system(glue::glue("inkscape {.[[1]]} --export-png={.[[2]]}")), mc.cores=8)
-tofiles <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg") %>% gsub("\\.svg", "\\.tmp\\.pdf", .)
+tofiles <- files %>% gsub("\\.svg", "\\.tmp\\.pdf", .)
 parallel::mclapply(purrr::transpose(list(files, tofiles)), function(.) system(glue::glue("inkscape {.[[1]]} --export-pdf={.[[2]]}")), mc.cores=8)
 
 # generate pdfs
@@ -65,14 +62,14 @@ render(
   "analysis/paper/paper_latex.Rmd",
   output_format = rmarkdown::pdf_document(
     latex_engine = "xelatex",
-    dev="png",
-    keep_tex=TRUE,
-    citation_package="biblatex",
-    pandoc_args=c("--csl=nature-biotechnology.csl")
+    dev = "png",
+    keep_tex = TRUE,
+    citation_package = "biblatex",
+    pandoc_args = c("--csl=nature-biotechnology.csl")
   ),
   output_dir = "analysis/paper/",
   output_file = "paper_latex.pdf",
-  clean=F
+  clean = F
 )
 unlink(tofiles) # remove tmp pdfs
 
