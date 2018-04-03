@@ -712,7 +712,8 @@ We classified all possible trajectory topologies into distinct trajectory types,
 
 
 
-# Supplementary Material
+## Data and code availability
+The datasets used in this study are deposited in zenodo [doi.org/10.5281/zenodo.1211533](doi.org/10.5281/zenodo.1211533). Code is available as several R packages on github [https://github.com/dynverse/dynverse](https://github.com/dynverse/dynverse).
 
 
 
@@ -734,5 +735,7 @@ add_sfig(
 
 
 ```{r "supplementary", echo=FALSE, results='asis'}
-source(paste0(dynalysis::get_dynalysis_folder(), "/analysis/paper/sfigs_stables.R"))
+if (params$table_format == "html") 
+  source(paste0(dynalysis::get_dynalysis_folder(), "/analysis/paper/sfigs_stables.R"))
+write_rds(lst(sfigs, stables), derived_file("sfigs_stables.rds", "paper"))
 ```

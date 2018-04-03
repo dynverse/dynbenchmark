@@ -70,6 +70,7 @@ citation_format <- c(
 imp_table <- map(c("latex", "html"), function(format) {
   implementations_table <-
     implementations %>%
+    filter(type == "algorithm") %>%
     arrange(date) %>%
     mutate(
       evaluated = ifelse(evaluated, "Yes", map_chr(non_inclusion_reasons_footnotes, ~paste0("No" , superscript[[format]](paste0(., collapse=" "))))),
