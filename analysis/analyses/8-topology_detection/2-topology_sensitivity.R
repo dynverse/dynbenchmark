@@ -74,7 +74,7 @@ topology_sensitivity_table <- map(c("html", "latex"), function(format) {
     rename_all(label_long) %>%
     knitr::kable(format, escape = F) %>%
     kableExtra::kable_styling()
-})
+}) %>% set_names(c("html", "latex"))
 topology_sensitivity_table
 write_rds(topology_sensitivity_table, figure_file("topology_sensitivity_table.rds"))
 
