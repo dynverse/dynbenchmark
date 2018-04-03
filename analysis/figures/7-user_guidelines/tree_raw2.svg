@@ -9,9 +9,9 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="1187.7532"
+   width="1208.7115"
    height="610.00031"
-   viewBox="0 0 1187.7534 610.00028"
+   viewBox="0 0 1208.7118 610.00028"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.2 (unknown)"
@@ -721,7 +721,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
      inkscape:cx="991.86787"
-     inkscape:cy="229.51239"
+     inkscape:cy="229.51241"
      inkscape:document-units="mm"
      inkscape:current-layer="layer2"
      showgrid="true"
@@ -742,8 +742,8 @@
     <inkscape:grid
        type="xygrid"
        id="grid817"
-       originx="-2.2467721"
-       originy="309.99998" />
+       originx="-2.2467724"
+       originy="309.99996" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -753,7 +753,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -1953,7 +1953,7 @@
          inkscape:connector-curvature="0" />
       <polygon
          id="polygon22"
-         points="21.5,43 21.5,50 23.5,50 23.5,53 29.5,53 29.5,50 31.5,50 31.5,43 "
+         points="23.5,50 23.5,53 29.5,53 29.5,50 31.5,50 31.5,43 21.5,43 21.5,50 "
          style="fill:#556080;stroke-width:1.70711994"
          transform="translate(-1.500009,456.80865)" />
     </g>
@@ -2013,7 +2013,7 @@
          inkscape:connector-curvature="0" />
       <polygon
          id="polygon22-2"
-         points="29.5,53 29.5,50 31.5,50 31.5,43 21.5,43 21.5,50 23.5,50 23.5,53 "
+         points="31.5,50 31.5,43 21.5,43 21.5,50 23.5,50 23.5,53 29.5,53 29.5,50 "
          style="fill:#556080;stroke-width:1.70711994"
          transform="translate(-1.500009,456.80865)" />
     </g>
