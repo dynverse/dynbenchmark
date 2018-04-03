@@ -144,21 +144,27 @@ Several methods obtained a high overall score despite having 5 to 10% of failed 
 
 <!-- Evaluation robustness -->
 ```{r}
+
+# the correlation when subsampling
 correlation_tenth <- read_rds(result_file("task_sample_correlations.rds", "11-evaluation_robustness")) %>%
 filter(n_tasks == round(max(n_tasks)/10)) %>% 
           pull(cor) %>% 
           mean()
+
+# how often is a method top when subsampling
 top_method_rank_match <- read_rds(result_file("task_sample_ranks_match.rds", "11-evaluation_robustness")) %>%
 filter(method_short_name == "slngsht") %>% 
 filter(n_tasks == round(max(n_tasks)/10)) %>%
 pull(rank_match)
+
+# how many datasets are necessary to get a method on top
 random_method_max_tasks_top <- read_rds(result_file("task_sample_max_tasks_top.rds", "11-evaluation_robustness")) %>% 
 filter(method_short_name == "wishbone") %>% 
 pull(max_n_tasks_top)
 ```
 
 
-We further investigated the robustness of our evaluation across datasets and dataset sources. Method performance was moderately to highly correlated (0.5-0.9 depending on the trajectory type) between real and synthetic datasets (`r ref("sfig", "robustness_comparison", "a")`), confirming the relevance of synthetic data, and the accuracy of the real datasets' gold standard. Furthermore, while performance was strongly dependent on individual datasets, the ordering of methods was still robust, with a majority of the methods significantly outperforming the next method in the ranking (`r ref("sfig", "robustness_comparison", "b")`). To further illustrate this, we looked at the scores in a randomly selected 10% subset of all datasets. The overall ordering was still highly correlated with the ordering on all datasets (average spearman's correlation of  `r round(correlation_tenth, 2)`), and the top method, Slingshot, was the top method in `r scales::percent(top_method_rank_match)` of random dataset subsets. On the other hand, for nearly every method it was possible to find a subset of datasets on which it on average performed the best. For example, for Wishbone, a method ranked in the middle, we found a subset of `r random_method_max_tasks_top` datasets on which it would be the top ranking method. Altogether, this demonstrates that almost every method can be the best on a particular set of datasets, and that a large number of datasets, as we included in our evaluation, is necessary to robustly compare the overall performance of methods.
+We further investigated the robustness of our evaluation across datasets and dataset sources. Method performance was moderately to highly correlated (0.5-0.9 depending on the trajectory type) between real and synthetic datasets (`r ref("sfig", "robustness_comparison", "a")`), confirming the relevance of synthetic data, and the accuracy of the real datasets' gold standard. Furthermore, while performance was strongly dependent on individual datasets, the ordering of methods was still robust, with a majority of the methods significantly outperforming the next method in the ranking (`r ref("sfig", "robustness_comparison", "b")`). To further illustrate this, we looked at the scores in a randomly selected 10% subset of all datasets. The overall ordering was still highly correlated with the ordering on all datasets (average spearman's correlation of  `r round(correlation_tenth, 2)`), and the top method, Slingshot, was the top method in `r scales::percent(top_method_rank_match)` of random dataset subsets. On the other hand, for nearly every method it was possible to find a subset of datasets on which it on average performed the best  (`r ref("sfig", "robustness_comparison", "c")`). For example, for Wishbone, a method ranked in the middle, we found a subset of `r random_method_max_tasks_top` datasets on which it would be the top ranking method. Altogether, this demonstrates that almost every method can be the best on a particular set of datasets, and that a large number of datasets, as we included in our evaluation, is necessary to robustly compare the overall performance of methods.
 
 
 ```{r}
@@ -184,7 +190,14 @@ In most cases, the methods which were specifically designed to handle a particul
 
 
 <!-- Topological complexity versus performance -->
-Despite their similar overall performance, the topologies predicted by the top methods differed considerably. Trajectories detected by Slingshot and cellTree tended to contain less branches, while those detected by TSCAN, AGA Pseudotime and Monocle DDRTree gravitated towards more complex topologies (`r ref("fig", "topology_complexity_comparison")`). AGA Pseudotime and Monocle DDRTree for example, frequently predicted a tree topology, even when only a cyclic, linear or bifurcating topology was present in the data. Indeed, when we assessed how often a method inferred the correct topology, Slingshot and TSCAN were good at correctly predicting linear, bifurcating and converging trajectories, while Monocle DDRTree most frequently predicted the correct tree topology (`r ref("stable", "topology_sensitivity")`). Nonetheless, the overall accuracy of topology prediction was very low, with Slingshot correctly predicting bifurcating and converging topologies for half of the datasets, and Monocle DDRTree predicting the correct tree topology in only 11% of the cases  (`r ref("stable", "topology_sensitivity")`). Inferring the correct topology without parameter tuning is therefore still an open challenge. When the data contains a complex trajectory structure, TI will currently require a considerable guidance by the user, either to optimise the parameters or to choose the method whose output best fits the user's expert knowledge.
+```{r}
+
+# sensitivity of topology prediction
+topology_sensitivity <- read_rds(result_file("topology_sensitivity.rds"))
+```
+
+
+Despite their similar overall performance, the topologies predicted by the top methods differed considerably. Trajectories detected by Slingshot and cellTree tended to contain less branches, while those detected by TSCAN and AGA Pseudotime gravitated towards more complex topologies (`r ref("fig", "topology_complexity_comparison")`). AGA Pseudotime for example frequently predicted a tree topology, even when a non-branching topology was present in the data. Indeed, when we assessed how often a method inferred the correct topology, Slingshot and TSCAN were good at correctly predicting linear, bifurcating and converging trajectories, while Monocle DDRTree most frequently predicted the correct tree topology (`r ref("stable", "topology_sensitivity")`). Nonetheless, the overall accuracy of topology prediction was very low, with Slingshot best discriminating linear from bifurcating topologies (sensitivity of respectively ), and Monocle DDRTree and SCUBA best predicting the correct tree topology in respectively `r scales::percent(filter(topology_sensitivity, method_id == 'mnclddr', trajectory_type == 'rooted_tree')$perc_perfect)` and `r scales::percent(filter(topology_sensitivity, method_id == 'scuba', trajectory_type == 'rooted_tree')$perc_perfect)` of the cases  (`r ref("stable", "topology_sensitivity")`). Inferring the correct topology without parameter tuning is therefore still an open challenge. When the data contains a complex trajectory structure, TI will currently require a considerable guidance by the user, either to optimise the parameters or to choose the method whose output best fits the user's expert knowledge.
 
 
 `r anchor("fig", "topology_complexity_comparison")`
@@ -195,7 +208,7 @@ Despite their similar overall performance, the topologies predicted by the top m
 
 
 <!-- Additional factors which could influence performance -->
-Apart from the trajectory types, we also investigated several other factors which could influence the performance of a method. Although we provided prior information to those methods that require it, we did not observe any major difference in method performance between these methods and those that did not receive any prior information (`r ref("fig", "results_overview", "b")`). When we looked at the algorithmic steps shared by different methods, we found that those which included principal curves (such as Slingshot and SCORPIUS), k-means (which include Slingshot and several other top scoring methods) and some graph building (which include almost every top scoring method) tended to have a slightly higher performance, while those which included tSNE had a lower performance ( `r ref("stable", "component_importance")`).
+Apart from the trajectory types, we also investigated several other factors which could influence the performance of a method. Although we provided prior information to those methods that require it, we did not observe any major difference in method performance between these methods and those that did not receive any prior information (`r ref("fig", "results_overview", "a-b")`). When we looked at the algorithmic steps shared by different methods, we found that those which included principal curves (such as Slingshot and SCORPIUS), k-means (which include Slingshot and several other top scoring methods) and some graph building (which include almost every top scoring method) tended to have a slightly higher performance, while those which included tSNE had a lower performance ( `r ref("stable", "component_importance")`).
 
 
 ```{r}
@@ -224,7 +237,7 @@ We found that most methods fulfilled the basic criteria, such as free availabili
 ![](`r figure_file("implementation_qc_overview.svg","4-method_characterisation")`)
 
 
-`r ref("fig", "implementation_qc_overview")` **Overview of the quality control results for every method.** Shown is the score given for each method on every item from our quality control score sheet (`r ref("stable", "qc_checks")`). Each aspect of the quality control was part of a category, and each category was weighted so that it contributed equally to the final quality score. Within each category, each aspect also received a weight depending on how often it was mentioned in a set of papers discussing good practices in tool development and evaluation. This height is represented in the plot as the block heighton the y-axis. Top: Average QC score for each method. Right: The average score of each quality control item. Shown into more detail are those items which had a score lower than 0.5. 
+`r ref("fig", "implementation_qc_overview")` **Overview of the quality control results for every method.** Shown is the score given for each method on every item from our quality control score sheet (`r ref("stable", "qc_checks")`). Each aspect of the quality control was part of a category, and each category was weighted so that it contributed equally to the final quality score. Within each category, each aspect also received a weight depending on how often it was mentioned in a set of papers discussing good practices in tool development and evaluation. This is represented in the plot as the height on the y-axis. Top: Average QC score for each method. Right: The average score of each quality control item. Shown into more detail are those items which had a score lower than 0.5. 
 
 
 We observed no clear relation between method quality and method performance (`r ref("fig", "results_overview")`). We could also not find any quality aspect which was significantly associated with method performance.
@@ -300,7 +313,7 @@ A continuously updated list can also be found [online](https://goo.gl/FnsTxG)). 
 <!-- Inclusion criterion -->
 Methods were excluded from the evaluation based on several criteria: `r glue::collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. This resulted in the inclusion of `r sum(methods$evaluated)` methods in the evaluation.
 <!-- Components -->
-The selected methods were dissected into a set of algorithmic components. Each component can have a significant impact on the performance, scalability, and output data structures. Across all methods, these components can be broadly grouped into two stages; (i) conversion to a simplified representation using dimensionality reduction, clustering or graph building and (ii) ordering the cells along the simplified representation [@cannoodt_computational_2016]. Interestingly, components are frequently shared between different algorithms (`r ref("sfig", "implementation_components")`). For example, minimal spanning trees (MST), used in the first single-cell RNA-seq trajectory inference methods [@trapnell_dynamicsregulatorscell_2014], is shared by almost half of the methods we evaluated  (`r ref("sfig", "implementation_components", "b")`).
+The selected methods were dissected into a set of algorithmic components. Each component can have a significant impact on the performance, scalability, and output. Across all methods, these components can be broadly grouped into two stages; (i) conversion to a simplified representation using dimensionality reduction, clustering or graph building and (ii) ordering the cells along the simplified representation [@cannoodt_computational_2016]. Interestingly, components are frequently shared between different algorithms (`r ref("sfig", "implementation_components")`). For example, minimal spanning trees (MST), used in the first single-cell RNA-seq trajectory inference methods [@trapnell_dynamicsregulatorscell_2014], is shared by almost half of the methods we evaluated  (`r ref("sfig", "implementation_components", "b")`).
 
 ### Method input
 As input, we provided for each method either the raw count data (after cell and gene filtering) or normalised expression values, based on the description in the methods documentation or from the study describing the method.
@@ -308,7 +321,7 @@ As input, we provided for each method either the raw count data (after cell and 
 A large portion of the methods requires some form of prior information (e.g. a start cell) in order to be executable. Other methods allow to exploit certain prior information, though this is not required. Prior information can be supplied as a starting cell from which the trajectory will originate, a set of important marker genes, or even a grouping of cells into cell states. Providing prior information to a TI method can be both a blessing and a curse. In one way, prior information can help the method to find the correct trajectory among many, equally likely, alternatives. On the other hand, incorrect or noisy prior information can bias the trajectory towards current knowledge. Moreover, prior information is not always easily available, and its subjectivity can therefore lead to multiple equally plausible solutions, restricting the applicability of such TI methods to well studied systems.
 
 
-The prior information was extracted from the gold/silver standards as follows:
+The prior information was extracted from the gold standard as follows:
 
 
 * **Start cells** The identity of one or more start cells. For both real and synthetic data, a cell was chosen which was the closest (in geodesic distance) to each milestone with only outgoing edges. For ties, one random cell was chosen. For cyclic datasets, a random cell was chosen.
@@ -524,7 +537,7 @@ Because each cellular simulation follows the trajectory at its own speed, knowin
 We used a standard single-cell RNA-seq preprocessing pipeline which applies parts of the scran and scater Bioconductor packages [@lun_stepbystepworkflowlowlevel_2016]. The advantages of this pipeline is that it works both with and without spike-ins, and includes a harsh cell filtering which looks at abnormalities in library sizes, mitochondrial gene expression, and number of genes expressed using median absolute deviations (set to 3). We required that a gene was expressed in at least 5% of the cells, and that it should have an average expression higher than 0.05. Furthermore, we used the pipeline to select the most highly variable genes, using a false discovery rate of 5% and a biological component higher than 0.5. As a final filter, we removed both zero genes and cells until convergence.
 
 ## Evaluation metrics
-The importance of using multiple metrics to compare complex models has been stated repeatedly [@norel_selfassessmenttrap_2011]. We defined three metrics for comparing the likeness of predicted trajectories to a gold standard (`r ref("fig", "evaluation_overview", "c")`). Each metric assesses the performance of a different aspect of the trajectory (`r ref("sfig", "score_aspects")`); (i) the correlation metric measures the similarity in pairwise cell-cell distances; (ii) the RF MSE metric assesses whether cell neighbourhoods are similar in both trajectories; and (iii) the edge flip scores assesses similarity in trajectory topologies. 
+The importance of using multiple metrics to compare complex models has been stated repeatedly [@norel_selfassessmenttrap_2011]. We defined three metrics for comparing the similarity of predicted trajectories to a gold standard (`r ref("fig", "evaluation_overview", "c")`). Each metric assesses the performance of a different aspect of the trajectory (`r ref("sfig", "score_aspects")`); (i) the correlation metric measures the similarity in pairwise cell-cell distances; (ii) the RF MSE metric assesses whether cell neighbourhoods are similar in both trajectories; and (iii) the edge flip scores assesses similarity in trajectory topologies. 
 
 
 ```{r}
@@ -713,5 +726,5 @@ add_sfig(
 
 
 ```{r "supplementary", echo=FALSE, results='asis'}
-source("analysis/paper/sfigs_stables.R")
+source(paste0(dynalysis::get_dynalysis_folder(), "/analysis/paper/sfigs_stables.R"))
 ```
