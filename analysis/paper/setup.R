@@ -35,18 +35,19 @@ create_names <- list(
   stable = function(i) pritt("Supplementary Table {i}"),
   section = function(i) pritt("")
 )
-sfigs <- tibble(ref_id = character(), fig = list(), caption = character(), width=numeric(), height=numeric())
-add_sfig <- function(fig, ref_id, caption, width=15, height=10) {
+sfigs <- tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width=numeric(), height=numeric())
+add_sfig <- function(fig_path, ref_id, caption_main, caption_text, width=15, height=10) {
   sfigs <<- sfigs %>% add_row(
-    fig = list(fig),
     ref_id = ref_id,
-    caption=caption,
-    width=width,
-    height=height
+    fig_path = fig_path,
+    caption_main = caption_main,
+    caption_text = caption_text,
+    width = width,
+    height = height
   )
 }
 
-figs <- tibble(ref_id = character(), fig_path = list(), caption_main = character(), caption_text = character(), width=numeric(), height=numeric())
+figs <- tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width=numeric(), height=numeric())
 add_fig <- function(fig_path, ref_id, caption_main, caption_text, width = 5, height = 7) {
   # save it because why not
   figs <<- figs %>% add_row(
@@ -57,14 +58,16 @@ add_fig <- function(fig_path, ref_id, caption_main, caption_text, width = 5, hei
     width = width,
     height = height
   )
-
-  fig_anch <- anchor("fig", ref_id)
+  plot_fig("fig", ref_id, fig_path, caption_main, caption_text, width, height)
+}
+plot_fig <- function(ref_type, ref_id, fig_path, caption_main, caption_text, width = 5, height = 7) {
+  fig_anch <- anchor(ref_type, ref_id)
 
   caption_main <- knitr::knit(text = caption_main, quiet = TRUE)
   caption_text <- knitr::knit(text = caption_text, quiet = TRUE)
 
   if (params$table_format == "latex") {
-    fig_name <- ref("fig", ref_id, pattern = "{ref_full_name}")
+    fig_name <- ref(ref_type, ref_id, pattern = "{ref_full_name}")
     subchunk <- glue::glue(
       "\\Begin{{figure}}\n",
       "\\Begin{{center}}\n",
@@ -75,11 +78,12 @@ add_fig <- function(fig_path, ref_id, caption_main, caption_text, width = 5, hei
       "\\End{{figure}}\n"
     )
   } else {
-    fig_cap <- ref("fig", ref_id, pattern = "{ref_full_name}")
+    fig_cap <- ref(ref_type, ref_id, pattern = "{ref_full_name}")
     subchunk <- glue::glue(
       "<p>\n",
       "  {fig_anch}\n",
       "  <img src=\"{fig_path}\" />\n",
+      "</p><p>\n",
       "  <strong>{fig_cap}: {caption_main}</strong> {caption_text}\n",
       "</p>\n"
     )
