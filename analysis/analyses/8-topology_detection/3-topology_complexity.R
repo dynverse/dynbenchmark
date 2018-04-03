@@ -125,9 +125,17 @@ trajectory_type_comparison
 ### Compare complexity distributions                                        ####
 
 bw <- 1.5
-arrow_y <- 10
+arrow_y <- 9
 trajectory_type_colors <- c(set_names(trajectory_types_simplified$color, trajectory_types_simplified$simplified), "all_trajectory_types"="#333333")
 complexity_difference_limits <- with(milestone_networks, c(min(complexity_predicted - complexity_gold, na.rm=T)-bw, max(complexity_predicted - complexity_gold, na.rm=T)+bw))
+arrow_annot_data <- tibble(
+  method_id = factor(method_order[[1]], method_order),
+  x = complexity_difference_limits,
+  text = c("Prediction too\nsimple", "Prediction too\ncomplex"),
+  hjust = c(-0.05, 1)
+)
+
+
 complexity_difference_distribution <- milestone_networks %>%
   mutate(complexity_difference = complexity_predicted - complexity_gold) %>%
   {
@@ -136,8 +144,9 @@ complexity_difference_distribution <- milestone_networks %>%
     mutate(., trajectory_type_gold = "all_trajectory_types")
     ) %>% mutate(trajectory_type_gold = factor(trajectory_type_gold, levels=c(trajectory_types_simplified$simplified, "all_trajectory_types")))
   } %>%
-  ggplot(aes(complexity_difference, y=trajectory_type_gold, fill=trajectory_type_gold)) +
+  ggplot(aes(complexity_difference, y=trajectory_type_gold)) +
   ggridges::geom_density_ridges2(
+    aes(fill=trajectory_type_gold),
     stat="density_ridges",
     alpha=0.8,
     bandwidth=bw,
@@ -148,9 +157,9 @@ complexity_difference_distribution <- milestone_networks %>%
   scale_fill_manual(values=trajectory_type_colors) +
   facet_grid(.~method_id, labeller=label_facet_methods) +
   scale_y_discrete(label_long("trajectory_type_gold"), expand = c(0,0), labels=label_long) +
-  scale_x_continuous(label_long("Difference in topological complexity (= # nodes + # edges)\nbetween prediction and gold standard"), expand = c(0, 0), limits = complexity_difference_limits) +
-  annotate("segment", x = complexity_difference_limits[[2]]/3, xend = complexity_difference_limits[[2]], y = arrow_y, yend = arrow_y, colour = "#333333", arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
-  annotate("text", x = complexity_difference_limits[[2]], y = arrow_y, colour = "#333333", label="More complex", hjust=1, vjust=1.5, lineheight = 0.8, size=3) +
+  scale_x_continuous(label_long("Difference in topology size (= # nodes + # edges)\nbetween prediction and gold standard"), expand = c(0, 0), limits = complexity_difference_limits) +
+  # geom_segment(aes(x = 0, xend = x, y = arrow_y, yend = arrow_y), colour = "#333333", arrow=arrow(type="closed", length=unit(0.1, "inches")), data=arrow_annot_data) +
+  geom_text(aes(x = x, y = arrow_y, hjust=hjust, label=text), colour = "#333333", vjust=-0.5, lineheight = 0.8, size=3.2, data=arrow_annot_data) +
   theme(legend.position = "none", axis.text.y=element_text(vjust=0))
 complexity_difference_distribution
 
@@ -163,7 +172,7 @@ topology_complexity_comparison <- plot_grid(
   ncol=1,
   align="v",
   axis="lr",
-  labels="auto"
+  labels=NULL
 )
 
 topology_complexity_comparison
