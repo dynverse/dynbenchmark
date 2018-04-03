@@ -713,7 +713,7 @@ We classified all possible trajectory topologies into distinct trajectory types,
 
 
 ## Data and code availability
-The datasets used in this study are deposited in zenodo [doi.org/10.5281/zenodo.1211533](doi.org/10.5281/zenodo.1211533). Code is available as several R packages on github [https://github.com/dynverse/dynverse](https://github.com/dynverse/dynverse).
+The datasets used in this study are deposited in zenodo [doi.org/10.5281/zenodo.1211533](https://doi.org/10.5281/zenodo.1211533). Code is available as several R packages on github [github.com/dynverse/dynverse](https://github.com/dynverse/dynverse).
 
 
 
