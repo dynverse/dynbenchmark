@@ -88,4 +88,5 @@ unlink(tofiles) # remove tmp pdfs
 
 # upload to google drive
 drive_update("dynverse/paper.pdf", "analysis/paper/paper_latex.pdf")
+drive_update("dynverse/supplementary.pdf", "analysis/paper/supplementary_latex.pdf")
 
