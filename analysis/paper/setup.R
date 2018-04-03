@@ -22,11 +22,10 @@ ref <- function(ref_type, ref_id, suffix="", anchor=FALSE, pattern = "[**{ref_fu
   ref
 }
 anchor <- function(ref_type, ref_id) {
-  if (params$table_format == "html") {
-    pritt("<a name='{ref_type}_{ref_id}'></a>")
-  } else {
-    pritt("\\hypertarget{{{ref_type}_{ref_id}}}{{}}")
-  }
+  case_when(
+    params$table_format == "html" ~ pritt("<a name='{ref_type}_{ref_id}'></a>"),
+    params$table_format == "latex" ~ pritt("\\protect\\hypertarget{{{ref_type}_{ref_id}}}{{}}")
+  )
 }
 create_names <- list(
   sfig = function(i) pritt("Supplementary Figure {i}"),
@@ -45,6 +44,48 @@ add_sfig <- function(fig, ref_id, caption, width=15, height=10) {
     width=width,
     height=height
   )
+}
+
+figs <- tibble(ref_id = character(), fig_path = list(), caption_main = character(), caption_text = character(), width=numeric(), height=numeric())
+add_fig <- function(fig_path, ref_id, caption_main, caption_text, width = 5, height = 7) {
+  # save it because why not
+  figs <<- figs %>% add_row(
+    ref_id = ref_id,
+    fig_path = fig_path,
+    caption_main = caption_main,
+    caption_text = caption_text,
+    width = width,
+    height = height
+  )
+
+  fig_anch <- anchor("fig", ref_id)
+
+  caption_main <- knitr::knit(text = caption_main, quiet = TRUE)
+  caption_text <- knitr::knit(text = caption_text, quiet = TRUE)
+
+  if (params$table_format == "latex") {
+    fig_name <- ref("fig", ref_id, pattern = "{ref_full_name}")
+    subchunk <- glue::glue(
+      "\\Begin{{figure}}\n",
+      "\\Begin{{center}}\n",
+      "{fig_anch}\n",
+      "\\includegraphics{{{fig_path}}}\n\n",
+      "\\End{{center}}\n",
+      "**{fig_name}: {caption_main}** {caption_text}\n\n",
+      "\\End{{figure}}\n"
+    )
+  } else {
+    fig_cap <- ref("fig", ref_id, pattern = "{ref_full_name}")
+    subchunk <- glue::glue(
+      "<p>\n",
+      "  {fig_anch}\n",
+      "  <img src=\"{fig_path}\" />\n",
+      "  <strong>{fig_cap}: {caption_main}</strong> {caption_text}\n",
+      "</p>\n"
+    )
+  }
+
+  cat(subchunk)
 }
 
 stables <- tibble(ref_id = character(), table = list(), caption = character())
@@ -75,11 +116,11 @@ add_caption_latex <- function(table, caption="hi") {
 # table
 add_table <- function(ref_id, table, caption) {
   if (params$table_format == "latex") {
-    caption_latex <- paste0("\\\\textbf{", ref('table', ref_id, pattern = "{ref_full_name}"), "} ", caption)
+    caption_latex <- paste0("\\\\textbf{", ref('table', ref_id, pattern = "{ref_full_name}"), "}: ", caption)
     table_output <- paste("", "", table[["latex"]] %>% add_caption_latex(caption_latex), "", "", sep="\n")
   } else {
     table_output <- paste0(
-      paste0(ref("table", "implementations", anchor=TRUE), " ", caption),
+      paste0(ref("table", "implementations", anchor=TRUE), ": ", caption),
       table[["html"]],
       collapse="\n"
     )
