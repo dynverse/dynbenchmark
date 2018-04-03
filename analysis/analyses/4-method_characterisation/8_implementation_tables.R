@@ -119,7 +119,7 @@ imp_table <- map(c("latex", "html"), function(format) {
         escape = FALSE
       )
     ) %>%
-    select(method = implementation_name, date, maximal_trajectory_type, fixes_topology, prior_required, prior_optional, evaluated, reference) %>%
+    select(method = implementation_name, date, maximal_trajectory_type,evaluated, reference) %>%
     rename_all(label_long)
 
   # force newline most complex trajectory type -_-
