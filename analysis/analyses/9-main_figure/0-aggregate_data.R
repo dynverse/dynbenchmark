@@ -153,21 +153,12 @@ for (n in names(part_list)) {
   }
 }
 
-# # construct minis
-# priors_mini <- meta %>%
-#   group_by_at(vars(!!setdiff(priors$prior_id, "time"), prior_mini_id)) %>%
-#   summarise() %>%
-#   ungroup() %>%
-#   gather(prior_id, prior_usage, -prior_mini_id) %>%
-#   {split(., .$prior_mini_id)} %>%
-#   map_chr(generate_prior_mini) %>%
-#   {tibble(prior_mini_id = names(.), svg=.)}
+# construct minis
+trajectory_types_mini <- tibble(
+  id = list.files(figure_file("", "trajectory_types/mini")) %>% str_replace(".svg$", ""),
+  svg = id %>% map(~as.character(xml2::read_xml(figure_file(paste0(., ".svg"), "trajectory_types/mini"))))
+)
 
-trajectory_types_mini <- map(trajectory_types$id, ~xml2::read_xml(figure_file(paste0("mini/", ., ".svg"), "trajectory_types"))) %>%
-  map_chr(as.character) %>%
-  {tibble(trajectory_type = trajectory_types$id, svg=.)}
-
-# minis <- bind_rows(priors_mini, trajectory_types_mini) %>% create_replacers()
 minis <- trajectory_types_mini %>% create_replacers()
 
 # write output
