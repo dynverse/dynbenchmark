@@ -44,8 +44,7 @@ row_spacing <- .1
 control_methods <- c("periodpc", "angle", "comp1", "random", "gng")
 
 method_tib <- method_tib %>%
-  left_join(minis %>% select(maximal_trajectory_types = trajectory_type, maxtraj_replace_id = replace_id), by = "maximal_trajectory_types") %>%
-  # arrange(method_short_name %in% control_methods, method_name_f) %>%
+  left_join(minis %>% select(maximal_trajectory_types = id, maxtraj_replace_id = replace_id), by = "maximal_trajectory_types") %>%
   arrange(method_name_f) %>%
   mutate(
     method_i = seq_len(n()),
