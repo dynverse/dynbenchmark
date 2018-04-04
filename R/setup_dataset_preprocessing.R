@@ -132,7 +132,7 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   milestone_percentages <- milestone_percentages %>% filter(cell_id %in% cell_ids)
 
   # cut out unrepresented milestones
-  milestone_network <- cut_unrepresented_milestones(milestone_network, milestone_percentages)
+  milestone_network <- cut_unrepresented_milestones(milestone_network, milestone_percentages, milestone_ids)
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
   # add intermediate nodes to bifurcating regions
@@ -207,7 +207,7 @@ convert_to_symbol <- function(counts) {
 }
 
 
-cut_unrepresented_milestones <- function(milestone_network, milestone_percentages) {
+cut_unrepresented_milestones <- function(milestone_network, milestone_percentages, milestone_ids) {
   unrepresented_milestones <- setdiff(milestone_ids, milestone_percentages$milestone_id)
 
   for(milestone_id in unrepresented_milestones) {
