@@ -132,8 +132,7 @@ imp_table <- map(c("latex", "html"), function(format) {
 
   table <- implementations_table %>%
     knitr::kable(format, escape=F) %>%
-    kableExtra::kable_styling(bootstrap_options = c("striped", "hover","condensed"), font_size = ifelse(format == "latex", 7, 12)) %>%
-    kableExtra::add_footnote(non_inclusion_reasons$long, "alphabet")
+    kableExtra::kable_styling(bootstrap_options = c("striped", "hover","condensed"), font_size = ifelse(format == "latex", 7, 12))
   table
 }) %>% set_names(c("latex", "html"))
 imp_table
