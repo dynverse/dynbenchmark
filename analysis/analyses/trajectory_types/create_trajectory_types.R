@@ -1,3 +1,9 @@
+library(tidyverse)
+library(dynalysis)
+
+experiment("trajectory_types")
+
+## Helper functions
 library(xml2)
 
 xml_find_multiple_ids <- function(xml, ids) {
@@ -12,13 +18,9 @@ change_opacity <- function(
   svg_location,
   folder = ".",
   verbose = FALSE,
-  export = "--export-area-page",
-  trim = FALSE,
   size = "100%",
   identifier = "g",
-  attribute = "id",
-  png=TRUE,
-  svg=FALSE
+  attribute = "id"
 ) {
   if (!("opacity" %in% colnames(boxes))) {
     stop("Need opacity")
@@ -48,26 +50,29 @@ change_opacity <- function(
 
   write(as.character(xml), file=glue::glue("{folder}/{output}.svg"))
 
-  if(svg && trim) {
-    command <- glue::glue("inkscape --verb=FitCanvasToDrawing --verb=FileSave --verb=FileQuit {folder}/{output}.svg")
-    system(command, ignore.stdout = !verbose)
-  }
+  command <- glue::glue("inkscape --verb=FitCanvasToDrawing --verb=FileVacuum --verb=FileSave --verb=FileQuit {folder}/{output}.svg")
+  system(command, ignore.stdout = !verbose)
 
-  if (!svg) {
-    file.remove(glue::glue("{folder}/{output}.svg"))
-  }
 
-  if (png) {
-    if(trim) {
-      system(glue::glue("convert {folder}/{output}.png -trim {folder}/{output}.png"))
-    }
-    system(glue::glue("inkscape {folder}/{output}.svg --export-area-page --export-png={folder}/{output}.png"), ignore.stdout = !verbose)
-  }
-
-  glue::glue('{folder}/{output}.png')
-
-  #glue::glue("<img src='{folder}/{output}.png' style='max-width:{size};max-height:{size}' />")
+  glue::glue('{folder}/{output}.svg')
 }
 
 
+
+
+# Check traj types
+trajectory_types$id
+
+boxes <- tibble(
+  id = trajectory_types$id, opacity = 1
+)
+map(boxes$id, function(id) {
+  boxes$opacity <- ifelse(boxes$id == id, 1, 0)
+
+  change_opacity(boxes, id, figure_file("trajectory_types.svg"), folder = figure_file("mini"))
+})
+
+boxes$base64 <- boxes$id %>% map_chr(function(x) {base64enc::base64encode(glue::glue("analysis/figures/trajectory_types/mini/{x}.svg"))})
+
+write_rds(boxes, figure_file("trajectory_type_boxes.rds"))
 
