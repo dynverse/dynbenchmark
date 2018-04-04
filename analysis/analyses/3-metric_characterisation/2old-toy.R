@@ -1,6 +1,6 @@
 library(tidyverse)
 
-experiment("3-score_rules/2-toy")
+experiment("3-metric_characterisation/2-toy")
 
 source("scripts/wouter/toy/generation.R")
 source("scripts/wouter/toy/perturbation.R")
