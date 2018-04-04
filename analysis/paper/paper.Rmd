@@ -92,7 +92,7 @@ Other methods attempt to infer the topology computationally, which increases the
 add_stable(
   read_rds(figure_file("implementations_table.rds", "4-method_characterisation"))[[params$table_format]],
 "implementations",
-"Overview of the trajectory inference methods included in this study."
+paste0("Overview of the trajectory inference methods included in this study. ", glue::glue_data(non_inclusion_reasons, "{footnote}: {long}") %>% glue::collapse("; "))
 )
 ```
 
@@ -104,15 +104,27 @@ Given the diversity in TI methods, an important issue to address is a quantitati
 
 
 <!-- §4: Our study -->
-In this study, we performed a comprehensive evaluation of  `r nrow(filter(methods, evaluated, type == "algorithm"))` TI methods (`r ref("fig", "evaluation_overview", "a")`). The inclusion criterion for TI methods was primarily based on their free availability and presence of a programming interface (`r ref("stable", "implementations")`). In addition, we added three control methods to define baseline performance: a random trajectory, Component 1 as a control for linear trajectories and Angle as a control for circular trajectories. The evaluation comprised two core aspects: (i) assessment of the accuracy and scalability of TI methods by comparing predicted trajectories with a gold standard on `r sum(tasks_info$task_source == "real")` real and `r sum(tasks_info$task_source == "synthetic")` synthetic datasets, and (ii) a quality control of the provided software and documentation. Finally, we combined both the performance and QC evaluation to provide a set of practical guidelines for users. 
+In this study, we performed a comprehensive evaluation of  `r nrow(filter(methods, evaluated, type == "algorithm"))` TI methods (`r ref("fig", "ti_evaluation_overview", "a")`). The inclusion criterion for TI methods was primarily based on their free availability and presence of a programming interface (`r ref("stable", "implementations")`). In addition, we added three control methods to define baseline performance: a random trajectory, Component 1 as a control for linear trajectories and Angle as a control for circular trajectories. The evaluation comprised two core aspects: (i) assessment of the accuracy and scalability of TI methods by comparing predicted trajectories with a gold standard on `r sum(tasks_info$task_source == "real")` real and `r sum(tasks_info$task_source == "synthetic")` synthetic datasets, and (ii) a quality control of the provided software and documentation. Finally, we combined both the performance and QC evaluation to provide a set of practical guidelines for users. 
 
 
 ```{r echo=FALSE, results="asis"}
 add_fig(
-  fig_path = figure_file("ti_evaluation_overview_v3.svg", experiment_id="evaluation_overview"),
-  ref_id = "evaluation_overview", 
+  fig_path = figure_file("ti_evaluation_overview_v3.svg", experiment_id="manual_figures"),
+  ref_id = "ti_evaluation_overview", 
   caption_main = "Overview of several key aspects of the evaluation.", 
   caption_text = "a) A schematic overview of our evaluation pipeline. b) In order to make the trajectories comparable to each other, a common trajectory model was used to represent gold standard trajectories from the real and synthetic datasets, as well as any predicted trajectories from TI methods. c) Three metrics were defined in order to assess the similarity in cell ordering, cell neighbourhood, and topology, for any two trajectories."
+)
+```
+
+
+```{r}
+add_sfig(
+  fig_path = figure_file("overview_evaluation_expanded_v1.svg", "manual_figures"),
+  ref_id = "overview_evaluation_expanded",
+  caption_main = "Extended overview of our evaluation pipeline.", 
+  caption_text = "From literature we extracted a quality control checklist, a list of trajectory inference methods, a set of real datasets containing a trajectory and real regulatory networks used to generate the synthetic data. We created a wrapper of each method, so that its output was transformed into a common probabilistic trajectory model, and used these to infer trajectories on all real and synthetic datasets using their default parameters. Using several similarity metrics, we compared the gold standard of the real and synthetic datasets with the inferred trajectories. We also evaluated the quality of each method using the quality control checklist, and used both the benchmark results and quality control results to produce a final set of guidelines for method's users.", 
+  width = 15, 
+  height = 7.5
 )
 ```
 
@@ -126,7 +138,7 @@ add_fig(
 
 
 <!-- Evaluation overview -->
-In order to make gold standard trajectories and predicted trajectories directly comparable to each other, we developed a common probabilistic model for representing trajectories from all possible sources (`r ref("fig", "evaluation_overview", "b")`). In this model, the overall topology is represented by a network of "milestones", and the cells are placed within the space formed by each set of connected milestones. We then defined a set of metrics for comparing the similarities of such trajectories, each assessing a different aspect of the trajectory: the similarity in cell ordering, the cell neighbourhood and the topology (`r ref("fig", "evaluation_overview", "c")`). The data compendium consisted of both synthetic datasets, which offer the most exact gold standard, and real datasets, which offer the highest biological relevance. These real datasets come from a variety of single-cell technologies, organisms, and dynamic processes, and contain several types of trajectory topologies (`r ref("stable", "datasets")`). In order to generate synthetic datasets, we simulated gene regulatory networks using a thermodynamic model of gene regulation [@schaffter_genenetweaversilicobenchmark_2011], and subsequently simulated single-cell profiling experiments by matching the distributions of the synthetic data with real reference datasets.
+In order to make gold standard trajectories and predicted trajectories directly comparable to each other, we developed a common probabilistic model for representing trajectories from all possible sources (`r ref("fig", "ti_evaluation_overview", "b")`). In this model, the overall topology is represented by a network of "milestones", and the cells are placed within the space formed by each set of connected milestones. We then defined a set of metrics for comparing the similarities of such trajectories, each assessing a different aspect of the trajectory: the similarity in cell ordering, the cell neighbourhood and the topology (`r ref("fig", "ti_evaluation_overview", "c")`). The data compendium consisted of both synthetic datasets, which offer the most exact gold standard, and real datasets, which offer the highest biological relevance. These real datasets come from a variety of single-cell technologies, organisms, and dynamic processes, and contain several types of trajectory topologies (`r ref("stable", "datasets")`). In order to generate synthetic datasets, we simulated gene regulatory networks using a thermodynamic model of gene regulation [@schaffter_genenetweaversilicobenchmark_2011], and subsequently simulated single-cell profiling experiments by matching the distributions of the synthetic data with real reference datasets.
 
 
 <!-- Overall evaluation results -->
@@ -143,6 +155,8 @@ add_fig(
   caption_text = "a) The methods were characterised according to the most complex trajectory type they can infer, whether or not the inferred topology is constrained by the algorithm or a parameter, and which prior information a method requires or can optionally use. b) The methods are ordered according to the overall score achieved both in the benchmark and QC evaluation. Three controls (random trajectory, component 1 of a PCA and angle on a PCA) were added, which provide a baseline performance. c) Also shown are the aggregated scores per metric, source and trajectory type, as well as the average execution time across all datasets and the percentage of executions in which no output was produced. d) Performance in the quality control evaluation is highly variable, even amongst the highest ranked methods according to the benchmark evaluation. Also listed are the quality control scores aggregated according to practicality and the different categories."
 )
 ```
+
+
 
 
 <!-- Errors-->
@@ -182,7 +196,7 @@ add_sfig(
   ),
   "robustness_comparison", 
   "The robustness of our evaluation.",
-  "a) Comparison of method performance between real and synthetic datasets across trajectory types. Given in the top-left corner of each panel is the Pearson's correlation. \"All\" includes the performance on all individual trajectory types, while \"Overall\" includes the performance averaged over all trajectory types. b) Violin plots of the overall performance on each individual dataset. For each method, the arch indicates next method in the ranking over which one has significant improvement in performance over the other (top; pairwise wilcoxon test corrected for multiple testing; p-value < 0.05). c) Estimate of the size of largest subset of datasets on which the method would be the average top performer. For each method, starting from all datasets, we removed datasets one by one by order of their performance, and tested whether after aggregating all scores leads to the method being ranked first. This number is therefore only a        lower bound, and the actual size of largest subset could be higher."
+  "a) Comparison of method performance between real and synthetic datasets across trajectory types. Given in the top-left corner of each panel is the Pearson's correlation. \"All\" includes the performance on all individual trajectory types, while \"Overall\" includes the performance averaged over all trajectory types. b) Violin plots of the overall performance on each individual dataset. For each method, the arch indicates the first method with which a method performs significantly higher (using a pairwise wilcoxon test corrected for multiple testing; p-value < 0.05). c) Estimates of the size of largest subset of datasets on which the method would be the average top performer. For each method, starting from all datasets, we removed datasets one by one by order of their performance, and tested whether this method ranks first when aggregating the scores over these datasets. This number is therefore only a lower bound, and the actual size of largest subset could be higher."
 )
 ```
 
@@ -214,8 +228,8 @@ Despite their similar overall performance, the topologies predicted by the top m
 add_fig(
   fig_path = figure_file("topology_complexity_comparison.svg", experiment_id = "8-compare_topology"),
   ref_id = "topology_complexity_comparison", 
-  caption_main = "Comparing the ability of the top TI methods to detect the correct trajectory type.", 
-  caption_text = "Distributions of the difference in size between predicted and gold standard topologies, defined by the sum of the number of milestones and edges between milestones, compared with the true trajectory type present in the data."
+  caption_main = "Comparison of the size (number of nodes and number of edges) of the topology predicted by the top TI methods, compared to the size of the gold standard.", 
+  caption_text = "Shown are the distributions of the difference in size between predicted and gold standard topologies, defined by the sum of the number of milestones and edges between milestones, compared with the true trajectory type present in the data."
 )
 ```
 
@@ -339,22 +353,22 @@ The prior information was extracted from the gold standard as follows:
 * **Time course** For each cell a time point from which it was sampled. If available, directly extracted from the gold standard. For synthetic data: four timepoints were chosen, at which the cells were “sampled” to provide a time course information reflecting the one provided in real experiments.
 
 ### Common trajectory model
-Due to the absence of a common format for trajectory models, most methods return a unique set of output formats with few overlap. We therefore created wrappers around each method (available at [github.com/dynverse/dynmethods](https://www.github.com/dynverse/dynmethods)) and postprocessed its output into a common probabilistic trajectory model (`r ref("sfig", "wrapping", "a")`). This model consists of three parts: (i) The milestone network represents the overall network topology, and contains edges between different milestones and the length of the edge between them. (ii) The milestone percentages contain, for each cell, its position between milestones, and sums for each cell to one. (iii) The trajectory model also allows for regions of delayed commitment, where cells are allowed to be positioned between three or more connected milestones. Regions must be explicitly defined in the trajectory model. Per region, one milestone must be directly connected to all other milestones in the network.
+Due to the absence of a common format for trajectory models, most methods return a unique set of output formats with few overlap. We therefore created wrappers around each method (available at [github.com/dynverse/dynmethods](https://www.github.com/dynverse/dynmethods)) and postprocessed its output into a common probabilistic trajectory model (`r ref("sfig", "overview_wrapping", "a")`). This model consists of three parts: (i) The milestone network represents the overall network topology, and contains edges between different milestones and the length of the edge between them. (ii) The milestone percentages contain, for each cell, its position between milestones, and sums for each cell to one. (iii) The trajectory model also allows for regions of delayed commitment, where cells are allowed to be positioned between three or more connected milestones. Regions must be explicitly defined in the trajectory model. Per region, one milestone must be directly connected to all other milestones in the network.
 
 
 ```{r}
 add_sfig(
-  figure_file('wrapping.svg', '4-method_characterisation'),
-  "wrapping", 
+  figure_file("overview_wrapping_v1.svg", "manual_figures"),
+  "overview_wrapping", 
   "A common interface for TI methods.", 
-  "a) The input and output of each TI method is standardised. As input, each TI method receives either raw or normalised counts, several parameters, and a selection of prior information. After its execution, a method uses one of the six wrapper functions to transform its output to the common trajectory model. This common model then allows to perform common analysis functions on trajectory models produced by any TI method. b) The specific transformations performed by each of the wrapper functions is explained in more detail.", 
+  "a) The input and output of each TI method is standardised. As input, each TI method receives either raw or normalised counts, several parameters, and a selection of prior information. After its execution, a method uses one of the seven wrapper functions to transform its output to the common trajectory model. This common model then allows to perform common analysis functions on trajectory models produced by any TI method. b) The specific transformations performed by each of the wrapper functions is shown in more detail.", 
   15, 
   7.5
 )
 ```
 
 
-Depending on the output of a method, we used different strategies to convert the output to our model (`r ref("sfig", "wrapping", "b")`). Special conversions are denoted by an \*, and will be explained in more detail below.
+Depending on the output of a method, we used different strategies to convert the output to our model (`r ref("sfig", "overview_wrapping", "b")`). Special conversions are denoted by an \*, and will be explained in more detail below.
 
 
 ```{r}
@@ -545,12 +559,12 @@ Because each cellular simulation follows the trajectory at its own speed, knowin
 We used a standard single-cell RNA-seq preprocessing pipeline which applies parts of the scran and scater Bioconductor packages [@lun_stepbystepworkflowlowlevel_2016]. The advantages of this pipeline is that it works both with and without spike-ins, and includes a harsh cell filtering which looks at abnormalities in library sizes, mitochondrial gene expression, and number of genes expressed using median absolute deviations (set to 3). We required that a gene was expressed in at least 5% of the cells, and that it should have an average expression higher than 0.05. Furthermore, we used the pipeline to select the most highly variable genes, using a false discovery rate of 5% and a biological component higher than 0.5. As a final filter, we removed both zero genes and cells until convergence.
 
 ## Evaluation metrics
-The importance of using multiple metrics to compare complex models has been stated repeatedly [@norel_selfassessmenttrap_2011]. We defined three metrics for comparing the similarity of predicted trajectories to a gold standard (`r ref("fig", "evaluation_overview", "c")`). Each metric assesses the performance of a different aspect of the trajectory (`r ref("sfig", "score_aspects")`); (i) the correlation metric measures the similarity in pairwise cell-cell distances; (ii) the RF MSE metric assesses whether cell neighbourhoods are similar in both trajectories; and (iii) the edge flip scores assesses similarity in trajectory topologies. 
+The importance of using multiple metrics to compare complex models has been stated repeatedly [@norel_selfassessmenttrap_2011]. We defined three metrics for comparing the similarity of predicted trajectories to a gold standard (`r ref("fig", "ti_evaluation_overview", "c")`). Each metric assesses the performance of a different aspect of the trajectory (`r ref("sfig", "score_aspects")`); (i) the correlation metric measures the similarity in pairwise cell-cell distances; (ii) the RF MSE metric assesses whether cell neighbourhoods are similar in both trajectories; and (iii) the edge flip scores assesses similarity in trajectory topologies. 
 
 
 ```{r}
 add_sfig(
-  figure_file("score_aspects_v2.svg", experiment_id="3-score_rules/5-score_aspects"), 
+  figure_file("aspects_v2.svg", experiment_id="manual_figures/metrics"), 
   "score_aspects", 
   "Different scores assess different aspects of the correspondence between a prediction and gold standard trajectory.", 
   "",
@@ -567,7 +581,7 @@ The similarity in cell ordering between two trajectories is assessed by calculat
 
 ```{r}
 add_sfig(
-  figure_file("metric_geodesic.svg", experiment_id="evaluation_overview"), 
+  figure_file("geodesic.svg", experiment_id="manual_figures/metrics"), 
   "metric_geodesic", 
   "The modified geodesic distances demonstrated on a toy example.", 
   "a) A toy example containing four milestones (W to Z) and five cells (a to e). b) The corresponding milestone network, milestone percentages and regions of delayed commitment, when the toy trajectory is converted to the common trajectory model. c) The calculations made for calculating the pairwise geodesic distances. d) A heatmap representation of the pairwise geodesic distances."
@@ -578,7 +592,7 @@ add_sfig(
 The geodesic distance between two cells depends on whether they are (i) on the same transition, or (ii) in different transitions. In the first case, the distance is defined as the product of the difference in milestone percentages and the length of the transition they both reside on. For cells $a$ and $b$ in the example, $d(a, b)$ is equal to $1 \times (0.9 - 0.2) = 0.7$. In the latter case, the distances between the cells and all of their neighbouring milestones will be calculated. These distances in combination with the milestone network are used to calculate the shortest path distance between the two cells. For cells $a$ and $c$ in the example, $d(a, X) = 1 \times 0.9$ and $d(c, X) = 3 \times 0.2$, and therefore $d(a, c) = 1 \times 0.9 + 3 \times 0.2$. 
 
 
-According to the defined common trajectory model (`r ref("fig", "evaluation_overview", "b")`), cells are also allowed to have a delayed commitment. In a region of delayed commitment, one milestone will be connected to all other milestones as per the milestone network. In this case, the distance between two cells both inside a region of delayed commitment is calculated as the manhattan distances between the milestone percentages weighted by the transition weights from the milestone network. For cells $d$ and $e$ in the example, $d(d, e)$ is equal to $0 \times (0.3 - 0.2) + 2 \times (0.7 - 0.2) + 3 \times(0.4 - 0.1)$, which is equal to $1.9$. The distance between two cells where one is part of a region of delayed commitment is calculated similarly to the previous paragraph, by first calculating the distance between the cells and their neighbouring milestones first, then calculating the shortest path distances between the two.
+According to the defined common trajectory model (`r ref("fig", "ti_evaluation_overview", "b")`), cells are also allowed to have a delayed commitment. In a region of delayed commitment, one milestone will be connected to all other milestones as per the milestone network. In this case, the distance between two cells both inside a region of delayed commitment is calculated as the manhattan distances between the milestone percentages weighted by the transition weights from the milestone network. For cells $d$ and $e$ in the example, $d(d, e)$ is equal to $0 \times (0.3 - 0.2) + 2 \times (0.7 - 0.2) + 3 \times(0.4 - 0.1)$, which is equal to $1.9$. The distance between two cells where one is part of a region of delayed commitment is calculated similarly to the previous paragraph, by first calculating the distance between the cells and their neighbouring milestones first, then calculating the shortest path distances between the two.
 
 
 Finally, calculating all pairwise distances between cells would scale poorly for trajectories with large numbers of cells. For this reason, a set of waypoint cells are defined *a priori*, and only the distances between the waypoint cells and all other cells is calculated, in order to calculate the correlation of geodesic distances of two trajectories. The waypoints are determined by viewing each milestone, transition and region of delayed commitment as a collection of cells, and sampling cells from the different collections weighted by the total number of cells within that collection. For calculating the correlation of geodesic distances between two trajectories, the distances between all cells and the union of both waypoint sets is computed. For the benchmark evaluation, the total number of waypoints sampled from a trajectory was one hundred.
@@ -656,7 +670,7 @@ Here, the mean is subtracted from the raw score in order to center the distribut
 
 ```{r}
 add_sfig(
-  figure_file("metric_aggregation_overview_v1.svg", experiment_id="evaluation_overview"), 
+  figure_file("overview_aggregation_v1.svg", experiment_id="manual_figures/metrics"), 
   "aggregation_of_results", 
   "Aggregation methodology of metric scores.",
   "",
@@ -722,16 +736,8 @@ The datasets used in this study are deposited in zenodo [doi.org/10.5281/zenodo.
 
 
 
-```{r}
-add_sfig(
-  figure_file('expanded_ti_evaluation_overview_v1.svg', 'evaluation_overview'),
-  "extended_evaluation_overview",
-  "Extended overview of our evaluation pipeline.", 
-  "From literature we extracted a quality control checklist, a list of trajectory inference methods, a set of real datasets containing a trajectory and real regulatory networks used to generate the synthetic data. We created a wrapper of each method, so that its output was transformed into a common probabilistic trajectory model, and used these to infer trajectories on all real and synthetic datasets using their default parameters. Using several similarity metrics, we compared the gold standard of the real and synthetic datasets with the inferred trajectories. We also evaluated the quality of each method using the quality control checklist, and used both the benchmark results and quality control results to produce a final set of guidelines for method's users.", 
-  15, 
-  7.5
-)
-```
+
+
 
 
 
