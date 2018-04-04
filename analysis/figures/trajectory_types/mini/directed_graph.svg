@@ -11,7 +11,7 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="60"
    height="35"
-   viewBox="0 0 15.875 9.2604169"
+   viewBox="0 0 15.875 9.2604167"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
@@ -146,12 +146,12 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.6374888"
-     inkscape:cx="-117.1817"
-     inkscape:cy="186.22734"
-     inkscape:document-units="mm"
+     inkscape:zoom="16"
+     inkscape:cx="14.118868"
+     inkscape:cy="69.398836"
+     inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     showgrid="false"
+     showgrid="true"
      inkscape:window-width="3840"
      inkscape:window-height="2031"
      inkscape:window-x="0"
@@ -170,8 +170,8 @@
        spacingy="0.77169698"
        spacingx="0.66145834"
        empspacing="6"
-       originx="3.3156009e-08"
-       originy="-13.890625" />
+       originx="9.915027e-08"
+       originy="-13.89063" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">

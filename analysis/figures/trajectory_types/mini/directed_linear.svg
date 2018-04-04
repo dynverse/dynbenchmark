@@ -12,7 +12,7 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="60"
    height="35"
-   viewBox="0 0 15.875 9.2604169"
+   viewBox="0 0 15.875 9.2604167"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
@@ -26,7 +26,8 @@
        refX="0"
        refY="0"
        orient="auto"
-       inkscape:stockid="TriangleOutS">
+       inkscape:stockid="TriangleOutS"
+       inkscape:collect="always">
       <path
          transform="scale(0.2)"
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
@@ -68,12 +69,12 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.6374888"
-     inkscape:cx="-117.1817"
-     inkscape:cy="-128.77266"
-     inkscape:document-units="mm"
+     inkscape:zoom="16"
+     inkscape:cx="14.118868"
+     inkscape:cy="-298.10118"
+     inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     showgrid="false"
+     showgrid="true"
      inkscape:window-width="3840"
      inkscape:window-height="2031"
      inkscape:window-x="0"
@@ -92,8 +93,8 @@
        spacingy="0.77169698"
        spacingx="0.66145834"
        empspacing="6"
-       originx="1.2175331e-07"
-       originy="-97.234377" />
+       originx="1.8774757e-07"
+       originy="-111.12501" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -111,12 +112,12 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-3.2086718,22.754651)"
+     transform="translate(-3.2086718,36.645281)"
      style="display:inline">
     <g
        id="directed_linear"
        style="stroke:url(#linearGradient1675);stroke-width:0.40000001;stroke-miterlimit:4;stroke-dasharray:none"
-       transform="translate(0.9855959,-26.082313)">
+       transform="translate(0.9855959,-39.972943)">
       <path
          inkscape:connector-curvature="0"
          id="path815"
