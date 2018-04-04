@@ -1,0 +1,27 @@
+language: r
+sudo: required
+dist: trusty
+cache: packages
+warnings_are_errors: false
+env:
+  global:
+    - R_MAX_NUM_DLLS=250
+    - _R_CHECK_FORCE_SUGGESTS_="FALSE"
+addons:
+  apt:
+    packages:
+      - libgsl-dev
+      - libsdl1.2-dev
+      - libreadline-dev
+      - imagemagick
+      - libfftw3-dev
+      - libudunits2-dev
+      - libblas-dev
+      - liblapack-dev
+install:
+ - R -e 'install.packages("devtools")'
+
+ - R -e 'setRepositories(ind = 1:2)'
+ - R -e 'devtools::install_github(c("dynverse/StemID", "dynverse/topslam", "dynverse/Waterfall", "dynverse/Wishbone", "igraph/rigraph", "kieranrcampbell/pseudogp", "kieranrcampbell/mfa", "kieranrcampbell/ouija", "kieranrcampbell/phenopath", "kstreet13/slingshot"))'
+ - R -e 'devtools::install()'
+r_check_args: "--no-tests --no-manual --no-vignettes --no-build-vignettes"

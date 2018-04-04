@@ -1,14 +1,12 @@
 language: r
 sudo: required
 dist: trusty
-bioc_required: true
 cache: packages
-warnings_are_errors: true
-python:
-  - "3.6"
+warnings_are_errors: false
 env:
   global:
     - R_MAX_NUM_DLLS=250
+    - _R_CHECK_FORCE_SUGGESTS_="FALSE"
 addons:
   apt:
     packages:
@@ -30,5 +28,5 @@ install:
  - sudo pip3 install --upgrade matplotlib pandas six jinja2 python-dateutil pytz pyparsing cycler tqdm python-igraph Cython statsmodels sklearn seaborn h5py anndata
  - R -e 'install.packages("devtools")'
  - R -e 'setRepositories(ind = 1:2)'
- - R -e 'devtools::install(dependencies = T, upgrade = T)'
- - R -e 'dynmethods::check_dependencies()'
+ - R -e 'devtools::install(dep = T, upgr = T)'
+r_check_args: "--no-tests --no-manual --no-vignettes --no-build-vignettes"
