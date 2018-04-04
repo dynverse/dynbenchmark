@@ -4,7 +4,7 @@ library(tidyverse)
 library(dynalysis)
 library(dynutils)
 
-experiment("3-score_rules/5-score_aspects")
+experiment("3-metric_characterisation/5-score_aspects")
 
 wrap <- function(x) {
   wrap_prediction_model(
