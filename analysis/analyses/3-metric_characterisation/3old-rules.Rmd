@@ -11,7 +11,7 @@ library(dyneval)
 ```
 
 ```{r}
-experiment("3-score_rules/3-rules")
+experiment("3-metric_characterisation/3-rules")
 
 scores <- read_rds(result_file("scores.rds"))
 toys <- read_rds(derived_file("toys.rds"))
@@ -45,7 +45,7 @@ scores_summary %>%
 library(googlesheets)
 rules_info <- gs_title("Metrics rules") %>% gs_read("rules") %>% mutate(id=factor(id, levels=id))
 
-source("analysis/analyses/3-score_rules/rules.R")
+source("analysis/analyses/3-metric_characterisation/rules.R")
 rules_info$check_func <- map(paste0("check_", rules_info$id), get)
 
 rules <- map2(

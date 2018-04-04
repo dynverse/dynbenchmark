@@ -12,10 +12,10 @@ library(dyneval)
 
 ## Generate toy datasets for comparing scores
 ```{r}
-source("analysis/analyses/3-score_rules/generation.R")
-source("analysis/analyses/3-score_rules/perturbation.R")
+source("analysis/analyses/3-metric_characterisation/generation.R")
+source("analysis/analyses/3-metric_characterisation/perturbation.R")
 
-experiment("3-score_rules/1-generate_toys")
+experiment("3-metric_characterisation/1-generate_toys")
 ```
 
 
