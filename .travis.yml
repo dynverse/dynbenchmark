@@ -8,7 +8,7 @@ python:
   - "3.6"
 env:
   global:
-    - R_MAX_NUM_DLLS=250
+    - R_MAX_NUM_DLLS=500
 addons:
   apt:
     packages:
@@ -31,4 +31,3 @@ install:
  - R -e 'install.packages("devtools")'
  - R -e 'setRepositories(ind = 1:2)'
  - R -e 'devtools::install(dependencies = T, upgrade = T)'
- - R -e 'dynmethods::check_dependencies()'
