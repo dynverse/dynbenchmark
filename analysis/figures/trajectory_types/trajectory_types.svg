@@ -3841,9 +3841,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="16"
-     inkscape:cx="13.993869"
-     inkscape:cy="122.02383"
+     inkscape:zoom="2.8284271"
+     inkscape:cx="-26.648643"
+     inkscape:cy="263.03751"
      inkscape:document-units="px"
      inkscape:current-layer="directed_acyclic_graph"
      showgrid="true"
@@ -3876,7 +3876,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -3884,7 +3884,7 @@
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="Background"
-     style="display:inline"
+     style="display:none"
      transform="translate(3.9915027e-7,43.921135)">
     <rect
        y="-30.030506"
