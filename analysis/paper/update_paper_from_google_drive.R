@@ -94,4 +94,9 @@ drive_update("dynverse/supplementary.pdf", "analysis/paper/supplementary_latex.p
 paper_folder <- "../../dyndocs/20180401_submission_nat_biotech/"
 file.copy("analysis/paper/paper_latex.pdf", paste0(paper_folder, "paper.pdf"), overwrite=TRUE)
 
-figs$fig_path
+figs <- read_rds(derived_file("figs.rds", "paper"))
+figs$fig_id <- seq_len(nrow(figs))
+
+walk2(figs$fig_id, figs$fig_path, function(fig_id, fig_path) {
+  file.copy(fig_path, paste0(paper_folder, glue::glue("fig_{fig_id}.pdf")), overwrite=TRUE)
+})
