@@ -27,42 +27,31 @@ task_ids <- outputs_ind %>%
 task_ids
 task_ids <- "real/dentate-gyrus-neurogenesis_hochgerner"
 
-# Get outputs
+
+##  .............................................................................
+##  Load outputs and task                                                    ####
+# load models
 outputs_oi <- outputs_ind %>%
   filter(
     task_id %in% task_ids,
     repeat_i == 1,
     method_short_name %in% c(top_methods)
   )
-outputs_oi$model <- pbapply::pblapply(cl=8, seq_len(nrow(outputs_oi)), function(row_i) {
-  load_dyneval_model(
-    method_short_name = outputs_oi$method_short_name[[row_i]],
-    model_id = outputs_oi$model_id[[row_i]],
-    experiment_id = "5-optimise_parameters/3-evaluate_parameters"
-  )[[1]]
-})
+outputs_oi$model <- get_models(outputs_oi)
 outputs_oi <- outputs_oi %>% filter(!map_dbl(model, is.null))
 
-# Select first task
+##  ............................................................................
+##  Get task of interest                                                    ####
 task_id <- task_ids[[1]]
-print(task_id)
 task <- extract_row_to_list(tasks, which(tasks$id == task_id))
-
-# Preprocess task
-task$milestone_network <- dynalysis:::cut_unrepresented_milestones(task$milestone_network, task$milestone_percentages %>% filter(percentage > 0), task$milestone_ids)
-task$milestone_network <- task$milestone_network %>% mutate(from = factor(from, levels=task$milestone_ids)) %>% arrange(from) %>% mutate(from = as.character(from)) # retain order from before
-task$milestone_ids <- unique(c(task$milestone_network$from, task$milestone_network$to))
-task$milestone_percentages <- task$milestone_percentages %>% filter(percentage > 0)
-task$progressions <- dynwrap::convert_milestone_percentages_to_progressions(task$cell_ids, task$milestone_ids, task$milestone_network, task$milestone_percentages)
-
-milestone_network <- task$milestone_network
-milestone_ids <- task$milestone_ids
+task <- preprocess_task(task)
 
 # Select outputs
+methods_oi <- c("slngsht", "scorpius", "embeddr", "wndrlst", "waterfll")
 outputs_plot <- outputs_oi %>%
   filter(task_id == !!task_id) %>%
   arrange(edge_flip) %>%
-  slice(match(c("slngsht", "scorpius", "embeddr", "wndrlst", "waterfll"), method_short_name)) %>%
+  slice(match(methods_oi, method_short_name)) %>%
   mutate(plot_fun = slice(descriptions, match(method_short_name, descriptions$short_name)) %>% pull(plot_fun))
 
 # Replace model id with name of method
@@ -140,10 +129,11 @@ plot_linearised <- function(model, label=FALSE) {
   plot
 }
 
-task_linearised_plot <- plot_linearised(task, label=TRUE)
-
 grouping_assignment <- task$cell_grouping
 group_order <- unique(c(task$milestone_network$from, task$milestone_network$to))
+
+task_linearised_plot <- plot_linearised(task, label=TRUE)
+
 outputs_plot$linearised_plot <- map(outputs_plot$model, plot_linearised) %>%
   map(~.)
 
