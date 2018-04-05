@@ -232,7 +232,7 @@ add_fig(
   fig_path = figure_file("topology_complexity_comparison.tmp.pdf", experiment_id = "8-compare_topology"),
   ref_id = "topology_complexity_comparison", 
   caption_main = "Comparison of the size (number of nodes and number of edges) of the topology predicted by the top TI methods, compared to the size of the gold standard.", 
-  caption_text = "Shown are the distributions of the difference in size between predicted and gold standard topologies, defined by the sum of the number of milestones and edges between milestones, compared with the true trajectory type present in the data."
+  caption_text = "Shown are the distributions of the difference in size between predicted and gold standard topologies. A positive difference means that the topology predicted by the method is more complex than the one in the gold standard."
 )
 ```
 
@@ -243,13 +243,13 @@ add_fig(
 add_stable(
   read_rds(figure_file("topology_sensitivity_table.rds", "8-compare_topology"))[[params$table_format]],
 "topology_sensitivity",
-"Sensitivity of topology prediction of each TI method. Given is how often a method is able to correctly predict the topology of the trajectory present in the dataset, between different trajectory types."
+"Sensitivity of topology prediction of each TI method. Given is how often a method is able to correctly predict the topology of the trajectory present in the dataset, within a particular trajectory type."
 )
 ```
 
 
 <!-- Additional factors which could influence performance -->
-Apart from the trajectory types, we also investigated several other factors that could influence the performance of a method. Although we provided prior information to those methods that require it, we did not observe any major difference in method performance between these methods and those that did not receive any prior information (`r ref("fig", "results_overview", "a-b")`). When we looked at the algorithmic steps shared by different methods, we found that those which included principal curves (such as Slingshot and SCORPIUS), k-means (which include Slingshot and several other top scoring methods) and some graph building (which include almost every top scoring method) tended to have a slightly higher performance, while those which included tSNE had a lower performance ( `r ref("stable", "component_importance")`), although these tendencies were not significant.
+Apart from the trajectory types, we also investigated several other factors that could influence the performance of a method. Although we provided prior information to those methods that require it, we did not observe any major difference in method performance between these methods and those that did not receive any prior information (`r ref("fig", "results_overview", "a")`). When we looked at the algorithmic steps shared by different methods, we found that those which included principal curves (such as Slingshot and SCORPIUS), k-means (which include Slingshot and several other top scoring methods) and some graph building (which include almost every top scoring method) tended to have a slightly higher performance, while those which included tSNE had a lower performance ( `r ref("stable", "component_importance")`), although these tendencies were not significant.
 
 
 ```{r}
@@ -259,7 +259,7 @@ add_stable(
     "6-performance_predictors"
   ))[[params$table_format]], 
   "component_importance", 
-  "Importance values for algorithmic components. The overall performance was compared between methods containing a particular algorithmic component, and we calculated both a corrected p-value using a two-tailed Mann–Whitney U test and the increase in node purity importance measure using random forest classification."
+  "Importance values for algorithmic components. The overall performance was compared between methods containing a particular algorithmic component, and we calculated both a p-value using a two-tailed Mann–Whitney U test (corrected for multiple testing using the method of Benjamini-Hochberg) and the increase in node purity importance measure using random forest classification."
 )
 ```
 
@@ -296,7 +296,7 @@ We observed no clear relation between method quality and method performance (`r 
 
 
 <!-- The context -->
-In this study, we presented a large scale evaluation of the performance and code of  `r nrow(filter(methods, evaluated, type == "algorithm"))`  TI methods. By using a common structure and three metrics to compare the methods’ outputs, we were able to assess the performance of the methods on more than a hundred datasets, which allowed us to highlight the strengths and weaknesses of each method on different trajectory types. We also assessed the code quality of these methods, to provide information on important scientific and software development practices for these methods. 
+In this study, we presented a large scale evaluation of the performance and code of  `r nrow(filter(methods, evaluated, type == "algorithm"))`  TI methods. By using a common structure and three metrics to compare the methods’ outputs, we were able to assess the performance of the methods on more than a hundred datasets, which allowed us to highlight the strengths and weaknesses of each method on different trajectory types. We also assessed the code quality of these methods, to provide information on important scientific and software development practices for these methods.
 
 
 <!-- FOR METHOD USERS -->
@@ -315,11 +315,11 @@ add_fig(
 
 
 <!-- Further considerations -->
-When choosing a method, it is important to take two further points into account. First, it is important that a trajectory, and the downstream results and/or hypotheses originating from it, are confirmed by multiple TI methods. This is to make sure the prediction is not biased due to the given parameter setting or the particular algorithms underlying a TI method. Second, even if the expected topology is known, it can be beneficial to also try out methods which make less assumptions about the trajectory topology. When the expected topology is confirmed using such a method, it provides extra evidence to the user's knowledge of the biological system. When a more complex topology is produced, this could indicate the presence of a more complex trajectory in the data than was expected by the user.
+When choosing a method, it is important to take two further points into account. First, it is critical that a trajectory, and the downstream results and/or hypotheses originating from it, are confirmed by multiple TI methods. This is to make sure the prediction is not biased due to the given parameter setting or the particular algorithms underlying a TI method. Second, even if the expected topology is known, it can be beneficial to also try out methods which make less assumptions about the trajectory topology. When the expected topology is confirmed using such a method, it provides extra evidence to the user's knowledge of the biological system. When a more complex topology is produced, this could indicate the presence of a more complex trajectory in the data than was expected by the user.
 
 
 <!-- A common trajectory analysis framework -->
-Critical to the broad applicability of TI methods is standardisation of the input and output interfaces of TI methods, so that users can effortlessly execute TI methods on their dataset of interest, compare different predicted trajectories, and apply downstream analyses such as network inference [@aibar_scenicsinglecellregulatory_2017a] or module detection [@saelens_comprehensiveevaluationmodule_2018]. Our framework is an initial attempt at tackling this problem, and we illustrate its usefulness here by comparing the predicted trajectories of several top-performing methods on a randomly picked dataset (`r ref("fig", "example_predictions")`). In the future, this framework should be extended to allow easier downstream analyses and also to allow easier interpretation by overlaying custom values such as cell type or expression values. In addition, further debate is required in order to arrive at a consensus concerning a common interface for trajectory models.
+Critical to the broad applicability of TI methods is standardisation of the input and output interfaces of TI methods, so that users can effortlessly execute TI methods on their dataset of interest, compare different predicted trajectories, and apply downstream analyses such as network inference [@aibar_scenicsinglecellregulatory_2017a] or module detection [@saelens_comprehensiveevaluationmodule_2018]. Our framework is an initial attempt at tackling this problem, and we illustrate its usefulness here by comparing the predicted trajectories of several top-performing methods on a randomly picked dataset (`r ref("fig", "example_predictions")`). In the future, this framework should be extended to allow easier downstream analyses and also to allow easier interpretation by overlaying custom values such as cell type or expression values. In addition, further discussion within the field is required in order to arrive at a consensus concerning a common interface for trajectory models, which can include additional features such as uncertainty and gene importance.
 
 
 ```{r echo=FALSE, results="asis"}
@@ -327,7 +327,7 @@ add_fig(
   fig_path = figure_file("bifurcating_example.tmp.pdf", experiment_id = "14-example_predictions"),
   ref_id = "example_predictions", 
   caption_main = "Demonstration of how a common framework for TI methods facilitates broad applicability using an example dataset.", 
-  caption_text = "a) The dataset consists of fibroblasts being reprogrammed towards neurons and myocytes, and thus contains a bifurcating dynamic process  [@treutlein_dissectingdirectreprogramming_2016]. b) A common visualisation of the predicted trajectories allows to easily compare the similarities and differences between predictions. The predictions are in line with earlier results in that Slingshot underestimates the complexity of the topology, AGA Pseudotime and Monocle DDRTree overestimate the complexity, and TSCAN is able to correctly identify the trajectory topology but obtains a suboptimal ordering of the cells. c) More insight can be gained into which cells ended up on which branch by placing the trajectory segments one after the other. d) Method-specific visualisations provide insight into the inner workings of a method's methodology and into how the trajectory was constructed. e) While only TSCAN and cellTree correctly predict the topology, the ordering of Slingshot and AGA Pseudotime on this dataset corresponds better to the expected ordering."
+  caption_text = "a) The dataset consists of fibroblasts being reprogrammed towards neurons and myocytes, and thus contains a bifurcating dynamic process  [@treutlein_dissectingdirectreprogramming_2016]. A multi-dimensional scaling of dataset is shown at the bottom. MEF: mouse embryonic fibroblast b) A common visualisation of the predicted trajectories allows to easily compare the similarities and differences between predictions. The predictions are in line with earlier results in that Slingshot underestimates the complexity of the topology, AGA Pseudotime and Monocle DDRTree overestimate the complexity, and TSCAN is able to correctly identify the trajectory topology. c) More insight can be gained into the ordering of the cells by placing the branches one after the other. The predicted topology is shown in the bottom of each plot. d) Method-specific visualisations provide insight into the inner workings of a method's methodology and into how the trajectory was constructed. e) Our metrics can be used to compare the output to a gold standard or to each other. In this case, while only TSCAN and cellTree correctly predict the topology, the ordering of Slingshot and AGA Pseudotime on this dataset corresponds better to the expected ordering."
 )
 ```
 
@@ -432,15 +432,15 @@ Special conversions were necessary for certain methods:
 The dynmethods github repository contains one vignette for each of the methods, discussing how to use the package to apply a method to a dataset, the specific implementation of the wrapper, and how the quality control scores of each TI method were derived.
 
 ### Control methods
-For comparison purposes, we added three control methods, namely "Random", "Component 1", and "Angle". 
+To define baseline performance, we added three control methods, namely "Random", "Component 1", and "Angle". 
 
 
-* **Random:** A random network with 50 milestones according to the Barabási–Albert model is generated, and cells are placed randomly along the network. This method provides a baseline performance to compare against; each other TI method should be able to obtain a higher benchmark score than this control method.
-* **Component 1:**: This method returns the first component of a PCA dimensionality reduction as a linear trajectory. We added this method because indeed in some studies the first component of a dimensionality reduction is being used to pseudotemporally order cells [@kouno_temporaldynamicstranscriptional_2013,@zeng_pseudotemporalorderingsingle_2017].
-* **Angle:** Similar to the previous method, this method computes the angle with respect to the origin in a two-dimensional PCA plot, and returns a cyclical trajectory. As reCAT was the only method specifically designed to produce cyclical trajectories, we believed it would be important to add this simple approach.
+* **Random:** A random network with 50 milestones according to the Barabási–Albert model is generated, and cells are placed randomly along the network. This method provides a bottom line performance; each other TI method should be able to obtain a higher benchmark score than this control method.
+* **Component 1:**: This method returns the first component of a PCA dimensionality reduction as a linear trajectory. Although conceptually very simple, it has been used in certain studies [@kouno_temporaldynamicstranscriptional_2013; @zeng_pseudotemporalorderingsingle_2017].
+* **Angle:** Similar to the previous method, this method computes the angle with respect to the origin in a two-dimensional PCA plot, and returns a cyclical trajectory.
 
 ## Real datasets
-We gathered `r sum(tasks_info$task_source == "real")` real datasets by searching for "single-cell" at the Gene Expression Omnibus and selecting those datasets in which the cells are sampled from different stages in a dynamic process (`r ref("stable", "datasets")`). The scripts to download and process these datasets are available on our repository ([github.com/dynverse/dynalysis](http://www.github.com/dynverse/dynalysis)). Whenever possible, we preferred to start from the raw counts data. These raw counts were all normalised and filtered using a common pipeline, discussed later. We determined a reference standard for every dataset using labelling provided by the author's, and classified the standards into gold and silver based on whether this labelling was determined by the expert using the expression (silver standard) or using other external information (such as FACS or the origin of the sample, gold standard) (`r ref("stable", "datasets")`).
+We gathered `r sum(tasks_info$task_source == "real")` real datasets by searching for "single-cell" at the Gene Expression Omnibus and selecting those datasets in which the cells are sampled from different stages in a dynamic process (`r ref("stable", "datasets")`). The scripts to download and process these datasets are available on our repository ([github.com/dynverse/dynalysis](http://www.github.com/dynverse/dynalysis)). Whenever possible, we preferred to start from the raw counts data. These raw counts were all normalised and filtered using a common pipeline, discussed later. We determined a reference standard for every dataset using labelling provided by the author's, and classified the standards into gold and silver based on whether this labelling was determined by the expert using the expression (silver standard) or using other external information (such as FACS or the origin of the sample; gold standard) (`r ref("stable", "datasets")`). These datasets are deposited in Zenodo ([doi.org/10.5281/zenodo.1211533](https://doi.org/10.5281/zenodo.1211533)) [@cannoodt_goldstandardsinglecell_].
 
 
 ```{r}
@@ -735,7 +735,7 @@ We classified all possible trajectory topologies into distinct trajectory types,
 
 
 ## Data and code availability
-The datasets used in this study are deposited on Zenodo ([doi.org/10.5281/zenodo.1211533](https://doi.org/10.5281/zenodo.1211533)). The code to fully reproduce the results from this study has been split into several R packages and is available on github ([github.com/dynverse/dynverse](https://github.com/dynverse/dynverse)).
+The real and synthetic datasets used in this study are deposited on Zenodo ([doi.org/10.5281/zenodo.1211533](https://doi.org/10.5281/zenodo.1211533)) [@cannoodt_goldstandardsinglecell_]. The code to fully reproduce the results from this study has been split into several R packages and is available on github ([github.com/dynverse/dynverse](https://github.com/dynverse/dynverse)).
 
 
 
