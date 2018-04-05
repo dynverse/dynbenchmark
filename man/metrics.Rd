@@ -4,7 +4,7 @@
 \name{metrics}
 \alias{metrics}
 \title{Common metric information}
-\format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 3 rows and 3 columns.}
+\format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 3 rows and 5 columns.}
 \usage{
 metrics
 }
