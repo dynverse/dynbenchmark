@@ -50,8 +50,7 @@ methods_oi <- c("slngsht", "tscan", "agapt", "ctmaptpx", "mnclddr")
 outputs_plot <- outputs_oi %>%
   filter(task_id == !!task_id) %>%
   arrange(edge_flip) %>%
-  slice(match(methods_oi, method_short_name)) %>%
-  mutate(plot_fun = slice(descriptions, match(method_short_name, descriptions$short_name)) %>% pull(plot_fun))
+  slice(match(methods_oi, method_short_name))
 
 # No title theme
 no_title_theme <- theme(legend.position = "none", plot.title = element_blank())
@@ -101,6 +100,8 @@ cowplot::plot_grid(plotlist=default_plots, nrow=1)
 task_method_plot <- plot_task_cells(task)
 
 # Method plots
+outputs_plot$plot_fun <- slice(descriptions, match(outputs_plot$method_short_name, descriptions$short_name)) %>% pull(plot_fun)
+
 outputs_plot <- outputs_plot %>%
   mutate(method_plot = map2(model, plot_fun, function(model, plot_fun) {
     print(model$id)
@@ -108,7 +109,7 @@ outputs_plot <- outputs_plot %>%
   }))
 
 method_row_label <- ggplot() +
-  geom_text(aes(0, 0, label="Method's own\nplotting function"), hjust=1) +
+  geom_text(aes(0, 0, label="Method's \nplotting style"), hjust=1) +
   scale_x_continuous(limits=c(-2, 0), expand=c(0,0)) +
   theme_void()
 
@@ -157,7 +158,7 @@ metric_plots <- c(list(metric_row_label, task_metric_plot), outputs_plot$metric_
 cowplot::plot_grid(plotlist=metric_plots, nrow=1)
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
-### Metrics                                                                 ####
+### Linear                                                                  ####
 plot_linearised <- function(model, label=FALSE) {
   model$milestone_network <- dynplot:::map_order(model, task)
 
@@ -233,7 +234,7 @@ bifurcating_example <- c(
   linearised_plots,
   method_plots
 ) %>%
-  cowplot::plot_grid(plotlist=., nrow=5, rel_heights = c(1, 3, 5, 5, 5), rel_widths=c(1.5, rep(2, length(title_plots)-1)))
+  cowplot::plot_grid(plotlist=., nrow=5, rel_heights = c(1, 2, 5, 5, 5), rel_widths=c(1.5, rep(2, length(title_plots)-1)))
 
 cowplot::save_plot(figure_file("bifurcating_example.svg"), bifurcating_example, base_height=10, base_width=16)
 
