@@ -2,6 +2,10 @@ library(dynalysis)
 library(tidyverse)
 library(dynplot)
 
+library(ggraph)
+library(tidygraph)
+
+
 experiment("14-example_predictions")
 
 source("analysis/analyses/14-example_predictions/common_functions.R")
@@ -50,7 +54,8 @@ methods_oi <- c("slngsht", "tscan", "agapt", "ctmaptpx", "mnclddr")
 outputs_plot <- outputs_oi %>%
   filter(task_id == !!task_id) %>%
   arrange(edge_flip) %>%
-  slice(match(methods_oi, method_short_name))
+  slice(match(methods_oi, method_short_name)) %>%
+  fix_aga()
 
 # No title theme
 no_title_theme <- theme(legend.position = "none", plot.title = element_blank())
@@ -90,7 +95,7 @@ default_row_label <- ggplot() +
   scale_x_continuous(limits=c(-2, 0), expand=c(0,0)) +
   theme_void()
 
-default_plots <- c(list(default_row_label, task_default_plot), outputs_plot$default_plot)
+default_plots <- c(list(default_row_label), outputs_plot$default_plot)
 
 cowplot::plot_grid(plotlist=default_plots, nrow=1)
 
@@ -113,7 +118,7 @@ method_row_label <- ggplot() +
   scale_x_continuous(limits=c(-2, 0), expand=c(0,0)) +
   theme_void()
 
-method_plots <- c(list(method_row_label, task_method_plot), outputs_plot$method_plot)
+method_plots <- c(list(method_row_label), outputs_plot$method_plot)
 
 cowplot::plot_grid(plotlist=method_plots, nrow=1)
 
@@ -153,27 +158,62 @@ metric_row_label <- row_labels_metric_plot <- metrics_oi %>%
   theme_void() +
   metrics_y_scale
 
-metric_plots <- c(list(metric_row_label, task_metric_plot), outputs_plot$metric_plot)
+metric_plots <- c(list(metric_row_label), outputs_plot$metric_plot)
 
 cowplot::plot_grid(plotlist=metric_plots, nrow=1)
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
 ### Linear                                                                  ####
+outputs_plot <- outputs_oi %>%
+  filter(task_id == !!task_id) %>%
+  arrange(edge_flip) %>%
+  slice(match(methods_oi, method_short_name)) %>%
+  fix_aga()
+
+
+manual_edge_flips <- list(
+  c(),
+  c(2),
+  c(),
+  c(1),
+  c(2,5)
+)
+outputs_plot$model <- map2(outputs_plot$model, manual_edge_flips, function(model, manual_edge_flips){
+  model$manual_edge_flips <- manual_edge_flips
+  model
+})
+
+model <- outputs_plot$model[[2]]
+
+flip_edges <- function(model, manual_edge_flips) {
+  if(length(manual_edge_flips) > 0) {
+    model$milestone_network[manual_edge_flips,] <-
+      model$milestone_network[manual_edge_flips,] %>% mutate(from2=from, from=to, to=from2) %>%
+      select(-from2)
+    model$progressions <- dynwrap::convert_milestone_percentages_to_progressions(model$cell_ids, model$milestone_ids, model$milestone_network, model$milestone_percentages)
+  }
+
+  model
+}
+
 plot_linearised <- function(model, label=FALSE) {
   model$milestone_network <- dynplot:::map_order(model, task)
 
-  margin <- 0
+  model <- flip_edges(model, model$manual_edge_flips)
+
+  margin <- 0.1
   cell_linearisation <- dynplot:::linearize_cells(model$milestone_network, model$progressions, margin=margin, one_edge = TRUE)
-  cell_linearisation$progressions$cumpercentage <- cell_linearisation$progressions$cumpercentage %>% {(. - min(.))/(max(.) - min(.))}
 
   plot <- left_join(grouping_assignment, cell_linearisation$progressions, "cell_id") %>%
     left_join(groups, "group_id") %>%
     mutate(group_id = factor(group_id, rev(group_order))) %>%
     ggplot(aes(cumpercentage, group_id)) +
+    # geom_rect(aes(x=NULL, y = NULL, xmin=cumstart, xmax=cumend, ymin=-Inf, ymax=Inf), cell_linearisation$milestone_network, fill="#999999", alpha=0.1) +
+    geom_segment(aes(x=cumstart, xend=cumend, y=group_id, yend=group_id), crossing(cell_linearisation$milestone_network, group_id=fct_inorder(rev(group_order))), color="#666666") +
     ggbeeswarm::geom_quasirandom(aes(color = color), groupOnX=F) +
+    # geom_vline(aes(), data=cell_linearisation$milestone_network)
     theme_bw() +
     theme(legend.position = "none") +
-    scale_y_discrete("", labels=NULL) +
     scale_color_identity() +
     scale_x_continuous(NULL, breaks = NULL) +
     theme(
@@ -181,7 +221,7 @@ plot_linearised <- function(model, label=FALSE) {
       axis.ticks.y = element_blank(),
       axis.title.y = element_blank(),
       axis.title.x=NULL,
-      panel.border = element_rect(colour = "black", fill = NA),
+      panel.border = element_rect(colour = "black", fill = NA)
     )
   if(label) {
     label_data <- left_join(grouping_assignment, cell_linearisation$progressions, "cell_id") %>%
@@ -195,10 +235,8 @@ plot_linearised <- function(model, label=FALSE) {
       scale_fill_identity()
   }
 
-  # connections <- plot_connections(model$milestone_network, orientation = -1, margin=margin)
-  # cowplot::plot_grid(plot, connections, ncol=1, rel_heights = c(4, 1))
-
-  plot
+  connections <- plot_connections(model$milestone_network, orientation = -1, margin=margin)
+  cowplot::plot_grid(plot, connections, ncol=1, rel_heights = c(4, 1))
 }
 
 grouping_assignment <- task$cell_grouping
@@ -213,7 +251,7 @@ linearised_row_label <- ggplot() +
   scale_x_continuous(limits=c(-2, 0), expand=c(0,0)) +
   theme_void()
 
-linearised_plots <- c(list(linearised_row_label, task_linearised_plot), outputs_plot$linearised_plot)
+linearised_plots <- c(list(linearised_row_label), outputs_plot$linearised_plot)
 
 cowplot::plot_grid(plotlist=linearised_plots, nrow=1)
 
@@ -225,16 +263,51 @@ outputs_plot$title_plot <- map(outputs_plot$method_short_name, function(method_s
   ggplot() + geom_text(aes(0, 0, label=title), size = 6, fontface = "bold", hjust = .5) + theme_void()
 })
 
-title_plots <- c(list(ggplot() + theme_void(), task_title_plot), outputs_plot$title_plot)
+title_plots <- c(list(ggplot() + theme_void()), outputs_plot$title_plot)
 
-bifurcating_example <- c(
+### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
+### Dataset                                                                 ####
+layout <- tbl_graph(groups, task$milestone_network) %>% create_layout("tree")
+layout$x <- layout$x * 3
+task_milestone_plot <-
+  ggraph(layout) +
+    geom_edge_fan() +
+    geom_edge_fan(aes(xend = x + (xend-x)/1.5, yend = y + (yend-y)/1.5), arrow=arrow(type="closed", length = unit(0.4, "cm"))) +
+    geom_node_label(aes(fill=color, label=group_id)) +
+    scale_fill_identity() +
+    no_title_theme
+task_milestone_plot <- (task_milestone_plot %>% process_dynplot(NULL))
+
+dataset_plot <- cowplot::plot_grid(task_milestone_plot, task_method_plot, ncol=1)
+dataset_plot
+
+
+##  ............................................................................
+##  Overall plot                                                            ####
+prediction_plot <- c(
   title_plots,
-  metric_plots,
   default_plots,
   linearised_plots,
-  method_plots
+  method_plots,
+  metric_plots
 ) %>%
-  cowplot::plot_grid(plotlist=., nrow=5, rel_heights = c(1, 2, 5, 5, 5), rel_widths=c(1.5, rep(2, length(title_plots)-1)))
+  cowplot::plot_grid(
+    plotlist=.,
+    nrow=5,
+    rel_heights = c(1, 5, 6, 5, 2),
+    rel_widths=c(1.5, rep(2, length(title_plots)-1)),
+    labels =map(c("", letters[2:5]), ~c(., rep("", length(title_plots)-1))) %>% unlist()
+)
+
+bifurcating_example <- cowplot::plot_grid(
+  dataset_plot,
+  prediction_plot,
+  nrow=1,
+  rel_widths = c(2, 5),
+  labels = c("a", "")
+)
+
+bifurcating_example
 
 cowplot::save_plot(figure_file("bifurcating_example.svg"), bifurcating_example, base_height=10, base_width=16)
 

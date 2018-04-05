@@ -1,6 +1,6 @@
 plot_task_cells <- function(task) {
   source("../dynmodular/dimred_wrappers.R")
-  space_cells <- dimred_mds(task$counts(), ndim=2) %>%
+  space_cells <- dimred_mds(task$expression(), ndim=2) %>%
     as_tibble() %>%
     mutate(cell_id = rownames(task$expression())) %>%
     left_join(task$prior_information$grouping_assignment, by="cell_id") %>%
@@ -88,4 +88,30 @@ preprocess_task <- function(task) {
   task$progressions <- dynwrap::convert_milestone_percentages_to_progressions(task$cell_ids, task$milestone_ids, task$milestone_network, task$milestone_percentages)
 
   task
+}
+
+
+
+
+
+fix_aga <- function(outputs_plot) {
+  row_i <- which(outputs_plot$method_short_name== "agapt")
+
+  model <- outputs_plot[row_i, ]$model[[1]]
+  mil_map <- c(
+    model$milestone_network %>% filter(length == 0) %>% {set_names(.$from, .$to)},
+    set_names(model$milestone_ids, model$milestone_ids)
+  )
+  model$milestone_ids <- unique(mil_map[model$milestone_ids])
+  model$milestone_network <- model$milestone_network %>%
+    mutate(from = mil_map[from], to = mil_map[to]) %>%
+    filter(length > 0)
+  model$progressions <- model$progressions %>%
+    mutate(from = mil_map[from], to = mil_map[to])
+  model$milestone_percentages <- model$milestone_percentages %>%
+    mutate(milestone_id = mil_map[milestone_id])
+
+  outputs_plot$model[[row_i]] <- model
+
+  outputs_plot
 }
