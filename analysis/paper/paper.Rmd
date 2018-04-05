@@ -16,7 +16,10 @@ header-includes:
   - \usepackage{pbox}
   - \usepackage[labelformat=empty]{caption}
   - \usepackage{hyperref}
-  - \hypersetup{colorlinks=true}
+  - \definecolor{airforceblue}{rgb}{0.36, 0.54, 0.66}
+  - \definecolor{cerulean}{rgb}{0.0, 0.48, 0.65}
+  - \definecolor{burntorange}{rgb}{0.8, 0.33, 0.0}
+  - \hypersetup{colorlinks=true,linkcolor=airforceblue,citecolor=cerulean,urlcolor=burntorange}
   - \ExecuteBibliographyOptions{sorting=none,sortcites=true,autocite=superscript,autopunct=false}
   - \newcommand{\hideFromPandoc}[1]{#1}
   - \hideFromPandoc{\let\Begin\begin}
@@ -72,7 +75,7 @@ Wouter Saelens* ¹ ², Robrecht Cannoodt* ¹ ² ³, Helena Todorov¹ ² ⁴, Yva
 Recent technological advances allow unbiased investigation of cellular dynamic processes, by generating -omics profiles of thousands of single cells and computationally ordering these cells along a trajectory. Since 2014, at least `r sum(implementations$contains_ti, na.rm=TRUE)` trajectory inference methods have been developed, but due to high variability in their inputs and outputs, these methods are difficult to compare. As a result, a comprehensive assessment of the performance of trajectory inference methods is still lacking, and more importantly also guidelines for new users to the field. 
 
 
-In this study, we evaluated a total of  `r nrow(filter(methods, evaluated, type == "algorithm"))` methods in terms of cellular ordering, trajectory topology, code quality and user friendliness. Our results indicate that there is no "one-size-fits-all" method, but that the choice of method mostly depends on the topology present in the data. We therefore developed a set of guidelines to aid users select the most appropriate method, based on their prior knowledge of the trajectory present in the data. While the field certainly has matured significantly since its inception, further progress is still necessary in order to cope with increasingly complex and novel use cases. We hope to spearhead such developments and the field as a whole, by making our evaluation pipeline easily extensible and freely available at [github.com/dynverse/dynverse](https://www.github.com/dynverse/dynverse).
+In this study, we evaluated a total of  `r nrow(filter(methods, evaluated, type == "algorithm"))` methods in terms of cellular ordering, trajectory topology, code quality and user friendliness. Our results indicate that existing methods are typically better at ordering the cells rather than inferring the correct trajectory topology, and that there is no "one-fits-all" method. Instead, the choice of method depends on the trajectory topology present in the data. We therefore developed a set of guidelines to aid users select the most appropriate method, based on their prior knowledge of the trajectory present in the data. While the field certainly has matured significantly since its inception, further progress is still necessary in order to cope with increasingly complex and novel use cases. We hope to spearhead such developments and the field as a whole, by making our evaluation pipeline easily extensible and freely available at [github.com/dynverse/dynverse](https://www.github.com/dynverse/dynverse).
 
 
 
@@ -312,7 +315,21 @@ add_fig(
 
 
 <!-- Further considerations -->
-When choosing a method, it is important to take two further points into account. First, it is important that a trajectory, and the downstream results and/or hypotheses originating from it, are confirmed by multiple TI methods. This is to make sure the model is not biased towards the particular model underlying a TI method, for example its preferred trajectory type. Second, even if the expected topology is known, it can be beneficial to also try out methods which make less assumptions about the trajectory topology. When the expected topology is confirmed using such a method, it provides extra evidence to the user's knowledge of the biological system. When a more complex topology is produced, this could indicate the presence of a more complex trajectory in the data than was expected by the user.
+When choosing a method, it is important to take two further points into account. First, it is important that a trajectory, and the downstream results and/or hypotheses originating from it, are confirmed by multiple TI methods. This is to make sure the prediction is not biased due to the given parameter setting or the particular algorithms underlying a TI method. Second, even if the expected topology is known, it can be beneficial to also try out methods which make less assumptions about the trajectory topology. When the expected topology is confirmed using such a method, it provides extra evidence to the user's knowledge of the biological system. When a more complex topology is produced, this could indicate the presence of a more complex trajectory in the data than was expected by the user.
+
+
+<!-- A common trajectory analysis framework -->
+Critical to the broad application of TI methods is that both the user's input and the method's output is standardised, so that users can easily and quickly try out different methods, compare their output, and run common analysis pipelines such as network inference [@aibar_scenicsinglecellregulatory_2017a] or module detection [@saelens_comprehensiveevaluationmodule_2018]. A common framework to analyse trajectories is especially important when the output of methods contradict, as they often do. We illustrate this in  `r ref("fig", "example_predictions")`. Here, we predicted trajectories on a datasets containing fibroblasts which were reprogrammed towards neurons and myocytes, a bifurcating trajectory [@treutlein_dissectingdirectreprogramming_2016]. The topology of all five methods differs greatly, with Slingshot underestimating the complexity of the topology, while AGA pseudotime and Monocle DDRTree overestimated the complexity, at least compared to what was expected in the data.
+
+
+```{r echo=FALSE, results="asis"}
+add_fig(
+  fig_path = figure_file("bifurcating_example.svg", experiment_id = "14-example_predictions"),
+  ref_id = "example_predictions", 
+  caption_main = "An example gold standard and prediction.", 
+  caption_text = "As an illustration to our practical guidelines"
+)
+```
 
 
 <!-- FOR METHOD DEVELOPERS -->

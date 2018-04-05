@@ -90,3 +90,8 @@ render(
 drive_update("dynverse/paper.pdf", "analysis/paper/paper_latex.pdf")
 drive_update("dynverse/supplementary.pdf", "analysis/paper/supplementary_latex.pdf")
 
+# prepare for submission
+paper_folder <- "../../dyndocs/20180401_submission_nat_biotech/"
+file.copy("analysis/paper/paper_latex.pdf", paste0(paper_folder, "paper.pdf"))
+
+figs$fig_path
