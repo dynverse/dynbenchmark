@@ -92,6 +92,6 @@ drive_update("dynverse/supplementary.pdf", "analysis/paper/supplementary_latex.p
 
 # prepare for submission
 paper_folder <- "../../dyndocs/20180401_submission_nat_biotech/"
-file.copy("analysis/paper/paper_latex.pdf", paste0(paper_folder, "paper.pdf"))
+file.copy("analysis/paper/paper_latex.pdf", paste0(paper_folder, "paper.pdf"), overwrite=TRUE)
 
 figs$fig_path
