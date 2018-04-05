@@ -93,6 +93,7 @@ drive_update("dynverse/supplementary.pdf", "analysis/paper/supplementary_latex.p
 # prepare for submission
 paper_folder <- "../../dyndocs/20180401_submission_nat_biotech/"
 file.copy("analysis/paper/paper_latex.pdf", paste0(paper_folder, "paper.pdf"), overwrite=TRUE)
+file.copy("analysis/paper/supplementary_latex.pdf", paste0(paper_folder, "supplementary_material.pdf"), overwrite=TRUE)
 
 figs <- read_rds(derived_file("figs.rds", "paper"))
 figs$fig_id <- seq_len(nrow(figs))
