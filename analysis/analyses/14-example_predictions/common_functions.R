@@ -57,7 +57,7 @@ plot_task_cells <- function(task) {
     ggplot(aes(Comp1, Comp2)) +
     geom_point(aes(fill=color), color="black", shape=21) +
     ggraph::geom_edge_link(aes(x=Comp1_from, y=Comp2_from, xend=Comp1_to, yend=Comp2_to), data=group_network) +
-    ggraph::geom_edge_link(aes(x=Comp1_from, y=Comp2_from, xend=Comp1_mid, yend=Comp2_mid), data=group_network, arrow=arrow(type="closed", length = unit(0.2, "cm"))) +
+    ggraph::geom_edge_link(aes(x=Comp1_from, y=Comp2_from, xend=Comp1_mid, yend=Comp2_mid), data=group_network, arrow=arrow(type="closed", length = unit(0.4, "cm"))) +
     geom_point(color="black", data=space_groups, size=6) +
     geom_point(aes(color=color), data=space_groups, size=4) +
     scale_color_identity() +

@@ -266,7 +266,7 @@ outputs_plot$title_plot <- map(outputs_plot$method_short_name, function(method_s
 title_plots <- c(list(ggplot() + theme_void()), outputs_plot$title_plot)
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
-### Dataset                                                                 ####
+### Gold standard                                                           ####
 layout <- tbl_graph(groups, task$milestone_network) %>% create_layout("tree")
 layout$x <- layout$x * 3
 task_milestone_plot <-
@@ -278,7 +278,7 @@ task_milestone_plot <-
     no_title_theme
 task_milestone_plot <- (task_milestone_plot %>% process_dynplot(NULL))
 
-dataset_plot <- cowplot::plot_grid(task_milestone_plot, task_method_plot, ncol=1)
+dataset_plot <- cowplot::plot_grid(task_title_plot, task_milestone_plot, task_method_plot, ncol=1, rel_heights = c(1, 5, 5))
 dataset_plot
 
 
