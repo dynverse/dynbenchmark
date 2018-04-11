@@ -33,7 +33,7 @@ prior_usages <- tribble(
 #' @param svg The base svg of the priors
 #' @export
 #'
-#' @importFrom xml2 read_xml xml_new_root xml_find_first xml_remove xml_read_xml xml_add_child write_xml
+#' @importFrom xml2 read_xml xml_new_root xml_find_first xml_remove xml_add_child write_xml
 generate_prior_mini <- function(method_priors, svg = xml2::read_xml(figure_file("priors.svg", experiment_id = "priors"))) {
   svg2 <- xml2::xml_new_root(svg, .copy=T)
 
