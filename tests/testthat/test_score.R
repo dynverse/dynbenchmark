@@ -40,15 +40,20 @@ dimred_pca = function(x, ndim=3) {
 
 context("Dataset scores")
 
+verbose <- FALSE
+
 test_that("Connectivity score", {
   ## connectivity -----------------------
   adjustments <- seq(-2, 4, 0.2)
   means <- adjustments %>% map(~list(c(1, 3, 1), c(1+., 3-., 1), c(3, 1, 1)) %>% do.call(rbind, .))
   datasets <- map(means, generate_blob_datasets, sd=2)
-  plot_datasets(datasets)
-  scores <- map_dbl(datasets, ~score_milestone_connectivity(.$counts, .$cell_grouping, .$milestone_ids, .$milestone_network, perc=0.2)$connectivity)
+
+  if (verbose) plot_datasets(datasets)
+
+  scores <- map_dbl(datasets, function(d) score_milestone_connectivity(d$counts, d$cell_grouping, d$milestone_ids, d$milestone_network, perc=0.2)$connectivity)
   expect_equal(which.max(scores), which(adjustments == 1))
-  plot(scores)
+
+  if (verbose) plot(scores)
 })
 
 test_that("Transitions score", {
@@ -56,7 +61,9 @@ test_that("Transitions score", {
   adjustments <- seq(-1, 3, 0.5)
   means <- adjustments %>% map(~list(c(1, 3, 1), c(1+., 3-., 1), c(3, 1, 1), c(3, 1, 2)) %>% do.call(rbind, .))
   datasets <- map(means, generate_blob_datasets, sd=2)
-  plot_datasets(datasets)
+
+  if (verbose) plot_datasets(datasets)
+
   scores <- map(datasets, function(dataset) {
     counts_grouped <- dynutils::group_counts(dataset$counts, dataset$cell_grouping)
     score_milestone_transitions(counts_grouped, dataset$milestone_ids, dataset$milestone_network)
@@ -64,7 +71,7 @@ test_that("Transitions score", {
   expect_equal(which.max(scores$transition_frac), which(adjustments == 1))
   expect_equal(max(scores$transition_pval), scores$transition_pval[which(adjustments == 1)])
 
-  plot(scores$transition_frac)
+  if (verbose) plot(scores$transition_frac)
 })
 
 test_that("Grouping score", {
@@ -72,12 +79,15 @@ test_that("Grouping score", {
   adjustments <- seq(0, 8, 1)
   means <- adjustments %>% map(~list(c(1, 3), c(1+., 3)) %>% do.call(rbind, .))
   datasets <- map(means, generate_blob_datasets, sd=2)
-  plot_datasets(datasets)
+
+  if (verbose) plot_datasets(datasets)
+
   scores <- map(datasets, function(dataset) {
     score_milestone_grouping(dataset$counts, dataset$cell_grouping)
   }) %>% bind_rows()
   expect_equal(which.max(scores$grouping_asw), length(adjustments))
-  plot(scores)
+
+  if (verbose) plot(scores)
 })
 
 test_that("Aggregation score", {
@@ -85,11 +95,13 @@ test_that("Aggregation score", {
   adjustments <- seq(1, 4, 0.4)
   means <- adjustments %>% map(~list(c(1, 2, 3), c(1, 3, 2), c(2*., 3*., 1*.)) %>% do.call(rbind, .))
   datasets <- map(means, generate_blob_datasets, sd=2)
-  plot_datasets(datasets, "ncounts")
+
+  if (verbose) plot_datasets(datasets, "ncounts")
+
   scores <- map_dbl(datasets, function(dataset) {
     score_aggregation(dataset$counts, dataset$cell_grouping)$aggregation_sd_frac
   })
   which.max(scores) == which(adjustments == 1)
 
-  plot(scores)
+  if (verbose) plot(scores)
 })
