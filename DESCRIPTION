@@ -29,7 +29,6 @@ Imports:
   dynnormaliser,
   ggraph,
   ggplot2,
-  lazyeval,
   purrr,
   RColorBrewer,
   readr,
