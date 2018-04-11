@@ -2,7 +2,10 @@ language: r
 sudo: required
 dist: trusty
 bioc_required: true
-cache: packages
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/R
 warnings_are_errors: true
 python:
   - "3.6"
