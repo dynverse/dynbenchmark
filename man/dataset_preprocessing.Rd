@@ -19,13 +19,13 @@ dataset_file(filename = "", dataset_id = NULL, relative = FALSE)
 save_dataset(dataset, dataset_id = NULL)
 }
 \arguments{
-\item{dataset_id}{Dataset id}
+\item{dataset_id}{The ID of the dataset to be used}
 
-\item{filename}{filename}
+\item{filename}{Custom filename}
+
+\item{relative}{Whether or not to output relative paths}
 
 \item{dataset}{Dataset object to save}
-
-\item{prefix}{Dataset prefix}
 }
 \description{
 Helper functions for creating new datasets

@@ -1,9 +1,9 @@
 #' Helper functions for creating new datasets
 #'
-#' @param prefix Dataset prefix
-#' @param dataset_id Dataset id
+#' @param dataset_id The ID of the dataset to be used
 #' @param dataset Dataset object to save
-#' @param filename filename
+#' @param filename Custom filename
+#' @param relative Whether or not to output relative paths
 #'
 #' @export
 #'
@@ -31,9 +31,12 @@ datasetpreproc_getid <- function() {
 
 # create a helper function
 datasetpreproc_subfolder <- function(path) {
-  function(filename = "", dataset_id = NULL, relative=FALSE) {
+  function(filename = "", dataset_id = NULL, relative = FALSE) {
     dyn_fold <- get_dynalysis_folder()
-    if(relative) {dyn_fold = ""}
+
+    if (relative) {
+      dyn_fold = ""
+    }
 
     if (is.null(dataset_id)) {
       dataset_id <- datasetpreproc_getid()
@@ -80,6 +83,7 @@ list_datasets <- function() {
 #' Download a file and return its location path
 #' @param url The url of the file to download
 #' @param filename What name to give to the file
+#' @param dataset_id An optional dataset_id
 #' @export
 download_dataset_file <- function(filename, url, dataset_id = NULL) {
   loc <- dataset_preproc_file(dataset_id = dataset_id, filename = filename)

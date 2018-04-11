@@ -7,7 +7,7 @@
 load_dataset(dataset_id = NULL)
 }
 \arguments{
-\item{dataset_id}{Dataset id}
+\item{dataset_id}{The ID of the dataset to be used}
 }
 \description{
 Loading a dataset after it has been preprocessed
