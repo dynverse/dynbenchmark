@@ -13,6 +13,7 @@ Depends:
   dyneval,
   dyngen,
   dynmethods,
+  dynplot,
   dyntoy,
   dynutils,
   dynwrap
@@ -22,28 +23,31 @@ LazyData: true
 URL: https://github.com/Zouter/dynalysis
 BugReports: https://github.com/Zouter/dynalysis/issues
 Imports: 
-  bookdown,
+  cluster,
+  colorspace, 
   dplyr,
   dynnormaliser,
+  ggraph,
+  ggplot2,
+  glue,
+  Hmisc,
+  purrr,
+  RColorBrewer,
+  readr,
+  reshape2,
   tidyr,
   tidyverse,
   tibble,
-  purrr,
-  ggplot2,
-  readr,
   testthat,
-  lazyeval,
-  SCORPIUS,
-  cluster,
-  reshape2,
   tidygraph,
-  ggraph
+  xml2
 Remotes:
   dynverse/dyneval,
+  dynverse/dyngen,
   dynverse/dynmethods,
   dynverse/dynnormaliser,
+  dynverse/dynplot,
   dynverse/dynutils,
   dynverse/dyntoy,
-  dynverse/dynwrap,
-  Zouter/dyngen
+  dynverse/dynwrap
 RoxygenNote: 6.0.1

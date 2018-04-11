@@ -3,8 +3,6 @@
 #' @param experiment_id id for the experiment
 #' @param filename the filename
 #'
-#' @importFrom lazyeval lazy_eval
-#' @importFrom testthat expect_match
 #' @export
 #'
 #' @rdname experiment
