@@ -5,12 +5,11 @@
 #' @param milestone_network data frame contain the milestone network
 #' @param perc Percentage of lowest distances to use between groups
 #'
-#' @importFrom SCORPIUS correlation_distance
 #' @importFrom reshape2 melt
 #'
 #' @export
 score_milestone_connectivity <- function(counts, cell_grouping, milestone_ids, milestone_network, perc=0.1) {
-  distances <- SCORPIUS::correlation_distance(counts)
+  distances <- dynutils::correlation_distance(counts)
   alldistances <- distances %>%
     reshape2::melt(varnames=c("from_cell_id", "to_cell_id"), value.name="distance") %>%
     mutate_if(is.factor, funs(as.character)) %>%
