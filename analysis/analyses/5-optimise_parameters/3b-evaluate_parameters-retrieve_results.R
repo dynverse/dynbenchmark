@@ -37,7 +37,7 @@ task_errors <- outputs %>%
   ungroup()
 
 print(task_errors)
-write_tsv(task_errors, figure_file("errors_qsub.tsv"))
+write_tsv(task_errors, derived_file("errors_qsub.tsv"))
 
 # print job errors
 job_errors <- outputs %>%
@@ -49,7 +49,7 @@ job_errors <- outputs %>%
   arrange(desc(n))
 
 print(job_errors)
-write_tsv(job_errors, figure_file("errors_method.tsv"))
+write_tsv(job_errors, derived_file("errors_method.tsv"))
 
 job_errors %>% filter(error_message %in% c("Memory limit exceeded"))
 job_errors %>% filter(error_message %in% c("Time limit exceeded"))

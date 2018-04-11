@@ -60,7 +60,7 @@ overall_comp <-
   bind_rows(oc1, oc2) %>%
   mutate(metric_f = factor(metric, levels = metr_lev))
 
-pdf(figure_file("1_overall_comparison.pdf"), 16, 12)
+pdf(derived_file("1_overall_comparison.pdf"), 16, 12)
 ggplot(overall_comp) +
   geom_hline(aes(yintercept = y), data_frame(y = .5, metric_f = factor(metr_lev[1:6], levels = metr_lev))) +
   geom_bar(aes(method_name_f, score, fill = metric_f), stat = "identity") +
@@ -81,7 +81,7 @@ cols <- RColorBrewer::brewer.pal(4, "Blues")[2:4]
 cols <- viridis::viridis(8)[-1]
 method_cols <- rep(cols, ceiling(length(lvls) / length(cols)))[seq_along(lvls)]
 
-pdf(figure_file("2_trajtype_comparison.pdf"), 20, 12)
+pdf(derived_file("2_trajtype_comparison.pdf"), 20, 12)
 ggplot(outputs_summtrajtype_totalsx2) +
   geom_point(aes(method_name_f, harm_mean, colour = method_name_f)) +
   coord_flip() +

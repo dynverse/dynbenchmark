@@ -2,7 +2,7 @@ library(dynalysis)
 library(tidyverse)
 library(dynplot)
 
-experiment("5-optimise_parameters/9-plot_all_trajectories")
+experiment("5-optimise_parameters/5-plot_all_trajectories")
 
 #### FIRST RUN THE RSYNC FROM SCRIPT 3C ####
 
