@@ -10,14 +10,12 @@
 #' @export
 score_milestone_connectivity <- function(counts, cell_grouping, milestone_ids, milestone_network, perc=0.1) {
   distances <- dynutils::correlation_distance(counts)
+
   alldistances <- distances %>%
     reshape2::melt(varnames=c("from_cell_id", "to_cell_id"), value.name="distance") %>%
     mutate_if(is.factor, funs(as.character)) %>%
     left_join(cell_grouping %>% rename(from = "group_id"), by=c("from_cell_id" = "cell_id")) %>%
     left_join(cell_grouping %>% rename(to = "group_id"), by=c("to_cell_id" = "cell_id"))
-  # alldistances %>% ggplot() + geom_boxplot(aes(from, distance)) + facet_wrap(~to)
-
-  percs <- tibble(perc=)
 
   distance_ecdf <- ecdf(alldistances$distance)
 
@@ -33,10 +31,4 @@ score_milestone_connectivity <- function(counts, cell_grouping, milestone_ids, m
   connectivity <- 1 - connectivity
 
   lst(connectivity)
-
-
-  # lst(
-  #   connectivity = (perc-ecdf(alldistances$distance)(milestone_network$connectivity)) %>% mean(),
-  #   connectivities = list(milestone_network)
-  # )
 }
