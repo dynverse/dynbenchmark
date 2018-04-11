@@ -1,12 +1,10 @@
 #' Helper functions for creating new datasets
 #'
-#' @param prefix Dataset prefix
-#' @param dataset_id Dataset id
+#' @param dataset_id The ID of the dataset to be used
 #' @param dataset Dataset object to save
-#' @param filename filename
+#' @param filename Custom filename
+#' @param relative Whether or not to output relative paths
 #'
-#' @importFrom lazyeval lazy_eval
-#' @importFrom testthat expect_match
 #' @export
 #'
 #' @rdname dataset_preprocessing
@@ -33,9 +31,12 @@ datasetpreproc_getid <- function() {
 
 # create a helper function
 datasetpreproc_subfolder <- function(path) {
-  function(filename = "", dataset_id = NULL, relative=FALSE) {
+  function(filename = "", dataset_id = NULL, relative = FALSE) {
     dyn_fold <- get_dynalysis_folder()
-    if(relative) {dyn_fold = ""}
+
+    if (relative) {
+      dyn_fold = ""
+    }
 
     if (is.null(dataset_id)) {
       dataset_id <- datasetpreproc_getid()
@@ -82,6 +83,7 @@ list_datasets <- function() {
 #' Download a file and return its location path
 #' @param url The url of the file to download
 #' @param filename What name to give to the file
+#' @param dataset_id An optional dataset_id
 #' @export
 download_dataset_file <- function(filename, url, dataset_id = NULL) {
   loc <- dataset_preproc_file(dataset_id = dataset_id, filename = filename)
@@ -93,6 +95,17 @@ download_dataset_file <- function(filename, url, dataset_id = NULL) {
   loc
 }
 
+#' Preprocessing functionality for real datasets
+#'
+#' @param counts Count matrix
+#' @param cell_ids The ids of the cells. Is equal to the rownames of the counts.
+#' @param milestone_ids The ids of the milestones in the trajectory. Type: Character vector.
+#' @param milestone_network A data frame specifying what percentage milestone each cell consists of. Type: Data frame(cell_id = character, milestone_id = character, percentage = numeric).
+#' @param cell_grouping Milestone groups of the cells.
+#' @param cell_info A data frame of extra information pertaining the cells. First column must be \code{cell_id}.
+#' @param feature_info A data frame of extra information pertaining the genes/features. First column must be \code{feature_id}.
+#' @param dataset_id The name of the dataset.
+#'
 #' @importFrom dynnormaliser normalise_filter_counts generate_prior_information
 #' @export
 datasetpreproc_normalise_filter_wrap_and_save <- function(

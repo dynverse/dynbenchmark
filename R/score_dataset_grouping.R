@@ -3,7 +3,6 @@
 #' @param cell_grouping data frame contain cell groups
 #'
 #' @importFrom cluster silhouette
-#' @importFrom SCORPIUS correlation_distance
 #'
 #' @export
 score_milestone_grouping <- function(counts, cell_grouping) {
@@ -15,7 +14,7 @@ score_milestone_grouping <- function(counts, cell_grouping) {
 
   cell_grouping <- cell_grouping %>% slice(match(rownames(counts), cell_id))
 
-  result <- cluster::silhouette(as.numeric(factor(cell_grouping$group_id)), dmatrix=SCORPIUS::correlation_distance(counts))
+  result <- cluster::silhouette(as.numeric(factor(cell_grouping$group_id)), dmatrix=dynutils::correlation_distance(counts))
 
   list(grouping_asw = summary(result)$si.summary[["Mean"]])
 }

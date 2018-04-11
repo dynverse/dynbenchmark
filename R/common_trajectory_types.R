@@ -52,7 +52,10 @@ trajectory_type_edges_directed <- tribble(
 ##  ............................................................................
 ##  Create trajectory types                                                 ####
 #' Trajectory types
+#'
 #' @export
+#'
+#' @importFrom colorspace hex HSV
 trajectory_types <- {
   trajectory_types <- bind_rows(
     tibble(
@@ -142,7 +145,7 @@ trajectory_type_dag <- {
 
   trajectory_type_dag <- trajectory_type_edges %>% igraph::graph_from_data_frame(vertices=trajectory_types) %>% tidygraph::as_tbl_graph()
 
-  trajectory_type_dag %>% ggraph::ggraph() +
+  trajectory_type_dag %>% ggraph::ggraph(layout = "nicely") +
     ggraph::geom_edge_link() +
     ggraph::geom_edge_link(ggplot2::aes(xend = x+(xend-x)/2, yend = y+(yend - y)/2), arrow=ggplot2::arrow()) +
     ggraph::geom_node_label(ggplot2::aes(label=name, fill=directedness)) +

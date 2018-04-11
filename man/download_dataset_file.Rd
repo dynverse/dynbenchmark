@@ -10,6 +10,8 @@ download_dataset_file(filename, url, dataset_id = NULL)
 \item{filename}{What name to give to the file}
 
 \item{url}{The url of the file to download}
+
+\item{dataset_id}{An optional dataset_id}
 }
 \description{
 Download a file and return its location path
