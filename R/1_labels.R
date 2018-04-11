@@ -38,9 +38,15 @@ label_short <- function(x, width=10) {
     pull(short)
 }
 
+#' Text wrapping
+#'
+#' @param x a character vector.
+#' @param width a positive integer giving the target column for wrapping lines in the output.
+#' @param collapse an optional character string to separate the different lines.
+#'
 #' @export
-label_wrap <- function(x, width=10, collapse="\n") {
-  map_chr(strwrap(x, width, simplify=FALSE), paste0, collapse=collapse)
+label_wrap <- function(x, width = 10, collapse = "\n") {
+  strwrap(x, width, simplify = FALSE) %>% map_chr(paste0, collapse = collapse)
 }
 
 #' Long labelling function
@@ -53,6 +59,7 @@ label_long <- function(x) {
     pull(long)
 }
 
+#' @importFrom Hmisc capitalize
 label_capitalise <- function(x) {
   x %>% gsub("_", " ", .) %>% Hmisc::capitalize()
 }
@@ -86,7 +93,10 @@ label_extrema <- function(x) {
 #' Label p_value
 #' @param p_values P values
 #' @param cutoffs Cutoffs for number of asterisks
+#'
 #' @export
+#'
+#' @importFrom glue collapse
 label_pvalue <- function(p_values, cutoffs=c(0.1, 0.01, 1e-5)) {
   breaks <- c(Inf, cutoffs, -Inf)
   labels <- rev(c("NS", map_chr(seq_len(length(cutoffs)), ~glue::collapse(rep("*", .)))))
