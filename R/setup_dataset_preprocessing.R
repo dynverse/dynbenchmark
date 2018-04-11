@@ -5,8 +5,6 @@
 #' @param dataset Dataset object to save
 #' @param filename filename
 #'
-#' @importFrom lazyeval lazy_eval
-#' @importFrom testthat expect_match
 #' @export
 #'
 #' @rdname dataset_preprocessing
