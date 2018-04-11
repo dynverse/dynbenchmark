@@ -24,21 +24,21 @@ URL: https://github.com/Zouter/dynalysis
 BugReports: https://github.com/Zouter/dynalysis/issues
 Imports: 
   bookdown,
+  cluster,
   dplyr,
   dynnormaliser,
+  ggraph,
+  ggplot2,
+  lazyeval,
+  purrr,
+  RColorBrewer,
+  readr,
+  reshape2,
   tidyr,
   tidyverse,
   tibble,
-  purrr,
-  ggplot2,
-  readr,
   testthat,
-  lazyeval,
-  SCORPIUS,
-  cluster,
-  reshape2,
-  tidygraph,
-  ggraph
+  tidygraph
 Remotes:
   dynverse/dyneval,
   dynverse/dyngen,
