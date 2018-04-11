@@ -20,12 +20,9 @@ labels <- bind_rows(
 #' @export
 prior_usages <- tribble(
   ~prior_usage, ~color,
-  "can_use", "#0074D9",
-  "can_root", "#39CCCC",
+  "optional", "#0074D9",
   "no", "#EEEEEE",
-  "?", "#AAAAAA",
-  "required", "#FF4136",
-  "required_default", "#FF4136"
+  "required", "#FF4136"
 )
 
 #' Creates a prior mini svg
