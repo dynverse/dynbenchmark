@@ -2,7 +2,7 @@ library(dynalysis)
 library(tidyverse)
 library(dynplot)
 
-experiment("5-optimise_parameters/5-compare_scaling")
+experiment("5-optimise_parameters/4-compare_metric_normalisation")
 
 outputs_ind <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_parameters/3-evaluate_parameters"))$outputs_ind %>%
   mutate(rf_mse_neg = 1 - rf_mse)
