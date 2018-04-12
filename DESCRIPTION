@@ -32,6 +32,7 @@ Imports:
   glue,
   Hmisc,
   httr,
+  ParamHelpers (>= 0.11),
   purrr,
   RColorBrewer,
   readr,
@@ -45,6 +46,7 @@ Imports:
   tidygraph,
   xml2
 Remotes:
+  berndbischl/ParamHelpers,
   dynverse/dyneval,
   dynverse/dyngen,
   dynverse/dynmethods,
