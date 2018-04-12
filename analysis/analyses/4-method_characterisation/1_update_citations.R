@@ -14,7 +14,7 @@ sheet <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE")
 methods <- sheet %>%
   gs_read(ws = "Implementations", col_types = cols(gscholar_cluster_id = "c"), skip = 1)
 
-ncitations <- pbapply::pbsapply(methods$gscholar_cluster_id, dynutils::google_scholar_num_citations)
+ncitations <- pbapply::pbsapply(methods$gscholar_cluster_id, google_scholar_num_citations)
 # ncitations <- pbapply::pbsapply(methods$DOI, rcrossref::cr_citation_count)
 ncitations[is.na(ncitations)] <- ""
 
