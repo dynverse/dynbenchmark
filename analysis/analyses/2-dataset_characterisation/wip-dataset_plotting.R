@@ -41,7 +41,8 @@ task_scores <- pmap(as.list(tasks), function(...) {
   Coi2 <- task$prior_information$grouping_assignment %>% group_by(group_id) %>% filter(row_number() == 1) %>% pull(cell_id)
   Coi <- union(Coi, Coi2)
 
-  expression_grouped <- task$expression[Coi, Goi] %>% dynutils::group_counts(task$prior_information$grouping_assignment)
+  expression_grouped <- task$expression[Coi, Goi] %>% dynutils::calculate_average_by_group(task$prior_information$grouping_assignment)
+  # (alternatively you can use dynutils::calculate_average_by_milestones_percentages !)
   scores <- list()
 
   print("transitions")
