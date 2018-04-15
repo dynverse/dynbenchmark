@@ -9,19 +9,24 @@ datasetpreproc_normalise_filter_wrap_and_save(counts, cell_ids, milestone_ids,
   feature_info, dataset_id = NULL)
 }
 \arguments{
-\item{counts}{Count matrix}
+\item{counts}{The counts.}
 
-\item{cell_ids}{The ids of the cells. Is equal to the rownames of the counts.}
+\item{cell_ids}{The ids of the cells.}
 
 \item{milestone_ids}{The ids of the milestones in the trajectory. Type: Character vector.}
 
-\item{milestone_network}{A data frame specifying what percentage milestone each cell consists of. Type: Data frame(cell_id = character, milestone_id = character, percentage = numeric).}
+\item{milestone_network}{The network of the milestones.
+Type: Data frame(from = character, to = character, length = numeric, directed = logical).}
+
+\item{milestone_percentages}{A data frame specifying what percentage milestone each cell
+consists of.
+Type: Data frame(cell_id = character, milestone_id = character, percentage = numeric).}
 
 \item{cell_grouping}{Milestone groups of the cells.}
 
-\item{cell_info}{A data frame of extra information pertaining the cells. First column must be \code{cell_id}.}
+\item{cell_info}{Optional meta-information pertaining the cells.}
 
-\item{feature_info}{A data frame of extra information pertaining the genes/features. First column must be \code{feature_id}.}
+\item{feature_info}{Optional meta-information pertaining the features.}
 
 \item{dataset_id}{The name of the dataset.}
 }

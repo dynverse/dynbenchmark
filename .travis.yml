@@ -25,15 +25,16 @@ addons:
       - libudunits2-dev
       - libblas-dev
       - liblapack-dev
-r_packages:
-  - devtools
+      - python3-pip
 before_install:
- - sudo apt-get -y install python3-pip
  - sudo pip3 install --upgrade pip setuptools wheel
- - python3 -V
- - pip3 -V
 install:
  - pip3 install --user --upgrade --only-binary=numpy,scipy numpy scipy
  - pip3 install --user --upgrade matplotlib pandas six jinja2 python-dateutil pytz pyparsing cycler tqdm python-igraph Cython statsmodels sklearn seaborn h5py anndata
+ - R -e 'if ("devtools" %in% rownames(installed.packages())) update.packages(oldPkgs = "devtools", ask = FALSE) else install.packages("devtools")'
  - R -e 'setRepositories(ind = 1:2)'
- - R -e 'devtools::install(dependencies = T, upgrade = T)'
+ - R -e 'devtools::install_cran("covr")'
+ - R -e 'devtools::install(dependencies = TRUE, upgrade = TRUE)'
+ - R -e 'dynmethods::check_dependencies()'
+after_success:
+ - R -e 'covr::codecov()'
