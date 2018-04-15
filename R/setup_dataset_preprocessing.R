@@ -97,13 +97,10 @@ download_dataset_file <- function(filename, url, dataset_id = NULL) {
 
 #' Preprocessing functionality for real datasets
 #'
-#' @param counts Count matrix
-#' @param cell_ids The ids of the cells. Is equal to the rownames of the counts.
-#' @param milestone_ids The ids of the milestones in the trajectory. Type: Character vector.
-#' @param milestone_network A data frame specifying what percentage milestone each cell consists of. Type: Data frame(cell_id = character, milestone_id = character, percentage = numeric).
+#' @inheritParams dynwrap::wrap_data
+#' @inheritParams dynwrap::add_expression_to_wrapper
+#' @inheritParams dynwrap::add_trajectory_to_wrapper
 #' @param cell_grouping Milestone groups of the cells.
-#' @param cell_info A data frame of extra information pertaining the cells. First column must be \code{cell_id}.
-#' @param feature_info A data frame of extra information pertaining the genes/features. First column must be \code{feature_id}.
 #' @param dataset_id The name of the dataset.
 #'
 #' @importFrom dynnormaliser normalise_filter_counts generate_prior_information
