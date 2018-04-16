@@ -12,11 +12,12 @@ create_replacers <- function(to_replace) {
 #' @param svg The svg to replace
 #' @param replacer Replacer dataframe
 #'
-#' @importFrom glue collapse
 #' @importFrom xml2 xml_find_all xml_attr xml_attrs xml_new_root read_xml xml_set_attrs xml_add_child xml_remove
 #'
 #' @export
 replace_svg <- function(svg, replacer) {
+  requireNamespace("glue")
+
   if(!all(c("replace_id", "svg") %in% colnames(replacer))) stop("Replacer requires columns replace_id and svg")
 
   walk2(replacer$replace_id, replacer$svg, function(replace_id, sub_svg_str) {

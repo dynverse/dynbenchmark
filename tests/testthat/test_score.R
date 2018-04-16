@@ -65,7 +65,7 @@ test_that("Transitions score", {
   if (verbose) plot_datasets(datasets)
 
   scores <- map(datasets, function(dataset) {
-    counts_grouped <- dynwrap::group_counts(dataset$counts, dataset$cell_grouping)
+    counts_grouped <- dynwrap::calculate_average_by_group(dataset$counts, dataset$cell_grouping)
     score_milestone_transitions(counts_grouped, dataset$milestone_ids, dataset$milestone_network)
   }) %>% bind_rows()
   expect_equal(which.max(scores$transition_frac), which(adjustments == 1))
