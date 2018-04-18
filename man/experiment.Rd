@@ -22,6 +22,8 @@ result_file(filename = "", experiment_id = NULL)
 \item{experiment_id}{id for the experiment}
 
 \item{filename}{the filename}
+
+\item{glue}{if specified, glue::glue this string and override filename.}
 }
 \description{
 Helper function for controlling experiments
