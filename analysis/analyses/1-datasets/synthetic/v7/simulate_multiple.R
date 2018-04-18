@@ -8,7 +8,7 @@ params_i <- params$settings$params_i
 # Helper function to load in data (model, simulation, ...) from disk
 load_data <- function(load = character(), params_i = 1) {
   map(load, function(id) {
-    readRDS(dataset_preproc_file(pritt("{params_i}_{id}.rds")))
+    readRDS(dataset_preproc_file(glue = "{params_i}_{id}.rds"))
   }) %>% set_names(load)
 }
 
@@ -17,9 +17,9 @@ ncores <- 6
 prepare_environment <- function(ncores = 6) {
   library(tidyverse)
   library(dynalysis)
-  
+
   options(ncores=ncores)
-  
+
   dataset_preprocessing(dataset_id)
 }
 prepare_environment()
@@ -32,13 +32,13 @@ qsub_environment <- list2env(lst(ncores, prepare_environment, dataset_id, load_d
 source("scripts/2_steps.R", local = qsub_environment)
 
 qsub_config <- override_qsub_config(
-  num_cores = ncores, 
-  memory = paste0("10G"), 
-  wait=FALSE, 
-  r_module=NULL, 
-  execute_before="", 
-  name = "dyngen", 
-  stop_on_error = F, 
+  num_cores = ncores,
+  memory = paste0("10G"),
+  wait=FALSE,
+  r_module=NULL,
+  execute_before="",
+  name = "dyngen",
+  stop_on_error = F,
   max_wall_time = "24:00:00"
 )
 qsub_config_single <- override_qsub_config(qsub_config, num_cores = 1)
@@ -47,7 +47,7 @@ qsub_packages <- c("tidyverse", "dynalysis", "dyngen")
 generate_wrapper <- function(func, output_file, ncores) {
   function(params) {
     prepare_environment(ncores=ncores)
-    if (!file.exists(dataset_preproc_file(pritt("{params$settings$params_i}_{output_file}")))) {
+    if (!file.exists(dataset_preproc_file(glue = "{params$settings$params_i}_{output_file}"))) {
       func(params)
     } else {
       TRUE
@@ -57,12 +57,12 @@ generate_wrapper <- function(func, output_file, ncores) {
 
 run_cluster <- function(func, output_file, ncores, paramsets, qsub_config=qsub_config) {
   wrapper <- generate_wrapper(func, output_file, ncores)
-  
+
   output_name <- gsub("(.*)\\..*", "\\1", output_file)
-  
+
   handle <- qsub_lapply(
-    qsub_config=qsub_config %>% list_modify(name = output_name), 
-    qsub_environment=qsub_environment, 
+    qsub_config=qsub_config %>% list_modify(name = output_name),
+    qsub_environment=qsub_environment,
     qsub_packages=qsub_packages,
     paramsets,
     wrapper
