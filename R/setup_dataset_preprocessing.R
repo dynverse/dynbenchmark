@@ -103,7 +103,8 @@ download_dataset_file <- function(filename, url, dataset_id = NULL) {
 #' @param cell_grouping Milestone groups of the cells.
 #' @param dataset_id The name of the dataset.
 #'
-#' @importFrom dynnormaliser normalise_filter_counts generate_prior_information
+#' @importFrom dynnormaliser normalise_filter_counts
+#' @importFrom dynwrap generate_prior_information
 #' @export
 datasetpreproc_normalise_filter_wrap_and_save <- function(
   counts,
@@ -194,7 +195,7 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
     counts = counts,
     expression = expression,
     feature_info = feature_info
-  ) %>% dynnormaliser::add_prior_information_to_wrapper()
+  ) %>% dynwrap::add_prior_information_to_wrapper()
 
   write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
   write_rds(original_counts, dataset_file(dataset_id = dataset_id, filename = "original_counts.rds"))
