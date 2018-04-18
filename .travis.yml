@@ -39,5 +39,5 @@ install:
  - R -e 'setRepositories(ind = 1:2)'
  - R -e 'devtools::install(dependencies = TRUE, upgrade = TRUE)'
  - R -e 'dynmethods::check_dependencies()'
-after_success:
- - R -e 'covr::codecov()'
+# after_success:
+#  - R -e 'covr::codecov()'
