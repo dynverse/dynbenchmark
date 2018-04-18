@@ -1,21 +1,21 @@
 language: r
 sudo: required
 dist: trusty
-bioc_required: true
 cache:
   timeout: 2000
   apt: true
   directories:
     - $HOME/.cache/pip
     - $HOME/R/Library
-warnings_are_errors: true
+warnings_are_errors: false
 env:
   global:
     - R_MAX_NUM_DLLS=250
+    - _R_CHECK_FORCE_SUGGESTS_="FALSE"
 addons:
   apt:
     packages:
-      - libgsl-dev                        # dyngen > splatter > zinbwave > copula > gsl
+      - libgsl-dev
       - libsdl1.2-dev
       - libreadline-dev
       - imagemagick
@@ -23,8 +23,10 @@ addons:
       - libudunits2-dev
       - libblas-dev
       - liblapack-dev
+      - python3-pip
 before_install:
  - source <( curl --insecure https://raw.githubusercontent.com/dynverse/dynmethods/master/.travis_install_python.sh ) # use travis's own python
+install:
 install:
  - pip3 install --user --upgrade --only-binary=numpy,scipy numpy scipy        # many packages
  - pip3 install --user --upgrade pandas matplotlib tqdm GPy                   # GPfates
@@ -34,10 +36,7 @@ install:
  - pip3 install --user --upgrade python-igraph h5py anndata                   # AGA / scanpy
  - pip3 install --user --upgrade Cython statsmodels                           # Wishbone
  - pip3 install --user --upgrade cycler pyparsing pytz python-dateutil six    # unknown
- - R -e 'if ("devtools" %in% rownames(installed.packages())) update.packages(oldPkgs = "devtools", ask = FALSE) else install.packages("devtools")'
- - R -e 'devtools::install_cran("covr")'
+ - R -e 'install.packages("devtools")'
  - R -e 'setRepositories(ind = 1:2)'
- - R -e 'devtools::install(dependencies = TRUE, upgrade = TRUE)'
- - R -e 'dynmethods::check_dependencies()'
-# after_success:
-#  - R -e 'covr::codecov()'
+ - R -e 'devtools::install(dep = T, upgr = T)'
+r_check_args: "--no-tests --no-manual --no-vignettes --no-build-vignettes"
