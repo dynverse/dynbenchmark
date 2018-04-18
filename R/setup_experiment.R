@@ -2,6 +2,7 @@
 #'
 #' @param experiment_id id for the experiment
 #' @param filename the filename
+#' @param glue if specified, glue::glue this string and override filename.
 #'
 #' @export
 #'
@@ -25,6 +26,7 @@ experiment <- function(experiment_id) {
 }
 
 # create a helper function
+#' @importFrom glue glue
 experiment_subfolder <- function(path) {
   function(filename= "", experiment_id = NULL) {
     filename <- paste0(filename, collapse = "")
@@ -46,6 +48,14 @@ experiment_subfolder <- function(path) {
 
     # create if necessary
     dir.create(full_path, recursive = TRUE, showWarnings = FALSE)
+
+    # process glue, if necessary
+    if (!is.null(glue)) {
+      if (filename != "") {
+        stop("if 'glue' is specified, 'filename' must be \"\".")
+      }
+      filename <- glue::glue(glue)
+    }
 
     # get complete filename
     paste(full_path, filename, sep = "")

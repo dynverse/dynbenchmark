@@ -12,9 +12,11 @@ dataset_preprocessing(dataset_id)
 
 datasetpreproc_getid()
 
-dataset_preproc_file(filename = "", dataset_id = NULL, relative = FALSE)
+dataset_preproc_file(filename = "", glue = NULL, dataset_id = NULL,
+  relative = FALSE)
 
-dataset_file(filename = "", dataset_id = NULL, relative = FALSE)
+dataset_file(filename = "", glue = NULL, dataset_id = NULL,
+  relative = FALSE)
 
 save_dataset(dataset, dataset_id = NULL)
 }
@@ -22,6 +24,8 @@ save_dataset(dataset, dataset_id = NULL)
 \item{dataset_id}{The ID of the dataset to be used}
 
 \item{filename}{Custom filename}
+
+\item{glue}{if specified, glue::glue this string and override filename.}
 
 \item{relative}{Whether or not to output relative paths}
 
