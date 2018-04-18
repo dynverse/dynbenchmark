@@ -1,10 +1,10 @@
 library(tidyverse)
-library(dynutils)
+library(dynalysis)
 library(PRISM)
-#library(dyngen)
 
 dataset_preprocessing("synthetic/v6")
 
+## List models to be used
 updates_model <- tribble(
   ~modulenet_name, ~totaltime,
   "linear", 5,
@@ -17,16 +17,29 @@ updates_model <- tribble(
   "converging", 10,
   "bifurcating_loop", 30
 )
-updates_platform <- tibble(platform_name = list.files("ext_data/platforms/") %>% gsub("(.*)\\.rds", "\\1", .)) %>% filter(row_number() <= 10) %>% bind_rows(tibble(platform_name = "small"), .)
 
-updates_replicates <- tibble(replicate_id = 1)
-updates <- tidyr::crossing(updates_model, updates_platform, updates_replicates)
-updates <- updates %>%
+## List available platforms and choose a subselection of them
+# TODO zouter: choose a relevant subset based on the platforms parameters,
+# not just a head(10)
+platform_names <- find.package("dyngen") %>%
+  paste0("/ext_data/platforms/") %>%
+  list.files() %>%
+  str_replace("\\.rds$", "") %>%
+  head(10)
+
+## Combine models, platforms and replicates
+updates <- crossing(
+  updates_model,
+  platform_name = platform_names,
+  replicate_id = 1L
+) %>%
   group_by(modulenet_name) %>%
   mutate(dataset_id = paste0("synthetic/", modulenet_name, "_", seq_len(n()))) %>%
   ungroup()
 
-update_params <- function(base_params=dyngen:::base_params, ...) {
+## Hocus pocus
+# TODO zouter: clean this piece of code up :)
+update_params <- function(base_params = dyngen:::base_params, ...) {
   dots <- list(...)
 
   if("modulenet_name" %in% names(dots)) base_params$model$modulenet_name <- dots$modulenet_name
@@ -45,9 +58,18 @@ paramsets <- map(seq_len(nrow(updates)), function(row_id) {
   invoke(update_params, row)
 })
 
-# remote preparation
+## Configure remote
 ncores <- 6
-qsub_config <- override_qsub_config(num_cores = ncores, memory = paste0("10G"), wait=FALSE, r_module=NULL, execute_before="", name = "^_____^", stop_on_error = F, max_wall_time = "24:00:00")
+qsub_config <- PRISM::override_qsub_config(
+  num_cores = ncores,
+  memory = paste0("10G"),
+  wait = FALSE,
+  r_module = NULL,
+  execute_before = "",
+  name = "^_____^",
+  stop_on_error = F,
+  max_wall_time = "24:00:00"
+)
 qsub_config_single <- override_qsub_config(qsub_config, num_cores = 1)
 qsub_packages <- c("tidyverse", "dyngen")
 
