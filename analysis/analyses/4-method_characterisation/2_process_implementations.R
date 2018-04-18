@@ -35,6 +35,9 @@ implementations <- bind_cols(implementations, implementations_altmetrics)
 ## Non inclusion reasons ------------------------
 implementations$non_inclusion_reasons_split <- implementations$non_inclusion_reasons %>% str_split("[ ]?,[ ]?")
 
+## Platforms ------------------
+implementations$platforms_split <- implementations$platforms %>% str_split("[ ]?,[ ]?")
+
 
 #   ____________________________________________________________________________
 #   Methods                                                                 ####
