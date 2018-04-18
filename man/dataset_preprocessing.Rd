@@ -12,10 +12,10 @@ dataset_preprocessing(dataset_id)
 
 datasetpreproc_getid()
 
-dataset_preproc_file(filename = "", glue = NULL, dataset_id = NULL,
+dataset_preproc_file(filename = "", dataset_id = NULL, glue = NULL,
   relative = FALSE)
 
-dataset_file(filename = "", glue = NULL, dataset_id = NULL,
+dataset_file(filename = "", dataset_id = NULL, glue = NULL,
   relative = FALSE)
 
 save_dataset(dataset, dataset_id = NULL)
