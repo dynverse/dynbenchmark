@@ -6,7 +6,7 @@ cache:
   apt: true
   directories:
     - $HOME/.cache/pip
-    - $HOME/R
+    - $HOME/R/Library
 warnings_are_errors: false
 env:
   global:
