@@ -33,7 +33,7 @@ datasetpreproc_getid <- function() {
 # create a helper function
 #' @importFrom glue glue
 datasetpreproc_subfolder <- function(path) {
-  function(filename = "", glue = NULL, dataset_id = NULL, relative = FALSE) {
+  function(filename = "", dataset_id = NULL, glue = NULL, relative = FALSE) {
     dyn_fold <- get_dynalysis_folder()
 
     if (relative) {
