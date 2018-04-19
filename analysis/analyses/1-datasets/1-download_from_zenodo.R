@@ -28,8 +28,8 @@ pbapply::pblapply(task_ids, function(task_id) {
 })
 
 # make one big tasks tibble, with count and expression as functions.
-tasks <- list_as_tibble(map(traj_files, function(task_file) {
-  task <- read_rds(derived_file(task_file))
+tasks <- list_as_tibble(map(task_ids, function(task_id) {
+  task <- load_dataset(task_id)
   for (col in c("expression", "counts")) {
     env <- new.env(baseenv())
     assign("task_file", task_file, env)
