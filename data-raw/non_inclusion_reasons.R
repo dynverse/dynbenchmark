@@ -1,5 +1,3 @@
-#' Non inclusion reasons
-#' @export
 non_inclusion_reasons <- tribble(
   ~id, ~long,
   "not_free", "Not freely available",
@@ -12,3 +10,5 @@ non_inclusion_reasons <- tribble(
   "no_ordering", "Doesn't return an ordering",
   "user_input", "Requires additional user input during the algorithm (not prior information)"
 ) %>% mutate(footnote = letters[seq_along(id)])
+
+devtools::use_data(non_inclusion_reasons, overwrite = TRUE)
