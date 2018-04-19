@@ -23,7 +23,6 @@ pbapply::pblapply(task_ids, function(task_id) {
     dynwrap::add_cell_waypoints_to_wrapper() %>%
     .[names(.) != "milenet_spr"]
 
-  dir.create(dataset_file(filename = "", dataset_id = task_id))
   save_dataset(task, task_id)
   file.remove(file)
 })
