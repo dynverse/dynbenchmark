@@ -20,7 +20,8 @@ scale_brewer_funs <- map(setNames(brewer_names, brewer_names), ~ sc_col_fun(colo
 viridis_names <- c("viridis", "magma", "plasma", "inferno", "cividis")
 scale_viridis_funs <- map(setNames(viridis_names, viridis_names), ~ sc_col_fun(viridisLite::viridis(101, option = .)))
 
-error_colours <- setNames(RColorBrewer::brewer.pal(4, "Set3"), c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic"))
+topinf_colours <- setNames(topinf_types$colour, topinf_types$name)
+error_colours <- setNames(error_reasons$colour, error_reasons$name)
 maxtraj_colours <- setNames(trajectory_types$color, trajectory_types$id)
 
 coloverall <- "inferno"
@@ -55,7 +56,7 @@ method_tib <- method_tib %>%
     method_ymax = method_y + row_height / 2,
     rank_time_method = percent_rank(-time_method),
     trafo = str_replace(output_transformation, ":.*", ""),
-    topinf_lab = c("free" = "free", "fixed" = "fixed", "parameter" = "param")[topology_inference_type],
+    topinf_lab = setNames(topinf_types$name, topinf_types$short_name)[topology_inference_type],
     avg_time_lab = ifelse(time_method < 60, paste0(round(time_method), "s"), ifelse(time_method < 3600, paste0(round(time_method / 60), "m"), paste0(round(time_method / 3600), "h"))),
     remove_results = pct_errored > .49,
     pct_succeeded = 1 - pct_errored,
@@ -300,13 +301,9 @@ barguides_data <- geom_data_processor(
 # CREATE LEGENDS
 legy_start <- min(method_tib$method_ymin)
 
-leg_topinf <- data_frame(
-  label = names(topinf_colours),
-  col = topinf_colours,
-  x = 1,
-  y = seq_along(topinf_colours),
-  explanation = c("inferred by algorithm", "determined by parameter", "fixed by algorithm")
-)
+leg_topinf <- topinf_types %>%
+  mutate(x = 1, y = seq_len(n())) %>%
+  rename(label = name, col = colour)
 leg_prior <- data_frame(
   label = c("id", "#", "id", "#"),
   type1 = c("optional_", "optional_", "required_", "required_"),
@@ -336,18 +333,18 @@ bench_leg <- make_scale_legend(viridisLite::viridis(101, option = colbench), ran
 time_leg <- make_scale_legend(viridisLite::viridis(101, option = coltime), range_labels = c("long", "short"))
 qc_leg <- make_scale_legend(viridisLite::viridis(101, option = colqc), range_labels = c("low", "high"))
 
-error_leg_df <- data_frame(
-  rad_start = seq(0, pi, length.out = 5)[-5],
-  rad_end = seq(0, pi, length.out = 5)[-1],
-  rad = (rad_start + rad_end) / 2,
-  label = c("Memory limit exceeded", "Time limit exceeded", "Dataset-specific error", "Stochastic error"),
-  fill = error_colours[c("pct_memory_exceeded", "pct_time_exceeded", "pct_allerrored", "pct_stochastic")],
-  colour = rep("black", length(rad)),
-  lab_x = row_height * sin(rad),
-  lab_y = row_height * cos(rad),
-  hjust = rep(0, length(rad)),
-  vjust = seq(0, 1, length.out = length(rad)+2)[c(-1,-(length(rad)+2))]
-)
+error_leg_df <- error_reasons %>%
+  rename(fill = colour) %>%
+  mutate(
+    rad_start = seq(0, pi, length.out = 5)[-5],
+    rad_end = seq(0, pi, length.out = 5)[-1],
+    rad = (rad_start + rad_end) / 2,
+    colour = rep("black", length(rad)),
+    lab_x = row_height * sin(rad),
+    lab_y = row_height * cos(rad),
+    hjust = rep(0, length(rad)),
+    vjust = seq(0, 1, length.out = length(rad)+2)[c(-1,-(length(rad)+2))]
+  )
 
 # Stamp
 stamp <- paste0("Generated on ", Sys.Date())
