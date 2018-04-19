@@ -17,5 +17,6 @@ prior_usages <- tribble(
   "required", "#FF4136"
 )
 
-devtools::use_data(prior_types, overwrite = TRUE)
-devtools::use_data(prior_usages, overwrite = TRUE)
+devtools::use_data(prior_types, prior_usages, overwrite = TRUE)
+
+# also update data-raw/labels.R
