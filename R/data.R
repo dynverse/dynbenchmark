@@ -22,7 +22,28 @@
 #'
 #' @docType data
 "prior_types"
+
 #' Metadata on prior usage types
 #'
 #' @docType data
 "prior_usages"
+
+#' Metadata on metrics
+#'
+#' @docType data
+"metrics"
+
+#' Metadata on non-inclusion reasons
+#'
+#' @docType data
+"non_inclusion_reasons"
+
+#' Metadata on QC applications
+#'
+#' @docType data
+"qc_applications"
+
+#' Metadata on QC categories
+#'
+#' @docType data
+"qc_categories"
