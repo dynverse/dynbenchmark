@@ -6,10 +6,14 @@ extrafont::loadfonts()
 
 experiment("2-dataset_characterisation/3-trajectory_type_dag")
 
+trajectory_type_ancestors <- trajectory_type_dag %>% igraph::ego(99999999, mode="out") %>% map(names) %>% setNames(names(igraph::V(trajectory_type_dag)))
+
 # filter unknown from dag, and add linetype to edges
 trajectory_type_tree_data <- trajectory_type_dag %>%
   activate(nodes) %>%
   filter(name != "unknown") %>%
+  mutate(num_ancestors = map_dbl(name, function(y) length(trajectory_type_ancestors[[y]]))) %>%
+  arrange(num_ancestors, name) %>%
   activate(edges) %>%
   mutate(
     directed_change = ifelse(map_lgl(prop_changes, ~"undirected" %in% .), "Add undirected", "Other generalisation")
@@ -26,32 +30,35 @@ label_prop_changes <- function(prop_changes) {
   map(prop_changes, format_prop_changes) %>% map_chr(glue::collapse, "\n")
 }
 
-less_complex_annotation <- ggplot() +
+left_side <-
+  ggplot() +
   geom_line(aes(x=0, y=0:1),arrow=arrow()) +
   geom_text(aes(x=-0.05, y=0.5), label="Increasing complexity",angle=90) +
   theme_void() +
   scale_x_continuous(limits=c(-0.1, 0.05))
 
-trajectory_type_tree_changes_individual <- map(c("undirected", "directed"), function(directedness)  {
-  trajectory_type_tree_changes <- trajectory_type_tree_data %>%
-    activate(nodes) %>%
-    filter(directedness == !!directedness) %>%
-    activate(edges) %>%
-    filter(paste0(.N()$name[from], .N()$name[to]) != "convergencebifurcation")
+trajectory_type_tree_changes_individual <- map(
+  c("undirected", "directed"),
+  function(directedness)  {
+    gr <- trajectory_type_tree_data %>%
+      activate(nodes) %>%
+      filter(directedness == !!directedness) %>%
+      activate(edges) %>%
+      filter(.N()$name[from] != "convergence" | .N()$name[to] != "bifurcation")
 
-  ggraph(trajectory_type_tree_changes, layout = "tree") +
-    geom_edge_link() +
-    geom_edge_link(aes(xend = x+(xend-x)/1.5, yend = y+(yend - y)/1.5), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
-    geom_edge_link(aes(xend = x+(xend-x)/2, yend = y+(yend - y)/2), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
-    geom_edge_link(aes(xend = x+(xend-x)/4, yend = y+(yend - y)/4), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
-    geom_node_label(aes(label=label_long(name), fill=colour), color="white") +
-    ggrepel::geom_label_repel(aes(x=x+(xend-x)/2, y = y+(yend - y)/2, label=label_prop_changes(prop_changes)), data = get_edges(), min.segment.length=Inf, force=0.1) +
-    scale_fill_identity() +
-    theme_graph() +
-    theme(plot.title=element_text(family="Open Sans", hjust=0.5)) +
-    scale_x_continuous(expand=c(0.2, 0.2)) +
-    ggtitle(label_long(directedness))
-})
+    ggraph(trajectory_type_tree_changes, layout = "tree") +
+      geom_edge_link() +
+      geom_edge_link(aes(xend = x+(xend-x)*.25, yend = y+(yend - y)*.25), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
+      geom_edge_link(aes(xend = x+(xend-x)*.5, yend = y+(yend - y)*.5), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
+      geom_edge_link(aes(xend = x+(xend-x)*.75, yend = y+(yend - y)*.75), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
+      geom_node_label(aes(label=label_long(name), fill=colour), color="white") +
+      ggrepel::geom_label_repel(aes(x=x+(xend-x)/2, y = y+(yend - y)/2, label=label_prop_changes(prop_changes)), data = get_edges(), min.segment.length=Inf, force=0.1) +
+      scale_fill_identity() +
+      theme_graph() +
+      theme(plot.title=element_text(family="Open Sans", hjust=0.5)) +
+      scale_x_continuous(expand=c(0.2, 0.2)) +
+      ggtitle(label_long(directedness))
+  })
 
 trajectory_type_tree_changes <- cowplot::plot_grid(plotlist=c(list(less_complex_annotation), trajectory_type_tree_changes_individual), nrow=1, rel_widths = c(0.2, 0.4, 0.4))
 
