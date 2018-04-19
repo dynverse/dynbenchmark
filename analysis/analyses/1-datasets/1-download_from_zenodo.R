@@ -14,14 +14,19 @@ unzip(dataset_file, exdir = derived_file(""))
 file.remove(dataset_file)
 
 # temporary fix; the classes were accidentally removed from each dataset before submission to zenodo
-traj_files <- list.files(derived_file(""), pattern = ".rds", recursive = TRUE, full.names = FALSE)
-for (file in traj_files) {
-  traj <- read_rds(derived_file(file)) %>%
+task_ids <- list.files(derived_file(""), pattern = ".rds", recursive = TRUE, full.names = FALSE) %>% str_replace(".rds$", "")
+pbapply::pblapply(task_ids, function(task_id) {
+  file <- derived_file(glue::glue("{task_id}.rds"))
+
+  task <- read_rds(file) %>%
     add_class(paste0("dynwrap::", c("data_wrapper", "with_expression", "with_prior", "with_trajectory"))) %>%
     dynwrap::add_cell_waypoints_to_wrapper() %>%
     .[names(.) != "milenet_spr"]
-  write_rds(traj, derived_file(file))
-}
+
+  dir.create(dataset_file(filename = "", dataset_id = task_id))
+  save_dataset(task, task_id)
+  file.remove(file)
+})
 
 # make one big tasks tibble, with count and expression as functions.
 tasks <- list_as_tibble(map(traj_files, function(task_file) {
