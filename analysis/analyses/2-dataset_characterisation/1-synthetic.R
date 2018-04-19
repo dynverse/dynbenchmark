@@ -1,12 +1,11 @@
 library(dynalysis)
-library(dyngen)
 library(tidyverse)
 
 library(tidygraph)
 library(ggraph)
 
-experiment("2-dataset_characterisation/3-synthetic")
-tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
+experiment("2-dataset_characterisation/1-synthetic")
+tasks <- load_datasets_tibble()
 
 
 ##  ............................................................................

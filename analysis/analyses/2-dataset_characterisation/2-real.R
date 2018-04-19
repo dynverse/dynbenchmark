@@ -4,9 +4,9 @@ library(googlesheets)
 library(dynalysis)
 
 
-experiment("2-dataset_characterisation")
+experiment("2-dataset_characterisation/2-real")
 
-tasks <- readRDS(derived_file("tasks.rds"))
+tasks <- load_datasets_tibble()
 tasks_real <- tasks %>% filter(category == "real")
 
 technology_colors <- unique(tasks_real$technology) %>% {setNames(RColorBrewer::brewer.pal(length(.), "Set1"), .)}
