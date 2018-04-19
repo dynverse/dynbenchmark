@@ -45,7 +45,6 @@ trajectory_types <- tribble(
   "directed_cycle",                 "cycle",                "#003d76", TRUE,
 
   # dag
-  "undirected_acyclic_graph",       "acyclic_graph",        "#ff8821", FALSE,
   "directed_acyclic_graph",         "acyclic_graph",        "#ff8821", TRUE,
 
   # graph
