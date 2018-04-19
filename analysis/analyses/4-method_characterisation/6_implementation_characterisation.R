@@ -238,7 +238,7 @@ topology_inference_timeline_data <- topology_inference_timeline_data %>%
 topology_inference_timeline <- topology_inference_timeline_data %>% ggplot() +
   geom_area(aes(date, y, fill=fct_rev(topology_inference_type)), stat = "identity") +
   geom_text(aes(end_date-50, y-(y-lag(y, 1, 0))/2, label=topology_inference_type), data=topology_inference_timeline_data %>% filter(date == end_date) %>% mutate(y=cumsum(y)), hjust=1, color="white", size=5) +
-  scale_fill_manual(label_long("topology_inference_type"), values = topinf_colours) +
+  scale_fill_manual(label_long("topology_inference_type"), values = setNames(topinf_types$colour, topinf_types$name)) +
   scale_x_date(expand=c(0,0), limits=c(start_date, end_date)) +
   scale_y_continuous(label_long("n_implementations"), expand=c(0,0)) +
   theme(legend.position="none")
