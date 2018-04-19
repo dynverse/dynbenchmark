@@ -32,9 +32,8 @@ datasetpreproc_getid <- function() {
 
 # create a helper function
 #' @importFrom glue glue
-datasetpreproc_subfolder <- function(path, ext) {
-  use_folder <- ext == "/"
-  fun <- function(filename = "", dataset_id = NULL, glue = NULL, relative = FALSE) {
+datasetpreproc_subfolder <- function(path) {
+  function(filename = "", dataset_id = NULL, glue = NULL, relative = FALSE) {
     dyn_fold <- get_dynalysis_folder()
 
     if (relative) {
@@ -46,11 +45,7 @@ datasetpreproc_subfolder <- function(path, ext) {
     }
 
     # determine the full path
-    if (use_folder) {
-      full_path <- paste0(dyn_fold, "/", path, "/", dataset_id, "/")
-    } else {
-      full_path <- paste0(dyn_fold, "/", path, "/")
-    }
+    full_path <- paste0(dyn_fold, "/", path, "/", dataset_id, "/")
 
     # create if necessary
     dir.create(full_path, recursive = TRUE, showWarnings = FALSE)
@@ -64,37 +59,29 @@ datasetpreproc_subfolder <- function(path, ext) {
     }
 
     # get complete filename
-    if (use_folder) {
       paste0(full_path, filename)
-    } else {
-      paste0(full_path, dataset_id, ext)
-    }
   }
-  if (!use_folder) {
-    formals(fun) <- formals(fun)[-1]
-  }
-  fun
 }
 
 #' @rdname dataset_preprocessing
 #' @export
-dataset_preproc_file <- datasetpreproc_subfolder("analysis/data/derived_data/1-datasets_preproc", ext = "/")
+dataset_preproc_file <- datasetpreproc_subfolder("analysis/data/derived_data/1-datasets_preproc")
 
 #' @rdname dataset_preprocessing
 #' @export
-dataset_file <- datasetpreproc_subfolder("analysis/data/derived_data/1-datasets", ext = ".rds")
+dataset_file <- datasetpreproc_subfolder("analysis/data/derived_data/1-datasets")
 
 #' @rdname dataset_preprocessing
 #' @export
 save_dataset <- function(dataset, dataset_id = NULL) {
-  write_rds(dataset, dataset_file(dataset_id = dataset_id))
+  write_rds(dataset, dataset_file(filename = "dataset.rds", dataset_id = dataset_id))
 }
 
 #' Load a dataset after it has been preprocessed
 #' @export
 #' @inheritParams dataset_preprocessing
 load_dataset <- function(dataset_id = NULL) {
-  read_rds(dataset_file(dataset_id = dataset_id))
+  read_rds(dataset_file(filename = "dataset.rds", dataset_id = dataset_id))
 }
 
 #' Load the tibble of datasets
@@ -119,7 +106,7 @@ download_dataset_file <- function(filename, url, dataset_id = NULL) {
   loc <- dataset_preproc_file(dataset_id = dataset_id, filename = filename)
 
   if (!file.exists(loc)) {
-    download.file(url, loc, method="libcurl")
+    download.file(url, loc, method = "libcurl")
   }
 
   loc

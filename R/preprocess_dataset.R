@@ -24,7 +24,7 @@ preprocess_dataset <- function(
     dataset_id <- datasetpreproc_getid()
   }
 
-  readr::write_lines(as.character(Sys.time()), dataset_file(dataset_id = dataset_id, filename = "date.txt"))
+  readr::write_lines(as.character(Sys.time()), dataset_preproc_file(dataset_id = dataset_id, filename = "date.txt"))
 
   # convert symbols
   conversion_out <- convert_to_symbol(counts)
@@ -100,10 +100,10 @@ preprocess_dataset <- function(
     feature_info = feature_info
   ) %>% dynwrap::add_prior_information_to_wrapper()
 
-  write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
-  write_rds(original_counts, dataset_file(dataset_id = dataset_id, filename = "original_counts.rds"))
+  write_rds(dataset, dataset_file(dataset_id = dataset_id))
+  write_rds(original_counts, dataset_preproc_file(dataset_id = dataset_id, filename = "original_counts.rds"))
 
-  pdf(dataset_file(dataset_id = dataset_id, "normalisation.pdf"))
+  pdf(dataset_preproc_file(dataset_id = dataset_id, "normalisation.pdf"))
   walk(norm_out$normalisation_plots, print)
   graphics.off()
 
