@@ -15,8 +15,7 @@ datasetpreproc_getid()
 dataset_preproc_file(filename = "", dataset_id = NULL, glue = NULL,
   relative = FALSE)
 
-dataset_file(filename = "", dataset_id = NULL, glue = NULL,
-  relative = FALSE)
+dataset_file(dataset_id = NULL, glue = NULL, relative = FALSE)
 
 save_dataset(dataset, dataset_id = NULL)
 }

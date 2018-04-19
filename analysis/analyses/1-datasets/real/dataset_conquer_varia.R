@@ -195,7 +195,7 @@ for (source_info in conquer_infos) {
 
   cell_ids <- rownames(counts)
 
-  datasetpreproc_normalise_filter_wrap_and_save(
+  preprocess_dataset(
     dataset_id = source_info$id,
     counts = counts,
     cell_ids = cell_ids,
