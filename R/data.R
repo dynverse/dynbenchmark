@@ -2,3 +2,8 @@
 #'
 #' @docType data
 "id_mapper"
+
+#' Common manual labelling
+#'
+#' @docType data
+"labels"

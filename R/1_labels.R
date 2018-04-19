@@ -1,31 +1,3 @@
-#' Common manual labeling
-#' @export
-labels <- tibble::tribble(
-  ~id, ~long, ~short,
-  "directed_acyclic_graph", "Directed acyclic graph", "DAG",
-  "disconnected_directed_graph", "Disconnected directed graph", "DDG",
-  "ngenes", "Number of genes", "# genes",
-  "ncells", "Number of cells", "# cells",
-  "n_methods", "Number of methods", "# methods",
-  "n_implementations", "Number of methods", "# methods",
-  "silver", "Silver standard", "Silver",
-  "gold", "Gold standard", "Gold",
-  "gse", "Source(s)", "Source(s)",
-  "gs", "Gold standard", "Gold standard",
-  "rf_mse", "Random Forest MSE", "RF MSE",
-  "maximal_trajectory_type", "Most complex trajectory type", "Trajectory type",
-  "qc_score", "QC score", "QC score",
-  "component_id", "Component", "Component",
-  "p_value", "p-value", "p-value",
-  "q_value", "Adjusted p-value", "p-value (adj.)",
-  TRUE, "Yes", "Yes",
-  FALSE, "No", "No",
-  "trajectory_type_gold", "Gold standard trajectory type", "Gold trajectory type",
-  "trajectory_type_predicted", "Predicted trajectory type", "Predicted trajectory type",
-  "harm_mean", "Harmonic mean", "Harmonic mean",
-  "task_source", "Dataset source", "Dataset source"
-)
-
 #' Short labelling function
 #' @param x The text
 #' @param width The width of the label
