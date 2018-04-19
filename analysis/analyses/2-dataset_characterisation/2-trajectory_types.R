@@ -48,8 +48,8 @@ trajectory_type_tree_changes_individual <- map(c("undirected", "directed"), func
     geom_edge_link(aes(xend = x+(xend-x)/2, yend = y+(yend - y)/2), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
     geom_edge_link(aes(xend = x+(xend-x)/4, yend = y+(yend - y)/4), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
     geom_node_label(aes(label=label_long(name), fill=name), color="white") +
-    ggrepel::geom_label_repel(aes(x=x+(xend-x)/2, y = y+(yend - y)/2, label=label_prop_changes(prop_changes)), data = get_edges(), min.segment.length=Inf, force=0.1) +
-    scale_fill_manual(values=set_names(trajectory_types$color, trajectory_types$id)) +
+    # ggrepel::geom_label_repel(aes(x=x+(xend-x)/2, y = y+(yend - y)/2, label=label_prop_changes(prop_changes)), data = get_edges(), min.segment.length=Inf, force=0.1) +
+    scale_fill_manual(values=set_names(trajectory_types$colour, trajectory_types$id)) +
     theme_graph() +
     theme(legend.position="none", plot.title=element_text(family="Open Sans", hjust=0.5)) +
     scale_x_continuous(expand=c(0.2, 0.2)) +
@@ -73,7 +73,7 @@ trajectory_type_tree_overall <- trajectory_type_tree_data %>%
   theme_graph() +
   theme(legend.position="top") +
   scale_x_continuous(expand=c(0.2, 0.2)) +
-  scale_fill_manual(values=set_names(trajectory_types$color, trajectory_types$id), guide=FALSE) +
+  scale_fill_manual(values=set_names(trajectory_types$colour, trajectory_types$id), guide=FALSE) +
   scale_edge_linetype_discrete("", labels=label_long)
 trajectory_type_tree_overall
 

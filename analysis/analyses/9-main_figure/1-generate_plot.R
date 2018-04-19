@@ -22,7 +22,7 @@ scale_viridis_funs <- map(setNames(viridis_names, viridis_names), ~ sc_col_fun(v
 
 topinf_colours <- setNames(topinf_types$colour, topinf_types$name)
 error_colours <- setNames(error_reasons$colour, error_reasons$name)
-maxtraj_colours <- setNames(trajectory_types$color, trajectory_types$id)
+maxtraj_colours <- setNames(trajectory_types$colour, trajectory_types$id)
 
 coloverall <- "inferno"
 colbench <- "magma"

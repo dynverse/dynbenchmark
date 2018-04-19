@@ -87,7 +87,7 @@ imp_table <- map(c("latex", "html"), function(format) {
           label_simple_trajectory_types(maximal_trajectory_type),
           format,
           background =
-            toupper(set_names(trajectory_types$color, trajectory_types$id)[maximal_trajectory_type]) %>%
+            toupper(set_names(trajectory_types$colour, trajectory_types$id)[maximal_trajectory_type]) %>%
             map(~replace(., is.na(.), "#666666")),
           color = "#FFFFFF"
         ),

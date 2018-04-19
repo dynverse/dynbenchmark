@@ -44,7 +44,7 @@ topology_sensitivity_plot <- topology_sensitivity %>%
   scale_color_identity() +
   theme_bw() +
   theme(panel.spacing.x = unit(0, "inch"), panel.grid.major = element_blank()) +
-  # scale_fill_manual(values=set_names(trajectory_types$color, trajectory_types$id)) +
+  # scale_fill_manual(values=set_names(trajectory_types$colour, trajectory_types$id)) +
   scale_y_continuous(breaks=-seq_along(method_order), labels=set_names(methods$method_name, methods$method_id)[method_order], expand=c(0.005,0.005)) +
   scale_x_continuous("% of cases where topology was predicted correctly", breaks=c(0.5,1),labels = scales::percent)
 topology_sensitivity_plot

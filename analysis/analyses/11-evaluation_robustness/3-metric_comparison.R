@@ -32,7 +32,7 @@ g <- ggplot(cross_df) +
   theme_bw() +
   coord_equal() +
   labs(x = "Score B (see right facet label)", y = "Score A (see left facet label)") +
-  scale_color_manual(values=set_names(c("black", "black", trajectory_types$color), c("all", "overall", trajectory_types$id))) +
+  scale_color_manual(values=set_names(c("black", "black", trajectory_types$colour), c("all", "overall", trajectory_types$id))) +
   theme(legend.position = "none", panel.grid = element_blank()) +
   scale_x_continuous(breaks = c(0, 1)) +
   scale_y_continuous(breaks = c(0, 1))
@@ -53,7 +53,7 @@ h <- ggplot(df) +
   theme_bw() +
   coord_equal() +
   labs(x = "Percentage errored", y = "Overall score") +
-  scale_color_manual(values=set_names(c("black", "black", trajectory_types$color), c("all", "overall", trajectory_types$id))) +
+  scale_color_manual(values=set_names(c("black", "black", trajectory_types$colour), c("all", "overall", trajectory_types$id))) +
   theme(legend.position = "none", panel.grid = element_blank()) +
   scale_x_continuous(breaks = c(0, 1)) +
   scale_y_continuous(breaks = c(0, 1))
