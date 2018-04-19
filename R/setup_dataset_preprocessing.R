@@ -3,7 +3,6 @@
 #' @param dataset_id The ID of the dataset to be used
 #' @param dataset Dataset object to save
 #' @param filename Custom filename
-#' @param glue if specified, glue::glue this string and override filename.
 #' @param relative Whether or not to output relative paths
 #'
 #' @export
@@ -31,9 +30,8 @@ datasetpreproc_getid <- function() {
 
 
 # create a helper function
-#' @importFrom glue glue
 datasetpreproc_subfolder <- function(path) {
-  function(filename = "", dataset_id = NULL, glue = NULL, relative = FALSE) {
+  function(filename = "", dataset_id = NULL, relative = FALSE) {
     dyn_fold <- get_dynalysis_folder()
 
     if (relative) {
@@ -49,14 +47,6 @@ datasetpreproc_subfolder <- function(path) {
 
     # create if necessary
     dir.create(full_path, recursive = TRUE, showWarnings = FALSE)
-
-    # process glue, if necessary
-    if (!is.null(glue)) {
-      if (filename != "") {
-        stop("if 'glue' is specified, 'filename' must be \"\".")
-      }
-      filename <- glue::glue(glue)
-    }
 
     # get complete filename
       paste0(full_path, filename)
