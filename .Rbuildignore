@@ -12,3 +12,4 @@
 ^\.git$
 ^docker
 ^scripts
+^data-raw$
