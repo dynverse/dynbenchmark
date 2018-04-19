@@ -213,20 +213,6 @@ datasetpreproc_normalise_filter_wrap_and_save <- function(
   pdf(dataset_file(dataset_id = dataset_id, "normalisation.pdf"));walk(norm_out$normalisation_plots, print);graphics.off()
 }
 
-convert_to_symbol <- function(counts) {
-  id_mapper <- readRDS(derived_file("id_mapper.rds", experiment_id = "normalisation"))
-
-  colnames(counts) <- tibble(gene_id = colnames(counts)) %>%
-    left_join(id_mapper, by=c("gene_id"="ensembl")) %>%
-    mutate(gene_id = ifelse(is.na(symbol), gene_id, symbol)) %>%
-    pull(gene_id)
-
-  filtered <- names(which(table(colnames(counts)) == 1))
-  counts <- counts[, filtered] # remove duplicates
-
-  lst(counts, filtered)
-}
-
 
 cut_unrepresented_milestones <- function(milestone_network, milestone_percentages, milestone_ids) {
   unrepresented_milestones <- setdiff(milestone_ids, milestone_percentages$milestone_id)
