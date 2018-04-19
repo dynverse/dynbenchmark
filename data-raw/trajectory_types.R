@@ -1,4 +1,5 @@
 library(tidyverse)
+library(colorspace)
 
 ################################
 ## Construct trajectory_types ##
