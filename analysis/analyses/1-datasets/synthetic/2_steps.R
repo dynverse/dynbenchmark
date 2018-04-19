@@ -2,7 +2,7 @@
 generate_model <- function(params) {
   model <- invoke(dyngen:::generate_model_from_modulenet, params$model)
   model$uuids <- list(model=uuid::UUIDgenerate())
-  saveRDS(model, dataset_preproc_file(glue = "{params$settings$params_i}_model.rds"))
+  saveRDS(model, dataset_preproc_file(glue::glue("{params$settings$params_i}_model.rds")))
 }
 
 ## Simulate -------------------------
@@ -11,14 +11,14 @@ simulate <- function(params) {
 
   simulation <- invoke(dyngen:::simulate_multiple, params$simulation, data$model$system)
   simulation$uuids <- list(simulation=uuid::UUIDgenerate()) %>% c(data$model$uuids)
-  saveRDS(simulation, dataset_preproc_file(glue = "{params$settings$params_i}_simulation.rds"))
+  saveRDS(simulation, dataset_preproc_file(glue::glue("{params$settings$params_i}_simulation.rds")))
 }
 
 ## Check simulation -----------------
 check_simulation <- function(params, params_i = params$settings$params_i) {
   checks <- list(exists = FALSE, params_i=params_i)
 
-  simulation_location <- dataset_preproc_file(glue = "{params_i}_simulation.rds")
+  simulation_location <- dataset_preproc_file(glue::glue("{params_i}_simulation.rds"))
 
   if (file.exists(simulation_location)) {
     data <- load_data("simulation", params_i)
@@ -41,7 +41,7 @@ extract_goldstandard <- function(params) {
   gs$checks <- dyngen:::check_goldstandard(gs)
   gs$uuids <- list(gs=uuid::UUIDgenerate()) %>% c(data$simulation$uuids)
 
-  saveRDS(gs, dataset_preproc_file(glue = "{params$settings$params_i}_gs.rds"))
+  saveRDS(gs, dataset_preproc_file(glue::glue("{params$settings$params_i}_gs.rds")))
 }
 
 ## Generate experiment ------------
@@ -51,7 +51,7 @@ generate_experiment <- function(params) {
   experiment <- invoke(dyngen:::run_experiment, params$experiment, data$simulation, data$gs)
   experiment$uuids <- list(experiment=uuid::UUIDgenerate()) %>% c(data$gs$uuids)
 
-  saveRDS(experiment, dataset_preproc_file(glue = "{params$settings$params_i}_experiment.rds"))
+  saveRDS(experiment, dataset_preproc_file(glue::glue("{params$settings$params_i}_experiment.rds")))
 }
 
 ## Normalise ------------
@@ -59,13 +59,13 @@ normalise <- function(params) {
   data <- load_data(c("experiment"), params$settings$params_i)
 
   graphics.off()
-  pdf(dataset_preproc_file(glue = "{params$settings$params_i}_normalisation_plot.pdf"), width=12, height=12)
+  pdf(dataset_preproc_file(glue::glue("{params$settings$params_i}_normalisation_plot.pdf")), width=12, height=12)
   dev.control('enable')
 
   normalisation <- invoke(dynnormaliser::normalise_filter_counts, params$normalisation, data$experiment$counts, verbose = TRUE)
   normalisation$uuids <- list(normalisation=uuid::UUIDgenerate()) %>% c(data$experiment$uuids)
 
-  saveRDS(normalisation, dataset_preproc_file(glue = "{params$settings$params_i}_normalisation.rds"))
+  saveRDS(normalisation, dataset_preproc_file(glue::glue("{params$settings$params_i}_normalisation.rds")))
 
   walk(normalisation$normalisation_plots, print)
   dyngen:::plot_normalisation(data$experiment, normalisation)
@@ -75,7 +75,7 @@ normalise <- function(params) {
 ## Plot model --------------
 plot_model <- function(params) {
   data <- load_data(c("model"), params$settings$params_i)
-  model_plot_location <- dataset_preproc_file(glue = "{params$settings$params_i}_model_plot.pdf")
+  model_plot_location <- dataset_preproc_file(glue::glue("{params$settings$params_i}_model_plot.pdf"))
 
   graphics.off()
   pdf(model_plot_location, width=12, height=12)
@@ -87,7 +87,7 @@ plot_model <- function(params) {
 plot_simulation <- function(params) {
   data <- load_data(c("simulation"), params$settings$params_i)
 
-  simulation_plot_location <- dataset_preproc_file(glue = "{params$settings$params_i}_simulation_plot.pdf")
+  simulation_plot_location <- dataset_preproc_file(glue::glue("{params$settings$params_i}_simulation_plot.pdf"))
 
   graphics.off()
   pdf(simulation_plot_location, width=12, height=12)
@@ -100,7 +100,7 @@ plot_simulation <- function(params) {
 plot_goldstandard <- function(params) {
   data <- load_data(c("model", "simulation", "gs"), params$settings$params_i)
 
-  gs_plot_location <- dataset_preproc_file(glue = "{params$settings$params_i}_gs_plot.pdf")
+  gs_plot_location <- dataset_preproc_file(glue::glue("{params$settings$params_i}_gs_plot.pdf"))
 
   graphics.off()
   pdf(gs_plot_location, width=12, height=12)
@@ -112,7 +112,7 @@ plot_goldstandard <- function(params) {
 plot_experiment <- function(params) {
   data <- load_data(c("experiment"), params$settings$params_i)
 
-  experiment_plot_location <- dataset_preproc_file(glue = "{params$settings$params_i}_experiment_plot.pdf")
+  experiment_plot_location <- dataset_preproc_file(glue::glue("{params$settings$params_i}_experiment_plot.pdf"))
 
   graphics.off()
   pdf(experiment_plot_location, width=12, height=12)
@@ -127,7 +127,7 @@ wrap <- function(params) {
   task <- dyngen::wrap_task(params, data$model, data$simulation, data$gs, data$experiment, data$normalisation)
   task$uuids <- list(task=uuid::UUIDgenerate()) %>% c(data$normalisation$uuids)
 
-  task_location <- dataset_preproc_file(glue = "{params$settings$params_i}_task.rds")
+  task_location <- dataset_preproc_file(glue::glue("{params$settings$params_i}_task.rds"))
   task %>% saveRDS(task_location)
 }
 
