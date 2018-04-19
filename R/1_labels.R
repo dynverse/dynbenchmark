@@ -33,7 +33,7 @@ label_long <- function(x) {
 
 #' @importFrom Hmisc capitalize
 label_capitalise <- function(x) {
-  x %>% str_replace("_", " ") %>% Hmisc::capitalize()
+  x %>% str_replace_all("_", " ") %>% Hmisc::capitalize()
 }
 
 
