@@ -24,7 +24,6 @@ URL: https://github.com/Zouter/dynalysis
 BugReports: https://github.com/Zouter/dynalysis/issues
 Imports: 
   cluster,
-  colorspace, 
   dplyr,
   dynnormaliser,
   ggraph,
