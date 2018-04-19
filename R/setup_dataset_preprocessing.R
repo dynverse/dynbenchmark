@@ -238,18 +238,3 @@ cut_unrepresented_milestones <- function(milestone_network, milestone_percentage
 }
 
 
-add_bifurcating_intermediate_nodes <- function(milestone_network, milestone_ids) {
-  map(milestone_ids, function(milestone_id) {
-    milestone_network_from <- milestone_network %>% filter(from == milestone_id)
-    milestone_network_to <- milestone_network %>% filter(to == milestone_id)
-    if(nrow(milestone_network_to) == 0 && milestone_network_from >= 2) {
-      intermediate_node <- paste0("INTERMEDIATE_", dynutils::random_time_string())
-      bind_rows(
-        tibble(from = milestone_id, to = intermediate_node, length=1e-10, directed=TRUE),
-        milestone_network_from %>% mutate(from = intermediate_node)
-      )
-    } else {
-      milestone_network_from
-    }
-  }) %>% bind_rows()
-}
