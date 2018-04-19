@@ -2,29 +2,26 @@ library(dynalysis)
 library(tidygraph)
 library(ggraph)
 library(tidyverse)
+extrafont::loadfonts()
 
-experiment("2-dataset_characterisation/2-trajectory_types")
+experiment("2-dataset_characterisation/3-trajectory_type_dag")
 
-
-
-#   ____________________________________________________________________________
-#   Trajectory type trees                                                   ####
-
+# filter unknown from dag, and add linetype to edges
 trajectory_type_tree_data <- trajectory_type_dag %>%
   activate(nodes) %>%
   filter(name != "unknown") %>%
   activate(edges) %>%
   mutate(
-    directed_change = map_lgl(prop_changes, ~"undirected" %in% .),
-    directed_change = ifelse(directed_change,"Add undirected", "Other generalisation")
+    directed_change = ifelse(map_lgl(prop_changes, ~"undirected" %in% .), "Add undirected", "Other generalisation")
   )
 
-
-##  ............................................................................
-##  Changes                                                                 ####
+# helper function for labelling prop changes
 label_prop_changes <- function(prop_changes) {
   format_prop_changes <- function(prop_changes) {
-    gsub("==", "=", prop_changes) %>% gsub("num", "number_of", .) %>% label_long()
+    prop_changes %>%
+      str_replace_all("==", "=") %>%
+      str_replace_all("num", "number_of") %>%
+      label_long()
   }
   map(prop_changes, format_prop_changes) %>% map_chr(glue::collapse, "\n")
 }
@@ -47,11 +44,11 @@ trajectory_type_tree_changes_individual <- map(c("undirected", "directed"), func
     geom_edge_link(aes(xend = x+(xend-x)/1.5, yend = y+(yend - y)/1.5), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
     geom_edge_link(aes(xend = x+(xend-x)/2, yend = y+(yend - y)/2), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
     geom_edge_link(aes(xend = x+(xend-x)/4, yend = y+(yend - y)/4), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
-    geom_node_label(aes(label=label_long(name), fill=name), color="white") +
+    geom_node_label(aes(label=label_long(name), fill=colour), color="white") +
     ggrepel::geom_label_repel(aes(x=x+(xend-x)/2, y = y+(yend - y)/2, label=label_prop_changes(prop_changes)), data = get_edges(), min.segment.length=Inf, force=0.1) +
-    scale_fill_manual(values=set_names(trajectory_types$colour, trajectory_types$id)) +
+    scale_fill_identity() +
     theme_graph() +
-    theme(legend.position="none", plot.title=element_text(family="Open Sans", hjust=0.5)) +
+    theme(plot.title=element_text(family="Open Sans", hjust=0.5)) +
     scale_x_continuous(expand=c(0.2, 0.2)) +
     ggtitle(label_long(directedness))
 })
@@ -89,4 +86,4 @@ less_complex_annotation <- ggplot() +
 
 trajectory_type_trees <- cowplot::plot_grid(trajectory_type_tree_changes, trajectory_type_tree_overall, ncol=1, labels="auto")
 trajectory_type_trees
-save_plot(figure_file("trajectory_type_trees.svg"), trajectory_type_trees, base_width=15, base_height=18)
+cowplot::save_plot(figure_file("trajectory_type_trees.svg"), trajectory_type_trees, base_width=15, base_height=18)
