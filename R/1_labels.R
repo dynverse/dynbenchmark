@@ -4,7 +4,7 @@
 #' @export
 label_short <- function(x, width=10) {
   tibble(id = as.character(x)) %>%
-    left_joind(dynalysis::labels, "id") %>%
+    left_join(dynalysis::labels, "id") %>%
     mutate(short=ifelse(is.na(short), label_capitalise(id), short)) %>%
     mutate(short=label_wrap(short, width=width)) %>%
     pull(short)
