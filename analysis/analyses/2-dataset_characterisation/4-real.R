@@ -31,7 +31,7 @@ pie <- function(tasks=tasks_real, what = "technology") {
   } else if (what == "technology") {
     fill_scale <- scale_fill_manual(values=technology_colors)
   } else if (what == "trajectory_type") {
-    fill_scale <- scale_fill_manual(values=setNames(trajectory_types$background_color,trajectory_types$id))
+    fill_scale <- scale_fill_manual(values=setNames(trajectory_types$background_colour,trajectory_types$id))
     # pie_data <- pie_data %>% arrange(
     #   -match(as.character(variable_of_interest), trajectory_types$id)
     # )
@@ -145,7 +145,7 @@ table <- map(c("latex", "html"), function(format) {
       trajectory_type = kableExtra::cell_spec(
         label_long(trajectory_type),
         format,
-        background=toupper(set_names(trajectory_types$color, trajectory_types$id)[trajectory_type]),
+        background=toupper(set_names(trajectory_types$colour, trajectory_types$id)[trajectory_type]),
         color=ifelse(trajectory_type == "rooted_tree", "#333333", "#FFFFFF"),
       ),
       ncells = cell_spec(
@@ -251,7 +251,7 @@ pie <- function(tasks=tasks_real, what = "technology") {
     )
     fill_scale <- scale_fill_manual(
       "",
-      values = setNames(trajectory_types$color,trajectory_types$id)[pie_data$variable_of_interest],
+      values = setNames(trajectory_types$colour,trajectory_types$id)[pie_data$variable_of_interest],
       labels = label_legend(pie_data$variable_of_interest),
       breaks = pie_data$variable_of_interest
     )

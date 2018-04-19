@@ -204,7 +204,7 @@ trajectory_components_over_time <- trajectory_components_gathered %>%
   ggplot() +
   geom_area(aes(date, n_implementations), stat="identity", fill="#BBBBBB") +
   geom_area(aes(date, n_implementations_oi, fill=trajectory_type), stat="identity") +
-  scale_fill_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
+  scale_fill_manual(values=setNames(trajectory_types$colour, trajectory_types$id)) +
   facet_wrap(~trajectory_type, labeller = label_facet(label_simple_trajectory_types), nrow = 2) +
   theme(legend.position = "none") +
   scale_x_date(label_long("publication_date"), limits=c(start_date, end_date), breaks=c(start_date, end_date), labels=c("", ""), expand=c(0, 0)) +
@@ -283,8 +283,8 @@ implementation_small_history <- implementation_small_history_data %>%
     ),
     direction="y", max.iter=10000, ylim=c(0, NA), force=10, min.segment.length = 0) +
   # ggrepel::geom_label_repel(aes(fill=maximal_trajectory_type, label=implementation_id, fontface=fontface, size=size), direction="y", max.iter=10000, ylim=c(0, NA), force=10, min.segment.length = 999999) +
-  scale_color_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
-  scale_fill_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
+  scale_color_manual(values=setNames(trajectory_types$colour, trajectory_types$id)) +
+  scale_fill_manual(values=setNames(trajectory_types$colour, trajectory_types$id)) +
   scale_alpha_manual(values=c(`TRUE`=1, `FALSE`=0.6)) +
   scale_x_date(label_long("publishing_date"), limits=c(start_date, end_date), date_breaks="1 year", date_labels="%Y") +
   scale_y_continuous(NULL, breaks=NULL, limits=c(0, 1), expand=c(0, 0)) +
@@ -309,7 +309,7 @@ children[xml_name(children) == "rect"] %>% xml_remove()
 # text color
 texts <- xml_children(svg) %>% {xml_children(.)} %>% {.[xml_name(.) == "text"]} %>% {.[str_detect(xml_attr(., "style"), "fill:")]}
 walk(texts, function(text) {
-  # xml_attr(text, "style") <- xml_attr(text, "style") %>% gsub(pritt("fill: {toupper(trajectory_types$color[trajectory_types$id == 'rooted_tree'])};"), "fill: #000;", .)
+  # xml_attr(text, "style") <- xml_attr(text, "style") %>% gsub(pritt("fill: {toupper(trajectory_types$colour[trajectory_types$id == 'rooted_tree'])};"), "fill: #000;", .)
   xml_attr(text, "style") <- xml_attr(text, "style") %>% gsub("fill: #[A-Z0-9]{6};", "fill: #FFF;", .)
 })
 
@@ -331,8 +331,8 @@ implementation_small_distribution <- implementations %>%
   geom_bar(aes(fill=trajectory_type, color=trajectory_type), stat="identity", width=0.95) +
   geom_text(aes(label=n), vjust=0) +
   # geom_hline(yintercept = sum(implementations$contains_ti, na.rm=TRUE), line) +
-  scale_fill_manual(values=setNames(trajectory_types$background_color, trajectory_types$id)) +
-  scale_color_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
+  scale_fill_manual(values=setNames(trajectory_types$background_colour, trajectory_types$id)) +
+  scale_color_manual(values=setNames(trajectory_types$colour, trajectory_types$id)) +
   scale_y_continuous(expand=c(0, 2)) +
   theme(legend.position = "None")
 implementation_small_distribution

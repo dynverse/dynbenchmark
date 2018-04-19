@@ -47,7 +47,7 @@ real_synthetic_comparison <- trajtype_source_scores %>%
   geom_point(aes(color=trajectory_type)) +
   geom_text(aes(label=round(cor, 2)), x=0.1, y=0.9, data=trajtype_source_score_cors) +
   facet_wrap(~trajectory_type, labeller = label_facet(label_simple_trajectory_types), nrow=1) +
-  scale_color_manual(values=set_names(c("black", "black", trajectory_types$color), c("all", "overall", trajectory_types$id))) +
+  scale_color_manual(values=set_names(c("black", "black", trajectory_types$colour), c("all", "overall", trajectory_types$id))) +
   scale_x_continuous(breaks=c(0,1), limits=c(0, 1))+
   scale_y_continuous(breaks=c(0,1), limits=c(0, 1))+
   coord_equal() +

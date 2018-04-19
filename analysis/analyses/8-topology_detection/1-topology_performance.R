@@ -31,8 +31,8 @@ method_trajtypes_scores <- left_join(
 get_violin_color <- function(trajectory_type, can_handle_trajectory_type) {
   ifelse(
     can_handle_trajectory_type,
-    set_names(trajectory_types$color, trajectory_types$id)[trajectory_type],
-    set_names(trajectory_types$background_color, trajectory_types$id)[trajectory_type]
+    set_names(trajectory_types$colour, trajectory_types$id)[trajectory_type],
+    set_names(trajectory_types$background_colour, trajectory_types$id)[trajectory_type]
   )
 }
 
@@ -109,7 +109,7 @@ linear_split_comparison <- linear_split_scores %>%
   facet_grid(score_id~trajectory_type_linear, scales = "free_y", labeller = label_facet(function(x) label_short(x, 15))) +
   scale_y_continuous(label_long("maximal_score_on_dataset"), limits=c(NA, 1), expand=c(0, 0.2)) +
   scale_x_discrete(label_long("method_restriction"), label = label_short) +
-  scale_fill_manual(values = set_names(trajectory_types$color[match(c("directed_linear", "rooted_tree"), trajectory_types$id)], c("linear_method", "non-linear_method"))) +
+  scale_fill_manual(values = set_names(trajectory_types$colour[match(c("directed_linear", "rooted_tree"), trajectory_types$id)], c("linear_method", "non-linear_method"))) +
   theme(legend.position="none", strip.text.y = element_text(angle=0))
 linear_split_comparison
 ggsave(figure_file("linear_split_comparison.svg"), linear_split_comparison, width=6, height=8)
@@ -131,7 +131,7 @@ edge_flip_distributions <- ind_scores %>%
     from=0,
     to=1
   ) +
-  scale_fill_manual(values=set_names(trajectory_types$color, trajectory_types$id)) +
+  scale_fill_manual(values=set_names(trajectory_types$colour, trajectory_types$id)) +
   facet_grid(.~trajectory_type, labeller=label_facet(label_simple_trajectory_types)) +
   scale_y_discrete(label_long("method_short_name"), expand = c(0, 0), labels=set_names(methods$method_name, methods$method_short_name)) +
   scale_x_continuous(label_long("edge_flip"), expand = c(0, 0), breaks=c(0, 0.5, 1), label=round) +

@@ -275,7 +275,7 @@ task_sample_max_tasks_top_individual %>%
   mutate(method_short_name = factor(method_short_name, method_order)) %>%
   ggplot(aes(method_short_name, fill = trajectory_type)) +
     geom_bar() +
-    scale_fill_manual(values=set_names(trajectory_types$color, trajectory_types$id))
+    scale_fill_manual(values=set_names(trajectory_types$colour, trajectory_types$id))
 
 
 
