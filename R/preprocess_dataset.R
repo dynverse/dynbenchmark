@@ -8,6 +8,8 @@
 #'
 #' @importFrom dynnormaliser normalise_filter_counts
 #' @importFrom dynwrap generate_prior_information
+#' @importFrom testthat expect_match
+#'
 #' @export
 preprocess_dataset <- function(
   counts,
@@ -23,6 +25,8 @@ preprocess_dataset <- function(
   if (is.null(dataset_id)) {
     dataset_id <- datasetpreproc_getid()
   }
+
+  testthat::expect_match(dataset_id, ".+/.+")
 
   readr::write_lines(as.character(Sys.time()), dataset_file(dataset_id = dataset_id, filename = "date.txt"))
 
@@ -82,10 +86,10 @@ preprocess_dataset <- function(
   }
 
   dataset <- dynwrap::wrap_data(
+    task_source = str_replace(dataset_id, "/.*", ""),
     id = dataset_id,
     cell_ids = cell_ids,
     cell_info = cell_info,
-    task_source = "real",
     cell_grouping = cell_grouping,
     normalisation_info = normalisation_info,
     creation_date = Sys.time()
