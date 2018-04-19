@@ -8,7 +8,7 @@ params_i <- params$settings$params_i
 # Helper function to load in data (model, simulation, ...) from disk
 load_data <- function(load = character(), params_i = 1) {
   map(load, function(id) {
-    readRDS(dataset_preproc_file(glue = "{params_i}_{id}.rds"))
+    readRDS(dataset_preproc_file(glue::glue("{params_i}_{id}.rds")))
   }) %>% set_names(load)
 }
 
@@ -47,7 +47,7 @@ qsub_packages <- c("tidyverse", "dynalysis", "dyngen")
 generate_wrapper <- function(func, output_file, ncores) {
   function(params) {
     prepare_environment(ncores=ncores)
-    if (!file.exists(dataset_preproc_file(glue = "{params$settings$params_i}_{output_file}"))) {
+    if (!file.exists(dataset_preproc_file(glue::glue("{params$settings$params_i}_{output_file}")))) {
       func(params)
     } else {
       TRUE
