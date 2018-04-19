@@ -4,10 +4,10 @@
 \alias{label_simple_trajectory_types}
 \title{Label trajectory types simplified}
 \usage{
-label_simple_trajectory_types(trajectory_types_oi)
+label_simple_trajectory_types(x)
 }
 \arguments{
-\item{trajectory_types_oi}{Trajectory types}
+\item{x}{Trajectory types}
 }
 \description{
 Label trajectory types simplified

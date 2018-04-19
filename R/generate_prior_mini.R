@@ -8,7 +8,7 @@ generate_prior_mini <- function(method_priors, svg = xml2::read_xml(figure_file(
   svg2 <- xml2::xml_new_root(svg, .copy=T)
 
   map2(method_priors$prior_id, method_priors$prior_usage, function(prior_id, usage) {
-    color <- prior_usages$color[prior_usages$prior_usage == usage]
+    color <- dynalysis::prior_usages$color[dynalysis::prior_usages$prior_usage == usage]
 
     layer <- svg2 %>% xml2::xml_find_first(pritt(".//svg:g[@inkscape:label='{prior_id}']")) %>% xml2::xml_remove()
 

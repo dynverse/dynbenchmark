@@ -9,6 +9,7 @@
 #' @import tibble
 #' @import dplyr
 #' @importFrom purrr %>% map set_names map_dbl map2_dbl
+#' @importFrom stringr str_replace_all str_replace
 #'
 #' @docType package
 #' @name dynalysis

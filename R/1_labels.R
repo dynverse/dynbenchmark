@@ -4,7 +4,7 @@
 #' @export
 label_short <- function(x, width=10) {
   tibble(id = as.character(x)) %>%
-    left_join(labels, "id") %>%
+    left_joind(dynalysis::labels, "id") %>%
     mutate(short=ifelse(is.na(short), label_capitalise(id), short)) %>%
     mutate(short=label_wrap(short, width=width)) %>%
     pull(short)
@@ -26,14 +26,14 @@ label_wrap <- function(x, width = 10, collapse = "\n") {
 #' @export
 label_long <- function(x) {
   tibble(id = as.character(x)) %>%
-    left_join(labels, "id") %>%
-    mutate(long=ifelse(is.na(long), label_capitalise(id), long)) %>%
+    left_join(dynalysis::labels, "id") %>%
+    mutate(long = ifelse(is.na(long), label_capitalise(id), long)) %>%
     pull(long)
 }
 
 #' @importFrom Hmisc capitalize
 label_capitalise <- function(x) {
-  x %>% gsub("_", " ", .) %>% Hmisc::capitalize()
+  x %>% str_replace("_", " ") %>% Hmisc::capitalize()
 }
 
 
@@ -43,14 +43,13 @@ label_capitalise <- function(x) {
 label_facet <- function(label_func = label_long) {function(df) {mutate_all(df, label_func)}}
 
 #' Label trajectory types simplified
-#' @param trajectory_types_oi Trajectory types
+#' @param x Trajectory types
 #' @export
-label_simple_trajectory_types <- function(trajectory_types_oi) {
-  ifelse(
-    trajectory_types_oi %in% trajectory_types$id,
-    trajectory_types$simplified[match(trajectory_types_oi, trajectory_types$id)] %>% label_long(),
-    label_long(trajectory_types_oi)
-  )
+label_simple_trajectory_types <- function(x) {
+  tibble(id = as.character(x)) %>%
+    left_join(dynalysis::trajectory_types, by = "id") %>%
+    mutate(label = label_long(ifelse(!is.na(simplified), simplified, x))) %>%
+    .$label
 }
 
 

@@ -116,7 +116,7 @@ preprocess_dataset <- function(
 
 convert_to_symbol <- function(counts) {
   colnames(counts) <- tibble(gene_id = colnames(counts)) %>%
-    left_join(id_mapper, by = c("gene_id" = "ensembl")) %>%
+    left_join(dynalysis::id_mapper, by = c("gene_id" = "ensembl")) %>%
     mutate(gene_id = ifelse(is.na(symbol), gene_id, symbol)) %>%
     pull(gene_id)
   filtered <- names(which(table(colnames(counts)) == 1))
