@@ -8,5 +8,4 @@ qc_categories <- tibble(
   label = c("Availability", "Code quality", "Code assurance", "Documentation", "Behaviour", "Study design")
 )
 
-devtools::use_data(qc_applications, overwrite = TRUE)
-devtools::use_data(qc_categories, overwrite = TRUE)
+devtools::use_data(qc_applications, qc_categories, overwrite = TRUE)
