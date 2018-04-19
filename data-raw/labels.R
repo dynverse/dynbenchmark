@@ -1,4 +1,4 @@
-labels <- tibble::tribble(
+common_labels <- tribble(
   ~id, ~long, ~short,
   "directed_acyclic_graph", "Directed acyclic graph", "DAG",
   "disconnected_directed_graph", "Disconnected directed graph", "DDG",
@@ -22,6 +22,12 @@ labels <- tibble::tribble(
   "trajectory_type_predicted", "Predicted trajectory type", "Predicted trajectory type",
   "harm_mean", "Harmonic mean", "Harmonic mean",
   "task_source", "Dataset source", "Dataset source"
+)
+
+
+labels <- bind_rows(
+  common_labels,
+  prior_types %>% select(id = prior_id, long = prior_name, short = prior_name)
 )
 
 devtools::use_data(labels, overwrite = TRUE)
