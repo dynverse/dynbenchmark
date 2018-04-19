@@ -2,7 +2,7 @@
 % Please edit documentation in R/setup_dataset_preprocessing.R
 \name{load_dataset}
 \alias{load_dataset}
-\title{Loading a dataset after it has been preprocessed}
+\title{Load a dataset after it has been preprocessed}
 \usage{
 load_dataset(dataset_id = NULL)
 }
@@ -10,5 +10,5 @@ load_dataset(dataset_id = NULL)
 \item{dataset_id}{The ID of the dataset to be used}
 }
 \description{
-Loading a dataset after it has been preprocessed
+Load a dataset after it has been preprocessed
 }

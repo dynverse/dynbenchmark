@@ -2,10 +2,10 @@
 % Please edit documentation in R/setup_dataset_preprocessing.R
 \name{list_datasets}
 \alias{list_datasets}
-\title{List the names of all real datasets}
+\title{List the names of all present datasets}
 \usage{
 list_datasets()
 }
 \description{
-List the names of all real datasets
+List the names of all present datasets
 }

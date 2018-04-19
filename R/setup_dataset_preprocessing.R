@@ -32,8 +32,9 @@ datasetpreproc_getid <- function() {
 
 # create a helper function
 #' @importFrom glue glue
-datasetpreproc_subfolder <- function(path) {
-  function(filename = "", dataset_id = NULL, glue = NULL, relative = FALSE) {
+datasetpreproc_subfolder <- function(path, ext) {
+  use_folder <- ext == "/"
+  fun <- function(filename = "", dataset_id = NULL, glue = NULL, relative = FALSE) {
     dyn_fold <- get_dynalysis_folder()
 
     if (relative) {
@@ -45,7 +46,11 @@ datasetpreproc_subfolder <- function(path) {
     }
 
     # determine the full path
-    full_path <- paste0(dyn_fold, "/", path, "/", dataset_id, "/")
+    if (use_folder) {
+      full_path <- paste0(dyn_fold, "/", path, "/", dataset_id, "/")
+    } else {
+      full_path <- paste0(dyn_fold, "/", path, "/")
+    }
 
     # create if necessary
     dir.create(full_path, recursive = TRUE, showWarnings = FALSE)
@@ -59,35 +64,50 @@ datasetpreproc_subfolder <- function(path) {
     }
 
     # get complete filename
-    paste0(full_path, filename)
+    if (use_folder) {
+      paste0(full_path, filename)
+    } else {
+      paste0(full_path, dataset_id, ext)
+    }
   }
+  if (!use_folder) {
+    formals(fun) <- formals(fun)[-1]
+  }
+  fun
 }
 
 #' @rdname dataset_preprocessing
 #' @export
-dataset_preproc_file <- datasetpreproc_subfolder("analysis/data/derived_data/datasets_preproc")
+dataset_preproc_file <- datasetpreproc_subfolder("analysis/data/derived_data/1-datasets_preproc", ext = "/")
 
 #' @rdname dataset_preprocessing
 #' @export
-dataset_file <- datasetpreproc_subfolder("analysis/data/derived_data/datasets")
+dataset_file <- datasetpreproc_subfolder("analysis/data/derived_data/1-datasets", ext = ".rds")
 
 #' @rdname dataset_preprocessing
 #' @export
 save_dataset <- function(dataset, dataset_id = NULL) {
-  write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
+  write_rds(dataset, dataset_file(dataset_id = dataset_id))
 }
 
-#' Loading a dataset after it has been preprocessed
+#' Load a dataset after it has been preprocessed
 #' @export
 #' @inheritParams dataset_preprocessing
 load_dataset <- function(dataset_id = NULL) {
-  read_rds(dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
+  read_rds(dataset_file(dataset_id = dataset_id))
 }
 
-#' List the names of all real datasets
+#' Load the tibble of datasets
+#' @export
+#' @inheritParams dataset_preprocessing
+load_datasets_tibble <- function() {
+  read_rds(derived_file("tasks.rds", "1-datasets"))
+}
+
+#' List the names of all present datasets
 #' @export
 list_datasets <- function() {
-  paste0("real/", list.files(dataset_file(filename = "", dataset_id = "real")))
+  load_datasets_tibble()$id
 }
 
 #' Download a file and return its location path
@@ -104,137 +124,3 @@ download_dataset_file <- function(filename, url, dataset_id = NULL) {
 
   loc
 }
-
-#' Preprocessing functionality for real datasets
-#'
-#' @inheritParams dynwrap::wrap_data
-#' @inheritParams dynwrap::add_expression_to_wrapper
-#' @inheritParams dynwrap::add_trajectory_to_wrapper
-#' @param cell_grouping Milestone groups of the cells.
-#' @param dataset_id The name of the dataset.
-#'
-#' @importFrom dynnormaliser normalise_filter_counts
-#' @importFrom dynwrap generate_prior_information
-#' @export
-datasetpreproc_normalise_filter_wrap_and_save <- function(
-  counts,
-  cell_ids,
-  milestone_ids,
-  milestone_network,
-  milestone_percentages,
-  cell_grouping,
-  cell_info,
-  feature_info,
-  dataset_id = NULL
-) {
-  if (is.null(dataset_id)) {
-    dataset_id <- datasetpreproc_getid()
-  }
-
-  readr::write_lines(as.character(Sys.time()), dataset_file(dataset_id = dataset_id, filename = "date.txt"))
-
-  # convert symbols
-  conversion_out <- convert_to_symbol(counts)
-  original_counts <- conversion_out$counts
-  feature_info <- feature_info[conversion_out$filtered, ] %>% mutate(feature_id = colnames(original_counts))
-
-  # normalise and filter expression
-  norm_out <- dynnormaliser::normalise_filter_counts(original_counts, verbose = TRUE)
-
-  normalisation_info <- norm_out$info
-
-  expression <- norm_out$expression
-  counts <- norm_out$counts
-
-  cell_ids <- rownames(counts)
-  cell_info <- cell_info %>% slice(match(cell_ids, cell_id))
-  cell_grouping <- cell_grouping %>% filter(cell_id %in% cell_ids)
-  feature_info <- feature_info %>% slice(match(colnames(counts), feature_id))
-  milestone_percentages <- milestone_percentages %>% filter(cell_id %in% cell_ids)
-
-  # cut out unrepresented milestones
-  milestone_network <- cut_unrepresented_milestones(milestone_network, milestone_percentages, milestone_ids)
-  milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
-
-  # add intermediate nodes to bifurcating regions
-  milestone_network <- add_bifurcating_intermediate_nodes(milestone_network, milestone_ids)
-  milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
-
-  # get progressions
-  progressions <- dynwrap::convert_milestone_percentages_to_progressions(cell_ids, milestone_ids, milestone_network, milestone_percentages)
-
-  # extract divergence regions
-  part1 <- progressions %>%
-    group_by(cell_id) %>%
-    filter(n() > 1) %>%
-    ungroup() %>%
-    select(from, to) %>%
-    distinct()
-
-  if (nrow(part1) > 0) {
-    divergence_regions <-
-      part1 %>%
-      group_by(from) %>%
-      do({
-        data_frame(
-          divergence_id = paste0("div_", .$from[[1]]),
-          milestone_id = c(.$from[[1]], .$to),
-          is_start = c(T, rep(F, nrow(.)))
-        )
-      }) %>%
-      ungroup() %>%
-      select(divergence_id, milestone_id, is_start)
-  } else {
-    divergence_regions <- NULL
-  }
-
-  dataset <- dynwrap::wrap_data(
-    id = dataset_id,
-    cell_ids = cell_ids,
-    cell_info = cell_info,
-    task_source = "real",
-    cell_grouping = cell_grouping,
-    normalisation_info = normalisation_info,
-    creation_date = Sys.time()
-  ) %>% dynwrap::add_trajectory_to_wrapper(
-    milestone_ids = milestone_ids,
-    milestone_network = milestone_network,
-    divergence_regions = divergence_regions,
-    progressions = progressions
-  ) %>% dynwrap::add_expression_to_wrapper(
-    counts = counts,
-    expression = expression,
-    feature_info = feature_info
-  ) %>% dynwrap::add_prior_information_to_wrapper()
-
-  write_rds(dataset, dataset_file(dataset_id = dataset_id, filename = "dataset.rds"))
-  write_rds(original_counts, dataset_file(dataset_id = dataset_id, filename = "original_counts.rds"))
-
-  pdf(dataset_file(dataset_id = dataset_id, "normalisation.pdf"));walk(norm_out$normalisation_plots, print);graphics.off()
-}
-
-
-cut_unrepresented_milestones <- function(milestone_network, milestone_percentages, milestone_ids) {
-  unrepresented_milestones <- setdiff(milestone_ids, milestone_percentages$milestone_id)
-
-  for(milestone_id in unrepresented_milestones) {
-    milestone_network_from <- milestone_network %>% filter(from == milestone_id)
-    milestone_network_to <- milestone_network %>% filter(to == milestone_id)
-    if (nrow(milestone_network_from) > 0 & nrow(milestone_network_to) > 0) {
-      milestone_network <- bind_rows(
-        milestone_network,
-        crossing(milestone_network_from, milestone_network_to) %>%
-          mutate(length = length + length1) %>%
-          mutate(from = from1) %>%
-          select(from, to, length, directed)
-      )
-    }
-
-    milestone_network <- milestone_network %>%
-      filter(from != milestone_id & to != milestone_id)
-  }
-
-  milestone_network
-}
-
-
