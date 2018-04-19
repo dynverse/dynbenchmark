@@ -37,6 +37,7 @@ Imports:
   reshape2,
   rvest,
   stats,
+  stringr,
   tidyr,
   tidyverse,
   tibble,

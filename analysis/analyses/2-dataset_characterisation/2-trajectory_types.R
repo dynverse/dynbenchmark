@@ -40,8 +40,9 @@ trajectory_type_tree_changes_individual <- map(c("undirected", "directed"), func
     activate(nodes) %>%
     filter(directedness == !!directedness) %>%
     activate(edges) %>%
-    filter(paste0(.N()$name[from], .N()$name[to]) != "convergencebifurcation") %>%
-    ggraph(layout = "tree") +
+    filter(paste0(.N()$name[from], .N()$name[to]) != "convergencebifurcation")
+
+  ggraph(trajectory_type_tree_changes, layout = "tree") +
     geom_edge_link() +
     geom_edge_link(aes(xend = x+(xend-x)/1.5, yend = y+(yend - y)/1.5), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
     geom_edge_link(aes(xend = x+(xend-x)/2, yend = y+(yend - y)/2), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
@@ -53,7 +54,6 @@ trajectory_type_tree_changes_individual <- map(c("undirected", "directed"), func
     theme(legend.position="none", plot.title=element_text(family="Open Sans", hjust=0.5)) +
     scale_x_continuous(expand=c(0.2, 0.2)) +
     ggtitle(label_long(directedness))
-  trajectory_type_tree_changes
 })
 
 trajectory_type_tree_changes <- cowplot::plot_grid(plotlist=c(list(less_complex_annotation), trajectory_type_tree_changes_individual), nrow=1, rel_widths = c(0.2, 0.4, 0.4))
