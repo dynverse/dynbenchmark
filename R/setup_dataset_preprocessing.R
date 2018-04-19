@@ -64,6 +64,7 @@ dataset_file <- datasetpreproc_subfolder("analysis/data/derived_data/1-datasets"
 #' @rdname dataset_preprocessing
 #' @export
 save_dataset <- function(dataset, dataset_id = NULL) {
+  dir.create(dataset_file(filename = "", dataset_id = dataset_id), showWarnings = FALSE)
   write_rds(dataset, dataset_file(filename = "dataset.rds", dataset_id = dataset_id))
 }
 
