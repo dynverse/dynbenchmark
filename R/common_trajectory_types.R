@@ -1,3 +1,5 @@
+
+# Converting trajectory types from directed to undirected
 trajectory_type_directed_to_undirected<- c(
   "directed_linear" = "undirected_linear",
   "bifurcation" = "simple_fork",
