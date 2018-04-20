@@ -7,14 +7,15 @@ library(ggraph)
 experiment("2-dataset_characterisation/1-synthetic")
 tasks <- load_datasets_tibble()
 
-
-##  ............................................................................
-##  Modulenet graphs                                                        ####
+##################################################
+## Generate plots for each of the dyngen models ##
+##################################################
 modulenet_names <- tasks$settings %>% map("modulenet_name") %>% unlist() %>% unique()
 
-params <- simple_params
+params <- dyngen::simple_params
 
-scale_edge_burn <- scale_edge_linetype_manual(values=c(`FALSE` = "solid", `TRUE` = "dashed"))
+scale_edge_burn <- scale_edge_linetype_manual(values = c("FALSE" = "solid", "TRUE" = "dashed"))
+scale_edge_transition <- scale_edge_colour_brewer(palette = "Set2")
 theme_without_legend <- theme(legend.position = "none")
 
 plots <- map(modulenet_names, function(modulenet_name) {
@@ -27,19 +28,18 @@ plots <- map(modulenet_names, function(modulenet_name) {
     activate(nodes) %>%
     mutate(a0 = as.character(a0))
 
-
   modulenet_plot <- modulenet_graph %>%
     activate(edges) %>%
     arrange(from == to) %>%
     ggraph(layout = 'linear', circular = TRUE) +
-    geom_edge_link(aes(color = effect), arrow=arrow(type="closed"), end_cap = circle(3, 'mm')) +
-    geom_edge_loop(aes(color = effect), arrow=arrow(type="closed"), end_cap = circle(3, 'mm')) +
+    geom_edge_link(aes(color = effect), arrow = arrow(type="closed"), end_cap = circle(3, 'mm')) +
+    geom_edge_loop(aes(color = effect), arrow = arrow(type="closed"), end_cap = circle(3, 'mm')) +
     geom_node_label(aes(fill = a0, label=module_id)) +
     scale_edge_color_manual(values = c("-1"="#0074D9", "1"="#FF4136")) +
     scale_fill_manual(values = c("1"="#FF4136", "0"="white")) +
     theme_graph() +
-    theme_without_legend
-  modulenet_plot
+    theme_without_legend +
+    ggtitle(label_long(modulenet_name), "Module network")
 
   # Milestone graph
   edge_operations <- model$edge_operations %>%
@@ -52,10 +52,10 @@ plots <- map(modulenet_names, function(modulenet_name) {
     geom_node_point(aes()) +
     geom_edge_link(aes(color = edge_id, edge_linetype=burn), arrow=arrow(type="closed")) +
     scale_edge_burn +
+    scale_edge_transition +
     theme_graph("") +
     theme_without_legend +
-    ggtitle(label_long(modulenet_name))
-  milestone_plot
+    ggtitle(" ", "Milestone network")
 
   # Edge operations graph
   edge_operations_graph <- edge_operations %>%
@@ -72,30 +72,31 @@ plots <- map(modulenet_names, function(modulenet_name) {
   edge_operations_plot <- ggraph(edge_operations_graph, layout = "fr") +
     geom_edge_link(aes(label = module_progression, edge_linetype=burn, color=edge_id), arrow=arrow(type="closed"), angle_calc = 'along', label_dodge = unit(2.5, 'mm')) +
     geom_node_point() +
+    scale_edge_transition +
     theme_graph() +
-    theme_without_legend
-  edge_operations_plot
+    theme_without_legend +
+    ggtitle(" ", "Edge operations")
 
-  lst(modulenet_plot, milestone_plot, edge_operations_plot)
+  comb_plot <- cowplot::plot_grid(
+    modulenet_plot,
+    milestone_plot,
+    edge_operations_plot,
+    nrow = 1,
+    align = "v"
+  )
+
+  comb_plot
 })
 
-modulenet_plots <- map(plots, ~cowplot::plot_grid(plotlist=., ncol=3, align = "v"))
-
-ggrid <- cowplot::plot_grid(plotlist = modulenet_plots, ncol = 1)
+ggrid <- cowplot::plot_grid(plotlist = plots, ncol = 1)
 ggsave(figure_file("modulenets.svg"), ggrid, width = 12, height = 35)
 
 
 
-##  ............................................................................
-##  Module net to gene net example                                          ####
-model <- ""
 
-
-
-
-
-##  ............................................................................
-##  Samplers table                                                          ####
+####################
+## Samplers table ##
+####################
 samplers <- read_tsv(raw_file("samplers"))
 notes <- c("$y_{max} = r/d * p/q$")
 
@@ -110,4 +111,4 @@ table <- map(c("latex", "html"), function(format) {
   table
 }) %>% set_names(c("latex", "html"))
 
-table %>% saveRDS(figure_file("samplers.rds"))
+write_rds(table, figure_file("samplers.rds"))
