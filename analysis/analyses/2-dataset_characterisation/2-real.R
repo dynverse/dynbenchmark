@@ -3,69 +3,77 @@ library(cowplot)
 library(googlesheets)
 library(dynalysis)
 
-
 experiment("2-dataset_characterisation/2-real")
 
-tasks <- load_datasets_tibble()
-tasks_real <- tasks %>% filter(category == "real")
+# Fetch tasks
+tasks_real <- load_datasets_tibble() %>% filter(category == "real")
 
-technology_colors <- unique(tasks_real$technology) %>% {setNames(RColorBrewer::brewer.pal(length(.), "Set1"), .)}
-standard_colors <- c("gold"="#ffeca9", "silver"="#e3e3e3")
+# Define colours
+technology_colours <- unique(tasks_real$technology) %>%
+  setNames(RColorBrewer::brewer.pal(length(.), "Set1"), .)
+standard_colours <- c("gold" = "#ffeca9", "silver" = "#e3e3e3")
 
-##  ............................................................................
-##  Pie charts                                                              ####
-pie <- function(tasks=tasks_real, what = "technology") {
-  tasks$variable_of_interest <- tasks[[what]]
+#######################################
+## Dataset characteristics bar chart ##
+#######################################
+dataset_characterisation_boxes <- cowplot::plot_grid(
+  nrow = 1,
+  plotlist = map(
+    c("technology", "organism", "standard","dynamic_process", "trajectory_type"),
+    function(what) {
+      tasks <- tasks_real
+      tasks$variable_of_interest <- tasks[[what]]
 
-  # first extract the variable
-  pie_data <- tasks %>%
-    count(variable_of_interest) %>%
-    arrange(n)
+      # extract the variable and calculate the positions
+      pie_data <- tasks %>%
+        count(variable_of_interest) %>%
+        arrange(n) %>%
+        mutate(
+          odd = row_number() %% 2,
+          row_number = row_number(),
+          start = lag(cumsum(n), 1, 0),
+          end = cumsum(n),
+          mid = start + (end - start) / 2
+        )
 
-  # change labels, fill or order depending on variable
-  label <-"{label_short(variable_of_interest, 15)}: {n}"
-  fill_scale <- scale_fill_grey(start = 0.6, end = 0.9)
-  text_position <- 0.5
-  if (what == "standard") {
-    fill_scale <- scale_fill_manual(values=standard_colors)
-  } else if (what == "technology") {
-    fill_scale <- scale_fill_manual(values=technology_colors)
-  } else if (what == "trajectory_type") {
-    fill_scale <- scale_fill_manual(values=setNames(trajectory_types$background_colour,trajectory_types$id))
-    # pie_data <- pie_data %>% arrange(
-    #   -match(as.character(variable_of_interest), trajectory_types$id)
-    # )
-    # label <- "{n}"
-    # text_position <- 0.9
-  }
+      # change labels, fill or order depending on variable
+      label <- "{label_short(variable_of_interest, 15)}: {n}"
+      fill_scale <- scale_fill_grey(start = 0.6, end = 0.9)
+      text_position <- 0.5
 
-  # now calcualte positions
-  pie_data <- pie_data %>% mutate(odd = row_number()%%2, row_number = row_number()) %>%
-    mutate(start = lag(cumsum(n), 1, 0), end = cumsum(n), mid = start + (end - start)/2)
+      if (what == "standard") {
+        fill_scale <- scale_fill_manual(values=standard_colours)
+      } else if (what == "technology") {
+        fill_scale <- scale_fill_manual(values=technology_colours)
+      } else if (what == "trajectory_type") {
+        fill_scale <- scale_fill_manual(values=setNames(trajectory_types$background_colour,trajectory_types$id))
+      }
 
-  pie <- pie_data %>%
-    ggplot(aes(ymin=0, ymax=1)) +
-    geom_rect(aes(xmin=start, xmax=end, fill=variable_of_interest), stat="identity", color="white", size=0.5) +
-    geom_text(aes(mid, text_position, label = pritt(label), vjust=0.5), color="black", hjust=0.5, size=4) +
-    fill_scale +
-    ggtitle(label_long(what)) +
-    theme_void() +
-    theme(legend.position = "none") +
-    scale_x_continuous(expand=c(0, 0)) +
-    scale_y_continuous(expand=c(0, 0)) +
-    coord_flip()
-}
+      ggplot(pie_data, aes(ymin=0, ymax=1)) +
+        geom_rect(aes(xmin=start, xmax=end, fill=variable_of_interest), stat="identity", color="white", size=0.5) +
+        geom_text(aes(mid, text_position, label = pritt(label), vjust=0.5), color="black", hjust=0.5, size=4) +
+        fill_scale +
+        ggtitle(label_long(what)) +
+        theme_void() +
+        theme(legend.position = "none") +
+        scale_x_continuous(expand=c(0, 0)) +
+        scale_y_continuous(expand=c(0, 0)) +
+        coord_flip()
+    }
+  ))
+dataset_characterisation_boxes
 
-dataset_characterisation_pies <- c("technology", "organism", "standard","dynamic_process", "trajectory_type") %>% map(pie, tasks = tasks_real) %>% cowplot::plot_grid(plotlist=., nrow =1)
-dataset_characterisation_pies
-dataset_characterisation_pies %>% write_rds(figure_file("dataset_characterisation_pies.rds"))
+ggsave(figure_file("dataset_characterisation_boxes.svg"), dataset_characterisation_boxes, width = 10, height = 8)
 
+
+
+##################################################################################################
+## TODO robrecht; WIP                                                                           ##
+##################################################################################################
 
 
 ##  ............................................................................
 ##  Distributions                                                           ####
-tasks_real$ngenes <- map_int(tasks_real$normalisation_info, ~last(.$normalisation_steps[["ngenes"]]))
-tasks_real$ncells <- map_int(tasks_real$normalisation_info, ~last(.$normalisation_steps[["ncells"]]))
 dataset_characterisation_distributions <- c("ncells", "ngenes", "date") %>% map(function(what) {
   nbins <- 70
 
@@ -84,8 +92,8 @@ dataset_characterisation_distributions <- c("ncells", "ngenes", "date") %>% map(
     geom_dotplot(binwidth=as.numeric(max(limits) - min(limits)) / nbins, method = "histodot", binpositions="all", stackgroups=TRUE, stackratio=1.5, dotsize=0.7) +
     x_scale +
     scale_y_continuous(NULL, breaks=NULL, expand=c(0.02, 0)) +
-    scale_fill_manual(values=technology_colors) +
-    scale_color_manual(values=technology_colors) +
+    scale_fill_manual(values=technology_colours) +
+    scale_color_manual(values=technology_colours) +
     theme(legend.position="none")
 })
 # dataset_characterisation_distributions[[2]] <- dataset_characterisation_distributions[[2]] + theme(legend.position="right")
@@ -133,7 +141,7 @@ table <- map(c("latex", "html"), function(format) {
       technology = cell_spec(
         glue::glue(grouper[[format]]("technology")),
         format,
-        background=technology_colors[technology],
+        background=technology_colours[technology],
         color="white",
         escape=FALSE
       ),
@@ -165,7 +173,7 @@ table <- map(c("latex", "html"), function(format) {
       standard_determination = cell_spec(
         standard_determination,
         format,
-        background=toupper(standard_colors[standard])
+        background=toupper(standard_colours[standard])
       )
     ) %>%
     select(-id, -standard) %>%
@@ -241,7 +249,7 @@ pie <- function(tasks=tasks_real, what = "technology") {
   if (what == "technology") {
     fill_scale <- scale_fill_manual(
       "",
-      values = technology_colors[pie_data$variable_of_interest],
+      values = technology_colours[pie_data$variable_of_interest],
       labels = label_legend(pie_data$variable_of_interest),
       breaks = pie_data$variable_of_interest
     )
