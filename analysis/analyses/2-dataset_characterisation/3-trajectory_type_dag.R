@@ -36,7 +36,7 @@ label_prop_changes <- function(prop_changes) {
   map(prop_changes, format_prop_changes) %>% map_chr(glue::collapse, "\n")
 }
 
-left_side <-
+less_complex_annotation <-
   ggplot() +
   geom_line(aes(x=0, y=0:1),arrow=arrow()) +
   geom_text(aes(x=-0.05, y=0.5), label="Increasing complexity",angle=90) +
@@ -52,7 +52,7 @@ trajectory_type_tree_changes_individual <- map(
       activate(edges) %>%
       filter(.N()$name[from] != "convergence" | .N()$name[to] != "bifurcation")
 
-    ggraph(trajectory_type_tree_changes, layout = "tree") +
+    ggraph(gr, layout = "tree") +
       geom_edge_link() +
       geom_edge_link(aes(xend = x+(xend-x)*.25, yend = y+(yend - y)*.25), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
       geom_edge_link(aes(xend = x+(xend-x)*.5, yend = y+(yend - y)*.5), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
@@ -81,7 +81,7 @@ trajectory_type_tree_overall <- trajectory_type_tree_data %>%
   geom_edge_link(aes(xend = x+(xend-x)/2, yend = y+(yend - y)/2, edge_linetype = directed_change), arrow=arrow(type="closed", length=unit(0.1, "inches"))) +
   geom_node_label(aes(label=label_long(name) %>% gsub(" ", "\n", .), fill=name), color="white") +
   theme_graph() +
-  theme(legend.position="top") +
+  theme(plot.title=element_text(family="Open Sans", hjust=0.5), legend.position="top") +
   scale_x_continuous(expand=c(0.2, 0.2)) +
   scale_fill_manual(values=set_names(trajectory_types$colour, trajectory_types$id), guide=FALSE) +
   scale_edge_linetype_discrete("", labels=label_long)
@@ -91,12 +91,6 @@ trajectory_type_tree_overall %>% write_rds(figure_file("trajectory_type_tree_ove
 
 ##  ............................................................................
 ##  Combined tree plot                                                      ####
-less_complex_annotation <- ggplot() +
-  geom_line(aes(x=0, y=0:1),arrow=arrow()) +
-  geom_text(aes(x=-0.05, y=0.5), label="Increasing complexity",angle=90) +
-  theme_void() +
-  scale_x_continuous(limits=c(-0.1, 0.05))
-
 trajectory_type_trees <- cowplot::plot_grid(trajectory_type_tree_changes, trajectory_type_tree_overall, ncol=1, labels="auto")
 trajectory_type_trees
 cowplot::save_plot(figure_file("trajectory_type_trees.svg"), trajectory_type_trees, base_width=15, base_height=18)
