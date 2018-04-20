@@ -6,6 +6,12 @@ extrafont::loadfonts()
 
 experiment("2-dataset_characterisation/3-trajectory_type_dag")
 
+
+#############################################################
+# TODO: Update this script to be able to reproduce
+# analysis/figures/2-dataset_characterisation/3-trajectory_type_dag/trajectory_type_trees.svg
+#############################################################
+
 trajectory_type_ancestors <- trajectory_type_dag %>% igraph::ego(99999999, mode="out") %>% map(names) %>% setNames(names(igraph::V(trajectory_type_dag)))
 
 # filter unknown from dag, and add linetype to edges
