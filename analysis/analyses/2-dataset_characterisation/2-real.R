@@ -264,7 +264,7 @@ pies <- cowplot::plot_grid(
         text_position <- 0.9
       }
 
-      # now calcualte positions
+      # now calculate positions
       pie_data <- pie_data %>% mutate(odd = row_number()%%2, row_number = row_number()) %>%
         mutate(start = lag(cumsum(n), 1, 0), end = cumsum(n), mid = start + (end - start)/2)
 
