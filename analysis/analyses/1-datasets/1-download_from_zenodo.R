@@ -32,6 +32,7 @@ pbapply::pblapply(task_ids, function(task_id) {
   invisible()
 })
 
+# task_ids <- list_datasets()
 # pbapply::pblapply(task_ids, function(task_id) {
 #   task <- load_dataset(task_id)
 #   task$date <- as.Date(task$date, origin = "1970-01-01")
@@ -55,6 +56,9 @@ tasks <- list_as_tibble(map(task_ids, function(task_id) {
   }
   task
 }))
+# todo: list_as_tibble needs to handle dates correctly
+tasks$date <- as.Date(tasks$date, origin = "1970-01-01")
+tasks$creation_date = as.POSIXct(tasks$creation_date, origin = "1970-01-01")
 write_rds(tasks, derived_file("tasks.rds"))
 
 # check the size of tasks, in MB
