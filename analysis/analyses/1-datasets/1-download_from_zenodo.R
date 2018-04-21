@@ -23,9 +23,22 @@ pbapply::pblapply(task_ids, function(task_id) {
     dynwrap::add_cell_waypoints_to_wrapper() %>%
     .[names(.) != "milenet_spr"]
 
+  task$date <- as.Date(task$date, origin = "1970-01-01")
+  task$creation_date = as.POSIXct(task$creation_date, origin = "1970-01-01")
+
   save_dataset(task, task_id)
   file.remove(file)
+
+  invisible()
 })
+
+# pbapply::pblapply(task_ids, function(task_id) {
+#   task <- load_dataset(task_id)
+#   task$date <- as.Date(task$date, origin = "1970-01-01")
+#   task$creation_date = as.POSIXct(task$creation_date, origin = "1970-01-01")
+#   save_dataset(task, task_id)
+#   invisible()
+# })
 
 # make one big tasks tibble, with count and expression as functions.
 tasks <- list_as_tibble(map(task_ids, function(task_id) {
