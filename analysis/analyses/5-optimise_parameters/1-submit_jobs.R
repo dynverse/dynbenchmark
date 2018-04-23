@@ -23,10 +23,10 @@ remote_output_folder <- paste0("/scratch/irc/shared/dynverse_derived/", getOptio
 task_ids <- read_rds(paste0(local_tasks_folder, "/task_ids.rds")) %>% keep(~str_detect(., "synthetic/"))
 
 methods_order <- c(
-  "identity", "shuffle", "random", "slngsht", "mpath", "waterfll", "sincell", "tscan", "scorpius",
-  "embeddr", "dpt", "wndrlst", "wishbone", "mnclddr", "mnclica", "slice", "ouijaflw", "ctvem",
-  "scimitar", "slicer", "scuba", "topslam", "gpfates", "phenopth", "pseudogp", "recat", "stemid",
-  "ctmaptpx", "ouija", "mfa", "scoup", "ctgibbs"
+  "identity", "shuffle", "random", "manual_wouters", "manual_robrechtc", "slngsht", "mpath",  "comp1", "angle", "periodpc", "gng",
+  "waterfll", "tscan", "sincell", "scorpius", "scorspar", "embeddr", "wndrlst", "wishbone", "mnclddr", "dpt", "mnclica", "slice",
+  "ctvem", "ouijaflw", "slicer", "scuba", "topslam", "gpfates", "aga", "agapt", "phenopth", "ctmaptpx", "mfa", "stemid2", "recat",
+  "stemid", "scoup", "ctgibbs", "scimitar", "ouija", "pseudogp"
 )
 # methods <- methods %>% slice(c(match(methods_order, methods$short_name)
 , which(!methods$short_name %in% methods_order)))
