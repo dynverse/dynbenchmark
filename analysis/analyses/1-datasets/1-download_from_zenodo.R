@@ -5,13 +5,13 @@ experiment("1-datasets")
 
 # download the zip file from zenodo
 dataset_file <- derived_file("datasets.zip")
-download.file("https://zenodo.org/record/1211533/files/datasets.zip", dataset_file)
+if (!file.exists(dataset_file)) download.file("https://zenodo.org/record/1211533/files/datasets.zip", dataset_file)
 
 # unzip the folder
 unzip(dataset_file, exdir = derived_file(""))
 
 # remove zip
-file.remove(dataset_file)
+# file.remove(dataset_file)
 
 # temporary fix; the classes were accidentally removed from each dataset before submission to zenodo
 task_ids <- list.files(derived_file(""), pattern = ".rds", recursive = TRUE, full.names = FALSE) %>% str_replace(".rds$", "")
@@ -20,9 +20,10 @@ pbapply::pblapply(task_ids, function(task_id) {
 
   task <- read_rds(file) %>%
     add_class(paste0("dynwrap::", c("data_wrapper", "with_expression", "with_prior", "with_trajectory"))) %>%
-    dynwrap::add_cell_waypoints_to_wrapper() %>%
-    .[names(.) != "milenet_spr"]
+    dynwrap::add_cell_waypoints_to_wrapper()
 
+  task$milenet_spr <- NULL
+  task$.object_class <- NULL
   task$date <- as.Date(task$date, origin = "1970-01-01")
   task$creation_date = as.POSIXct(task$creation_date, origin = "1970-01-01")
 
