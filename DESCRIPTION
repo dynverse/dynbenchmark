@@ -39,6 +39,7 @@ Imports:
   pbapply,
   PRISM,
   purrr,
+  randomForest,
   RColorBrewer,
   readr,
   reshape2,
