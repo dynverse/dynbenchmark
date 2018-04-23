@@ -220,7 +220,7 @@ paramoptim_submit_check <- function(
 #' @param grid_i paramoptim config index
 paramoptim_qsub_fun <- function(grid_i) {
   # call helper function
-  paramoptim_run_evaluation(
+  paramoptim_run_optimisation(
     grid,
     grid_i,
     task_ids,
@@ -239,7 +239,7 @@ paramoptim_qsub_fun <- function(grid_i) {
 #' @importFrom parallelMap parallelStartMulticore parallelStop
 #' @importFrom mlrMBO mbo
 #' @importFrom mlr configureMlr
-paramoptim_run_evaluation <- function(
+paramoptim_run_optimisation <- function(
   grid,
   grid_i,
   task_ids,
@@ -255,7 +255,7 @@ paramoptim_run_evaluation <- function(
   mlr::configureMlr(show.learner.output = FALSE, on.learner.warning = "warn")
 
   # read tasks
-  tasks <- map_df(task_ids, load_dataset) %>% list_as_tibble()
+  tasks <- map(task_ids, load_dataset) %>% list_as_tibble()
 
   # create an objective function
   obj_fun <- make_obj_fun(method = method, metrics = metrics, extra_metrics = NULL, verbose = verbose)
