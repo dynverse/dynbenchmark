@@ -6,6 +6,9 @@
 \usage{
 label_capitalise(x)
 }
+\arguments{
+\item{x}{The text}
+}
 \description{
 Capitalise label
 }
