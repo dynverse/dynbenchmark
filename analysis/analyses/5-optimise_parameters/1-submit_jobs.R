@@ -39,8 +39,6 @@ write_rds(lst(
 
 paramoptim_submit(
   task_ids = task_ids,
-  local_tasks_folder = local_tasks_folder,
-  remote_tasks_folder = remote_tasks_folder,
   methods = methods,
   timeout_paramoptim = timeout_paramoptim,
   max_memory_per_core = max_memory_per_core,
