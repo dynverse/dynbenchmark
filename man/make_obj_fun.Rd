@@ -7,6 +7,17 @@
 make_obj_fun(method, metrics, extra_metrics, noisy = FALSE, verbose = FALSE)
 }
 \arguments{
+\item{method}{The method to evaluate.}
+
+\item{metrics}{which metrics to evaluate:
+\enumerate{
+  \item Spearman correlation of geodesic distances: \code{"correlation"}
+  \item Edge flip score: \code{"edge_flip"}
+  \item RF MSE: \code{"rf_mse"}, \code{"rf_rsq"}
+}}
+
+\item{extra_metrics}{Extra metrics to calculate but not evaluate with.}
+
 \item{noisy}{Whether or not the metric is noisy or not}
 
 \item{verbose}{Whether or not to print extra information output}

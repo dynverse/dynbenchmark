@@ -22,10 +22,12 @@ remote_output_folder <- paste0("/scratch/irc/shared/dynverse_derived/", getOptio
 
 methods_order <- c(
   "identity", "shuffle", "random", "slngsht", "mpath",  "comp1", "angle", "periodpc", "gng",
-  "waterfll", "tscan", "sincell", "scorpius", "scorspar", "embeddr", "wndrlst", "wishbone", "mnclddr", "dpt", "mnclica", "slice",
-  "ctvem", "ouijaflw", "slicer", "scuba", "topslam", "gpfates", "paga", "agapt", "phenopth", "ctmaptpx", "mfa", "stemid2", "recat",
-  "stemid", "scoup", "ctgibbs", "scimitar", "ouija", "pseudogp"
+  "waterfll", "tscan", "sincell", "scorpius", "scorspar", "embeddr"
+  # , "wndrlst", "wishbone", "mnclddr", "dpt", "mnclica", "slice",
+  # "ctvem", "ouijaflw", "slicer", "scuba", "topslam", "gpfates", "paga", "agapt", "phenopth", "ctmaptpx", "mfa", "stemid2", "recat",
+  # "stemid", "scoup", "ctgibbs", "scimitar", "ouija", "pseudogp"
 )
+# methods <- methods %>% slice(c(match(methods_order, methods$short_name), which(!methods$short_name %in% methods_order)))
 methods <- methods %>% slice(match(methods_order, methods$short_name))
 methods$short_name
 
