@@ -1,8 +1,6 @@
 #' A parameter optimisation suite
 #'
 #' @param task_ids The ids of the tasks to be used in the evaluation.
-#' @param local_tasks_folder A local folder containing all of the tasks to be evaluated on.
-#' @param remote_tasks_folder A remote folder containing all of the tasks to be evaluated on.
 #' @param methods A tibble of TI methods to use, see \code{\link[dynmethods]{get_descriptions}}.
 #' @param timeout_paramoptim The parameter optimisation timeout
 #' @param max_memory_per_core The maximum amount of memory each core is allowed to use
@@ -31,8 +29,6 @@
 #' @export
 paramoptim_submit <- function(
   task_ids,
-  local_tasks_folder,
-  remote_tasks_folder,
   methods,
   timeout_paramoptim,
   max_memory_per_core,
@@ -47,8 +43,6 @@ paramoptim_submit <- function(
   verbose = FALSE
 ) {
   paramoptim_submit_check(
-    local_tasks_folder,
-    remote_tasks_folder,
     task_ids,
     methods,
     timeout_paramoptim,
@@ -142,7 +136,7 @@ paramoptim_submit <- function(
         )
 
       # which packages to load on the cluster
-      qsub_packages <- c("dplyr", "purrr", "dyneval", "mlrMBO", "parallelMap", "readr")
+      qsub_packages <- c("dplyr", "purrr", "dyneval", "mlrMBO", "parallelMap", "readr", "dynalysis")
 
       # which data objects will need to be transferred to the cluster
       qsub_environment <-  c(
@@ -162,8 +156,6 @@ paramoptim_submit <- function(
 
       # save data and handle to RDS file
       metadata <- lst(
-        local_tasks_folder,
-        remote_tasks_folder,
         local_output_folder,
         remote_output_folder,
         task_ids,
@@ -195,8 +187,6 @@ paramoptim_submit <- function(
 #' @importFrom testthat expect_equal expect_is
 #' @importFrom ParamHelpers dfRowToList
 paramoptim_submit_check <- function(
-  local_tasks_folder,
-  remote_tasks_folder,
   task_ids,
   methods,
   timeout_paramoptim,
@@ -237,7 +227,6 @@ paramoptim_qsub_fun <- function(grid_i) {
     control,
     learner,
     design,
-    remote_tasks_folder,
     method,
     metrics,
     num_cores,
@@ -257,7 +246,6 @@ paramoptim_run_evaluation <- function(
   control,
   learner,
   design,
-  remote_tasks_folder,
   method,
   metrics,
   num_cores,
@@ -267,7 +255,7 @@ paramoptim_run_evaluation <- function(
   mlr::configureMlr(show.learner.output = FALSE, on.learner.warning = "warn")
 
   # read tasks
-  tasks <- map_df(paste0(remote_tasks_folder, "/", task_ids, ".rds"), readr::read_rds)
+  tasks <- map_df(task_ids, load_dataset) %>% list_as_tibble()
 
   # create an objective function
   obj_fun <- make_obj_fun(method = method, metrics = metrics, extra_metrics = NULL, verbose = verbose)
@@ -415,7 +403,7 @@ paramoptim_bind_results <- function(local_output_folder) {
 
 #' Used for wrapping an evaluation function around a TI method
 #'
-#' @inheritParams execute_evaluation
+#' @inheritParams dyneval::execute_evaluation
 #' @param noisy Whether or not the metric is noisy or not
 #' @param verbose Whether or not to print extra information output
 #'

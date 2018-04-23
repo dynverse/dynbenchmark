@@ -4,17 +4,13 @@
 \alias{paramoptim_submit}
 \title{A parameter optimisation suite}
 \usage{
-paramoptim_submit(task_ids, local_tasks_folder, remote_tasks_folder, methods,
-  timeout_paramoptim, max_memory_per_core, num_cores, metrics, num_repeats,
-  num_iterations, num_init_params, local_output_folder, remote_output_folder,
-  execute_before = NULL, verbose = FALSE)
+paramoptim_submit(task_ids, methods, timeout_paramoptim, max_memory_per_core,
+  num_cores, metrics, num_repeats, num_iterations, num_init_params,
+  local_output_folder, remote_output_folder, execute_before = NULL,
+  verbose = FALSE)
 }
 \arguments{
 \item{task_ids}{The ids of the tasks to be used in the evaluation.}
-
-\item{local_tasks_folder}{A local folder containing all of the tasks to be evaluated on.}
-
-\item{remote_tasks_folder}{A remote folder containing all of the tasks to be evaluated on.}
 
 \item{methods}{A tibble of TI methods to use, see \code{\link[dynmethods]{get_descriptions}}.}
 
