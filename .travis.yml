@@ -36,6 +36,7 @@ install:
  - pip3 install --user --upgrade cycler pyparsing pytz python-dateutil six    # unknown
  - if [ `git branch | grep '* master' | wc -l` == 0 ]; then sed -i 's#\(dynverse/[^, ]*\)#\1@devel#' DESCRIPTION; fi
  - R -e 'if ("devtools" %in% rownames(installed.packages())) update.packages(oldPkgs = "devtools", ask = FALSE) else install.packages("devtools")'
+ - R -e 'devtools::install_github(c("r-lib/rlang", "tidyverse/ggplot2"))'
  - R -e 'devtools::install_cran("covr")'
  - R -e 'setRepositories(ind = 1:2)'
  - R -e 'devtools::install(dependencies = TRUE, upgrade = TRUE)'
