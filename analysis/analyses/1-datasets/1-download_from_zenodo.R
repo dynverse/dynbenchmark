@@ -48,10 +48,10 @@ tasks <- list_as_tibble(map(task_ids, function(task_id) {
   task_file <- dataset_file(filename = "dataset.rds", dataset_id = task_id)
   for (col in c("expression", "counts")) {
     env <- new.env(baseenv())
-    assign("task_file", task_file, env)
+    assign("task_id", task_id, env)
     assign("col", col, env)
     task[[col]] <- function() {
-      readr::read_rds(dynalysis::derived_file(task_file, "1-datasets"))[[col]]
+      dynalysis::load_dataset(task_id)[[col]]
     }
     environment(task[[col]]) <- env
   }
