@@ -1,7 +1,7 @@
 library(dynalysis)
 library(tidyverse)
 
-experiment("5-optimise_parameters/2-parameter_optimisation")
+experiment("5-optimise_parameters")
 
 ##########################################################
 ############### PART TWO: RETRIEVE RESULTS ###############
@@ -15,10 +15,7 @@ outputs <- paramoptim_bind_results(derived_file("suite/"))
 
 # load tasks info
 list2env(read_rds(derived_file("config.rds")), environment())
-tasks_info <- map_df(
-  paste0(local_tasks_folder, "/", task_ids, ".rds"),
-  ~ read_rds(.) %>% select(task_id = id, trajectory_type, task_source)
-)
+tasks <- load_datasets_tibble()
 
 ###################################################
 ############### CREATE AGGREGATIONS ###############
