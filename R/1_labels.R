@@ -31,7 +31,10 @@ label_long <- function(x) {
     pull(long)
 }
 
+#' Capitalise label
+#' @param x The text
 #' @importFrom Hmisc capitalize
+#' @export
 label_capitalise <- function(x) {
   x %>% str_replace_all("_", " ") %>% Hmisc::capitalize()
 }
