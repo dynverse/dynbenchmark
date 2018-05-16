@@ -20,22 +20,31 @@ Depends:
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/Zouter/dynalysis
-BugReports: https://github.com/Zouter/dynalysis/issues
+URL: https://github.com/dynverse/dynalysis
+BugReports: https://github.com/dynverse/dynalysis/issues
 Imports: 
   cluster,
   dplyr,
   dynnormaliser,
+  emoa,
   ggraph,
   ggplot2,
   glue,
   Hmisc,
   httr,
+  mlr,
+  mlrMBO,
+  parallelMap,
+  ParamHelpers (>= 1.11),
+  pbapply,
+  PRISM,
   purrr,
+  randomForest,
   RColorBrewer,
   readr,
   reshape2,
   rvest,
+  smoof,
   stats,
   stringr,
   tidyr,
@@ -43,8 +52,9 @@ Imports:
   tibble,
   testthat,
   tidygraph,
-  xml2
+  xml2,
 Remotes:
+  berndbischl/ParamHelpers,
   dynverse/dyneval,
   dynverse/dyngen,
   dynverse/dynmethods,
@@ -52,5 +62,9 @@ Remotes:
   dynverse/dynplot,
   dynverse/dynutils,
   dynverse/dyntoy,
-  dynverse/dynwrap
+  dynverse/dynwrap,
+  mlr-org/mlr,
+  mlr-org/mlrMBO,
+  jakobbossek/smoof,
+  rcannood/PRISM
 RoxygenNote: 6.0.1

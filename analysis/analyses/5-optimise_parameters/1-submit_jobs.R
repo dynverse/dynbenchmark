@@ -1,10 +1,10 @@
 library(dynalysis)
 library(tidyverse)
 
-experiment("5-optimise_parameters/2-parameter_optimisation")
+experiment("5-optimise_parameters")
 
 # settings
-methods <- get_descriptions() %>% filter(short_name != "manual")
+methods <- get_descriptions() %>% filter(!short_name %in% c("manual", "pseudogp", "slicer", "stemid", "ouija", "stemid2"))
 metrics <- c("correlation", "rf_mse", "edge_flip")
 timeout_paramoptim <- 1 * 24 * 60 * 60
 num_repeats <- 4
@@ -16,33 +16,29 @@ execute_before <- "source /scratch/irc/shared/dynverse/module_load_R.sh; export 
 verbose <- TRUE
 
 # define important folders
-local_tasks_folder <- derived_file("tasks", "5-optimise_parameters/0-process_tasks")
-remote_tasks_folder <- "/scratch/irc/shared/dynverse_derived/5-optimise_parameters/0-process_tasks/tasks"
+task_ids <- load_datasets_tibble() %>% filter(task_source == "synthetic") %>% pull(id)
 local_output_folder <- derived_file("suite/")
 remote_output_folder <- paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/")
-task_ids <- read_rds(paste0(local_tasks_folder, "/task_ids.rds")) %>% keep(~str_detect(., "synthetic/"))
 
 methods_order <- c(
-  "identity", "shuffle", "random", "slngsht", "mpath", "waterfll", "sincell", "tscan", "scorpius",
-  "embeddr", "dpt", "wndrlst", "wishbone", "mnclddr", "mnclica", "slice", "ouijaflw", "ctvem",
-  "scimitar", "slicer", "scuba", "topslam", "gpfates", "phenopth", "pseudogp", "recat", "stemid",
-  "ctmaptpx", "ouija", "mfa", "scoup", "ctgibbs"
+  "identity", "shuffle", "random", "slngsht", "mpath",  "comp1", "angle", "periodpc", "gng",
+  "waterfll", "tscan", "sincell", "scorpius", "scorspar", "embeddr"
+  # , "wndrlst", "wishbone", "mnclddr", "dpt", "mnclica", "slice",
+  # "ctvem", "ouijaflw", "slicer", "scuba", "topslam", "gpfates", "paga", "agapt", "phenopth", "ctmaptpx", "mfa", "stemid2", "recat",
+  # "stemid", "scoup", "ctgibbs", "scimitar", "ouija", "pseudogp"
 )
-# methods <- methods %>% slice(c(match(methods_order, methods$short_name)
-, which(!methods$short_name %in% methods_order)))
+# methods <- methods %>% slice(c(match(methods_order, methods$short_name), which(!methods$short_name %in% methods_order)))
 methods <- methods %>% slice(match(methods_order, methods$short_name))
 methods$short_name
 
 # save benchmark configuration and start it
 write_rds(lst(
   methods, metrics, timeout_paramoptim, num_repeats, num_init_params, num_iterations, max_memory_per_core, num_cores,
-  execute_before, verbose, local_tasks_folder, remote_tasks_folder, local_output_folder, remote_output_folder, task_ids
+  execute_before, verbose, local_output_folder, remote_output_folder, task_ids
 ), derived_file("config.rds"))
 
 paramoptim_submit(
   task_ids = task_ids,
-  local_tasks_folder = local_tasks_folder,
-  remote_tasks_folder = remote_tasks_folder,
   methods = methods,
   timeout_paramoptim = timeout_paramoptim,
   max_memory_per_core = max_memory_per_core,
