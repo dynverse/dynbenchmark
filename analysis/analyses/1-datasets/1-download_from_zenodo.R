@@ -20,7 +20,7 @@ pbapply::pblapply(task_ids, function(task_id) {
 
   task <- read_rds(file) %>%
     add_class(paste0("dynwrap::", c("data_wrapper", "with_expression", "with_prior", "with_trajectory"))) %>%
-    dynwrap::add_cell_waypoints_to_wrapper()
+    dynwrap::add_cell_waypoints()
 
   task$milenet_spr <- NULL
   task$.object_class <- NULL
