@@ -1,8 +1,8 @@
 #' Preprocessing functionality for real datasets
 #'
 #' @inheritParams dynwrap::wrap_data
-#' @inheritParams dynwrap::add_expression_to_wrapper
-#' @inheritParams dynwrap::add_trajectory_to_wrapper
+#' @inheritParams dynwrap::add_expression
+#' @inheritParams dynwrap::add_trajectory
 #' @param cell_grouping Milestone groups of the cells.
 #' @param dataset_id The name of the dataset.
 #'
@@ -93,16 +93,16 @@ preprocess_dataset <- function(
     cell_grouping = cell_grouping,
     normalisation_info = normalisation_info,
     creation_date = Sys.time()
-  ) %>% dynwrap::add_trajectory_to_wrapper(
+  ) %>% dynwrap::add_trajectory(
     milestone_ids = milestone_ids,
     milestone_network = milestone_network,
     divergence_regions = divergence_regions,
     progressions = progressions
-  ) %>% dynwrap::add_expression_to_wrapper(
+  ) %>% dynwrap::add_expression(
     counts = counts,
     expression = expression,
     feature_info = feature_info
-  ) %>% dynwrap::add_prior_information_to_wrapper()
+  ) %>% dynwrap::add_prior_information()
 
   save_dataset(dataset, dataset_id = dataset_id)
   write_rds(original_counts, dataset_file(dataset_id = dataset_id, filename = "original_counts.rds"))

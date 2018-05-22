@@ -20,16 +20,16 @@ for (i in seq_along(dataset_ids)) {
       cell_grouping = cell_grouping,
       normalisation_info = normalisation_info,
       creation_date = creation_date
-    ) %>% add_trajectory_to_wrapper(
+    ) %>% add_trajectory(
       milestone_ids = milestone_ids,
       milestone_network = milestone_network,
       divergence_regions = divergence_regions,
       progressions = progressions
-    ) %>% add_expression_to_wrapper(
+    ) %>% add_expression(
       counts = counts,
       expression = expression,
       feature_info = feature_info
-    ) %>% dynwrap::add_prior_information_to_wrapper()
+    ) %>% dynwrap::add_prior_information()
   )
 
   # dataset$trajectory_type <- dynutils::classify_milestone_network(dataset$milestone_network)$network_type
