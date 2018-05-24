@@ -4,7 +4,7 @@ library(tidyverse)
 experiment("5-optimise_parameters")
 
 # settings
-methods <- get_descriptions() %>% filter(!short_name %in% c("manual", "pseudogp", "slicer", "stemid", "ouija", "stemid2"))
+methods <- get_ti_methods() %>% filter(!short_name %in% c("manual", "pseudogp", "slicer", "stemid", "ouija", "stemid2"))
 metrics <- c("correlation", "rf_mse", "edge_flip")
 timeout_paramoptim <- 1 * 24 * 60 * 60
 num_repeats <- 4

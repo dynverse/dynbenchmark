@@ -27,12 +27,12 @@ networks_synthetic <- map(topologies, dyntoy:::generate_toy_milestone_network) %
 
 Add SCORPIUS predictions
 ```{r}
-descriptions <- list(description_scorpius())
+ti_methods <- list(ti_scorpius())
 data <- dyntoy::generate_toy_datasets(c("linear"), num_replicates=1, num_cells=30, num_genes=10) %>% dynutils::extract_row_to_list(1)
 
-results <- map(descriptions, ~.$run_fun(data$counts))
+results <- map(ti_methods, ~.$run_fun(data$counts))
 
-networks_methods <- tibble(topology=map_chr(descriptions, "name"), milestone_network=map(results, "milestone_network"))
+networks_methods <- tibble(topology=map_chr(ti_methods, "name"), milestone_network=map(results, "milestone_network"))
 ```
 
 ```{r}

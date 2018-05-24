@@ -4,7 +4,7 @@ library(tidyverse)
 experiment("5-optimise_parameters/3-evaluate_parameters")
 
 # settings
-methods <- get_descriptions() %>% filter(!short_name %in% c("manual", "scorspar"))
+methods <- get_ti_methods() %>% filter(!short_name %in% c("manual", "scorspar"))
 metrics <- c("correlation", "rf_mse", "edge_flip")
 timeout_per_execution <- 60 * 60 * 6
 num_repeats <- 4

@@ -1,7 +1,7 @@
 #' A parameter optimisation suite
 #'
 #' @param task_ids The ids of the tasks to be used in the evaluation.
-#' @param methods A tibble of TI methods to use, see \code{\link[dynmethods]{get_descriptions}}.
+#' @param methods A tibble of TI methods to use, see \code{\link[dynmethods]{get_ti_methods}}.
 #' @param timeout_paramoptim The parameter optimisation timeout
 #' @param max_memory_per_core The maximum amount of memory each core is allowed to use
 #' @param num_cores The number of cores to use.
@@ -24,7 +24,7 @@
 #' @importFrom parallelMap parallelStartMulticore parallelStop
 #' @importFrom randomForest randomForest
 #' @importFrom emoa emoa_control
-#' @importFrom dynmethods get_descriptions
+#' @importFrom dynmethods get_ti_methods
 #'
 #' @export
 paramoptim_submit <- function(

@@ -12,7 +12,7 @@ paramoptim_submit(task_ids, methods, timeout_paramoptim, max_memory_per_core,
 \arguments{
 \item{task_ids}{The ids of the tasks to be used in the evaluation.}
 
-\item{methods}{A tibble of TI methods to use, see \code{\link[dynmethods]{get_descriptions}}.}
+\item{methods}{A tibble of TI methods to use, see \code{\link[dynmethods]{get_ti_methods}}.}
 
 \item{timeout_paramoptim}{The parameter optimisation timeout}
 

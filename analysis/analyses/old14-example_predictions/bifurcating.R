@@ -17,7 +17,7 @@ read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggr
 methods <- methods %>% filter(type == "algorithm")
 
 tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
-descriptions <- dynmethods::get_descriptions()
+ti_methods <- dynmethods::get_ti_methods()
 
 top_methods <- methods %>% filter(bifurcation) %>% pull(method_short_name)
 
@@ -105,7 +105,7 @@ cowplot::plot_grid(plotlist=default_plots, nrow=1)
 task_method_plot <- plot_task_cells(task)
 
 # Method plots
-outputs_plot$plot_fun <- slice(descriptions, match(outputs_plot$method_short_name, descriptions$short_name)) %>% pull(plot_fun)
+outputs_plot$plot_fun <- slice(ti_methods, match(outputs_plot$method_short_name, ti_methods$short_name)) %>% pull(plot_fun)
 
 outputs_plot <- outputs_plot %>%
   mutate(method_plot = map2(model, plot_fun, function(model, plot_fun) {

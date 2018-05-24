@@ -1,7 +1,7 @@
 #' A benchmark suite with which to run all the methods on the different tasks
 #'
 #' @param task_ids The ids of the tasks to be used in the evaluation.
-#' @param methods A tibble of TI methods to use, see \code{\link[dynmethods]{get_descriptions}}.
+#' @param methods A tibble of TI methods to use, see \code{\link[dynmethods]{get_ti_methods}}.
 #' @param parameters A named list containing data frames of the parameters to evaluate.
 #'   The names of the list must be equal to the \code{short_name} column of \code{methods}.
 #'   The data frames must correspond to the parameter set \code{par_set} of each method,
