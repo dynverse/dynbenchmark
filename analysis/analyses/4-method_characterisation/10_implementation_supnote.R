@@ -5,11 +5,11 @@ library(dynalysis)
 experiment("4-method_characterisation")
 
 methods <- read_rds(derived_file("methods_evaluated.rds"))
-methods$run_fun <- paste0("description_", methods$method_id) %>% map(get, "package:dynmethods") %>% map(~.()) %>% map("run_fun")
+methods$run_fun <- paste0("ti_", methods$method_id) %>% map(get, "package:dynmethods") %>% map(~.()) %>% map("run_fun")
 
-methods$descriptions <- paste0("description_", methods$method_id) %>% map(get, "package:dynmethods") %>% map(~.())
-methods$inputs <- methods$descriptions %>% map("run_fun") %>% map(formals)
-methods$par_set <- methods$descriptions %>% map("par_set")
+methods$ti_methods <- paste0("ti_", methods$method_id) %>% map(get, "package:dynmethods") %>% map(~.())
+methods$inputs <- methods$ti_methods %>% map("run_fun") %>% map(formals)
+methods$par_set <- methods$ti_methods %>% map("par_set")
 
 get_input_expression <- function(inputs) {
   possible_inputs <- c("expression", "counts", "task")

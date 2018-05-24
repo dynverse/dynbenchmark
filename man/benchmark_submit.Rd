@@ -11,7 +11,7 @@ benchmark_submit(task_ids, methods, parameters, timeout_per_execution,
 \arguments{
 \item{task_ids}{The ids of the tasks to be used in the evaluation.}
 
-\item{methods}{A tibble of TI methods to use, see \code{\link[dynmethods]{get_descriptions}}.}
+\item{methods}{A tibble of TI methods to use, see \code{\link[dynmethods]{get_ti_methods}}.}
 
 \item{parameters}{A named list containing data frames of the parameters to evaluate.
 The names of the list must be equal to the \code{short_name} column of \code{methods}.

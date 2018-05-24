@@ -11,7 +11,7 @@ read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggr
 methods <- methods %>% filter(type == "algorithm")
 
 tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
-descriptions <- dynmethods::get_descriptions()
+ti_methods <- dynmethods::get_ti_methods()
 
 top_methods <- methods %>% filter(directed_linear) %>% pull(method_short_name)
 
@@ -52,7 +52,7 @@ outputs_plot <- outputs_oi %>%
   filter(task_id == !!task_id) %>%
   arrange(edge_flip) %>%
   slice(match(methods_oi, method_short_name)) %>%
-  mutate(plot_fun = slice(descriptions, match(method_short_name, descriptions$short_name)) %>% pull(plot_fun))
+  mutate(plot_fun = slice(ti_methods, match(method_short_name, ti_methods$short_name)) %>% pull(plot_fun))
 
 # Replace model id with name of method
 outputs_plot$model <- map2(outputs_plot$model, outputs_plot$method_short_name, function(model, method_short_name) {
