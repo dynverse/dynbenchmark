@@ -403,7 +403,7 @@ paramoptim_bind_results <- function(local_output_folder) {
 
 #' Used for wrapping an evaluation function around a TI method
 #'
-#' @inheritParams dyneval::execute_evaluation
+#' @inheritParams dyneval::evaluate_ti_method
 #' @param noisy Whether or not the metric is noisy or not
 #' @param verbose Whether or not to print extra information output
 #'
@@ -426,7 +426,7 @@ make_obj_fun <- function(method, metrics, extra_metrics, noisy = FALSE, verbose 
     has.simple.signature = FALSE,
     par.set = method$par_set,
     fn = function(x, tasks, output_model, mc_cores = 1) {
-      execute_evaluation(
+      evaluate_ti_method(
         tasks = tasks,
         method = method,
         parameters = x,

@@ -238,7 +238,7 @@ benchmark_run_evaluation <- function(
     ParamHelpers::trafoValue(method$par_set, .)
 
   # start evaluation
-  out <- execute_evaluation(
+  out <- evaluate_ti_method(
     tasks = task,
     method = method,
     parameters = parm_list,

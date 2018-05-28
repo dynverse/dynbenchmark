@@ -74,7 +74,7 @@ results <- purrr::map(method_names, function(method_name) {
   }
 
   # factory(function() {
-    dyneval:::execute_evaluation(tasks, method, params, metrics = metric_names, timeout = 100)
+    dyneval:::evaluate_ti_method(tasks, method, params, metrics = metric_names, timeout = 100)
   # }
   # )()
 })
