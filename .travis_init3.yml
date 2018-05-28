@@ -30,4 +30,4 @@ install:
  - R -e 'setRepositories(ind = 1:2)'
  - R -e 'devtools::install_github(c("dynverse/StemID", "dynverse/topslam", "dynverse/Waterfall", "dynverse/Wishbone", "igraph/rigraph", "kieranrcampbell/pseudogp", "kieranrcampbell/mfa", "kieranrcampbell/ouija", "kieranrcampbell/phenopath", "kstreet13/slingshot"))'
  - R -e 'devtools::install()'
-r_check_args: "--no-tests --no-manual --no-vignettes --no-build-vignettes"
+r_check_args: "--no-tests --no-manual --no-vignettes --no-build-vignettes --no-examples"
