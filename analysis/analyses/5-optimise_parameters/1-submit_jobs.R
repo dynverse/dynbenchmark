@@ -12,7 +12,7 @@ num_init_params <- 16
 num_iterations <- 1000
 num_cores <- 8
 max_memory_per_core <- "10G"
-execute_before <- "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500; export DYNALYSIS_PATH=/group/irc/shared/dynalysis/"
+execute_before <- "export DYNALYSIS_PATH=/group/irc/shared/dynalysis/; singularity exec -B /scratch:/scratch -B /group:/group /scratch/irc/shared/dynmethods.simg \\"
 verbose <- TRUE
 
 # define important folders

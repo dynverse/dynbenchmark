@@ -8,8 +8,7 @@ methods <- get_ti_methods() %>% filter(!short_name %in% c("manual", "scorspar"))
 metrics <- c("correlation", "rf_mse", "edge_flip")
 timeout_per_execution <- 60 * 60 * 6
 num_repeats <- 4
-
-execute_before <- "source /scratch/irc/shared/dynverse/module_load_R.sh; export R_MAX_NUM_DLLS=500; export DYNALYSIS_PATH=/group/irc/shared/dynalysis/"
+execute_before <- "export DYNALYSIS_PATH=/group/irc/shared/dynalysis/; singularity exec -B /scratch:/scratch -B /group:/group /scratch/irc/shared/dynmethods.simg \\"
 verbose <- TRUE
 
 # run most methods
