@@ -6,9 +6,10 @@
 ^CONTRIBUTING\.md$
 ^analysis
 ^Dockerfile$
-^\.travis\.yml$
+^\.travis
 ^\.httr-oauth$
 ^\.dockerignore$
 ^\.git$
 ^docker
 ^scripts
+^data-raw$

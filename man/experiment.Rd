@@ -10,20 +10,18 @@
 \usage{
 experiment(experiment_id)
 
-derived_file(filename = "", experiment_id = NULL, glue = NULL)
+derived_file(filename = "", experiment_id = NULL)
 
-raw_file(filename = "", experiment_id = NULL, glue = NULL)
+raw_file(filename = "", experiment_id = NULL)
 
-figure_file(filename = "", experiment_id = NULL, glue = NULL)
+figure_file(filename = "", experiment_id = NULL)
 
-result_file(filename = "", experiment_id = NULL, glue = NULL)
+result_file(filename = "", experiment_id = NULL)
 }
 \arguments{
 \item{experiment_id}{id for the experiment}
 
 \item{filename}{the filename}
-
-\item{glue}{if specified, glue::glue this string and override filename.}
 }
 \description{
 Helper function for controlling experiments

@@ -118,7 +118,7 @@ for (setting in settings) {
 
   feature_info <- tibble(feature_id = colnames(expression))
 
-  datasetpreproc_normalise_filter_wrap_and_save(
+  preprocess_dataset(
     counts = counts,
     cell_ids = cell_ids,
     milestone_ids = milestone_ids,
