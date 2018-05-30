@@ -30,4 +30,4 @@ install:
  - R -e 'setRepositories(ind = 1:2)'
  - R -e 'devtools::install_github(c("dynverse/cellTree@RELEASE_3_6", "dynverse/embeddr", "dynverse/destiny", "dynverse/GPfates", "dynverse/monocle-release", "dynverse/Mpath", "dynverse/ouijaflow", "dynverse/reCAT", "dynverse/scaterlegacy", "dynverse/SCIMITAR", "dynverse/SCOUP", "dynverse/SLICER", "dynverse/SLICE"))'
  - R -e 'devtools::install()'
-r_check_args: "--no-tests --no-manual --no-vignettes --no-build-vignettes"
+r_check_args: "--no-tests --no-manual --no-vignettes --no-build-vignettes --no-examples"

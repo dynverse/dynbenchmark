@@ -87,7 +87,7 @@ imp_table <- map(c("latex", "html"), function(format) {
           label_simple_trajectory_types(maximal_trajectory_type),
           format,
           background =
-            toupper(set_names(trajectory_types$color, trajectory_types$id)[maximal_trajectory_type]) %>%
+            toupper(set_names(trajectory_types$colour, trajectory_types$id)[maximal_trajectory_type]) %>%
             map(~replace(., is.na(.), "#666666")),
           color = "#FFFFFF"
         ),
@@ -104,7 +104,7 @@ imp_table <- map(c("latex", "html"), function(format) {
       fixes_topology = kableExtra::cell_spec(
         ifelse(is.na(topology_inference_type), "TBD", label_long(topology_inference_type)),
         format,
-        color = ifelse(is.na(topology_inference_type), "gray", topinf_colours[topology_inference_type]),
+        color = ifelse(is.na(topology_inference_type), "gray", setNames(topinf_types$colour, topinf_types$name)[topology_inference_type]),
         escape = FALSE
       ),
       prior_required = kableExtra::cell_spec(

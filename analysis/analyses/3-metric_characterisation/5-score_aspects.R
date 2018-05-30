@@ -9,7 +9,7 @@ experiment("3-metric_characterisation/5-score_aspects")
 wrap <- function(x) {
   wrap_prediction_model(
     cell_ids = sort(unique(x$progressions$cell_id))
-  ) %>% add_trajectory_to_wrapper(
+  ) %>% add_trajectory(
     milestone_ids = unique(c(x$milestone_network$from, x$milestone_network$to)),
     milestone_network = x$milestone_network,
     progressions = x$progressions,
