@@ -9,7 +9,7 @@ preprocess_dataset(counts, cell_ids, milestone_ids, milestone_network,
   dataset_id = NULL)
 }
 \arguments{
-\item{counts}{The counts.}
+\item{counts}{The counts with genes in columns and cells in rows}
 
 \item{cell_ids}{The ids of the cells.}
 
@@ -26,7 +26,7 @@ Type: Data frame(cell_id = character, milestone_id = character, percentage = num
 
 \item{cell_info}{Optional meta-information pertaining the cells.}
 
-\item{feature_info}{Optional meta-information pertaining the features.}
+\item{feature_info}{Optional meta-information of the features, a data.frame with at least feature_id as column}
 
 \item{dataset_id}{The name of the dataset.}
 }
