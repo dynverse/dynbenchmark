@@ -1,7 +1,7 @@
 library(dynalysis)
 library(tidyverse)
 
-experiment("5-optimise_parameters/3-evaluate_parameters")
+experiment("6-benchmark")
 
 # settings
 methods <- get_ti_methods() %>% filter(!short_name %in% c("manual", "scorspar"))
