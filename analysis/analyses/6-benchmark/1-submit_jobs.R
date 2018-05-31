@@ -4,7 +4,7 @@ library(tidyverse)
 experiment("6-benchmark")
 
 # settings
-methods <- get_ti_methods() %>% filter(!short_name %in% c("manual", "scorspar"))
+methods <- get_ti_methods(packages = c("dynwrap", "dynmethods"))  %>% filter(!short_name %in% c("manual", "scorspar"))
 metrics <- c("correlation", "rf_mse", "edge_flip")
 timeout_per_execution <- 60 * 60 * 6
 num_repeats <- 4

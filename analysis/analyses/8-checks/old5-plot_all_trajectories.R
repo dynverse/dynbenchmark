@@ -10,7 +10,7 @@ list2env(read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_paramete
 list2env(read_rds(derived_file("config.rds", "5-optimise_parameters/3-evaluate_parameters")), environment())
 
 tasks <- map_df(paste0(local_tasks_folder, "/", task_ids, ".rds"), read_rds) %>% filter(task_source != "toy")
-methods <- dynmethods::get_ti_methods()
+methods <- dynwrap::get_ti_methods()
 method_names <- methods$short_name %>% discard(~ . %in% c("identity", "shuffle", "random", "manual"))
 
 walk(tasks$id, function(tid) {
