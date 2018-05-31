@@ -14,6 +14,7 @@ make_obj_fun(method, metrics, extra_metrics, noisy = FALSE, verbose = FALSE)
   \item Spearman correlation of geodesic distances: \code{"correlation"}
   \item Edge flip score: \code{"edge_flip"}
   \item RF MSE: \code{"rf_mse"}, \code{"rf_rsq"}
+  \item Similarity in feature importance: \code{"featureimp_cor"}
 }}
 
 \item{extra_metrics}{Extra metrics to calculate but not evaluate with.}

@@ -11,7 +11,7 @@ read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggr
 methods <- methods %>% filter(type == "algorithm")
 
 tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
-ti_methods <- dynmethods::get_ti_methods()
+ti_methods <- dynwrap::get_ti_methods()
 
 top_methods <- methods %>% filter(directed_linear) %>% pull(method_short_name)
 
