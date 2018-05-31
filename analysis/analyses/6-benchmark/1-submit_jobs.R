@@ -4,11 +4,11 @@ library(tidyverse)
 experiment("6-benchmark")
 
 # settings
-methods <- get_ti_methods(packages = c("dynwrap", "dynmethods"))  %>% filter(!short_name %in% c("manual", "scorspar"))
-metrics <- c("correlation", "rf_mse", "edge_flip")
+methods <- get_ti_methods(packages = c("dynwrap", "dynmethods")) %>% filter(short_name %in% c("scorpius", "embeddr"))
+metrics <- c("correlation", "rf_mse", "edge_flip", "featureimp_cor")
 timeout_per_execution <- 60 * 60 * 6
 num_repeats <- 4
-execute_before <- "export DYNALYSIS_PATH=/group/irc/shared/dynalysis/; singularity exec -B /scratch:/scratch -B /group:/group /scratch/irc/shared/dynmethods.simg \\"
+execute_before <- "export DYNALYSIS_PATH=/group/irc/shared/dynalysis/; singularity exec -B /scratch:/scratch -B /group:/group /scratch/irc/shared/dynalysis.simg \\"
 verbose <- TRUE
 
 # run most methods
@@ -25,11 +25,9 @@ method_filter <- c("mnclica", "recat", "ctgibbs", "scimitar", "ouijaflw", "ouija
 
 
 # define important folders
-local_tasks_folder <- derived_file("tasks", "5-optimise_parameters/0-process_tasks")
-remote_tasks_folder <- "/scratch/irc/shared/dynverse_derived/5-optimise_parameters/0-process_tasks/tasks"
 local_output_folder <- derived_file("suite/")
 remote_output_folder <- paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/")
-task_ids <- read_rds(paste0(local_tasks_folder, "/task_ids.rds"))
+task_ids <- list_datasets() %>% head(10)
 
 # use previous output to determine method ordering based on its running time
 # read_rds("analysis/data/derived_data/5-optimise_parameters-previousresults/180226-derived_data/3-evaluate_parameters/outputs_postprocessed.rds") %>%
@@ -70,14 +68,12 @@ parameters <- lapply(methods$short_name, function(mn) {
 
 # save benchmark configuration and start it
 write_rds(lst(
-  methods, metrics, timeout_per_execution, num_repeats, max_memory_per_execution, execute_before, verbose, local_tasks_folder, remote_tasks_folder,
+  methods, metrics, timeout_per_execution, num_repeats, max_memory_per_execution, execute_before, verbose,
   local_output_folder, remote_output_folder, task_ids, parameters
 ), derived_file("config.rds"))
 
 benchmark_submit(
   task_ids = task_ids,
-  local_tasks_folder = local_tasks_folder,
-  remote_tasks_folder = remote_tasks_folder,
   methods = methods,
   parameters = parameters,
   timeout_per_execution = timeout_per_execution,
