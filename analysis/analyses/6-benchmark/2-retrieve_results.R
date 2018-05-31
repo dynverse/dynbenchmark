@@ -1,7 +1,7 @@
 library(dynalysis)
 library(tidyverse)
 
-experiment("5-optimise_parameters/3-evaluate_parameters")
+experiment("6-benchmark")
 
 ##########################################################
 ############### PART TWO: RETRIEVE RESULTS ###############
