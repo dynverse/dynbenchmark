@@ -2,4 +2,6 @@
 
 # dynalysis
 
-Scripts to reproduce manuscript
+Scripts to reproduce manuscript.
+
+**This repo is still highly under development**
