@@ -26,10 +26,13 @@ addons:
 before_install:
  - source <( curl --insecure https://raw.githubusercontent.com/dynverse/dynmethods/master/.travis_install_python.sh ) # use travis's own python
 install:
- - R -e 'setRepositories(ind = 1:2); devtools::install_github(c("dynverse/StemID", "dynverse/topslam", "dynverse/Waterfall", "dynverse/Wishbone", "igraph/rigraph", "kieranrcampbell/pseudogp", "kieranrcampbell/mfa", "kieranrcampbell/ouija", "kieranrcampbell/phenopath", "kstreet13/slingshot"))'
+ - pip3 install --user --upgrade --only-binary=numpy,scipy numpy scipy
+ - pip3 install --user --upgrade matplotlib pandas six jinja2 python-dateutil pytz pyparsing cycler tqdm python-igraph Cython statsmodels sklearn seaborn h5py anndata umap
+ - R -e 'install.packages("devtools")'
+ - R -e 'install.packages("knitr")'
+ - R -e 'install.packages("tidyverse")'
+ - R -e 'devtools::install_github(c("r-lib/rlang", "tidyverse/ggplot2"))'
 script:
  - echo No R CMD check since this is an init.
-r_check_args: "--no-tests --no-manual --no-vignettes --no-build-vignettes --no-examples"
-r_build_args: "--no-build-vignettes"
 after_success:
- - echo Init 4 succeeded!
+ - echo Init 0 succeeded!
