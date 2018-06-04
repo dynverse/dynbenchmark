@@ -35,8 +35,6 @@ benchmark_submit <- function(
   verbose = FALSE
 ) {
   benchmark_submit_check(
-    local_tasks_folder,
-    remote_tasks_folder,
     task_ids,
     methods,
     parameters,
@@ -103,7 +101,7 @@ benchmark_submit <- function(
 
       # which data objects will need to be transferred to the cluster
       qsub_environment <-  c(
-        "grid", "remote_tasks_folder", "remote_output_folder", "parms", "method", "metrics", "verbose"
+        "grid", "parms", "method", "metrics", "verbose"
       )
 
       # submit to the cluster
@@ -145,8 +143,6 @@ benchmark_submit <- function(
 #' @importFrom testthat expect_equal expect_is
 #' @importFrom ParamHelpers dfRowToList
 benchmark_submit_check <- function(
-  local_tasks_folder,
-  remote_tasks_folder,
   task_ids,
   methods,
   parameters,
@@ -207,7 +203,7 @@ benchmark_submit_check <- function(
 #' @param grid_i Benchmark config index
 benchmark_qsub_fun <- function(grid_i) {
   # call helper function
-  benchmark_run_evaluation(grid, grid_i, remote_tasks_folder, parms, method, metrics, verbose)
+  benchmark_run_evaluation(grid, grid_i, parms, method, metrics, verbose)
 }
 
 #' @importFrom readr read_rds
@@ -215,7 +211,6 @@ benchmark_qsub_fun <- function(grid_i) {
 benchmark_run_evaluation <- function(
   grid,
   grid_i,
-  remote_tasks_folder,
   parms,
   method,
   metrics,
@@ -226,7 +221,7 @@ benchmark_run_evaluation <- function(
   pid <- grid[grid_i,]$paramset_id
 
   # read task
-  task <- readr::read_rds(paste0(remote_tasks_folder, "/", tid, ".rds"))
+  task <- load_dataset(tid)
 
   # get param set
   parm_df <- parms %>% filter(paramset_id == pid)
@@ -357,7 +352,6 @@ benchmark_fetch_results <- function(local_output_folder) {
             out <- benchmark_run_evaluation(
               grid = grid,
               grid_i = grid_i,
-              remote_tasks_folder = metadata$local_tasks_folder,
               parms = metadata$parms,
               method = method_failer,
               metrics = metadata$metrics,

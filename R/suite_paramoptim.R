@@ -140,7 +140,7 @@ paramoptim_submit <- function(
 
       # which data objects will need to be transferred to the cluster
       qsub_environment <-  c(
-        "grid", "remote_tasks_folder", "remote_output_folder", "method", "metrics", "verbose",
+        "grid", "remote_output_folder", "method", "metrics", "verbose",
         "num_cores", "control", "learner", "design", "task_ids"
       )
 
