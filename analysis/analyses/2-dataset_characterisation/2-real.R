@@ -6,7 +6,7 @@ library(dynalysis)
 experiment("2-dataset_characterisation/2-real")
 
 # Fetch tasks
-tasks_real <- load_datasets_tibble() %>% filter(category == "real")
+tasks_real <- load_datasets() %>% filter(category == "real")
 
 # Define colours
 technology_colours <- unique(tasks_real$technology) %>%
