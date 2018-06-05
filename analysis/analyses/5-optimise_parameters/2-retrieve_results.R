@@ -15,7 +15,7 @@ outputs <- paramoptim_bind_results(derived_file("suite/"))
 
 # load tasks info
 list2env(read_rds(derived_file("config.rds")), environment())
-tasks <- load_datasets_tibble()
+tasks <- load_datasets()
 
 ###################################################
 ############### CREATE AGGREGATIONS ###############

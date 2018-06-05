@@ -5,7 +5,7 @@ library(tidygraph)
 library(ggraph)
 
 experiment("2-dataset_characterisation/1-synthetic")
-tasks <- load_datasets_tibble()
+tasks <- load_datasets()
 
 ##################################################
 ## Generate plots for each of the dyngen models ##

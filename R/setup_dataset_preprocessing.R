@@ -68,24 +68,26 @@ save_dataset <- function(dataset, dataset_id = NULL) {
   write_rds(dataset, dataset_file(filename = "dataset.rds", dataset_id = dataset_id))
 }
 
-#' Load a dataset after it has been preprocessed
+#' Load datasets
 #' @export
 #' @inheritParams dataset_preprocessing
-load_dataset <- function(dataset_id = NULL) {
-  read_rds(dataset_file(filename = "dataset.rds", dataset_id = dataset_id))
+#' @param as_tibble Return the datasets as a tibble or as a list of datasets?
+#'
+#' @rdname load_dataset
+load_dataset <- function(dataset_id, as_tibble = TRUE) {
+  dataset <- read_rds(dataset_file(filename = "dataset.rds", dataset_id = dataset_id))
+
+  if (as_tibble) {
+    dataset <- list_as_tibble(list(dataset))
+  }
+
+  dataset
 }
 
-#' Load the tibble of datasets
 #' @export
-#' @inheritParams dataset_preprocessing
-load_datasets_tibble <- function() {
+#' @rdname load_dataset
+load_datasets <- function(as_tibble = TRUE) {
   read_rds(derived_file("tasks.rds", "1-datasets"))
-}
-
-#' List the names of all present datasets
-#' @export
-list_datasets <- function() {
-  load_datasets_tibble()$id
 }
 
 #' Download a file and return its location path

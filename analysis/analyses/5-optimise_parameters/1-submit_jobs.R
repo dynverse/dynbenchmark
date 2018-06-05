@@ -16,7 +16,7 @@ execute_before <- "export DYNALYSIS_PATH=/group/irc/shared/dynalysis/; singulari
 verbose <- TRUE
 
 # define important folders
-task_ids <- load_datasets_tibble() %>% filter(task_source == "synthetic") %>% pull(id)
+task_ids <- load_datasets() %>% filter(task_source == "synthetic") %>% pull(id)
 local_output_folder <- derived_file("suite/")
 remote_output_folder <- paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/")
 
