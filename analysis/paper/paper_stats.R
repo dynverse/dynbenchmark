@@ -26,8 +26,8 @@ stats <-
 
 
 stats %>%
-  mutate(section = factor(section, levels=pieces$section)) %>%
+  mutate(section = factor(section, levels = pieces$section)) %>%
   ggplot(aes(section, value)) +
-  geom_bar(stat="identity") +
+  geom_bar(stat = "identity") +
   facet_wrap(~statistic, scales = "free") +
   coord_flip()

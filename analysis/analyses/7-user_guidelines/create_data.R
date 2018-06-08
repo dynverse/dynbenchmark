@@ -23,7 +23,7 @@ scoring <- list(
   metrics = metrics %>% filter(metric_id %in% c("correlation", "rf_mse", "edge_flip"))
 )
 
-process_prior_information <- function(scoring, answer=NULL) {
+process_prior_information <- function(scoring, answer = NULL) {
   scoring
 }
 

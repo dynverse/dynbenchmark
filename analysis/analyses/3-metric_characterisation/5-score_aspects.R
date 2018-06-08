@@ -84,7 +84,7 @@ toys <- tribble(
   "bad_topology",
   gs,
   list(
-    milestone_network = dyntoy:::generate_toy_milestone_network("consecutive_bifurcating") %>% mutate(length=ifelse(to %in% c("M5", "M6"), 0.1, 1)),
+    milestone_network = dyntoy:::generate_toy_milestone_network("consecutive_bifurcating") %>% mutate(length = ifelse(to %in% c("M5", "M6"), 0.1, 1)),
     progressions = tribble(
       ~cell_id, ~from, ~to, ~percentage,
       "1", "M1", "M2", 0.4,
@@ -111,12 +111,12 @@ toys <- toys %>% add_row(
 
 dynutils::extract_row_to_list(toys, 1) %>% list2env(.GlobalEnv)
 metrics <- c("correlation", "rf_mse", "edge_flip")
-compare_toy <- function(gs, toy, metrics, id="") {
-  scores <- dyneval:::calculate_metrics(gs, toy, metrics=metrics)$summary
+compare_toy <- function(gs, toy, metrics, id = "") {
+  scores <- dyneval:::calculate_metrics(gs, toy, metrics = metrics)$summary
   scores %>% mutate(id = !!id)
 }
 
-scores <- toys %>% as.list() %>% pmap(compare_toy, metrics=metrics) %>% bind_rows()
+scores <- toys %>% as.list() %>% pmap(compare_toy, metrics = metrics) %>% bind_rows()
 
 
 ##  ............................................................................
@@ -124,24 +124,24 @@ scores <- toys %>% as.list() %>% pmap(compare_toy, metrics=metrics) %>% bind_row
 
 scores_heatmap <- scores[,c(metrics, "id")] %>%
   mutate(rf_mse = (1-rf_mse)) %>%
-  mutate(id = factor(id, levels=rev(id))) %>%
+  mutate(id = factor(id, levels = rev(id))) %>%
   gather(metric, score, -id) %>%
-  mutate(metric = factor(metric, levels=metrics)) %>%
+  mutate(metric = factor(metric, levels = metrics)) %>%
   group_by(metric) %>%
   mutate(score_norm = (score - min(score))/(max(score) - min(score))) %>%
   ungroup() %>%
   ggplot() +
-    geom_tile(aes(metric, id, fill=score_norm)) +
-    #geom_text(aes(metric, id, label=round(score, 2))) +
-    scale_fill_distiller("", breaks=c(0, 1), labels=c("Lowest score", "Best score"), direction=1) +
-    scale_x_discrete("Metric", expand=c(0, 0), labels=label_long) +
-    scale_y_discrete("", expand=c(0, 0), labels=function(x) label_short(x, 20)) +
+    geom_tile(aes(metric, id, fill = score_norm)) +
+    #geom_text(aes(metric, id, label = round(score, 2))) +
+    scale_fill_distiller("", breaks = c(0, 1), labels = c("Lowest score", "Best score"), direction = 1) +
+    scale_x_discrete("Metric", expand = c(0, 0), labels = label_long) +
+    scale_y_discrete("", expand = c(0, 0), labels = function(x) label_short(x, 20)) +
     cowplot::theme_cowplot() +
     coord_equal() +
     theme(
       legend.position = "top",
       legend.key.width = unit(30, "points"),
-      axis.text.x = element_text(angle=30, hjust=1)
+      axis.text.x = element_text(angle = 30, hjust = 1)
     )
 scores_heatmap
 
@@ -156,10 +156,10 @@ cell_colors <- shades::gradient(RColorBrewer::brewer.pal(3, "YlGnBu"), 101)[gs$p
 
 tasks <- set_names(toys$toy, toys$id)
 connections <- map(tasks, function(task) {
-  dynplot::plot_connections(task$milestone_network, cell_progressions=task$progressions, cell_colors=cell_colors, orientation=-1)
+  dynplot::plot_connections(task$milestone_network, cell_progressions = task$progressions, cell_colors = cell_colors, orientation = -1)
 }) %>%
   map2(., names(tasks), ~.+ggtitle(label_long(.y)) + theme(plot.title = element_text(hjust = 0.5))) %>%
-  cowplot::plot_grid(plotlist = ., ncol=1, labels="auto", rel_heights=c(2,2,2,4,4))
+  cowplot::plot_grid(plotlist = ., ncol = 1, labels = "auto", rel_heights = c(2,2,2,4,4))
 connections
 
 ##  ............................................................................

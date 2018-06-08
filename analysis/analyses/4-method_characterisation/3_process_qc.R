@@ -74,13 +74,13 @@ write_rds(checks, result_file("checks.rds"))
 # calculate average category scores
 implementation_qc_category_scores <- implementation_qc %>%
   group_by(implementation_id, category) %>%
-  summarise(qc_score=sum(answer * item_weight * weight)/sum(item_weight * weight)) %>%
+  summarise(qc_score = sum(answer * item_weight * weight)/sum(item_weight * weight)) %>%
   ungroup()
 
 # use the average category scores to calculate the final qc_score
 implementation_qc_scores <- implementation_qc_category_scores %>%
   group_by(implementation_id) %>%
-  summarise(qc_score=mean(qc_score)) %>%
+  summarise(qc_score = mean(qc_score)) %>%
   arrange(-qc_score) %>%
   ungroup()
 
@@ -89,7 +89,7 @@ implementation_qc_application_scores <- implementation_qc %>%
   gather(application, application_applicable, !!qc_applications$application) %>%
   filter(application_applicable) %>%
   group_by(implementation_id, application) %>%
-  summarise(score=sum(answer * item_weight * weight)/sum(item_weight * weight)) %>%
+  summarise(score = sum(answer * item_weight * weight)/sum(item_weight * weight)) %>%
   ungroup()
 
 

@@ -71,8 +71,8 @@ walk(tasks$id, function(tid) {
           rel_widths = c(3, 2)
         )
 
-        title <- cowplot::ggdraw() + cowplot::draw_label(glue::glue("{mid}; {tid}; replicate {i}"), fontface='bold')
-        cowplot::plot_grid(title, g_comb, ncol=1, rel_heights=c(0.1, 1)) %>% print()
+        title <- cowplot::ggdraw() + cowplot::draw_label(glue::glue("{mid}; {tid}; replicate {i}"), fontface = 'bold')
+        cowplot::plot_grid(title, g_comb, ncol = 1, rel_heights = c(0.1, 1)) %>% print()
       }, error = function(e) {
         cat("Error at ", tid, ", ", mid, ", ", i, ": ", as.character(e$message), "\n", sep = "")
       })

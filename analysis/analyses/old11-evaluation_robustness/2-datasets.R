@@ -20,19 +20,19 @@ ymax <- max(indrep_scores$harm_mean)
 performance_datasets_variability <- indrep_scores %>%
   mutate(method_short_name = factor(method_short_name, (method_order))) %>%
   ggplot(aes(method_short_name, harm_mean)) +
-    ggbeeswarm::geom_quasirandom(aes(color=task_source)) +
-    # geom_boxplot(outlier.size=0.5) +
+    ggbeeswarm::geom_quasirandom(aes(color = task_source)) +
+    # geom_boxplot(outlier.size = 0.5) +
     geom_point(
-      aes(color=task_source),
-      data=method_scores %>% mutate(task_source = "mean") %>% mutate(method_short_name = factor(method_short_name, (method_order))),
-      size=4,
-      alpha=0.8
+      aes(color = task_source),
+      data = method_scores %>% mutate(task_source = "mean") %>% mutate(method_short_name = factor(method_short_name, (method_order))),
+      size = 4,
+      alpha = 0.8
     ) +
-    # geom_point(data=method_scores, shape=15, size=4) +
-    scale_y_continuous(label_long("overall_performance_on_dataset"), expand=c(0, 0.01)) +
-    scale_x_discrete("", label=method_names) +
-    scale_color_manual(label_long("task_source"), values=c(mean="black", synthetic="#39CCCC", real="#FF4136"), label=label_long) +
-    theme(axis.text.x = element_text(angle = 45, hjust=1), legend.position = "right", legend.justification = "center")
+    # geom_point(data = method_scores, shape = 15, size = 4) +
+    scale_y_continuous(label_long("overall_performance_on_dataset"), expand = c(0, 0.01)) +
+    scale_x_discrete("", label = method_names) +
+    scale_color_manual(label_long("task_source"), values = c(mean = "black", synthetic = "#39CCCC", real = "#FF4136"), label = label_long) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "right", legend.justification = "center")
 performance_datasets_variability
 
 
@@ -40,7 +40,7 @@ performance_datasets_variability
 ##  Significant performance                                                 ####
 performance_variability_tests <- combn(method_order, 2) %>% t %>% as_data_frame() %>% magrittr::set_colnames(c("from", "to")) %>%
   mutate(test = map2(from, to, function(from, to) {
-    wilcox.test(indrep_scores$harm_mean[indrep_scores$method_short_name == to], indrep_scores$harm_mean[indrep_scores$method_short_name == from], paired = T, conf.int=T, alternative="less")
+    wilcox.test(indrep_scores$harm_mean[indrep_scores$method_short_name == to], indrep_scores$harm_mean[indrep_scores$method_short_name == from], paired = T, conf.int = T, alternative = "less")
   })) %>%
   mutate(
     p_value = map_dbl(test, "p.value"),
@@ -60,12 +60,12 @@ performance_variability_tests <- combn(method_order, 2) %>% t %>% as_data_frame(
 performance_variability_tests %>%
   mutate(from = factor(from, rev(levels(from)))) %>%
   ggplot() +
-  geom_tile(aes(to, from, fill=q_value), color="white") +
-  geom_text(aes(to, from, label=label_pvalue(q_value))) +
-  # geom_tile(aes(to, from, alpha = ifelse(q_value < 0.05, 1, 0)), size=1, color="black") +
-  scale_fill_gradientn(colors=RColorBrewer::brewer.pal(6, "YlGnBu"), values=c(0, 0.0001, 0.001, 0.01, 0.1, 1)) +
+  geom_tile(aes(to, from, fill = q_value), color = "white") +
+  geom_text(aes(to, from, label = label_pvalue(q_value))) +
+  # geom_tile(aes(to, from, alpha = ifelse(q_value < 0.05, 1, 0)), size = 1, color = "black") +
+  scale_fill_gradientn(colors = RColorBrewer::brewer.pal(6, "YlGnBu"), values = c(0, 0.0001, 0.001, 0.01, 0.1, 1)) +
   scale_alpha_identity() +
-  scale_y_discrete(labels=method_names) +
+  scale_y_discrete(labels = method_names) +
   coord_equal()
 
 
@@ -79,7 +79,7 @@ first_significant <- performance_variability_tests %>%
   ungroup() %>%
   mutate(ystart = as.numeric(from), yend = as.numeric(to)) %>%
   mutate(ystep = ystart - yend) %>%
-  mutate(x=0) %>%
+  mutate(x = 0) %>%
   arrange(-ystep)
 
 for (i in seq_len(nrow(first_significant))) {
@@ -101,15 +101,15 @@ first_significant <- first_significant %>%
 
 first_significant_bars <- first_significant %>%
   ggplot() +
-  geom_segment(aes(x=x-0.5, xend=0, y=ystart, yend=ystart), color="#BBBBBB") + # bottom left
-  geom_segment(aes(x=x-0.5, xend=0, y=yend, yend=yend), color="#BBBBBB") + # bottom right
-  geom_segment(aes(x=x, xend=x, y=ystart, yend=yend), color="#FFFFFF", size=4) + # white horizontal bar
-  geom_segment(aes(x=x, xend=x, y=ystart, yend=yend), color="#777777") + # actual horizontal bar
-  geom_segment(aes(x=x, xend=x-0.5, y=ystart, yend=ystart), color="#777777") + # bottom left
-  geom_segment(aes(x=x, xend=x-0.5, y=yend, yend=yend), color="#777777") + # bottom right
-  scale_y_continuous("", breaks=seq_along(method_order), expand=c(0,0),limits=c(0.5, length(method_order)+0.5)) +
+  geom_segment(aes(x = x-0.5, xend = 0, y = ystart, yend = ystart), color = "#BBBBBB") + # bottom left
+  geom_segment(aes(x = x-0.5, xend = 0, y = yend, yend = yend), color = "#BBBBBB") + # bottom right
+  geom_segment(aes(x = x, xend = x, y = ystart, yend = yend), color = "#FFFFFF", size = 4) + # white horizontal bar
+  geom_segment(aes(x = x, xend = x, y = ystart, yend = yend), color = "#777777") + # actual horizontal bar
+  geom_segment(aes(x = x, xend = x-0.5, y = ystart, yend = ystart), color = "#777777") + # bottom left
+  geom_segment(aes(x = x, xend = x-0.5, y = yend, yend = yend), color = "#777777") + # bottom right
+  scale_y_continuous("", breaks = seq_along(method_order), expand = c(0,0),limits = c(0.5, length(method_order)+0.5)) +
   coord_flip() +
-  theme(axis.text.x = element_text(angle = 45, hjust=1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 first_significant_bars
 
 
@@ -117,15 +117,15 @@ first_significant_bars
 ##  ............................................................................
 ##  Combined dataset variability and significance plot                      ####
 performance_dataset_variability_combined <- plot_grid(
-  first_significant_bars + theme_void() + theme(plot.margin=margin(10, 0, 0, 0)),
+  first_significant_bars + theme_void() + theme(plot.margin = margin(10, 0, 0, 0)),
   performance_datasets_variability,
-  ncol=1,
-  align="v",
-  axis="lr",
+  ncol = 1,
+  align = "v",
+  axis = "lr",
   rel_heights = c(0.2, 0.8)
 )
 performance_dataset_variability_combined
-save_plot(figure_file("performance_dataset_variability_combined.svg"), performance_dataset_variability_combined, base_width=20, base_height=5)
+save_plot(figure_file("performance_dataset_variability_combined.svg"), performance_dataset_variability_combined, base_width = 20, base_height = 5)
 write_rds(performance_dataset_variability_combined, figure_file("performance_dataset_variability_combined.rds"))
 
 
@@ -136,7 +136,7 @@ write_rds(performance_dataset_variability_combined, figure_file("performance_dat
 all_task_ids <- unique(ind_scores$task_id)
 
 n_samples <- 10
-task_sample_scores <- pbapply::pblapply(cl=8, 1:length(all_task_ids), function(n_tasks) {
+task_sample_scores <- pbapply::pblapply(cl = 8, 1:length(all_task_ids), function(n_tasks) {
   map(1:n_samples, function(tasks_sample_i) {
     task_ids <- sample(all_task_ids, n_tasks)
     method_scores <- rank_methods(
@@ -150,18 +150,18 @@ task_sample_scores <- pbapply::pblapply(cl=8, 1:length(all_task_ids), function(n
 task_sample_correlations <- task_sample_scores %>%
   group_by(n_tasks, tasks_sample_i) %>%
   slice(match(method_scores$method_short_name, method_short_name)) %>%
-  do(cor = cor(.$overall_benchmark, method_scores$overall_benchmark, method="spearman")) %>%
+  do(cor = cor(.$overall_benchmark, method_scores$overall_benchmark, method = "spearman")) %>%
   ungroup() %>%
   mutate(cor = unlist(cor)) %>%
   mutate(n_tasks_perc = n_tasks / length(all_task_ids))
 write_rds(task_sample_correlations, result_file("task_sample_correlations.rds"))
 
 task_sample_correlations_boxplot <- task_sample_correlations %>%
-  ggplot(aes(n_tasks, cor, group=n_tasks)) +
+  ggplot(aes(n_tasks, cor, group = n_tasks)) +
     geom_boxplot() +
-    geom_hline(yintercept=1) +
-    scale_y_continuous(label_long("correlation_between_method_ordering"), expand=c(0, 0), limits=c(0,1)) +
-    scale_x_continuous(label_long("n_datasets"), expand=c(0, 0), breaks=c(1, seq(10, length(all_task_ids)-10, 10), length(all_task_ids)))
+    geom_hline(yintercept = 1) +
+    scale_y_continuous(label_long("correlation_between_method_ordering"), expand = c(0, 0), limits = c(0,1)) +
+    scale_x_continuous(label_long("n_datasets"), expand = c(0, 0), breaks = c(1, seq(10, length(all_task_ids)-10, 10), length(all_task_ids)))
 task_sample_correlations_boxplot
 
 # calculate rank variability of each method
@@ -177,7 +177,7 @@ write_rds(task_sample_ranks_match, result_file("task_sample_ranks_match.rds"))
 
 task_sample_ranks_match %>%
   ggplot() +
-    geom_line(aes(n_tasks, rank_match, color=method_short_name))
+    geom_line(aes(n_tasks, rank_match, color = method_short_name))
 
 # calculate n times a method is in the top
 task_sample_n_top <- task_sample_ranks %>%
@@ -189,7 +189,7 @@ task_sample_n_top <- task_sample_ranks %>%
 task_sample_n_top %>%
   filter(n_tasks <= 10) %>%
   ggplot(aes(method_short_name, n_top)) +
-    geom_bar(stat="identity")
+    geom_bar(stat = "identity")
 
 # calculate the maximal subset of datasets at which a method is top
 # this is based on subsampling, see beneath for a smarter method
@@ -197,7 +197,7 @@ task_sample_max_tasks_top <- task_sample_n_top %>%
   filter(n_top > 1) %>%
   group_by(method_short_name) %>%
   summarise(max_n_tasks_top = max(n_tasks)) %>%
-  complete(method_short_name, fill=list(max_n_tasks_top=0))
+  complete(method_short_name, fill = list(max_n_tasks_top = 0))
 
 
 
@@ -223,7 +223,7 @@ binary_scorer <- function(method_short_name) {
   }
 }
 
-task_sample_max_tasks_top <- pbapply::pblapply(cl=8, method_scores$method_short_name, function(method_short_name) {
+task_sample_max_tasks_top <- pbapply::pblapply(cl = 8, method_scores$method_short_name, function(method_short_name) {
   task_removal_order <- indrep_scores %>%
     filter(method_short_name == !!method_short_name) %>%
     arrange(-harm_mean_rank) %>%
@@ -245,7 +245,7 @@ task_sample_max_tasks_top <- pbapply::pblapply(cl=8, method_scores$method_short_
       }
     }
   }
-  tibble(method_short_name = method_short_name, max_n_tasks_top=sum(include_tasks), task_ids = list(names(include_tasks)[include_tasks]))
+  tibble(method_short_name = method_short_name, max_n_tasks_top = sum(include_tasks), task_ids = list(names(include_tasks)[include_tasks]))
 }) %>% bind_rows()
 
 task_sample_max_tasks_top <- task_sample_max_tasks_top %>% bind_rows()
@@ -256,32 +256,32 @@ task_sample_max_tasks_top <- read_rds(result_file("task_sample_max_tasks_top.rds
 task_sample_max_tasks_overview <- task_sample_max_tasks_top %>%
   mutate(method_short_name = factor(method_short_name, method_order)) %>%
   ggplot(aes(method_short_name, max_n_tasks_top)) +
-    geom_bar(stat="identity") +
-    geom_text(aes(label=max_n_tasks_top), vjust=0) +
-    geom_hline(yintercept=length(all_task_ids), linetype="dashed") +
-    geom_text(aes(y=length(all_task_ids), x=nrow(task_sample_max_tasks_top)), label="All datasets", hjust=1, vjust=1.5, data=tibble()) +
-    scale_x_discrete("", labels=method_names) +
-    theme(axis.text.x = element_text(angle=45, hjust=1)) +
-    scale_y_continuous(label_short("largest_subset_of_datasets_at_which_method_ranks_first", 30), limits=c(0, length(all_task_ids)+10), expand=c(0, 0))
+    geom_bar(stat = "identity") +
+    geom_text(aes(label = max_n_tasks_top), vjust = 0) +
+    geom_hline(yintercept = length(all_task_ids), linetype = "dashed") +
+    geom_text(aes(y = length(all_task_ids), x = nrow(task_sample_max_tasks_top)), label = "All datasets", hjust = 1, vjust = 1.5, data = tibble()) +
+    scale_x_discrete("", labels = method_names) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    scale_y_continuous(label_short("largest_subset_of_datasets_at_which_method_ranks_first", 30), limits = c(0, length(all_task_ids)+10), expand = c(0, 0))
 task_sample_max_tasks_overview %>% write_rds(figure_file("task_sample_max_tasks_overview.rds"))
 
 
 task_sample_max_tasks_top_individual <- task_sample_max_tasks_top %>%
   unnest(task_ids) %>%
   rename(task_id = task_ids) %>%
-  left_join(tasks, c("task_id"="id"))
+  left_join(tasks, c("task_id" = "id"))
 
 task_sample_max_tasks_top_individual %>%
   mutate(method_short_name = factor(method_short_name, method_order)) %>%
   ggplot(aes(method_short_name, fill = trajectory_type)) +
     geom_bar() +
-    scale_fill_manual(values=set_names(trajectory_types$colour, trajectory_types$id))
+    scale_fill_manual(values = set_names(trajectory_types$colour, trajectory_types$id))
 
 
 
 # GA
 # include_tasks <- rep(TRUE, length(all_task_ids))
-# result <- GA::ga("binary", binary_scorer("mfa"), nBits=length(all_task_ids), maxiter=10, popSize=1000)
+# result <- GA::ga("binary", binary_scorer("mfa"), nBits = length(all_task_ids), maxiter = 10, popSize = 1000)
 
 
 
@@ -300,11 +300,11 @@ method_scores_technologies <- map(unique(tasks$technology) %>% discard(is.na), f
 method_scores_technologies <- method_scores_technologies %>%
   select(method_short_name, technology_id, harm_mean) %>%
   rename(harm_mean_technology = harm_mean) %>%
-  left_join(method_scores_real %>% rename(harm_mean_overall = harm_mean), by="method_short_name")
+  left_join(method_scores_real %>% rename(harm_mean_overall = harm_mean), by = "method_short_name")
 
 method_scores_technologies_cors <- method_scores_technologies %>%
   group_by(technology_id) %>%
-  summarise(cor=cor(harm_mean_technology, harm_mean_overall))
+  summarise(cor = cor(harm_mean_technology, harm_mean_overall))
 
 
 
@@ -313,9 +313,9 @@ method_scores_technologies %>%
     geom_point() +
     facet_wrap(~technology_id) +
     geom_abline(intercept = 0, slope = 1) +
-    geom_text(aes(label=round(cor, 2)), x=0.1, y=max(method_scores_technologies$harm_mean_overall), data=method_scores_technologies_cors, size=5) +
+    geom_text(aes(label = round(cor, 2)), x = 0.1, y = max(method_scores_technologies$harm_mean_overall), data = method_scores_technologies_cors, size = 5) +
     coord_equal() +
   theme_bw() +
   theme(
-    legend.position="none", panel.grid = element_blank()
+    legend.position = "none", panel.grid = element_blank()
   )

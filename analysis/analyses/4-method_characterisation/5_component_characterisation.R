@@ -10,7 +10,7 @@ methods <- read_rds(derived_file("methods.rds")) %>%
 
 method_components <- methods %>% select(method_id, components) %>%
   mutate(components = gsub("\\(.*?\\)", "", components)) %>%  # remove anything between ()
-  unnest_tokens(component_id, components, "regex", pattern = "[\\{\\}\\[\\]\\|\\+\\=]", to_lower = FALSE) %>%
+  unnest_tokens(component_id, components, "regex", pattern = "[\\{\\}\\[\\]\\|\\+\\ = ]", to_lower = FALSE) %>%
   mutate(component_id = trimws(component_id)) %>%
   filter(nchar(component_id) > 0)
 
@@ -77,13 +77,13 @@ method_component_counts <- method_components %>%
 method_components_wordcloud_plot <- method_component_counts %>%
   filter(n > 1 | !is.na(category)) %>%
   ggplot() +
-    ggrepel::geom_text_repel(aes(1, 1, size=n, label=component_id, color=category), segment.size = 0) +
+    ggrepel::geom_text_repel(aes(1, 1, size = n, label = component_id, color = category), segment.size = 0) +
     scale_y_continuous(breaks = NULL) +
     scale_x_continuous(breaks = NULL) +
     theme_void() +
     labs(x = '', y = '') +
     scale_size(range = c(3, 15), guide = FALSE) +
-    scale_color_manual(guide=F, values=component_category_colors)
+    scale_color_manual(guide = F, values = component_category_colors)
 method_components_wordcloud_plot
 
 method_components_ordering_plot <- method_component_counts %>%
@@ -91,13 +91,13 @@ method_components_ordering_plot <- method_component_counts %>%
   filter(n > 1 | !is.na(category)) %>%
   mutate(component_id = forcats::fct_inorder(component_id)) %>%
   ggplot(aes(component_id, n, fill = category)) +
-    geom_bar(stat="identity") +
-    geom_text(aes(y=0, label=pritt("{component_id}: {n}")), stat="identity", hjust=0) +
-    scale_x_discrete(breaks=c(), expand=c(0, 0), name="") +
-    scale_y_continuous(label_long("n_methods"), expand=c(0, 0), breaks=seq_len(500)) +
-    scale_fill_manual(values=component_category_colors) +
+    geom_bar(stat = "identity") +
+    geom_text(aes(y = 0, label = pritt("{component_id}: {n}")), stat = "identity", hjust = 0) +
+    scale_x_discrete(breaks = c(), expand = c(0, 0), name = "") +
+    scale_y_continuous(label_long("n_methods"), expand = c(0, 0), breaks = seq_len(500)) +
+    scale_fill_manual(values = component_category_colors) +
     coord_flip() +
-    theme(legend.position="top")
+    theme(legend.position = "top")
 method_components_ordering_plot
 
 n_methods <- length(unique(method_components$method_id))
@@ -115,13 +115,13 @@ method_components_categories_plot <- bind_rows(
 ) %>%
   mutate(included = fct_inorder(included)) %>%
   ggplot(aes(1, n)) +
-    geom_bar(aes(fill=included), stat="identity") +
-    geom_text(aes(label=n, y=n_methods - 4), fill=NA, category_counts, size=5) +
-    facet_grid(.~category, labeller=label_facet()) +
-    scale_fill_manual(values=component_category_colors %>% c(unknown="grey")) +
+    geom_bar(aes(fill = included), stat = "identity") +
+    geom_text(aes(label = n, y = n_methods - 4), fill = NA, category_counts, size = 5) +
+    facet_grid(.~category, labeller = label_facet()) +
+    scale_fill_manual(values = component_category_colors %>% c(unknown = "grey")) +
     coord_polar("y") +
     theme_void() +
-    theme(legend.position="none")
+    theme(legend.position = "none")
 method_components_categories_plot
 
 
@@ -130,9 +130,9 @@ method_components_categories_plot
 ##  ............................................................................
 ##  method components plot                                                  ####
 method_components_plot <-
-  cowplot::plot_grid(method_components_wordcloud_plot, method_components_ordering_plot, rel_widths = c(0.6, 0.4), labels="auto") %>%
-  cowplot::plot_grid(., method_components_categories_plot, ncol=1, rel_heights = c(0.6, 0.4), labels = c("", "c"))
+  cowplot::plot_grid(method_components_wordcloud_plot, method_components_ordering_plot, rel_widths = c(0.6, 0.4), labels = "auto") %>%
+  cowplot::plot_grid(., method_components_categories_plot, ncol = 1, rel_heights = c(0.6, 0.4), labels = c("", "c"))
 method_components_plot
 
-save_plot(figure_file("method_components.svg"), method_components_plot, base_width=15, base_height=12)
+save_plot(figure_file("method_components.svg"), method_components_plot, base_width = 15, base_height = 12)
 

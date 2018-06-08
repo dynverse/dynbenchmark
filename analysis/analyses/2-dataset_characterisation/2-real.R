@@ -40,22 +40,22 @@ boxes <- cowplot::plot_grid(
       text_position <- 0.5
 
       if (what == "standard") {
-        fill_scale <- scale_fill_manual(values=standard_colours)
+        fill_scale <- scale_fill_manual(values = standard_colours)
       } else if (what == "technology") {
-        fill_scale <- scale_fill_manual(values=technology_colours)
+        fill_scale <- scale_fill_manual(values = technology_colours)
       } else if (what == "trajectory_type") {
-        fill_scale <- scale_fill_manual(values=setNames(trajectory_types$background_colour,trajectory_types$id))
+        fill_scale <- scale_fill_manual(values = setNames(trajectory_types$background_colour,trajectory_types$id))
       }
 
-      ggplot(pie_data, aes(ymin=0, ymax=1)) +
-        geom_rect(aes(xmin=start, xmax=end, fill=variable_of_interest), stat="identity", color="white", size=0.5) +
-        geom_text(aes(mid, text_position, label = pritt(label), vjust=0.5), color="black", hjust=0.5, size=4) +
+      ggplot(pie_data, aes(ymin = 0, ymax = 1)) +
+        geom_rect(aes(xmin = start, xmax = end, fill = variable_of_interest), stat = "identity", color = "white", size = 0.5) +
+        geom_text(aes(mid, text_position, label = pritt(label), vjust = 0.5), color = "black", hjust = 0.5, size = 4) +
         fill_scale +
         ggtitle(label_long(what)) +
         theme_void() +
         theme(legend.position = "none") +
-        scale_x_continuous(expand=c(0, 0)) +
-        scale_y_continuous(expand=c(0, 0)) +
+        scale_x_continuous(expand = c(0, 0)) +
+        scale_y_continuous(expand = c(0, 0)) +
         coord_flip()
     }
   ))
@@ -112,18 +112,18 @@ pies <- cowplot::plot_grid(
         mutate(start = lag(cumsum(n), 1, 0), end = cumsum(n), mid = start + (end - start)/2)
 
       pie_data %>%
-        ggplot(aes(ymin=0, ymax=1)) +
-        geom_rect(aes(xmin=start, xmax=end, fill=variable_of_interest), stat="identity", color="white", size=0.5) +
+        ggplot(aes(ymin = 0, ymax = 1)) +
+        geom_rect(aes(xmin = start, xmax = end, fill = variable_of_interest), stat = "identity", color = "white", size = 0.5) +
         theme_void() +
-        scale_x_continuous(expand=c(0, 0)) +
-        scale_y_continuous(expand=c(0, 0)) +
+        scale_x_continuous(expand = c(0, 0)) +
+        scale_y_continuous(expand = c(0, 0)) +
         fill_scale +
         coord_polar()
     }
   )
 )
 
-ggsave(figure_file("dataset_characterisation_pies_small.svg"), pies, width=6, height=3)
+ggsave(figure_file("dataset_characterisation_pies_small.svg"), pies, width = 6, height = 3)
 
 
 
@@ -140,7 +140,7 @@ dotplots <- cowplot::plot_grid(
 
       if (what %in% c("n_cells", "n_genes")) {
         limits <- c(10, 30000)
-        x_scale <- scale_x_log10(label_long(what), breaks=c(10, 100, 100, 1000, 10000), limits = limits)
+        x_scale <- scale_x_log10(label_long(what), breaks = c(10, 100, 100, 1000, 10000), limits = limits)
         limits <- log10(limits)
       } else {
         limits <- c(as.Date("2014-01-01"), as.Date("2018-06-01"))
@@ -157,10 +157,10 @@ dotplots <- cowplot::plot_grid(
           dotsize = 0.7
         ) +
         x_scale +
-        scale_y_continuous(NULL, breaks=NULL, expand=c(0.02, 0)) +
+        scale_y_continuous(NULL, breaks = NULL, expand = c(0.02, 0)) +
         scale_fill_manual(values = technology_colours) +
         scale_color_manual(values = technology_colours) +
-        theme(legend.position="none")
+        theme(legend.position = "none")
     })
 )
 
@@ -184,7 +184,7 @@ ggsave(figure_file("dataset_characterisation.svg"), combined, width = 10, height
 # Table
 grouper <- list(
   latex = function(x) paste0("\\iffalse {label_long(gse)} \\fi {", x, "}"),
-  html = function(x) paste0("<span style='display: none;'>{gse}</span> {", x, "}")
+  html = function(x) paste0("<span style = 'display: none;'>{gse}</span> {", x, "}")
 )
 
 library(kableExtra)
@@ -198,14 +198,14 @@ table <- map(c("latex", "html"), function(format) {
       technology = cell_spec(
         glue::glue(grouper[[format]]("technology")),
         format,
-        background=technology_colours[technology],
-        color="white",
-        escape=FALSE
+        background = technology_colours[technology],
+        color = "white",
+        escape = FALSE
       ),
       organism = cell_spec(
         glue::glue(grouper[[format]]("organism")),
         format,
-        escape=FALSE
+        escape = FALSE
       ),
       trajectory_type = kableExtra::cell_spec(
         label_long(trajectory_type),
@@ -234,11 +234,11 @@ table <- map(c("latex", "html"), function(format) {
       )
     ) %>%
     select(-id, -standard) %>%
-    rename_all(label_short, width=99999999) %>%
+    rename_all(label_short, width = 99999999) %>%
     rename_all(function(x) if(format == "latex") {gsub("\\#", "\\\\#", x)} else {x}) %>%
-    knitr::kable(format, escape=FALSE) %>%
+    knitr::kable(format, escape = FALSE) %>%
     collapse_rows(1:2) %>%
-    kable_styling(bootstrap_options = c("hover", "striped"), latex_options = c("striped", "scale_down"), font_size=7)
+    kable_styling(bootstrap_options = c("hover", "striped"), latex_options = c("striped", "scale_down"), font_size = 7)
   table
 }) %>% set_names(c("latex", "html"))
 table
@@ -274,14 +274,14 @@ plots <- seq_len(nrow(tasks_real)) %>% map(function(task_i) {
 
   ggraph(milestone_graph, layout = layout) +
     geom_edge_link() +
-    geom_edge_link(aes(xend=x + (xend - x)/1.6, yend = y + (yend - y)/1.6), arrow=arrow(type="closed")) +
-    geom_node_label(aes(label=node, fill=node)) +
+    geom_edge_link(aes(xend = x + (xend - x)/1.6, yend = y + (yend - y)/1.6), arrow = arrow(type = "closed")) +
+    geom_node_label(aes(label = node, fill = node)) +
     theme_graph() +
-    theme(legend.position="none", plot.margin = margin(1, 1, 1, 1)) +
+    theme(legend.position = "none", plot.margin = margin(1, 1, 1, 1)) +
     scale_x_continuous(expand = c(1,1)) +
     ggtitle(label_dataset(task$id))
 })
-cowplot::plot_grid(plotlist=plots[1:10], ncol=5)
+cowplot::plot_grid(plotlist = plots[1:10], ncol = 5)
 
 
 
