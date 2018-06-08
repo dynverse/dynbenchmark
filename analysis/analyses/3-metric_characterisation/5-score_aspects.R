@@ -18,7 +18,7 @@ wrap <- function(x) {
 }
 
 gs <- list(
-  milestone_network = dyntoy:::generate_toy_milestone_network("simple_linear"),
+  milestone_network = dyntoy:::generate_milestone_network("simple_linear"),
   progressions = tribble(
     ~cell_id, ~from, ~to, ~percentage,
     "1", "M1", "M2", 0.00,
@@ -84,7 +84,7 @@ toys <- tribble(
   "bad_topology",
   gs,
   list(
-    milestone_network = dyntoy:::generate_toy_milestone_network("consecutive_bifurcating") %>% mutate(length = ifelse(to %in% c("M5", "M6"), 0.1, 1)),
+    milestone_network = dyntoy:::generate_milestone_network("consecutive_bifurcating") %>% mutate(length = ifelse(to %in% c("M5", "M6"), 0.1, 1)),
     progressions = tribble(
       ~cell_id, ~from, ~to, ~percentage,
       "1", "M1", "M2", 0.4,

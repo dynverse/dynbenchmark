@@ -272,14 +272,14 @@ perturb_structure_and_position <- function(task) {
 
 ## Change milestone network
 change_network <- function(task, trajectory_type = "linear") {
-  task$milestone_network <- dyntoy:::generate_toy_milestone_network(trajectory_type)
+  task$milestone_network <- dyntoy:::generate_milestone_network(trajectory_type)
   task$progressions <- dyntoy:::random_progressions(task$milestone_network, ncells = length(task$cell_ids))
   task$milestone_ids <- unique(c(task$milestone_network$from, task$milestone_network$to))
 
   recreate_task(task)
 }
 
-trajectory_models <- eval(formals(dyntoy:::generate_toy_milestone_network)$model)
+trajectory_models <- eval(formals(dyntoy:::generate_milestone_network)$model)
 
 map(trajectory_models, function(x) function(task) change_network(task, x)) %>% setNames(paste0("perturb_change_network_", trajectory_models)) %>% list2env(.GlobalEnv)
 
