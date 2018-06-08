@@ -20,9 +20,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Generate different trajectory topologies
 ```{r}
-topologies <- eval(formals(dyntoy:::generate_toy_milestone_network)$model)
+topologies <- eval(formals(dyntoy:::generate_milestone_network)$model)
 topologies <- topologies[topologies != "BA"]
-networks_synthetic <- map(topologies, dyntoy:::generate_toy_milestone_network) %>% tibble(milestone_network = ., topology = topologies)
+networks_synthetic <- map(topologies, dyntoy:::generate_milestone_network) %>% tibble(milestone_network = ., topology = topologies)
 ```
 
 Add SCORPIUS predictions
