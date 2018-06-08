@@ -114,7 +114,7 @@ extract_top_methods <- function(leaf_id, n_top) {
   # add ? if no high scoring methods
   # if(nrow(scores) == 1 | max(scores$score) < 0.5) {
   #   scores <- bind_rows(
-  #     tibble(method_id = "?", score=1, method_position=1),
+  #     tibble(method_id = "?", score = 1, method_position = 1),
   #     scores %>% mutate(method_position = method_position+1)
   #   )
   # }
@@ -128,7 +128,7 @@ extract_top_methods <- function(leaf_id, n_top) {
       scores,
       tibble(
         method_id = extra_methods,
-        score=NA,
+        score = NA,
         method_position = seq_len(n_extra_methods) + nrow(scores)
       )
     )
@@ -148,7 +148,7 @@ extract_top_methods <- function(leaf_id, n_top) {
 
   # user friendly and performance indicators
   scores$user_friendly_indicator <- map(scores$user_friendly, score_indicator)
-  scores$score_indicator <- map(scores$score - max(scores$score, na.rm=T), score_indicator, c(-0.0001, -0.05, -0.4, -1))
+  scores$score_indicator <- map(scores$score - max(scores$score, na.rm = T), score_indicator, c(-0.0001, -0.05, -0.4, -1))
 
   # add prior information
   scores$prior_indicator <- scores %>%
@@ -174,12 +174,12 @@ n_top <- 4
 
 svg <- read_xml(figure_file("tree_raw2.svg"))
 
-leaf_nodeset <- svg %>% xml_find_all(".//svg:text[@class='methods']")
+leaf_nodeset <- svg %>% xml_find_all(".//svg:text[@class = 'methods']")
 leaf_ids <- xml_attr(leaf_nodeset, "id")
 
 extract_divider_position <- function(id) {
   svg %>%
-    xml_find_first(paste0(".//svg:path[@id='" , id, "']")) %>%
+    xml_find_first(paste0(".//svg:path[@id = '" , id, "']")) %>%
     xml_attr("d") %>%
     str_replace("[^0-9]*([0-9\\.]*),.*", "\\1") %>%
     as.numeric()
@@ -192,7 +192,7 @@ leaf_methods <- map(leaf_ids, function(leaf_id) {
   n_methods <- nrow(scores)
 
   # method name
-  method_node <- svg %>% xml_find_first(pritt(".//svg:text[@id='{leaf_id}']"))
+  method_node <- svg %>% xml_find_first(pritt(".//svg:text[@id = '{leaf_id}']"))
 
   spans <- method_node %>% xml_children()
 
@@ -213,7 +213,7 @@ leaf_methods <- map(leaf_ids, function(leaf_id) {
   xml_attr(method_node, "y") <- as.numeric(xml_attr(method_node, "y")) + y_change
 
   # user friendliness indicators
-  user_friendly_node <- xml_add_sibling(method_node, method_node, .copy=T)
+  user_friendly_node <- xml_add_sibling(method_node, method_node, .copy = T)
   spans <- user_friendly_node %>% xml_children()
 
   xml_attr(spans, "x") <- xml_attr(user_friendly_node, "x") <- extract_divider_position("user_friendliness") + 1
@@ -223,7 +223,7 @@ leaf_methods <- map(leaf_ids, function(leaf_id) {
   xml_text(spans)[seq_len(length(spans)-n_methods)+n_methods] <- ""
 
   # performance indicators
-  performance_node <- xml_add_sibling(method_node, method_node, .copy=T)
+  performance_node <- xml_add_sibling(method_node, method_node, .copy = T)
   spans <- performance_node %>% xml_children()
 
   xml_attr(spans, "x") <- xml_attr(performance_node, "x") <- extract_divider_position("performance") + 1
@@ -233,7 +233,7 @@ leaf_methods <- map(leaf_ids, function(leaf_id) {
   xml_text(spans)[seq_len(length(spans)-n_methods)+n_methods] <- ""
 
   # prior information
-  prior_node <- xml_add_sibling(method_node, method_node, .copy=T)
+  prior_node <- xml_add_sibling(method_node, method_node, .copy = T)
   spans <- prior_node %>% xml_children()
 
   xml_text(spans)[seq_len(n_methods)] <- scores$prior_indicator
@@ -242,7 +242,7 @@ leaf_methods <- map(leaf_ids, function(leaf_id) {
   xml_attr(spans, "x") <- xml_attr(prior_node, "x") <- extract_divider_position("priors") + 1
 })
 
-date <- xml_child(xml_find_first(svg, ".//svg:text[@id='date']"))
+date <- xml_child(xml_find_first(svg, ".//svg:text[@id = 'date']"))
 xml_text(date) <- paste0("Generated at ", as.character(Sys.Date()))
 
 svg %>% write_xml(figure_file("tree.svg"))

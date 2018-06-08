@@ -114,7 +114,7 @@ paramoptim_submit <- function(
 
     ## If no output or qsub handle exists yet
     if (!file.exists(output_file) && !file.exists(qsubhandle_file)) {
-      cat("Submitting ", method$name, "\n", sep="")
+      cat("Submitting ", method$name, "\n", sep = "")
 
       ## create a grid for each of the tasks, paramsets, and repeats
       grid <- crossing(
@@ -345,7 +345,7 @@ paramoptim_fetch_results <- function(local_output_folder) {
                 grid_i,
                 iteration = dob[[param_i]],
                 param_i,
-                param_row = list(path[param_i,,drop=F]),
+                param_row = list(path[param_i,,drop = F]),
                 error_message = sapply(error, function(err) ifelse(is.null(err), "", err$message))
               ) %>%
               select(-error)

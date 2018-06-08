@@ -14,7 +14,7 @@ plot_equal_gold_standard_score <- function(scores_summary) {
   scores_summary %>%
     filter(perturbator_id == "gs") %>%
     ggplot() +
-    ggbeeswarm::geom_beeswarm(aes(score_id, score, color=toy_category))
+    ggbeeswarm::geom_beeswarm(aes(score_id, score, color = toy_category))
 }
 
 # direct_gs_comparison -------------------------------------
@@ -28,7 +28,7 @@ check_direct_gs_comparison <- function(scores_summary) {
 plot_direct_gs_comparison <- function(scores_summary) {
   scores_summary %>%
     ggplot() +
-    ggbeeswarm::geom_beeswarm(aes(toy_category, diff, color=perturbator_id)) +
+    ggbeeswarm::geom_beeswarm(aes(toy_category, diff, color = perturbator_id)) +
     geom_hline(yintercept = 0) +
     facet_wrap(~score_id)
 }
@@ -49,13 +49,13 @@ plot_indirect_gs_comparison <- function(scores_summary) {
   scores_summary %>%
     mutate(is_gs = (perturbator_id %in% gs_perturbator_ids)) %>%
     ggplot() +
-    geom_boxplot(aes(is_gs, diff, color=toy_category)) +
+    geom_boxplot(aes(is_gs, diff, color = toy_category)) +
     facet_wrap(~score_id)
 
   scores_summary %>%
     mutate(is_gs = (perturbator_id %in% gs_perturbator_ids)) %>%
     ggplot() +
-    geom_boxplot(aes(is_gs, diff, color=perturbator_id)) +
+    geom_boxplot(aes(is_gs, diff, color = perturbator_id)) +
     facet_wrap(~score_id)
 }
 
@@ -64,7 +64,7 @@ check_break_cycles <- function(scores_summary) {
   scores_summary %>%
     filter(perturbator_id == "break_cycles") %>%
     group_by(score_id) %>%
-    summarise(rule_id="3a", rule = all(diff < 0))
+    summarise(rule_id = "3a", rule = all(diff < 0))
 }
 
 # join_linear --------------------
@@ -103,7 +103,7 @@ check_switch_two_vs_switch_all <- function(scores_summary) {
 
 plot_switch_two_vs_switch_all <- function(scores_summary) {
   scores_summary_largevssmall %>% ggplot() +
-    geom_boxplot(aes(toy_category, score, color=perturbator_id)) +
+    geom_boxplot(aes(toy_category, score, color = perturbator_id)) +
     facet_wrap(~score_id)
 }
 
@@ -134,7 +134,7 @@ check_hairy_small_vs_hairy_large <- function(scores_summary) {
 
 plot_hairy <- function(scores_summary) {
   scores_summary_largevssmall %>% ggplot() +
-    geom_boxplot(aes(toy_category, score, color=perturbator_id)) +
+    geom_boxplot(aes(toy_category, score, color = perturbator_id)) +
     facet_wrap(~score_id)
 }
 
@@ -158,7 +158,7 @@ plot_warping <- function(scores_summary) {
   scores_summary %>%
     filter(perturbator_id == "warp") %>%
     ggplot() +
-    ggbeeswarm::geom_beeswarm(aes(score_id, diff, color=trajectory_type))
+    ggbeeswarm::geom_beeswarm(aes(score_id, diff, color = trajectory_type))
 }
 
 
@@ -167,7 +167,7 @@ plot_warping <- function(scores_summary) {
 check_hairy_large_effect <- function(scores_summary) {
   scores_summary %>%
     group_by(score_id) %>%
-    mutate(maxscore = max(score, na.rm=TRUE), minscore = min(score, na.rm=TRUE)) %>%
+    mutate(maxscore = max(score, na.rm = TRUE), minscore = min(score, na.rm = TRUE)) %>%
     filter(perturbator_id == "hairy_large") %>%
     summarise(rule = all(score < quantile(c(maxscore, minscore), 0.5)))  ## how to define a "high" change??
 }
@@ -189,7 +189,7 @@ check_linear <- function(scores_summary) {
     mutate(perc = as.numeric(gsub("switch_(\\d*)", "\\1", perturbator_id))) %>%
     mutate(score = score + runif(n(), 0, 1e-10)) %>%
     group_by(score_id) %>%
-    summarise(cor=cor(perc, score), rule = cor < -0.9) %>% select(-cor)
+    summarise(cor = cor(perc, score), rule = cor < -0.9) %>% select(-cor)
 }
 
 
@@ -199,7 +199,7 @@ check_remove_cells <- function(scores_summary) {
   scores_summary %>%
     filter(perturbator_id == "remove_cells") %>%
     group_by(score_id) %>%
-    summarise(rule=all(diff < 0))
+    summarise(rule = all(diff < 0))
 }
 
 
@@ -209,7 +209,7 @@ check_different_structure <- function(scores_summary) {
   scores_summary %>%
     filter(perturbator_id == "add_distant_edge") %>%
     group_by(score_id) %>%
-    summarise(rule=all(diff < 0))
+    summarise(rule = all(diff < 0))
 }
 
 
@@ -219,7 +219,7 @@ check_different_lengths <- function(scores_summary) {
   scores_summary %>%
     filter(perturbator_id == "change_lengths") %>%
     group_by(score_id) %>%
-    summarise(rule=all(diff < -1e-5))
+    summarise(rule = all(diff < -1e-5))
 }
 
 # change terminal lengths -------------------------
@@ -227,7 +227,7 @@ check_different_terminal_lengths <- function(scores_summary) {
   scores_summary %>%
     filter(perturbator_id == "change_terminal_lengths") %>%
     group_by(score_id) %>%
-    summarise(rule=all(diff < -1e-5))
+    summarise(rule = all(diff < -1e-5))
 }
 
 # both position and structure ----------------------
@@ -261,7 +261,7 @@ check_grouping <- function(scores_summary) {
 
 plot_grouping <- function(scores_summary) {
   scores_summary %>%
-    ggplot() + geom_point(aes(score, score_grouped, color=perturbator_id, shape=trajectory_type)) + facet_wrap(~score_id)
+    ggplot() + geom_point(aes(score, score_grouped, color = perturbator_id, shape = trajectory_type)) + facet_wrap(~score_id)
 }
 
 # equivalence relation ---------------------

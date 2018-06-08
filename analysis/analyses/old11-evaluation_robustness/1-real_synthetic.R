@@ -34,28 +34,28 @@ trajtype_source_scores <- bind_rows(
 
 # set order
 trajtype_source_scores <- trajtype_source_scores %>%
-  mutate(trajectory_type = factor(trajectory_type, levels=c("all", "overall", trajectory_types$id)))
+  mutate(trajectory_type = factor(trajectory_type, levels = c("all", "overall", trajectory_types$id)))
 
 # calculate correlations
 trajtype_source_score_cors <- trajtype_source_scores %>%
   group_by(trajectory_type) %>%
-  summarise(cor=cor(real, synthetic))
+  summarise(cor = cor(real, synthetic))
 
 real_synthetic_comparison <- trajtype_source_scores %>%
   ggplot(aes(real, synthetic)) +
   geom_abline(intercept = 0, slope = 1) +
-  geom_point(aes(color=trajectory_type)) +
-  geom_text(aes(label=round(cor, 2)), x=0.1, y=0.9, data=trajtype_source_score_cors) +
-  facet_wrap(~trajectory_type, labeller = label_facet(label_simple_trajectory_types), nrow=1) +
-  scale_color_manual(values=set_names(c("black", "black", trajectory_types$colour), c("all", "overall", trajectory_types$id))) +
-  scale_x_continuous(breaks=c(0,1), limits=c(0, 1))+
-  scale_y_continuous(breaks=c(0,1), limits=c(0, 1))+
+  geom_point(aes(color = trajectory_type)) +
+  geom_text(aes(label = round(cor, 2)), x = 0.1, y = 0.9, data = trajtype_source_score_cors) +
+  facet_wrap(~trajectory_type, labeller = label_facet(label_simple_trajectory_types), nrow = 1) +
+  scale_color_manual(values = set_names(c("black", "black", trajectory_types$colour), c("all", "overall", trajectory_types$id))) +
+  scale_x_continuous(breaks = c(0,1), limits = c(0, 1))+
+  scale_y_continuous(breaks = c(0,1), limits = c(0, 1))+
   coord_equal() +
-  labs(x=label_wrap("Overall performance on real data", 100), y=label_wrap("Overall performance on synthetic data", 25))+
+  labs(x = label_wrap("Overall performance on real data", 100), y = label_wrap("Overall performance on synthetic data", 25))+
   theme_bw() +
   theme(
-    legend.position="none", panel.grid = element_blank()
+    legend.position = "none", panel.grid = element_blank()
   )
 real_synthetic_comparison
 real_synthetic_comparison %>% write_rds(figure_file("real_synthetic_comparison.rds"))
-real_synthetic_comparison %>% ggsave(figure_file("real_synthetic_comparison.svg"), ., width=15, height=5)
+real_synthetic_comparison %>% ggsave(figure_file("real_synthetic_comparison.svg"), ., width = 15, height = 5)

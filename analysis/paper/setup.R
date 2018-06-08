@@ -6,7 +6,7 @@ library(cowplot)
 
 # refering to figures & supplementary figures
 refs <- tibble(ref_id = character(), name = character(), ref_type = character())
-ref <- function(ref_type, ref_id, suffix="", anchor=FALSE, pattern = "[**{ref_full_name}**](#{ref_type}_{ref_id})") {
+ref <- function(ref_type, ref_id, suffix = "", anchor = FALSE, pattern = "[**{ref_full_name}**](#{ref_type}_{ref_id})") {
   if(nrow(refs %>% filter(ref_id == !!ref_id)) == 0) {
     refs <<- refs %>% bind_rows(tibble(
       name = create_names[[ref_type]](sum(refs$ref_type == ref_type) + 1),
@@ -23,7 +23,7 @@ ref <- function(ref_type, ref_id, suffix="", anchor=FALSE, pattern = "[**{ref_fu
 }
 anchor <- function(ref_type, ref_id) {
   case_when(
-    params$table_format == "html" ~ pritt("<a name='{ref_type}_{ref_id}'></a>"),
+    params$table_format == "html" ~ pritt("<a name = '{ref_type}_{ref_id}'></a>"),
     params$table_format == "latex" ~ pritt("\\protect\\hypertarget{{{ref_type}_{ref_id}}}{{}}")
   )
 }
@@ -35,8 +35,8 @@ create_names <- list(
   stable = function(i) pritt("Supplementary Table {i}"),
   section = function(i) pritt("")
 )
-sfigs <- tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width=numeric(), height=numeric())
-add_sfig <- function(fig_path, ref_id, caption_main, caption_text, width=15, height=10) {
+sfigs <- tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width = numeric(), height = numeric())
+add_sfig <- function(fig_path, ref_id, caption_main, caption_text, width = 15, height = 10) {
   sfigs <<- sfigs %>% add_row(
     ref_id = ref_id,
     fig_path = fig_path,
@@ -47,7 +47,7 @@ add_sfig <- function(fig_path, ref_id, caption_main, caption_text, width=15, hei
   )
 }
 
-figs <- tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width=numeric(), height=numeric())
+figs <- tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width = numeric(), height = numeric())
 add_fig <- function(fig_path, ref_id, caption_main, caption_text, width = 5, height = 7) {
   # save it because why not
   figs <<- figs %>% add_row(
@@ -82,7 +82,7 @@ plot_fig <- function(ref_type, ref_id, fig_path, caption_main, caption_text, wid
     subchunk <- glue::glue(
       "<p>\n",
       "  {fig_anch}\n",
-      "  <img src=\"{fig_path}\" />\n",
+      "  <img src = \"{fig_path}\" />\n",
       "</p><p>\n",
       "  <strong>{fig_cap}: {caption_main}</strong> {caption_text}\n",
       "</p>\n"
@@ -97,7 +97,7 @@ add_stable <- function(table, ref_id, caption) {
   stables <<- stables %>% add_row(
     table = list(table),
     ref_id = ref_id,
-    caption=caption
+    caption = caption
   )
 }
 
@@ -113,7 +113,7 @@ cite_methods <- function(method_ids) {
 }
 
 # add caption to table
-add_caption_latex <- function(table, caption="hi") {
+add_caption_latex <- function(table, caption = "hi") {
   table %>% gsub("(egin\\{table\\}\\[H\\])", paste0("\\1\n\\\\caption{", caption, "}"), .)
 }
 
@@ -121,12 +121,12 @@ add_caption_latex <- function(table, caption="hi") {
 add_table <- function(ref_id, table, caption) {
   if (params$table_format == "latex") {
     caption_latex <- paste0("\\\\textbf{", ref('table', ref_id, pattern = "{ref_full_name}"), "}: ", caption)
-    table_output <- paste("", "", table[["latex"]] %>% add_caption_latex(caption_latex), "", "", sep="\n")
+    table_output <- paste("", "", table[["latex"]] %>% add_caption_latex(caption_latex), "", "", sep = "\n")
   } else {
     table_output <- paste0(
-      paste0(ref("table", "implementations", anchor=TRUE), ": ", caption),
+      paste0(ref("table", "implementations", anchor = TRUE), ": ", caption),
       table[["html"]],
-      collapse="\n"
+      collapse = "\n"
     )
   }
   cat(table_output)

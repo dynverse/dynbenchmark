@@ -28,27 +28,27 @@ topology_sensitivity %>% saveRDS(result_file("topology_sensitivity.rds"))
 
 
 topology_sensitivity_plot <- topology_sensitivity %>%
-  left_join(trajectory_types, c("trajectory_type"="id")) %>%
+  left_join(trajectory_types, c("trajectory_type" = "id")) %>%
   left_join(method_trajtypes, c("trajectory_type", "method_id")) %>%
   mutate(
-    method_id=factor(method_id, levels=method_order),
-    trajectory_type = factor(trajectory_type, levels=trajectory_types$id)
+    method_id = factor(method_id, levels = method_order),
+    trajectory_type = factor(trajectory_type, levels = trajectory_types$id)
   ) %>%
-  ggplot(aes(ymin=-as.numeric(method_id)-w/2, ymax=-as.numeric(method_id) + w/2, xmax=perc_perfect)) +
-  geom_rect(aes(xmax=1, xmin=0, fill=background_color)) +
-  geom_rect(aes(fill=color, xmin=0)) +
-  geom_rect(aes(xmax=1, xmin=0, color=ifelse(can_handle_trajectory_type, "black", "white")), fill=NA) +
-  geom_vline(aes(xintercept = 0.5), linetype="dashed", color="white") +
-  facet_grid(.~trajectory_type, labeller=label_facet(label_simple_trajectory_types)) +
+  ggplot(aes(ymin = -as.numeric(method_id)-w/2, ymax = -as.numeric(method_id) + w/2, xmax = perc_perfect)) +
+  geom_rect(aes(xmax = 1, xmin = 0, fill = background_color)) +
+  geom_rect(aes(fill = color, xmin = 0)) +
+  geom_rect(aes(xmax = 1, xmin = 0, color = ifelse(can_handle_trajectory_type, "black", "white")), fill = NA) +
+  geom_vline(aes(xintercept = 0.5), linetype = "dashed", color = "white") +
+  facet_grid(.~trajectory_type, labeller = label_facet(label_simple_trajectory_types)) +
   scale_fill_identity() +
   scale_color_identity() +
   theme_bw() +
   theme(panel.spacing.x = unit(0, "inch"), panel.grid.major = element_blank()) +
-  # scale_fill_manual(values=set_names(trajectory_types$colour, trajectory_types$id)) +
-  scale_y_continuous(breaks=-seq_along(method_order), labels=set_names(methods$method_name, methods$method_id)[method_order], expand=c(0.005,0.005)) +
-  scale_x_continuous("% of cases where topology was predicted correctly", breaks=c(0.5,1),labels = scales::percent)
+  # scale_fill_manual(values = set_names(trajectory_types$colour, trajectory_types$id)) +
+  scale_y_continuous(breaks = -seq_along(method_order), labels = set_names(methods$method_name, methods$method_id)[method_order], expand = c(0.005,0.005)) +
+  scale_x_continuous("% of cases where topology was predicted correctly", breaks = c(0.5,1),labels = scales::percent)
 topology_sensitivity_plot
-topology_sensitivity_plot %>% ggsave(figure_file("topology_sensitivity.svg"), ., width=12, height=12)
+topology_sensitivity_plot %>% ggsave(figure_file("topology_sensitivity.svg"), ., width = 12, height = 12)
 
 
 # table for correct topology prediction
@@ -66,7 +66,7 @@ topology_sensitivity_table <- map(c("html", "latex"), function(format) {
       ~kableExtra::cell_spec(
         scales::percent(.),
         format,
-        background=kableExtra::spec_color(., scale_from=c(0, 1)),
+        background = kableExtra::spec_color(., scale_from = c(0, 1)),
         color = ifelse(. > 0.5, "black", "white")
     )) %>%
     mutate(method_id = methods$method_name[match(method_id, methods$method_id)]) %>%

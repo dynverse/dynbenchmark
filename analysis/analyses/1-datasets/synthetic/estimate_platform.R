@@ -15,7 +15,7 @@ splatEstDropout <- function(norm.counts, params) {
   params <- splatter::setParams(params, dropout.mid = mid, dropout.shape = shape)
   return(params)
 }
-assignInNamespace("splatEstDropout", splatEstDropout, pos="package:splatter")
+assignInNamespace("splatEstDropout", splatEstDropout, pos = "package:splatter")
 
 mutate <- dplyr::mutate
 filter <- dplyr::filter
@@ -41,7 +41,7 @@ walk(list.files("../dynalysis/analysis/data/derived_data/datasets/real/"), funct
   # calculate changing genes
   seurat <- Seurat::CreateSeuratObject(t(counts))
   seurat@ident <- dataset$cell_grouping %>% slice(match(rownames(counts), cell_id)) %>% pull(group_id) %>% factor() %>% setNames(rownames(counts))
-  changing <- FindAllMarkers(seurat, logfc.treshold = 1, min.pct=0.4)
+  changing <- FindAllMarkers(seurat, logfc.treshold = 1, min.pct = 0.4)
   n_changing <- changing %>% filter(abs(avg_logFC) >= 1) %>% pull(gene) %>% unique() %>% length()
   pct_changing <- n_changing / ncol(counts)
   

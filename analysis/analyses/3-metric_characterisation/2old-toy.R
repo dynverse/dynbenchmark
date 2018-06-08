@@ -27,29 +27,29 @@ toys_blueprint <- tribble(
   "cycle", "warp",
   "cycle", "hairy"
 ) %>% rowwise() %>% mutate(
-  generator=list(get(paste0("generate_", generator_id))),
-  perturbator=list(get(paste0("perturb_", perturbator_id)))
+  generator = list(get(paste0("generate_", generator_id))),
+  perturbator = list(get(paste0("perturb_", perturbator_id)))
 )
 
 # replicate
 nreplicates <- 5
-toys <- toys_blueprint %>% slice(rep(1:n(), each=nreplicates)) %>% mutate(
-  replicate=seq_len(nrow(.))%%nreplicates,
-  toy_category=paste0(generator_id, "-", perturbator_id),
-  toy_id=paste0(toy_category, "-", replicate)
+toys <- toys_blueprint %>% slice(rep(1:n(), each = nreplicates)) %>% mutate(
+  replicate = seq_len(nrow(.))%%nreplicates,
+  toy_category = paste0(generator_id, "-", perturbator_id),
+  toy_id = paste0(toy_category, "-", replicate)
 ) %>%
-  mutate(ncells=sample(50:500, n(), replace=TRUE))
+  mutate(ncells = sample(50:500, n(), replace = TRUE))
 
 # generate gold standards and toys, can take some time (for computing the geodesic distances I presume)
 # I choose to not do this using mutate because it is much easier to debug using loops
 toys$gs <- toys %>% split(seq_len(nrow(toys))) %>% parallel::mclapply(function(row) {
   row$generator[[1]](row$ncells)
-}, mc.cores=8)
+}, mc.cores = 8)
 #toys$gs <- map2(toys$generator, toys$ncells, ~.x(.y))
 
 toys$toy <- toys %>% split(seq_len(nrow(toys))) %>% parallel::mclapply(function(row) {
   row$perturbator[[1]](row$gs[[1]])
-}, mc.cores=8)
+}, mc.cores = 8)
 # toys$toy <- map2(toys$perturbator, toys$gs, ~.x(.y))
 toys$toy <- map2(toys$toy, toys$toy_id, ~rename_toy(.x, .y))
 
@@ -63,16 +63,16 @@ toys <- read_rds(derived_file("toys.rds"))
 
 # get the scores when comparing the gs to toy
 metrics <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation", "edge_flip", "rf_mse", "rf_rsq")
-compare_toy <- function(gs, toy, id=toy$id) {
-  scores <- dyneval:::calculate_metrics(gs, toy, metrics=metrics)$summary
-  scores %>% mutate(toy_id=id)
+compare_toy <- function(gs, toy, id = toy$id) {
+  scores <- dyneval:::calculate_metrics(gs, toy, metrics = metrics)$summary
+  scores %>% mutate(toy_id = id)
 }
 
 # get the scores when both comparing gs to gs and comparing gs to toy
 compare_gs_toy <- function(gs, toy) {
   bind_rows(
-    compare_toy(gs, toy) %>% mutate(comparison="gs-toy"),
-    compare_toy(gs, gs, id=toy$id) %>% mutate(comparison="gs-gs")
+    compare_toy(gs, toy) %>% mutate(comparison = "gs-toy"),
+    compare_toy(gs, gs, id = toy$id) %>% mutate(comparison = "gs-gs")
   )
 }
 

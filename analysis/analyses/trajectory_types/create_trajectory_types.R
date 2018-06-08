@@ -7,7 +7,7 @@ experiment("trajectory_types")
 library(xml2)
 
 xml_find_multiple_ids <- function(xml, ids) {
-  ids_txt <- paste0(glue::glue("@id = \'"), ids, "\'", collapse=" or ")
+  ids_txt <- paste0(glue::glue("@id = \'"), ids, "\'", collapse = " or ")
   xpath <- glue::glue(".//svg:g[{ids_txt}]")
 
   xml_find_all(xml, xpath)
@@ -31,6 +31,6 @@ walk(trajtype_ids, function(id) {
 
   write(as.character(xml_mini), file = mini_name)
 
-  command <- glue::glue("inkscape --verb=FitCanvasToDrawing --verb=FileVacuum --verb=FileSave --verb=FileQuit {mini_name}")
+  command <- glue::glue("inkscape --verb = FitCanvasToDrawing --verb = FileVacuum --verb = FileSave --verb = FileQuit {mini_name}")
   system(command, ignore.stdout = F)
 })

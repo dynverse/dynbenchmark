@@ -2,11 +2,11 @@
 #' @param x The text
 #' @param width The width of the label
 #' @export
-label_short <- function(x, width=10) {
+label_short <- function(x, width = 10) {
   tibble(id = as.character(x)) %>%
     left_join(dynalysis::labels, "id") %>%
-    mutate(short=ifelse(is.na(short), label_capitalise(id), short)) %>%
-    mutate(short=label_wrap(short, width=width)) %>%
+    mutate(short = ifelse(is.na(short), label_capitalise(id), short)) %>%
+    mutate(short = label_wrap(short, width = width)) %>%
     pull(short)
 }
 
@@ -69,7 +69,7 @@ label_extrema <- function(x) {
 #' @param cutoffs Cutoffs for number of asterisks
 #'
 #' @export
-label_pvalue <- function(p_values, cutoffs=c(0.1, 0.01, 1e-5)) {
+label_pvalue <- function(p_values, cutoffs = c(0.1, 0.01, 1e-5)) {
   requireNamespace("glue")
 
   breaks <- c(Inf, cutoffs, -Inf)
