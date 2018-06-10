@@ -14,12 +14,12 @@ warnings_are_errors: true
 addons:
   apt:
     packages:
-      - libgsl0-dev                        # dyngen > splatter > zinbwave > copula > gsl
+      - libgsl0-dev                         # dyngen > splatter > zinbwave > copula > gsl
       - libsdl1.2-dev
       - libreadline-dev
       - imagemagick
       - libfftw3-dev
-      - libudunits2-dev
+      - libudunits2-dev                     # dynalysis > ggforce > units
       - libblas-dev
       - liblapack-dev
       - libglu1-mesa-dev                    # dynmethods > merlot > rgl
