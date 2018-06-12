@@ -5,7 +5,6 @@ library(dynalysis)
 
 experiment("4-method_characterisation")
 
-
 #   ____________________________________________________________________________
 #   Implementations                                                         ####
 
@@ -83,9 +82,6 @@ if(!methods$conversion_split %>% map_lgl(~all(. %in% allowed_conversions)) %>% a
   stop("Some conversions are invalid!")
 }
 methods$conversion_special <- map_lgl(methods$conversion_split, ~"special" %in% .)
-
-## methods outputs --------------
-methods$output_split <- methods$output %>% str_split("[ ]?,[ ]?")
 
 # # add extra reason for date cutoff
 # date_cutoff <- as.Date("2017-06-01")

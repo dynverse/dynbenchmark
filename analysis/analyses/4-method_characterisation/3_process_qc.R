@@ -17,7 +17,8 @@ applications <- c("developer_friendly", "user_friendly", "good_science")
 implementation_qc_converted <- implementation_qc_sheet %>%
   filter(active) %>%
   tidyr::fill(aspect_id) %>%
-  mutate(aspect_id = factor(aspect_id, levels = implementation_qc_sheet$aspect_id %>% unique() %>% keep(~!is.na(.)))) %>%
+  mutate(aspect_id = factor(aspect_id, levels = implementation_qc_sheet$aspect_id %>% unique() %>%
+                              keep(~!is.na(.)))) %>%
   group_by(aspect_id) %>%
   tidyr::fill(name, category, weight, aspect, !!applications, references) %>%
   mutate_at(vars(!!applications), ~ifelse(is.na(.), FALSE, TRUE)) %>%
