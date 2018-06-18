@@ -19,3 +19,4 @@ ncitations <- pbapply::pbsapply(methods$gscholar_cluster_id, google_scholar_num_
 ncitations[is.na(ncitations)] <- ""
 
 gs_edit_cells(sheet, ws = "Implementations", input = ncitations, byrow = FALSE, anchor = which(colnames(methods) == "ncitations") %>% {paste0(LETTERS[floor(./26)], LETTERS[. %% 26], "3")})
+
