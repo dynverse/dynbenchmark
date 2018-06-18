@@ -140,7 +140,7 @@ improve_df <- crossing(
   correlation = c(F, T),
   rf_mse_inv = c(F, T)
 ) %>% mutate(
-  id = glue::glue("c={ifelse(correlation, 'T', 'F')},r={ifelse(rf_mse_inv, 'T', 'F')},nt={nettype}")
+  id = glue::glue("c = {ifelse(correlation, 'T', 'F')},r = {ifelse(rf_mse_inv, 'T', 'F')},nt = {nettype}")
 )
 
 outputs <-

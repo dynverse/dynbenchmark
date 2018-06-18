@@ -32,11 +32,11 @@ plots <- map(modulenet_names, function(modulenet_name) {
     activate(edges) %>%
     arrange(from == to) %>%
     ggraph(layout = 'linear', circular = TRUE) +
-    geom_edge_link(aes(color = effect), arrow = arrow(type="closed"), end_cap = circle(3, 'mm')) +
-    geom_edge_loop(aes(color = effect), arrow = arrow(type="closed"), end_cap = circle(3, 'mm')) +
-    geom_node_label(aes(fill = a0, label=module_id)) +
-    scale_edge_color_manual(values = c("-1"="#0074D9", "1"="#FF4136")) +
-    scale_fill_manual(values = c("1"="#FF4136", "0"="white")) +
+    geom_edge_link(aes(color = effect), arrow = arrow(type = "closed"), end_cap = circle(3, 'mm')) +
+    geom_edge_loop(aes(color = effect), arrow = arrow(type = "closed"), end_cap = circle(3, 'mm')) +
+    geom_node_label(aes(fill = a0, label = module_id)) +
+    scale_edge_color_manual(values = c("-1" = "#0074D9", "1" = "#FF4136")) +
+    scale_fill_manual(values = c("1" = "#FF4136", "0" = "white")) +
     theme_graph() +
     theme_without_legend +
     ggtitle(label_long(modulenet_name), "Module network")
@@ -50,7 +50,7 @@ plots <- map(modulenet_names, function(modulenet_name) {
 
   milestone_plot <- ggraph(milestone_graph, layout = "fr") +
     geom_node_point(aes()) +
-    geom_edge_link(aes(color = edge_id, edge_linetype=burn), arrow=arrow(type="closed")) +
+    geom_edge_link(aes(color = edge_id, edge_linetype = burn), arrow = arrow(type = "closed")) +
     scale_edge_burn +
     scale_edge_transition +
     theme_graph("") +
@@ -59,7 +59,7 @@ plots <- map(modulenet_names, function(modulenet_name) {
 
   # Edge operations graph
   edge_operations_graph <- edge_operations %>%
-    separate_rows(module_progression, sep="\\|") %>%
+    separate_rows(module_progression, sep = "\\|") %>%
     group_by(from, to) %>%
     mutate(
       from_b = ifelse(row_number() == 1, as.character(from), paste0(from, "_", edge_id, "_", seq_len(n())-1)),
@@ -70,7 +70,7 @@ plots <- map(modulenet_names, function(modulenet_name) {
     as_tbl_graph()
 
   edge_operations_plot <- ggraph(edge_operations_graph, layout = "fr") +
-    geom_edge_link(aes(label = module_progression, edge_linetype=burn, color=edge_id), arrow=arrow(type="closed"), angle_calc = 'along', label_dodge = unit(2.5, 'mm')) +
+    geom_edge_link(aes(label = module_progression, edge_linetype = burn, color = edge_id), arrow = arrow(type = "closed"), angle_calc = 'along', label_dodge = unit(2.5, 'mm')) +
     geom_node_point() +
     scale_edge_transition +
     theme_graph() +
@@ -103,9 +103,9 @@ notes <- c("$y_{max} = r/d * p/q$")
 table <- map(c("latex", "html"), function(format) {
   table <- samplers %>% mutate(text = pritt("${parameter} = {distribution}$")) %>%
     select(text) %>%
-    mutate(text = kableExtra::cell_spec(text, format, escape=FALSE)) %>%
-    knitr::kable(format, escape = FALSE, col.names=NULL) %>%
-    kableExtra::kable_styling(bootstrap_options="condensed") %>%
+    mutate(text = kableExtra::cell_spec(text, format, escape = FALSE)) %>%
+    knitr::kable(format, escape = FALSE, col.names = NULL) %>%
+    kableExtra::kable_styling(bootstrap_options = "condensed") %>%
     kableExtra::footnote(notes, general_title = "where") %>%
     gsub("&amp;", "&", .)
   table

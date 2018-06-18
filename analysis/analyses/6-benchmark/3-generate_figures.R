@@ -10,7 +10,7 @@ experiment("5-optimise_parameters/3-evaluate_parameters")
 #   path_src = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
 #   remote_dest = "",
 #   path_dest = derived_file(),
-#   verbose=T
+#   verbose = T
 # )
 
 ############################################################

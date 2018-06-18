@@ -5,7 +5,7 @@
 #'
 #' @importFrom xml2 read_xml xml_new_root xml_find_first xml_remove xml_add_child write_xml
 generate_prior_mini <- function(method_priors, svg = xml2::read_xml(figure_file("priors.svg", experiment_id = "priors"))) {
-  svg2 <- xml2::xml_new_root(svg, .copy=T)
+  svg2 <- xml2::xml_new_root(svg, .copy = T)
 
   map2(method_priors$prior_id, method_priors$prior_usage, function(prior_id, usage) {
     color <- dynalysis::prior_usages$color[dynalysis::prior_usages$prior_usage == usage]
