@@ -24,8 +24,8 @@ implementations$date[replace_date] <- implementations$publication_date[replace_d
 # Altmetrics ----------------------------
 implementations_altmetrics <- map(implementations$DOI, function(doi) {
   tryCatch(
-    rAltmetric::altmetrics(doi=doi) %>% rAltmetric::altmetric_data() %>% select(ends_with("_count")) %>% mutate_all(as.numeric),
-    error = function(x) tibble(cited_by_posts_count=0)
+    rAltmetric::altmetrics(doi = doi) %>% rAltmetric::altmetric_data() %>% select(ends_with("_count")) %>% mutate_all(as.numeric),
+    error = function(x) tibble(cited_by_posts_count = 0)
   )
 }) %>% bind_rows()
 implementations_altmetrics[is.na(implementations_altmetrics)] <- 0
@@ -45,7 +45,7 @@ methods <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
 # Trajectory components --------------------------
 # split maximal trajectory types
 methods <- methods %>%
-  mutate(maximal_trajectory_types_split = map(maximal_trajectory_types, ~as.character(stringr::str_split(., "[ ]?,[ ]?", simplify=TRUE)))) %>%
+  mutate(maximal_trajectory_types_split = map(maximal_trajectory_types, ~as.character(stringr::str_split(., "[ ]?,[ ]?", simplify = TRUE)))) %>%
   mutate(maximal_trajectory_type = map_chr(maximal_trajectory_types_split, first))
 
 # now add for every trajectory type a column, whether it can handle such a trajectory or not

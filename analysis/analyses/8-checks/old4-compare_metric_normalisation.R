@@ -202,7 +202,7 @@ out_scalings <-
 
     gden <- ggplot(ois) +
       geom_vline(aes(xintercept = x), colour = "black", vline) +
-      geom_density(aes(x = value, y=..scaled.., colour = type)) +
+      geom_density(aes(x = value, y = ..scaled.., colour = type)) +
       geom_label(aes(x, y, label = paste0("Mean diff = ", round(drift, 2))), driftdf) +
       facet_grid(stage~metric) +
       theme_bw()
@@ -221,7 +221,7 @@ out_scalings <-
       labs(title = score_name)
 
     g2 <- ggplot(oi) +
-      geom_density(aes(x = norm_score, y=..scaled.., group = task_id, colour = task_colour)) +
+      geom_density(aes(x = norm_score, y = ..scaled.., group = task_id, colour = task_colour)) +
       facet_grid(metric~trajectory_type, scales = "free") +
       theme_bw() +
       theme(legend.position = "none")

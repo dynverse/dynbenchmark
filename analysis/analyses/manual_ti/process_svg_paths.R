@@ -23,15 +23,15 @@ run$spaces$id <- tasks$id[pmatch(run$spaces$id %>% gsub(".*/(.*)", "\\1", .), ta
 # - The images dimensions are in points
 
 svg <- read_xml(derived_file(glue::glue("{run$run_id}.svg")))
-layer <- svg %>% xml_find_first("//svg:g[@inkscape:label='segments']")
+layer <- svg %>% xml_find_first("//svg:g[@inkscape:label = 'segments']")
 paths_svg <- layer %>% xml_find_all("svg:path") %>% xml_attr("d")
 
 split_coords <- function(x) as.numeric(str_split(x, ",")[[1]])
 
 # calculate dimensions of svg and layer transformation
 dimensions <- c(
-  svg %>% xml_find_first("svg:g[@inkscape:label='back']") %>% xml_child() %>% xml_attr("width") %>% as.numeric(),
-  svg %>% xml_find_first("svg:g[@inkscape:label='back']") %>% xml_child() %>% xml_attr("height") %>% as.numeric()
+  svg %>% xml_find_first("svg:g[@inkscape:label = 'back']") %>% xml_child() %>% xml_attr("width") %>% as.numeric(),
+  svg %>% xml_find_first("svg:g[@inkscape:label = 'back']") %>% xml_child() %>% xml_attr("height") %>% as.numeric()
 )
 if (any(is.na(dimensions))) {stop("Dimensions should be in pt!!")}
 base_coords <- layer %>% xml_attr("transform") %>% str_extract("\\(.*\\)") %>% str_sub(2, -2) %>% split_coords()
@@ -61,9 +61,9 @@ process_path <- function(path, base_coords = c(0, 0)) {
     cur <- split[[i]]
 
     if(cur %in% c("m", "l")) {
-      relative=TRUE
+      relative = TRUE
     } else if (cur %in% c("M", "L")){
-      relative=FALSE
+      relative = FALSE
     } else if(str_detect(cur, "[0-9\\.-]*,[0-9\\.-]")) {
       pieces <- c(pieces, list(split_coords(cur)))
       if(relative && length(pieces) > 1) {
@@ -156,7 +156,7 @@ if(any(as.integer(paths$box_id) != paths$box_id)) {
 paths[paths$box_id <= 10 & paths$box_id >= 1,] %>%
   mutate(path_id = row_number()) %>%
   unnest(path) %>%
-  ggplot(aes(x=x, y=-y, color=factor(box_id))) + geom_path(aes(group=path_id)) + coord_equal() + facet_wrap(~box_id, scales="free") + ggraph::theme_graph() + theme(legend.position = "none")
+  ggplot(aes(x = x, y = -y, color = factor(box_id))) + geom_path(aes(group = path_id)) + coord_equal() + facet_wrap(~box_id, scales = "free") + ggraph::theme_graph() + theme(legend.position = "none")
 
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
@@ -189,7 +189,7 @@ nodes_premerge$node_group_id <- (possible_node_merges * (node_dist < node_max_di
 
 nodes <- nodes_premerge %>%
   group_by(node_group_id) %>%
-  mutate(x=mean(x), y=mean(y)) %>%
+  mutate(x = mean(x), y = mean(y)) %>%
   select(-node_id) %>%
   rename(node_id = node_group_id)
 
@@ -205,7 +205,7 @@ if(!all(run$spaces$box_id %in% nodes$box_id)) {
 cluster_networks <- nodes %>%
   group_by(path_id) %>%
   summarise(
-    cluster_network = list(drop_na(tibble(from=lag(node_id, 1), to=node_id) %>% filter(from != to))),
+    cluster_network = list(drop_na(tibble(from = lag(node_id, 1), to = node_id) %>% filter(from != to))),
     box_id = as.integer(first(box_id))
   ) %>%
   group_by(box_id) %>%
@@ -232,21 +232,21 @@ cluster_positions <- nodes %>%
     x = (x - 0.5) * global_x_scale + 0.5,
     y = (y - 0.5) * global_y_scale + 0.5
   ) %>%
-  left_join(run$spaces %>% select(x_scale, y_scale, y_shift, x_shift, box_id), by="box_id") %>%
+  left_join(run$spaces %>% select(x_scale, y_scale, y_shift, x_shift, box_id), by = "box_id") %>%
   mutate(
     x = x * x_scale + x_shift,
     y = y * y_scale + y_shift
   ) %>%
   group_by(box_id) %>%
-  summarise(cluster_positions = list(tibble(x=x, y=y, node_id=node_id))) %>%
+  summarise(cluster_positions = list(tibble(x = x, y = y, node_id = node_id))) %>%
   ungroup()
 
 # make sure points overlap with data
 run$spaces[100:120, ] %>% unnest(space) %>%
   ggplot(aes(Comp1, Comp2)) +
   geom_point() +
-  geom_point(aes(x, y), color="red", data=cluster_positions[100:120, ] %>% unnest(cluster_positions)) +
-  facet_wrap(~box_id, scale="free")
+  geom_point(aes(x, y), color = "red", data = cluster_positions[100:120, ] %>% unnest(cluster_positions)) +
+  facet_wrap(~box_id, scale = "free")
 
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
@@ -255,7 +255,7 @@ predictions_data <- left_join(cluster_positions, cluster_networks, "box_id") %>%
 predictions_list <- predictions_data %>% pmap(function(box_id, cluster_positions, cluster_network, space, ...) {
   print(box_id)
   cluster_space <- cluster_positions %>% column_to_rownames("node_id") %>% as.matrix()
-  cluster_network <- cluster_network %>% mutate_all(as.character) %>% mutate(directed=F, length=1)
+  cluster_network <- cluster_network %>% mutate_all(as.character) %>% mutate(directed = F, length = 1)
   sample_space <- space %>% .[, c("Comp1", "Comp2")] %>% magrittr::set_colnames(c("x", "y")) %>% magrittr::set_rownames(space$cell_id)
 
   out <- dynmethods:::project_cells_to_segments(cluster_network, cluster_space, sample_space)

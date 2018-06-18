@@ -76,7 +76,7 @@ benchmark_submit <- function(
 
     ## If no output or qsub handle exists yet
     if (!file.exists(output_file) && !file.exists(qsubhandle_file)) {
-      cat("Submitting ", method$name, "\n", sep="")
+      cat("Submitting ", method$name, "\n", sep = "")
 
       # fetch parameters
       parms <- parameters[[method$short_name]]

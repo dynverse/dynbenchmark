@@ -2,7 +2,7 @@ run_qstat <- function() {
   out_qhost <- PRISM:::run_remote("qhost -F", "prism")$cmd_out
   out_qstat <- PRISM:::run_remote("qstat -u \"*\" -f", "prism")$cmd_out
   
-  processed_qstat_string <- paste0(paste(out_qstat[grepl("^  ", out_qstat)], collapse="\n"), "\n\n")
+  processed_qstat_string <- paste0(paste(out_qstat[grepl("^  ", out_qstat)], collapse = "\n"), "\n\n")
   
   task_id_fun <- function(x) {
     if (grepl("-", x)) {
@@ -17,7 +17,7 @@ run_qstat <- function() {
   
   split_task_id <- function(x) {
     map(x, function(x) {
-      gsub(":[0-9]*", "", x) %>% gsub("-", ":", .) %>% parse(text=.) %>% eval()
+      gsub(":[0-9]*", "", x) %>% gsub("-", ":", .) %>% parse(text = .) %>% eval()
     })
   }
   
@@ -66,10 +66,10 @@ design$status <- design %>% as.list() %>% pmap(function(task_id, name) {
   }
 }) %>% unlist()
 design %>% 
-  mutate(name = factor(name, levels=names)) %>% 
+  mutate(name = factor(name, levels = names)) %>% 
   ggplot(aes(name, as.character(task_id))) + 
-  geom_tile(aes(fill=status)) + 
-  scale_fill_manual(values=c(output="#0074D9", running="#2ECC40", waiting="#FF851B", "not_present"="#FF4136")) + 
-  geom_text(aes(label=task_id), color="white", size=2) +
+  geom_tile(aes(fill = status)) + 
+  scale_fill_manual(values = c(output = "#0074D9", running = "#2ECC40", waiting = "#FF851B", "not_present" = "#FF4136")) + 
+  geom_text(aes(label = task_id), color = "white", size = 2) +
   cowplot::theme_cowplot() +
-  scale_x_discrete(expand=c(0,0))  + scale_y_discrete(expand=c(0,0))
+  scale_x_discrete(expand = c(0,0))  + scale_y_discrete(expand = c(0,0))
