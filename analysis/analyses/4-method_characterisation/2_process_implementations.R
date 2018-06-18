@@ -37,7 +37,6 @@ implementations$non_inclusion_reasons_split <- implementations$non_inclusion_rea
 ## Platforms ------------------
 implementations$platforms_split <- implementations$platforms %>% str_split("[ ]?,[ ]?")
 
-
 #   ____________________________________________________________________________
 #   Methods                                                                 ####
 methods <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
@@ -75,7 +74,7 @@ trajectory_type_capabilities <- (trajectory_type_capabilities & !trajectory_type
 # add capabilities to implementations
 methods <- methods %>% bind_cols(trajectory_type_capabilities)
 
-## methods conversions ------------------------
+## Methods conversions ------------------------
 methods$conversion_split <- methods$conversion %>% str_split("[ ]?,[ ]?")
 allowed_conversions <- c("trajectory", "linear", "end_state_probability", "dimred_projection", "cluster_graph", "cell_graph", "special", "cyclic", NA)
 if(!methods$conversion_split %>% map_lgl(~all(. %in% allowed_conversions)) %>% all()) {
@@ -83,12 +82,7 @@ if(!methods$conversion_split %>% map_lgl(~all(. %in% allowed_conversions)) %>% a
 }
 methods$conversion_special <- map_lgl(methods$conversion_split, ~"special" %in% .)
 
-# # add extra reason for date cutoff
-# date_cutoff <- as.Date("2017-06-01")
-# date_filter <- implementations$date > date_cutoff & !is.na(implementations$date)
-# implementations$non_inclusion_reasons_split[date_filter] <- map(implementations$non_inclusion_reasons_split[date_filter], c, "date") %>% map(unique)
-
-## add extra prior information columns for robrecht
+## Prior information ---------------------------
 methods$prior_start <- case_when(
   methods$start_id == "required" ~ "required_id",
   methods$start_id == "optional" ~ "optional_id"
@@ -107,12 +101,20 @@ methods$prior_states <- case_when(
   methods$states_network == "required" ~ "required_network",
   methods$states_network == "optional" ~ "optional_network"
 )
-methods$prior_genes <- case_when(
-  methods$genes_id == "required" ~ "required_id",
-  methods$genes_id == "optional" ~ "optional_id"
+methods$prior_features <- case_when(
+  methods$features_id == "required" ~ "required_id",
+  methods$features_id == "optional" ~ "optional_id"
 )
 
-# Saving -------------------------
+## Dynmethods information ------------------------
+methods_dynmethods <- dynmethods::methods
+methods <- methods %>% left_join(
+  methods_dynmethods[setdiff(colnames(methods_dynmethods), c(colnames(methods), colnames(implementations))) %>% c("method_id")],
+  "method_id"
+)
+
+#   ____________________________________________________________________________
+#   Save output                                                             ####
 write_rds(methods, derived_file("methods_tidy.rds"))
 write_rds(implementations, derived_file("implementations_tidy.rds"))
 

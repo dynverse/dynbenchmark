@@ -4,7 +4,6 @@ library(dynalysis)
 
 experiment("4-method_characterisation")
 
-
 ##  ............................................................................
 ##  QC sheet processing                                                     ####
 # Download qc & initial processing
@@ -37,25 +36,11 @@ implementation_qc_molten <- implementation_qc_converted %>%
 # process answer, NA coercion warnings are normal here due to check of
 implementation_qc_processed <- implementation_qc_molten %>%
   mutate(
-    answer = ifelse(is.na(answer), " ", answer),
-    answer_first_char = str_split_fixed(answer, " ", 2)[, 1],
-    answer_description = str_split_fixed(answer, " ", 2)[, 2],
-    answer = ifelse(
-      answer_first_char == ">",
-      1,
-      ifelse(
-        answer_first_char == "?",
-        NA,
-        ifelse(
-          suppressWarnings({!is.na(as.numeric(answer_first_char))}),
-          suppressWarnings(as.numeric(answer_first_char)),
-          0
-        )
-      ))
-  )
-
-# are all checks answered?
-implementation_qc_processed %>% group_by(implementation_id) %>% summarise(answered = all(!is.na(answer))) %>% ggplot() + geom_point(aes(answered, implementation_id))
+    answer = ifelse(is.na(answer), "0", answer),
+    answer_first_char = str_replace(answer, "([\\d\\.]*).*", "\\1"),
+    answer_description = str_replace(answer, "[\\d\\.]*(.*)", "\\1") %>% trimws()
+  ) %>%
+  mutate(answer = as.numeric(ifelse(answer_first_char == "", "0", answer_first_char)))
 
 implementation_qc_processed <- implementation_qc_processed %>%
   group_by(implementation_id) %>%
