@@ -99,6 +99,7 @@ Following aspects of the wrapper still have to be confirmed with the authors:
     - Are all important parameters exposed?
     - Are the correct default values used?
     - Is the parameter space reasonable (the lower and upper boundaries for numeric parameters, the possible values for discrete parameters) ?
+    - Is the documentation of the parameters correct and up-to-date?
 - [ ] Input
     - Is the correct type of expression requested (raw counts or normalised expression)?
     - Is all prior information (required or optional) requested?
@@ -114,6 +115,8 @@ Following aspects of the wrapper still have to be confirmed with the authors:
     - Is the [quality control assessment]({qc_worksheet_url}) of the wrapper correct and up to date?
     - You can improve the QC score of your method by implementing the required changes and letting us know here
 - [ ] Are there any other comments?
+
+We welcome further feedback.
 ")
 
 blueprint %>% clipr::write_clip()
