@@ -159,7 +159,7 @@ columns <- tribble(
   "Priors required", "prior_required", label_tbd,
   "Priors optional", "prior_optional", label_tbd,
   "Evaluated", "evaluated", label_long,
-  "Reference" , "DOI", cite,
+  "Reference" , "doi", cite,
   "Code/package", "code_location", url
 )
 
