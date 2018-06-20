@@ -73,7 +73,6 @@ implementations <- readRDS(derived_file("implementations.rds"))
 
 # choose implementation
 implementation_ids <- implementations %>% filter(implementation_name %in% issues$title) %>% pull(implementation_id)
-implementation_ids <- "grandprix"
 
 for (implementation_id in implementation_ids) {
   print(implementation_id)
