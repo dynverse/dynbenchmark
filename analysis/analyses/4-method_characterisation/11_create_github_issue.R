@@ -57,7 +57,7 @@ issues_url <- "https://api.github.com/repos/dynverse/dynmethods/issues"
 
 issues <- GET(
   paste0(issues_url, "?per_page=100"),
-  body = list(labels=c("method discussion", since = "2018-01-01T00:00:00Z"))
+  body = list(labels=c("method discussion"))
 ) %>% content() %>% list_as_tibble()
 
 # get qc spreadsheet
@@ -71,9 +71,27 @@ first_non_na <- function(x) {x %>% discard(is.na) %>% first}
 methods <- readRDS(derived_file("methods.rds"))
 implementations <- readRDS(derived_file("implementations.rds"))
 
-# choose implementation
+# add [x] to implementations
+n_xs <- 5
+implementations_xs <- tibble(
+  implementation_name = issues$title,
+  xs = issues$body %>%
+    map(~str_extract_all(., "\\[([ x])\\]")[[1]]) %>%
+    map(~c(., rep("[]", n_xs - length(.))))
+)
+implementations <- left_join(implementations, implementations_xs, "implementation_name")
+implementations$xs <- map(implementations$xs, function(xs) {
+  if (any(is.na(xs))) {
+    rep("[]", n_xs)
+  } else {
+    xs
+  }
+})
+
+
+# choose implementations
 implementation_ids <- implementations %>% filter(implementation_name %in% issues$title) %>% pull(implementation_id)
-implementation_ids <- "dpt"
+implementation_id <- "scorpius"
 
 for (implementation_id in implementation_ids) {
   print(implementation_id)
@@ -132,22 +150,22 @@ This issue is for discussing the wrapper for your trajectory inference method, {
 
 We are creating this issue to ensure your method is being evaluated in the way it was designed for. The checklist below contains some important questions for you to have a look at.
 
-- [ ] **Parameters**, defined in {definition_text} ([more info](https://dynverse.github.io/dynwrap/articles/create_ti_method_docker.html#parameters))
+- {implementation$xs[[1]]} **Parameters**, defined in {definition_text} ([more info](https://dynverse.github.io/dynwrap/articles/create_ti_method_docker.html#parameters))
   - Are all important parameters described in this file?
   - For each parameter, is the proposed default value reasonable?
   - For each parameter, is the proposed parameter space reasonable (e.g. lower and upper boundaries)?
   - Is the description of the parameters correct and up-to-date?
-- [ ] **Input**, defined in {definition_text} and loaded in {entrypoint_text} ([more info](https://dynverse.github.io/dynwrap/articles/create_ti_method_docker.html#input))
+- {implementation$xs[[2]]} **Input**, defined in {definition_text} and loaded in {entrypoint_text} ([more info](https://dynverse.github.io/dynwrap/articles/create_ti_method_docker.html#input))
   - Is the correct type of expression requested (raw counts or normalised expression)?
   - Is all prior information (required or optional) requested?
   - Would some other type of prior information help the method?
-- [ ] **Output**, defined in {definition_text} and saved in {entrypoint_text} ([more info](https://dynverse.github.io/dynwrap/articles/create_ti_method_docker.html#output))
+- {implementation$xs[[3]]} **Output**, defined in {definition_text} and saved in {entrypoint_text} ([more info](https://dynverse.github.io/dynwrap/articles/create_ti_method_docker.html#output))
   - Is the output correctly processed towards the [common trajectory model](https://github.com/dynverse/dynwrap#dynwrap)? Would some other postprocessing method make more sense?
   - Is all relevant output saved (dimensionality reduction, clustering/grouping, pseudotime, ...)
-- [ ] **Wrapper script**, see {entrypoint_text} ([more info](https://dynverse.github.io/dynwrap/articles/create_ti_method_docker.html#doing-trajectory-inference))
+- {implementation$xs[[4]]} **Wrapper script**, see {entrypoint_text} ([more info](https://dynverse.github.io/dynwrap/articles/create_ti_method_docker.html#doing-trajectory-inference))
   - This is a script that is executed upon starting the docker container. It will receive several input files as defined by `definition.yml`, and is expected to produce certain output files, also as defined by `definition.yml`.
   - Is the script a correct representation of the general workflow a user is expected to follow when they want to apply your method to their data?
-- [ ] **Quality control**, see {qc_worksheet_text}
+- {implementation$xs[[5]]} **Quality control**, see {qc_worksheet_text}
   - We also evaluated the implementation of a method based on a large check list of good software software development practices.
   - Are the answers we wrote down for your method correct and up to date? Do you disagree with certain answers? (Feel free to leave a comment in the worksheet)
     - You can improve the QC score of your method by implementing the required changes and letting us know. *Do not gloss over this, as it is the easiest way to improve the overall ranking of your TI method in our study!*
