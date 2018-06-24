@@ -2,13 +2,18 @@
 % Please edit documentation in R/setup_dataset_preprocessing.R
 \name{load_dataset}
 \alias{load_dataset}
-\title{Loading a dataset after it has been preprocessed}
+\alias{load_datasets}
+\title{Load datasets}
 \usage{
-load_dataset(dataset_id = NULL)
+load_dataset(dataset_id, as_tibble = TRUE)
+
+load_datasets(as_tibble = TRUE)
 }
 \arguments{
 \item{dataset_id}{The ID of the dataset to be used}
+
+\item{as_tibble}{Return the datasets as a tibble or as a list of datasets?}
 }
 \description{
-Loading a dataset after it has been preprocessed
+Load datasets
 }

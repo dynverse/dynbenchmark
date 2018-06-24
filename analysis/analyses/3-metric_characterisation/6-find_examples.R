@@ -36,12 +36,12 @@ progressions <- map_df(seq_len(num_groups), function(groupi) {
 task <- wrap_data(
   id = "example",
   cell_ids = cell_ids
-) %>% add_trajectory_to_wrapper(
+) %>% add_trajectory(
   milestone_ids = milestone_ids,
   milestone_network = milestone_network,
   progressions = progressions,
   divergence_regions = NULL
-) %>% add_cell_waypoints_to_wrapper()
+) %>% add_cell_waypoints()
 
 plot_default(task)
 
@@ -112,17 +112,17 @@ run_fun <- function(percentages, network) {
   # return output
   wrap_prediction_model(
     cell_ids = cell_ids
-  ) %>% add_trajectory_to_wrapper(
+  ) %>% add_trajectory(
     milestone_ids = milestone_ids,
     milestone_network = milestone_network,
     milestone_percentages = milestone_percentages,
     divergence_regions = divergence_regions
-  ) %>% add_timings_to_wrapper(
+  ) %>% add_timings(
     timings =
       add_timing_checkpoint(NULL, "method_afterpreproc") %>%
       add_timing_checkpoint("method_aftermethod") %>%
       add_timing_checkpoint("method_afterpostproc")
-  ) %>% add_cell_waypoints_to_wrapper()
+  ) %>% add_cell_waypoints()
 }
 calculate_metrics2 <- function(task, model) {
   calculate_metrics(task, model) %>% mutate(rf_mse_inv = 1 - rf_mse, rf_mse_w = 1 - 4 * rf_mse)
@@ -140,7 +140,7 @@ improve_df <- crossing(
   correlation = c(F, T),
   rf_mse_inv = c(F, T)
 ) %>% mutate(
-  id = glue::glue("c={ifelse(correlation, 'T', 'F')},r={ifelse(rf_mse_inv, 'T', 'F')},nt={nettype}")
+  id = glue::glue("c = {ifelse(correlation, 'T', 'F')},r = {ifelse(rf_mse_inv, 'T', 'F')},nt = {nettype}")
 )
 
 outputs <-

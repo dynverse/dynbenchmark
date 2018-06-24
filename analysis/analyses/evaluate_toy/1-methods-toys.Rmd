@@ -42,7 +42,7 @@ method_params <- yaml::yaml.load_file("toy_params.yml")$linear
 method_names <- names(method_params)
 # method_names <- c("ouija", "slice")
 
-method_descriptions <- map(method_names, ~get(paste0("description_", .))()) %>% set_names(method_names)
+method_ti_methods <- map(method_names, ~get(paste0("ti_", .))()) %>% set_names(method_names)
 
 metric_names <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation")
 
@@ -50,12 +50,12 @@ method_names <- c("scorpius")
 ```
 
 ```{r}
-# results <- PRISM::qsub_lapply(names(method_descriptions), function(method_name) {
+# results <- PRISM::qsub_lapply(names(method_ti_methods), function(method_name) {
 results <- purrr::map(method_names, function(method_name) {
   library(dyneval)
 
   cat("Processing ", method_name, "\n", sep="")
-  method <- method_descriptions[[method_name]]
+  method <- method_ti_methods[[method_name]]
   params <- method_params[[method_name]]
 
   factory <- function(fun) {
@@ -74,11 +74,11 @@ results <- purrr::map(method_names, function(method_name) {
   }
 
   # factory(function() {
-    dyneval:::execute_evaluation(tasks, method, params, metrics = metric_names, timeout = 100)
+    dyneval:::evaluate_ti_method(tasks, method, params, metrics = metric_names, timeout = 100)
   # }
   # )()
 })
-# }, qsub_environment = list2env(lst(method_descriptions, tasks, metric_names, method_params)), qsub_config = PRISM::override_qsub_config(memory = "10G", execute_before=c("module load python/x86_64/3.5.1"), wait=F))
+# }, qsub_environment = list2env(lst(method_ti_methods, tasks, metric_names, method_params)), qsub_config = PRISM::override_qsub_config(memory = "10G", execute_before=c("module load python/x86_64/3.5.1"), wait=F))
 ```
 
 Gather the output of the different methods, and check whether there were any errors

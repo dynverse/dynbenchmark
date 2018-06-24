@@ -4,7 +4,6 @@ library(dynalysis)
 
 experiment("4-method_characterisation")
 
-
 ##  ............................................................................
 ##  QC sheet processing                                                     ####
 # Download qc & initial processing
@@ -17,7 +16,8 @@ applications <- c("developer_friendly", "user_friendly", "good_science")
 implementation_qc_converted <- implementation_qc_sheet %>%
   filter(active) %>%
   tidyr::fill(aspect_id) %>%
-  mutate(aspect_id = factor(aspect_id, levels = implementation_qc_sheet$aspect_id %>% unique() %>% keep(~!is.na(.)))) %>%
+  mutate(aspect_id = factor(aspect_id, levels = implementation_qc_sheet$aspect_id %>% unique() %>%
+                              keep(~!is.na(.)))) %>%
   group_by(aspect_id) %>%
   tidyr::fill(name, category, weight, aspect, !!applications, references) %>%
   mutate_at(vars(!!applications), ~ifelse(is.na(.), FALSE, TRUE)) %>%
@@ -36,25 +36,11 @@ implementation_qc_molten <- implementation_qc_converted %>%
 # process answer, NA coercion warnings are normal here due to check of
 implementation_qc_processed <- implementation_qc_molten %>%
   mutate(
-    answer = ifelse(is.na(answer), " ", answer),
-    answer_first_char = str_split_fixed(answer, " ", 2)[, 1],
-    answer_description = str_split_fixed(answer, " ", 2)[, 2],
-    answer = ifelse(
-      answer_first_char == ">",
-      1,
-      ifelse(
-        answer_first_char == "?",
-        NA,
-        ifelse(
-          suppressWarnings({!is.na(as.numeric(answer_first_char))}),
-          suppressWarnings(as.numeric(answer_first_char)),
-          0
-        )
-      ))
-  )
-
-# are all checks answered?
-implementation_qc_processed %>% group_by(implementation_id) %>% summarise(answered = all(!is.na(answer))) %>% ggplot() + geom_point(aes(answered, implementation_id))
+    answer = ifelse(is.na(answer), "0", answer),
+    answer_first_char = str_replace(answer, "([\\d\\.]*).*", "\\1"),
+    answer_description = str_replace(answer, "[\\d\\.]*(.*)", "\\1") %>% trimws()
+  ) %>%
+  mutate(answer = as.numeric(ifelse(answer_first_char == "", "0", answer_first_char)))
 
 implementation_qc_processed <- implementation_qc_processed %>%
   group_by(implementation_id) %>%
@@ -74,13 +60,13 @@ write_rds(checks, result_file("checks.rds"))
 # calculate average category scores
 implementation_qc_category_scores <- implementation_qc %>%
   group_by(implementation_id, category) %>%
-  summarise(qc_score=sum(answer * item_weight * weight)/sum(item_weight * weight)) %>%
+  summarise(qc_score = sum(answer * item_weight * weight)/sum(item_weight * weight)) %>%
   ungroup()
 
 # use the average category scores to calculate the final qc_score
 implementation_qc_scores <- implementation_qc_category_scores %>%
   group_by(implementation_id) %>%
-  summarise(qc_score=mean(qc_score)) %>%
+  summarise(qc_score = mean(qc_score)) %>%
   arrange(-qc_score) %>%
   ungroup()
 
@@ -89,7 +75,7 @@ implementation_qc_application_scores <- implementation_qc %>%
   gather(application, application_applicable, !!qc_applications$application) %>%
   filter(application_applicable) %>%
   group_by(implementation_id, application) %>%
-  summarise(score=sum(answer * item_weight * weight)/sum(item_weight * weight)) %>%
+  summarise(score = sum(answer * item_weight * weight)/sum(item_weight * weight)) %>%
   ungroup()
 
 

@@ -4,7 +4,7 @@ perturb_gs <- function(task) {
 }
 
 ## Switch cells
-perturb_switch_n_cells <- function(task, n=length(task$cell_ids)) {
+perturb_switch_n_cells <- function(task, n = length(task$cell_ids)) {
   the_chosen_ones <- sample(task$cell_ids, n)
 
   mapper <- set_names(task$cell_ids, task$cell_ids)
@@ -58,7 +58,7 @@ perturb_break_cycles <- function(task) {
     new_milestone_n <- new_milestone_n + 1
 
     task$progressions[(task$progressions$from == from) & (task$progressions$to == to),]$to = newto
-    task$milestone_network <- task$milestone_network %>% add_row(from=from, to=newto, length=length)
+    task$milestone_network <- task$milestone_network %>% add_row(from = from, to = newto, length = length)
 
     task$milestone_ids <- c(task$milestone_ids, newto)
   }
@@ -80,7 +80,7 @@ perturb_join_linear <- function(task) {
     "M1", "M2",
     "M2", "M3",
     "M3", "M1"
-  ) %>% mutate(length=length/3, directed=TRUE)
+  ) %>% mutate(length = length/3, directed = TRUE)
 
   task$milestone_ids <- c("M1", "M2", "M3")
 
@@ -107,14 +107,14 @@ perturb_split_linear <- function(task) {
     "M1", "M2",
     "M2", "M3",
     "M2", "M4"
-  ) %>% mutate(length=length/2, directed=TRUE)
+  ) %>% mutate(length = length/2, directed = TRUE)
 
   task$milestone_ids <- c("M1", "M2", "M3", "M4")
 
   task$progressions <- task$progressions %>%
     mutate(
       from = ifelse(percentage > 0.5, "M2", "M1"),
-      to = ifelse(percentage > 0.5, sample(c("M3", "M4"), n(), replace=TRUE), "M2"),
+      to = ifelse(percentage > 0.5, sample(c("M3", "M4"), n(), replace = TRUE), "M2"),
       percentage = (percentage * 2) %% 1
     )
   recreate_task(task)
@@ -124,7 +124,7 @@ perturb_split_linear <- function(task) {
 # Make a trajectory hairy
 #task <- generate_linear()
 
-perturb_hairy <- function(task, nhairs=10, overall_hair_length=1) {
+perturb_hairy <- function(task, nhairs = 10, overall_hair_length = 1) {
   if(overall_hair_length < 1) {stop("hair length should be larger than 1")}
 
   newmilestone_network <- task$milestone_network
@@ -133,7 +133,7 @@ perturb_hairy <- function(task, nhairs=10, overall_hair_length=1) {
   new_milestone_i <- 1
 
   for (i in seq_len(nhairs)) {
-    chosen_milestone_edge <- sample(seq_len(nrow(newmilestone_network)), 1, prob=newmilestone_network$length)
+    chosen_milestone_edge <- sample(seq_len(nrow(newmilestone_network)), 1, prob = newmilestone_network$length)
     chosen_edge <- as.list(newmilestone_network[chosen_milestone_edge, ])
     hair_length <- runif(1, 0.1, 0.2)
     window_start <- runif(1, 0, 1-hair_length)
@@ -206,8 +206,8 @@ perturb_hairy <- function(task, nhairs=10, overall_hair_length=1) {
   newtask
 }
 
-perturb_hairy_small <- function(task) {perturb_hairy(task, nhairs=2)}
-perturb_hairy_large <- function(task) {perturb_hairy(task, nhairs=20)}
+perturb_hairy_small <- function(task) {perturb_hairy(task, nhairs = 2)}
+perturb_hairy_large <- function(task) {perturb_hairy(task, nhairs = 20)}
 # perturb_hairy_long <- function(task) {perturb_hairy(task, overall_hair_length = 2)}
 
 # Warping the times
@@ -239,7 +239,7 @@ perturb_remove_cells <- function(task) {
 perturb_add_distant_edge <- function(task) {
   task$milestone_network <- bind_rows(
     task$milestone_network,
-    tibble(from=c(task$milestone_ids[[1]], "NEWM"), to=c("NEWM", task$milestone_ids[[2]]), length=sum(task$milestone_network$length)/2, directed=TRUE)
+    tibble(from = c(task$milestone_ids[[1]], "NEWM"), to = c("NEWM", task$milestone_ids[[2]]), length = sum(task$milestone_network$length)/2, directed = TRUE)
   )
   task$milestone_ids <- c(task$milestone_ids, "NEWM")
   recreate_task(task)
@@ -272,14 +272,14 @@ perturb_structure_and_position <- function(task) {
 
 ## Change milestone network
 change_network <- function(task, trajectory_type = "linear") {
-  task$milestone_network <- dyntoy:::generate_toy_milestone_network(trajectory_type)
+  task$milestone_network <- dyntoy:::generate_milestone_network(trajectory_type)
   task$progressions <- dyntoy:::random_progressions(task$milestone_network, ncells = length(task$cell_ids))
   task$milestone_ids <- unique(c(task$milestone_network$from, task$milestone_network$to))
 
   recreate_task(task)
 }
 
-trajectory_models <- eval(formals(dyntoy:::generate_toy_milestone_network)$model)
+trajectory_models <- eval(formals(dyntoy:::generate_milestone_network)$model)
 
 map(trajectory_models, function(x) function(task) change_network(task, x)) %>% setNames(paste0("perturb_change_network_", trajectory_models)) %>% list2env(.GlobalEnv)
 
@@ -293,7 +293,7 @@ recreate_task <- function(task) {
     task$cell_ids,
     task$milestone_ids,
     task$milestone_network,
-    progression=task$progression
+    progression = task$progression
   )
   task$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(task)
 

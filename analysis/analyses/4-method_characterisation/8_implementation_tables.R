@@ -38,10 +38,10 @@ implementations$non_inclusion_reasons_footnotes <- implementations$non_inclusion
 
 ##  ............................................................................
 ##  Paper table                                                             ####
-superscript <- c(latex = function(x) pritt("\\textsuperscript{{{x}}}"), html=function(x) pritt("<sup>{x}</sup>"))
+superscript <- c(latex = function(x) pritt("\\textsuperscript{{{x}}}"), html = function(x) pritt("<sup>{x}</sup>"))
 
 citation_format <- c(
-  latex=function(references) {
+  latex = function(references) {
     if(is.na(references)) {
       ""
     } else {
@@ -53,7 +53,7 @@ citation_format <- c(
         paste0("\\cite{", ., "}")
     }
   },
-  html=function(references) {
+  html = function(references) {
     if(is.na(references)) {
       ""
     } else {
@@ -73,7 +73,7 @@ imp_table <- map(c("latex", "html"), function(format) {
     filter(type == "algorithm") %>%
     arrange(date) %>%
     mutate(
-      evaluated = ifelse(evaluated, "Yes", map_chr(non_inclusion_reasons_footnotes, ~paste0("No" , superscript[[format]](paste0(., collapse=" "))))),
+      evaluated = ifelse(evaluated, "Yes", map_chr(non_inclusion_reasons_footnotes, ~paste0("No" , superscript[[format]](paste0(., collapse = " "))))),
       evaluated = kableExtra::cell_spec(
         evaluated,
         format,
@@ -87,7 +87,7 @@ imp_table <- map(c("latex", "html"), function(format) {
           label_simple_trajectory_types(maximal_trajectory_type),
           format,
           background =
-            toupper(set_names(trajectory_types$color, trajectory_types$id)[maximal_trajectory_type]) %>%
+            toupper(set_names(trajectory_types$colour, trajectory_types$id)[maximal_trajectory_type]) %>%
             map(~replace(., is.na(.), "#666666")),
           color = "#FFFFFF"
         ),
@@ -104,7 +104,7 @@ imp_table <- map(c("latex", "html"), function(format) {
       fixes_topology = kableExtra::cell_spec(
         ifelse(is.na(topology_inference_type), "TBD", label_long(topology_inference_type)),
         format,
-        color = ifelse(is.na(topology_inference_type), "gray", topinf_colours[topology_inference_type]),
+        color = ifelse(is.na(topology_inference_type), "gray", setNames(topinf_types$colour, topinf_types$name)[topology_inference_type]),
         escape = FALSE
       ),
       prior_required = kableExtra::cell_spec(
@@ -131,7 +131,7 @@ imp_table <- map(c("latex", "html"), function(format) {
   }
 
   table <- implementations_table %>%
-    knitr::kable(format, escape=F) %>%
+    knitr::kable(format, escape = F) %>%
     kableExtra::kable_styling(bootstrap_options = c("striped", "hover","condensed"), font_size = ifelse(format == "latex", 7, 12))
   table
 }) %>% set_names(c("latex", "html"))
@@ -142,12 +142,12 @@ write_rds(imp_table, figure_file("implementations_table.rds"))
 
 ##  ............................................................................
 ##  Google sheet                                                            ####
-sheet <- gs_url("https://docs.google.com/spreadsheets/d/1xeRtfa4NZR-FBZOosPv6nY-alfoGE1ZCEP2ceQg6GH0/edit#gid=0")
+sheet <- gs_url("https://docs.google.com/spreadsheets/d/1xeRtfa4NZR-FBZOosPv6nY-alfoGE1ZCEP2ceQg6GH0/edit#gid = 0")
 
 label_tbd <- function(x) ifelse(is.na(x), "TBD", label_long(x))
 
 direct <- function(x) x
-url <- function(url, text=url) ifelse(is.na(url), "", pritt("=HYPERLINK('{url}', '{text}')"))
+url <- function(url, text = url) ifelse(is.na(url), "", pritt(" = HYPERLINK('{url}', '{text}')"))
 cite <- function(doi) ifelse(is.na(doi), "", url(pritt("https://doi.org/{doi}"), doi))
 date <- function(x) x
 columns <- tribble(
@@ -159,7 +159,7 @@ columns <- tribble(
   "Priors required", "prior_required", label_tbd,
   "Priors optional", "prior_optional", label_tbd,
   "Evaluated", "evaluated", label_long,
-  "Reference" , "DOI", cite,
+  "Reference" , "doi", cite,
   "Code/package", "code_location", url
 )
 

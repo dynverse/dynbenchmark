@@ -3,7 +3,7 @@
 #' @param to_replace Dataframe containing the data
 #' @export
 create_replacers <- function(to_replace) {
-  to_replace %>% mutate(replace_id = map_chr(1-seq_len(n())/100, format, nsmall=2))
+  to_replace %>% mutate(replace_id = map_chr(1-seq_len(n())/100, format, nsmall = 2))
 }
 
 
@@ -62,7 +62,7 @@ replace_svg <- function(svg, replacer) {
 
       sub_g %>%
         xml2::xml_set_attrs(list(
-          transform=transform
+          transform = transform
         ))
 
       # put sub_svg in group

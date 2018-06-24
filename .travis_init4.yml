@@ -23,20 +23,13 @@ addons:
       - libudunits2-dev
       - libblas-dev
       - liblapack-dev
-      - python3-pip
 before_install:
  - source <( curl --insecure https://raw.githubusercontent.com/dynverse/dynmethods/master/.travis_install_python.sh ) # use travis's own python
 install:
-install:
- - pip3 install --user --upgrade --only-binary=numpy,scipy numpy scipy        # many packages
- - pip3 install --user --upgrade pandas matplotlib tqdm GPy                   # GPfates
- - pip3 install --user --upgrade matplotlib seaborn pandas scikit-learn GPy   # topslam
- - pip3 install --user --upgrade scikit-learn networkx matplotlib seaborn munkres # SCIMITAR
- - pip3 install --user --upgrade jinja2                                       # SCUBA
- - pip3 install --user --upgrade python-igraph h5py anndata                   # AGA / scanpy
- - pip3 install --user --upgrade Cython statsmodels                           # Wishbone
- - pip3 install --user --upgrade cycler pyparsing pytz python-dateutil six    # unknown
- - R -e 'install.packages("devtools")'
- - R -e 'setRepositories(ind = 1:2)'
- - R -e 'devtools::install(dep = T, upgr = T)'
-r_check_args: "--no-tests --no-manual --no-vignettes --no-build-vignettes"
+ - R -e 'setRepositories(ind = 1:2); devtools::install_github(c("dynverse/StemID", "dynverse/topslam", "dynverse/Waterfall", "dynverse/Wishbone", "igraph/rigraph", "kieranrcampbell/pseudogp", "kieranrcampbell/mfa", "kieranrcampbell/ouija", "kieranrcampbell/phenopath", "kstreet13/slingshot"))'
+script:
+ - echo No R CMD check since this is an init.
+r_check_args: "--no-tests --no-manual --no-vignettes --no-build-vignettes --no-examples"
+r_build_args: "--no-build-vignettes"
+after_success:
+ - echo Init 4 succeeded!

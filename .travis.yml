@@ -2,6 +2,8 @@ language: r
 sudo: required
 dist: trusty
 bioc_required: true
+services:
+  - docker
 cache:
   timeout: 2000
   apt: true
@@ -9,20 +11,19 @@ cache:
     - $HOME/.cache/pip
     - $HOME/R/Library
 warnings_are_errors: true
-env:
-  global:
-    - R_MAX_NUM_DLLS=250
 addons:
   apt:
     packages:
-      - libgsl-dev                        # dyngen > splatter > zinbwave > copula > gsl
+      - libgsl0-dev                         # dyngen > splatter > zinbwave > copula > gsl
       - libsdl1.2-dev
       - libreadline-dev
       - imagemagick
       - libfftw3-dev
-      - libudunits2-dev
+      - libudunits2-dev                     # dynalysis > ggforce > units
       - libblas-dev
       - liblapack-dev
+      - libglu1-mesa-dev                    # dynmethods > merlot > rgl
+      - libx11-dev                          # dynmethods > merlot > rgl
 before_install:
  - source <( curl --insecure https://raw.githubusercontent.com/dynverse/dynmethods/master/.travis_install_python.sh ) # use travis's own python
 install:
@@ -34,10 +35,12 @@ install:
  - pip3 install --user --upgrade python-igraph h5py anndata                   # AGA / scanpy
  - pip3 install --user --upgrade Cython statsmodels                           # Wishbone
  - pip3 install --user --upgrade cycler pyparsing pytz python-dateutil six    # unknown
+ - if [ `git branch | grep '* master' | wc -l` == 0 ]; then sed -i 's#\(dynverse/[^, ]*\)#\1@devel#' DESCRIPTION; fi
+ - sudo ldconfig                                                              # for merlot > rgl
  - R -e 'if ("devtools" %in% rownames(installed.packages())) update.packages(oldPkgs = "devtools", ask = FALSE) else install.packages("devtools")'
+ - R -e 'devtools::install_github(c("r-lib/rlang", "tidyverse/ggplot2"))'
  - R -e 'devtools::install_cran("covr")'
- - R -e 'setRepositories(ind = 1:2)'
- - R -e 'devtools::install(dependencies = TRUE, upgrade = TRUE)'
+ - R -e 'setRepositories(ind = 1:2); devtools::install(dependencies = TRUE, upgrade = TRUE)'
  - R -e 'dynmethods::check_dependencies()'
-# after_success:
-#  - R -e 'covr::codecov()'
+after_success:
+ - R -e 'covr::codecov()'

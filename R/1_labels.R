@@ -1,40 +1,12 @@
-#' Common manual labeling
-#' @export
-labels <- tibble::tribble(
-  ~id, ~long, ~short,
-  "directed_acyclic_graph", "Directed acyclic graph", "DAG",
-  "disconnected_directed_graph", "Disconnected directed graph", "DDG",
-  "ngenes", "Number of genes", "# genes",
-  "ncells", "Number of cells", "# cells",
-  "n_methods", "Number of methods", "# methods",
-  "n_implementations", "Number of methods", "# methods",
-  "silver", "Silver standard", "Silver",
-  "gold", "Gold standard", "Gold",
-  "gse", "Source(s)", "Source(s)",
-  "gs", "Gold standard", "Gold standard",
-  "rf_mse", "Random Forest MSE", "RF MSE",
-  "maximal_trajectory_type", "Most complex trajectory type", "Trajectory type",
-  "qc_score", "QC score", "QC score",
-  "component_id", "Component", "Component",
-  "p_value", "p-value", "p-value",
-  "q_value", "Adjusted p-value", "p-value (adj.)",
-  TRUE, "Yes", "Yes",
-  FALSE, "No", "No",
-  "trajectory_type_gold", "Gold standard trajectory type", "Gold trajectory type",
-  "trajectory_type_predicted", "Predicted trajectory type", "Predicted trajectory type",
-  "harm_mean", "Harmonic mean", "Harmonic mean",
-  "task_source", "Dataset source", "Dataset source"
-)
-
 #' Short labelling function
 #' @param x The text
 #' @param width The width of the label
 #' @export
-label_short <- function(x, width=10) {
+label_short <- function(x, width = 10) {
   tibble(id = as.character(x)) %>%
-    left_join(labels, "id") %>%
-    mutate(short=ifelse(is.na(short), label_capitalise(id), short)) %>%
-    mutate(short=label_wrap(short, width=width)) %>%
+    left_join(dynalysis::labels, "id") %>%
+    mutate(short = ifelse(is.na(short), label_capitalise(id), short)) %>%
+    mutate(short = label_wrap(short, width = width)) %>%
     pull(short)
 }
 
@@ -54,14 +26,17 @@ label_wrap <- function(x, width = 10, collapse = "\n") {
 #' @export
 label_long <- function(x) {
   tibble(id = as.character(x)) %>%
-    left_join(labels, "id") %>%
-    mutate(long=ifelse(is.na(long), label_capitalise(id), long)) %>%
+    left_join(dynalysis::labels, "id") %>%
+    mutate(long = ifelse(is.na(long), label_capitalise(id), long)) %>%
     pull(long)
 }
 
+#' Capitalise label
+#' @param x The text
 #' @importFrom Hmisc capitalize
+#' @export
 label_capitalise <- function(x) {
-  x %>% gsub("_", " ", .) %>% Hmisc::capitalize()
+  x %>% str_replace_all("_", " ") %>% Hmisc::capitalize()
 }
 
 
@@ -71,14 +46,13 @@ label_capitalise <- function(x) {
 label_facet <- function(label_func = label_long) {function(df) {mutate_all(df, label_func)}}
 
 #' Label trajectory types simplified
-#' @param trajectory_types_oi Trajectory types
+#' @param x Trajectory types
 #' @export
-label_simple_trajectory_types <- function(trajectory_types_oi) {
-  ifelse(
-    trajectory_types_oi %in% trajectory_types$id,
-    trajectory_types$simplified[match(trajectory_types_oi, trajectory_types$id)] %>% label_long(),
-    label_long(trajectory_types_oi)
-  )
+label_simple_trajectory_types <- function(x) {
+  tibble(id = as.character(x)) %>%
+    left_join(dynalysis::trajectory_types, by = "id") %>%
+    mutate(label = label_long(ifelse(!is.na(simplified), simplified, x))) %>%
+    .$label
 }
 
 
@@ -95,7 +69,7 @@ label_extrema <- function(x) {
 #' @param cutoffs Cutoffs for number of asterisks
 #'
 #' @export
-label_pvalue <- function(p_values, cutoffs=c(0.1, 0.01, 1e-5)) {
+label_pvalue <- function(p_values, cutoffs = c(0.1, 0.01, 1e-5)) {
   requireNamespace("glue")
 
   breaks <- c(Inf, cutoffs, -Inf)
