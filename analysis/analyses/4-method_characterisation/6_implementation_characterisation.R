@@ -39,7 +39,7 @@ implementation_publication_data <- implementation_publication_data %>%
   filter(publication_type == "publication_date") %>%
   mutate(publication_type = "preprint_date", counter = -1) %>%
   bind_rows(implementation_publication_data) %>%
-  mutate(publication_type = factor(publication_type, levels=c("publication_date", "preprint_date")))
+  mutate(publication_type = factor(publication_type, levels = c("publication_date", "preprint_date")))
 
 # summarise by publication type how many implementations there are
 publication_cumulative_by_type <- implementation_publication_data %>%
@@ -54,7 +54,7 @@ earliest <- publication_cumulative_by_type %>%
   group_by(publication_type) %>%
   arrange(publication_date) %>%
   filter(row_number() == 1) %>%
-  mutate(n_implementations = 0, publication_date = earliest_date, implementation_id = NA, counter=0) %>%
+  mutate(n_implementations = 0, publication_date = earliest_date, implementation_id = NA, counter = 0) %>%
   ungroup()
 latest <- publication_cumulative_by_type %>%
   group_by(publication_type) %>%
@@ -65,8 +65,8 @@ latest <- publication_cumulative_by_type %>%
 publication_cumulative_by_type <- bind_rows(earliest, publication_cumulative_by_type, latest)
 
 ggplot(publication_cumulative_by_type) +
-  geom_step(aes(publication_date, n_implementations, color=publication_type)) +
-  scale_x_date(limits=c(start_date, end_date))
+  geom_step(aes(publication_date, n_implementations, color = publication_type)) +
+  scale_x_date(limits = c(start_date, end_date))
 
 # the following code is very complex, don't try to understand it, I don't either
 # for geom_area it is important that every date is represented in every group
@@ -81,7 +81,7 @@ publication_cumulative_by_type_interpolated <- publication_cumulative_by_type %>
   ungroup()
 
 # now we calculate cumulative number of implementations
-# although not necessary with geom_area and position="stack", this is necessary to add labels
+# although not necessary with geom_area and position = "stack", this is necessary to add labels
 publication_cumulative_by_type_interpolated <- publication_cumulative_by_type_interpolated %>%
   group_by(publication_date) %>%
   arrange(-as.numeric(publication_type)) %>%
@@ -91,7 +91,7 @@ publication_cumulative_by_type_interpolated <- publication_cumulative_by_type_in
 # now we make the plot step-like, by adding an extra row just before every row with n_implementations equal to the previous row
 publication_cumulative_by_type_interpolated <- publication_cumulative_by_type_interpolated %>%
   arrange(publication_type, publication_date) %>%
-  mutate(n_implementations_cumulative = lag(n_implementations_cumulative, 1), publication_date = publication_date - 0.1, counter=0, prefix=TRUE) %>%
+  mutate(n_implementations_cumulative = lag(n_implementations_cumulative, 1), publication_date = publication_date - 0.1, counter = 0, prefix = TRUE) %>%
   drop_na(n_implementations_cumulative) %>%
   bind_rows(publication_cumulative_by_type_interpolated) %>%
   arrange(publication_type, publication_date, n_implementations_cumulative)
@@ -104,7 +104,7 @@ publication_cumulative_by_type_interpolated_text <- publication_cumulative_by_ty
   mutate(run = rle(n_implementations_cumulative) %>% {rep(seq_along(.$lengths), .$lengths)}) %>%
   filter(counter == 1) %>%
   group_by(publication_type, n_implementations_cumulative, run) %>%
-  summarise(implementation_id = paste0(implementation_id, collapse="   "), publication_date = min(publication_date))
+  summarise(implementation_id = paste0(implementation_id, collapse = "   "), publication_date = min(publication_date))
 
 publication_cumulative_text <- implementation_publication_data %>%
   group_by(implementation_id) %>%
@@ -115,7 +115,7 @@ publication_cumulative_text <- implementation_publication_data %>%
 
 # now calculate new implementations per year
 implementations_per_year <- implementations %>%
-  mutate(year=lubridate::year(date)) %>%
+  mutate(year = lubridate::year(date)) %>%
   count(year) %>%
   mutate(
     min = as.Date(paste0(year, "-01-01")),
@@ -125,29 +125,29 @@ implementations_per_year <- implementations %>%
 
 
 n_implementations_over_time <- publication_cumulative_by_type_interpolated %>%
-  mutate(publication_type = c(publication_date="peer_reviewed", preprint_date = "preprint")[publication_type]) %>%
+  mutate(publication_type = c(publication_date = "peer_reviewed", preprint_date = "preprint")[publication_type]) %>%
   ggplot() +
-    geom_area(aes(publication_date, n_implementations_cumulative, fill=publication_type), position="identity") +
-    scale_fill_manual("", labels=label_long, values=c(peer_reviewed="#334466", preprint="#445588")) +
+    geom_area(aes(publication_date, n_implementations_cumulative, fill = publication_type), position = "identity") +
+    scale_fill_manual("", labels = label_long, values = c(peer_reviewed = "#334466", preprint = "#445588")) +
     geom_text(
       aes(
         publication_date + 1,
         n_implementations_cumulative - 0.5,
-        label=implementation_id_to_name[implementation_id],
-        group=publication_type
+        label = implementation_id_to_name[implementation_id],
+        group = publication_type
       ),
       data = publication_cumulative_text,
-      color="white",
-      vjust=0.5,
-      hjust=0,
+      color = "white",
+      vjust = 0.5,
+      hjust = 0,
       fontface = "bold",
-      size=2.5
+      size = 2.5
     ) +
     theme(legend.position = c(0.05, 0.8)) +
-  scale_y_continuous(label_long("n_implementations"), expand=c(0, 0), limits=c(0, nrow(implementations)+2)) +
-  scale_x_date(label_long("publication_date"), expand=c(0.05, 0.05), limits=c(start_date, end_date)) +
-  geom_text(aes(date, nrow(implementations)+1, label=ifelse(year == "2018", pritt("{year}: +{n} so far"), pritt("{year}: +{n}"))), data=implementations_per_year) +
-  geom_vline(aes(xintercept = min), data=implementations_per_year, linetype="dashed", color="grey")
+  scale_y_continuous(label_long("n_implementations"), expand = c(0, 0), limits = c(0, nrow(implementations)+2)) +
+  scale_x_date(label_long("publication_date"), expand = c(0.05, 0.05), limits = c(start_date, end_date)) +
+  geom_text(aes(date, nrow(implementations)+1, label = ifelse(year == "2018", pritt("{year}: +{n} so far"), pritt("{year}: +{n}"))), data = implementations_per_year) +
+  geom_vline(aes(xintercept = min), data = implementations_per_year, linetype = "dashed", color = "grey")
 n_implementations_over_time
 # ggsave(figure_file("n_implementations_over_time.png"), n_implementations_over_time, width = 15, height = 8)
 write_rds(n_implementations_over_time %>% ggdraw(), figure_file("n_implementations_over_time.rds"))
@@ -155,19 +155,19 @@ write_rds(n_implementations_over_time %>% ggdraw(), figure_file("n_implementatio
 
 ##  ............................................................................
 ##  Platforms                                                               ####
-platforms <- implementations %>% separate_rows(platform=platforms, sep=", ") %>%
+platforms <- implementations %>% separate_rows(platform = platforms, sep = ", ") %>%
   group_by(platforms) %>%
   summarise(quantity = n()) %>%
   arrange(quantity) %>%
   mutate(platform = ifelse(is.na(platforms), "Not available", platforms)) %>%
-  mutate(platform = factor(platform, levels=rev(platform))) %>%
+  mutate(platform = factor(platform, levels = rev(platform))) %>%
   ungroup() %>%
   mutate(pos = cumsum(quantity) - quantity/2) %>%
   ggplot(aes(1, quantity)) +
-    geom_bar(aes(fill=platform), width = 1, stat="identity") +
-    geom_text(aes(1, pos, label=pritt("{platform} \n {quantity}"), fill=platform), color="white", fontface = "bold", direction = "y", segment.alpha=0) +
+    geom_bar(aes(fill = platform), width = 1, stat = "identity") +
+    geom_text(aes(1, pos, label = pritt("{platform} \n {quantity}"), fill = platform), color = "white", fontface = "bold", direction = "y", segment.alpha = 0) +
     theme_void() +
-    theme(legend.position="none") +
+    theme(legend.position = "none") +
     coord_flip() +
     coord_polar("y")
 platforms
@@ -185,7 +185,7 @@ trajectory_components <- trajectory_components %>%
 
 add_step <- function(df) {
   df <- df %>%
-    mutate(date = date - 10, prefix=TRUE, count = 0) %>%
+    mutate(date = date - 10, prefix = TRUE, count = 0) %>%
     bind_rows(df)
   df %>% arrange(date)
 }
@@ -194,7 +194,7 @@ trajectory_components_step <- add_step(arrange(trajectory_components, date))
 
 trajectory_components_gathered <- trajectory_components_step %>%
   gather(trajectory_type, can_trajectory_type, !!directed_trajectory_type_order) %>%
-  mutate(trajectory_type = factor(trajectory_type, levels=directed_trajectory_type_order)) %>%
+  mutate(trajectory_type = factor(trajectory_type, levels = directed_trajectory_type_order)) %>%
   group_by(trajectory_type) %>%
   arrange(date) %>%
   mutate(n_implementations = cumsum(count), n_implementations_oi = cumsum(count * can_trajectory_type))
@@ -202,13 +202,13 @@ trajectory_components_gathered <- trajectory_components_step %>%
 trajectory_components_over_time <- trajectory_components_gathered %>%
   arrange(date) %>%
   ggplot() +
-  geom_area(aes(date, n_implementations), stat="identity", fill="#BBBBBB") +
-  geom_area(aes(date, n_implementations_oi, fill=trajectory_type), stat="identity") +
-  scale_fill_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
+  geom_area(aes(date, n_implementations), stat = "identity", fill = "#BBBBBB") +
+  geom_area(aes(date, n_implementations_oi, fill = trajectory_type), stat = "identity") +
+  scale_fill_manual(values = setNames(trajectory_types$colour, trajectory_types$id)) +
   facet_wrap(~trajectory_type, labeller = label_facet(label_simple_trajectory_types), nrow = 2) +
   theme(legend.position = "none") +
-  scale_x_date(label_long("publication_date"), limits=c(start_date, end_date), breaks=c(start_date, end_date), labels=c("", ""), expand=c(0, 0)) +
-  scale_y_continuous(label_long("n_implementations"), expand=c(0, 0))
+  scale_x_date(label_long("publication_date"), limits = c(start_date, end_date), breaks = c(start_date, end_date), labels = c("", ""), expand = c(0, 0)) +
+  scale_y_continuous(label_long("n_implementations"), expand = c(0, 0))
 
 trajectory_components_over_time
 
@@ -219,16 +219,16 @@ write_rds(trajectory_components_over_time, figure_file("trajectory_components_ov
 ##  Topology fixation over time                                             ####
 topology_inference_timeline_data <- implementations_evaluated %>%
   select(date, topology_inference_type) %>%
-  mutate(topology_inference_type = factor(topology_inference_type, levels=c("fixed", "parameter", "free"))) %>%
+  mutate(topology_inference_type = factor(topology_inference_type, levels = c("fixed", "parameter", "free"))) %>%
   mutate(topology_inference_type_follows = TRUE)
 topology_inference_timeline_data <- topology_inference_timeline_data %>%
   bind_rows(
-    topology_inference_timeline_data %>% mutate(date = date-0.2, topology_inference_type_follows=F),
-    tibble(date=end_date, topology_inference_type = factor(levels(topology_inference_timeline_data$topology_inference_type)), topology_inference_type_follows=F)
+    topology_inference_timeline_data %>% mutate(date = date-0.2, topology_inference_type_follows = F),
+    tibble(date = end_date, topology_inference_type = factor(levels(topology_inference_timeline_data$topology_inference_type)), topology_inference_type_follows = F)
   )
 
 topology_inference_timeline_data <- topology_inference_timeline_data %>%
-  complete(topology_inference_type, date, fill=list(topology_inference_type_follows=FALSE)) %>%
+  complete(topology_inference_type, date, fill = list(topology_inference_type_follows = FALSE)) %>%
   arrange(date, topology_inference_type) %>%
   ungroup() %>%
   group_by(topology_inference_type) %>%
@@ -236,12 +236,12 @@ topology_inference_timeline_data <- topology_inference_timeline_data %>%
   ungroup()
 
 topology_inference_timeline <- topology_inference_timeline_data %>% ggplot() +
-  geom_area(aes(date, y, fill=fct_rev(topology_inference_type)), stat = "identity") +
-  geom_text(aes(end_date-50, y-(y-lag(y, 1, 0))/2, label=topology_inference_type), data=topology_inference_timeline_data %>% filter(date == end_date) %>% mutate(y=cumsum(y)), hjust=1, color="white", size=5) +
-  scale_fill_manual(label_long("topology_inference_type"), values = topinf_colours) +
-  scale_x_date(expand=c(0,0), limits=c(start_date, end_date)) +
-  scale_y_continuous(label_long("n_implementations"), expand=c(0,0)) +
-  theme(legend.position="none")
+  geom_area(aes(date, y, fill = fct_rev(topology_inference_type)), stat = "identity") +
+  geom_text(aes(end_date-50, y-(y-lag(y, 1, 0))/2, label = topology_inference_type), data = topology_inference_timeline_data %>% filter(date == end_date) %>% mutate(y = cumsum(y)), hjust = 1, color = "white", size = 5) +
+  scale_fill_manual(label_long("topology_inference_type"), values = setNames(topinf_types$colour, topinf_types$name)) +
+  scale_x_date(expand = c(0,0), limits = c(start_date, end_date)) +
+  scale_y_continuous(label_long("n_implementations"), expand = c(0,0)) +
+  theme(legend.position = "none")
 topology_inference_timeline
 write_rds(topology_inference_timeline, figure_file("topology_inference_timeline.rds"))
 
@@ -252,17 +252,17 @@ trajectory_components_over_time <- read_rds(figure_file("trajectory_components_o
 topology_inference_timeline <- read_rds(figure_file("topology_inference_timeline.rds"))
 
 implementations_timeline <- cowplot::plot_grid(
-  plotlist=list(
+  plotlist = list(
     n_implementations_over_time,
     topology_inference_timeline,
     trajectory_components_over_time
   ),
-  nrow=3,
+  nrow = 3,
   rel_heights = c(0.8, 0.5, 0.5),
-  labels="auto"
+  labels = "auto"
 )
 implementations_timeline
-implementations_timeline %>% save_plot(figure_file("implementations_timeline.svg"), ., base_width=10, base_height=10)
+implementations_timeline %>% save_plot(figure_file("implementations_timeline.svg"), ., base_width = 10, base_height = 10)
 
 ##  ............................................................................
 ##  Small implementation timeline                                                   ####
@@ -277,19 +277,19 @@ implementation_small_history <- implementation_small_history_data %>%
   ggplot(aes(date, y)) +
   ggrepel::geom_label_repel(
     aes(
-      fill=maximal_trajectory_type,
-      color=maximal_trajectory_type,
-      label=implementation_id_to_name[implementation_id]
+      fill = maximal_trajectory_type,
+      color = maximal_trajectory_type,
+      label = implementation_id_to_name[implementation_id]
     ),
-    direction="y", max.iter=10000, ylim=c(0, NA), force=10, min.segment.length = 0) +
-  # ggrepel::geom_label_repel(aes(fill=maximal_trajectory_type, label=implementation_id, fontface=fontface, size=size), direction="y", max.iter=10000, ylim=c(0, NA), force=10, min.segment.length = 999999) +
-  scale_color_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
-  scale_fill_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
-  scale_alpha_manual(values=c(`TRUE`=1, `FALSE`=0.6)) +
-  scale_x_date(label_long("publishing_date"), limits=c(start_date, end_date), date_breaks="1 year", date_labels="%Y") +
-  scale_y_continuous(NULL, breaks=NULL, limits=c(0, 1), expand=c(0, 0)) +
+    direction = "y", max.iter = 10000, ylim = c(0, NA), force = 10, min.segment.length = 0) +
+  # ggrepel::geom_label_repel(aes(fill = maximal_trajectory_type, label = implementation_id, fontface = fontface, size = size), direction = "y", max.iter = 10000, ylim = c(0, NA), force = 10, min.segment.length = 999999) +
+  scale_color_manual(values = setNames(trajectory_types$colour, trajectory_types$id)) +
+  scale_fill_manual(values = setNames(trajectory_types$colour, trajectory_types$id)) +
+  scale_alpha_manual(values = c(`TRUE` = 1, `FALSE` = 0.6)) +
+  scale_x_date(label_long("publishing_date"), limits = c(start_date, end_date), date_breaks = "1 year", date_labels = "%Y") +
+  scale_y_continuous(NULL, breaks = NULL, limits = c(0, 1), expand = c(0, 0)) +
   scale_size_identity() +
-  theme(legend.position="none")
+  theme(legend.position = "none")
 implementation_small_history
 
 ggsave(figure_file("implementation_small_history.svg"), implementation_small_history, height = 4.5, width = 10)
@@ -302,14 +302,14 @@ children <- svg %>% xml_children()
 front <- xml_name(children) %in% c("line")
 new <- children[!front]
 for (node in children[front]) {
-  new %>% xml_add_sibling(node, .copy = FALSE, where=c("before"))
+  new %>% xml_add_sibling(node, .copy = FALSE, where = c("before"))
 }
 children[xml_name(children) == "rect"] %>% xml_remove()
 
 # text color
 texts <- xml_children(svg) %>% {xml_children(.)} %>% {.[xml_name(.) == "text"]} %>% {.[str_detect(xml_attr(., "style"), "fill:")]}
 walk(texts, function(text) {
-  # xml_attr(text, "style") <- xml_attr(text, "style") %>% gsub(pritt("fill: {toupper(trajectory_types$color[trajectory_types$id == 'rooted_tree'])};"), "fill: #000;", .)
+  # xml_attr(text, "style") <- xml_attr(text, "style") %>% gsub(pritt("fill: {toupper(trajectory_types$colour[trajectory_types$id == 'rooted_tree'])};"), "fill: #000;", .)
   xml_attr(text, "style") <- xml_attr(text, "style") %>% gsub("fill: #[A-Z0-9]{6};", "fill: #FFF;", .)
 })
 
@@ -323,17 +323,17 @@ xml2::write_xml(svg, figure_file("implementation_small_history.svg"))
 
 implementation_small_distribution <- implementations %>%
   gather(trajectory_type, can_handle, !!directed_trajectory_type_order) %>%
-  mutate(trajectory_type = factor(trajectory_type, levels=directed_trajectory_type_order)) %>%
+  mutate(trajectory_type = factor(trajectory_type, levels = directed_trajectory_type_order)) %>%
   filter(can_handle) %>%
   group_by(trajectory_type) %>%
   count() %>%
   ggplot(aes(trajectory_type, n)) +
-  geom_bar(aes(fill=trajectory_type, color=trajectory_type), stat="identity", width=0.95) +
-  geom_text(aes(label=n), vjust=0) +
-  # geom_hline(yintercept = sum(implementations$contains_ti, na.rm=TRUE), line) +
-  scale_fill_manual(values=setNames(trajectory_types$background_color, trajectory_types$id)) +
-  scale_color_manual(values=setNames(trajectory_types$color, trajectory_types$id)) +
-  scale_y_continuous(expand=c(0, 2)) +
+  geom_bar(aes(fill = trajectory_type, color = trajectory_type), stat = "identity", width = 0.95) +
+  geom_text(aes(label = n), vjust = 0) +
+  # geom_hline(yintercept = sum(implementations$contains_ti, na.rm = TRUE), line) +
+  scale_fill_manual(values = setNames(trajectory_types$background_colour, trajectory_types$id)) +
+  scale_color_manual(values = setNames(trajectory_types$colour, trajectory_types$id)) +
+  scale_y_continuous(expand = c(0, 2)) +
   theme(legend.position = "None")
 implementation_small_distribution
 ggsave(figure_file("implementation_small_distribution.svg"), implementation_small_distribution, height = 2, width = 5)
@@ -342,7 +342,7 @@ ggsave(figure_file("implementation_small_distribution.svg"), implementation_smal
 
 implementations %>%
   gather(trajectory_type, can_handle, !!directed_trajectory_type_order) %>%
-  mutate(trajectory_type = factor(trajectory_type, levels=directed_trajectory_type_order)) %>%
+  mutate(trajectory_type = factor(trajectory_type, levels = directed_trajectory_type_order)) %>%
   filter(can_handle) %>%
   group_by(trajectory_type) %>%
   count()

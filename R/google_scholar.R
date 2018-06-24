@@ -59,7 +59,7 @@ google_scholar <- function(cluster_id) {
 #' @importFrom xml2 read_html
 #' @importFrom rvest html_nodes html_attr html_text
 google_scholar_num_citations <- function(cluster_id) {
-  df <- dynutils::google_scholar(cluster_id)
+  df <- google_scholar(cluster_id)
   if (nrow(df) > 0) {
     max(c(0, df$num_citations), na.rm = T)
   } else {
