@@ -1,6 +1,6 @@
 run_qstat <- function() {
-  out_qhost <- PRISM:::run_remote("qhost -F", "prism")$cmd_out
-  out_qstat <- PRISM:::run_remote("qstat -u \"*\" -f", "prism")$cmd_out
+  out_qhost <- qsub:::run_remote("qhost -F", "prism")$cmd_out
+  out_qstat <- qsub:::run_remote("qstat -u \"*\" -f", "prism")$cmd_out
   
   processed_qstat_string <- paste0(paste(out_qstat[grepl("^  ", out_qstat)], collapse = "\n"), "\n\n")
   
@@ -45,7 +45,7 @@ run_qstat <- function() {
 
 #### 
 qstat <- run_qstat()
-files <- PRISM:::run_remote(glue::glue("ls {paste0(remote_folder, dataset_preproc_file(relative = TRUE))}"), "prism")$cmd_out
+files <- qsub:::run_remote(glue::glue("ls {paste0(remote_folder, dataset_preproc_file(relative = TRUE))}"), "prism")$cmd_out
 
 names <- c("model", "simulation", "gs", "gs_plot", "experiment", "experiment_plot", "normalisation", "normalisation_plot", "task")
 design <- crossing(task_id = seq_along(paramsets), name = names)
