@@ -87,7 +87,7 @@ paramoptim_submit <- function(
 
   ##################### PRISM CONFIG ################################
   ## prepare for remote execution; create a qsub config
-  qsub_config <- PRISM::override_qsub_config(
+  qsub_config <- qsub::override_qsub_config(
     wait = FALSE,
     remove_tmp_folder = FALSE,
     stop_on_error = FALSE,
@@ -110,7 +110,7 @@ paramoptim_submit <- function(
     output_file <- paste0(method_folder, "/output.rds")
     qsubhandle_file <- paste0(method_folder, "/qsubhandle.rds")
 
-    PRISM:::mkdir_remote(path = method_folder, remote = "")
+    qsub:::mkdir_remote(path = method_folder, remote = "")
 
     ## If no output or qsub handle exists yet
     if (!file.exists(output_file) && !file.exists(qsubhandle_file)) {
@@ -129,7 +129,7 @@ paramoptim_submit <- function(
 
       # set parameters for the cluster
       qsub_config_method <-
-        PRISM::override_qsub_config(
+        qsub::override_qsub_config(
           qsub_config = qsub_config,
           name = paste0("D_", method$short_name),
           local_tmp_path = paste0(method_folder, "/r2gridengine")
@@ -145,7 +145,7 @@ paramoptim_submit <- function(
       )
 
       # submit to the cluster
-      qsub_handle <- PRISM::qsub_lapply(
+      qsub_handle <- qsub::qsub_lapply(
         X = seq_len(nrow(grid)),
         object_envir = environment(),
         qsub_environment = qsub_environment,
@@ -319,7 +319,7 @@ paramoptim_fetch_results <- function(local_output_folder) {
       num_tasks <- qsub_handle$num_tasks
 
       # attempt to retrieve results; return NULL if job is still busy or has failed
-      output <- PRISM::qsub_retrieve(
+      output <- qsub::qsub_retrieve(
         qsub_handle,
         wait = FALSE
       )

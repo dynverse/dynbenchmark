@@ -67,9 +67,9 @@ tasks %>% map_int(~ pryr::object_size(.) %>% as.integer) %>% sort(decreasing = T
 
 # upload to remote, if relevant
 # this assumes you have a gridengine cluster at hand
-remote_config <- PRISM::override_qsub_config()
-remote_dynalysis_path <- PRISM:::run_remote("echo $DYNALYSIS_PATH", remote = remote_config$remote)$cmd_out
-PRISM:::rsync_remote(
+remote_config <- qsub::override_qsub_config()
+remote_dynalysis_path <- qsub:::run_remote("echo $DYNALYSIS_PATH", remote = remote_config$remote)$cmd_out
+qsub:::rsync_remote(
   remote_src = "",
   path_src = derived_file(),
   remote_dest = remote_config$remote,
