@@ -15,8 +15,7 @@ Depends:
   dynmethods,
   dynplot,
   dynutils,
-  dynwrap,
-  strict
+  dynwrap
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -68,6 +67,5 @@ Remotes:
   mlr-org/mlr,
   mlr-org/mlrMBO,
   jakobbossek/smoof,
-  rcannood/qsub,
-  hadley/strict
+  rcannood/qsub
 RoxygenNote: 6.0.1
