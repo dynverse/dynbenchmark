@@ -18,7 +18,9 @@ unzip(dataset_file, exdir = derived_file(""))
 # - add divergence regions
 # - add cell waypoints
 # - process dates
-task_ids <- list.files(derived_file(""), pattern = ".rds", recursive = TRUE, full.names = FALSE) %>% str_replace(".rds$", "")
+task_ids <- list.files(derived_file(""), pattern = ".rds", recursive = TRUE, full.names = FALSE) %>%
+  str_replace(".rds$", "") %>%
+  discard(~. == "tasks")
 pbapply::pblapply(task_ids, function(task_id) {
   file <- derived_file(glue::glue("{task_id}.rds"))
 
@@ -42,7 +44,7 @@ pbapply::pblapply(task_ids, function(task_id) {
 
 # make one big tasks tibble, with count and expression as functions.
 tasks <- list_as_tibble(map(task_ids, function(task_id) {
-  task <- load_dataset(task_id)
+  task <- load_dataset(task_id) %>% extract_row_to_list(1)
   task_file <- dataset_file(filename = "dataset.rds", dataset_id = task_id)
   for (col in c("expression", "counts")) {
     env <- new.env(baseenv())
@@ -53,8 +55,10 @@ tasks <- list_as_tibble(map(task_ids, function(task_id) {
     }
     environment(task[[col]]) <- env
   }
+
   task
 }))
+
 # todo: list_as_tibble needs to handle dates correctly
 tasks$date <- as.Date(tasks$date, origin = "1970-01-01")
 tasks$creation_date = as.POSIXct(tasks$creation_date, origin = "1970-01-01")
