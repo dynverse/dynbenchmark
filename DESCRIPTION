@@ -38,7 +38,7 @@ Imports:
   parallelMap,
   ParamHelpers (>= 1.11),
   pbapply,
-  PRISM,
+  qsub,
   purrr,
   randomForest,
   RColorBrewer,
@@ -67,5 +67,5 @@ Remotes:
   mlr-org/mlr,
   mlr-org/mlrMBO,
   jakobbossek/smoof,
-  rcannood/PRISM
+  rcannood/qsub
 RoxygenNote: 6.0.1

@@ -101,6 +101,6 @@ tasks <- tasks %>% filter(map(settings, "platform_name") != "small")
 write_rds(tasks, dataset_file("tasks.rds"))
 
 
-PRISM:::rsync_remote("prism", paste0("/group/irc/shared/dynalysis", dataset_file(relative = T), "tasks.rds"), "", dataset_file())
+qsub:::rsync_remote("prism", paste0("/group/irc/shared/dynalysis", dataset_file(relative = T), "tasks.rds"), "", dataset_file())
 
 tasks$trajectory_type %>% table()
