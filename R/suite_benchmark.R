@@ -49,7 +49,7 @@ benchmark_submit <- function(
   )
 
   ## prepare for remote execution; create a qsub config
-  qsub_config <- PRISM::override_qsub_config(
+  qsub_config <- qsub::override_qsub_config(
     wait = FALSE,
     remove_tmp_folder = FALSE,
     stop_on_error = FALSE,
@@ -72,7 +72,7 @@ benchmark_submit <- function(
     output_file <- paste0(method_folder, "/output.rds")
     qsubhandle_file <- paste0(method_folder, "/qsubhandle.rds")
 
-    PRISM:::mkdir_remote(path = method_folder, remote = "")
+    qsub:::mkdir_remote(path = method_folder, remote = "")
 
     ## If no output or qsub handle exists yet
     if (!file.exists(output_file) && !file.exists(qsubhandle_file)) {
@@ -90,7 +90,7 @@ benchmark_submit <- function(
 
       # set parameters for the cluster
       qsub_config_method <-
-        PRISM::override_qsub_config(
+        qsub::override_qsub_config(
           qsub_config = qsub_config,
           name = paste0("D_", method$short_name),
           local_tmp_path = paste0(method_folder, "/r2gridengine")
@@ -105,7 +105,7 @@ benchmark_submit <- function(
       )
 
       # submit to the cluster
-      qsub_handle <- PRISM::qsub_lapply(
+      qsub_handle <- qsub::qsub_lapply(
         X = seq_len(nrow(grid)),
         object_envir = environment(),
         qsub_environment = qsub_environment,
@@ -287,7 +287,7 @@ benchmark_fetch_results <- function(local_output_folder) {
       num_tasks <- qsub_handle$num_tasks
 
       # attempt to retrieve results; return NULL if job is still busy or has failed
-      output <- PRISM::qsub_retrieve(
+      output <- qsub::qsub_retrieve(
         qsub_handle,
         wait = FALSE
       )
@@ -296,7 +296,7 @@ benchmark_fetch_results <- function(local_output_folder) {
         cat("Output found! Saving output.\n", sep = "")
 
         suppressWarnings({
-          qacct_out <- PRISM::qacct(qsub_handle)
+          qacct_out <- qsub::qacct(qsub_handle)
         })
 
         # process each job separately
@@ -379,7 +379,7 @@ benchmark_fetch_results <- function(local_output_folder) {
       } else {
         # the job is probably still running
         suppressWarnings({
-          qstat_out <- PRISM::qstat_j(qsub_handle)
+          qstat_out <- qsub::qstat_j(qsub_handle)
         })
 
         error_message <-

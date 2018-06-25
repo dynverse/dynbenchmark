@@ -14,10 +14,10 @@ if (remote) {
 } else {
   ## Remote
   # Make sure all packages are installed on the cluster; i.e. GEOquery, MultiAssayExperiment, tidyverse, and dynalysis.
-  handle <- PRISM::qsub_lapply(
+  handle <- qsub::qsub_lapply(
     X = dataset_scripts,
     qsub_environment = list2env(list()),
-    qsub_config = PRISM::override_qsub_config(
+    qsub_config = qsub::override_qsub_config(
       name = "dynreal",
       memory = "30G",
       wait = FALSE,
