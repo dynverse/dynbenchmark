@@ -12,11 +12,11 @@
 #' @param metrics Which metrics to evaluate; see \code{\link{calculate_metrics}} for a list of which metrics are available.
 #' @param num_repeats The number of times to repeat the evaluation.
 #' @param local_output_folder A folder in which to output intermediate and final results.
-#' @param remote_output_folder A folder in which to store intermediate results in a remote directory when using the PRISM package.
+#' @param remote_output_folder A folder in which to store intermediate results in a remote directory when using the qsub package.
 #' @param execute_before Shell commands to execute before running R.
 #' @param verbose Whether or not to print extra information.
 #'
-#' @importFrom PRISM qsub_lapply override_qsub_config
+#' @importFrom qsub qsub_lapply override_qsub_config
 #' @importFrom pbapply pblapply
 #' @importFrom readr read_rds write_rds
 #'
@@ -263,7 +263,7 @@ benchmark_run_evaluation <- function(
 #'
 #' @param local_output_folder The folder in which to output intermediate and final results.
 #'
-#' @importFrom PRISM qsub_retrieve qacct qstat_j
+#' @importFrom qsub qsub_retrieve qacct qstat_j
 #' @importFrom readr read_rds write_rds
 #' @export
 benchmark_fetch_results <- function(local_output_folder) {
