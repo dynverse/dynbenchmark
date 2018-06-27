@@ -1,7 +1,7 @@
 saveRDS(qsub_environment, "env.rds")
-PRISM:::rsync_remote("", "env.rds", "prism", "/group/irc/personal/wouters/env.rds")
+qsub:::rsync_remote("", "env.rds", "prism", "/group/irc/personal/wouters/env.rds")
 saveRDS(paramsets, "paramsets.rds")
-PRISM:::rsync_remote("", "paramsets.rds", "prism", "/group/irc/personal/wouters/paramsets.rds")
+qsub:::rsync_remote("", "paramsets.rds", "prism", "/group/irc/personal/wouters/paramsets.rds")
 
 
 ##

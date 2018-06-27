@@ -1,6 +1,5 @@
 library(tidyverse)
 library(cowplot)
-library(googlesheets)
 library(dynalysis)
 
 experiment("2-dataset_characterisation/2-real")
@@ -13,7 +12,9 @@ technology_colours <- unique(tasks_real$technology) %>%
   setNames(RColorBrewer::brewer.pal(length(.), "Set1"), .)
 standard_colours <- c("gold" = "#ffeca9", "silver" = "#e3e3e3")
 
-# Create box plot
+
+#   ____________________________________________________________________________
+#   Overview figure of different datasets                                   ####
 boxes <- cowplot::plot_grid(
   nrow = 1,
   plotlist = map(
@@ -181,7 +182,9 @@ ggsave(figure_file("dataset_characterisation.svg"), combined, width = 10, height
 
 
 
-# Table
+
+#   ____________________________________________________________________________
+#   Overview table of different datasets                                    ####
 grouper <- list(
   latex = function(x) paste0("\\iffalse {label_long(gse)} \\fi {", x, "}"),
   html = function(x) paste0("<span style = 'display: none;'>{gse}</span> {", x, "}")
@@ -246,10 +249,9 @@ table
 write_rds(table, figure_file("datasets.rds"))
 
 
-# Generate plot of each dataset
-library(tidygraph)
-library(ggraph)
 
+##  ............................................................................
+##  Milestone network of every dataset                                      ####
 label_dataset <- function(x) {
   x %>%
     str_replace_all(".*/(.*)", "\\1") %>%
@@ -261,25 +263,7 @@ label_dataset <- function(x) {
 plots <- seq_len(nrow(tasks_real)) %>% map(function(task_i) {
   task <- dynutils::extract_row_to_list(tasks_real, task_i)
 
-  milestone_graph <- tbl_graph(
-    tibble(node = factor(task$milestone_ids, levels = task$milestone_ids)),
-    task$milestone_network %>% mutate(from = match(from, task$milestone_ids), to = match(to, task$milestone_ids))
-  )
-
-  # determine layout
-  layout <- "tree"
-  if (task$trajectory_type == "directed_cycle") {
-    layout <- "circle"
-  }
-
-  ggraph(milestone_graph, layout = layout) +
-    geom_edge_link() +
-    geom_edge_link(aes(xend = x + (xend - x)/1.6, yend = y + (yend - y)/1.6), arrow = arrow(type = "closed")) +
-    geom_node_label(aes(label = node, fill = node)) +
-    theme_graph() +
-    theme(legend.position = "none", plot.margin = margin(1, 1, 1, 1)) +
-    scale_x_continuous(expand = c(1,1)) +
-    ggtitle(label_dataset(task$id))
+  plot_topology(task)
 })
 cowplot::plot_grid(plotlist = plots[1:10], ncol = 5)
 
