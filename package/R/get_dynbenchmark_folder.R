@@ -19,7 +19,7 @@ get_dynbenchmark_folder <- function() {
     pwd <- getwd()
   }
 
-  if (!file.exists(paste0(pwd, "/dynbenchmark.Rproj")))) {
+  if (!file.exists(paste0(pwd, "/dynbenchmark.Rproj"))) {
     stop("dynbenchmark folder could not be found. Either set it as the working directory, or export a DYNBENCHMARK_PATH variable.")
   }
 
