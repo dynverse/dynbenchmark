@@ -10,7 +10,7 @@ files <- c(
   list.files(raw_file("deprecated_repositories"), "*.txt", full.names = TRUE)
 )
 
-user_map <- c(Zouter = "Wouter Saelens")
+user_map <- c(Zouter = "Wouter Saelens", zouter = "Wouter Saelens")
 changes <- files %>%
   map_df(~read_delim(., delim = "|", col_names = c("time", "user", "type", "path"))) %>%
   mutate(user = ifelse(user %in% names(user_map), user_map[user], user)) %>%
@@ -32,8 +32,13 @@ system(pritt(
 changes_df <- changes %>%
   mutate(
     posix = as.POSIXct(time, origin = "1970-01-01"),
-    is_doc = grepl("google_drive|dyndocs", path)
-  )
+    is_doc = grepl("google_drive|dyndocs", path),
+    tmp_first = str_replace(path, "^/([^/]*)/.*$", "\\1"),
+    tmp_second = str_replace(path, "^/([^/]*)/([^/]*)/.*$", "\\2"),
+    project = ifelse(grepl("^/[^/]*$", path), "dynverse", ifelse(grepl("^/[^/]*/dyn$", path), tmp_second, tmp_first))
+  ) %>%
+  filter(!is.na(posix))
+changes_df$project %>% table
 
 ggplot(changes_df, aes(x = as.factor(format(posix, format = "%y/%m")), alpha = is_doc)) +
   geom_bar(aes(fill = user)) +
@@ -42,3 +47,25 @@ ggplot(changes_df, aes(x = as.factor(format(posix, format = "%y/%m")), alpha = i
 ggplot(changes_df) +
   ggridges::geom_density_ridges(aes(posix, y = user, fill = user)) +
   cowplot::theme_cowplot()
+
+ggplot(changes_df) +
+  ggridges::geom_density_ridges(aes(posix, y = project, fill = project)) +
+  cowplot::theme_cowplot()
+
+posix_range <- changes_df$posix %>% range()
+dens_x <- seq(posix_range[[1]], posix_range[[2]], length.out = 1000)
+densities <- changes_df %>%
+  group_by(project) %>%
+  do({
+    dens <- density(as.numeric(.$posix))
+    data_frame(project = .$project[[1]], x = dens$x, y = dens$y, ynorm = y / max(y))
+  }) %>%
+  ungroup() %>%
+  mutate(x = as.POSIXct(x, origin = "1970-01-01"))
+
+den_summ <- densities %>% group_by(project) %>% arrange(x) %>% slice(1) %>% ungroup() %>% arrange(x)
+
+densities <- densities %>%
+  mutate(project_f = factor(project, levels = rev(den_summ$project)))
+
+ggplot(densities) + geom_point(aes(x, project_f, colour = ynorm)) + scale_colour_distiller(palette = "RdBu")

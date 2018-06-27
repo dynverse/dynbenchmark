@@ -11,6 +11,7 @@ command <- glue::glue("java -Dwebdriver.chrome.driver='{derived_file('chromedriv
 system(glue::glue("tmux new-session -d '{command}'"))
 
 # run server
+# devtools::install_github("JBGruber/RSelenium")
 library(RSelenium)
 library(rvest)
 library(tidyverse)
@@ -24,7 +25,7 @@ stop("Login in google!!!")
 links <- tribble(
   ~id, ~link,
   "claims", "https://docs.google.com/document/d/1Poe2NfubYgotXk8x2Wak_IY32-K6xCM5yJOgyax6vD0/edit",
-  "synthetic_data_methodology", "https://docs.google.com/document/d/1Wko6pMy0pl6DOY-pjiHXoM2zscqOi3pMFot26UfuopM/edit",
+  # "synthetic_data_methodology", "https://docs.google.com/document/d/1Wko6pMy0pl6DOY-pjiHXoM2zscqOi3pMFot26UfuopM/edit",
   "trajectory_structures", "https://docs.google.com/spreadsheets/d/1mGjj20cCk2OUTZ1oy1gkl-HVHEve6Kg7pRyprMpLIZ4/edit?usp=drive_web&ouid=105833423392613772145",
   "dyngen_data_generation", "https://docs.google.com/document/d/1khvUfXobom5Cdb_K-1QCXuU8EesSqI23iG8bbVQum3A/edit",
   "good_scientific_code", "https://docs.google.com/document/d/1hO0wuBfBvMfmFPSbhVsKolzi7J1M9wp3XgbD2QY4esU/edit",
@@ -40,13 +41,15 @@ links <- tribble(
   "manuscript_v2", "https://docs.google.com/document/d/14ZzuesLq5u5l-Gp_r5tSkvwOpxxz9LuXS_HG6GAYfxw/edit",
   "stemid_feedback" = "https://docs.google.com/document/d/1YweBb_8Q20FGT7MO5f5KnXdsrDmONWjmmUXfN49BIWQ/edit",
   "journal_rejection_letter" = "https://docs.google.com/document/d/1QeyQNPH-0LmSo501KfHUGHtfaRiejaDMYAEotYCO7J4/edit",
-  "action_plan" = "https://docs.google.com/document/d/13soQw70c6gFGxnn0MUperC4Xnmydt1Bdi-7z431n4MU/edit#heading=h.oj9omuyq6ow8"
+  "action_plan" = "https://docs.google.com/document/d/13soQw70c6gFGxnn0MUperC4Xnmydt1Bdi-7z431n4MU/edit#heading=h.oj9omuyq6ow8",
+  "feedback_nbt" = "https://docs.google.com/document/d/1KWgqwrv998yKLcyMv7Zm9o5LrwNRwbWu3gl8LTDVHpA/edit"
 )
 
 library(xml2)
 
 warning("Leave this browser window alone! >:) You can do other stuff in the meantime, though.")
 revisions_df <- map_df(seq_len(nrow(links)), function(i) {
+  cat("Processing ", i, "\n", sep = "")
   id <- links$id[[i]]
   link <- links$link[[i]]
 
