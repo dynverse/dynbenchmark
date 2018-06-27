@@ -38,7 +38,6 @@ Imports:
   parallelMap,
   ParamHelpers (>= 1.11),
   pbapply,
-  qsub,
   purrr,
   randomForest,
   RColorBrewer,
@@ -53,7 +52,9 @@ Imports:
   tibble,
   testthat,
   tidygraph,
-  xml2,
+  xml2
+Suggests:
+  qsub
 Remotes:
   berndbischl/ParamHelpers,
   dynverse/dyneval,
