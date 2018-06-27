@@ -371,7 +371,7 @@ benchmark_fetch_results <- function(local_output_folder) {
             NA
           }
         })
-        models <- models %>% setNames(model_ids)
+        models <- models %>% set_names(model_ids)
         outputs <- outputs %>% select(-model) %>% mutate(model_i = seq_len(n()), model_id = model_ids)
         readr::write_rds(models, output_models_file)
 
