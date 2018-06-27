@@ -10,7 +10,7 @@ Description: This package contains the code to reproduce the main analyses of ou
              "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
              Using code from our other packages such as dyneval, dyngen and dynutils
 Depends: 
-  R (>= 3.4.0),
+  R (>= 3.5.0),
   dyneval,
   dynmethods,
   dynplot,
