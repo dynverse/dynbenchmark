@@ -1,0 +1,72 @@
+Package: dynbenchmark
+Title: Analysis of "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
+Version: 0.0.0.9000
+Authors@R: c(
+  person("Yvan", "Saeys", email = "yvan.saeys@ugent.be", role = c("ths")),
+  person("Robrecht", "Cannoodt", email="rcannood@gmail.com", role="aut"),
+  person("Wouter", "Saelens", email="wouter.saelens@gmail.com", role=c("cre", "aut")),
+  person("Helena", "Todorov", email="helena.todorov@ugent.be", role="aut"))
+Description: This package contains the code to reproduce the main analyses of our paper 
+             "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
+             Using code from our other packages such as dyneval, dyngen and dynutils
+Depends: 
+  R (>= 3.4.0),
+  dyneval,
+  dynmethods,
+  dynplot,
+  dynutils,
+  dynwrap
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+URL: https://github.com/dynverse/dynalysis
+BugReports: https://github.com/dynverse/dynalysis/issues
+Imports: 
+  cluster,
+  dplyr,
+  dyngen,
+  dyntoy,
+  dynnormaliser,
+  emoa,
+  ggraph,
+  ggplot2,
+  glue,
+  Hmisc,
+  httr,
+  mlr,
+  mlrMBO,
+  parallelMap,
+  ParamHelpers (>= 1.11),
+  pbapply,
+  purrr,
+  randomForest,
+  RColorBrewer,
+  readr,
+  reshape2,
+  rvest,
+  smoof,
+  stats,
+  stringr,
+  tidyr,
+  tidyverse,
+  tibble,
+  testthat,
+  tidygraph,
+  xml2
+Suggests:
+  qsub
+Remotes:
+  berndbischl/ParamHelpers,
+  dynverse/dyneval,
+  dynverse/dyngen,
+  dynverse/dynmethods,
+  dynverse/dynnormaliser,
+  dynverse/dynplot,
+  dynverse/dynutils,
+  dynverse/dyntoy,
+  dynverse/dynwrap,
+  mlr-org/mlr,
+  mlr-org/mlrMBO,
+  jakobbossek/smoof,
+  rcannood/qsub
+RoxygenNote: 6.0.1
