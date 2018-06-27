@@ -29,7 +29,7 @@ but must also contain the column \code{paramset_id}.}
 
 \item{local_output_folder}{A folder in which to output intermediate and final results.}
 
-\item{remote_output_folder}{A folder in which to store intermediate results in a remote directory when using the PRISM package.}
+\item{remote_output_folder}{A folder in which to store intermediate results in a remote directory when using the qsub package.}
 
 \item{execute_before}{Shell commands to execute before running R.}
 

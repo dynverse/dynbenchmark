@@ -197,13 +197,13 @@ to_save <- to_save[c(str_subset(names(to_save), "^outputs_"), "trajtypes")]
 write_rds(to_save, derived_file("outputs_postprocessed.rds"))
 
 # # # Upload ---------------------
-# PRISM:::rsync_remote(
+# qsub:::rsync_remote(
 #   remote_dest = "prism",
 #   path_dest = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
 #   remote_src = "",
 #   path_src = derived_file("config.rds")
 # )
-# PRISM:::rsync_remote(
+# qsub:::rsync_remote(
 #   remote_dest = "prism",
 #   path_dest = paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/"),
 #   remote_src = "",
@@ -215,8 +215,8 @@ write_rds(to_save, derived_file("outputs_postprocessed.rds"))
 #   path_dest <- paste0("/group/irc/shared/dynalysis/analysis/data/derived_data/", getOption("dynalysis_experiment_id"), "/suite/", method_name, "/")
 #
 #   if (length(list.files(paste0(derived_file("suite/"), method_name, "/"), pattern = "output_*")) > 0) {
-#     PRISM:::mkdir_remote(path_dest, remote = "prism")
-#     PRISM:::rsync_remote(
+#     qsub:::mkdir_remote(path_dest, remote = "prism")
+#     qsub:::rsync_remote(
 #       remote_dest = "prism",
 #       path_dest = path_dest,
 #       remote_src = "",

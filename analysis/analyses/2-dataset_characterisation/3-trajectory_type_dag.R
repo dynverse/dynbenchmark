@@ -2,15 +2,8 @@ library(dynalysis)
 library(tidygraph)
 library(ggraph)
 library(tidyverse)
-extrafont::loadfonts()
 
 experiment("2-dataset_characterisation/3-trajectory_type_dag")
-
-
-#############################################################
-# TODO: Update this script to be able to reproduce
-# analysis/figures/2-dataset_characterisation/3-trajectory_type_dag/trajectory_type_trees.svg
-#############################################################
 
 trajectory_type_ancestors <- trajectory_type_dag %>% igraph::ego(99999999, mode = "out") %>% map(names) %>% setNames(names(igraph::V(trajectory_type_dag)))
 
@@ -52,13 +45,11 @@ trajectory_type_tree_changes_individual <- map(
       activate(edges) %>%
       filter(.N()$name[from] != "convergence" | .N()$name[to] != "bifurcation")
 
-    ggraph(gr, layout = "tree") +
+    ggraph(gr, layout = "kk") +
       geom_edge_link() +
       geom_edge_link(aes(xend = x+(xend-x)*.25, yend = y+(yend - y)*.25), arrow = arrow(type = "closed", length = unit(0.1, "inches"))) +
-      geom_edge_link(aes(xend = x+(xend-x)*.5, yend = y+(yend - y)*.5), arrow = arrow(type = "closed", length = unit(0.1, "inches"))) +
-      geom_edge_link(aes(xend = x+(xend-x)*.75, yend = y+(yend - y)*.75), arrow = arrow(type = "closed", length = unit(0.1, "inches"))) +
-      geom_node_label(aes(label = label_long(name), fill = colour), color = "white") +
-      ggrepel::geom_label_repel(aes(x = x+(xend-x)/2, y = y+(yend - y)/2, label = label_prop_changes(prop_changes)), data = get_edges(), min.segment.length = Inf, force = 0.1) +
+      geom_node_label(aes(label = label_short(name, 15), fill = colour), color = "white") +
+      # ggrepel::geom_label_repel(aes(x = x+(xend-x)/2, y = y+(yend - y)/2, label = label_prop_changes(prop_changes)), data = get_edges()) +
       scale_fill_identity() +
       theme_graph() +
       theme(plot.title = element_text(family = "Open Sans", hjust = 0.5)) +

@@ -7,9 +7,10 @@ library(ggraph)
 experiment("2-dataset_characterisation/1-synthetic")
 tasks <- load_datasets()
 
-##################################################
-## Generate plots for each of the dyngen models ##
-##################################################
+
+#   ____________________________________________________________________________
+#   Plotting the different models                                           ####
+
 modulenet_names <- tasks$settings %>% map("modulenet_name") %>% unlist() %>% unique()
 
 params <- dyngen::simple_params
@@ -93,10 +94,8 @@ ggsave(figure_file("modulenets.svg"), ggrid, width = 12, height = 35)
 
 
 
-
-####################
-## Samplers table ##
-####################
+#   ____________________________________________________________________________
+#   Samplers table                                                          ####
 samplers <- read_tsv(raw_file("samplers"))
 notes <- c("$y_{max} = r/d * p/q$")
 
