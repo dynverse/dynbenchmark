@@ -14,7 +14,6 @@
 #' @param execute_before Shell commands to execute before running R.
 #' @param verbose Whether or not to print extra information.
 #'
-#' @importFrom qsub qsub_lapply override_qsub_config
 #' @importFrom pbapply pblapply
 #' @importFrom readr read_rds write_rds
 #' @importFrom testthat expect_equal expect_is
@@ -42,6 +41,8 @@ paramoptim_submit <- function(
   execute_before = NULL,
   verbose = FALSE
 ) {
+  requireNamespace("qsub")
+
   paramoptim_submit_check(
     task_ids,
     methods,
@@ -296,10 +297,11 @@ paramoptim_run_optimisation <- function(
 #'
 #' @param local_output_folder The folder in which to output intermediate and final results.
 #'
-#' @importFrom qsub qsub_retrieve qacct qstat_j
 #' @importFrom readr read_rds write_rds
 #' @export
 paramoptim_fetch_results <- function(local_output_folder) {
+  requireNamespace("qsub")
+
   method_names <- list.dirs(local_output_folder, full.names = FALSE, recursive = FALSE) %>% discard(~ . == "")
 
   # process each method separately
