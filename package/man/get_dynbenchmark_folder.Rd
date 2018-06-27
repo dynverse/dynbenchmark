@@ -8,5 +8,5 @@ get_dynbenchmark_folder()
 }
 \description{
 When executing some of the dynbenchmark functions, the git repository needs to be found.
-Either set the working directory to the repository, or define the DYNALYSIS_PATH variable.
+Either set the working directory to the repository, or define the DYNBENCHMARK_PATH variable.
 }
