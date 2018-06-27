@@ -70,7 +70,7 @@ tasks %>% map_int(~ pryr::object_size(.) %>% as.integer) %>% sort(decreasing = T
 # upload to remote, if relevant
 # this assumes you have a gridengine cluster at hand
 remote_config <- qsub::override_qsub_config()
-remote_dynbenchmark_path <- qsub:::run_remote("echo $DYNALYSIS_PATH", remote = remote_config$remote)$stdout
+remote_dynbenchmark_path <- qsub:::run_remote("echo $DYNBENCHMARK_PATH", remote = remote_config$remote)$stdout
 qsub:::rsync_remote(
   remote_src = "",
   path_src = derived_file(),

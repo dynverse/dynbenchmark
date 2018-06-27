@@ -8,7 +8,7 @@ methods <- get_ti_methods(packages = c("dynwrap", "dynmethods")) %>% filter(shor
 metrics <- c("correlation", "rf_mse", "edge_flip", "featureimp_cor")
 timeout_per_execution <- 60 * 60 * 6
 num_repeats <- 4
-execute_before <- "export DYNALYSIS_PATH=/group/irc/shared/dynbenchmark/; singularity exec -B /scratch:/scratch -B /group:/group /scratch/irc/shared/dynbenchmark.simg \\"
+execute_before <- "export DYNBENCHMARK_PATH=/group/irc/shared/dynbenchmark/; singularity exec -B /scratch:/scratch -B /group:/group /scratch/irc/shared/dynbenchmark.simg \\"
 verbose <- TRUE
 
 # run most methods
