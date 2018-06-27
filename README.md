@@ -11,6 +11,19 @@ A comparison of single-cell trajectory inference methods: towards more accurate 
 Wouter Saelens\*, Robrecht Cannoodt\*, Helena Todorov, Yvan Saeys
 bioRxiv 276907; doi: <https://doi.org/10.1101/276907>
 
+Structure
+---------
+
+This repository is structured as follows:
+
+-   data: raw data files required by the scripts
+-   derived: data files produced by the scripts
+-   figures: figures created by the scrips
+-   manuscript: source files for producing the manuscript
+-   package: an R package with helper functions
+-   results: data objects outputted by the scripts
+-   scripts: code required to reproduce the analyses of the benchmark
+
 Datasets
 --------
 
