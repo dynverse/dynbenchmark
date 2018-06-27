@@ -16,7 +16,7 @@ load_data <- function(load = character(), params_i = 1) {
 ncores <- 6
 prepare_environment <- function(ncores = 6) {
   library(tidyverse)
-  library(dynalysis)
+  library(dynbenchmark)
 
   options(ncores = ncores)
 
@@ -42,7 +42,7 @@ qsub_config <- override_qsub_config(
   max_wall_time = "24:00:00"
 )
 qsub_config_single <- override_qsub_config(qsub_config, num_cores = 1)
-qsub_packages <- c("tidyverse", "dynalysis", "dyngen")
+qsub_packages <- c("tidyverse", "dynbenchmark", "dyngen")
 
 generate_wrapper <- function(func, output_file, ncores) {
   function(params) {
@@ -101,6 +101,6 @@ tasks <- tasks %>% filter(map(settings, "platform_name") != "small")
 write_rds(tasks, dataset_file("tasks.rds"))
 
 
-qsub:::rsync_remote("prism", paste0("/group/irc/shared/dynalysis", dataset_file(relative = T), "tasks.rds"), "", dataset_file())
+qsub:::rsync_remote("prism", paste0("/group/irc/shared/dynbenchmark", dataset_file(relative = T), "tasks.rds"), "", dataset_file())
 
 tasks$trajectory_type %>% table()

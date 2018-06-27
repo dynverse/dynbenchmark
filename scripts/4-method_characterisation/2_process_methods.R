@@ -1,7 +1,7 @@
 # This file will process the implementation en method characteristics google sheets
 library(tidyverse)
 library(googlesheets)
-library(dynalysis)
+library(dynbenchmark)
 library(dynmethods)
 
 experiment("4-method_characterisation")

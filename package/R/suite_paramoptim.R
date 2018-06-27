@@ -137,7 +137,7 @@ paramoptim_submit <- function(
         )
 
       # which packages to load on the cluster
-      qsub_packages <- c("dplyr", "purrr", "dyneval", "mlrMBO", "parallelMap", "readr", "dynalysis")
+      qsub_packages <- c("dplyr", "purrr", "dyneval", "mlrMBO", "parallelMap", "readr", "dynbenchmark")
 
       # which data objects will need to be transferred to the cluster
       qsub_environment <-  c(

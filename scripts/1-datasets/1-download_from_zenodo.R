@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynalysis)
+library(dynbenchmark)
 
 experiment("1-datasets")
 
@@ -51,7 +51,7 @@ tasks <- list_as_tibble(map(task_ids, function(task_id) {
     assign("task_id", task_id, env)
     assign("col", col, env)
     task[[col]] <- function() {
-      dynalysis::load_dataset(task_id)[[col]]
+      dynbenchmark::load_dataset(task_id)[[col]]
     }
     environment(task[[col]]) <- env
   }
@@ -70,10 +70,10 @@ tasks %>% map_int(~ pryr::object_size(.) %>% as.integer) %>% sort(decreasing = T
 # upload to remote, if relevant
 # this assumes you have a gridengine cluster at hand
 remote_config <- qsub::override_qsub_config()
-remote_dynalysis_path <- qsub:::run_remote("echo $DYNALYSIS_PATH", remote = remote_config$remote)$stdout
+remote_dynbenchmark_path <- qsub:::run_remote("echo $DYNALYSIS_PATH", remote = remote_config$remote)$stdout
 qsub:::rsync_remote(
   remote_src = "",
   path_src = derived_file(),
   remote_dest = remote_config$remote,
-  path_dest = derived_file() %>% str_replace(get_dynalysis_folder(), remote_dynalysis_path)
+  path_dest = derived_file() %>% str_replace(get_dynbenchmark_folder(), remote_dynbenchmark_path)
 )

@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynalysis)
+library(dynbenchmark)
 
 dataset_preprocessing("real/pancreatic-cell-maturation_zhang")
 

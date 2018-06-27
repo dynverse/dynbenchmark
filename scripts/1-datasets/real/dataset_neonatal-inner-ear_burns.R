@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynalysis)
+library(dynbenchmark)
 
 dataset_preprocessing("real/neonatal-inner-ear_burns")
 

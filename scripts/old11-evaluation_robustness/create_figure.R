@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynalysis)
+library(dynbenchmark)
 
 experiment("11-evaluation_robustness")
 

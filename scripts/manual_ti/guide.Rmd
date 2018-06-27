@@ -4,7 +4,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-library(dynalysis)
+library(dynbenchmark)
 library(tidyverse)
 
 tasks_control <- read_rds(derived_file("tasks.rds", "1-datasets/control"))

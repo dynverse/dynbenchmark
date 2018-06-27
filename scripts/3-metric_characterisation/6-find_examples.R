@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynalysis)
+library(dynbenchmark)
 library(dynplot)
 library(PRISM)
 
@@ -147,7 +147,7 @@ outputs <-
   qsub_lapply(
     X = seq_len(nrow(improve_df)),
     qsub_config = override_qsub_config(num_cores = 24, execute_before = "source /scratch/irc/shared/dynverse/module_load_R.sh", r_module = NULL, max_wall_time = NULL),
-    qsub_packages = c("tidyverse", "GA", "dynalysis"),
+    qsub_packages = c("tidyverse", "GA", "dynbenchmark"),
     FUN = function(i) {
       improve <- improve_df %>% extract_row_to_list(i)
 

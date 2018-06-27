@@ -22,10 +22,10 @@ filter <- dplyr::filter
 slice <- dplyr::slice
 
 # dataset_id <- "psc-astrocyte-maturation-neuron_sloan"
-walk(list.files("../dynalysis/analysis/data/derived_data/datasets/real/"), function(dataset_id) {
+walk(list.files("../dynbenchmark/analysis/data/derived_data/datasets/real/"), function(dataset_id) {
   print(dataset_id)
-  counts <- readRDS(glue::glue("../dynalysis/analysis/data/derived_data/datasets/real/{dataset_id}/original_counts.rds"))
-  dataset <- readRDS(glue::glue("../dynalysis/analysis/data/derived_data/datasets/real/{dataset_id}/dataset.rds"))
+  counts <- readRDS(glue::glue("../dynbenchmark/analysis/data/derived_data/datasets/real/{dataset_id}/original_counts.rds"))
+  dataset <- readRDS(glue::glue("../dynbenchmark/analysis/data/derived_data/datasets/real/{dataset_id}/dataset.rds"))
   counts <- counts[dataset$cell_grouping$cell_id,]
   counts %>% dim
   
@@ -72,7 +72,7 @@ platform$n_genes <- 100
 platform$n_cells <- 100
 saveRDS(platform, "inst/ext_data/platforms/small.rds")
 
-walk(list.files("../dynalysis/analysis/data/derived_data/datasets/real/"), function(dataset_id) {
+walk(list.files("../dynbenchmark/analysis/data/derived_data/datasets/real/"), function(dataset_id) {
   platform <- readRDS(glue::glue("inst/ext_data/platforms/{dataset_id}.rds"))
   
   platform$n_genes <- min(20000, platform$n_genes)
