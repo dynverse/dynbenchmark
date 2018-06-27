@@ -3,7 +3,7 @@
 \name{experiment}
 \alias{experiment}
 \alias{derived_file}
-\alias{raw_file}
+\alias{data_file}
 \alias{figure_file}
 \alias{result_file}
 \title{Helper function for controlling experiments}
@@ -12,7 +12,7 @@ experiment(experiment_id)
 
 derived_file(filename = "", experiment_id = NULL)
 
-raw_file(filename = "", experiment_id = NULL)
+data_file(filename = "", experiment_id = NULL)
 
 figure_file(filename = "", experiment_id = NULL)
 
