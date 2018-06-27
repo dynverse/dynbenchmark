@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynalysis)
+library(dynbenchmark)
 options('download.file.method.GEOquery'='curl')
 
 dataset_preprocessing("real/hematopoiesis_olsson")

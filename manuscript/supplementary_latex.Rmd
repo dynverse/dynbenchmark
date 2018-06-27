@@ -37,7 +37,7 @@ Make sure to pin the zotero bibtex references after first using them!
 
 
 ```{r setup, include=FALSE}
-source(paste0(dynalysis::get_dynalysis_folder(), "/analysis/paper/setup.R"))
+source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/analysis/paper/setup.R"))
 
 # knitr options
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
@@ -54,5 +54,5 @@ list2env(read_rds(derived_file("sfigs_stables.rds", "paper")), environment())
 ```
 
 ```{r "supplementary", echo=FALSE, results='asis'}
-source(paste0(dynalysis::get_dynalysis_folder(), "/analysis/paper/sfigs_stables.R"))
+source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/analysis/paper/sfigs_stables.R"))
 ```

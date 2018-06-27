@@ -1,7 +1,7 @@
 library(dynutils)
 library(tidyverse)
 library(cowplot)
-library(dynalysis)
+library(dynbenchmark)
 
 experiment("artificial/parameter_optimization")
 

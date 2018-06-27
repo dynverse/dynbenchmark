@@ -1,7 +1,7 @@
 library(tidyverse)
 library(cowplot)
 library(googlesheets)
-library(dynalysis)
+library(dynbenchmark)
 
 library(xml2)
 library(stringr)
@@ -308,7 +308,7 @@ predictions %>% write_rds(derived_file(pritt("predictions_{run$run_id}.rds")))
 # upload to PRISM
 qsub:::rsync_remote(
   remote_dest = "prism",
-  path_dest = derived_file() %>% gsub(dynalysis::get_dynalysis_folder(), qsub:::run_remote("echo $DYNALYSIS_PATH", "prism")$cmd_out, .),
+  path_dest = derived_file() %>% gsub(dynbenchmark::get_dynbenchmark_folder(), qsub:::run_remote("echo $DYNALYSIS_PATH", "prism")$cmd_out, .),
   remote_src = "",
   path_src = derived_file()
 )

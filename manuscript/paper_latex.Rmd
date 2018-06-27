@@ -40,7 +40,7 @@ Make sure to pin the zotero bibtex references after first using them!
 
 
 ```{r setup, include=FALSE}
-source(paste0(dynalysis::get_dynalysis_folder(), "/analysis/paper/setup.R"))
+source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/analysis/paper/setup.R"))
 
 # knitr options
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
@@ -440,7 +440,7 @@ To define baseline performance, we added three control methods, namely "Random",
 * **Angle:** Similar to the previous method, this method computes the angle with respect to the origin in a two-dimensional PCA plot, and returns a cyclical trajectory.
 
 ## Real datasets
-We gathered `r sum(tasks_info$task_source == "real")` real datasets by searching for "single-cell" at the Gene Expression Omnibus and selecting those datasets in which the cells are sampled from different stages in a dynamic process (`r ref("stable", "datasets")`). The scripts to download and process these datasets are available on our repository ([github.com/dynverse/dynalysis](http://www.github.com/dynverse/dynalysis)). Whenever possible, we preferred to start from the raw counts data. These raw counts were all normalised and filtered using a common pipeline, discussed later. We determined a reference standard for every dataset using labelling provided by the author's, and classified the standards into gold and silver based on whether this labelling was determined by the expert using the expression (silver standard) or using other external information (such as FACS or the origin of the sample; gold standard) (`r ref("stable", "datasets")`). These datasets are deposited in Zenodo ([doi.org/10.5281/zenodo.1211533](https://doi.org/10.5281/zenodo.1211533)) [@cannoodt_goldstandardsinglecell_].
+We gathered `r sum(tasks_info$task_source == "real")` real datasets by searching for "single-cell" at the Gene Expression Omnibus and selecting those datasets in which the cells are sampled from different stages in a dynamic process (`r ref("stable", "datasets")`). The scripts to download and process these datasets are available on our repository ([github.com/dynverse/dynbenchmark](http://www.github.com/dynverse/dynbenchmark)). Whenever possible, we preferred to start from the raw counts data. These raw counts were all normalised and filtered using a common pipeline, discussed later. We determined a reference standard for every dataset using labelling provided by the author's, and classified the standards into gold and silver based on whether this labelling was determined by the expert using the expression (silver standard) or using other external information (such as FACS or the origin of the sample; gold standard) (`r ref("stable", "datasets")`). These datasets are deposited in Zenodo ([doi.org/10.5281/zenodo.1211533](https://doi.org/10.5281/zenodo.1211533)) [@cannoodt_goldstandardsinglecell_].
 
 
 ```{r}
@@ -750,7 +750,7 @@ The real and synthetic datasets used in this study are deposited on Zenodo ([doi
 
 ```{r "supplementary", echo=FALSE, results='asis'}
 if (params$table_format == "html") 
-  source(paste0(dynalysis::get_dynalysis_folder(), "/analysis/paper/sfigs_stables.R"))
+  source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/analysis/paper/sfigs_stables.R"))
 write_rds(lst(refs, sfigs, stables), derived_file("sfigs_stables.rds", "paper"))
 write_rds(figs, derived_file("figs.rds", "paper"))
 ```

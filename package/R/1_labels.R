@@ -4,7 +4,7 @@
 #' @export
 label_short <- function(x, width = 10) {
   tibble(id = as.character(x)) %>%
-    left_join(dynalysis::labels, "id") %>%
+    left_join(dynbenchmark::labels, "id") %>%
     mutate(short = ifelse(is.na(short), label_capitalise(id), short)) %>%
     mutate(short = label_wrap(short, width = width)) %>%
     pull(short)
@@ -26,7 +26,7 @@ label_wrap <- function(x, width = 10, collapse = "\n") {
 #' @export
 label_long <- function(x) {
   tibble(id = as.character(x)) %>%
-    left_join(dynalysis::labels, "id") %>%
+    left_join(dynbenchmark::labels, "id") %>%
     mutate(long = ifelse(is.na(long), label_capitalise(id), long)) %>%
     pull(long)
 }
@@ -50,7 +50,7 @@ label_facet <- function(label_func = label_long) {function(df) {mutate_all(df, l
 #' @export
 label_simple_trajectory_types <- function(x) {
   tibble(id = as.character(x)) %>%
-    left_join(dynalysis::trajectory_types, by = "id") %>%
+    left_join(dynbenchmark::trajectory_types, by = "id") %>%
     mutate(label = label_long(ifelse(!is.na(simplified), simplified, x))) %>%
     .$label
 }

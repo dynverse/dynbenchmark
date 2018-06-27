@@ -1,4 +1,4 @@
-library(dynalysis)
+library(dynbenchmark)
 library(tidyverse)
 library(dynplot)
 
@@ -124,7 +124,7 @@ cowplot::plot_grid(plotlist = method_plots, nrow = 1)
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
 ### Metrics                                                                 ####
-metrics_oi <- dynalysis::metrics %>% slice(match(c("correlation", "rf_mse_inv", "edge_flip"), metric_id)) %>%
+metrics_oi <- dynbenchmark::metrics %>% slice(match(c("correlation", "rf_mse_inv", "edge_flip"), metric_id)) %>%
   mutate(y = row_number())
 
 metrics_y_scale <- scale_y_continuous(limits = c(min(metrics_oi$y)-0.5, max(metrics_oi$y)+0.5), expand = c(0, 0))

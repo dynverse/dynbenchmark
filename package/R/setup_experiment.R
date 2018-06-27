@@ -17,11 +17,11 @@
 #' dev.off()
 #' }
 experiment <- function(experiment_id) {
-  # check whether the working directory is indeed the dynalysis folder
-  dyn_fold <- get_dynalysis_folder()
+  # check whether the working directory is indeed the dynbenchmark folder
+  dyn_fold <- get_dynbenchmark_folder()
 
   # set option
-  options(dynalysis_experiment_id = experiment_id)
+  options(dynbenchmark_experiment_id = experiment_id)
 }
 
 # create a helper function
@@ -29,11 +29,11 @@ experiment_subfolder <- function(path) {
   function(filename = "", experiment_id = NULL) {
     filename <- paste0(filename, collapse = "")
 
-    dyn_fold <- get_dynalysis_folder()
+    dyn_fold <- get_dynbenchmark_folder()
 
     # check whether exp_id is given
     if (is.null(experiment_id)) {
-      experiment_id <- getOption("dynalysis_experiment_id")
+      experiment_id <- getOption("dynbenchmark_experiment_id")
     }
 
     # check whether exp_fold could be found

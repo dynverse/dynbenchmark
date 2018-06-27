@@ -1,4 +1,4 @@
-library(dynalysis)
+library(dynbenchmark)
 library(tidyverse)
 
 experiment("5-optimise_parameters")
@@ -12,13 +12,13 @@ num_init_params <- 16
 num_iterations <- 1000
 num_cores <- 8
 max_memory_per_core <- "10G"
-execute_before <- "export DYNALYSIS_PATH=/group/irc/shared/dynalysis/; singularity exec -B /scratch:/scratch -B /group:/group /scratch/irc/shared/dynmethods.simg \\"
+execute_before <- "export DYNALYSIS_PATH=/group/irc/shared/dynbenchmark/; singularity exec -B /scratch:/scratch -B /group:/group /scratch/irc/shared/dynmethods.simg \\"
 verbose <- TRUE
 
 # define important folders
 task_ids <- load_datasets() %>% filter(task_source == "synthetic") %>% pull(id)
 local_output_folder <- derived_file("suite/")
-remote_output_folder <- paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynalysis_experiment_id"), "/")
+remote_output_folder <- paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynbenchmark_experiment_id"), "/")
 
 methods_order <- c(
   "identity", "shuffle", "random", "slngsht", "mpath",  "comp1", "angle", "periodpc", "gng",

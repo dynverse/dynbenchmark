@@ -1,4 +1,4 @@
-Package: dynalysis
+Package: dynbenchmark
 Title: Analysis of "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
 Version: 0.0.0.9000
 Authors@R: c(

@@ -1,4 +1,4 @@
-library(dynalysis)
+library(dynbenchmark)
 
 experiment("1-datasets/real/run_all_datasets")
 
@@ -13,7 +13,7 @@ if (remote) {
   }
 } else {
   ## Remote
-  # Make sure all packages are installed on the cluster; i.e. GEOquery, MultiAssayExperiment, tidyverse, and dynalysis.
+  # Make sure all packages are installed on the cluster; i.e. GEOquery, MultiAssayExperiment, tidyverse, and dynbenchmark.
   handle <- qsub::qsub_lapply(
     X = dataset_scripts,
     qsub_environment = list2env(list()),
@@ -26,12 +26,12 @@ if (remote) {
       stop_on_error = FALSE,
       remove_tmp_folder = FALSE
     ),
-    qsub_packages = c("GEOquery", "MultiAssayExperiment", "tidyverse", "dynalysis"),
+    qsub_packages = c("GEOquery", "MultiAssayExperiment", "tidyverse", "dynbenchmark"),
     FUN = function(dataset_script) {
       cat("Running ", sQuote(dataset_script), "\n", sep = "")
       oldwd <- getwd()
-      setwd("/group/irc/shared/dynalysis/")
-      source(paste0(dynalysis::get_dynalysis_folder(), "/", dataset_script))
+      setwd("/group/irc/shared/dynbenchmark/")
+      source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/", dataset_script))
       setwd(oldwd)
       TRUE
     }

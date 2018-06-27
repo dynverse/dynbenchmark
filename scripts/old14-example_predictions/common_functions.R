@@ -81,7 +81,7 @@ get_models <- function(outputs_oi) {
 
 preprocess_task <- function(task) {
   # Preprocess task
-  task$milestone_network <- dynalysis:::cut_unrepresented_milestones(task$milestone_network, task$milestone_percentages %>% filter(percentage > 0), task$milestone_ids)
+  task$milestone_network <- dynbenchmark:::cut_unrepresented_milestones(task$milestone_network, task$milestone_percentages %>% filter(percentage > 0), task$milestone_ids)
   task$milestone_network <- task$milestone_network %>% mutate(from = factor(from, levels = task$milestone_ids)) %>% arrange(from) %>% mutate(from = as.character(from)) # retain order from before
   task$milestone_ids <- unique(c(task$milestone_network$from, task$milestone_network$to))
   task$milestone_percentages <- task$milestone_percentages %>% filter(percentage > 0)

@@ -1,4 +1,4 @@
-library(dynalysis)
+library(dynbenchmark)
 library(tidyverse)
 
 dataset_preprocessing("real/distal-lung-epithelium_treutlein")

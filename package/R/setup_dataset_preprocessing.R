@@ -9,19 +9,19 @@
 #'
 #' @rdname dataset_preprocessing
 dataset_preprocessing <- function(dataset_id) {
-  # check whether the working directory is indeed the dynalysis folder
-  dynalysis_folder <- get_dynalysis_folder()
+  # check whether the working directory is indeed the dynbenchmark folder
+  dynbenchmark_folder <- get_dynbenchmark_folder()
 
   # set option
   options(
-    dynalysis_datasetpreproc_id = dataset_id
+    dynbenchmark_datasetpreproc_id = dataset_id
   )
 }
 
 #' @rdname dataset_preprocessing
 #' @export
 datasetpreproc_getid <- function() {
-  dataset_id <- getOption("dynalysis_datasetpreproc_id")
+  dataset_id <- getOption("dynbenchmark_datasetpreproc_id")
   if (is.null(dataset_id)) {
     stop("No dataset_id found. Did you run dataset_preprocessing(...)?")
   }
@@ -32,7 +32,7 @@ datasetpreproc_getid <- function() {
 # create a helper function
 datasetpreproc_subfolder <- function(path) {
   function(filename = "", dataset_id = NULL, relative = FALSE) {
-    dyn_fold <- get_dynalysis_folder()
+    dyn_fold <- get_dynbenchmark_folder()
 
     if (relative) {
       dyn_fold = ""

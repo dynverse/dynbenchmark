@@ -3,7 +3,7 @@
 
 
 rm(list=ls())
-library(dynalysis)
+library(dynbenchmark)
 library(tidyverse)
 library(GEOquery)
 library(Biobase)

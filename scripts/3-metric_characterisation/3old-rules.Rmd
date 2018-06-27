@@ -5,7 +5,7 @@ output: html_document
 
 ```{r setup}
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
-library(dynalysis)
+library(dynbenchmark)
 library(tidyverse)
 library(dyneval)
 ```

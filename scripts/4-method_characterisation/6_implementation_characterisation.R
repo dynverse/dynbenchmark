@@ -2,7 +2,7 @@
 #   Loading                                                                 ####
 
 library(tidyverse)
-library(dynalysis)
+library(dynbenchmark)
 library(cowplot)
 
 experiment("4-method_characterisation")
