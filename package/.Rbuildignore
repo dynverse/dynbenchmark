@@ -1,0 +1,15 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^README\.Rmd$
+^README-.*\.png$
+^CONDUCT\.md$
+^CONTRIBUTING\.md$
+^analysis
+^Dockerfile$
+^\.travis
+^\.httr-oauth$
+^\.dockerignore$
+^\.git$
+^docker
+^scripts
+^data-raw$

@@ -1,10 +1,8 @@
 .Rproj.user
 .Rhistory
 .RData
-*/data/derived_data/*
-*/data/datasets/*
-*/data/datasets_preproc/*
-*log
+data_derived/*
+g*log
 analysis_output.tar
 .rds
 .httr-oauth

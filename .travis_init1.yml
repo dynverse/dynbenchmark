@@ -24,6 +24,7 @@ addons:
       - libblas-dev
       - liblapack-dev
 before_install:
+ - cd package
  - source <( curl --insecure https://raw.githubusercontent.com/dynverse/dynmethods/master/.travis_install_python.sh ) # use travis's own python
 install:
  - R -e 'setRepositories(ind = 1:2); devtools::install()'

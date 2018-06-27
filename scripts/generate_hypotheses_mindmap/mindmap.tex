@@ -1,0 +1,55 @@
+\documentclass[a4paper,twocolumn]{minimal} 
+
+\usepackage{bm}
+\usepackage[math]{iwona}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,decorations}
+\usepackage{amsmath,amssymb}
+
+
+\usepackage[a4paper,left=1cm,right=1cm,top=1cm,bottom=1cm]{geometry}
+
+\usetikzlibrary{shapes.multipart}
+
+\usetikzlibrary{trees}
+
+\newcommand{\mysection}[3]{%
+	\nodepart{#1}
+	\begin{minipage}{.9\linewidth}
+	\textbf{#2}\\
+	#3
+	\end{minipage}
+}
+\newcommand{\myhypothesis}[7]{%
+	\definecolor{my_#1}{RGB}{#3}
+	\begin{tikzpicture}
+		\node [mybox,draw=my_#1,fill=my_#1!10!white] (#1) {
+			\mysection{one}{Statement}{#4}
+			\mysection{two}{Experiment}{#5}
+			\mysection{three}{Expected results}{#6}
+			\mysection{four}{Motivation}{#7}
+		};
+		\node [mytitle,fill=my_#1] at (#1.north){\textbf{\color{white}#2}};
+	\end{tikzpicture}\\
+}
+
+\tikzstyle{mybox} = [
+	  fill=black!03, very thick,
+    rectangle, rounded corners, 
+    inner sep=5pt, inner ysep=5pt, 
+    rectangle split, rectangle split parts=4,
+    font=\fontsize{10}{11.4}\selectfont]
+\tikzstyle{mytitle} = [
+    anchor=center, fill=black!05,
+    very thick, rectangle,
+    yshift=.1cm,
+    font=\fontsize{14}{16.4}\selectfont]
+
+\begin{document}
+
+\input{hypotheses_tikz.tex}
+
+\end{document}

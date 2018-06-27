@@ -1,0 +1,112 @@
+---
+title: "1-methods-toys"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Testing methods on simple toy datasets
+
+```{r}
+library(tidyverse)
+library(dyntoy)
+library(dyneval)
+library(dynmethods)
+
+set.seed(1)
+
+data("toy_tasks")
+tasks <- toy_tasks
+```
+
+```{r}
+tasks$counts <- map(tasks$counts, function(counts) {
+  cbind2(counts, matrix(sample(1:100, nrow(counts)*100, replace=TRUE), nrow=nrow(counts))) %>% {magrittr::set_colnames(., paste0("G", 1:ncol(.)))}
+})
+task <- dynutils::extract_row_to_list(tasks, 3)
+pheatmap::pheatmap(task$counts)
+
+source("~/thesis/projects/dynverse/dynmodular/dimred_wrappers.R")
+# space <- task$counts %>% dimred_dp(2, neigen=2) %>% as.data.frame
+space <- task$counts %>% dimred_mds(2) %>% as.data.frame
+# space <- task$counts %>% dimred_lle(2) %>% as.data.frame
+space <- space %>% bind_cols(task$prior_information$grouping_assignment %>% slice(match(rownames(task$counts), cell_id)))
+space %>%  ggplot() + geom_point(aes(Comp1, Comp2, color=group_id))
+```
+
+We choose certain parameters for which we know that the method will find (or focus on finding) a linear trajectory, and will do this quickly
+```{r}
+method_params <- yaml::yaml.load_file("toy_params.yml")$linear
+method_names <- names(method_params)
+# method_names <- c("ouija", "slice")
+
+method_ti_methods <- map(method_names, ~get(paste0("ti_", .))()) %>% set_names(method_names)
+
+metric_names <- c("mean_R_nx", "auc_R_nx", "Q_local", "Q_global", "correlation")
+
+method_names <- c("scorpius")
+```
+
+```{r}
+# results <- qsub::qsub_lapply(names(method_ti_methods), function(method_name) {
+results <- purrr::map(method_names, function(method_name) {
+  library(dyneval)
+
+  cat("Processing ", method_name, "\n", sep="")
+  method <- method_ti_methods[[method_name]]
+  params <- method_params[[method_name]]
+
+  factory <- function(fun) {
+    function(...) {
+      warn <- err <- NULL
+      res <- withCallingHandlers(
+        tryCatch(fun(...), error=function(e) {
+          err <<- conditionMessage(e)
+          NULL
+        }), warning=function(w) {
+          warn <<- append(warn, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        })
+      list(res, warn=warn, err=err, method_name=method_name)
+    }
+  }
+
+  # factory(function() {
+    dyneval:::evaluate_ti_method(tasks, method, params, metrics = metric_names, timeout = 100)
+  # }
+  # )()
+})
+# }, qsub_environment = list2env(lst(method_ti_methods, tasks, metric_names, method_params)), qsub_config = qsub::override_qsub_config(memory = "10G", execute_before=c("module load python/x86_64/3.5.1"), wait=F))
+```
+
+Gather the output of the different methods, and check whether there were any errors
+```{r}
+scores <- purrr::map(results, function(result) {
+  bind_cols(
+    tibble(
+      model = attr(result, "extras")$.models
+    ),
+    attr(result, "extras")$.summary
+  )
+}) %>% bind_rows()
+
+# scores %>% saveRDS("results/toy_method_scores.rds")
+```
+
+```{r}
+scores %>% filter(errored)
+
+print(scores$error)
+```
+
+
+```{r fig.height=10, fig.width=10}
+scores %>% left_join(tasks %>% select(id, trajectory_type), by=c("task_id"="id")) %>% 
+  dplyr::select(-starts_with("time")) %>%
+  gather(score_id, score, -method_name, -method_short_name, -method_id, -task_id, -error, -warning, -model, -trajectory_type) %>%
+  filter(score_id %in% c("errored", "correlation", "robbie_network_score", "mean_R_nx")) %>% 
+  ggplot() + geom_bar(aes(method_name, score, fill=score_id), stat="identity") + 
+  facet_grid(trajectory_type~score_id) + coord_flip()
+```
