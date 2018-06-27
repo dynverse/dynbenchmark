@@ -1,7 +1,7 @@
 [![Build Status](https://api.travis-ci.org/dynverse/dynalysis.svg)](https://travis-ci.org/dynverse/dynalysis)
 ![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
 
-# Dynalysis
+# dynalysis
 
 Scripts to reproduce the manuscript
 
