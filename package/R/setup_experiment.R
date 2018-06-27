@@ -54,17 +54,20 @@ experiment_subfolder <- function(path) {
 
 #' @rdname experiment
 #' @export
-derived_file <- experiment_subfolder("analysis/data/derived_data")
+derived_file <- experiment_subfolder("derived")
 
 #' @rdname experiment
 #' @export
-raw_file <- experiment_subfolder("analysis/data/raw_data")
+raw_file <- experiment_subfolder("data")
+
+#' @export
+data_file <- raw_file
 
 #' @rdname experiment
 #' @export
-figure_file <- experiment_subfolder("analysis/figures")
+figure_file <- experiment_subfolder("figures")
 
 #' @rdname experiment
 #' @export
-result_file <- experiment_subfolder("analysis/results")
+result_file <- experiment_subfolder("results")
 
