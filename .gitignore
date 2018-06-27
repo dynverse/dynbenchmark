@@ -2,13 +2,13 @@
 .Rhistory
 .RData
 derived/*
-g*log
+*log
 analysis_output.tar
 .rds
 .httr-oauth
 *.html
-analysis/paper/paper*.md
-analysis/paper/paper*.tex
+manuscript/paper*.md
+manuscript/paper*.tex
 *.aux
 *.out
 *.bbl
