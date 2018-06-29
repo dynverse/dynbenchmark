@@ -1,0 +1,164 @@
+---
+title: "2-rules"
+output: html_document
+---
+
+```{r setup}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+library(dynbenchmark)
+library(tidyverse)
+library(dyneval)
+```
+
+```{r}
+experiment("3-metric_characterisation/3-rules")
+
+scores <- read_rds(result_file("scores.rds"))
+toys <- read_rds(derived_file("toys.rds"))
+timings <- read_rds(result_file("timings.rds"))
+
+# summarise the scores
+# get gs-toy score
+# get difference and fractions between gs-toy and gs-gs
+scores_summary <- scores %>% gather(score_id, score, -toy_id, -comparison) %>%
+  spread(comparison, score) %>% mutate(
+    score=`gs-toy`,
+    diff= `gs-toy`-`gs-gs`,
+    frac=`gs-toy`/`gs-gs`,
+    score_grouped = `gs_groupid-toy`
+  ) %>% select(-`gs-toy`, -`gs-gs`, -`gs_groupid-toy`) %>% left_join(toys, by="toy_id")
+
+scores_summary %>%
+  ggplot() +
+  geom_boxplot(aes(toy_category, score, color=perturbator_id)) +
+  facet_wrap(~score_id) +
+  coord_flip()
+
+scores_summary %>%
+  ggplot() +
+  geom_boxplot(aes(toy_category, diff, color=perturbator_id)) +
+  facet_wrap(~score_id) +
+  coord_flip()
+```
+
+```{r}
+library(googlesheets)
+rules_info <- gs_title("Metrics rules") %>% gs_read("rules") %>% mutate(id=factor(id, levels=id))
+
+source("analysis/analyses/3-metric_characterisation/rules.R")
+rules_info$check_func <- map(paste0("check_", rules_info$id), get)
+
+rules <- map2(
+  rules_info$check_func,
+  rules_info$id,
+  ~.x(scores_summary) %>%
+    mutate(rule_id=.y)
+  ) %>% bind_rows() %>% left_join(rules_info, by=c("rule_id"="id"))
+
+metric_types <- rep("positional", length(unique(scores_summary$score_id))) %>% setNames(unique(scores_summary$score_id))
+metric_types[c("ged", "robbie_network_score", "lies_network_score", "isomorphic")] <- "structural"
+
+rules$metric_type <- metric_types[rules$score_id]
+rules$rule_type <- rules$type
+
+## Plot all rules
+rules %>% ggplot(aes(rule_id, score_id)) +
+  geom_raster(aes(fill = c("red", "green")[as.numeric(rule)+1])) +
+  geom_text(aes(label = c("▼", "▲")[as.numeric(rule)+1]), color="white") +
+  scale_fill_identity() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+## Best combinations of scores
+```{r}
+## Possible score combinations satisfying all rules
+allscores <-unique(rules$score_id)
+score_ids_combinations <- map(1:length(allscores), function(x) map(combn(length(allscores), x, simplify = FALSE), ~allscores[.])) %>% unlist(recursive=FALSE)
+
+combination_scores <- map(score_ids_combinations, function(score_ids_combination) {
+  rules %>% 
+    filter(rule_id != "structure_and_position") %>% # do not look at this rule, none of the scores can satisfy it alone
+    filter(score_id %in% score_ids_combination) %>%
+    group_by(rule_id) %>%
+    summarise(any=any(rule), number=sum(rule, na.rm=TRUE)) %>%
+    group_by() %>%
+    summarise(all=all(any), avg_rules_retrieved=sum(number)/length(score_ids_combination), nscores = length(score_ids_combination)) %>%
+    mutate(score_ids_combination=list(score_ids_combination))
+}) %>% bind_rows() 
+
+combination_scores %>% filter(all) %>% arrange(nscores, -avg_rules_retrieved) %>% head(5)
+
+combination_scores %>% filter(all) %>% arrange(nscores, -avg_rules_retrieved) %>% pull(score_ids_combination) %>% head(5)
+```
+
+
+## Best aggregations of scores
+
+In the end, we want to compare methods using one aggregated number which follows all the rules of a good evaluation metric. We will aggregate all combinations of metrics using different aggregation functions.
+```{r}
+# score combinations
+score_ids_combinations <- map(1:length(allscores), function(x) map(combn(length(allscores), x, simplify = FALSE), ~allscores[.])) %>% unlist(recursive=FALSE)
+new_scores_combinations <- tibble(
+  combination = score_ids_combinations, 
+  nscores = map_int(combination, length),
+  combination_id = map_chr(combination, ~paste0(., collapse=","))
+)
+
+# aggregation functions
+new_scores_aggregations <- tibble(
+  aggregation_id = c("harmonic_mean", "arithmetic_mean", "geometric_mean", "max", "min"),
+  aggregation_func = list(
+    function(x) {if(any(x == 0)) {return(0)} else {length(x) /sum(1/x)}}, 
+    mean, 
+    function(x) {if(any(x == 0)) {return(0)} else {prod(x)^(1/length(x))}},
+    max,
+    min
+  )
+)
+
+# all combinations of score combinations and aggregation functions
+new_scores <- merge(new_scores_combinations, new_scores_aggregations) %>% as_tibble() %>% 
+  mutate(score_id = paste0(aggregation_id, "(", combination_id, ")"))
+```
+
+
+```{r}
+# calculate the scores
+scores2 <- new_scores %>% rowwise() %>% do(
+  tibble(score = apply(scores[.$combination], 1, .$aggregation_func), score_id=.$score_id, i=seq_len(nrow(scores)))
+) %>% spread(score_id, score) %>% bind_cols(scores %>% select(toy_id, comparison))
+
+# summarize the scores
+scores2_summary <- scores2 %>% gather(score_id, score, -toy_id, -comparison) %>%
+  spread(comparison, score) %>% mutate(
+    score=`gs-toy`,
+    diff= `gs-toy`-`gs-gs`,
+    frac=`gs-toy`/`gs-gs`,
+    score_grouped = `gs_groupid-toy`
+  ) %>% select(-`gs-toy`, -`gs-gs`) %>% left_join(toys, by="toy_id")
+
+# check whether a score follows a rule
+rules <- map2(
+  rules_info$check_func,
+  rules_info$id,
+  ~.x(scores2_summary) %>%
+    mutate(rule_id=.y)
+  ) %>% bind_rows() %>% left_join(rules_info, by=c("rule_id"="id"))
+```
+We want a score to follow all rules
+```{r}
+rules %>% group_by(score_id) %>% 
+  summarise(allpassed = all(rule), npassed=sum(rule)) %>% 
+  left_join(new_scores, by="score_id") %>% 
+  filter(allpassed) %>% 
+  arrange(nscores)
+```
+
+## Grouping cells
+```{r}
+check_grouping(scores_summary)
+
+plot_grouping(scores_summary)
+```
+
