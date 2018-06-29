@@ -55,11 +55,11 @@ datasetpreproc_subfolder <- function(path) {
 
 #' @rdname dataset_preprocessing
 #' @export
-dataset_preproc_file <- datasetpreproc_subfolder("analysis/data/derived_data/1-datasets_preproc")
+dataset_preproc_file <- datasetpreproc_subfolder("derived/1-datasets_preproc")
 
 #' @rdname dataset_preprocessing
 #' @export
-dataset_file <- datasetpreproc_subfolder("analysis/data/derived_data/1-datasets")
+dataset_file <- datasetpreproc_subfolder("derived/1-datasets")
 
 #' @rdname dataset_preprocessing
 #' @export
@@ -87,7 +87,7 @@ load_dataset <- function(dataset_id, as_tibble = TRUE) {
 #' @export
 #' @rdname load_dataset
 load_datasets <- function(as_tibble = TRUE) {
-  read_rds(derived_file("tasks.rds", "1-datasets"))
+  read_rds(derived_file("tasks.rds", experiment_id = "1-datasets"))
 }
 
 #' Download a file and return its location path
