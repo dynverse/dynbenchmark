@@ -26,8 +26,8 @@ preprocess_dataset <- function(
   counts,
   milestone_network,
   grouping,
+  root_milestone_id,
   cell_info = tibble(cell_id = rownames(counts)),
-  root_milestone_id = milestone_network$from[[1]],
   feature_info = tibble(feature_id = colnames(counts))
 ) {
   dataset_preprocessing(id)
