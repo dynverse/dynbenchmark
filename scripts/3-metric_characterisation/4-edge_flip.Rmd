@@ -1,0 +1,104 @@
+---
+title: "Flip score characterisation"
+output: html_document
+---
+
+
+```{r setup}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+library(dynbenchmark)
+library(tidyverse)
+library(dyneval)
+library(cowplot)
+```
+
+```{r}
+experiment("3-score_rules/4-edge_flip")
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Generate different trajectory topologies
+```{r}
+topologies <- eval(formals(dyntoy:::generate_milestone_network)$model)
+topologies <- topologies[topologies != "BA"]
+networks_synthetic <- map(topologies, dyntoy:::generate_milestone_network) %>% tibble(milestone_network = ., topology = topologies)
+```
+
+Add SCORPIUS predictions
+```{r}
+ti_methods <- list(ti_scorpius())
+data <- dyntoy::generate_toy_datasets(c("linear"), num_replicates=1, num_cells=30, num_genes=10) %>% dynutils::extract_row_to_list(1)
+
+results <- map(ti_methods, ~.$run_fun(data$counts))
+
+networks_methods <- tibble(topology=map_chr(ti_methods, "name"), milestone_network=map(results, "milestone_network"))
+```
+
+```{r}
+networks <- bind_rows(networks_synthetic, networks_methods)
+design <- crossing(networks, networks)
+```
+
+```{r fig.height=7}
+scores <- design %>% as.list() %>% pmap(function(milestone_network, milestone_network1, topology, topology1, ...) {
+  # print(topology)
+  # print(topology1)
+  
+  start <- Sys.time()
+  score <- dyneval:::calculate_edge_flip(milestone_network, milestone_network1)
+  time <- Sys.time() - start
+  tibble(score=score, time=time)
+}) %>% bind_rows()
+design <- bind_cols(design, scores)
+
+design %>% 
+  ggplot() + 
+  geom_raster(aes(topology, topology1, fill=score)) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+```{r}
+exclude_topologies <- c("SCORPIUS", "linear_long")
+edge_flip_comparison <- design %>% 
+  filter(!topology %in% exclude_topologies, !topology1 %in% exclude_topologies) %>% 
+  mutate(topology = factor(topology, levels=topologies)) %>% 
+  mutate(topology1 = factor(topology1, levels=rev(topologies))) %>% 
+  ggplot(aes(topology, topology1)) + 
+  geom_tile(aes(fill=score)) + 
+  geom_text(
+    aes(
+      label=round(score, 2) %>% gsub("0\\.", "\\.", .),
+      color = ifelse(score > 0.5, "white", "black")
+      )
+  ) +
+  viridis::scale_fill_viridis("Edge flip score", option="A", direction = -1) +
+  scale_color_identity() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_x_discrete("", labels=label_long, position="top", expand=c(0, 0)) +
+  scale_y_discrete("", labels=label_long, expand=c(0, 0)) +
+  theme(axis.text.x.top = element_text(hjust=0)) +
+  coord_equal()
+edge_flip_comparison
+write_rds(edge_flip_comparison, figure_file("edge_flip_comparison.rds"))
+ggsave(figure_file("edge_flip_comparison.svg"), edge_flip_comparison, width=7, height=7)
+```
+
+```{r}
+library(ggraph)
+library(tidygraph)
+
+networks$plot <- networks$milestone_network %>% map(function(net) {
+  net %>% as_tbl_graph(directed=FALSE) %>%
+    ggraph() +
+      geom_edge_fan() + geom_node_point() + ggraph::theme_graph(plot_margin = margin(0, 0, 0, 0))
+})
+
+design %>%
+  group_by(topology) %>%
+  arrange(-score) %>%
+  left_join(networks %>% select(-milestone_network), by=c("topology1"="topology")) %>%
+  summarise(plots = list(map2(plot, score, ~.x + ggtitle(round(.y, 2))))) %>%
+  pull(plots) %>% map(~cowplot::plot_grid(plotlist=.))
+```
+

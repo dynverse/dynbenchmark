@@ -1,0 +1,70 @@
+---
+title: "Guide for manual trajectory inference"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(dynbenchmark)
+library(tidyverse)
+
+tasks_control <- read_rds(derived_file("tasks.rds", "1-datasets/control"))
+space <- tasks_control %>% filter(id == "control_bifurcating") %>% pull(space) %>% first()
+```
+
+Shown are individual cells within a single-cell RNA-seq dataset in 2D. Cells closer to each other have more similar expression profiles compared to cells farther apart.
+
+```{r, echo=F}
+annotation <- tribble(
+  ~x1, ~x2, ~y1, ~y2, ~label,
+  0.5, 0.8, 0.8, 0.75, "",
+  0.5, 0.8, 0.75, 0.75, "Very similar cells",
+  0., 0.25, 0., 0.5, "",
+  0.5, 0.25, 0.8, 0.5, "Very different cells"
+)
+space %>% 
+  ggplot(aes(Comp1, Comp2)) +
+    geom_point() +
+    geom_segment(aes(x1, y1, xend=x2, yend=y2), data=annotation) +
+    geom_label(aes(x2, y2, label=label), data=annotation %>% filter(label != "")) +
+    geom_point(aes(x1, y1), color="red", data=annotation) +
+    ggraph::theme_graph()
+```
+
+In all datasets, cells were sampled while they were going through a cellular dynamic process, such as the cell cycle, differentiation, activation, ... 
+At some points during this process, cells make decisions about different paths they can take. At other points, they could converge towards very similar cell types. 
+
+When we assume that cells go through this process gradually, the expression changes will follow a continuum, and this will be reflected in the 2D visualisation of the cells. Cells will follow paths within this 2D visualisation, but due to heterogeneity, will not exactly lie on this "average" path. See for example the red path in the following visualisation:
+
+```{r, echo=F}
+graph <- tribble(
+  ~x1, ~y1, ~x2, ~y2,
+  0.5, 1, 0.5, 0.35,
+  0.5, 0.35, 1, 0,
+  0.5, 0.35,0,0
+)
+space %>% 
+  ggplot(aes(Comp1, Comp2)) +
+    geom_point() +
+    geom_segment(aes(x1, y1, xend=x2, yend=y2), data=graph, color="red", size=3,alpha=0.6) +
+  ggraph::theme_graph()
+```
+
+
+Your goal is to use this visualisation to draw the paths the cells follow. These can contain cycles, multiple splits and convergences.
+
+Open the svg file in inkscape and use these tools to draw the lines:
+
+![](pen.png)
+To draw lines
+
+![](select.png)
+To edit lines
+
+![](arrow.png)
+To select lines (and delete them with the delete key)
+
+You don't have to define an end or start point. When drawing cycles, splits or convergences, two points don't have to lie at exactly the same position, as they will be merged computationally.
+
+When ready, send the svg file back to wouter.saelens@ugent.be
+
+Thank you!
