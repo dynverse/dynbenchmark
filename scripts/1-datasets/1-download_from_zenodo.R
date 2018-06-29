@@ -1,5 +1,6 @@
 library(tidyverse)
 library(dynbenchmark)
+library(pryr)
 
 experiment("1-datasets")
 
@@ -21,11 +22,13 @@ unzip(dataset_file, exdir = derived_file(""))
 task_ids <- list.files(derived_file(""), pattern = ".rds", recursive = TRUE, full.names = FALSE) %>%
   str_replace(".rds$", "") %>%
   discard(~. == "tasks")
+
 pbapply::pblapply(task_ids, function(task_id) {
   file <- derived_file(glue::glue("{task_id}.rds"))
 
   task <- read_rds(file) %>%
-    add_class(paste0("dynwrap::", c("data_wrapper", "with_expression", "with_prior", "with_trajectory")))
+    add_class(paste0("dynwrap::", c("data_wrapper", "with_expression", "with_trajectory"))) %>%
+    add_prior_information()
 
   task$divergence_regions <- tibble(milestone_id = character(), divergence_id = character(), is_start = logical())
 
