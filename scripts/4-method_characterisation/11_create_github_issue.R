@@ -18,7 +18,7 @@ qc_ss <- gs_key("1GWWdndfTPtXPsCXK07jU03MmhIJHmv28E7YiMnQ_0Xo")
 worksheets <- gs_ws_ls(qc_ss)
 
 implementation_ids <- unique(implementation_qc$implementation_id)
-implementation_ids <- "ouijaflow"
+# implementation_ids <- "ouijaflow"
 
 for (implementation_id in implementation_ids) {
   input <-  implementation_qc %>%
