@@ -9,7 +9,6 @@ file1 <- download_dataset_file("GSE59114_C57BL6_GEO_all.xlsx", "https://www.ncbi
 
 # read counts
 tab1 <- readxl::read_xlsx(file1, skip = 1)
-# tab2 <- readxl::read_xlsx(file2, skip = 1)
 
 allexpression <- tab1 %>%
   select(-`UCSC transcripts`) %>%
@@ -26,6 +25,7 @@ allexpression <- tab1 %>%
   as.data.frame()
 
 allexpression <- allexpression %>% select(-sample) %>% magrittr::set_rownames(allexpression$sample) %>% as.matrix
+allcounts <- round(2^allexpression - 1)
 
 # create cell info
 allcell_info <- data_frame(
@@ -37,7 +37,7 @@ allcell_info <- data_frame(
 ) %>% filter(!bulk)
 
 
-settings <- lapply(c("old", "young"), function(age) {
+settings <- map(c("old", "young"), function(age) {
   list(
     id = pritt("real/aging-hsc-{age}_kowalczyk"),
     milestone_network = tribble(
@@ -53,26 +53,21 @@ for (setting in settings) {
   dataset_preprocessing(setting$id)
 
   milestone_network <- setting$milestone_network
-  milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
-  cell_info <- allcell_info %>% filter(milestone_id %in% milestone_ids, age == setting$age)
+  cell_info <- allcell_info %>% filter(
+    milestone_id %in% unique(c(milestone_network$from, milestone_network$to)),
+    age == setting$age
+  )
 
-  expression <- allexpression[cell_info$cell_id, ]
-  cell_ids <- cell_info$cell_id
+  grouping <- cell_info %>% select(cell_id, group_id = milestone_id) %>% deframe()
 
-  cell_grouping <- cell_info %>% select(cell_id, group_id = milestone_id)
-  milestone_percentages <- cell_info %>% select(cell_id, milestone_id) %>% mutate(percentage = 1)
-
-  feature_info <- tibble(feature_id = colnames(expression))
+  counts <- allcounts[cell_info$cell_id, ]
 
   preprocess_dataset(
-    counts = 2^expression - 1, # todo: fix this
-    cell_ids = cell_ids,
-    milestone_ids = milestone_ids,
+    id = setting$id,
+    counts = counts,
+    grouping = grouping,
     milestone_network = milestone_network,
-    milestone_percentages = milestone_percentages,
-    cell_grouping = cell_grouping,
-    cell_info = cell_info,
-    feature_info = feature_info
+    cell_info = cell_info
   )
 }

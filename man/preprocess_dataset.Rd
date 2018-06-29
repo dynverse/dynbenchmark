@@ -4,31 +4,23 @@
 \alias{preprocess_dataset}
 \title{Preprocessing functionality for real datasets}
 \usage{
-preprocess_dataset(counts, cell_ids, milestone_ids, milestone_network,
-  milestone_percentages, cell_grouping, cell_info, feature_info,
-  dataset_id = NULL)
+preprocess_dataset(id = datasetpreproc_getid(), counts, milestone_network,
+  grouping, cell_info = tibble(cell_id = rownames(counts)),
+  root_milestone_id = milestone_network$from[[1]],
+  feature_info = tibble(feature_id = colnames(counts)))
 }
 \arguments{
+\item{id}{A unique identifier for the data}
+
 \item{counts}{The counts with genes in columns and cells in rows}
 
-\item{cell_ids}{The ids of the cells.}
+\item{milestone_network}{A network of milestones.}
 
-\item{milestone_ids}{The ids of the milestones in the trajectory. Type: Character vector.}
-
-\item{milestone_network}{The network of the milestones.
-Type: Data frame(from = character, to = character, length = numeric, directed = logical).}
-
-\item{milestone_percentages}{A data frame specifying what percentage milestone each cell
-consists of.
-Type: Data frame(cell_id = character, milestone_id = character, percentage = numeric).}
-
-\item{cell_grouping}{Milestone groups of the cells.}
+\item{grouping}{A grouping of the cells, can be a named vector or a dataframe with group_id (character) and cell_id (character)}
 
 \item{cell_info}{Optional meta-information pertaining the cells.}
 
 \item{feature_info}{Optional meta-information of the features, a data.frame with at least feature_id as column}
-
-\item{dataset_id}{The name of the dataset.}
 }
 \description{
 Preprocessing functionality for real datasets
