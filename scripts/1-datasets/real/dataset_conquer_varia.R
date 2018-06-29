@@ -180,29 +180,15 @@ for (source_info in conquer_infos) {
 
   milestone_network <- source_info$milestone_network
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
-  milestone_percentages <- cell_info %>%
-    mutate(percentage = 1) %>%
-    select(cell_id, milestone_id, percentage)
-
-  cell_info <- cell_info %>% filter(milestone_id %in% milestone_ids)
-
+  grouping <- cell_info %>% select(cell_id, milestone_id) %>% filter(milestone_id %in% milestone_ids) %>% deframe()
+  cell_info <- cell_info %>% slice(match(names(grouping), cell_id))
   counts <- counts[cell_info$cell_id, ]
-  cell_info$num_genes_expressed <- counts %>% apply(1, function(x) sum(x>0))
-  cell_info <- cell_info %>% filter(num_genes_expressed > 0)
-  counts <- counts[cell_info$cell_id, ]
-
-  cell_grouping <- cell_info %>% select(cell_id, milestone_id) %>% rename(group_id = milestone_id)
-
-  cell_ids <- rownames(counts)
 
   preprocess_dataset(
-    dataset_id = source_info$id,
+    id = id,
     counts = counts,
-    cell_ids = cell_ids,
-    milestone_ids = milestone_ids,
+    grouping = grouping,
     milestone_network = milestone_network,
-    milestone_percentages = milestone_percentages,
-    cell_grouping = cell_grouping,
     cell_info = cell_info,
     feature_info = feature_info
   )
