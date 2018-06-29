@@ -11,6 +11,12 @@
 #' @importFrom purrr %>% map set_names map_dbl map2_dbl map_df
 #' @importFrom stringr str_replace_all str_replace
 #'
+#' @import dynutils
+#' @import dynplot
+#' @import dyneval
+#' @import dynmethods
+#' @import dynwrap
+#'
 #' @docType package
 #' @name dynbenchmark
 #'
