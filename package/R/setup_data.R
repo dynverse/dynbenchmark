@@ -117,9 +117,17 @@ load_dataset <- function(dataset_id, as_tibble = FALSE) {
 }
 
 #' @export
+#' @param dataset_ids Character vector of dataset identifiers
 #' @rdname load_dataset
-load_datasets <- function(as_tibble = TRUE) {
-  read_rds(derived_file("tasks.rds", experiment_id = "1-datasets"))
+load_datasets <- function(dataset_ids = list_datasets()$dataset_id, as_tibble = TRUE) {
+  datasets <- map(dataset_ids, load_dataset)
+
+  if (as_tibble) {
+    datasets %>% list_as_tibble()
+  } else {
+    datasets
+  }
+  # read_rds(derived_file("tasks.rds", experiment_id = "1-datasets"))
 }
 
 #' Download a file and return its location path
