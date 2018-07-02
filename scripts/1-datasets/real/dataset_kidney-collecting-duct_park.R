@@ -91,7 +91,6 @@ settings <- list(
       "CD-PC", "CD-PC-CDC",
       "CD-PC", "CD-Trans",
       "CD-Trans", "CD-IC",
-      "CD-IC", "CD-IC-A",
       "CD-IC", "CD-IC-A"
     ) %>% mutate(length = 1, directed = FALSE)
   )
@@ -107,25 +106,17 @@ for (setting in settings) {
   group_id <- setting$group_id
 
   cell_info <- all_cell_info %>%
-    rename(milestone_id = !!group_id) %>%
-    filter(milestone_id %in% milestone_ids)
+    rename(group_id = !!group_id) %>%
+    filter(group_id %in% milestone_ids)
 
   counts <- all_counts[cell_info$cell_id, ]
-  cell_ids <- cell_info$cell_id
 
-  cell_grouping <- cell_info %>% select(cell_id, group_id = milestone_id)
-  milestone_percentages <- cell_info %>% select(cell_id, milestone_id) %>% mutate(percentage = 1)
-
-  feature_info <- tibble(feature_id = colnames(expression))
+  grouping <- cell_info %>% select(cell_id, group_id) %>% deframe()
 
   preprocess_dataset(
     counts = counts,
-    cell_ids = cell_ids,
-    milestone_ids = milestone_ids,
     milestone_network = milestone_network,
-    milestone_percentages = milestone_percentages,
-    cell_grouping = cell_grouping,
-    cell_info = cell_info,
-    feature_info = feature_info
+    grouping = grouping,
+    cell_info = cell_info
   )
 }

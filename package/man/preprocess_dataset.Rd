@@ -5,8 +5,8 @@
 \title{Preprocessing functionality for real datasets}
 \usage{
 preprocess_dataset(id = datasetpreproc_getid(), counts, milestone_network,
-  grouping, root_milestone_id, cell_info = tibble(cell_id = rownames(counts)),
-  feature_info = tibble(feature_id = colnames(counts)))
+  grouping, root_milestone_id = NULL, cell_info = tibble(cell_id =
+  rownames(counts)), feature_info = tibble(feature_id = colnames(counts)))
 }
 \arguments{
 \item{id}{A unique identifier for the data}
@@ -17,7 +17,7 @@ preprocess_dataset(id = datasetpreproc_getid(), counts, milestone_network,
 
 \item{grouping}{A grouping of the cells, can be a named vector or a dataframe with group_id (character) and cell_id (character)}
 
-\item{root_milestone_id}{The id of the root milestone}
+\item{root_milestone_id}{The root milestone, optional}
 
 \item{cell_info}{Optional meta-information pertaining the cells.}
 
