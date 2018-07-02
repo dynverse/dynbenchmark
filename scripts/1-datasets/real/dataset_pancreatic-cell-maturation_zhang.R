@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynverse)
+library(dynbenchmark)
 library(GEOquery)
 
 dataset_preprocessing("real/pancreatic-cell-maturation_zhang")

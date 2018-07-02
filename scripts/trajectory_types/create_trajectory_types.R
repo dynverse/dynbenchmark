@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynverse)
+library(dynbenchmark)
 
 experiment("trajectory_types")
 

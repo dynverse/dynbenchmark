@@ -1,4 +1,4 @@
-library(dynverse)
+library(dynbenchmark)
 library(tidyverse)
 
 experiment("gource")

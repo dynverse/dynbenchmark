@@ -1,7 +1,7 @@
 library(tidyverse)
 library(cowplot)
 library(googlesheets)
-library(dynverse)
+library(dynbenchmark)
 
 experiment("manual_ti")
 

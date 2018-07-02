@@ -2,7 +2,7 @@
 
 
 library(tidyverse)
-library(dynverse)
+library(dynbenchmark)
 
 analysis_folder <- "analysis/analyses/4-method_characterisation"
 people <- readr::read_csv(paste0(analysis_folder, "/survey/people.csv"))

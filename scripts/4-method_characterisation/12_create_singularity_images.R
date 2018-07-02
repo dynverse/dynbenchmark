@@ -1,6 +1,6 @@
 library(dynmethods)
 library(dynwrap)
-library(dynverse)
+library(dynbenchmark)
 library(tidyverse)
 
 experiment("4-method_characterisation/singularity_images")

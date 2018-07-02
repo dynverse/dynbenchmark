@@ -1,7 +1,7 @@
 # This file will update the number of citations in the google sheets
 library(tidyverse)
 library(googlesheets)
-library(dynverse)
+library(dynbenchmark)
 
 experiment("4-method_characterisation")
 

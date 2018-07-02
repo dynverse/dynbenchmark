@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynverse)
+library(dynbenchmark)
 
 dataset_preprocessing("real/stimulated-dendritic-cells_shalek")
 

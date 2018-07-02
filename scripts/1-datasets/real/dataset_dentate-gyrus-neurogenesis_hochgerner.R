@@ -1,4 +1,4 @@
-library(dynverse)
+library(dynbenchmark)
 library(tidyverse)
 library(GEOquery)
 library(Biobase)
