@@ -120,6 +120,8 @@ load_dataset <- function(dataset_id, as_tibble = FALSE) {
 #' @param dataset_ids Character vector of dataset identifiers
 #' @rdname load_dataset
 load_datasets <- function(dataset_ids = list_datasets()$dataset_id, as_tibble = TRUE) {
+  testthat::expect_true(is.character(dataset_ids))
+
   datasets <- map(dataset_ids, load_dataset)
 
   if (as_tibble) {

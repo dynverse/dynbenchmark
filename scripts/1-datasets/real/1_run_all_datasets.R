@@ -54,8 +54,10 @@ if (remote) {
 
 
 
+datasets <- load_datasets(list_datasets() %>% filter(dataset_source == "real") %>% pull(dataset_id))
 
-
+dataset <- extract_row_to_list(datasets, 8)
+dataset %>% dynplot::plot_dimred(grouping = dataset$grouping, dimred = dyndimred::dimred_mds, plot_milestone_network = T)
 
 
 # sync back locally
