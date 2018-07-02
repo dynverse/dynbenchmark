@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynbenchmark)
+library(dynverse)
 library(dynwrap)
 
 dataset_preprocessing("real/conquer_varia")

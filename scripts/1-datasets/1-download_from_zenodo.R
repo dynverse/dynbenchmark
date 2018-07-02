@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynbenchmark)
+library(dynverse)
 
 experiment("1-datasets")
 

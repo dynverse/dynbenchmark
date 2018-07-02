@@ -1,4 +1,4 @@
-library(dynbenchmark)
+library(dynverse)
 library(png)
 library(tidyverse)
 library(GNG)

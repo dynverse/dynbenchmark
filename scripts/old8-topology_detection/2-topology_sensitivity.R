@@ -1,6 +1,6 @@
 library(cowplot)
 library(tidyverse)
-library(dynbenchmark)
+library(dynverse)
 
 library(tidygraph)
 library(ggraph)

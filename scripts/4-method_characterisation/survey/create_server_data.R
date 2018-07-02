@@ -1,6 +1,6 @@
 library(tidyverse)
 library(googlesheets)
-library(dynbenchmark)
+library(dynverse)
 
 experiment("4-method_characterisation")
 analysis_folder <- "analysis/analyses/4-method_characterisation"

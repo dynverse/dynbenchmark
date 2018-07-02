@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynbenchmark)
+library(dynverse)
 
 dataset_preprocessing("real/germline-human_li")
 

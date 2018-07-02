@@ -1,4 +1,4 @@
-library(dynbenchmark)
+library(dynverse)
 library(tidyverse)
 
 experiment("6-benchmark")

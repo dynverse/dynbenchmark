@@ -1,6 +1,6 @@
 library(cowplot)
 library(tidyverse)
-library(dynbenchmark)
+library(dynverse)
 
 experiment("7-user_guidelines")
 

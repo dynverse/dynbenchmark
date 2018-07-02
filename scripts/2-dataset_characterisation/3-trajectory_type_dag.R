@@ -1,4 +1,4 @@
-library(dynbenchmark)
+library(dynverse)
 library(tidygraph)
 library(ggraph)
 library(tidyverse)

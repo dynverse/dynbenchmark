@@ -1,6 +1,6 @@
 library(googlesheets)
 library(tidyverse)
-library(dynbenchmark)
+library(dynverse)
 
 experiment("4-method_characterisation")
 
