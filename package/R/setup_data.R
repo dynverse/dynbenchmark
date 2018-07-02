@@ -85,13 +85,28 @@ save_dataset <- function(dataset, dataset_id = NULL, lazy_load = TRUE) {
   write_rds(dataset, dataset_file(filename = "dataset.rds", dataset_id = dataset_id))
 }
 
+#' @rdname load_dataset
+list_datasets <- function() {
+  dataset_ids <- list.files(
+    derived_file("", experiment_id = "1-datasets"),
+    "dataset\\.rds",
+    recursive = TRUE
+  ) %>% dirname()
+
+  tibble(
+    dataset_id = dataset_ids,
+    dataset_source = gsub("(.*)/[^/]*", "\\1", dataset_ids),
+    dataset_name = gsub(".*/([^/]*)", "\\1", dataset_ids)
+  )
+}
+
 #' Load datasets
 #' @export
 #' @inheritParams dataset_preprocessing
 #' @param as_tibble Return the datasets as a tibble or as a list of datasets?
 #'
 #' @rdname load_dataset
-load_dataset <- function(dataset_id, as_tibble = TRUE) {
+load_dataset <- function(dataset_id, as_tibble = FALSE) {
   dataset <- read_rds(dataset_file(filename = "dataset.rds", dataset_id = dataset_id))
 
   if (as_tibble) {
