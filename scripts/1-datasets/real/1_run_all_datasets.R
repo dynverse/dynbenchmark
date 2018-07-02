@@ -7,6 +7,7 @@ library(dynbenchmark)
 experiment("1-datasets/real/run_all_datasets")
 
 dataset_scripts <- list.files(path = "scripts/1-datasets/real", pattern = "^dataset_.*\\.R", full.names = TRUE)
+# dataset_scripts <- results$dataset_script
 
 remote <- FALSE
 
@@ -18,7 +19,7 @@ if (remote) {
 } else {
   ## Remote
   # Make sure all packages are installed on the cluster; i.e. GEOquery, MultiAssayExperiment, tidyverse, and dynbenchmark.
-  script_contents <- map_chr(dataset_scripts, read_file)[1]
+  script_contents <- map_chr(dataset_scripts, read_file)
 
   handle <- qsub::qsub_lapply(
     X = script_contents,
@@ -41,5 +42,22 @@ if (remote) {
     }
   )
 
-  qsub::qsub_retrieve(handle)
+  results <- qsub::qsub_retrieve(handle)
+
+  names(results) <- dataset_scripts
+
+  results <- results %>%
+    keep(is.na) %>%
+    enframe("dataset_script", "result") %>%
+    mutate(error = map_chr(result, ~attr(., "qsub_error")))
 }
+
+
+
+# sync back locally
+qsub::rsync_remote()
+
+
+
+
+
