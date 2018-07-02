@@ -1,5 +1,6 @@
 library(dynbenchmark)
 library(tidyverse)
+library(GEOquery)
 options('download.file.method.GEOquery'='curl')
 
 dataset_preprocessing("real/cortical-interneuron-differentiation_frazer")
