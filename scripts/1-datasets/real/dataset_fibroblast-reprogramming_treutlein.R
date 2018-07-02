@@ -30,7 +30,7 @@ milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 counts <- floor(2^expression-1)
 
 cell_info <- cell_info %>% filter(milestone_id %in% milestone_ids)
-expression <- expression[cell_info$cell_id, ]
+counts <- counts[cell_info$cell_id, ]
 
 grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
