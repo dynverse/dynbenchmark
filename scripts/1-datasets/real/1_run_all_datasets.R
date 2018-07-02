@@ -54,6 +54,10 @@ if (remote) {
 
 
 
+
+
+
+
 # sync back locally
 qsub::rsync_remote()
 
