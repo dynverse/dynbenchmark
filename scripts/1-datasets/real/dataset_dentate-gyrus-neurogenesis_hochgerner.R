@@ -54,7 +54,7 @@ cell_info <- cell_info_all %>% slice(match(rownames(counts_all), cell_id)) %>%
 
 counts <- counts_all[cell_info$cell_id, ]
 
-grouping <- cell_info %>% select(cell_id, milestone_id) %>% rename(group_id = milestone_id)
+grouping <- cell_info %>% select(cell_id, milestone_id) %>% rename(group_id = milestone_id) %>% deframe()
 
 preprocess_dataset(
   counts = counts,

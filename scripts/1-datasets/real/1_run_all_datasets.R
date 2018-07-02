@@ -1,3 +1,5 @@
+# This script preprocesses all datasets, either on the cluster (remote <- TRUE) or locally (remote <- FALSE)
+
 library(dynbenchmark)
 
 experiment("1-datasets/real/run_all_datasets")
@@ -21,18 +23,14 @@ if (remote) {
       name = "dynreal",
       memory = "30G",
       wait = FALSE,
-      r_module = NULL,
       execute_before = "",
-      stop_on_error = FALSE,
-      remove_tmp_folder = FALSE
+      stop_on_error = FALSE
     ),
     qsub_packages = c("GEOquery", "MultiAssayExperiment", "tidyverse", "dynbenchmark"),
     FUN = function(dataset_script) {
       cat("Running ", sQuote(dataset_script), "\n", sep = "")
-      oldwd <- getwd()
-      setwd("/group/irc/shared/dynbenchmark/")
+      setwd(dynbenchmark::get_dynbenchmark_folder())
       source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/", dataset_script))
-      setwd(oldwd)
       TRUE
     }
   )

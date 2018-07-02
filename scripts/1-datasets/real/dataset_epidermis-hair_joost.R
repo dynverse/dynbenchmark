@@ -64,24 +64,16 @@ for (setting in settings) {
 
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
-  cell_info <- slice(cell_info_all, match(rownames(counts_all), cell_id))
-  cell_info <- cell_info %>% filter(milestone_id %in% milestone_ids)
+  cell_info <- slice(cell_info_all, match(rownames(counts_all), cell_id)) %>%
+    filter(milestone_id %in% milestone_ids)
   counts <- counts_all[cell_info$cell_id, ]
-  cell_ids <- cell_info$cell_id
 
-  cell_grouping <- cell_info %>% select(cell_id, milestone_id) %>% rename(group_id = milestone_id)
-  milestone_percentages <- cell_grouping %>% rename(milestone_id=group_id) %>% mutate(percentage=1)
-
-  feature_info <- tibble(feature_id = colnames(counts))
+  grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
   preprocess_dataset(
     counts = counts,
-    cell_ids = cell_ids,
-    milestone_ids = milestone_ids,
     milestone_network = milestone_network,
-    milestone_percentages = milestone_percentages,
-    cell_grouping = cell_grouping,
-    cell_info = cell_info,
-    feature_info = feature_info
+    grouping = grouping,
+    cell_info = cell_info
   )
 }
