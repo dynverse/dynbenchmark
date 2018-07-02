@@ -48,6 +48,5 @@ preprocess_dataset(
   counts = counts,
   milestone_network = milestone_network,
   grouping = grouping,
-  cell_info = cell_info,
-  feature_info = feature_info
+  cell_info = cell_info
 )
