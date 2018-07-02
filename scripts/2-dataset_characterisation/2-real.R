@@ -1,6 +1,6 @@
 library(tidyverse)
 library(cowplot)
-library(dynbenchmark)
+library(dynverse)
 
 experiment("2-dataset_characterisation/2-real")
 

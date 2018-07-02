@@ -1,7 +1,7 @@
 library(dyneval)
 library(dynplot)
 library(tidyverse)
-library(dynbenchmark)
+library(dynverse)
 library(dynutils)
 
 experiment("3-metric_characterisation/5-score_aspects")

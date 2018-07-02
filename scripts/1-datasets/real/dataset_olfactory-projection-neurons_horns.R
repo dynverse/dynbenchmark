@@ -1,4 +1,4 @@
-library(dynbenchmark)
+library(dynverse)
 library(tidyverse)
 
 dataset_preprocessing("real/olfactory-projection-neurons_horns")

@@ -9,13 +9,6 @@ Authors@R: c(
 Description: This package contains the code to reproduce the main analyses of our paper 
              "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
              Using code from our other packages such as dyneval, dyngen and dynutils
-Depends: 
-  R (>= 3.5.0),
-  dyneval,
-  dynmethods,
-  dynplot,
-  dynutils,
-  dynwrap
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -27,6 +20,7 @@ Imports:
   dyngen,
   dyntoy,
   dynnormaliser,
+  dynverse,
   emoa,
   ggraph,
   ggplot2,

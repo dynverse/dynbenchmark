@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynbenchmark)
+library(dynverse)
 library(patchwork)
 library(tidytext)
 library(svglite)

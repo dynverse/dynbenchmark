@@ -1,6 +1,6 @@
 library(tidyverse)
 library(PRISM)
-library(dynbenchmark)
+library(dynverse)
 
 dataset_id <- "synthetic/v7"
 dataset_preprocessing(dataset_id)

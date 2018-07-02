@@ -1,10 +1,12 @@
 # This script preprocesses all datasets, either on the cluster (remote <- TRUE) or locally (remote <- FALSE)
 
-library(dynbenchmark)
+library(dynverse)
+library(purrr)
+library(readr)
 
 experiment("1-datasets/real/run_all_datasets")
 
-dataset_scripts <- list.files(path = "analysis/analyses/1-datasets/real", pattern = "^dataset_.*\\.R", full.names = TRUE)
+dataset_scripts <- list.files(path = "scripts/1-datasets/real", pattern = "^dataset_.*\\.R", full.names = TRUE)
 
 remote <- FALSE
 
@@ -16,9 +18,11 @@ if (remote) {
 } else {
   ## Remote
   # Make sure all packages are installed on the cluster; i.e. GEOquery, MultiAssayExperiment, tidyverse, and dynbenchmark.
+  script_contents <- map_chr(dataset_scripts, read_file)
+
   handle <- qsub::qsub_lapply(
-    X = dataset_scripts,
-    qsub_environment = list2env(list()),
+    X = script_contents[1],
+    qsub_environment = character(),
     qsub_config = qsub::override_qsub_config(
       name = "dynreal",
       memory = "30G",
@@ -27,11 +31,17 @@ if (remote) {
       stop_on_error = FALSE
     ),
     qsub_packages = c("GEOquery", "MultiAssayExperiment", "tidyverse", "dynbenchmark"),
-    FUN = function(dataset_script) {
-      cat("Running ", sQuote(dataset_script), "\n", sep = "")
-      setwd(dynbenchmark::get_dynbenchmark_folder())
-      source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/", dataset_script))
+    FUN = function(script_content) {
+      script_content
+
+      dataset_script <- tempfile()
+      write_file(script_content, dataset_script)
+
+      source(dataset_script)
+
       TRUE
     }
   )
+
+  qsub::qsub_retrieve(handle)
 }

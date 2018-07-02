@@ -1,4 +1,4 @@
-library(dynbenchmark)
+library(dynverse)
 library(tidyverse)
 
 experiment("5-optimise_parameters")

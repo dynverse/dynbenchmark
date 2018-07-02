@@ -1,6 +1,6 @@
 # open selenium server java -Dwebdriver.chrome.driver="./chromedriver" -jar ./selenium-serr-standalone-3.9.0.jar  -port 4449
 
-library(dynbenchmark)
+library(dynverse)
 experiment("gource")
 
 curl::curl_download("https://goo.gl/wz6ovx", derived_file("selenium-server-standalone.jar"))

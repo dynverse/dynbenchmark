@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynbenchmark)
+library(dynverse)
 
 # This script assumes that the following scripts have already been executed:
 # * 1-datasets/real/1_run_all_datasets.R
