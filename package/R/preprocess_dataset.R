@@ -25,7 +25,7 @@ preprocess_dataset <- function(
   # convert symbols
   conversion_out <- convert_to_symbol(counts)
   counts_prefilter <- conversion_out$counts
-  feature_info <- feature_info %>% filter(feature_id %in% conversion_out$filtered)
+  feature_info <- feature_info %>% filter(conversion_out$filtered) %>% mutate(feature_id = colnames(counts_prefilter))
 
   # normalise and filter expression
   norm_out <- dynnormaliser::normalise_filter_counts(counts_prefilter, verbose = TRUE)
@@ -80,8 +80,8 @@ convert_to_symbol <- function(counts) {
     left_join(dynbenchmark::id_mapper, by = c("gene_id" = "ensembl")) %>%
     mutate(gene_id = ifelse(is.na(symbol), gene_id, symbol)) %>%
     pull(gene_id)
-  filtered <- names(which(table(colnames(counts)) == 1))
-  counts <- counts[, filtered] # remove duplicates
+  filtered <- colnames(counts) %in% names(which(table(colnames(counts)) == 1))
+  counts <- counts[, filtered]
   lst(counts, filtered)
 }
 
