@@ -4,6 +4,7 @@
 #' @param dataset Dataset object to save
 #' @param filename Custom filename
 #' @param relative Whether or not to output relative paths
+#' @param lazy_load Whether or not to allow for lazy loading of large objects in the dataset
 #'
 #' @export
 #'
