@@ -51,14 +51,10 @@ Suggests:
   qsub
 Remotes:
   berndbischl/ParamHelpers,
-  dynverse/dyneval,
+  dynverse/dynverse,
   dynverse/dyngen,
-  dynverse/dynmethods,
   dynverse/dynnormaliser,
-  dynverse/dynplot,
-  dynverse/dynutils,
   dynverse/dyntoy,
-  dynverse/dynwrap,
   mlr-org/mlr,
   mlr-org/mlrMBO,
   jakobbossek/smoof,
