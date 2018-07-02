@@ -16,7 +16,7 @@ dataset_preproc_file(filename = "", dataset_id = NULL, relative = FALSE)
 
 dataset_file(filename = "", dataset_id = NULL, relative = FALSE)
 
-save_dataset(dataset, dataset_id = NULL)
+save_dataset(dataset, dataset_id = NULL, lazy_load = TRUE)
 }
 \arguments{
 \item{dataset_id}{The ID of the dataset to be used}
@@ -26,6 +26,8 @@ save_dataset(dataset, dataset_id = NULL)
 \item{relative}{Whether or not to output relative paths}
 
 \item{dataset}{Dataset object to save}
+
+\item{lazy_load}{Whether or not to allow for lazy loading of large objects in the dataset}
 }
 \description{
 Helper functions for creating new datasets
