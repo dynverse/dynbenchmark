@@ -15,6 +15,7 @@ add_counts <- function(model, counts) {
 #' @inheritParams dynwrap::wrap_data
 #' @inheritParams dynwrap::add_expression
 #' @inheritParams dynwrap::add_cluster_graph
+#' @param root_milestone_id The id of the root milestone
 #'
 #' @importFrom dynnormaliser normalise_filter_counts
 #' @importFrom dynwrap generate_prior_information
@@ -26,8 +27,8 @@ preprocess_dataset <- function(
   counts,
   milestone_network,
   grouping,
+  root_milestone_id,
   cell_info = tibble(cell_id = rownames(counts)),
-  root_milestone_id = milestone_network$from[[1]],
   feature_info = tibble(feature_id = colnames(counts))
 ) {
   dataset_preprocessing(id)

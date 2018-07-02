@@ -77,12 +77,12 @@ implementations_xs <- tibble(
   implementation_name = issues$title,
   xs = issues$body %>%
     map(~str_extract_all(., "\\[([ x])\\]")[[1]]) %>%
-    map(~c(., rep("[]", n_xs - length(.))))
+    map(~c(., rep("[ ]", n_xs - length(.))))
 )
 implementations <- left_join(implementations, implementations_xs, "implementation_name")
 implementations$xs <- map(implementations$xs, function(xs) {
   if (any(is.na(xs))) {
-    rep("[]", n_xs)
+    rep("[ ]", n_xs)
   } else {
     xs
   }
