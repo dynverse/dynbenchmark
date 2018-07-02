@@ -24,11 +24,11 @@ preprocess_dataset <- function(
 
   # convert symbols
   conversion_out <- convert_to_symbol(counts)
-  original_counts <- conversion_out$counts
+  counts_prefilter <- conversion_out$counts
   feature_info <- feature_info %>% filter(feature_id %in% conversion_out$filtered)
 
   # normalise and filter expression
-  norm_out <- dynnormaliser::normalise_filter_counts(original_counts, verbose = TRUE)
+  norm_out <- dynnormaliser::normalise_filter_counts(counts_prefilter, verbose = TRUE)
 
   normalisation_info <- norm_out$info
   expression <- norm_out$expression
@@ -66,7 +66,7 @@ preprocess_dataset <- function(
   dataset <- dynwrap::add_root(dataset, root_milestone_id = root_milestone_id)
 
   save_dataset(dataset, dataset_id = id)
-  write_rds(original_counts, dataset_file(dataset_id = id, filename = "original_counts.rds"))
+  write_rds(counts_prefilter, dataset_file(dataset_id = id, filename = "counts_prefilter.rds"))
 
   pdf(dataset_file(dataset_id = id, "normalisation.pdf"))
   walk(norm_out$normalisation_plots, print)
