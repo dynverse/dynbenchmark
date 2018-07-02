@@ -1,6 +1,6 @@
 
 # load libraries
-library(dynverse)
+library(dynbenchmark)
 library(tidyverse)
 library(cowplot)
 

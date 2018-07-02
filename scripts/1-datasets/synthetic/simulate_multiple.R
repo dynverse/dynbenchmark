@@ -16,7 +16,7 @@ load_data <- function(load = character(), params_i = 1) {
 ncores <- 6
 prepare_environment <- function(ncores = 6) {
   library(tidyverse)
-  library(dynverse)
+  library(dynbenchmark)
 
   options(ncores = ncores)
 

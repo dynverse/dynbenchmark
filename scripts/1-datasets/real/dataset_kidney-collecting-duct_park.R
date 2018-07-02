@@ -1,4 +1,4 @@
-library(dynverse)
+library(dynbenchmark)
 library(tidyverse)
 
 dataset_preprocessing("real/kidney-collecting-duct_park")

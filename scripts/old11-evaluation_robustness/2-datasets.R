@@ -1,6 +1,6 @@
 library(cowplot)
 library(tidyverse)
-library(dynverse)
+library(dynbenchmark)
 
 experiment("11-evaluation_robustness")
 

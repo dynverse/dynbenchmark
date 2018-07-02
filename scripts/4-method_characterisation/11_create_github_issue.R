@@ -1,6 +1,6 @@
 # code to generate the issues for authors on the dynmethods github
 
-library(dynverse)
+library(dynbenchmark)
 library(tidyverse)
 library(cowplot)
 library(googlesheets)

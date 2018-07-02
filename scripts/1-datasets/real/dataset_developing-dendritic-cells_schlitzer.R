@@ -1,5 +1,5 @@
 library(tidyverse)
-library(dynverse)
+library(dynbenchmark)
 library(GEOquery)
 options('download.file.method.GEOquery'='curl')
 
