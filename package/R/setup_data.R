@@ -63,8 +63,24 @@ dataset_file <- datasetpreproc_subfolder("derived/1-datasets")
 
 #' @rdname dataset_preprocessing
 #' @export
-save_dataset <- function(dataset, dataset_id = NULL) {
+save_dataset <- function(dataset, dataset_id = NULL, lazy_load = TRUE) {
   dir.create(dataset_file(filename = "", dataset_id = dataset_id), showWarnings = FALSE)
+
+  if (lazy_load) {
+    for (col in c("expression", "counts")) {
+      col_file <- dataset_file(filename = paste0(col, ".rds"), dataset_id = dataset_id)
+      write_rds(dataset[[col]], col_file)
+
+      env <- new.env(baseenv())
+      assign("dataset_id", dataset_id, env)
+      assign("col", col, env)
+      dataset[[col]] <- function() {
+        readr::read_rds(dynbenchmark::dataset_file(paste0(col, ".rds"), dataset_id = dataset_id))
+      }
+      environment(dataset[[col]]) <- env
+    }
+  }
+
   write_rds(dataset, dataset_file(filename = "dataset.rds", dataset_id = dataset_id))
 }
 

@@ -1,15 +1,3 @@
-add_counts <- function(model, counts) {
-  norm_out <- dynnormaliser::normalise_filter_counts(counts, verbose = TRUE)
-
-  model %>%
-    add_expression(
-      counts = norm_out$counts,
-      expression = norm_out$expression,
-      normalisation_info = norm_out$info
-    )
-}
-
-
 #' Preprocessing functionality for real datasets
 #'
 #' @inheritParams dynwrap::wrap_data
@@ -37,7 +25,7 @@ preprocess_dataset <- function(
   # convert symbols
   conversion_out <- convert_to_symbol(counts)
   original_counts <- conversion_out$counts
-  feature_info$feature_id <- colnames(original_counts)
+  feature_info <- feature_info %>% filter(feature_id %in% conversion_out$filtered)
 
   # normalise and filter expression
   norm_out <- dynnormaliser::normalise_filter_counts(original_counts, verbose = TRUE)
@@ -59,21 +47,23 @@ preprocess_dataset <- function(
     normalisation_info = normalisation_info,
     creation_date = Sys.time()
   ) %>%
-  dynwrap::add_cluster_graph(
+    dynwrap::add_cluster_graph(
     milestone_network = milestone_network,
     grouping = grouping
   ) %>%
-  dynwrap::add_expression(
+    dynwrap::add_expression(
     counts = counts,
     expression = expression,
     feature_info = feature_info
   ) %>%
-  dynwrap::add_prior_information()
+    dynwrap::add_prior_information() %>%
+    dynwrap::add_cell_waypoints()
 
   # add root if given
-  if (!is.null(root_milestone_id)) {
-    dataset <- dynwrap::add_root(dataset, root_milestone_id = root_milestone_id)
+  if (is.null(root_milestone_id)) {
+    root_milestone_id <- milestone_network$from[[1]]
   }
+  dataset <- dynwrap::add_root(dataset, root_milestone_id = root_milestone_id)
 
   save_dataset(dataset, dataset_id = id)
   write_rds(original_counts, dataset_file(dataset_id = id, filename = "original_counts.rds"))
