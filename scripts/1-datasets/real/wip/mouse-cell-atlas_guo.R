@@ -303,12 +303,12 @@ for (setting in settings) {
 }
 
 
-traj <- load_dataset(id)
-
-dimred <- SCORPIUS::reduce_dimensionality(get_expression(traj, "counts"), dist_fun = SCORPIUS::correlation_distance, ndim = 2, num_landmarks = 100) %>% magrittr::set_colnames(c("comp_1", "comp_2"))
-plot_dimred(traj, "grouping", dimred = dimred, grouping = traj$grouping)
-plot_dimred(traj, "grouping", dimred = dyndimred::dimred_mds, grouping = traj$grouping, expression_source = "expression")
-plot_dimred(traj, "grouping", dimred = dyndimred::dimred_umap, grouping = traj$grouping, expression_source = "expression")
-plot_dimred(traj, "grouping", dimred = dyndimred::dimred_umap, grouping = traj$grouping, expression_source = "counts")
-
-plot_dimred(traj, "grouping", dimred = dyndimred::dimred_umap(get_expression(traj, "counts") %>% apply(1, function(x) x/sum(x)) %>% t, n_neighbors = 15), grouping = traj$grouping)
+# traj <- load_dataset(id)
+#
+# dimred <- SCORPIUS::reduce_dimensionality(get_expression(traj, "counts"), dist_fun = SCORPIUS::correlation_distance, ndim = 2, num_landmarks = 100) %>% magrittr::set_colnames(c("comp_1", "comp_2"))
+# plot_dimred(traj, "grouping", dimred = dimred, grouping = traj$grouping)
+# plot_dimred(traj, "grouping", dimred = dyndimred::dimred_mds, grouping = traj$grouping, expression_source = "expression")
+# plot_dimred(traj, "grouping", dimred = dyndimred::dimred_umap, grouping = traj$grouping, expression_source = "expression")
+# plot_dimred(traj, "grouping", dimred = dyndimred::dimred_umap, grouping = traj$grouping, expression_source = "counts")
+#
+# plot_dimred(traj, "grouping", dimred = dyndimred::dimred_umap(get_expression(traj, "counts") %>% apply(1, function(x) x/sum(x)) %>% t, n_neighbors = 15), grouping = traj$grouping)
