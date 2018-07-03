@@ -274,7 +274,32 @@ settings <- list(
   )
 )
 
+# create ids
+settings <- map(settings, function(setting) {
+  setting$id <- paste0("real/", setting$tissue, "-", setting$subid, "_", "mca")
+  setting
+})
 
+# combine differrent datasets to create disconnected trajectories
+set.seed(1)
+combinations <-
+  c(
+    combn(seq_along(settings), 2, simplify=F) %>% sample(10),
+    combn(seq_along(settings), 3, simplify=F) %>% sample(5)
+  )
+settings <- c(
+  settings,
+  map(combinations, function(combination) {
+    setting <- list(
+      milestone_network = bind_rows(map(settings[combination], "milestone_network")),
+      dynamic_process = "mix",
+      id = paste0("real/", glue::collapse(map_chr(settings[combination], ~paste0(setting$tissue, "-", setting$subid))), "_mca")
+    )
+  })
+)
+
+
+# process setting
 for (setting in settings) {
   milestone_network <- setting$milestone_network
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
@@ -288,12 +313,10 @@ for (setting in settings) {
 
   counts <- get_counts(cell_info)
 
-  id <- paste0("real/", setting$tissue, "-", setting$subid, "_", "mca")
-
   counts <- counts[, !(colnames(counts) %>% str_detect("mt-.*"))] # remove mitochondrial genes, as these were already used for filtering in the original study
 
   preprocess_dataset(
-    id,
+    setting$id,
     counts,
     milestone_network,
     grouping,
