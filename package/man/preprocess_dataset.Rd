@@ -30,6 +30,8 @@ preprocess_dataset(id = datasetpreproc_getid(), counts, milestone_network,
 \item{filter_genes}{Whether the genes have to be filtered}
 
 \item{filter_hvg}{Whether to filter on highly variable genes}
+
+\item{normalisation}{How to normalise}
 }
 \description{
 Preprocessing functionality for real datasets
