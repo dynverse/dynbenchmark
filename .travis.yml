@@ -26,6 +26,7 @@ addons:
       - libx11-dev                          # dynmethods > merlot > rgl
       - libssh-dev                          # qsub > ssh
 before_install:
+ - cd package
  - source <( curl --insecure https://raw.githubusercontent.com/dynverse/dynmethods/master/.travis_install_python.sh ) # use travis's own python
 install:
  - pip3 install --user --upgrade --only-binary=numpy,scipy numpy scipy        # many packages
