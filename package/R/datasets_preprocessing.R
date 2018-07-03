@@ -4,6 +4,7 @@
 #' @inheritParams dynwrap::add_expression
 #' @inheritParams dynwrap::add_cluster_graph
 #' @param root_milestone_id The root milestone, optional
+#' @inheritParams dynnormaliser::normalise_filter_counts
 #'
 #' @importFrom dynnormaliser normalise_filter_counts
 #' @importFrom dynwrap generate_prior_information
@@ -17,7 +18,11 @@ preprocess_dataset <- function(
   grouping,
   root_milestone_id = NULL,
   cell_info = tibble(cell_id = rownames(counts)),
-  feature_info = tibble(feature_id = colnames(counts))
+  feature_info = tibble(feature_id = colnames(counts)),
+  filter_cells = TRUE,
+  filter_genes = TRUE,
+  filter_hvg = TRUE,
+  normalisation = "scran_size_factors"
 ) {
   dataset_preprocessing(id)
   testthat::expect_match(id, ".+/.+")
@@ -28,7 +33,14 @@ preprocess_dataset <- function(
   feature_info <- feature_info %>% filter(conversion_out$filtered) %>% mutate(feature_id = colnames(counts_prefilter))
 
   # normalise and filter expression
-  norm_out <- dynnormaliser::normalise_filter_counts(counts_prefilter, verbose = TRUE)
+  norm_out <- dynnormaliser::normalise_filter_counts(
+    counts_prefilter,
+    verbose = TRUE,
+    filter_cells = filter_cells,
+    filter_genes = filter_genes,
+    filter_hvg = filter_hvg,
+    normalisation = normalisation
+  )
 
   normalisation_info <- norm_out$info
   expression <- norm_out$expression
