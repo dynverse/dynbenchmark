@@ -7,9 +7,11 @@ library(dynbenchmark)
 experiment("1-datasets/real/run_all_datasets")
 
 dataset_scripts <- list.files(path = "scripts/1-datasets/real", pattern = "^dataset_.*\\.R", full.names = TRUE)
+dataset_scripts <- dataset_scripts %>% str_subset(".*mouse-cell-atlas.*")
+dataset_scripts
 # dataset_scripts <- results$dataset_script
 
-remote <- FALSE
+remote <- TRUE
 
 if (remote) {
   ## Local
