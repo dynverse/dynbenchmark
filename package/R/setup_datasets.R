@@ -86,6 +86,7 @@ save_dataset <- function(dataset, dataset_id = NULL, lazy_load = TRUE) {
 }
 
 #' @rdname load_dataset
+#' @export
 list_datasets <- function() {
   dataset_ids <- list.files(
     derived_file("", experiment_id = "1-datasets"),
