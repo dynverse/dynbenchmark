@@ -50,7 +50,7 @@ label_facet <- function(label_func = label_long) {function(df) {mutate_all(df, l
 #' @export
 label_simple_trajectory_types <- function(x) {
   tibble(id = as.character(x)) %>%
-    left_join(dynbenchmark::trajectory_types, by = "id") %>%
+    left_join(dynwrap::trajectory_types, by = "id") %>%
     mutate(label = label_long(ifelse(!is.na(simplified), simplified, x))) %>%
     .$label
 }
