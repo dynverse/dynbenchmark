@@ -74,7 +74,9 @@ for (setting in settings) {
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
   if (!"length" %in% names(milestone_network)) milestone_network$length <- 1
+  milestone_network$length[is.na(milestone_network$length)] <- TRUE
   if (!"directed" %in% names(milestone_network)) milestone_network$directed <- TRUE
+  milestone_network$directed[is.na(milestone_network$directed)] <- TRUE
 
   cell_info <- all_cell_info %>% filter(group_id %in% milestone_ids)
 
