@@ -215,18 +215,14 @@ settings <- map(settings, function(setting) {
 
 # combine differrent datasets to create disconnected trajectories
 set.seed(1)
-combinations <-
-  c(
-    combn(seq_along(settings), 2, simplify=F) %>% sample(10),
-    combn(seq_along(settings), 3, simplify=F) %>% sample(5)
-  )
+combinations <- combn(seq_along(settings), 2, simplify=F) %>% sample(10)
 settings <- c(
   settings,
-  map(combinations, function(combination) {
+  map2(seq_along(combinations), combinations, function(combination_ix, combination) {
     setting <- list(
       milestone_network = bind_rows(map(settings[combination], "milestone_network")),
       dynamic_process = "mix",
-      id = paste0("real/", glue::collapse(map_chr(settings[combination], ~paste0(.$tissue, "-", .$subid)), "_"), "_mca")
+      id = paste0("real/mouse-cell-atlas-combination-", combination_ix)
     )
   })
 )
