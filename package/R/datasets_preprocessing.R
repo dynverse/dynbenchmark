@@ -52,7 +52,7 @@ preprocess_dataset <- function(
   feature_info <- feature_info %>% slice(match(colnames(counts), feature_id))
 
   dataset <- dynwrap::wrap_data(
-    task_source = str_replace(id, "/.*", ""),
+    dataset_source = str_replace(id, "/.*", ""),
     id = id,
     cell_ids = cell_ids,
     cell_info = cell_info,
