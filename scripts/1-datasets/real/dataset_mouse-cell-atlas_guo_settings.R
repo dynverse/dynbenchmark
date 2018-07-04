@@ -226,7 +226,7 @@ settings <- c(
     setting <- list(
       milestone_network = bind_rows(map(settings[combination], "milestone_network")),
       dynamic_process = "mix",
-      id = paste0("real/", glue::collapse(map_chr(settings[combination], ~paste0(.$tissue, "-", .$subid))), "_mca")
+      id = paste0("real/", glue::collapse(map_chr(settings[combination], ~paste0(.$tissue, "-", .$subid)), "_"), "_mca")
     )
   })
 )
