@@ -4,6 +4,7 @@
 \alias{dataset_preprocessing}
 \alias{get_dataset_preprocessing_id}
 \alias{dataset_source_file}
+\alias{dataset_raw_file}
 \alias{save_raw_dataset}
 \alias{dataset_file}
 \alias{save_dataset}
@@ -14,6 +15,8 @@ dataset_preprocessing(dataset_id)
 get_dataset_preprocessing_id()
 
 dataset_source_file(filename = "", dataset_id = NULL, relative = FALSE)
+
+dataset_raw_file(dataset_id)
 
 save_raw_dataset(dataset, dataset_id = get_dataset_preprocessing_id())
 
