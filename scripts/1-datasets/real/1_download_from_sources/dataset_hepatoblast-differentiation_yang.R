@@ -16,7 +16,7 @@ counts <- read_tsv(txt_location, col_types = cols(ID = "c", Symbol = "c", .defau
   as.matrix() %>%
   t
 
-geo <- GEOquery::getGEO(GEO = "GSE90047", destdir = dataset_preproc_file(""))
+geo <- GEOquery::getGEO(GEO = "GSE90047", destdir = dataset_source_file(""))
 cell_info <- geo[[2]] %>%
   Biobase::phenoData() %>%
   as("data.frame") %>%

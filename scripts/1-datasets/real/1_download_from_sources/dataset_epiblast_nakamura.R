@@ -22,7 +22,7 @@ rpm_cy <- read_tsv(rpm_cy_location) %>%
   as.matrix() %>%
   t()
 
-geo <- GEOquery::getGEO("GSE74767", destdir = dataset_preproc_file(""))
+geo <- GEOquery::getGEO("GSE74767", destdir = dataset_source_file(""))
 
 celldata_location <- download_dataset_source_file(
   "nature19096-s1.xlsx",

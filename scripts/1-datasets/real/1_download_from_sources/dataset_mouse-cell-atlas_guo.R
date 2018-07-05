@@ -16,9 +16,9 @@ all_cell_info$cell_id <- all_cell_info$cell_id %>% str_replace_all("NeonatalBrai
 
 # counts
 counts_zip <- download_dataset_source_file("MCA_BatchRemove_dge.zip", "https://ndownloader.figshare.com/files/10756795?private_link=865e694ad06d5857db4b")
-system(paste0("unzip -o ", counts_zip, " -d ", dataset_preproc_file()))
+system(paste0("unzip -o ", counts_zip, " -d ", dataset_source_file()))
 
-counts_files <- list.files(dataset_preproc_file("rmbatch_dge"), full.names = TRUE)
+counts_files <- list.files(dataset_source_file("rmbatch_dge"), full.names = TRUE)
 counts_files_unzipped <- map(counts_files, function(counts_file) {  # fix top-left corner of counts files
   counts_file_unzipped <- gsub("\\.gz", "", counts_file)
   if (!file.exists(counts_file_unzipped)) {

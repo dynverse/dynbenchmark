@@ -8,11 +8,11 @@ tar_location <- download_dataset_source_file(
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE86146&format=file"
 )
 
-utils::untar(tar_location, exdir = dataset_preproc_file(""))
+utils::untar(tar_location, exdir = dataset_source_file(""))
 
-allcounts <- list.files(dataset_preproc_file("")) %>%
+allcounts <- list.files(dataset_source_file("")) %>%
   keep(~ startsWith(., "GSM")) %>%
-  map(~ read_tsv(dataset_preproc_file(.), col_types = cols(.default = "d", Gene = "c")) %>% gather(Sample, Expression, -Gene)) %>%
+  map(~ read_tsv(dataset_source_file(.), col_types = cols(.default = "d", Gene = "c")) %>% gather(Sample, Expression, -Gene)) %>%
   bind_rows() %>%
   spread(Gene, Expression) %>%
   as.data.frame() %>%

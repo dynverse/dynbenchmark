@@ -8,7 +8,7 @@ txt_location <- download_dataset_source_file(
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE99951&format=file&file=GSE99951%5Fall%5Fdata%5Fhtseq%5Fout%2Ecsv%2Egz"
 )
 
-# geo <- GEOquery::getGEO("GSE99951", destdir = dataset_preproc_file(""))
+# geo <- GEOquery::getGEO("GSE99951", destdir = dataset_source_file(""))
 # cell_info_all <- geo[[1]] %>%
 #   Biobase::phenoData() %>%
 #   as("data.frame") %>%
@@ -18,7 +18,7 @@ txt_location <- download_dataset_source_file(
 
 
 # temporary workaround because the above does not seem to be working
-geo <- GEOquery::getGEO("GSE99951", destdir = dataset_preproc_file(""), GSElimits = c(1,1), GSEMatrix = FALSE, getGPL = FALSE, AnnotGPL = FALSE)
+geo <- GEOquery::getGEO("GSE99951", destdir = dataset_source_file(""), GSElimits = c(1,1), GSEMatrix = FALSE, getGPL = FALSE, AnnotGPL = FALSE)
 
 
 cell_info_all <- dynutils::list_as_tibble(geo@gsms %>% map(~.@header)) %>%
