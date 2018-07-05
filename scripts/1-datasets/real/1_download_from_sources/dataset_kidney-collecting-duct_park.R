@@ -3,7 +3,7 @@ library(tidyverse)
 
 dataset_preprocessing("real/kidney-collecting-duct_park")
 
-txt_location <- download_dataset_file(
+txt_location <- download_dataset_source_file(
   "GSE107585_Mouse_kidney_single_cell_datamatrix.txt.gz",
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE107585&format=file&file=GSE107585%5FMouse%5Fkidney%5Fsingle%5Fcell%5Fdatamatrix%2Etxt%2Egz"
 )
@@ -98,8 +98,6 @@ settings <- list(
 
 
 for (setting in settings) {
-  dataset_preprocessing(setting$id)
-
   milestone_network <- setting$milestone_network
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
@@ -113,10 +111,5 @@ for (setting in settings) {
 
   grouping <- cell_info %>% select(cell_id, group_id) %>% deframe()
 
-  preprocess_dataset(
-    counts = counts,
-    milestone_network = milestone_network,
-    grouping = grouping,
-    cell_info = cell_info
-  )
+  save_raw_dataset(lst(milestone_network, cell_info, grouping, counts), setting$id)
 }

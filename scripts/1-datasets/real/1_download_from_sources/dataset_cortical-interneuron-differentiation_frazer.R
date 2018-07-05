@@ -5,7 +5,7 @@ options('download.file.method.GEOquery'='curl')
 
 dataset_preprocessing("real/cortical-interneuron-differentiation_frazer")
 
-txt_location <- download_dataset_file(
+txt_location <- download_dataset_source_file(
   "GSE90860_SupplementaryData1_revised_julien.tsv.gz",
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE90860&format=file&file=GSE90860%5FSupplementaryData1%5Frevised%5Fjulien%2Etsv%2Egz"
 )
@@ -40,9 +40,4 @@ counts <- counts[cell_info$cell_id, ]
 
 grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
-preprocess_dataset(
-  counts = counts,
-  grouping = grouping,
-  milestone_network = milestone_network,
-  cell_info = cell_info
-)
+save_raw_dataset(lst(milestone_network, cell_info, grouping, counts))

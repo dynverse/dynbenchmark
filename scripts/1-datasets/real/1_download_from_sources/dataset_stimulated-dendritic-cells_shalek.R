@@ -3,7 +3,7 @@ library(dynbenchmark)
 
 dataset_preprocessing("real/stimulated-dendritic-cells_shalek")
 
-file <- download_dataset_file(
+file <- download_dataset_source_file(
   "GSM1406531_GSM1407094.txt.gz",
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE48968&format=file&file=GSE48968%5FallgenesTPM%5FGSM1189042%5FGSM1190902%2Etxt%2Egz"
 )
@@ -35,8 +35,6 @@ settings <- lapply(c("LPS", "PAM", "PIC"), function(stim) {
 tab <- tab[, !grepl("^ERCC", colnames(tab))] # remove spike-ins, are not present in every cell
 
 for (setting in settings) {
-  dataset_preprocessing(setting$id)
-
   milestone_network <- setting$milestone_network
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
@@ -46,10 +44,5 @@ for (setting in settings) {
 
   grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
-  preprocess_dataset(
-    counts = counts,
-    milestone_network = milestone_network,
-    grouping = grouping,
-    cell_info = cell_info
-  )
+  save_raw_dataset(lst(milestone_network, cell_info, grouping, counts), setting$id)
 }

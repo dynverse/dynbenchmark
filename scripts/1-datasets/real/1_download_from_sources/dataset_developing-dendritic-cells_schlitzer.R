@@ -6,7 +6,7 @@ options('download.file.method.GEOquery'='curl')
 dataset_preprocessing("real/developing-dendritic-cells_schlitzer")
 
 # download and untar files
-file <- download_dataset_file("GSE60781_RAW.tar", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE60781&format=file")
+file <- download_dataset_source_file("GSE60781_RAW.tar", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE60781&format=file")
 
 untar(file, exdir = dataset_preproc_file(""))
 
@@ -44,9 +44,4 @@ cell_ids <- cell_info$cell_id
 
 grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
-preprocess_dataset(
-  counts = counts,
-  milestone_network = milestone_network,
-  grouping = grouping,
-  cell_info = cell_info
-)
+save_raw_dataset(lst(milestone_network, cell_info, grouping, counts))

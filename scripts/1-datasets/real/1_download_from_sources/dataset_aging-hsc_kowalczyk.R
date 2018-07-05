@@ -5,7 +5,7 @@ options('download.file.method.GEOquery'='curl')
 dataset_preprocessing("real/aging-hsc_kowalczyk")
 
 # download
-file1 <- download_dataset_file("GSE59114_C57BL6_GEO_all.xlsx", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE59114&format=file&file=GSE59114%5FC57BL6%5FGEO%5Fall%2Exlsx")
+file1 <- download_dataset_source_file("GSE59114_C57BL6_GEO_all.xlsx", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE59114&format=file&file=GSE59114%5FC57BL6%5FGEO%5Fall%2Exlsx")
 
 # read counts
 tab1 <- readxl::read_xlsx(file1, skip = 1)
@@ -50,8 +50,6 @@ settings <- map(c("old", "young"), function(age) {
 })
 
 for (setting in settings) {
-  dataset_preprocessing(setting$id)
-
   milestone_network <- setting$milestone_network
 
   cell_info <- allcell_info %>% filter(
@@ -63,11 +61,8 @@ for (setting in settings) {
 
   counts <- allcounts[cell_info$cell_id, ]
 
-  preprocess_dataset(
-    id = setting$id,
-    counts = counts,
-    grouping = grouping,
-    milestone_network = milestone_network,
-    cell_info = cell_info
+  save_raw_dataset(
+    lst(milestone_network, cell_info, grouping, counts),
+    setting$id
   )
 }
