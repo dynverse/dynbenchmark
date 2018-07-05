@@ -4,7 +4,10 @@
 \alias{get_dynbenchmark_folder}
 \title{Find the dynbenchmark path}
 \usage{
-get_dynbenchmark_folder()
+get_dynbenchmark_folder(remote = "")
+}
+\arguments{
+\item{remote}{The remote to access, "" if running locally, TRUE if using default qsub config remote}
 }
 \description{
 When executing some of the dynbenchmark functions, the git repository needs to be found.

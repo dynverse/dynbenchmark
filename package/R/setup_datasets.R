@@ -72,15 +72,18 @@ download_dataset_source_file <- function(filename, url, dataset_id = NULL) {
   loc
 }
 
+dataset_raw_file <- function(dataset_id) {
+  file <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "1-datasets_preproc/raw")
+  dir.create(dirname(file), showWarnings = FALSE)
+  file
+}
+
 #' @rdname dataset_preprocessing
 #' @export
 save_raw_dataset <- function(dataset, dataset_id = get_dataset_preprocessing_id()) {
   dataset$id <- dataset_id
 
-  file <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "1-datasets_preproc/raw")
-  dir.create(dirname(file), showWarnings = FALSE)
-
-  write_rds(dataset, file)
+  write_rds(dataset, dataset_raw_file(dataset_id))
 }
 
 #' @rdname dataset_preprocessing

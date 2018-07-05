@@ -1,30 +1,24 @@
-#' Preprocessing functionality for real datasets
+#' Process a raw real or synthetic dataset
 #'
 #' @inheritParams dynwrap::wrap_data
 #' @inheritParams dynwrap::add_expression
 #' @inheritParams dynwrap::add_cluster_graph
 #' @param root_milestone_id The root milestone, optional
-#' @inheritParams dynnormaliser::normalise_filter_counts
 #'
 #' @importFrom dynnormaliser normalise_filter_counts
 #' @importFrom dynwrap generate_prior_information
 #' @importFrom testthat expect_match
 #'
 #' @export
-preprocess_dataset <- function(
-  id = datasetpreproc_getid(),
+process_raw_dataset <- function(
+  id,
   counts,
   milestone_network,
   grouping,
   root_milestone_id = NULL,
   cell_info = tibble(cell_id = rownames(counts)),
-  feature_info = tibble(feature_id = colnames(counts)),
-  filter_cells = TRUE,
-  filter_genes = TRUE,
-  filter_hvg = TRUE,
-  normalisation = "scran_size_factors"
+  feature_info = tibble(feature_id = colnames(counts))
 ) {
-  dataset_preprocessing(id)
   testthat::expect_match(id, ".+/.+")
 
   # convert symbols
@@ -35,22 +29,20 @@ preprocess_dataset <- function(
   # normalise and filter expression
   norm_out <- dynnormaliser::normalise_filter_counts(
     counts_prefilter,
-    verbose = TRUE,
-    filter_cells = filter_cells,
-    filter_genes = filter_genes,
-    filter_hvg = filter_hvg,
-    normalisation = normalisation
+    verbose = TRUE
   )
 
   normalisation_info <- norm_out$info
   expression <- norm_out$expression
   counts <- norm_out$counts
 
+  # filter cells based on normalisation
   cell_ids <- rownames(counts)
   cell_info <- cell_info %>% slice(match(cell_ids, cell_id))
   grouping <- grouping[cell_ids]
   feature_info <- feature_info %>% slice(match(colnames(counts), feature_id))
 
+  # wrap dataset
   dataset <- dynwrap::wrap_data(
     dataset_source = str_replace(id, "/.*", ""),
     id = id,
@@ -71,15 +63,19 @@ preprocess_dataset <- function(
     dynwrap::add_prior_information() %>%
     dynwrap::add_cell_waypoints()
 
-  # add root if given
+  # add root if given, or choose default root if not given
   if (is.null(root_milestone_id)) {
     root_milestone_id <- milestone_network$from[[1]]
   }
   dataset <- dynwrap::add_root(dataset, root_milestone_id = root_milestone_id)
 
+  # save the dataset
   save_dataset(dataset, dataset_id = id)
+
+  # save the counts before filtering/normalisation
   write_rds(counts_prefilter, dataset_file(dataset_id = id, filename = "counts_prefilter.rds"))
 
+  # save the normalisation plots
   pdf(dataset_file(dataset_id = id, "normalisation.pdf"))
   walk(norm_out$normalisation_plots, print)
   graphics.off()
@@ -96,9 +92,6 @@ convert_to_symbol <- function(counts) {
   counts <- counts[, filtered]
   lst(counts, filtered)
 }
-
-
-
 
 
 cut_unrepresented_milestones <- function(milestone_network, milestone_percentages, milestone_ids) {
