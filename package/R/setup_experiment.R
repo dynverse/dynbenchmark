@@ -2,6 +2,7 @@
 #'
 #' @param experiment_id id for the experiment
 #' @param filename the filename
+#' @param remote The remote to access, "" if working locally, TRUE if using default qsub_config remote
 #'
 #' @export
 #'
@@ -26,10 +27,12 @@ experiment <- function(experiment_id) {
 
 # create a helper function
 experiment_subfolder <- function(path) {
-  function(filename = "", experiment_id = NULL) {
+  function(filename = "", experiment_id = NULL, remote = "") {
+    if (remote == TRUE) remote <- qsub::get_default_qsub_config()$remote
+
     filename <- paste0(filename, collapse = "")
 
-    dyn_fold <- get_dynbenchmark_folder()
+    dyn_folder <- get_dynbenchmark_folder(remote = remote)
 
     # check whether exp_id is given
     if (is.null(experiment_id)) {
@@ -42,10 +45,10 @@ experiment_subfolder <- function(path) {
     }
 
     # determine the full path
-    full_path <- paste0(dyn_fold, "/", path, "/", experiment_id, "/")
+    full_path <- paste0(dyn_folder, "/", path, "/", experiment_id, "/")
 
     # create if necessary
-    dir.create(full_path, recursive = TRUE, showWarnings = FALSE)
+    qsub::mkdir_remote(full_path, remote = remote)
 
     # get complete filename
     paste(full_path, filename, sep = "")
