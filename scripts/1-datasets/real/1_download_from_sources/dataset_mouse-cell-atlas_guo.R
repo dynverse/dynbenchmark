@@ -64,7 +64,7 @@ get_counts <- function(cell_info) {
   counts
 }
 
-source("scripts/1-datasets/real/helper_mouse-cell-atlas_settings.R")
+source("scripts/1-datasets/real/1_download_from_sources/helper_mouse-cell-atlas_settings.R")
 
 # process setting
 for (setting in settings) {
