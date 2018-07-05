@@ -8,7 +8,7 @@ dataset_preprocessing("real/dentate-gyrus-neurogenesis_hochgerner")
 
 
 # get cell info
-geo <- GEOquery::getGEO("GSE95315", destdir = dataset_preproc_file(""))[[1]]
+geo <- GEOquery::getGEO("GSE95315", destdir = dataset_source_file(""))[[1]]
 
 cell_info_all <- phenoData(geo) %>% as("data.frame") %>% select(title, characteristics_ch1.2, characteristics_ch1.4) %>%
   rename(

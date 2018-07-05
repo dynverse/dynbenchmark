@@ -3,23 +3,23 @@ library(dynbenchmark)
 
 dataset_preprocessing("real/fly-blastoderm-atac_cusanovich")
 
-txt_location <- download_dataset_file(
+txt_location <- download_dataset_source_file(
   "2to4_files.tar.gz",
   "http://krishna.gs.washington.edu/content/members/cusanovich/fly_embryogenesis/updated_data/vignette/2to4_files.tar.gz"
 )
-system(paste0("tar -xzf ", txt_location, " -C ", dataset_preproc_file(""), " --strip-components=1"))
+system(paste0("tar -xzf ", txt_location, " -C ", dataset_source_file(""), " --strip-components=1"))
 
 
 
-cds_2to4 = readRDS(dataset_preproc_file("2to4_files/cds_2to4_aggregated.rds"))
-overlapped_sites = read.table(dataset_preproc_file('./2to4_files/2to4.overlapped_sites.bed'))
-cell_classification = read.table(dataset_preproc_file('./2to4_files/2to4.germlayers.txt'))
+cds_2to4 = readRDS(dataset_source_file("2to4_files/cds_2to4_aggregated.rds"))
+overlapped_sites = read.table(dataset_source_file('./2to4_files/2to4.overlapped_sites.bed'))
+cell_classification = read.table(dataset_source_file('./2to4_files/2to4.germlayers.txt'))
 table(cell_classification$V2)
 
 
 
 DA_monocle_list = lapply(seq(1,7,1), FUN = function(x) {
-  DA_file_name = paste0(dataset_preproc_file('./2to4_files/2to4.sigopen.cluster'), x, '.txt')
+  DA_file_name = paste0(dataset_source_file('./2to4_files/2to4.sigopen.cluster'), x, '.txt')
   DA_file = read.csv(DA_file_name, sep = '\t', header = F)
   DA_file$GL = x
   return (DA_file)

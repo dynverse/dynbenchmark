@@ -12,14 +12,14 @@ options('download.file.method.GEOquery'='curl')
 id <- "real/pbmc-citeseq_stoeckius"
 dataset_preprocessing(id)
 
-geo <- GEOquery::getGEO(GEO = "GSM2695382", destdir = dataset_preproc_file(""))
+geo <- GEOquery::getGEO(GEO = "GSM2695382", destdir = dataset_source_file(""))
 
-rna_location <- download_dataset_file(
+rna_location <- download_dataset_source_file(
   "GSE100866_PBMC_vs_flow_10X-RNA_umi.csv.gz",
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE100866&format=file&file=GSE100866%5FPBMC%5Fvs%5Fflow%5F10X%2DRNA%5Fumi%2Ecsv%2Egz"
 )
 
-protein_location <- download_dataset_file(
+protein_location <- download_dataset_source_file(
   "GSE100866_PBMC_vs_flow_10X-ADT_umi.csv.gz",
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE100866&format=file&file=GSE100866%5FPBMC%5Fvs%5Fflow%5F10X%2DADT%5Fumi%2Ecsv%2Egz"
 )

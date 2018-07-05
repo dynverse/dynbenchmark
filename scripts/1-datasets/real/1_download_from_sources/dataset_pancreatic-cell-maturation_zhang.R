@@ -16,7 +16,7 @@ allcounts <- read_tsv(txt_location) %>%
   as.matrix() %>%
   t
 
-# geo <- GEOquery::getGEO(GEO = "GSE87375", destdir = dataset_preproc_file(""))
+# geo <- GEOquery::getGEO(GEO = "GSE87375", destdir = dataset_source_file(""))
 # allcell_info <- geo[[2]] %>%
 #   Biobase::phenoData() %>%
 #   as("data.frame") %>%
@@ -26,7 +26,7 @@ allcounts <- read_tsv(txt_location) %>%
 #   mutate_all(funs(as.character))
 
 # temporary workaround because the above does not seem to be working
-geo <- GEOquery::getGEO(GEO = "GSE87375", destdir = dataset_preproc_file(""), GSEMatrix = FALSE)
+geo <- GEOquery::getGEO(GEO = "GSE87375", destdir = dataset_source_file(""), GSEMatrix = FALSE)
 
 procful <- function(x) {
   batch_str <- x[grepl("batch:", x)]
