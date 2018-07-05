@@ -1,15 +1,12 @@
 # This script preprocesses all datasets, either on the cluster (remote <- TRUE) or locally (remote <- FALSE)
 
-library(purrr)
-library(readr)
+library(tidyverse)
 library(dynbenchmark)
 
 experiment("1-datasets/real/run_all_datasets")
 
 dataset_scripts <- list.files(path = "scripts/1-datasets/real", pattern = "^dataset_.*\\.R", full.names = TRUE)
-dataset_scripts <- dataset_scripts %>% str_subset(".*mouse-cell-atlas.*")
-dataset_scripts
-# dataset_scripts <- results$dataset_script
+# dataset_scripts <- dataset_scripts[!str_detect(dataset_scripts, "mouse-cell-atlas")]
 
 remote <- TRUE
 
@@ -30,7 +27,6 @@ if (remote) {
       name = "dynreal",
       memory = "30G",
       wait = FALSE,
-      execute_before = "",
       stop_on_error = FALSE
     ),
     qsub_packages = "dynbenchmark",
@@ -44,6 +40,8 @@ if (remote) {
     }
   )
 
+  write_rds(handle, "handle.rds")
+
   results <- qsub::qsub_retrieve(handle)
 
   names(results) <- dataset_scripts
@@ -55,17 +53,9 @@ if (remote) {
 }
 
 
+remote_dynbenchmark_folder <- qsub::qsub_lapply(1, function(x) dynbenchmark::get_dynbenchmark_folder(), qsub_environment = character())[[1]]
+local_dynbenchmark_folder <- dynbenchmark::get_dynbenchmark_folder()
+local_folder_sync <- dynbenchmark::derived_file("", "1-datasets/real/")
+remote_folder_sync <- gsub(local_dynbenchmark_folder, remote_dynbenchmark_folder, local_folder_sync)
 
-datasets <- load_datasets(list_datasets() %>% filter(dataset_source == "real") %>% pull(dataset_id))
-
-dataset <- extract_row_to_list(datasets, 8)
-dataset %>% dynplot::plot_dimred(grouping = dataset$grouping, dimred = dyndimred::dimred_mds, plot_milestone_network = T)
-
-
-# sync back locally
-qsub::rsync_remote()
-
-
-
-
-
+qsub::rsync_remote("prism", remote_folder_sync, "", local_folder_sync)

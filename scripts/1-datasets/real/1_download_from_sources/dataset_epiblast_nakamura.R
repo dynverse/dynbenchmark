@@ -3,11 +3,11 @@ library(dynbenchmark)
 
 dataset_preprocessing("real/epiblast_nakamura")
 
-rpm_ms_location <- download_dataset_file(
+rpm_ms_location <- download_dataset_source_file(
   "GSE74767_SC3seq_Ms_ProcessedData.txt.gz",
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE74767&format=file&file=GSE74767%5FSC3seq%5FMs%5FProcessedData%2Etxt%2Egz"
 )
-rpm_cy_location <- download_dataset_file(
+rpm_cy_location <- download_dataset_source_file(
   "GSE74767_SC3seq_Cy_ProcessedData.txt.gz",
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE74767&format=file&file=GSE74767%5FSC3seq%5FCy%5FProcessedData%2Etxt%2Egz"
 )
@@ -24,7 +24,7 @@ rpm_cy <- read_tsv(rpm_cy_location) %>%
 
 geo <- GEOquery::getGEO("GSE74767", destdir = dataset_preproc_file(""))
 
-celldata_location <- download_dataset_file(
+celldata_location <- download_dataset_source_file(
   "nature19096-s1.xlsx",
   "https://media.nature.com/original/nature-assets/nature/journal/v537/n7618/extref/nature19096-s1.xlsx"
 )
@@ -117,8 +117,6 @@ rpm_to_counts <- function(rpm) {
 
 
 for (setting in settings) {
-  dataset_preprocessing(setting$id)
-
   allcounts <- rpm_to_counts(setting$rpm)
   allcounts[is.na(allcounts)] <- 0
 
@@ -132,11 +130,6 @@ for (setting in settings) {
 
   grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
-  preprocess_dataset(
-    counts = counts,
-    milestone_network = milestone_network,
-    grouping = grouping,
-    cell_info = cell_info,
-  )
+  save_raw_dataset(lst(milestone_network, cell_info, grouping, counts), setting$id)
 }
 

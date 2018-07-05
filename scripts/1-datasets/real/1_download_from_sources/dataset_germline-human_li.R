@@ -3,7 +3,7 @@ library(dynbenchmark)
 
 dataset_preprocessing("real/germline-human_li")
 
-tar_location <- download_dataset_file(
+tar_location <- download_dataset_source_file(
   "GSE86146_RAW.tar",
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE86146&format=file"
 )
@@ -20,7 +20,7 @@ allcounts <- list.files(dataset_preproc_file("")) %>%
   select(-Sample) %>%
   as.matrix
 
-mmc2_location <- download_dataset_file(
+mmc2_location <- download_dataset_source_file(
   "mmc2.xlsx",
   "http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S1934590917300784/1-s2.0-S1934590917300784-mmc2.xlsx/274143/html/S1934590917300784/139b580f8ca22e965c646ac00b373e93/mmc2.xlsx"
 )
@@ -95,8 +95,6 @@ settings <- list(
 })
 
 for (setting in settings) {
-  dataset_preprocessing(setting$id)
-
   milestone_network <- setting$milestone_network
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
@@ -107,11 +105,6 @@ for (setting in settings) {
 
   grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
-  preprocess_dataset(
-    counts = counts,
-    milestone_network = milestone_network,
-    grouping = grouping,
-    cell_info = cell_info
-  )
+  save_raw_dataset(lst(milestone_network, cell_info, grouping, counts), setting$id)
 }
 

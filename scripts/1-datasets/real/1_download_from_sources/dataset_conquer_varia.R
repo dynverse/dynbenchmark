@@ -137,7 +137,7 @@ for (source_info in conquer_infos) {
   cat(pritt("Processing {id}"), sep = "\n")
 
   datas <- lapply(source_info$rds_name, function(rds_name) {
-    rds_file <- download_dataset_file(
+    rds_file <- download_dataset_source_file(
       pritt("{rds_name}.rds"),
       pritt("http://imlspenticton.uzh.ch/robinson_lab/conquer/data-mae/{rds_name}.rds")
     )
@@ -184,12 +184,8 @@ for (source_info in conquer_infos) {
   cell_info <- cell_info %>% slice(match(names(grouping), cell_id))
   counts <- counts[cell_info$cell_id, ]
 
-  preprocess_dataset(
-    id = id,
-    counts = counts,
-    grouping = grouping,
-    milestone_network = milestone_network,
-    cell_info = cell_info,
-    feature_info = feature_info
+  save_raw_dataset(
+    lst(milestone_network, cell_info, grouping, counts),
+    id
   )
 }

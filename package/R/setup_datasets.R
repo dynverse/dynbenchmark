@@ -21,14 +21,13 @@ dataset_preprocessing <- function(dataset_id) {
 
 #' @rdname dataset_preprocessing
 #' @export
-datasetpreproc_getid <- function() {
+get_dataset_preprocessing_id <- function() {
   dataset_id <- getOption("dynbenchmark_datasetpreproc_id")
   if (is.null(dataset_id)) {
     stop("No dataset_id found. Did you run dataset_preprocessing(...)?")
   }
   dataset_id
 }
-
 
 # create a helper function
 datasetpreproc_subfolder <- function(path) {
@@ -40,7 +39,7 @@ datasetpreproc_subfolder <- function(path) {
     }
 
     if (is.null(dataset_id)) {
-      dataset_id <- datasetpreproc_getid()
+      dataset_id <- get_dataset_preprocessing_id()
     }
 
     # determine the full path
@@ -50,13 +49,39 @@ datasetpreproc_subfolder <- function(path) {
     dir.create(full_path, recursive = TRUE, showWarnings = FALSE)
 
     # get complete filename
-      paste0(full_path, filename)
+    paste0(full_path, filename)
   }
 }
 
 #' @rdname dataset_preprocessing
 #' @export
-dataset_preproc_file <- datasetpreproc_subfolder("derived/1-datasets_preproc")
+dataset_source_file <- datasetpreproc_subfolder("derived/1-datasets_preproc/source")
+
+#' Download a file and return its location path
+#' @param url The url of the file to download
+#' @param filename What name to give to the file
+#' @param dataset_id An optional dataset_id
+#' @export
+download_dataset_source_file <- function(filename, url, dataset_id = NULL) {
+  loc <- dataset_source_file(dataset_id = dataset_id, filename = filename)
+
+  if (!file.exists(loc)) {
+    download.file(url, loc, method = "libcurl")
+  }
+
+  loc
+}
+
+#' @rdname dataset_preprocessing
+#' @export
+save_raw_dataset <- function(dataset, dataset_id = get_dataset_preprocessing_id()) {
+  dataset$id <- dataset_id
+
+  file <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "1-datasets_preproc/raw")
+  dir.create(dirname(file), showWarnings = FALSE)
+
+  write_rds(dataset, file)
+}
 
 #' @rdname dataset_preprocessing
 #' @export
@@ -101,6 +126,8 @@ list_datasets <- function() {
   )
 }
 
+
+
 #' Load datasets
 #' @export
 #' @inheritParams dataset_preprocessing
@@ -131,19 +158,4 @@ load_datasets <- function(dataset_ids = list_datasets()$dataset_id, as_tibble = 
     datasets
   }
   # read_rds(derived_file("tasks.rds", experiment_id = "1-datasets"))
-}
-
-#' Download a file and return its location path
-#' @param url The url of the file to download
-#' @param filename What name to give to the file
-#' @param dataset_id An optional dataset_id
-#' @export
-download_dataset_file <- function(filename, url, dataset_id = NULL) {
-  loc <- dataset_preproc_file(dataset_id = dataset_id, filename = filename)
-
-  if (!file.exists(loc)) {
-    download.file(url, loc, method = "libcurl")
-  }
-
-  loc
 }

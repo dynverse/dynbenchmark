@@ -2,17 +2,20 @@
 % Please edit documentation in R/setup_datasets.R
 \name{dataset_preprocessing}
 \alias{dataset_preprocessing}
-\alias{datasetpreproc_getid}
-\alias{dataset_preproc_file}
+\alias{get_dataset_preprocessing_id}
+\alias{dataset_source_file}
+\alias{save_raw_dataset}
 \alias{dataset_file}
 \alias{save_dataset}
 \title{Helper functions for creating new datasets}
 \usage{
 dataset_preprocessing(dataset_id)
 
-datasetpreproc_getid()
+get_dataset_preprocessing_id()
 
-dataset_preproc_file(filename = "", dataset_id = NULL, relative = FALSE)
+dataset_source_file(filename = "", dataset_id = NULL, relative = FALSE)
+
+save_raw_dataset(dataset, dataset_id = get_dataset_preprocessing_id())
 
 dataset_file(filename = "", dataset_id = NULL, relative = FALSE)
 

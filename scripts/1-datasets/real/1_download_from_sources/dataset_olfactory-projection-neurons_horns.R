@@ -23,12 +23,12 @@ txts <- tibble(remote_location=c(
     file = gsub(".*/(.*)$", "\\1", remote_location)
 )
 txts <- bind_cols(txts, str_match(txts$file, "names_(.*)_(.*)\\.txt")[, c(2, 3)] %>% as.data.frame() %>% magrittr::set_colnames(c("celltype", "stage")))
-txts$location <- map2_chr(txts$file, txts$remote_location, download_dataset_file)
+txts$location <- map2_chr(txts$file, txts$remote_location, download_dataset_source_file)
 txts$cell_id <- map(txts$location, readLines)
 
 allcell_info <- txts %>% unnest(cell_id) %>% select(cell_id, celltype, stage) %>% mutate_if(is.factor, as.character) %>% mutate(group_id = glue::glue("{celltype}_{stage}"))
 
-counts_location <- download_dataset_file(
+counts_location <- download_dataset_source_file(
   "GSE100058_htseq.tab.gz",
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE100058&format=file&file=GSE100058%5Fhtseq%2Etab%2Egz"
 )
@@ -86,8 +86,6 @@ settings <- list(
 )
 
 for (setting in settings) {
-  dataset_preprocessing(setting$id)
-
   milestone_network <- setting$milestone_network
   cell_info <- allcell_info
   cell_info$milestone_id <- cell_info[[setting$milestone_source]]
@@ -100,10 +98,5 @@ for (setting in settings) {
 
   grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
-  preprocess_dataset(
-    counts = counts,
-    milestone_network = milestone_network,
-    grouping = grouping,
-    cell_info = cell_info
-  )
+  save_raw_dataset(lst(milestone_network, cell_info, grouping, counts), setting$id)
 }

@@ -4,7 +4,7 @@ library(GEOquery)
 
 dataset_preprocessing("real/pancreatic-cell-maturation_zhang")
 
-txt_location <- download_dataset_file(
+txt_location <- download_dataset_source_file(
   "GSE87375_Single_Cell_RNA-seq_Gene_Read_Count.txt.gz",
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE87375&format=file&file=GSE87375%5FSingle%5FCell%5FRNA%2Dseq%5FGene%5FRead%5FCount%2Etxt%2Egz"
 )
@@ -75,8 +75,6 @@ settings <- list(
 )
 
 for (setting in settings) {
-  dataset_preprocessing(setting$id)
-
   milestone_network <- setting$milestone_network
 
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
@@ -86,10 +84,5 @@ for (setting in settings) {
 
   grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
-  preprocess_dataset(
-    counts = counts,
-    milestone_network = milestone_network,
-    grouping = grouping,
-    cell_info = cell_info
-  )
+  save_raw_dataset(lst(milestone_network, cell_info, grouping, counts), setting$id)
 }

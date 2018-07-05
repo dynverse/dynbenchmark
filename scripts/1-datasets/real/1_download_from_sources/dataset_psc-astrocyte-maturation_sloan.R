@@ -3,7 +3,7 @@ library(dynbenchmark)
 
 dataset_preprocessing("real/pancreatic-cell-maturation_zhang")
 
-txt_location <- download_dataset_file(
+txt_location <- download_dataset_source_file(
   "GSE99951_all_data_htseq_out.csv",
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE99951&format=file&file=GSE99951%5Fall%5Fdata%5Fhtseq%5Fout%2Ecsv%2Egz"
 )
@@ -58,8 +58,6 @@ milestone_network <- tribble(
 milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
 
 for (setting in settings) {
-  dataset_preprocessing(setting$id)
-
   cell_info <- cell_info_all %>% slice(match(rownames(counts_all), cell_id)) %>%
     filter(group == setting$group_id, milestone_id %in% milestone_ids)
 
@@ -67,11 +65,6 @@ for (setting in settings) {
 
   grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
-  preprocess_dataset(
-    counts = counts,
-    milestone_network = milestone_network,
-    grouping = grouping,
-    cell_info = cell_info
-  )
+  save_raw_dataset(lst(milestone_network, cell_info, grouping, counts), setting$id)
 }
 

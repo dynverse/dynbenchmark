@@ -7,7 +7,7 @@ options('download.file.method.GEOquery'='curl')
 id <- "real/mESC-differentiation_hayashi"
 dataset_preprocessing(id)
 
-counts_location <- download_dataset_file(
+counts_location <- download_dataset_source_file(
   "GSE98664_tpm_sailfish_mergedGTF_RamDA_mESC_differentiation_time_course.txt.gz",
   "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE98nnn/GSE98664/suppl/GSE98664_tpm_sailfish_mergedGTF_RamDA_mESC_differentiation_time_course.txt.gz"
 )
@@ -36,9 +36,4 @@ counts <- counts_all[cell_info$cell_id, ]
 
 grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
-preprocess_dataset(
-  counts = counts,
-  milestone_network = milestone_network,
-  grouping = grouping,
-  cell_info = cell_info
-)
+save_raw_dataset(lst(milestone_network, cell_info, grouping, counts))

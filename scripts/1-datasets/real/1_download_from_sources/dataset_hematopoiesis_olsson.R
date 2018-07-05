@@ -14,7 +14,7 @@ files_df <- tribble(
 ) %>%
   rowwise() %>%
   mutate(
-    preproc_loc = download_dataset_file(location, url)
+    preproc_loc = download_dataset_source_file(location, url)
   ) %>%
   ungroup()
 
@@ -30,7 +30,7 @@ allexpression <- files_df$preproc_loc %>%
 
 allcounts <- 2^allexpression-1
 
-txt_location <- download_dataset_file(
+txt_location <- download_dataset_source_file(
   "nature19348-f1.xlsx",
   "https://images.nature.com/original/nature-assets/nature/journal/v537/n7622/source_data/nature19348-f1.xlsx"
 )
@@ -74,8 +74,6 @@ settings <- list(
 )
 
 for (setting in settings) {
-  dataset_preprocessing(setting$id)
-
   milestone_network <- setting$milestone_network
   cell_info <- allcell_info
   cell_info$milestone_id <- cell_info[[setting$milestone_source]]
@@ -87,10 +85,5 @@ for (setting in settings) {
 
   grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
-  preprocess_dataset(
-    counts = counts, # todo: fix this
-    milestone_network = milestone_network,
-    grouping = grouping,
-    cell_info = cell_info
-  )
+  save_raw_dataset(lst(milestone_network, cell_info, grouping, counts), setting$id)
 }

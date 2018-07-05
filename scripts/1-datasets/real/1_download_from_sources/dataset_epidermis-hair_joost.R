@@ -4,7 +4,7 @@ options('download.file.method.GEOquery'='curl')
 
 dataset_preprocessing("real/epidermis-hair_joost")
 
-txt_location <- download_dataset_file(
+txt_location <- download_dataset_source_file(
   "GSE67602_Joost_et_al_expression.txt.gz",
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE67602&format=file&file=GSE67602%5FJoost%5Fet%5Fal%5Fexpression%2Etxt%2Egz"
 )
@@ -58,8 +58,6 @@ settings <- list(
 )
 
 for (setting in settings) {
-  dataset_preprocessing(setting$id)
-
   milestone_network <- setting$milestone_network
 
   milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
@@ -70,10 +68,5 @@ for (setting in settings) {
 
   grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
-  preprocess_dataset(
-    counts = counts,
-    milestone_network = milestone_network,
-    grouping = grouping,
-    cell_info = cell_info
-  )
+  save_raw_dataset(lst(milestone_network, cell_info, grouping, counts), setting$id)
 }

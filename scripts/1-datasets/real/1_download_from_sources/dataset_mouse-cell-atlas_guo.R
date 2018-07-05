@@ -6,7 +6,7 @@ library(dynbenchmark)
 dataset_preprocessing("real/mouse-cell-atlas_guo")
 
 # cell info
-cell_assignments_file <- download_dataset_file("MCA_CellAssignments.csv", "https://ndownloader.figshare.com/files/11083451?private_link=865e694ad06d5857db4b")
+cell_assignments_file <- download_dataset_source_file("MCA_CellAssignments.csv", "https://ndownloader.figshare.com/files/11083451?private_link=865e694ad06d5857db4b")
 all_cell_info <- read_csv(cell_assignments_file) %>%
   rename(cell_id = Cell.name, cluster_id = ClusterID, tissue = Tissue, batch = Batch, barcode = Cell.Barcode, group_id = Annotation) %>%
   mutate(cell_type = gsub("([^\\(_]*).*", "\\1", group_id))
@@ -15,7 +15,7 @@ all_cell_info$cell_id <- all_cell_info$cell_id %>% str_replace_all("FetalFemaleG
 all_cell_info$cell_id <- all_cell_info$cell_id %>% str_replace_all("NeonatalBrain", "NeontalBrain") # fix for neonatal brain names
 
 # counts
-counts_zip <- download_dataset_file("MCA_BatchRemove_dge.zip", "https://ndownloader.figshare.com/files/10756795?private_link=865e694ad06d5857db4b")
+counts_zip <- download_dataset_source_file("MCA_BatchRemove_dge.zip", "https://ndownloader.figshare.com/files/10756795?private_link=865e694ad06d5857db4b")
 system(paste0("unzip -o ", counts_zip, " -d ", dataset_preproc_file()))
 
 counts_files <- list.files(dataset_preproc_file("rmbatch_dge"), full.names = TRUE)
@@ -64,7 +64,7 @@ get_counts <- function(cell_info) {
   counts
 }
 
-source("scripts/1-datasets/real/dataset_mouse-cell-atlas_guo_settings.R")
+source("scripts/1-datasets/real/helper_mouse-cell-atlas_settings.R")
 
 # process setting
 for (setting in settings) {
@@ -86,14 +86,7 @@ for (setting in settings) {
 
   counts <- counts[, !(colnames(counts) %>% str_detect("mt-.*"))] # remove mitochondrial genes, as these were already used for filtering in the original study
 
-  preprocess_dataset(
-    setting$id,
-    counts,
-    milestone_network,
-    grouping,
-    cell_info = cell_info,
-    filter_hvg = FALSE
-  )
+  save_raw_dataset(lst(milestone_network, cell_info, grouping, counts), setting$id)
 }
 
 

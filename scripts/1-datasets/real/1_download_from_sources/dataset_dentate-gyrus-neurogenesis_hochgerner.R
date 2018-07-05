@@ -26,7 +26,7 @@ merge_clusters["nIPC2"] <- "nIPC"
 cell_info_all$population_id <- merge_clusters[cell_info_all$population_id]
 
 # load and process all counts
-tab_location <- download_dataset_file(
+tab_location <- download_dataset_source_file(
   "GSE95315_10X_expression_data.tab.gz",
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE95315&format=file&file=GSE95315%5F10X%5Fexpression%5Fdata%2Etab%2Egz"
 )
@@ -56,9 +56,4 @@ counts <- counts_all[cell_info$cell_id, ]
 
 grouping <- cell_info %>% select(cell_id, milestone_id) %>% rename(group_id = milestone_id) %>% deframe()
 
-preprocess_dataset(
-  counts = counts,
-  milestone_network = milestone_network,
-  grouping = grouping,
-  cell_info = cell_info
-)
+save_raw_dataset(lst(milestone_network, cell_info, grouping, counts))

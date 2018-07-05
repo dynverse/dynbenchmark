@@ -3,7 +3,7 @@ library(dynbenchmark)
 
 dataset_preprocessing("real/fibroblast-reprogramming_treutlein")
 
-txt_location <- download_dataset_file(
+txt_location <- download_dataset_source_file(
   "GSE67310_iN_data_log2FPKM_annotated.txt.gz",
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE67310&format=file&file=GSE67310%5FiN%5Fdata%5Flog2FPKM%5Fannotated%2Etxt%2Egz"
 )
@@ -34,9 +34,4 @@ counts <- counts[cell_info$cell_id, ]
 
 grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
-preprocess_dataset(
-  counts = counts,
-  milestone_network = milestone_network,
-  grouping = grouping,
-  cell_info = cell_info
-)
+save_raw_dataset(lst(milestone_network, cell_info, grouping, counts))

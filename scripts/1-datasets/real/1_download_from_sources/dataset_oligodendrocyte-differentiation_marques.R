@@ -5,7 +5,7 @@ options('download.file.method.GEOquery'='curl')
 
 dataset_preprocessing("real/oligodendrocyte-differentiation_marques")
 
-txt_location <- download_dataset_file(
+txt_location <- download_dataset_source_file(
   "Marques_mol_counts.tab.gz",
   "http://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE75330&format=file&file=GSE75330%5FMarques%5Fet%5Fal%5Fmol%5Fcounts2%2Etab%2Egz"
 )
@@ -56,8 +56,6 @@ settings <- list(
 )
 
 for (setting in settings) {
-  dataset_preprocessing(setting$id)
-
   milestone_network <- setting$milestone_network
   cell_info <- allcell_info
   cell_info$milestone_id <- cell_info[[setting$milestone_source]]
@@ -69,10 +67,5 @@ for (setting in settings) {
 
   grouping <- cell_info %>% select(cell_id, milestone_id) %>% deframe()
 
-  preprocess_dataset(
-    counts = counts,
-    milestone_network = milestone_network,
-    grouping = grouping,
-    cell_info = cell_info
-  )
+  save_raw_dataset(lst(milestone_network, cell_info, grouping, counts), setting$id)
 }
