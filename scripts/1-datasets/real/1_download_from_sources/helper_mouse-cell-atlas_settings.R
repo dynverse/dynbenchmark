@@ -52,57 +52,15 @@ settings <- list(
   ),
 
   list(
-    tissue = "bone-marrow-c-kit",
-    subid = "monocyte-differentiation",
-    milestone_network = tribble(
-      ~from, ~to,
-      "Multipotent progenitor_Ctla2a high(Bone-Marrow_c-kit)", "Monocyte progenitor(Bone-Marrow_c-kit)",
-      "Monocyte progenitor(Bone-Marrow_c-kit)", "Monocyte progenitor cell_Prtn3 high(Bone-Marrow_c-kit)",
-      "Monocyte progenitor cell_Prtn3 high(Bone-Marrow_c-kit)", "Monocyte progenitor cell_Ctsg high(Bone-Marrow_c-kit)"
-    ),
-    dynamic_process = "differentiation",
-    visual_check = "ok"
-  ),
-
-  list(
-    tissue = "bone-marrow-c-kit",
-    subid = "neutrophil-differentiation",
-    milestone_network = tribble(
-      ~from, ~to,
-      "Multipotent progenitor_Ctla2a high(Bone-Marrow_c-kit)", "Neutrophil_Ighg1 high(Bone-Marrow_c-kit)",
-      "Neutrophil_Ighg1 high(Bone-Marrow_c-kit)", "Neutrophil_Lcn2 high(Bone-Marrow_c-kit)",
-      "Neutrophil_Lcn2 high(Bone-Marrow_c-kit)", "Neutrophil_Ngp high(Bone-Marrow_c-kit)"
-    ),
-    dynamic_process = "differentiation",
-    visual_check = "ok"
-  ),
-
-  list(
-    tissue = "bone-marrow-c-kit",
-    subid = "hematopoiesis",
-    milestone_network = tribble(
-      ~from, ~to,
-      "Multipotent progenitor_Ctla2a high(Bone-Marrow_c-kit)", "Monocyte progenitor(Bone-Marrow_c-kit)",
-      "Monocyte progenitor(Bone-Marrow_c-kit)", "Monocyte progenitor cell_Prtn3 high(Bone-Marrow_c-kit)",
-      "Monocyte progenitor cell_Prtn3 high(Bone-Marrow_c-kit)", "Monocyte progenitor cell_Ctsg high(Bone-Marrow_c-kit)",
-      "Multipotent progenitor_Ctla2a high(Bone-Marrow_c-kit)", "Megakaryocyte progenitor cell(Bone-Marrow_c-kit)",
-      "Multipotent progenitor_Ctla2a high(Bone-Marrow_c-kit)", "Basophil(Bone-Marrow_c-kit)",
-      "Multipotent progenitor_Ctla2a high(Bone-Marrow_c-kit)", "Eosinophil progenitor cell(Bone-Marrow_c-kit)"
-    ),
-    visual_check = "ok",
-    dynamic_process = "differentiation"
-  ),
-
-  list(
     tissue = "embronic-mesenchyme",
     subid = "neuron-differentiation",
     milestone_network = tribble(
       ~from, ~to,
-      "Neuronal Progenitors(Embryonic-Mesenchyme)", "Neuron_Igfbpl1_high(Embryonic-Mesenchyme)",
-      "Neuron_Igfbpl1_high(Embryonic-Mesenchyme)", "Ganglion cell_Mapt high(Embryonic-Mesenchyme)",
-      "Neuron_Igfbpl1_high(Embryonic-Mesenchyme)", "Ganglion cell_Cartpt_high(Embryonic-Mesenchyme)",
-      "Neuron_Igfbpl1_high(Embryonic-Mesenchyme)", "Ganglion cell_Gal_high(Embryonic-Mesenchyme)",
-      "Neuronal Progenitors(Embryonic-Mesenchyme)", "Neuron_Npy_high(Embryonic-Mesenchyme)"
+      "Neuronal Progenitors(Embryonic-Mesenchyme)", "Neuron_Igfbpl1 high(Embryonic-Mesenchyme)",
+      "Neuron_Igfbpl1 high(Embryonic-Mesenchyme)", "Ganglion cell_Mapt high(Embryonic-Mesenchyme)",
+      "Neuron_Igfbpl1 high(Embryonic-Mesenchyme)", "Ganglion cell_Cartpt high(Embryonic-Mesenchyme)",
+      "Neuron_Igfbpl1 high(Embryonic-Mesenchyme)", "Ganglion cell_Gal high(Embryonic-Mesenchyme)",
+      "Neuronal Progenitors(Embryonic-Mesenchyme)", "Neuron_Npy high(Embryonic-Mesenchyme)"
     )
   ),
 
