@@ -4,7 +4,7 @@ run_qstat <- function() {
   
   processed_qstat_string <- paste0(paste(out_qstat[grepl("^  ", out_qstat)], collapse = "\n"), "\n\n")
   
-  task_id_fun <- function(x) {
+  dataset_id_fun <- function(x) {
     if (grepl("-", x)) {
       prms <- as.integer(strsplit(x, "[-:]")[[1]])
       (prms[[2]] - prms[[1]]) / prms[[3]] + 1
@@ -15,29 +15,29 @@ run_qstat <- function() {
     }
   }
   
-  split_task_id <- function(x) {
+  split_dataset_id <- function(x) {
     map(x, function(x) {
       gsub(":[0-9]*", "", x) %>% gsub("-", ":", .) %>% parse(text = .) %>% eval()
     })
   }
   
   if (processed_qstat_string != "\n\n") {
-    qstat_tab <- readr::read_table(processed_qstat_string, col_names = c("job_id", "prior", "name", "user", "state", "date", "queue", "slots", "task_id")) %>% mutate(
-      num_tasks = sapply(task_id, task_id_fun),
-      total_slots = slots * num_tasks,
+    qstat_tab <- readr::read_table(processed_qstat_string, col_names = c("job_id", "prior", "name", "user", "state", "date", "queue", "slots", "dataset_id")) %>% mutate(
+      num_datasets = sapply(dataset_id, dataset_id_fun),
+      total_slots = slots * num_datasets,
       running = grepl("r", state),
       error = grepl("E", state),
       queued = grepl("q", state) & !error,
-      task_ids = split_task_id(task_id)
+      dataset_ids = split_dataset_id(dataset_id)
     )
   } else {
-    qstat_tab <- data_frame(job_id = character(0), name = character(0), user = character(0), state = character(0), task_ids = numeric())
+    qstat_tab <- data_frame(job_id = character(0), name = character(0), user = character(0), state = character(0), dataset_ids = numeric())
   }
   
   if (nrow(qstat_tab) > 0) {
-    qstat_tab %>% filter(map_int(task_ids, length) > 0) %>% unnest(task_ids) %>% mutate(task_id = task_ids) %>% select(-task_ids)
+    qstat_tab %>% filter(map_int(dataset_ids, length) > 0) %>% unnest(dataset_ids) %>% mutate(dataset_id = dataset_ids) %>% select(-dataset_ids)
   } else {
-    qstat_tab %>% mutate(task_id = task_ids) %>% select(-task_ids)
+    qstat_tab %>% mutate(dataset_id = dataset_ids) %>% select(-dataset_ids)
   }
 }
 
@@ -45,21 +45,21 @@ run_qstat <- function() {
 
 #### 
 qstat <- run_qstat()
-files <- qsub:::run_remote(glue::glue("ls {paste0(remote_folder, dataset_preproc_file(relative = TRUE))}"), "prism")$cmd_out
+files <- qsub:::run_remote(glue::glue("ls {paste0(remote_folder, dataset_source_file(relative = TRUE))}"), "prism")$cmd_out
 
-names <- c("model", "simulation", "gs", "gs_plot", "experiment", "experiment_plot", "normalisation", "normalisation_plot", "task")
-design <- crossing(task_id = seq_along(paramsets), name = names)
-design$status <- design %>% as.list() %>% pmap(function(task_id, name) {
+names <- c("model", "simulation", "gs", "gs_plot", "experiment", "experiment_plot", "normalisation", "normalisation_plot", "dataset")
+design <- crossing(dataset_id = seq_along(paramsets), name = names)
+design$status <- design %>% as.list() %>% pmap(function(dataset_id, name) {
   name <- as.character(name)
   prism_names <- setNames(names, names)
   prism_names[["normalisation"]] <- "normalisat"
-  prism_names[["task"]] <- "wrap"
+  prism_names[["dataset"]] <- "wrap"
   prism_names[["experiment_plot"]] <- "exp_plot"
-  if (qstat %>% filter(prism_names[!!name] == name, task_id == !!task_id, state == "r") %>% nrow()) {
+  if (qstat %>% filter(prism_names[!!name] == name, dataset_id == !!dataset_id, state == "r") %>% nrow()) {
     "running"
-  } else if (qstat %>% filter(prism_names[!!name] == name, task_id == !!task_id, state == "qw") %>% nrow()) {
+  } else if (qstat %>% filter(prism_names[!!name] == name, dataset_id == !!dataset_id, state == "qw") %>% nrow()) {
     "waiting"
-  } else if (any(str_detect(files, glue::glue("^{task_id}_{name}\\..*")))) {
+  } else if (any(str_detect(files, glue::glue("^{dataset_id}_{name}\\..*")))) {
     "output"
   } else {
     "not_present"
@@ -67,9 +67,9 @@ design$status <- design %>% as.list() %>% pmap(function(task_id, name) {
 }) %>% unlist()
 design %>% 
   mutate(name = factor(name, levels = names)) %>% 
-  ggplot(aes(name, as.character(task_id))) + 
+  ggplot(aes(name, as.character(dataset_id))) + 
   geom_tile(aes(fill = status)) + 
   scale_fill_manual(values = c(output = "#0074D9", running = "#2ECC40", waiting = "#FF851B", "not_present" = "#FF4136")) + 
-  geom_text(aes(label = task_id), color = "white", size = 2) +
+  geom_text(aes(label = dataset_id), color = "white", size = 2) +
   cowplot::theme_cowplot() +
   scale_x_discrete(expand = c(0,0))  + scale_y_discrete(expand = c(0,0))

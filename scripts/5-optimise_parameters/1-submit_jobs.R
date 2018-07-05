@@ -16,7 +16,7 @@ execute_before <- "export DYNBENCHMARK_PATH=/group/irc/shared/dynbenchmark/; sin
 verbose <- TRUE
 
 # define important folders
-task_ids <- load_datasets() %>% filter(task_source == "synthetic") %>% pull(id)
+dataset_ids <- load_datasets() %>% filter(dataset_source == "synthetic") %>% pull(id)
 local_output_folder <- derived_file("suite/")
 remote_output_folder <- paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynbenchmark_experiment_id"), "/")
 
@@ -34,11 +34,11 @@ methods$short_name
 # save benchmark configuration and start it
 write_rds(lst(
   methods, metrics, timeout_paramoptim, num_repeats, num_init_params, num_iterations, max_memory_per_core, num_cores,
-  execute_before, verbose, local_output_folder, remote_output_folder, task_ids
+  execute_before, verbose, local_output_folder, remote_output_folder, dataset_ids
 ), derived_file("config.rds"))
 
 paramoptim_submit(
-  task_ids = task_ids,
+  dataset_ids = dataset_ids,
   methods = methods,
   timeout_paramoptim = timeout_paramoptim,
   max_memory_per_core = max_memory_per_core,

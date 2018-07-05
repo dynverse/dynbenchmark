@@ -16,7 +16,7 @@ for (i in seq_along(dataset_ids)) {
       id = id,
       cell_ids = cell_ids,
       cell_info = cell_info,
-      task_source = "real",
+      dataset_source = "real",
       cell_grouping = cell_grouping,
       normalisation_info = normalisation_info,
       creation_date = creation_date

@@ -23,7 +23,7 @@ common_labels <- tribble(
   "trajectory_type_gold", "Gold standard trajectory type", "Gold trajectory type",
   "trajectory_type_predicted", "Predicted trajectory type", "Predicted trajectory type",
   "harm_mean", "Harmonic mean", "Harmonic mean",
-  "task_source", "Dataset source", "Dataset source"
+  "dataset_source", "Dataset source", "Dataset source"
 )
 
 

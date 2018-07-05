@@ -10,30 +10,30 @@ read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggr
 
 methods <- methods %>% filter(type == "algorithm")
 
-tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
+datasets <- read_rds(derived_file("datasets.rds", "2-dataset_characterisation"))
 ti_methods <- dynwrap::get_ti_methods()
 
 top_methods <- methods %>% filter(directed_linear) %>% pull(method_short_name)
 
-task_ids <- outputs_ind %>%
-  filter(task_source == "real", repeat_i == 2) %>%
+dataset_ids <- outputs_ind %>%
+  filter(dataset_source == "real", repeat_i == 2) %>%
   filter(method_short_name %in% methods$method_id) %>%
-  group_by(task_id) %>%
+  group_by(dataset_id) %>%
   mutate(rank = rank(-correlation, ties.method = "min")) %>%
   ungroup() %>%
   filter(trajectory_type == "directed_linear", method_short_name == "embeddr", rank==1) %>%
-  pull(task_id)
+  pull(dataset_id)
 
-task_ids
-task_ids <- "real/dentate-gyrus-neurogenesis_hochgerner"
+dataset_ids
+dataset_ids <- "real/dentate-gyrus-neurogenesis_hochgerner"
 
 
 ##  .............................................................................
-##  Load outputs and task                                                    ####
+##  Load outputs and dataset                                                    ####
 # load models
 outputs_oi <- outputs_ind %>%
   filter(
-    task_id %in% task_ids,
+    dataset_id %in% dataset_ids,
     repeat_i == 1,
     method_short_name %in% c(top_methods)
   )
@@ -41,15 +41,15 @@ outputs_oi$model <- get_models(outputs_oi)
 outputs_oi <- outputs_oi %>% filter(!map_dbl(model, is.null))
 
 ##  ............................................................................
-##  Get task of interest                                                    ####
-task_id <- task_ids[[1]]
-task <- extract_row_to_list(tasks, which(tasks$id == task_id))
-task <- preprocess_task(task)
+##  Get dataset of interest                                                    ####
+dataset_id <- dataset_ids[[1]]
+dataset <- extract_row_to_list(datasets, which(datasets$id == dataset_id))
+dataset <- preprocess_dataset(dataset)
 
 # Select outputs
 methods_oi <- c("slngsht", "scorpius", "embeddr", "wndrlst", "waterfll")
 outputs_plot <- outputs_oi %>%
-  filter(task_id == !!task_id) %>%
+  filter(dataset_id == !!dataset_id) %>%
   arrange(edge_flip) %>%
   slice(match(methods_oi, method_short_name)) %>%
   mutate(plot_fun = slice(ti_methods, match(method_short_name, ti_methods$short_name)) %>% pull(plot_fun))
@@ -63,15 +63,15 @@ outputs_plot$model <- map2(outputs_plot$model, outputs_plot$method_short_name, f
 # No title theme
 no_title_theme <- theme(legend.position = "none", plot.title = element_blank())
 
-# Dimred of task
-dimred_task <- dynplot:::check_or_perform_dimred(task, FALSE, color_by = "Set3")
+# Dimred of dataset
+dimred_dataset <- dynplot:::check_or_perform_dimred(dataset, FALSE, color_by = "Set3")
 
 # Use colors of dimred also in the groups
 groups <- tibble(
-  group_id = task$milestone_ids
+  group_id = dataset$milestone_ids
 ) %>%
   mutate(
-    color = dimred_task$space_milestones %>% slice(match(group_id, milestone_id)) %>% pull(colour)
+    color = dimred_dataset$space_milestones %>% slice(match(group_id, milestone_id)) %>% pull(colour)
   ) %>%
   mutate(color = ifelse(startsWith(group_id, "INTERMEDIATE"), "grey", color))
 
@@ -79,12 +79,12 @@ groups <- tibble(
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
 ### Default plots                                                           ####
 
-task_default_plot <- plot_default(dimred_task, line_size = 2, arrow_length = unit(0.3, "cm")) +
+dataset_default_plot <- plot_default(dimred_dataset, line_size = 2, arrow_length = unit(0.3, "cm")) +
   no_title_theme
 
 outputs_plot$default_plot <- map(outputs_plot$model, function(prediction) {
   dimred_prediction <- dynplot:::check_or_perform_dimred(prediction, FALSE)
-  dimred_prediction$space_samples$colour <- dimred_task$space_samples %>% slice(match(dimred_prediction$space_samples$cell_id, cell_id)) %>% pull(colour)
+  dimred_prediction$space_samples$colour <- dimred_dataset$space_samples %>% slice(match(dimred_prediction$space_samples$cell_id, cell_id)) %>% pull(colour)
   dimred_prediction$space_samples <- dimred_prediction$space_samples %>% sample_n(nrow(dimred_prediction$space_samples)) # shuffle cells, so that no prior z-order is maintained
 
   prediction_plot <- plot_default(dimred_prediction, line_size = 2, arrow_length = unit(0, "cm"), label = "none", plot_milestones = F) +
@@ -93,7 +93,7 @@ outputs_plot$default_plot <- map(outputs_plot$model, function(prediction) {
   prediction_plot
 })
 
-cowplot::plot_grid(plotlist = c(list(task_default_plot), outputs_plot$default_plot), nrow = 1)
+cowplot::plot_grid(plotlist = c(list(dataset_default_plot), outputs_plot$default_plot), nrow = 1)
 
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
@@ -129,21 +129,21 @@ plot_linearised <- function(model, label = FALSE) {
   plot
 }
 
-grouping_assignment <- task$cell_grouping
-group_order <- unique(c(task$milestone_network$from, task$milestone_network$to))
+grouping_assignment <- dataset$cell_grouping
+group_order <- unique(c(dataset$milestone_network$from, dataset$milestone_network$to))
 
-task_linearised_plot <- plot_linearised(task, label = TRUE)
+dataset_linearised_plot <- plot_linearised(dataset, label = TRUE)
 
 outputs_plot$linearised_plot <- map(outputs_plot$model, plot_linearised) %>%
   map(~.)
 
-cowplot::plot_grid(plotlist = c(list(task_linearised_plot), outputs_plot$linearised_plot), nrow = 1)
+cowplot::plot_grid(plotlist = c(list(dataset_linearised_plot), outputs_plot$linearised_plot), nrow = 1)
 
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
 ### Method plots                                                            ####
 ## Dataset plot
-task_method_plot <- plot_task_cells(task)
+dataset_method_plot <- plot_dataset_cells(dataset)
 
 # Method plots
 outputs_plot <- outputs_plot %>%
@@ -151,11 +151,11 @@ outputs_plot <- outputs_plot %>%
     print(model$id)
     plot_fun(model) + theme(legend.position = "none", plot.title = element_blank())
   }))
-outputs_plot$method_plot %>% c(list(task_method_plot), .) %>% cowplot::plot_grid(plotlist = ., nrow = 1)
+outputs_plot$method_plot %>% c(list(dataset_method_plot), .) %>% cowplot::plot_grid(plotlist = ., nrow = 1)
 
 
 # Titles
-task_title_plot <- ggplot() + geom_text(aes(0, 0, label = "Gold standard"), size = 6, fontface = "bold", hjust = .5) + theme_void()
+dataset_title_plot <- ggplot() + geom_text(aes(0, 0, label = "Gold standard"), size = 6, fontface = "bold", hjust = .5) + theme_void()
 outputs_plot$title_plot <- map(outputs_plot$method_short_name, function(method_short_name) {
   title <- methods$method_name[match(method_short_name, methods$method_id)]
   ggplot() + geom_text(aes(0, 0, label = title), size = 6, fontface = "bold", hjust = .5) + theme_void()
@@ -169,13 +169,13 @@ row_labels <- list(
 
 c(
   row_labels[1],
-  list(task_title_plot),
+  list(dataset_title_plot),
   outputs_plot$title_plot,
   row_labels[2],
-  list(task_linearised_plot),
+  list(dataset_linearised_plot),
   outputs_plot$linearised_plot,
   row_labels[3],
-  list(task_method_plot),
+  list(dataset_method_plot),
   outputs_plot$method_plot
 ) %>%
-  cowplot::plot_grid(plotlist = ., nrow = 3, rel_heights = c(1, 5, 5), rel_widths = c(1, rep(2, length(task_title_plot))))
+  cowplot::plot_grid(plotlist = ., nrow = 3, rel_heights = c(1, 5, 5), rel_widths = c(1, rep(2, length(dataset_title_plot))))

@@ -62,7 +62,7 @@ ggsave(figure_file("required_priors_performance_comparison.svg"), required_prior
 ##  Individual datasets                                                     ####
 required_priors_dataset_testing <- indrep_scores %>%
   left_join(method_priors, "method_short_name") %>%
-  group_by(task_id, prior_id) %>%
+  group_by(dataset_id, prior_id) %>%
   summarise(
     test =
       list(wilcox.test(
@@ -82,16 +82,16 @@ required_priors_dataset_testing <- indrep_scores %>%
 
 required_priors_dataset_testing$q_value %>% hist()
 
-tasks_oi <- required_priors_dataset_testing %>%
+datasets_oi <- required_priors_dataset_testing %>%
   arrange(q_value) %>%
   top_n(5, -q_value) %>%
-  pull(task_id)
+  pull(dataset_id)
 
 
 indrep_scores %>%
-  filter(task_id %in% tasks_oi) %>%
+  filter(dataset_id %in% datasets_oi) %>%
   left_join(method_priors) %>%
   ggplot(aes(prior_usage == "not_required", harm_mean)) +
     geom_point() +
     geom_violin() +
-    facet_wrap(~task_id)
+    facet_wrap(~dataset_id)

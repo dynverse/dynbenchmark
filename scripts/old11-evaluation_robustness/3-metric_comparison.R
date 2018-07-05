@@ -9,7 +9,7 @@ outputs_list <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_p
 
 # create metric scores
 trajtype_metric_scores <- outputs_list$outputs_summtrajtype_totalsx2 %>%
-  filter(task_source == "mean") %>%
+  filter(dataset_source == "mean") %>%
   rename(method_id = method_short_name) %>%
   select(method_id, trajectory_type = trajectory_type_f, one_of(names(metrics_sel))) %>%
   gather(metric, score, one_of(names(metrics_sel))) %>%
@@ -42,7 +42,7 @@ ggsave(figure_file("metrics_comparison.svg"), g, width = 14, height = 5)
 write_rds(g, figure_file("metrics_comparison.rds"))
 
 df <- outputs_list$outputs_summtrajtype_totalsx2 %>%
-  filter(task_source == "mean") %>%
+  filter(dataset_source == "mean") %>%
   mutate(
     trajectory_type_l = factor(label_long(trajectory_type_f), levels = label_long(levels(trajectory_type_f)))
   )

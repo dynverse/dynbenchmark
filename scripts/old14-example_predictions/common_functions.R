@@ -1,9 +1,9 @@
-plot_task_cells <- function(task) {
+plot_dataset_cells <- function(dataset) {
   source("../dynmodular/dimred_wrappers.R")
-  space_cells <- dimred_mds(task$expression(), ndim = 2) %>%
+  space_cells <- dimred_mds(dataset$expression(), ndim = 2) %>%
     as_tibble() %>%
-    mutate(cell_id = rownames(task$expression())) %>%
-    left_join(task$prior_information$grouping_assignment, by = "cell_id") %>%
+    mutate(cell_id = rownames(dataset$expression())) %>%
+    left_join(dataset$prior_information$grouping_assignment, by = "cell_id") %>%
     left_join(groups)
 
   # define space groups
@@ -39,7 +39,7 @@ plot_task_cells <- function(task) {
     left_join(groups)
 
   # group network
-  group_network <- task$milestone_network %>%
+  group_network <- dataset$milestone_network %>%
     left_join(
       space_groups %>% rename_all(~paste0(., "_from")),
       by = c("from" = "group_id_from")
@@ -53,7 +53,7 @@ plot_task_cells <- function(task) {
       Comp2_mid = Comp2_from + (Comp2_to - Comp2_from) /2
     )
 
-  task_method_plot <- space_cells %>%
+  dataset_method_plot <- space_cells %>%
     ggplot(aes(Comp1, Comp2)) +
     geom_point(aes(fill = color), color = "black", shape = 21) +
     ggraph::geom_edge_link(aes(x = Comp1_from, y = Comp2_from, xend = Comp1_to, yend = Comp2_to), data = group_network) +
@@ -63,9 +63,9 @@ plot_task_cells <- function(task) {
     scale_color_identity() +
     scale_fill_identity() +
     theme_minimal()
-  task_method_plot <- process_dynplot(task_method_plot, "Gold standard") +
+  dataset_method_plot <- process_dynplot(dataset_method_plot, "Gold standard") +
     theme(legend.position = "none", plot.title = element_blank())
-  task_method_plot
+  dataset_method_plot
 }
 
 get_models <- function(outputs_oi) {
@@ -79,15 +79,15 @@ get_models <- function(outputs_oi) {
 }
 
 
-preprocess_task <- function(task) {
-  # Preprocess task
-  task$milestone_network <- dynbenchmark:::cut_unrepresented_milestones(task$milestone_network, task$milestone_percentages %>% filter(percentage > 0), task$milestone_ids)
-  task$milestone_network <- task$milestone_network %>% mutate(from = factor(from, levels = task$milestone_ids)) %>% arrange(from) %>% mutate(from = as.character(from)) # retain order from before
-  task$milestone_ids <- unique(c(task$milestone_network$from, task$milestone_network$to))
-  task$milestone_percentages <- task$milestone_percentages %>% filter(percentage > 0)
-  task$progressions <- dynwrap::convert_milestone_percentages_to_progressions(task$cell_ids, task$milestone_ids, task$milestone_network, task$milestone_percentages)
+preprocess_dataset <- function(dataset) {
+  # Preprocess dataset
+  dataset$milestone_network <- dynbenchmark:::cut_unrepresented_milestones(dataset$milestone_network, dataset$milestone_percentages %>% filter(percentage > 0), dataset$milestone_ids)
+  dataset$milestone_network <- dataset$milestone_network %>% mutate(from = factor(from, levels = dataset$milestone_ids)) %>% arrange(from) %>% mutate(from = as.character(from)) # retain order from before
+  dataset$milestone_ids <- unique(c(dataset$milestone_network$from, dataset$milestone_network$to))
+  dataset$milestone_percentages <- dataset$milestone_percentages %>% filter(percentage > 0)
+  dataset$progressions <- dynwrap::convert_milestone_percentages_to_progressions(dataset$cell_ids, dataset$milestone_ids, dataset$milestone_network, dataset$milestone_percentages)
 
-  task
+  dataset
 }
 
 

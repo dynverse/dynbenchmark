@@ -9,14 +9,14 @@ outputs_ind <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_pa
 
 metrics <- c("correlation", "edge_flip", "rf_mse_neg")
 
-task_cols <-
+dataset_cols <-
   outputs_ind %>%
-  select(trajectory_type, task_id) %>%
+  select(trajectory_type, dataset_id) %>%
   unique() %>%
   group_by(trajectory_type) %>%
-  mutate(task_colour = percent_rank(seq_len(n()))) %>%
+  mutate(dataset_colour = percent_rank(seq_len(n()))) %>%
   ungroup() %>%
-  mutate(task_colour = factor(rank(task_colour))) %>%
+  mutate(dataset_colour = factor(rank(dataset_colour))) %>%
   select(-trajectory_type)
 
 
@@ -85,18 +85,18 @@ minmax_trafo <- function (x, invert = FALSE, remove_errored = FALSE) {
   y
 }
 
-group_by_task_id <- function(task_id, score, fun, ...) {
-  data_frame(task_id, score) %>%
-    group_by(task_id) %>%
+group_by_dataset_id <- function(dataset_id, score, fun, ...) {
+  data_frame(dataset_id, score) %>%
+    group_by(dataset_id) %>%
     mutate(norm_score = fun(score, ...)) %>%
     ungroup() %>%
     pull(norm_score)
 }
 
-quantile_normalise <- function(task_id, score, repeats = 100) {
+quantile_normalise <- function(dataset_id, score, repeats = 100) {
   rowMeans(sapply(seq_len(repeats), function(rep) {
-    data_frame(task_id, score) %>%
-      group_by(task_id) %>%
+    data_frame(dataset_id, score) %>%
+      group_by(dataset_id) %>%
       mutate(rank_score = rank(score, ties.method = "random")) %>%
       ungroup() %>%
       group_by(rank_score) %>%
@@ -114,18 +114,18 @@ is_min <- function(a, b) {
 
 
 score_funs <- list(
-  identity = function(task_id, score) score,
-  percentrank = function(task_id, score) group_by_task_id(task_id, score, percent_rank),
+  identity = function(dataset_id, score) score,
+  percentrank = function(dataset_id, score) group_by_dataset_id(dataset_id, score, percent_rank),
   quantile = quantile_normalise,
-  scale_tanh = function(task_id, score) group_by_task_id(task_id, score, scaletanh_trafo, remove_errored = T, determine_coeff = F),
-  scale_tanh_sc = function(task_id, score) group_by_task_id(task_id, score, scaletanh_trafo, remove_errored = T, determine_coeff = T),
-  scale_sigmoid = function(task_id, score) group_by_task_id(task_id, score, scalesigmoid_trafo, remove_errored = T, determine_coeff = F),
-  scale_sigmoid_sc = function(task_id, score) group_by_task_id(task_id, score, scalesigmoid_trafo, remove_errored = T, determine_coeff = T),
-  medquan_sigmoid = function(task_id, score) group_by_task_id(task_id, score, medquansigmoid_trafo, remove_errored = T, determine_coeff = F),
-  medquan_sigmoid_sc = function(task_id, score) group_by_task_id(task_id, score, medquansigmoid_trafo, remove_errored = T, determine_coeff = T),
-  # medmad_sigmoid = function(task_id, score) group_by_task_id(task_id, score, medmadsigmoid_trafo, remove_errored = T, determine_coeff = F),
-  # medmad_sigmoid_sc = function(task_id, score) group_by_task_id(task_id, score, medmadsigmoid_trafo, remove_errored = T, determine_coeff = T),
-  minmax_rem = function(task_id, score) group_by_task_id(task_id, score, minmax_trafo, remove_errored = TRUE)
+  scale_tanh = function(dataset_id, score) group_by_dataset_id(dataset_id, score, scaletanh_trafo, remove_errored = T, determine_coeff = F),
+  scale_tanh_sc = function(dataset_id, score) group_by_dataset_id(dataset_id, score, scaletanh_trafo, remove_errored = T, determine_coeff = T),
+  scale_sigmoid = function(dataset_id, score) group_by_dataset_id(dataset_id, score, scalesigmoid_trafo, remove_errored = T, determine_coeff = F),
+  scale_sigmoid_sc = function(dataset_id, score) group_by_dataset_id(dataset_id, score, scalesigmoid_trafo, remove_errored = T, determine_coeff = T),
+  medquan_sigmoid = function(dataset_id, score) group_by_dataset_id(dataset_id, score, medquansigmoid_trafo, remove_errored = T, determine_coeff = F),
+  medquan_sigmoid_sc = function(dataset_id, score) group_by_dataset_id(dataset_id, score, medquansigmoid_trafo, remove_errored = T, determine_coeff = T),
+  # medmad_sigmoid = function(dataset_id, score) group_by_dataset_id(dataset_id, score, medmadsigmoid_trafo, remove_errored = T, determine_coeff = F),
+  # medmad_sigmoid_sc = function(dataset_id, score) group_by_dataset_id(dataset_id, score, medmadsigmoid_trafo, remove_errored = T, determine_coeff = T),
+  minmax_rem = function(dataset_id, score) group_by_dataset_id(dataset_id, score, minmax_trafo, remove_errored = TRUE)
 
 )
 
@@ -136,23 +136,23 @@ out_scalings <-
     cat("Processing ", mi, " ", score_name, "\n", sep = "")
 
     oi <- outputs_ind %>%
-      select(task_id, method_short_name, trajectory_type, one_of(metrics)) %>%
+      select(dataset_id, method_short_name, trajectory_type, one_of(metrics)) %>%
       gather(metric, score, one_of(metrics)) %>%
       group_by(metric) %>%
       mutate(
-        norm_score = score_fun(task_id, score),
+        norm_score = score_fun(dataset_id, score),
         is_med = is_min(median(score), score),
         is_q05 = is_min(quantile(score, .05), score),
         is_q95 = is_min(quantile(score, .95), score)
       ) %>%
       ungroup() %>%
-      left_join(task_cols, by = "task_id")
+      left_join(dataset_cols, by = "dataset_id")
 
     ois <- oi %>%
-      group_by(task_id, metric) %>%
+      group_by(dataset_id, metric) %>%
       summarise(mean__raw = mean(score), mean__norm = mean(norm_score), q25__raw = quantile(score, .25), q25__norm = quantile(norm_score, .25), q75__raw = quantile(score, .75), q75__norm = quantile(norm_score, .75)) %>%
       ungroup() %>%
-      gather(xxx, value, -task_id, -metric) %>%
+      gather(xxx, value, -dataset_id, -metric) %>%
       mutate(stage = gsub("__.*", "", xxx), type = gsub(".*__", "", xxx))
 
     ######## RIGHT
@@ -210,7 +210,7 @@ out_scalings <-
     gright <- cowplot::plot_grid(gden, gqq, ncol = 1, rel_heights = c(2, 1))
 
     ######### LEFT
-    g <- ggplot(oi, aes(score, norm_score, colour = task_colour)) +
+    g <- ggplot(oi, aes(score, norm_score, colour = dataset_colour)) +
       geom_line() +
       geom_point(aes(shape = "q50"), oi %>% filter(is_med)) +
       geom_point(aes(shape = "q05"), oi %>% filter(is_q05)) +
@@ -221,7 +221,7 @@ out_scalings <-
       labs(title = score_name)
 
     g2 <- ggplot(oi) +
-      geom_density(aes(x = norm_score, y = ..scaled.., group = task_id, colour = task_colour)) +
+      geom_density(aes(x = norm_score, y = ..scaled.., group = dataset_id, colour = dataset_colour)) +
       facet_grid(metric~trajectory_type, scales = "free") +
       theme_bw() +
       theme(legend.position = "none")

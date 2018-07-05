@@ -21,7 +21,7 @@ olist <- read_rds(derived_file("outputs_postprocessed.rds"))
 
 # get ordering of methods
 method_ord <- olist$outputs_summtrajtype_totalsx2 %>%
-  filter(task_source == "mean", trajectory_type == "overall") %>%
+  filter(dataset_source == "mean", trajectory_type == "overall") %>%
   arrange(desc(harm_mean)) %>%
   .$method_name
 
@@ -48,13 +48,13 @@ metr_lev <- c(
 
 oc1 <-
   outputs_summtrajtype_totalsx2 %>%
-  filter(task_source == "mean", trajectory_type_f == "overall") %>%
+  filter(dataset_source == "mean", trajectory_type_f == "overall") %>%
   select(method_name, method_short_name, method_name_f, paramset_id, one_of(metr_lev)) %>%
   gather(metric, score, -method_name:-paramset_id)
 oc2 <-
   outputs_summtrajtype_totalsx2 %>%
-  filter(task_source == c("real", "synthetic"), trajectory_type == "overall") %>%
-  select(method_name:paramset_id, method_name_f, metric = task_source, score = harm_mean)
+  filter(dataset_source == c("real", "synthetic"), trajectory_type == "overall") %>%
+  select(method_name:paramset_id, method_name_f, metric = dataset_source, score = harm_mean)
 
 overall_comp <-
   bind_rows(oc1, oc2) %>%
@@ -88,7 +88,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
   theme_bw() +
   theme(legend.position = "none") +
   scale_colour_manual(values = method_cols) +
-  facet_grid(task_source~trajectory_type_f) +
+  facet_grid(dataset_source~trajectory_type_f) +
   labs(
     x = NULL
   )
@@ -99,7 +99,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
   theme_bw() +
   theme(legend.position = "none") +
   scale_colour_manual(values = method_cols) +
-  facet_grid(task_source~trajectory_type_f) +
+  facet_grid(dataset_source~trajectory_type_f) +
   labs(
     x = NULL
   )
@@ -111,7 +111,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
   theme_bw() +
   theme(legend.position = "none") +
   scale_colour_manual(values = method_cols) +
-  facet_grid(task_source~trajectory_type_f) +
+  facet_grid(dataset_source~trajectory_type_f) +
   labs(
     x = NULL
   )
@@ -122,7 +122,7 @@ ggplot(outputs_summtrajtype_totalsx2) +
   theme_bw() +
   theme(legend.position = "none") +
   scale_colour_manual(values = method_cols) +
-  facet_grid(task_source~trajectory_type_f) +
+  facet_grid(dataset_source~trajectory_type_f) +
   labs(
     x = NULL
   )

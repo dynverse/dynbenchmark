@@ -2,7 +2,7 @@ rank_methods <- function(outputs_ind) {
   ### PART 1
   # aggregate over replicates
   outputs_summrepl <- outputs_ind %>%
-    group_by(method_short_name, task_id, task_source, paramset_id, trajectory_type, task_source, prior_str, trajectory_type_f) %>%
+    group_by(method_short_name, dataset_id, dataset_source, paramset_id, trajectory_type, dataset_source, prior_str, trajectory_type_f) %>%
     summarise_if(is.numeric, mean) %>%
     ungroup() %>%
     mutate(
@@ -13,7 +13,7 @@ rank_methods <- function(outputs_ind) {
 
   # process trajtype grouped evaluation
   outputs_summtrajtype <- outputs_summrepl %>%
-    group_by(method_short_name, task_source, paramset_id, trajectory_type, trajectory_type_f) %>%
+    group_by(method_short_name, dataset_source, paramset_id, trajectory_type, trajectory_type_f) %>%
     mutate(n = n()) %>%
     summarise_if(is.numeric, mean) %>%
     ungroup() %>%
@@ -23,7 +23,7 @@ rank_methods <- function(outputs_ind) {
 
   # process overall evaluation
   outputs_summmethod <- outputs_summtrajtype %>%
-    group_by(method_short_name, task_source, paramset_id) %>%
+    group_by(method_short_name, dataset_source, paramset_id) %>%
     mutate(n = n()) %>%
     summarise_if(is.numeric, mean) %>%
     ungroup() %>%
@@ -38,7 +38,7 @@ rank_methods <- function(outputs_ind) {
       group_by(method_short_name, paramset_id, trajectory_type, trajectory_type_f) %>%
       summarise_if(is.numeric, mean) %>%
       ungroup() %>%
-      mutate(task_source = "mean")
+      mutate(dataset_source = "mean")
   ) %>%
     mutate(
       harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
@@ -52,7 +52,7 @@ rank_methods <- function(outputs_ind) {
         group_by(method_short_name, paramset_id) %>%
         summarise_if(is.numeric, mean) %>%
         ungroup() %>%
-        mutate(task_source = "mean")
+        mutate(dataset_source = "mean")
     ) %>%
     mutate(
       harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
@@ -73,7 +73,7 @@ rank_methods <- function(outputs_ind) {
 
   part_overall_mean <-
     outputs_summtrajtype_totalsx2 %>%
-    filter(trajectory_type == "overall", task_source == "mean") %>%
+    filter(trajectory_type == "overall", dataset_source == "mean") %>%
     select(
       method_short_name, harm_mean, norm_correlation, norm_edge_flip, norm_rf_mse, time_method, rank_time_method,
       num_files_created, num_setseed_calls, pct_errored, pct_time_exceeded, pct_memory_exceeded, pct_allerrored, pct_stochastic
@@ -82,15 +82,15 @@ rank_methods <- function(outputs_ind) {
 
   part_sources <-
     outputs_summtrajtype_totalsx2 %>%
-    filter(trajectory_type == "overall", task_source != "mean") %>%
-    select(method_short_name, task_source, harm_mean) %>%
-    mutate(task_source = paste0("source_", task_source)) %>%
-    spread(task_source, harm_mean) %>%
+    filter(trajectory_type == "overall", dataset_source != "mean") %>%
+    select(method_short_name, dataset_source, harm_mean) %>%
+    mutate(dataset_source = paste0("source_", dataset_source)) %>%
+    spread(dataset_source, harm_mean) %>%
     mutate(overall_source = apply(.[,colnames(.)[grepl("^source_", colnames(.))]], 1, mean))
 
   part_trajtypes <-
     outputs_summtrajtype_totalsx2 %>%
-    filter(trajectory_type != "overall", task_source == "mean") %>%
+    filter(trajectory_type != "overall", dataset_source == "mean") %>%
     select(method_short_name, trajectory_type, harm_mean) %>%
     mutate(trajectory_type = paste0("trajtype_", trajectory_type)) %>%
     spread(trajectory_type, harm_mean) %>%

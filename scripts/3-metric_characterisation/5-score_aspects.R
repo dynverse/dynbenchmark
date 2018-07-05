@@ -154,11 +154,11 @@ scores_heatmap
 
 cell_colors <- shades::gradient(RColorBrewer::brewer.pal(3, "YlGnBu"), 101)[gs$progressions$percentage*100 + 1] %>% as.character() %>% set_names(gs$cell_ids)
 
-tasks <- set_names(toys$toy, toys$id)
-connections <- map(tasks, function(task) {
-  dynplot::plot_connections(task$milestone_network, cell_progressions = task$progressions, cell_colors = cell_colors, orientation = -1)
+datasets <- set_names(toys$toy, toys$id)
+connections <- map(datasets, function(dataset) {
+  dynplot::plot_connections(dataset$milestone_network, cell_progressions = dataset$progressions, cell_colors = cell_colors, orientation = -1)
 }) %>%
-  map2(., names(tasks), ~.+ggtitle(label_long(.y)) + theme(plot.title = element_text(hjust = 0.5))) %>%
+  map2(., names(datasets), ~.+ggtitle(label_long(.y)) + theme(plot.title = element_text(hjust = 0.5))) %>%
   cowplot::plot_grid(plotlist = ., ncol = 1, labels = "auto", rel_heights = c(2,2,2,4,4))
 connections
 

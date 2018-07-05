@@ -1,37 +1,37 @@
 ## Again gold standard
-perturb_gs <- function(task) {
-  task
+perturb_gs <- function(dataset) {
+  dataset
 }
 
 ## Switch cells
-perturb_switch_n_cells <- function(task, n = length(task$cell_ids)) {
-  the_chosen_ones <- sample(task$cell_ids, n)
+perturb_switch_n_cells <- function(dataset, n = length(dataset$cell_ids)) {
+  the_chosen_ones <- sample(dataset$cell_ids, n)
 
-  mapper <- set_names(task$cell_ids, task$cell_ids)
+  mapper <- set_names(dataset$cell_ids, dataset$cell_ids)
   mapper[match(the_chosen_ones, mapper)] <- rev(the_chosen_ones)
 
-  task$milestone_percentages$cell_id <- mapper[task$milestone_percentages$cell_id]
-  task$progression$cell_id <- mapper[task$progression$cell_id]
+  dataset$milestone_percentages$cell_id <- mapper[dataset$milestone_percentages$cell_id]
+  dataset$progression$cell_id <- mapper[dataset$progression$cell_id]
 
-  recreate_task(task)
+  recreate_dataset(dataset)
 }
 
-perturb_switch_two_cells <- function(task) perturb_switch_n_cells(task, 2)
+perturb_switch_two_cells <- function(dataset) perturb_switch_n_cells(dataset, 2)
 
-perturb_switch_all_cells <- function(task) perturb_switch_n_cells(task, length(unique(task$progressions$cell_id)))
+perturb_switch_all_cells <- function(dataset) perturb_switch_n_cells(dataset, length(unique(dataset$progressions$cell_id)))
 
 percs <- seq(0, 1, 0.1)
-perc_perturbators <- map(percs, function(perc) {function(task) perturb_switch_n_cells(task, length(task$cell_id) * perc)}) %>%
+perc_perturbators <- map(percs, function(perc) {function(dataset) perturb_switch_n_cells(dataset, length(dataset$cell_id) * perc)}) %>%
   set_names(paste0("perturb_switch_", percs * 100))
 perc_perturbators %>% list2env(.GlobalEnv)
 
 
 # Break cycle
 # this should be easier, no?
-perturb_break_cycles <- function(task) {
-  # task <- generate_cycle()
+perturb_break_cycles <- function(dataset) {
+  # dataset <- generate_cycle()
 
-  net <- task$milestone_network %>% mutate(linkid = seq_len(n()))
+  net <- dataset$milestone_network %>% mutate(linkid = seq_len(n()))
   visited <- c()
   remove_links <- c()
 
@@ -50,85 +50,85 @@ perturb_break_cycles <- function(task) {
 
   new_milestone_n <- 1
   for(remove_link in remove_links) {
-    from <- task$milestone_network[remove_link, ]$from
-    to <- task$milestone_network[remove_link, ]$to
-    length <- task$milestone_network[remove_link, ]$length
+    from <- dataset$milestone_network[remove_link, ]$from
+    to <- dataset$milestone_network[remove_link, ]$to
+    length <- dataset$milestone_network[remove_link, ]$length
 
     newto <- paste0("NM", new_milestone_n)
     new_milestone_n <- new_milestone_n + 1
 
-    task$progressions[(task$progressions$from == from) & (task$progressions$to == to),]$to = newto
-    task$milestone_network <- task$milestone_network %>% add_row(from = from, to = newto, length = length)
+    dataset$progressions[(dataset$progressions$from == from) & (dataset$progressions$to == to),]$to = newto
+    dataset$milestone_network <- dataset$milestone_network %>% add_row(from = from, to = newto, length = length)
 
-    task$milestone_ids <- c(task$milestone_ids, newto)
+    dataset$milestone_ids <- c(dataset$milestone_ids, newto)
   }
 
-  task$milestone_network <- task$milestone_network[-remove_links, ]
+  dataset$milestone_network <- dataset$milestone_network[-remove_links, ]
 
-  recreate_task(task)
+  recreate_dataset(dataset)
 }
 
 # Join linear
-perturb_join_linear <- function(task) {
-  # task <- generate_linear()
-  if(nrow(task$milestone_network) != 1) {stop("joining non-linear trajectories not supported")}
+perturb_join_linear <- function(dataset) {
+  # dataset <- generate_linear()
+  if(nrow(dataset$milestone_network) != 1) {stop("joining non-linear trajectories not supported")}
 
-  length <- task$milestone_network$length
+  length <- dataset$milestone_network$length
 
-  task$milestone_network <- tibble::tribble(
+  dataset$milestone_network <- tibble::tribble(
     ~from, ~to,
     "M1", "M2",
     "M2", "M3",
     "M3", "M1"
   ) %>% mutate(length = length/3, directed = TRUE)
 
-  task$milestone_ids <- c("M1", "M2", "M3")
+  dataset$milestone_ids <- c("M1", "M2", "M3")
 
-  task$progressions <- task$progressions %>%
+  dataset$progressions <- dataset$progressions %>%
     mutate(
-      from = task$milestone_ids[as.numeric(percentage*3) + 1],
-      to = task$milestone_ids[((as.numeric(percentage*3) +1) %% 3 + 1)],
+      from = dataset$milestone_ids[as.numeric(percentage*3) + 1],
+      to = dataset$milestone_ids[((as.numeric(percentage*3) +1) %% 3 + 1)],
       percentage = (percentage * 3) %% 1
     )
 
-  recreate_task(task)
+  recreate_dataset(dataset)
 }
 
 
 # Split linear to bifurcation
-perturb_split_linear <- function(task) {
-  # task <- generate_linear()
-  if(nrow(task$milestone_network) != 1) {stop("joining non-linear trajectories not supported")}
+perturb_split_linear <- function(dataset) {
+  # dataset <- generate_linear()
+  if(nrow(dataset$milestone_network) != 1) {stop("joining non-linear trajectories not supported")}
 
-  length <- task$milestone_network$length
+  length <- dataset$milestone_network$length
 
-  task$milestone_network <- tibble::tribble(
+  dataset$milestone_network <- tibble::tribble(
     ~from, ~to,
     "M1", "M2",
     "M2", "M3",
     "M2", "M4"
   ) %>% mutate(length = length/2, directed = TRUE)
 
-  task$milestone_ids <- c("M1", "M2", "M3", "M4")
+  dataset$milestone_ids <- c("M1", "M2", "M3", "M4")
 
-  task$progressions <- task$progressions %>%
+  dataset$progressions <- dataset$progressions %>%
     mutate(
       from = ifelse(percentage > 0.5, "M2", "M1"),
       to = ifelse(percentage > 0.5, sample(c("M3", "M4"), n(), replace = TRUE), "M2"),
       percentage = (percentage * 2) %% 1
     )
-  recreate_task(task)
+  recreate_dataset(dataset)
 }
 
 
 # Make a trajectory hairy
-#task <- generate_linear()
+#dataset <- generate_linear()
 
-perturb_hairy <- function(task, nhairs = 10, overall_hair_length = 1) {
+perturb_hairy <- function(dataset, nhairs = 10, overall_hair_length = 1) {
   if(overall_hair_length < 1) {stop("hair length should be larger than 1")}
 
-  newmilestone_network <- task$milestone_network
-  newprogressions <- task$progressions
+  newmilestone_network <- dataset$milestone_network
+  newprogressions <- dataset$progressions
 
   new_milestone_i <- 1
 
@@ -192,32 +192,32 @@ perturb_hairy <- function(task, nhairs = 10, overall_hair_length = 1) {
       ))
   }
 
-  newtask <- dynutils::wrap_ti_prediction(
-    task$trajectory_type,
-    task$id,
-    task$cell_ids,
+  newdataset <- dynutils::wrap_ti_prediction(
+    dataset$trajectory_type,
+    dataset$id,
+    dataset$cell_ids,
     unique(c(newmilestone_network$from, newmilestone_network$to)),
     newmilestone_network,
     progressions = newprogressions
   )
 
-  newtask$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(newtask)
+  newdataset$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(newdataset)
 
-  newtask
+  newdataset
 }
 
-perturb_hairy_small <- function(task) {perturb_hairy(task, nhairs = 2)}
-perturb_hairy_large <- function(task) {perturb_hairy(task, nhairs = 20)}
-# perturb_hairy_long <- function(task) {perturb_hairy(task, overall_hair_length = 2)}
+perturb_hairy_small <- function(dataset) {perturb_hairy(dataset, nhairs = 2)}
+perturb_hairy_large <- function(dataset) {perturb_hairy(dataset, nhairs = 20)}
+# perturb_hairy_long <- function(dataset) {perturb_hairy(dataset, overall_hair_length = 2)}
 
 # Warping the times
 # very quick and dirty way to wrap, but it works :p
-perturb_warp <- function(task) {
-  # task <- generate_linear()
+perturb_warp <- function(dataset) {
+  # dataset <- generate_linear()
 
-  task$progressions$percentage <- task$progressions$percentage^(2^runif(1, -2, 2))
+  dataset$progressions$percentage <- dataset$progressions$percentage^(2^runif(1, -2, 2))
 
-  recreate_task(task)
+  recreate_dataset(dataset)
 }
 
 ## Extreme trajectories
@@ -226,98 +226,98 @@ perturb_extreme_beginning <- function() {}
 
 
 ## Remove cells
-perturb_remove_cells <- function(task) {
-  allcells <- task$cell_ids
+perturb_remove_cells <- function(dataset) {
+  allcells <- dataset$cell_ids
   retained_cells <- sample(allcells, length(allcells) * 0.6)
-  task$progressions <- task$progressions %>% filter(cell_id %in% retained_cells)
+  dataset$progressions <- dataset$progressions %>% filter(cell_id %in% retained_cells)
 
-  recreate_task(task)
+  recreate_dataset(dataset)
 }
 
 
 ## Add distant edge, chaning the structure but not the cell distances
-perturb_add_distant_edge <- function(task) {
-  task$milestone_network <- bind_rows(
-    task$milestone_network,
-    tibble(from = c(task$milestone_ids[[1]], "NEWM"), to = c("NEWM", task$milestone_ids[[2]]), length = sum(task$milestone_network$length)/2, directed = TRUE)
+perturb_add_distant_edge <- function(dataset) {
+  dataset$milestone_network <- bind_rows(
+    dataset$milestone_network,
+    tibble(from = c(dataset$milestone_ids[[1]], "NEWM"), to = c("NEWM", dataset$milestone_ids[[2]]), length = sum(dataset$milestone_network$length)/2, directed = TRUE)
   )
-  task$milestone_ids <- c(task$milestone_ids, "NEWM")
-  recreate_task(task)
+  dataset$milestone_ids <- c(dataset$milestone_ids, "NEWM")
+  recreate_dataset(dataset)
 }
 
 ## Change lengths
 # randomly change all lengths
-perturb_change_lengths <- function(task) {
-  task$milestone_network <- task$milestone_network %>%
+perturb_change_lengths <- function(dataset) {
+  dataset$milestone_network <- dataset$milestone_network %>%
     mutate(length = runif(n()))
-  recreate_task(task)
+  recreate_dataset(dataset)
 }
 
 # change lengths of only terminal edges, while keeping the distances constant
-perturb_change_terminal_lengths <- function(task) {
-  task$milestone_network <- task$milestone_network %>%
+perturb_change_terminal_lengths <- function(dataset) {
+  dataset$milestone_network <- dataset$milestone_network %>%
     mutate(length = ifelse(to %in% from, length, length*2))
-  task$progressions <- task$progressions %>%
+  dataset$progressions <- dataset$progressions %>%
     mutate(percentage = ifelse(to %in% from, percentage, percentage/2))
-  recreate_task(task)
+  recreate_dataset(dataset)
 }
 
 
 ## Perturb structure and position
-perturb_structure_and_position <- function(task) {
-  task <- perturb_switch_all_cells(task)
-  task <- perturb_add_distant_edge(task)
-  task
+perturb_structure_and_position <- function(dataset) {
+  dataset <- perturb_switch_all_cells(dataset)
+  dataset <- perturb_add_distant_edge(dataset)
+  dataset
 }
 
 ## Change milestone network
-change_network <- function(task, trajectory_type = "linear") {
-  task$milestone_network <- dyntoy:::generate_milestone_network(trajectory_type)
-  task$progressions <- dyntoy:::random_progressions(task$milestone_network, ncells = length(task$cell_ids))
-  task$milestone_ids <- unique(c(task$milestone_network$from, task$milestone_network$to))
+change_network <- function(dataset, trajectory_type = "linear") {
+  dataset$milestone_network <- dyntoy:::generate_milestone_network(trajectory_type)
+  dataset$progressions <- dyntoy:::random_progressions(dataset$milestone_network, ncells = length(dataset$cell_ids))
+  dataset$milestone_ids <- unique(c(dataset$milestone_network$from, dataset$milestone_network$to))
 
-  recreate_task(task)
+  recreate_dataset(dataset)
 }
 
 trajectory_models <- eval(formals(dyntoy:::generate_milestone_network)$model)
 
-map(trajectory_models, function(x) function(task) change_network(task, x)) %>% setNames(paste0("perturb_change_network_", trajectory_models)) %>% list2env(.GlobalEnv)
+map(trajectory_models, function(x) function(dataset) change_network(dataset, x)) %>% setNames(paste0("perturb_change_network_", trajectory_models)) %>% list2env(.GlobalEnv)
 
 
 ### Some helper functions-------------------
-# Recreate task, forcing a reculaculation of geodesic distances
-recreate_task <- function(task) {
-  task <- dynutils::wrap_ti_prediction(
-    task$trajectory_type,
-    task$id,
-    task$cell_ids,
-    task$milestone_ids,
-    task$milestone_network,
-    progression = task$progression
+# Recreate dataset, forcing a reculaculation of geodesic distances
+recreate_dataset <- function(dataset) {
+  dataset <- dynutils::wrap_ti_prediction(
+    dataset$trajectory_type,
+    dataset$id,
+    dataset$cell_ids,
+    dataset$milestone_ids,
+    dataset$milestone_network,
+    progression = dataset$progression
   )
-  task$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(task)
+  dataset$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(dataset)
 
-  task
+  dataset
 }
 
 
-rename_toy <- function(task, toy_id) {task$id<-toy_id;task}
+rename_toy <- function(dataset, toy_id) {dataset$id<-toy_id;dataset}
 
-# same task, but with the cell_percentages grouped at their maximal milestone, simulating the effect of a "marker-based" or "clustering-based" gold standard for real data
-group_task <- function(task) {
-  task$milestone_percentages <- task$milestone_percentages %>%
+# same dataset, but with the cell_percentages grouped at their maximal milestone, simulating the effect of a "marker-based" or "clustering-based" gold standard for real data
+group_dataset <- function(dataset) {
+  dataset$milestone_percentages <- dataset$milestone_percentages %>%
     group_by(cell_id) %>%
     mutate(percentage = ifelse(percentage == max(percentage), 1, 0)) %>%
     ungroup()
 
-  task <- dynutils::wrap_ti_prediction(
-    task$trajectory_type,
-    task$id,
-    task$cell_ids,
-    task$milestone_ids,
-    task$milestone_network,
-    task$milestone_percentages
+  dataset <- dynutils::wrap_ti_prediction(
+    dataset$trajectory_type,
+    dataset$id,
+    dataset$cell_ids,
+    dataset$milestone_ids,
+    dataset$milestone_network,
+    dataset$milestone_percentages
   )
-  task$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(task)
-  task
+  dataset$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(dataset)
+  dataset
 }

@@ -5,13 +5,13 @@ library(tidygraph)
 library(ggraph)
 
 experiment("2-dataset_characterisation/1-synthetic")
-tasks <- load_datasets()
+datasets <- load_datasets()
 
 
 #   ____________________________________________________________________________
 #   Plotting the different models                                           ####
 
-modulenet_names <- tasks$settings %>% map("modulenet_name") %>% unlist() %>% unique()
+modulenet_names <- datasets$settings %>% map("modulenet_name") %>% unlist() %>% unique()
 
 params <- dyngen::simple_params
 

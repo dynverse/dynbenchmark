@@ -12,7 +12,7 @@ run_id <- "mds_robrechtc_1"
 run <- read_rds(derived_file(paste0(run_id, ".rds")))
 run$spaces <- run$spaces[[1]]
 
-run$spaces$id <- tasks$id[pmatch(run$spaces$id %>% gsub(".*/(.*)", "\\1", .), tasks$id %>% gsub(".*/(.*)", "\\1", .))]
+run$spaces$id <- datasets$id[pmatch(run$spaces$id %>% gsub(".*/(.*)", "\\1", .), datasets$id %>% gsub(".*/(.*)", "\\1", .))]
 
 
 
@@ -270,31 +270,31 @@ predictions_list <- predictions_data %>% pmap(function(box_id, cluster_positions
     edge = out$edge_df
   )
 })
-predictions <- tibble(prediction = predictions_list, task_id = run$spaces$id)
+predictions <- tibble(prediction = predictions_list, dataset_id = run$spaces$id)
 
 
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
 ### Check scores of controls                                                ####
-tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
-tasks <- tasks %>% slice(match(run$spaces$id, id))
+datasets <- read_rds(derived_file("datasets.rds", "2-dataset_characterisation"))
+datasets <- datasets %>% slice(match(run$spaces$id, id))
 
-controls <- map(tasks %>% filter(task_group == "control" & id != "control_BA") %>% pull(id), function(task_id) {
-  print(task_id)
-  task <- extract_row_to_list(tasks, which(tasks$id == task_id))
-  task$geodesic_dist <- dynutils::compute_tented_geodesic_distances(task)
+controls <- map(datasets %>% filter(dataset_group == "control" & id != "control_BA") %>% pull(id), function(dataset_id) {
+  print(dataset_id)
+  dataset <- extract_row_to_list(datasets, which(datasets$id == dataset_id))
+  dataset$geodesic_dist <- dynutils::compute_tented_geodesic_distances(dataset)
 
-  prediction <- extract_row_to_list(predictions, which(predictions$task_id == task_id))$prediction
+  prediction <- extract_row_to_list(predictions, which(predictions$dataset_id == dataset_id))$prediction
   prediction$geodesic_dist <- dynutils::compute_tented_geodesic_distances(prediction)
 
   plot = dynplot::plot_default(prediction)
   plot
 
   tibble(
-    scores = dyneval::calculate_metrics(task, prediction, c("correlation", "edge_flip", "rf_mse"))$summary %>%
+    scores = dyneval::calculate_metrics(dataset, prediction, c("correlation", "edge_flip", "rf_mse"))$summary %>%
       select(correlation, edge_flip) %>% list(),
     plot = list(plot),
-    task_id = task_id
+    dataset_id = dataset_id
   ) %>% unnest(scores)
 }) %>% bind_rows()
 

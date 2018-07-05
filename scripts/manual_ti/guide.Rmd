@@ -7,8 +7,8 @@ output: html_document
 library(dynbenchmark)
 library(tidyverse)
 
-tasks_control <- read_rds(derived_file("tasks.rds", "1-datasets/control"))
-space <- tasks_control %>% filter(id == "control_bifurcating") %>% pull(space) %>% first()
+datasets_control <- read_rds(derived_file("datasets.rds", "1-datasets/control"))
+space <- datasets_control %>% filter(id == "control_bifurcating") %>% pull(space) %>% first()
 ```
 
 Shown are individual cells within a single-cell RNA-seq dataset in 2D. Cells closer to each other have more similar expression profiles compared to cells farther apart.

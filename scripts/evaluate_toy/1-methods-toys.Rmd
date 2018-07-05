@@ -17,22 +17,22 @@ library(dynmethods)
 
 set.seed(1)
 
-data("toy_tasks")
-tasks <- toy_tasks
+data("toy_datasets")
+datasets <- toy_datasets
 ```
 
 ```{r}
-tasks$counts <- map(tasks$counts, function(counts) {
+datasets$counts <- map(datasets$counts, function(counts) {
   cbind2(counts, matrix(sample(1:100, nrow(counts)*100, replace=TRUE), nrow=nrow(counts))) %>% {magrittr::set_colnames(., paste0("G", 1:ncol(.)))}
 })
-task <- dynutils::extract_row_to_list(tasks, 3)
-pheatmap::pheatmap(task$counts)
+dataset <- dynutils::extract_row_to_list(datasets, 3)
+pheatmap::pheatmap(dataset$counts)
 
 source("~/thesis/projects/dynverse/dynmodular/dimred_wrappers.R")
-# space <- task$counts %>% dimred_dp(2, neigen=2) %>% as.data.frame
-space <- task$counts %>% dimred_mds(2) %>% as.data.frame
-# space <- task$counts %>% dimred_lle(2) %>% as.data.frame
-space <- space %>% bind_cols(task$prior_information$grouping_assignment %>% slice(match(rownames(task$counts), cell_id)))
+# space <- dataset$counts %>% dimred_dp(2, neigen=2) %>% as.data.frame
+space <- dataset$counts %>% dimred_mds(2) %>% as.data.frame
+# space <- dataset$counts %>% dimred_lle(2) %>% as.data.frame
+space <- space %>% bind_cols(dataset$prior_information$grouping_assignment %>% slice(match(rownames(dataset$counts), cell_id)))
 space %>%  ggplot() + geom_point(aes(Comp1, Comp2, color=group_id))
 ```
 
@@ -74,11 +74,11 @@ results <- purrr::map(method_names, function(method_name) {
   }
 
   # factory(function() {
-    dyneval:::evaluate_ti_method(tasks, method, params, metrics = metric_names, timeout = 100)
+    dyneval:::evaluate_ti_method(datasets, method, params, metrics = metric_names, timeout = 100)
   # }
   # )()
 })
-# }, qsub_environment = list2env(lst(method_ti_methods, tasks, metric_names, method_params)), qsub_config = qsub::override_qsub_config(memory = "10G", execute_before=c("module load python/x86_64/3.5.1"), wait=F))
+# }, qsub_environment = list2env(lst(method_ti_methods, datasets, metric_names, method_params)), qsub_config = qsub::override_qsub_config(memory = "10G", execute_before=c("module load python/x86_64/3.5.1"), wait=F))
 ```
 
 Gather the output of the different methods, and check whether there were any errors
@@ -103,9 +103,9 @@ print(scores$error)
 
 
 ```{r fig.height=10, fig.width=10}
-scores %>% left_join(tasks %>% select(id, trajectory_type), by=c("task_id"="id")) %>% 
+scores %>% left_join(datasets %>% select(id, trajectory_type), by=c("dataset_id"="id")) %>% 
   dplyr::select(-starts_with("time")) %>%
-  gather(score_id, score, -method_name, -method_short_name, -method_id, -task_id, -error, -warning, -model, -trajectory_type) %>%
+  gather(score_id, score, -method_name, -method_short_name, -method_id, -dataset_id, -error, -warning, -model, -trajectory_type) %>%
   filter(score_id %in% c("errored", "correlation", "robbie_network_score", "mean_R_nx")) %>% 
   ggplot() + geom_bar(aes(method_name, score, fill=score_id), stat="identity") + 
   facet_grid(trajectory_type~score_id) + coord_flip()

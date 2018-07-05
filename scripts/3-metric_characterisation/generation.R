@@ -1,5 +1,5 @@
 wrap <- function(milestone_network, progressions) {
-  task <- dynutils::wrap_ti_prediction(
+  dataset <- dynutils::wrap_ti_prediction(
     "toy",
     "toy",
     cell_ids = unique(progressions$cell_id),
@@ -8,9 +8,9 @@ wrap <- function(milestone_network, progressions) {
     progressions = progressions
   )
 
-  task$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(task)
+  dataset$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(dataset)
 
-  task
+  dataset
 }
 
 

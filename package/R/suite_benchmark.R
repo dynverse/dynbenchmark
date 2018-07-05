@@ -1,6 +1,6 @@
-#' A benchmark suite with which to run all the methods on the different tasks
+#' A benchmark suite with which to run all the methods on the different datasets
 #'
-#' @param task_ids The ids of the tasks to be used in the evaluation.
+#' @param dataset_ids The ids of the datasets to be used in the evaluation.
 #' @param methods A tibble of TI methods to use, see \code{\link[dynwrap]{get_ti_methods}}.
 #' @param parameters A named list containing data frames of the parameters to evaluate.
 #'   The names of the list must be equal to the \code{short_name} column of \code{methods}.
@@ -21,7 +21,7 @@
 #'
 #' @export
 benchmark_submit <- function(
-  task_ids,
+  dataset_ids,
   methods,
   parameters,
   timeout_per_execution,
@@ -36,7 +36,7 @@ benchmark_submit <- function(
   requireNamespace("qsub")
 
   benchmark_submit_check(
-    task_ids,
+    dataset_ids,
     methods,
     parameters,
     timeout_per_execution,
@@ -82,9 +82,9 @@ benchmark_submit <- function(
       # fetch parameters
       parms <- parameters[[method$short_name]]
 
-      ## create a grid for each of the tasks, paramsets, and repeats
+      ## create a grid for each of the datasets, paramsets, and repeats
       grid <- crossing(
-        task_id = task_ids,
+        dataset_id = dataset_ids,
         paramset_id = parms$paramset_id,
         repeat_i = seq_len(num_repeats)
       )
@@ -119,7 +119,7 @@ benchmark_submit <- function(
       metadata <- lst(
         local_output_folder,
         remote_output_folder,
-        task_ids,
+        dataset_ids,
         method,
         timeout_per_execution,
         max_memory_per_execution,
@@ -144,7 +144,7 @@ benchmark_submit <- function(
 #' @importFrom testthat expect_equal expect_is
 #' @importFrom ParamHelpers dfRowToList
 benchmark_submit_check <- function(
-  task_ids,
+  dataset_ids,
   methods,
   parameters,
   timeout_per_execution,
@@ -156,8 +156,8 @@ benchmark_submit_check <- function(
   execute_before,
   verbose
 ) {
-  # check tasks
-  # TODO: check whether all tasks are present, local and remote
+  # check datasets
+  # TODO: check whether all datasets are present, local and remote
 
   # check methods
   testthat::expect_is(methods, "tbl")
@@ -218,11 +218,11 @@ benchmark_run_evaluation <- function(
   verbose
 ) {
   # fetch grid arguments
-  tid <- grid[grid_i,]$task_id
+  tid <- grid[grid_i,]$dataset_id
   pid <- grid[grid_i,]$paramset_id
 
-  # read task
-  task <- load_dataset(tid)
+  # read dataset
+  dataset <- load_dataset(tid)
 
   # get param set
   parm_df <- parms %>% filter(paramset_id == pid)
@@ -235,7 +235,7 @@ benchmark_run_evaluation <- function(
 
   # start evaluation
   out <- evaluate_ti_method(
-    tasks = task,
+    datasets = dataset,
     method = method,
     parameters = parm_list,
     metrics = metrics,
@@ -247,7 +247,7 @@ benchmark_run_evaluation <- function(
 
   # create summary
   bind_cols(
-    grid[grid_i,] %>% select(-task_id),
+    grid[grid_i,] %>% select(-dataset_id),
     tibble(
       grid_i,
       params_notrafo = list(parm_df),
@@ -286,7 +286,7 @@ benchmark_fetch_results <- function(local_output_folder) {
       metadata <- readr::read_rds(qsubhandle_file)
       grid <- metadata$grid
       qsub_handle <- metadata$qsub_handle
-      num_tasks <- qsub_handle$num_tasks
+      num_datasets <- qsub_handle$num_datasets
 
       # attempt to retrieve results; return NULL if job is still busy or has failed
       output <- qsub::qsub_retrieve(
@@ -310,12 +310,12 @@ benchmark_fetch_results <- function(local_output_folder) {
             out
 
           } else {
-            # if qacct is empty or the correct taskid cannot be found, then
+            # if qacct is empty or the correct datasetid cannot be found, then
             # this job never ran
-            if (is.null(qacct_out) || !any(qacct_out$taskid == grid_i)) {
+            if (is.null(qacct_out) || !any(qacct_out$datasetid == grid_i)) {
               qsub_error <- "Job cancelled by user"
             } else {
-              qacct_filt <- qacct_out %>% filter(taskid == grid_i) %>% arrange(desc(row_number_i)) %>% slice(1)
+              qacct_filt <- qacct_out %>% filter(datasetid == grid_i) %>% arrange(desc(row_number_i)) %>% slice(1)
 
               qacct_memory <- qacct_filt$maxvmem %>% str_replace("GB$", "") %>% as.numeric
               qacct_exit_status <- qacct_filt$exit_status %>% str_replace(" +", " ")

@@ -12,7 +12,7 @@ methods$inputs <- methods$ti_methods %>% map("run_fun") %>% map(formals)
 methods$par_set <- methods$ti_methods %>% map("par_set")
 
 get_input_expression <- function(inputs) {
-  possible_inputs <- c("expression", "counts", "task")
+  possible_inputs <- c("expression", "counts", "dataset")
   intersect(names(inputs), possible_inputs) %>% first()
 }
 methods$input_expression <- map_chr(methods$inputs, get_input_expression)
