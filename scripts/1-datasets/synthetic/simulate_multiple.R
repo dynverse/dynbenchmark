@@ -1,6 +1,6 @@
 source("scripts/0_common.R")
 
-paramsets <- readRDS(dataset_preproc_file("paramsets.rds"))
+paramsets <- readRDS(dataset_source_file("paramsets.rds"))
 
 params <- paramsets[[1]]
 params_i <- params$settings$params_i
@@ -8,7 +8,7 @@ params_i <- params$settings$params_i
 # Helper function to load in data (model, simulation, ...) from disk
 load_data <- function(load = character(), params_i = 1) {
   map(load, function(id) {
-    readRDS(dataset_preproc_file(glue::glue("{params_i}_{id}.rds")))
+    readRDS(dataset_source_file(glue::glue("{params_i}_{id}.rds")))
   }) %>% set_names(load)
 }
 
@@ -47,7 +47,7 @@ qsub_packages <- c("tidyverse", "dynbenchmark", "dyngen")
 generate_wrapper <- function(func, output_file, ncores) {
   function(params) {
     prepare_environment(ncores = ncores)
-    if (!file.exists(dataset_preproc_file(glue::glue("{params$settings$params_i}_{output_file}")))) {
+    if (!file.exists(dataset_source_file(glue::glue("{params$settings$params_i}_{output_file}")))) {
       func(params)
     } else {
       TRUE
@@ -89,18 +89,18 @@ run_cluster(generate_experiment, "experiment.rds", 1, paramsets, qsub_config_sin
 normalise_handle <- run_cluster(normalise, "normalisation.rds", 1, paramsets, qsub_config_single)
 run_cluster(plot_goldstandard, "gs_plot.rds", 1, paramsets, qsub_config_single %>% list_modify(memory = "20G"))
 run_cluster(plot_experiment, "experiment_plot.pdf", 1, paramsets, qsub_config_single)
-wrap_handle <- run_cluster(wrap, "task.rds", 1, paramsets, qsub_config_single %>% list_modify(memory = "20G"))
+wrap_handle <- run_cluster(wrap, "dataset.rds", 1, paramsets, qsub_config_single %>% list_modify(memory = "20G"))
 
 result <- qsub_retrieve(normalise_handle)
 result
 
-## Group tasks
-tasks <- list.files(dataset_preproc_file(), "*task.rds", full.names = T) %>% sort() %>% map(readRDS) %>% dynutils::list_as_tibble()
-tasks <- tasks %>% filter(map(settings, "platform_name") != "small")
+## Group datasets
+datasets <- list.files(dataset_source_file(), "*dataset.rds", full.names = T) %>% sort() %>% map(readRDS) %>% dynutils::list_as_tibble()
+datasets <- datasets %>% filter(map(settings, "platform_name") != "small")
 
-write_rds(tasks, dataset_file("tasks.rds"))
+write_rds(datasets, dataset_file("datasets.rds"))
 
 
-qsub:::rsync_remote("prism", paste0("/group/irc/shared/dynbenchmark", dataset_file(relative = T), "tasks.rds"), "", dataset_file())
+qsub:::rsync_remote("prism", paste0("/group/irc/shared/dynbenchmark", dataset_file(relative = T), "datasets.rds"), "", dataset_file())
 
-tasks$trajectory_type %>% table()
+datasets$trajectory_type %>% table()

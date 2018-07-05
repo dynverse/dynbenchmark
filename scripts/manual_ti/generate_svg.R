@@ -6,7 +6,7 @@ library(dynbenchmark)
 experiment("manual_ti")
 
 # load in all datasets
-tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
+datasets <- read_rds(derived_file("datasets.rds", "2-dataset_characterisation"))
 
 run <- lst(
   dimred_id = "dp",
@@ -19,14 +19,14 @@ run <- lst(
 if(file.exists(derived_file(paste0(run$run_id, ".rds")))) {
   run2 <- read_rds(derived_file(paste0(run$run_id, ".rds")))
 
-  previous_task_ids <- run2$spaces %>% pull(id)
-  new_task_ids <- tasks$id[!(tasks$id %in% previous_task_ids)]
+  previous_dataset_ids <- run2$spaces %>% pull(id)
+  new_dataset_ids <- datasets$id[!(datasets$id %in% previous_dataset_ids)]
 
   print("Previous run found, using previous ordering (plus extra datasets)")
-  selected_tasks <- tasks %>% slice(match(c(previous_task_ids, new_task_ids), id))
+  selected_datasets <- datasets %>% slice(match(c(previous_dataset_ids, new_dataset_ids), id))
 } else {
   set.seed(run$seed)
-  selected_tasks <- tasks %>% arrange(sample(n()))
+  selected_datasets <- datasets %>% arrange(sample(n()))
 }
 
 ##  ............................................................................
@@ -46,22 +46,22 @@ load <- function(x) {
   }
 }
 
-spaces <- map(seq_len(nrow(selected_tasks)), function(task_i) {
-  # task <- extract_row_to_list(tasks %>% filter(category == "real"), 21)
-  task <- extract_row_to_list(selected_tasks, task_i)
-  print(task$id)
+spaces <- map(seq_len(nrow(selected_datasets)), function(dataset_i) {
+  # dataset <- extract_row_to_list(datasets %>% filter(category == "real"), 21)
+  dataset <- extract_row_to_list(selected_datasets, dataset_i)
+  print(dataset$id)
 
-  task$expression <- load(task$expression)
+  dataset$expression <- load(dataset$expression)
 
   plots <- list()
 
   set.seed(run$seed)
-  if (task$task_group == "control") {
-    space <- task$space
+  if (dataset$dataset_group == "control") {
+    space <- dataset$space
   } else {
     space <- tryCatch(
-      {dimred_function(task$expression)},
-      error = function(x) dimred_pca(task$expression)
+      {dimred_function(dataset$expression)},
+      error = function(x) dimred_pca(dataset$expression)
     )
     space <- space %>% as.data.frame() %>% tibble::rownames_to_column("cell_id")
   }
@@ -74,8 +74,8 @@ spaces <- map(seq_len(nrow(selected_tasks)), function(task_i) {
 
   tibble(
     plot = list(plot),
-    id = task$id,
-    task_id = task$id,
+    id = dataset$id,
+    dataset_id = dataset$id,
     x_scale = max(space$Comp1) - min(space$Comp1),
     y_scale = max(space$Comp2) - min(space$Comp2),
     x_shift = min(space$Comp1),

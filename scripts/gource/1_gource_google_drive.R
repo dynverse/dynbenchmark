@@ -33,7 +33,7 @@ links <- tribble(
   "dynverse_ideas", "https://docs.google.com/document/d/18PuTgnpUtbGwZvbTyiTsJQCaGRXratjbmsjv9JsnYUc/edit",
   "manuscript_v0", "https://docs.google.com/document/d/1DNuhEHJR03yT8yaAXHc8LYpV7EJDOMOTMdGl76J3zLg/edit",
   "real_datasets", "https://docs.google.com/spreadsheets/d/1SALZ2jt7TZJQJMEvvOwSR2r5yIl50qcGAZ-K5AC4DJo/edit#gid=0",
-  "hypotheses_and_tasks", "https://docs.google.com/spreadsheets/d/13jHFuMwie7oIxGcyLO95-onFri4M_GJjqgMEUnZliQI/edit#gid=0",
+  "hypotheses_and_datasets", "https://docs.google.com/spreadsheets/d/13jHFuMwie7oIxGcyLO95-onFri4M_GJjqgMEUnZliQI/edit#gid=0",
   "trajectory_inference_methods_public", "https://docs.google.com/spreadsheets/d/1xeRtfa4NZR-FBZOosPv6nY-alfoGE1ZCEP2ceQg6GH0/edit?usp=drive_web&ouid=105833423392613772145",
   "trajectory_inference_methods_private", "https://docs.google.com/spreadsheets/d/1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE/edit?usp=drive_web&ouid=105833423392613772145",
   "manuscript_v1_overview", "https://docs.google.com/document/d/12xrM1GDq4Lk3mHHQzazgL5eYq7yttrKFtUakgU2AvGs/edit",

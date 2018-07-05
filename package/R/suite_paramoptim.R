@@ -1,6 +1,6 @@
 #' A parameter optimisation suite
 #'
-#' @param task_ids The ids of the tasks to be used in the evaluation.
+#' @param dataset_ids The ids of the datasets to be used in the evaluation.
 #' @param methods A tibble of TI methods to use, see \code{\link[dynwrap]{get_ti_methods}}.
 #' @param timeout_paramoptim The parameter optimisation timeout
 #' @param max_memory_per_core The maximum amount of memory each core is allowed to use
@@ -27,7 +27,7 @@
 #'
 #' @export
 paramoptim_submit <- function(
-  task_ids,
+  dataset_ids,
   methods,
   timeout_paramoptim,
   max_memory_per_core,
@@ -44,7 +44,7 @@ paramoptim_submit <- function(
   requireNamespace("qsub")
 
   paramoptim_submit_check(
-    task_ids,
+    dataset_ids,
     methods,
     timeout_paramoptim,
     max_memory_per_core,
@@ -117,7 +117,7 @@ paramoptim_submit <- function(
     if (!file.exists(output_file) && !file.exists(qsubhandle_file)) {
       cat("Submitting ", method$name, "\n", sep = "")
 
-      ## create a grid for each of the tasks, paramsets, and repeats
+      ## create a grid for each of the datasets, paramsets, and repeats
       grid <- crossing(
         repeat_i = seq_len(num_repeats)
       )
@@ -142,7 +142,7 @@ paramoptim_submit <- function(
       # which data objects will need to be transferred to the cluster
       qsub_environment <-  c(
         "grid", "remote_output_folder", "method", "metrics", "verbose",
-        "num_cores", "control", "learner", "design", "task_ids"
+        "num_cores", "control", "learner", "design", "dataset_ids"
       )
 
       # submit to the cluster
@@ -159,7 +159,7 @@ paramoptim_submit <- function(
       metadata <- lst(
         local_output_folder,
         remote_output_folder,
-        task_ids,
+        dataset_ids,
         method,
         timeout_paramoptim,
         max_memory_per_core,
@@ -188,7 +188,7 @@ paramoptim_submit <- function(
 #' @importFrom testthat expect_equal expect_is
 #' @importFrom ParamHelpers dfRowToList
 paramoptim_submit_check <- function(
-  task_ids,
+  dataset_ids,
   methods,
   timeout_paramoptim,
   max_memory_per_core,
@@ -201,8 +201,8 @@ paramoptim_submit_check <- function(
   execute_before,
   verbose
 ) {
-  # check tasks
-  # TODO: check whether all tasks are present, local and remote
+  # check datasets
+  # TODO: check whether all datasets are present, local and remote
 
   # check methods
   testthat::expect_is(methods, "tbl")
@@ -224,7 +224,7 @@ paramoptim_qsub_fun <- function(grid_i) {
   paramoptim_run_optimisation(
     grid,
     grid_i,
-    task_ids,
+    dataset_ids,
     control,
     learner,
     design,
@@ -243,7 +243,7 @@ paramoptim_qsub_fun <- function(grid_i) {
 paramoptim_run_optimisation <- function(
   grid,
   grid_i,
-  task_ids,
+  dataset_ids,
   control,
   learner,
   design,
@@ -255,8 +255,8 @@ paramoptim_run_optimisation <- function(
   # configure mlr
   mlr::configureMlr(show.learner.output = FALSE, on.learner.warning = "warn")
 
-  # read tasks
-  tasks <- map(task_ids, load_dataset) %>% list_as_tibble()
+  # read datasets
+  datasets <- map(dataset_ids, load_dataset) %>% list_as_tibble()
 
   # create an objective function
   obj_fun <- make_obj_fun(method = method, metrics = metrics, extra_metrics = NULL, verbose = verbose)
@@ -281,7 +281,7 @@ paramoptim_run_optimisation <- function(
     control = control_train,
     show.info = TRUE,
     more.args = list(
-      tasks = tasks,
+      datasets = datasets,
       output_model = FALSE
     )
   )
@@ -318,7 +318,7 @@ paramoptim_fetch_results <- function(local_output_folder) {
       metadata <- readr::read_rds(qsubhandle_file)
       grid <- metadata$grid
       qsub_handle <- metadata$qsub_handle
-      num_tasks <- qsub_handle$num_tasks
+      num_datasets <- qsub_handle$num_datasets
 
       # attempt to retrieve results; return NULL if job is still busy or has failed
       output <- qsub::qsub_retrieve(
@@ -327,7 +327,7 @@ paramoptim_fetch_results <- function(local_output_folder) {
       )
 
       ## Create summary from the last saved states
-      summary <- map_df(seq_len(num_tasks), function(grid_i) {
+      summary <- map_df(seq_len(num_datasets), function(grid_i) {
         file <- paste0(qsub_handle$src_dir, "/mlrmbo/mlr_progress_", grid_i, ".RData")
 
         if (file.exists(file)) {
@@ -427,9 +427,9 @@ make_obj_fun <- function(method, metrics, extra_metrics, noisy = FALSE, verbose 
     noisy = noisy,
     has.simple.signature = FALSE,
     par.set = method$par_set,
-    fn = function(x, tasks, output_model, mc_cores = 1) {
+    fn = function(x, datasets, output_model, mc_cores = 1) {
       evaluate_ti_method(
-        tasks = tasks,
+        datasets = datasets,
         method = method,
         parameters = x,
         metrics = metrics,

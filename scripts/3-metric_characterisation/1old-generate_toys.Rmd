@@ -81,7 +81,7 @@ toys$toy <- toys %>% split(seq_len(nrow(toys))) %>% parallel::mclapply(function(
 # toys$toy <- map2(toys$perturbator, toys$gs, ~.x(.y))
 toys$toy <- map2(toys$toy, toys$toy_id, ~rename_toy(.x, .y))
 
-toys$gs_grouped <- parallel::mclapply(toys$gs, group_task, mc.cores=8)
+toys$gs_grouped <- parallel::mclapply(toys$gs, group_dataset, mc.cores=8)
 
 # plot toys
 toyplots <- toys %>% group_by(toy_category) %>% filter(row_number()==1) %>%

@@ -4,13 +4,13 @@
 \alias{paramoptim_submit}
 \title{A parameter optimisation suite}
 \usage{
-paramoptim_submit(task_ids, methods, timeout_paramoptim, max_memory_per_core,
+paramoptim_submit(dataset_ids, methods, timeout_paramoptim, max_memory_per_core,
   num_cores, metrics, num_repeats, num_iterations, num_init_params,
   local_output_folder, remote_output_folder, execute_before = NULL,
   verbose = FALSE)
 }
 \arguments{
-\item{task_ids}{The ids of the tasks to be used in the evaluation.}
+\item{dataset_ids}{The ids of the datasets to be used in the evaluation.}
 
 \item{methods}{A tibble of TI methods to use, see \code{\link[dynwrap]{get_ti_methods}}.}
 

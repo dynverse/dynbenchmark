@@ -10,9 +10,9 @@ eval_param_config <- read_rds(derived_file("config.rds", "5-optimise_parameters/
 # read param eval results
 eval_param_outputs <- read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_parameters/3-evaluate_parameters"))
 
-# read tasks
-tasks <- map_df(
-  paste0(eval_param_config$local_tasks_folder, "/", eval_param_config$task_ids, ".rds"),
+# read datasets
+datasets <- map_df(
+  paste0(eval_param_config$local_datasets_folder, "/", eval_param_config$dataset_ids, ".rds"),
   function(file_path) {
     read_rds(file_path) %>% mutate(ncell = nrow(expression[[1]]), nfeat = ncol(expression[[1]]))
   }
@@ -32,7 +32,7 @@ qc_application_scores <- read_rds(derived_file("implementation_qc_application_sc
 ## START GATHERING COLUMNS
 part_overall_mean <-
   eval_param_outputs$outputs_summtrajtype_totalsx2 %>%
-  filter(trajectory_type == "overall", task_source == "mean") %>%
+  filter(trajectory_type == "overall", dataset_source == "mean") %>%
   select(
     method_short_name, harm_mean, norm_correlation, norm_edge_flip, norm_rf_mse, time_method, rank_time_method,
     num_files_created, num_setseed_calls, pct_errored, pct_time_exceeded, pct_memory_exceeded, pct_allerrored, pct_stochastic
@@ -41,15 +41,15 @@ part_overall_mean <-
 
 part_sources <-
   eval_param_outputs$outputs_summtrajtype_totalsx2 %>%
-  filter(trajectory_type == "overall", task_source != "mean") %>%
-  select(method_short_name, task_source, harm_mean) %>%
-  mutate(task_source = paste0("source_", task_source)) %>%
-  spread(task_source, harm_mean) %>%
+  filter(trajectory_type == "overall", dataset_source != "mean") %>%
+  select(method_short_name, dataset_source, harm_mean) %>%
+  mutate(dataset_source = paste0("source_", dataset_source)) %>%
+  spread(dataset_source, harm_mean) %>%
   mutate(overall_source = apply(.[,colnames(.)[grepl("^source_", colnames(.))]], 1, mean))
 
 part_trajtypes <-
   eval_param_outputs$outputs_summtrajtype_totalsx2 %>%
-  filter(trajectory_type != "overall", task_source == "mean") %>%
+  filter(trajectory_type != "overall", dataset_source == "mean") %>%
   select(method_short_name, trajectory_type, harm_mean) %>%
   mutate(trajectory_type = paste0("trajtype_", trajectory_type)) %>%
   spread(trajectory_type, harm_mean) %>%

@@ -13,38 +13,38 @@ benchmark_fetch_results(derived_file("suite/"))
 # bind results in one data frame (without models)
 outputs <- benchmark_bind_results(derived_file("suite/"), load_models = FALSE)
 
-# load tasks info
+# load datasets info
 not_list <- function(x) !is.list(x)
 list2env(read_rds(derived_file("config.rds")), environment())
-tasks_info <- map_df(
-  paste0(local_tasks_folder, "/", task_ids, ".rds"),
+datasets_info <- map_df(
+  paste0(local_datasets_folder, "/", dataset_ids, ".rds"),
   ~ read_rds(.) %>% select_if(not_list)
 )
-write_rds(tasks_info, result_file("tasks_info.rds"))
+write_rds(datasets_info, result_file("datasets_info.rds"))
 
 # collect relevant trajectory types
 trajtypes <-
   dynbenchmark::trajectory_types %>%
-  filter(id %in% unique(tasks_info$trajectory_type)) %>%
+  filter(id %in% unique(datasets_info$trajectory_type)) %>%
   add_row(id = "overall", directedness = "directed", color = "#AAAAAA", background_color = "E6A1A1", .before = 1)
 
-# print task errors
-task_errors <- outputs %>%
-  filter(is.na(task_id)) %>%
+# print dataset errors
+dataset_errors <- outputs %>%
+  filter(is.na(dataset_id)) %>%
   mutate(error_message = str_sub(error_message, -600, -1)) %>%
   group_by(method_name, error_message) %>%
   summarise(n = n()) %>%
   ungroup()
 
-print(task_errors)
-write_tsv(task_errors, derived_file("errors_qsub.tsv"))
+print(dataset_errors)
+write_tsv(dataset_errors, derived_file("errors_qsub.tsv"))
 
 # print job errors
 job_errors <- outputs %>%
-  filter(error_message != "", !is.na(task_id)) %>%
+  filter(error_message != "", !is.na(dataset_id)) %>%
   mutate(error_message = str_sub(error_message, -600, -1)) %>%
   group_by(method_name, error_message) %>%
-  summarise(n = n(), example = task_id[[1]]) %>%
+  summarise(n = n(), example = dataset_id[[1]]) %>%
   ungroup() %>%
   arrange(desc(n))
 
@@ -55,8 +55,8 @@ job_errors %>% filter(error_message %in% c("Memory limit exceeded"))
 job_errors %>% filter(error_message %in% c("Time limit exceeded"))
 job_errors %>% group_by(method_name) %>% summarise(n = sum(n), example = example[[1]]) %>% arrange(desc(n))
 
-required_outputs <- length(task_ids) * num_repeats
-outputs %>% filter(!is.na(task_id)) %>% group_by(method_name) %>% summarise(n = n()) %>% filter(n != required_outputs) %>% mutate(pass = n > .9 * required_outputs)
+required_outputs <- length(dataset_ids) * num_repeats
+outputs %>% filter(!is.na(dataset_id)) %>% group_by(method_name) %>% summarise(n = n()) %>% filter(n != required_outputs) %>% mutate(pass = n > .9 * required_outputs)
 
 ###################################################
 ############### CREATE AGGREGATIONS ###############
@@ -67,7 +67,7 @@ outputs %>% filter(!is.na(task_id)) %>% group_by(method_name) %>% summarise(n = 
 outputs <- outputs %>% filter(!method_short_name %in% c("scorspar", "identity", "shuffle"))
 
 # filter disconnected as there is only 1 dataset
-outputs <- outputs %>% filter(task_id != "real/blastocyst-monkey_nakamura")
+outputs <- outputs %>% filter(dataset_id != "real/blastocyst-monkey_nakamura")
 trajtypes <- trajtypes %>% filter(id != "disconnected_directed_graph")
 
 
@@ -100,8 +100,8 @@ scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = TRUE) {
 trafo_fun <- scalesigmoid_trafo
 
 outputs_ind <- outputs %>%
-  left_join(tasks_info %>% select(task_id = id, trajectory_type, task_source), by = "task_id") %>%
-  filter(task_source != "toy") %>%
+  left_join(datasets_info %>% select(dataset_id = id, trajectory_type, dataset_source), by = "dataset_id") %>%
+  filter(dataset_source != "toy") %>%
   mutate(
     rf_mse_inv = 1 - rf_mse,
     error_message_int = error_message_interpret(error_message),
@@ -113,7 +113,7 @@ outputs_ind <- outputs %>%
     prior_str = sapply(prior_df, function(prdf) ifelse(is.null(prdf) || nrow(prdf) == 0, "", paste(prdf$prior_names, collapse = ";"))),
     trajectory_type_f = factor(trajectory_type, levels = trajtypes$id)
   ) %>%
-  group_by(task_id) %>%
+  group_by(dataset_id) %>%
   mutate(
     norm_correlation = trafo_fun(correlation),
     norm_edge_flip = trafo_fun(edge_flip),
@@ -125,7 +125,7 @@ outputs_ind <- outputs %>%
 
 # aggregate over replicates
 outputs_summrepl <- outputs_ind %>%
-  group_by(method_name, method_short_name, task_id, paramset_id, trajectory_type, task_source, prior_str, trajectory_type_f) %>%
+  group_by(method_name, method_short_name, dataset_id, paramset_id, trajectory_type, dataset_source, prior_str, trajectory_type_f) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
   mutate(
@@ -136,7 +136,7 @@ outputs_summrepl <- outputs_ind %>%
 
 # process trajtype grouped evaluation
 outputs_summtrajtype <- outputs_summrepl %>%
-  group_by(method_name, method_short_name, task_source, paramset_id, trajectory_type, trajectory_type_f) %>%
+  group_by(method_name, method_short_name, dataset_source, paramset_id, trajectory_type, trajectory_type_f) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
@@ -146,7 +146,7 @@ outputs_summtrajtype <- outputs_summrepl %>%
 
 # process overall evaluation
 outputs_summmethod <- outputs_summtrajtype %>%
-  group_by(method_name, method_short_name, task_source, paramset_id) %>%
+  group_by(method_name, method_short_name, dataset_source, paramset_id) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
@@ -161,7 +161,7 @@ outputs_summtrajtype_totals <- bind_rows(
     group_by(method_name, method_short_name, paramset_id, trajectory_type, trajectory_type_f) %>%
     summarise_if(is.numeric, mean) %>%
     ungroup() %>%
-    mutate(task_source = "mean")
+    mutate(dataset_source = "mean")
 ) %>%
   mutate(
     harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)
@@ -175,7 +175,7 @@ outputs_summmethod_totals <-
       group_by(method_name, method_short_name, paramset_id) %>%
       summarise_if(is.numeric, mean) %>%
       ungroup() %>%
-      mutate(task_source = "mean")
+      mutate(dataset_source = "mean")
   ) %>%
   mutate(
     harm_mean = apply(cbind(norm_correlation, norm_edge_flip, norm_rf_mse), 1, psych::harmonic.mean)

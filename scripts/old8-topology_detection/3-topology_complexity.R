@@ -48,16 +48,16 @@ calculate_statistics <- function(milestone_network) {
 # determine top methods
 read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
-# load config and tasks
+# load config and datasets
 config <- read_rds(derived_file("config.rds", "5-optimise_parameters/3-evaluate_parameters"))
-tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation")) %>% mutate(task_id = id)
-tasks$trajectory_type <- map(tasks$milestone_network, dynwrap::classify_milestone_network) %>% map_chr("network_type")
-tasks <- bind_cols(tasks, map_df(tasks$milestone_network, calculate_statistics))
+datasets <- read_rds(derived_file("datasets.rds", "2-dataset_characterisation")) %>% mutate(dataset_id = id)
+datasets$trajectory_type <- map(datasets$milestone_network, dynwrap::classify_milestone_network) %>% map_chr("network_type")
+datasets <- bind_cols(datasets, map_df(datasets$milestone_network, calculate_statistics))
 
 filter_errored_trajectory_types <- function(x) {
   map_chr(x, ~ifelse(is.null(.), "unknown", .))
 }
-trajectory_types_simplified_order <- intersect(trajectory_types_simplified$simplified, simplify_trajectory_type(tasks %>% filter(task_id %in% config$task_ids) %>% pull(trajectory_type)))
+trajectory_types_simplified_order <- intersect(trajectory_types_simplified$simplified, simplify_trajectory_type(datasets %>% filter(dataset_id %in% config$dataset_ids) %>% pull(trajectory_type)))
 
 
 #   ____________________________________________________________________________
@@ -70,17 +70,17 @@ milestone_networks <- pbapply::pblapply(cl = 4, method_order[1:5], function(meth
 
   output_models <- bind_cols(output_models, map_df(output_models$milestone_network, calculate_statistics))
 
-  tasks_oi <- tasks %>% slice(match(ind_scores_oi$task_id, task_id))
+  datasets_oi <- datasets %>% slice(match(ind_scores_oi$dataset_id, dataset_id))
 
   milestone_networks <- output_models %>%
     select(milestone_network, trajectory_type, n_edges, n_milestones, complexity) %>%
     rename_all(~paste0(., "_predicted")) %>%
-    mutate(task_id = ind_scores_oi$task_id) %>%
+    mutate(dataset_id = ind_scores_oi$dataset_id) %>%
     left_join(
-      tasks %>%
-        select(task_id, milestone_network, trajectory_type, n_edges, n_milestones, complexity) %>%
-        rename_at(vars(-task_id), ~paste0(., "_gold")),
-      "task_id"
+      datasets %>%
+        select(dataset_id, milestone_network, trajectory_type, n_edges, n_milestones, complexity) %>%
+        rename_at(vars(-dataset_id), ~paste0(., "_gold")),
+      "dataset_id"
     ) %>%
     mutate(trajectory_type_predicted = filter_errored_trajectory_types(trajectory_type_predicted)) %>%
     mutate(method_id = method_id)

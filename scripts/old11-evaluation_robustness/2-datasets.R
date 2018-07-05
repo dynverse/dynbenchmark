@@ -6,7 +6,7 @@ experiment("11-evaluation_robustness")
 
 read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
-tasks <- read_rds(derived_file("tasks.rds", "2-dataset_characterisation"))
+datasets <- read_rds(derived_file("datasets.rds", "2-dataset_characterisation"))
 
 source("analysis/analyses/11-evaluation_robustness/functions_rank_methods.R")
 method_scores <- rank_methods(ind_scores)
@@ -20,18 +20,18 @@ ymax <- max(indrep_scores$harm_mean)
 performance_datasets_variability <- indrep_scores %>%
   mutate(method_short_name = factor(method_short_name, (method_order))) %>%
   ggplot(aes(method_short_name, harm_mean)) +
-    ggbeeswarm::geom_quasirandom(aes(color = task_source)) +
+    ggbeeswarm::geom_quasirandom(aes(color = dataset_source)) +
     # geom_boxplot(outlier.size = 0.5) +
     geom_point(
-      aes(color = task_source),
-      data = method_scores %>% mutate(task_source = "mean") %>% mutate(method_short_name = factor(method_short_name, (method_order))),
+      aes(color = dataset_source),
+      data = method_scores %>% mutate(dataset_source = "mean") %>% mutate(method_short_name = factor(method_short_name, (method_order))),
       size = 4,
       alpha = 0.8
     ) +
     # geom_point(data = method_scores, shape = 15, size = 4) +
     scale_y_continuous(label_long("overall_performance_on_dataset"), expand = c(0, 0.01)) +
     scale_x_discrete("", label = method_names) +
-    scale_color_manual(label_long("task_source"), values = c(mean = "black", synthetic = "#39CCCC", real = "#FF4136"), label = label_long) +
+    scale_color_manual(label_long("dataset_source"), values = c(mean = "black", synthetic = "#39CCCC", real = "#FF4136"), label = label_long) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "right", legend.justification = "center")
 performance_datasets_variability
 
@@ -133,89 +133,89 @@ write_rds(performance_dataset_variability_combined, figure_file("performance_dat
 ##  Subsample datasets                                                      ####
 
 # subsample datasets, calculate overall benchmark score
-all_task_ids <- unique(ind_scores$task_id)
+all_dataset_ids <- unique(ind_scores$dataset_id)
 
 n_samples <- 10
-task_sample_scores <- pbapply::pblapply(cl = 8, 1:length(all_task_ids), function(n_tasks) {
-  map(1:n_samples, function(tasks_sample_i) {
-    task_ids <- sample(all_task_ids, n_tasks)
+dataset_sample_scores <- pbapply::pblapply(cl = 8, 1:length(all_dataset_ids), function(n_datasets) {
+  map(1:n_samples, function(datasets_sample_i) {
+    dataset_ids <- sample(all_dataset_ids, n_datasets)
     method_scores <- rank_methods(
-      ind_scores %>% filter(task_id %in% task_ids)
+      ind_scores %>% filter(dataset_id %in% dataset_ids)
     ) %>%
-      mutate(n_tasks = n_tasks, tasks_sample_i = tasks_sample_i)
+      mutate(n_datasets = n_datasets, datasets_sample_i = datasets_sample_i)
   }) %>% bind_rows()
 }) %>% bind_rows()
 
 # plot harm mean correlations across subsamples
-task_sample_correlations <- task_sample_scores %>%
-  group_by(n_tasks, tasks_sample_i) %>%
+dataset_sample_correlations <- dataset_sample_scores %>%
+  group_by(n_datasets, datasets_sample_i) %>%
   slice(match(method_scores$method_short_name, method_short_name)) %>%
   do(cor = cor(.$overall_benchmark, method_scores$overall_benchmark, method = "spearman")) %>%
   ungroup() %>%
   mutate(cor = unlist(cor)) %>%
-  mutate(n_tasks_perc = n_tasks / length(all_task_ids))
-write_rds(task_sample_correlations, result_file("task_sample_correlations.rds"))
+  mutate(n_datasets_perc = n_datasets / length(all_dataset_ids))
+write_rds(dataset_sample_correlations, result_file("dataset_sample_correlations.rds"))
 
-task_sample_correlations_boxplot <- task_sample_correlations %>%
-  ggplot(aes(n_tasks, cor, group = n_tasks)) +
+dataset_sample_correlations_boxplot <- dataset_sample_correlations %>%
+  ggplot(aes(n_datasets, cor, group = n_datasets)) +
     geom_boxplot() +
     geom_hline(yintercept = 1) +
     scale_y_continuous(label_long("correlation_between_method_ordering"), expand = c(0, 0), limits = c(0,1)) +
-    scale_x_continuous(label_long("n_datasets"), expand = c(0, 0), breaks = c(1, seq(10, length(all_task_ids)-10, 10), length(all_task_ids)))
-task_sample_correlations_boxplot
+    scale_x_continuous(label_long("n_datasets"), expand = c(0, 0), breaks = c(1, seq(10, length(all_dataset_ids)-10, 10), length(all_dataset_ids)))
+dataset_sample_correlations_boxplot
 
 # calculate rank variability of each method
-task_sample_ranks <- task_sample_scores %>%
-  group_by(n_tasks, tasks_sample_i) %>%
+dataset_sample_ranks <- dataset_sample_scores %>%
+  group_by(n_datasets, datasets_sample_i) %>%
   mutate(harm_mean_rank = rank(-harm_mean)) %>%
   ungroup()
 
-task_sample_ranks_match <- task_sample_ranks %>%
-  group_by(method_short_name, n_tasks) %>%
+dataset_sample_ranks_match <- dataset_sample_ranks %>%
+  group_by(method_short_name, n_datasets) %>%
   summarise(rank_match = mean(harm_mean_rank == match(method_short_name, method_order)))
-write_rds(task_sample_ranks_match, result_file("task_sample_ranks_match.rds"))
+write_rds(dataset_sample_ranks_match, result_file("dataset_sample_ranks_match.rds"))
 
-task_sample_ranks_match %>%
+dataset_sample_ranks_match %>%
   ggplot() +
-    geom_line(aes(n_tasks, rank_match, color = method_short_name))
+    geom_line(aes(n_datasets, rank_match, color = method_short_name))
 
 # calculate n times a method is in the top
-task_sample_n_top <- task_sample_ranks %>%
-  group_by(n_tasks, method_short_name) %>%
+dataset_sample_n_top <- dataset_sample_ranks %>%
+  group_by(n_datasets, method_short_name) %>%
   summarise(n_top = sum(harm_mean_rank == 1)) %>%
   mutate(method_short_name = factor(method_short_name, method_order)) %>%
   ungroup()
 
-task_sample_n_top %>%
-  filter(n_tasks <= 10) %>%
+dataset_sample_n_top %>%
+  filter(n_datasets <= 10) %>%
   ggplot(aes(method_short_name, n_top)) +
     geom_bar(stat = "identity")
 
 # calculate the maximal subset of datasets at which a method is top
 # this is based on subsampling, see beneath for a smarter method
-task_sample_max_tasks_top <- task_sample_n_top %>%
+dataset_sample_max_datasets_top <- dataset_sample_n_top %>%
   filter(n_top > 1) %>%
   group_by(method_short_name) %>%
-  summarise(max_n_tasks_top = max(n_tasks)) %>%
-  complete(method_short_name, fill = list(max_n_tasks_top = 0))
+  summarise(max_n_datasets_top = max(n_datasets)) %>%
+  complete(method_short_name, fill = list(max_n_datasets_top = 0))
 
 
 
 ##  ............................................................................
 ##  Subset of datasets for which method is top                              ####
-all_task_ids <- unique(ind_scores$task_id)
+all_dataset_ids <- unique(ind_scores$dataset_id)
 
 indrep_scores <- indrep_scores %>%
-  group_by(task_id) %>%
+  group_by(dataset_id) %>%
   mutate(harm_mean_rank = rank(-harm_mean)) %>%
   ungroup()
 
 binary_scorer <- function(method_short_name) {
-  function(include_tasks) {
-    if(sum(include_tasks) == 0) {
+  function(include_datasets) {
+    if(sum(include_datasets) == 0) {
       length(method_order)
     } else {
-      rank_methods(ind_scores %>% filter(task_id %in% all_task_ids[include_tasks == 1])) %>%
+      rank_methods(ind_scores %>% filter(dataset_id %in% all_dataset_ids[include_datasets == 1])) %>%
         mutate(overall_benchmark_rank = rank(-overall_benchmark)) %>%
         filter(method_short_name == !!method_short_name) %>%
         pull(overall_benchmark_rank)
@@ -223,55 +223,55 @@ binary_scorer <- function(method_short_name) {
   }
 }
 
-task_sample_max_tasks_top <- pbapply::pblapply(cl = 8, method_scores$method_short_name, function(method_short_name) {
-  task_removal_order <- indrep_scores %>%
+dataset_sample_max_datasets_top <- pbapply::pblapply(cl = 8, method_scores$method_short_name, function(method_short_name) {
+  dataset_removal_order <- indrep_scores %>%
     filter(method_short_name == !!method_short_name) %>%
     arrange(-harm_mean_rank) %>%
-    pull(task_id)
+    pull(dataset_id)
 
   scorer <- binary_scorer(method_short_name)
 
-  include_tasks <- rep(TRUE, length(all_task_ids)) %>% set_names(all_task_ids)
-  rank <- scorer(include_tasks)
+  include_datasets <- rep(TRUE, length(all_dataset_ids)) %>% set_names(all_dataset_ids)
+  rank <- scorer(include_datasets)
 
   if (rank != 1) {
-    for(remove_task_id in task_removal_order) {
-      include_tasks[remove_task_id] <- FALSE
+    for(remove_dataset_id in dataset_removal_order) {
+      include_datasets[remove_dataset_id] <- FALSE
 
-      rank <- scorer(include_tasks)
+      rank <- scorer(include_datasets)
 
       if(rank == 1) {
         break
       }
     }
   }
-  tibble(method_short_name = method_short_name, max_n_tasks_top = sum(include_tasks), task_ids = list(names(include_tasks)[include_tasks]))
+  tibble(method_short_name = method_short_name, max_n_datasets_top = sum(include_datasets), dataset_ids = list(names(include_datasets)[include_datasets]))
 }) %>% bind_rows()
 
-task_sample_max_tasks_top <- task_sample_max_tasks_top %>% bind_rows()
+dataset_sample_max_datasets_top <- dataset_sample_max_datasets_top %>% bind_rows()
 
-write_rds(task_sample_max_tasks_top, result_file("task_sample_max_tasks_top.rds"))
-task_sample_max_tasks_top <- read_rds(result_file("task_sample_max_tasks_top.rds"))
+write_rds(dataset_sample_max_datasets_top, result_file("dataset_sample_max_datasets_top.rds"))
+dataset_sample_max_datasets_top <- read_rds(result_file("dataset_sample_max_datasets_top.rds"))
 
-task_sample_max_tasks_overview <- task_sample_max_tasks_top %>%
+dataset_sample_max_datasets_overview <- dataset_sample_max_datasets_top %>%
   mutate(method_short_name = factor(method_short_name, method_order)) %>%
-  ggplot(aes(method_short_name, max_n_tasks_top)) +
+  ggplot(aes(method_short_name, max_n_datasets_top)) +
     geom_bar(stat = "identity") +
-    geom_text(aes(label = max_n_tasks_top), vjust = 0) +
-    geom_hline(yintercept = length(all_task_ids), linetype = "dashed") +
-    geom_text(aes(y = length(all_task_ids), x = nrow(task_sample_max_tasks_top)), label = "All datasets", hjust = 1, vjust = 1.5, data = tibble()) +
+    geom_text(aes(label = max_n_datasets_top), vjust = 0) +
+    geom_hline(yintercept = length(all_dataset_ids), linetype = "dashed") +
+    geom_text(aes(y = length(all_dataset_ids), x = nrow(dataset_sample_max_datasets_top)), label = "All datasets", hjust = 1, vjust = 1.5, data = tibble()) +
     scale_x_discrete("", labels = method_names) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_y_continuous(label_short("largest_subset_of_datasets_at_which_method_ranks_first", 30), limits = c(0, length(all_task_ids)+10), expand = c(0, 0))
-task_sample_max_tasks_overview %>% write_rds(figure_file("task_sample_max_tasks_overview.rds"))
+    scale_y_continuous(label_short("largest_subset_of_datasets_at_which_method_ranks_first", 30), limits = c(0, length(all_dataset_ids)+10), expand = c(0, 0))
+dataset_sample_max_datasets_overview %>% write_rds(figure_file("dataset_sample_max_datasets_overview.rds"))
 
 
-task_sample_max_tasks_top_individual <- task_sample_max_tasks_top %>%
-  unnest(task_ids) %>%
-  rename(task_id = task_ids) %>%
-  left_join(tasks, c("task_id" = "id"))
+dataset_sample_max_datasets_top_individual <- dataset_sample_max_datasets_top %>%
+  unnest(dataset_ids) %>%
+  rename(dataset_id = dataset_ids) %>%
+  left_join(datasets, c("dataset_id" = "id"))
 
-task_sample_max_tasks_top_individual %>%
+dataset_sample_max_datasets_top_individual %>%
   mutate(method_short_name = factor(method_short_name, method_order)) %>%
   ggplot(aes(method_short_name, fill = trajectory_type)) +
     geom_bar() +
@@ -280,8 +280,8 @@ task_sample_max_tasks_top_individual %>%
 
 
 # GA
-# include_tasks <- rep(TRUE, length(all_task_ids))
-# result <- GA::ga("binary", binary_scorer("mfa"), nBits = length(all_task_ids), maxiter = 10, popSize = 1000)
+# include_datasets <- rep(TRUE, length(all_dataset_ids))
+# result <- GA::ga("binary", binary_scorer("mfa"), nBits = length(all_dataset_ids), maxiter = 10, popSize = 1000)
 
 
 
@@ -289,11 +289,11 @@ task_sample_max_tasks_top_individual %>%
 ##  ............................................................................
 ##  Dataset technology influence                                            ####
 method_scores_real <- outputs_list$outputs_summmethod_totals %>%
-  filter(task_source == "real") %>%
+  filter(dataset_source == "real") %>%
   rename(method_short_name = method_short_name)
-method_scores_technologies <- map(unique(tasks$technology) %>% discard(is.na), function(technology_id) {
+method_scores_technologies <- map(unique(datasets$technology) %>% discard(is.na), function(technology_id) {
   method_ranking <- ind_scores %>%
-    filter(task_id %in% tasks$task_id[tasks$technology == technology_id]) %>%
+    filter(dataset_id %in% datasets$dataset_id[datasets$technology == technology_id]) %>%
     rank_methods() %>%
     mutate(technology_id = technology_id)
 }) %>% bind_rows()

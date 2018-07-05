@@ -4,11 +4,30 @@ library(dynbenchmark)
 
 experiment("2-dataset_characterisation/2-real")
 
-# Fetch tasks
-tasks_real <- load_datasets() %>% filter(category == "real")
+# Fetch datasets
+datasets_real <- load_datasets() %>% filter(dataset_source == "real")
+
+
+
+dataset <- load_dataset("real/aging-hsc-old_kowalczyk")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Define colours
-technology_colours <- unique(tasks_real$technology) %>%
+technology_colours <- unique(datasets_real$technology) %>%
   setNames(RColorBrewer::brewer.pal(length(.), "Set1"), .)
 standard_colours <- c("gold" = "#ffeca9", "silver" = "#e3e3e3")
 
@@ -20,11 +39,11 @@ boxes <- cowplot::plot_grid(
   plotlist = map(
     c("technology", "organism", "standard","dynamic_process", "trajectory_type"),
     function(what) {
-      tasks <- tasks_real
-      tasks$variable_of_interest <- tasks[[what]]
+      datasets <- datasets_real
+      datasets$variable_of_interest <- datasets[[what]]
 
       # extract the variable and calculate the positions
-      pie_data <- tasks %>%
+      pie_data <- datasets %>%
         count(variable_of_interest) %>%
         arrange(n) %>%
         mutate(
@@ -71,11 +90,11 @@ pies <- cowplot::plot_grid(
   plotlist = map(
     c("technology", "trajectory_type"),
     function(what) {
-      tasks <- tasks_real
-      tasks$variable_of_interest <- tasks[[what]]
+      datasets <- datasets_real
+      datasets$variable_of_interest <- datasets[[what]]
 
       # first extract the variable
-      pie_data <- tasks %>%
+      pie_data <- datasets %>%
         count(variable_of_interest) %>%
         arrange(n)
 
@@ -148,7 +167,7 @@ dotplots <- cowplot::plot_grid(
         x_scale <- scale_x_date(label_long(what), limits = limits, date_breaks = "1 year", date_labels = "%Y")
       }
 
-      ggplot(tasks_real, aes_string(what, fill = "technology", color = "technology")) +
+      ggplot(datasets_real, aes_string(what, fill = "technology", color = "technology")) +
         geom_dotplot(
           binwidth = as.numeric(max(limits) - min(limits)) / nbins,
           method = "histodot",
@@ -193,7 +212,7 @@ grouper <- list(
 library(kableExtra)
 
 table <- map(c("latex", "html"), function(format) {
-  table <- tasks_real %>%
+  table <- datasets_real %>%
     select(date, gse, organism, technology, id, trajectory_type, standard, standard_determination, n_cells, n_genes) %>%
     arrange(date) %>%
     select(-date) %>%
@@ -260,10 +279,10 @@ label_dataset <- function(x) {
     label_capitalise()
 }
 
-plots <- seq_len(nrow(tasks_real)) %>% map(function(task_i) {
-  task <- dynutils::extract_row_to_list(tasks_real, task_i)
+plots <- seq_len(nrow(datasets_real)) %>% map(function(dataset_i) {
+  dataset <- dynutils::extract_row_to_list(datasets_real, dataset_i)
 
-  plot_topology(task)
+  plot_topology(dataset)
 })
 cowplot::plot_grid(plotlist = plots[1:10], ncol = 5)
 

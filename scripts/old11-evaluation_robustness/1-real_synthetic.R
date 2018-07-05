@@ -11,15 +11,15 @@ read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggr
 
 # create trajectory type
 trajtype_source_scores <- trajtype_scores %>%
-  filter(task_source %in% c("real", "synthetic")) %>%
-  select(method_short_name, trajectory_type, task_source, harm_mean) %>%
-  spread("task_source", "harm_mean") %>%
+  filter(dataset_source %in% c("real", "synthetic")) %>%
+  select(method_short_name, trajectory_type, dataset_source, harm_mean) %>%
+  spread("dataset_source", "harm_mean") %>%
   drop_na()
 
 # create overall
 source_scores <- source_scores %>%
-  select(method_short_name, task_source, harm_mean) %>%
-  spread("task_source", "harm_mean") %>%
+  select(method_short_name, dataset_source, harm_mean) %>%
+  spread("dataset_source", "harm_mean") %>%
   drop_na() %>%
   mutate(trajectory_type = "overall")
 

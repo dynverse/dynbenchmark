@@ -2,14 +2,14 @@
 % Please edit documentation in R/suite_benchmark.R
 \name{benchmark_submit}
 \alias{benchmark_submit}
-\title{A benchmark suite with which to run all the methods on the different tasks}
+\title{A benchmark suite with which to run all the methods on the different datasets}
 \usage{
-benchmark_submit(task_ids, methods, parameters, timeout_per_execution,
+benchmark_submit(dataset_ids, methods, parameters, timeout_per_execution,
   max_memory_per_execution, metrics, num_repeats, local_output_folder,
   remote_output_folder, execute_before = NULL, verbose = FALSE)
 }
 \arguments{
-\item{task_ids}{The ids of the tasks to be used in the evaluation.}
+\item{dataset_ids}{The ids of the datasets to be used in the evaluation.}
 
 \item{methods}{A tibble of TI methods to use, see \code{\link[dynwrap]{get_ti_methods}}.}
 
@@ -36,5 +36,5 @@ but must also contain the column \code{paramset_id}.}
 \item{verbose}{Whether or not to print extra information.}
 }
 \description{
-A benchmark suite with which to run all the methods on the different tasks
+A benchmark suite with which to run all the methods on the different datasets
 }

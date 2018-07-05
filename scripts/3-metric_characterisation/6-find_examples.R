@@ -33,7 +33,7 @@ progressions <- map_df(seq_len(num_groups), function(groupi) {
   )
 })
 
-task <- wrap_data(
+dataset <- wrap_data(
   id = "example",
   cell_ids = cell_ids
 ) %>% add_trajectory(
@@ -43,7 +43,7 @@ task <- wrap_data(
   divergence_regions = NULL
 ) %>% add_cell_waypoints()
 
-plot_default(task)
+plot_default(dataset)
 
 # set up possible networks
 networks <- list(
@@ -124,14 +124,14 @@ run_fun <- function(percentages, network) {
       add_timing_checkpoint("method_afterpostproc")
   ) %>% add_cell_waypoints()
 }
-calculate_metrics2 <- function(task, model) {
-  calculate_metrics(task, model) %>% mutate(rf_mse_inv = 1 - rf_mse, rf_mse_w = 1 - 4 * rf_mse)
+calculate_metrics2 <- function(dataset, model) {
+  calculate_metrics(dataset, model) %>% mutate(rf_mse_inv = 1 - rf_mse, rf_mse_w = 1 - 4 * rf_mse)
 }
 
 # try out
 nl <- networks$cycle
 model <- run_fun(runif(nl$num_pcts), nl)
-summary <- calculate_metrics2(task, model)
+summary <- calculate_metrics2(dataset, model)
 
 plot_default(model)
 
@@ -163,7 +163,7 @@ outputs <-
         fitness = function(x) {
 
           model <- run_fun(x, nl)
-          summary <- calculate_metrics2(task, model)
+          summary <- calculate_metrics2(dataset, model)
 
           metrics <- c(correlation = summary$correlation, rf_mse_inv = summary$rf_mse_w)
 
@@ -183,7 +183,7 @@ outputs <-
         })
 
       model <- run_fun(ga_fit@solution[1,], nl)
-      summary <- calculate_metrics2(task, model)
+      summary <- calculate_metrics2(dataset, model)
       summary$id <- improve$id
 
       lst(id = improve$id, ga_fit, model, summary)
@@ -196,14 +196,14 @@ summary <- outputs %>% map_df(~.$summary)
 cowplot::plot_grid(plotlist = unlist(map(outputs, function(o) {
   s <- o$summary
   o$model$id <- glue::glue("cor = {round(s$correlation, 2)}, rfmse = {round(s$rf_mse, 2)}, edge = {round(s$edge_flip, 2)}")
-  list(plot_combined(task, o$model), plot_strip_connections(task, o$model))
+  list(plot_combined(dataset, o$model), plot_strip_connections(dataset, o$model))
 }), recursive = F), ncol = 8) %>% ggsave(filename = figure_file("aspects.pdf"), width = 40, height = 20)
 
-plot_default(task) %>% ggsave(filename = figure_file("task.pdf"), width = 5, height = 5)
+plot_default(dataset) %>% ggsave(filename = figure_file("dataset.pdf"), width = 5, height = 5)
 
 #
 # plot(ga_fit)
 #
 # plot_default(model)
-# plot_combined(task, model)
-# plot_strip_connections(task, model)
+# plot_combined(dataset, model)
+# plot_strip_connections(dataset, model)

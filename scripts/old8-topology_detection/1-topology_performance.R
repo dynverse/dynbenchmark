@@ -76,7 +76,7 @@ linear_split_scores <- indrep_scores %>%
     is_linear_restricted = ifelse(maximal_trajectory_type %in% c("directed_cycle", "directed_linear"), "linear_method", "non-linear_method"),
     trajectory_type_linear = ifelse(trajectory_type %in% c("directed_cycle", "directed_linear"), "linear_dataset", "more_complex_than_linear_dataset")
   ) %>%
-  group_by(task_id, is_linear_restricted, trajectory_type_linear) %>%
+  group_by(dataset_id, is_linear_restricted, trajectory_type_linear) %>%
   summarise_at(
     scores,
     max

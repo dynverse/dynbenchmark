@@ -5,10 +5,10 @@ restart <- FALSE
 
 if (restart) {
   unlink(dataset_file(), recursive = TRUE);dir.create(dataset_file(), recursive = TRUE, showWarnings = FALSE)
-  unlink(dataset_preproc_file(), recursive = TRUE);dir.create(dataset_preproc_file(), recursive = TRUE, showWarnings = FALSE)
+  unlink(dataset_source_file(), recursive = TRUE);dir.create(dataset_source_file(), recursive = TRUE, showWarnings = FALSE)
   qsub:::run_remote(glue::glue("rm -r {paste0(remote_folder, dataset_file(relative = TRUE))}"), "prism")
-  qsub:::run_remote(glue::glue("rm -r {paste0(remote_folder, dataset_preproc_file(relative = TRUE))}"), "prism")
-  qsub:::run_remote(glue::glue("mkdir {paste0(remote_folder, dataset_preproc_file(relative = TRUE))}"), "prism")
+  qsub:::run_remote(glue::glue("rm -r {paste0(remote_folder, dataset_source_file(relative = TRUE))}"), "prism")
+  qsub:::run_remote(glue::glue("mkdir {paste0(remote_folder, dataset_source_file(relative = TRUE))}"), "prism")
   qsub:::run_remote(glue::glue("mkdir {paste0(remote_folder, dataset_file(relative = TRUE))}"), "prism")
 }
 
@@ -59,5 +59,5 @@ paramsets <- map(seq_len(nrow(settings)), function(row_id) {
 })
 
 # save paramsets ----------------------------------------
-saveRDS(paramsets, dataset_preproc_file("paramsets.rds"))
-qsub:::rsync_remote("", dataset_preproc_file(), "prism", paste0(remote_folder, dataset_preproc_file(relative = TRUE)))
+saveRDS(paramsets, dataset_source_file("paramsets.rds"))
+qsub:::rsync_remote("", dataset_source_file(), "prism", paste0(remote_folder, dataset_source_file(relative = TRUE)))
