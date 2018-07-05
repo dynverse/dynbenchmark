@@ -48,7 +48,11 @@ experiment_subfolder <- function(path) {
     full_path <- paste0(dyn_folder, "/", path, "/", experiment_id, "/")
 
     # create if necessary
-    qsub::mkdir_remote(full_path, remote = remote)
+    if (remote != "") {
+      qsub::mkdir_remote(full_path, remote = remote)
+    } else {
+      dir.create(full_path, showWarnings = FALSE, recursive = TRUE)
+    }
 
     # get complete filename
     paste(full_path, filename, sep = "")
