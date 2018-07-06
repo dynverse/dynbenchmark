@@ -4,8 +4,31 @@ library(dynbenchmark)
 
 experiment("2-dataset_characterisation/2-real")
 
-# Fetch datasets
-datasets_real <- load_datasets() %>% filter(dataset_source == "real")
+datasets_real <- load_datasets(list_datasets() %>% filter(dataset_source == "real") %>% pull(dataset_id), as_tibble = TRUE)
+
+
+#   ____________________________________________________________________________
+#   Add dimensionality reduction                                            ####
+datasets_real <- tmap(datasets_real, add_dimred, dimred = dyndimred::dimred_umap) %>% list_as_tibble()
+
+datasets_real_plots <- tibble(
+  dataset_id = datasets_real$id,
+  topology = tmap(datasets_real, plot_topology)
+)
+
+
+
+
+
+
+plots <- tmap(datasets_real, plot_dimred, color_cells = "grouping")
+
+
+plot_dimred(extract_row_to_list(datasets_real, 59))
+
+
+
+datasets_real
 
 
 

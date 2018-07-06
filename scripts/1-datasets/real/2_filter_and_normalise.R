@@ -37,29 +37,8 @@ qsub_config <- qsub::override_qsub_config(
 handle <- qsub_lapply(dataset_ids_to_process, process_raw_dataset_wrapper, qsub_environment = character(), qsub_config = qsub_config)
 
 
-dataset_id <- "real/dentate-gyrus-neurogenesis_hochgerner"
-process_raw_dataset_wrapper(dataset_id)
-dataset <- load_dataset(dataset_id)
-
-dynplot::plot_dimred(dataset)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-remote_dynbenchmark_folder <- qsub::qsub_lapply(1, function(x) dynbenchmark::get_dynbenchmark_folder(), qsub_environment = character())[[1]]
-local_dynbenchmark_folder <- dynbenchmark::get_dynbenchmark_folder()
-local_folder_sync <- dynbenchmark::derived_file("", "1-datasets/real/")
-remote_folder_sync <- gsub(local_dynbenchmark_folder, remote_dynbenchmark_folder, local_folder_sync)
+# sync locally
+local_folder_sync <- derived_file("", "1-datasets/real/")
+remote_folder_sync <- derived_file("", "1-datasets/real/", remote = TRUE)
 
 qsub::rsync_remote("prism", remote_folder_sync, "", local_folder_sync)
