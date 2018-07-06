@@ -106,7 +106,7 @@ save_dataset <- function(dataset, dataset_id = NULL, lazy_load = TRUE) {
       assign("dataset_id", dataset_id, env)
       assign("col", col, env)
       dataset[[col]] <- function() {
-        readr::read_rds(dynbenchmark::dataset_file(paste0(col, ".rds"), dataset_id = dataset_id))
+        readr::read_rds(dataset_file(paste0(col, ".rds"), dataset_id = dataset_id))
       }
       environment(dataset[[col]]) <- env
     }
@@ -130,8 +130,6 @@ list_datasets <- function() {
     dataset_name = gsub(".*/([^/]*)", "\\1", dataset_ids)
   )
 }
-
-
 
 #' Load datasets
 #' @export
