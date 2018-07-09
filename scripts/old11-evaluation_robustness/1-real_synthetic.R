@@ -7,7 +7,7 @@ library(ggraph)
 
 experiment("11-evaluation_robustness")
 
-read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
+read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
 # create trajectory type
 trajtype_source_scores <- trajtype_scores %>%
