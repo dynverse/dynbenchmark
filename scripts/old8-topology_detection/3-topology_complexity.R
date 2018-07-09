@@ -46,11 +46,11 @@ calculate_statistics <- function(milestone_network) {
 }
 
 # determine top methods
-read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
+read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
 # load config and datasets
-config <- read_rds(derived_file("config.rds", "5-optimise_parameters/3-evaluate_parameters"))
-datasets <- read_rds(derived_file("datasets.rds", "2-dataset_characterisation")) %>% mutate(dataset_id = id)
+config <- read_rds(derived_file("config.rds", "06-optimise_parameters/3-evaluate_parameters"))
+datasets <- read_rds(derived_file("datasets.rds", "02-dataset_characterisation")) %>% mutate(dataset_id = id)
 datasets$trajectory_type <- map(datasets$milestone_network, dynwrap::classify_milestone_network) %>% map_chr("network_type")
 datasets <- bind_cols(datasets, map_df(datasets$milestone_network, calculate_statistics))
 
@@ -66,7 +66,7 @@ milestone_networks <- pbapply::pblapply(cl = 4, method_order[1:5], function(meth
   ind_scores_oi <- ind_scores %>%
     filter(method_short_name == !!method_id)
 
-  output_models <- load_dyneval_model(method_id, ind_scores_oi$model_id, experiment_id = "5-optimise_parameters/3-evaluate_parameters") %>% list_as_tibble()
+  output_models <- load_dyneval_model(method_id, ind_scores_oi$model_id, experiment_id = "06-optimise_parameters/3-evaluate_parameters") %>% list_as_tibble()
 
   output_models <- bind_cols(output_models, map_df(output_models$milestone_network, calculate_statistics))
 

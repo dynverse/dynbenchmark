@@ -7,11 +7,11 @@ library(ggraph)
 
 experiment("8-compare_topology")
 
-methods <- read_rds(derived_file("methods.rds", experiment_id = "4-method_characterisation"))
+methods <- read_rds(derived_file("methods.rds", experiment_id = "04-method_characterisation"))
 method_trajtypes <- methods %>%
   gather(trajectory_type, can_handle_trajectory_type, !!trajectory_types$id[trajectory_types$directedness == "directed"])
 
-read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
+read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
 ind_scores <- ind_scores %>%
   mutate(perfect_edge_flip = edge_flip == 1)

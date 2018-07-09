@@ -6,8 +6,8 @@
 #' @param remote The remote to access, "" if running locally, TRUE if using default qsub config remote
 #'
 #' @export
-get_dynbenchmark_folder <- function(remote = "") {
-  if (remote == "") {
+get_dynbenchmark_folder <- function(remote = FALSE) {
+  if (is.logical(remote) && !remote) {
     pwd <- getOption("dynbenchmark_path")
 
     if (is.null(pwd)) {
@@ -24,8 +24,6 @@ get_dynbenchmark_folder <- function(remote = "") {
 
     pwd
   } else {
-    if (remote == TRUE) {remote <- qsub::get_default_qsub_config()$remote}
-
     pwd <- qsub::run_remote("echo $DYNBENCHMARK_PATH", remote)$stdout
 
     if (pwd == "") {

@@ -4,7 +4,7 @@
 \alias{get_dynbenchmark_folder}
 \title{Find the dynbenchmark path}
 \usage{
-get_dynbenchmark_folder(remote = "")
+get_dynbenchmark_folder(remote = FALSE)
 }
 \arguments{
 \item{remote}{The remote to access, "" if running locally, TRUE if using default qsub config remote}

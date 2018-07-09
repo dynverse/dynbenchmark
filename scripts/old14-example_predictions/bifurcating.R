@@ -10,13 +10,13 @@ experiment("14-example_predictions")
 
 source("analysis/analyses/14-example_predictions/common_functions.R")
 
-list2env(read_rds(derived_file("outputs_postprocessed.rds", "5-optimise_parameters/3-evaluate_parameters")), environment())
-list2env(read_rds(derived_file("config.rds", "5-optimise_parameters/3-evaluate_parameters")), environment())
-read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
+list2env(read_rds(derived_file("outputs_postprocessed.rds", "06-optimise_parameters/3-evaluate_parameters")), environment())
+list2env(read_rds(derived_file("config.rds", "06-optimise_parameters/3-evaluate_parameters")), environment())
+read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
 methods <- methods %>% filter(type == "algorithm")
 
-datasets <- read_rds(derived_file("datasets.rds", "2-dataset_characterisation"))
+datasets <- read_rds(derived_file("datasets.rds", "02-dataset_characterisation"))
 ti_methods <- dynwrap::get_ti_methods()
 
 top_methods <- methods %>% filter(bifurcation) %>% pull(method_short_name)

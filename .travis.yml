@@ -3,46 +3,22 @@ sudo: required
 dist: trusty
 bioc_required: true
 services:
-  - docker
-cache:
-  timeout: 2000
-  apt: true
-  directories:
-    - $HOME/.cache/pip
-    - $HOME/R/Library
+- docker
+cache: packages
 warnings_are_errors: true
 addons:
   apt:
     packages:
-      - libgsl0-dev                         # dyngen > splatter > zinbwave > copula > gsl
-      - libsdl1.2-dev
-      - libreadline-dev
-      - imagemagick
-      - libfftw3-dev
-      - libudunits2-dev                     # dynalysis > ggforce > units
-      - libblas-dev
-      - liblapack-dev
-      - libglu1-mesa-dev                    # dynmethods > merlot > rgl
-      - libx11-dev                          # dynmethods > merlot > rgl
-      - libssh-dev                          # qsub > ssh
+    - libgsl0-dev                         # gsl > topicmodels > cellTree > dynmethods
+    - libudunits2-dev                     # units > ggforce > ggraph > patchwork > dynplot
+    - libssh-dev                          # ssh > qsub
 before_install:
  - cd package
- - source <( curl --insecure https://raw.githubusercontent.com/dynverse/dynmethods/master/.travis_install_python.sh ) # use travis's own python
 install:
- - pip3 install --user --upgrade --only-binary=numpy,scipy numpy scipy        # many packages
- - pip3 install --user --upgrade pandas matplotlib tqdm GPy                   # GPfates
- - pip3 install --user --upgrade matplotlib seaborn pandas scikit-learn GPy   # topslam
- - pip3 install --user --upgrade scikit-learn networkx matplotlib seaborn munkres # SCIMITAR
- - pip3 install --user --upgrade jinja2                                       # SCUBA
- - pip3 install --user --upgrade python-igraph h5py anndata                   # AGA / scanpy
- - pip3 install --user --upgrade Cython statsmodels                           # Wishbone
- - pip3 install --user --upgrade cycler pyparsing pytz python-dateutil six    # unknown
- - if [ `git branch | grep '* master' | wc -l` == 0 ]; then sed -i 's#\(dynverse/[^, ]*\)#\1@devel#' DESCRIPTION; fi
- - sudo ldconfig                                                              # for merlot > rgl
- - R -e 'if ("devtools" %in% rownames(installed.packages())) update.packages(oldPkgs = "devtools", ask = FALSE) else install.packages("devtools")'
- - R -e 'devtools::install_github(c("r-lib/rlang", "tidyverse/ggplot2"))'
- - R -e 'devtools::install_cran("covr")'
- - R -e 'setRepositories(ind = 1:2); devtools::install(dependencies = TRUE, upgrade = TRUE)'
- - R -e 'dynmethods::check_dependencies()'
+- if [ `git branch | grep '* master' | wc -l` == 0 ]; then sed -i 's#\(dynverse/[^, ]*\)#\1@devel#' DESCRIPTION; fi
+- R -e 'if ("devtools" %in% rownames(installed.packages())) update.packages(oldPkgs = "devtools", ask = FALSE) else install.packages("devtools")'
+- R -e 'devtools::install_cran("covr")'
+- R -e 'setRepositories(ind = 1:2); devtools::install(dependencies = TRUE, upgrade = TRUE)'
+- R -e 'dynmethods::check_dependencies()'
 after_success:
- - R -e 'covr::codecov()'
+- R -e 'covr::codecov()'

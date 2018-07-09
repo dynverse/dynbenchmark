@@ -73,7 +73,7 @@ benchmark_submit <- function(
     output_file <- paste0(method_folder, "/output.rds")
     qsubhandle_file <- paste0(method_folder, "/qsubhandle.rds")
 
-    qsub:::mkdir_remote(path = method_folder, remote = "")
+    qsub:::mkdir_remote(path = method_folder, remote = FALSE)
 
     ## If no output or qsub handle exists yet
     if (!file.exists(output_file) && !file.exists(qsubhandle_file)) {
@@ -243,7 +243,7 @@ benchmark_run_evaluation <- function(
     output_model = TRUE,
     mc_cores = 1,
     verbose = verbose
-  ) %>% attr("extras")
+  )
 
   # create summary
   bind_cols(
@@ -252,9 +252,9 @@ benchmark_run_evaluation <- function(
       grid_i,
       params_notrafo = list(parm_df),
       params_trafo = list(parm_list),
-      model = out$.models
+      model = out$models
     ),
-    out$.summary %>%
+    out$summary %>%
       mutate(error_message = ifelse(is.null(error[[1]]), "", error[[1]]$message)) %>%
       select(-error)
   )
