@@ -7,7 +7,7 @@ library(ggraph)
 
 experiment("8-compare_topology")
 
-read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
+read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
 label_facet_methods <- function(x) {tibble(method_short_name = methods$method_name[match(x$method_short_name, methods$method_short_name)])}
 

@@ -86,9 +86,9 @@ Gather the output of the different methods, and check whether there were any err
 scores <- purrr::map(results, function(result) {
   bind_cols(
     tibble(
-      model = attr(result, "extras")$.models
+      model = result$models
     ),
-    attr(result, "extras")$.summary
+    result$summary
   )
 }) %>% bind_rows()
 
