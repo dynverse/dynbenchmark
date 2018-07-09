@@ -11,7 +11,7 @@ if (!file.exists(dataset_file)) download.file("https://zenodo.org/record/1211533
 unzip(dataset_file, exdir = derived_file(""))
 
 # remove zip
-# file.remove(dataset_file)
+file.remove(dataset_file)
 
 # temporary fixes;
 # - the classes were accidentally removed from each dataset before submission to zenodo
@@ -21,6 +21,7 @@ unzip(dataset_file, exdir = derived_file(""))
 dataset_ids <- list.files(derived_file(""), pattern = ".rds", recursive = TRUE, full.names = FALSE) %>%
   str_replace(".rds$", "") %>%
   discard(~. == "datasets")
+
 pbapply::pblapply(dataset_ids, function(dataset_id) {
   file <- derived_file(glue::glue("{dataset_id}.rds"))
 
@@ -31,6 +32,7 @@ pbapply::pblapply(dataset_ids, function(dataset_id) {
 
   dataset <- dynwrap::add_cell_waypoints(dataset)
 
+  names(dataset) <- str_replace(names(dataset), "^task_", "dataset_")
   dataset$milenet_spr <- NULL
   dataset$.object_class <- NULL
   dataset$date <- as.Date(dataset$date, origin = "1970-01-01")
@@ -42,38 +44,12 @@ pbapply::pblapply(dataset_ids, function(dataset_id) {
   invisible()
 })
 
-# make one big datasets tibble, with count and expression as functions.
-datasets <- list_as_tibble(map(dataset_ids, function(dataset_id) {
-  dataset <- load_dataset(dataset_id) %>% extract_row_to_list(1)
-  dataset_file <- dataset_file(filename = "dataset.rds", dataset_id = dataset_id)
-  for (col in c("expression", "counts")) {
-    env <- new.env(baseenv())
-    assign("dataset_id", dataset_id, env)
-    assign("col", col, env)
-    dataset[[col]] <- function() {
-      dynbenchmark::load_dataset(dataset_id)[[col]]
-    }
-    environment(dataset[[col]]) <- env
-  }
-
-  dataset
-}))
-
-# todo: list_as_tibble needs to handle dates correctly
-datasets$date <- as.Date(datasets$date, origin = "1970-01-01")
-datasets$creation_date = as.POSIXct(datasets$creation_date, origin = "1970-01-01")
-write_rds(datasets, derived_file("datasets.rds"))
-
-# check the size of datasets, in MB
-datasets %>% map_int(~ pryr::object_size(.) %>% as.integer) %>% sort(decreasing = T) %>% {. / 1e6} %>% head(10)
-
 # upload to remote, if relevant
 # this assumes you have a gridengine cluster at hand
 remote_config <- qsub::override_qsub_config()
-remote_dynbenchmark_path <- qsub:::run_remote("echo $DYNBENCHMARK_PATH", remote = remote_config$remote)$stdout
 qsub:::rsync_remote(
-  remote_src = "",
+  remote_src = FALSE,
   path_src = derived_file(),
   remote_dest = remote_config$remote,
-  path_dest = derived_file() %>% str_replace(get_dynbenchmark_folder(), remote_dynbenchmark_path)
+  path_dest = derived_file(remote = TRUE)
 )
