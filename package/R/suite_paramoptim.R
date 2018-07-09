@@ -428,7 +428,7 @@ make_obj_fun <- function(method, metrics, extra_metrics, noisy = FALSE, verbose 
     has.simple.signature = FALSE,
     par.set = method$par_set,
     fn = function(x, datasets, output_model, mc_cores = 1) {
-      evaluate_ti_method(
+      eval_out <- evaluate_ti_method(
         datasets = datasets,
         method = method,
         parameters = x,
@@ -438,6 +438,15 @@ make_obj_fun <- function(method, metrics, extra_metrics, noisy = FALSE, verbose 
         mc_cores = mc_cores,
         verbose = verbose
       )
+
+      # post process evaluation output to get it
+      # in the right format for mlrMBO
+      score <- eval_out$score
+      attr(score, "extras") <- list(
+        .summary = eval_out$summary,
+        .models = eval_out$models
+      )
+      score
     }
   )
 }
