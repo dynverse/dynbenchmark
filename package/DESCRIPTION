@@ -56,7 +56,6 @@ Imports:
 Suggests:
   qsub
 Remotes:
-  berndbischl/ParamHelpers,
   dynverse/dyneval,
   dynverse/dyngen,
   dynverse/dynmethods,
