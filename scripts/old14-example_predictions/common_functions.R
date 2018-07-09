@@ -73,7 +73,7 @@ get_models <- function(outputs_oi) {
     load_dyneval_model(
       method_short_name = outputs_oi$method_short_name[[row_i]],
       model_id = outputs_oi$model_id[[row_i]],
-      experiment_id = "5-optimise_parameters/3-evaluate_parameters"
+      experiment_id = "06-optimise_parameters/3-evaluate_parameters"
     )[[1]]
   })
 }

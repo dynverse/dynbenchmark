@@ -55,7 +55,7 @@ datasetpreproc_subfolder <- function(path) {
 
 #' @rdname dataset_preprocessing
 #' @export
-dataset_source_file <- datasetpreproc_subfolder("derived/1-datasets_preproc/source")
+dataset_source_file <- datasetpreproc_subfolder("derived/01-datasets_preproc/source")
 
 #' Download a file and return its location path
 #' @param url The url of the file to download
@@ -75,7 +75,7 @@ download_dataset_source_file <- function(filename, url, dataset_id = NULL) {
 #' @rdname dataset_preprocessing
 #' @export
 dataset_raw_file <- function(dataset_id) {
-  file <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "1-datasets_preproc/raw")
+  file <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "01-datasets_preproc/raw")
   dir.create(dirname(file), showWarnings = FALSE)
   file
 }
@@ -90,7 +90,7 @@ save_raw_dataset <- function(dataset, dataset_id = get_dataset_preprocessing_id(
 
 #' @rdname dataset_preprocessing
 #' @export
-dataset_file <- datasetpreproc_subfolder("derived/1-datasets")
+dataset_file <- datasetpreproc_subfolder("derived/01-datasets")
 
 #' @rdname dataset_preprocessing
 #' @export
@@ -119,7 +119,7 @@ save_dataset <- function(dataset, dataset_id = NULL, lazy_load = TRUE) {
 #' @export
 list_datasets <- function() {
   dataset_ids <- list.files(
-    derived_file("", experiment_id = "1-datasets"),
+    derived_file("", experiment_id = "01-datasets"),
     "dataset\\.rds",
     recursive = TRUE
   ) %>% dirname()
@@ -160,5 +160,5 @@ load_datasets <- function(dataset_ids = list_datasets()$dataset_id, as_tibble = 
   } else {
     datasets
   }
-  # read_rds(derived_file("datasets.rds", experiment_id = "1-datasets"))
+  # read_rds(derived_file("datasets.rds", experiment_id = "01-datasets"))
 }
