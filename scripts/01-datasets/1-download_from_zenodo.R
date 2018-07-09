@@ -46,10 +46,9 @@ pbapply::pblapply(dataset_ids, function(dataset_id) {
 
 # upload to remote, if relevant
 # this assumes you have a gridengine cluster at hand
-remote_config <- qsub::override_qsub_config()
-qsub:::rsync_remote(
+qsub::rsync_remote(
   remote_src = FALSE,
   path_src = derived_file(),
-  remote_dest = remote_config$remote,
+  remote_dest = TRUE,
   path_dest = derived_file(remote = TRUE)
 )
