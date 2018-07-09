@@ -32,7 +32,7 @@ param_print_functions <- list(
 
 create_detectable_trajectory_types_table <- function(implementation) {
   trajectory_types %>%
-    filter(directedness == "undirected") %>%
+    filter(directedness == "undirected")
 
 }
 
