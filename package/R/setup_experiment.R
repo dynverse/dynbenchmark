@@ -27,7 +27,7 @@ experiment <- function(experiment_id) {
 
 # create a helper function
 experiment_subfolder <- function(path) {
-  function(filename = "", experiment_id = NULL, remote = "") {
+  function(filename = "", experiment_id = NULL, remote = FALSE) {
     filename <- paste0(filename, collapse = "")
 
     dyn_folder <- get_dynbenchmark_folder(remote = remote)
@@ -46,10 +46,10 @@ experiment_subfolder <- function(path) {
     full_path <- paste0(dyn_folder, "/", path, "/", experiment_id, "/")
 
     # create if necessary
-    if (remote != "") {
-      qsub::mkdir_remote(full_path, remote = remote)
-    } else {
+    if (is.logical(remote) && !remote) {
       dir.create(full_path, showWarnings = FALSE, recursive = TRUE)
+    } else {
+      qsub::mkdir_remote(full_path, remote = remote)
     }
 
     # get complete filename
