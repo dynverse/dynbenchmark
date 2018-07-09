@@ -9,7 +9,7 @@ warnings_are_errors: true
 addons:
   apt:
     packages:
-#    - libgsl0-dev                         # gsl > copula > zinbwave > splatter > dyngen
+    - libgsl0-dev                         # gsl > topicmodels > cellTree > dynmethods
 #    - libsdl1.2-dev
 #    - libreadline-dev
 #    - imagemagick
