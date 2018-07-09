@@ -3,14 +3,14 @@ library(tidyverse)
 library(dynbenchmark)
 library(xml2)
 
-experiment("7-user_guidelines")
+experiment("09-user_guidelines")
 
-read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
+read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
 methods <-
   left_join(
     methods,
-    read_rds(derived_file("implementation_qc_application_scores.rds", "4-method_characterisation")) %>%
+    read_rds(derived_file("implementation_qc_application_scores.rds", "04-method_characterisation")) %>%
       spread("application", "score"),
     "implementation_id"
   ) %>%

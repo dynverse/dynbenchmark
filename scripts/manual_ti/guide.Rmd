@@ -7,7 +7,7 @@ output: html_document
 library(dynbenchmark)
 library(tidyverse)
 
-datasets_control <- read_rds(derived_file("datasets.rds", "1-datasets/control"))
+datasets_control <- read_rds(derived_file("datasets.rds", "01-datasets/control"))
 space <- datasets_control %>% filter(id == "control_bifurcating") %>% pull(space) %>% first()
 ```
 

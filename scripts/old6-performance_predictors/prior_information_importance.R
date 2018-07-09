@@ -4,9 +4,9 @@ library(dynbenchmark)
 
 experiment("6-performance_predictors")
 
-read_rds(derived_file("evaluation_algorithm.rds", "5-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
+read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
-methods <- read_rds(derived_file("methods.rds", experiment_id = "4-method_characterisation"))
+methods <- read_rds(derived_file("methods.rds", experiment_id = "04-method_characterisation"))
 
 method_priors <- methods %>%
   filter(method_short_name %in% overall_scores$method_short_name) %>%

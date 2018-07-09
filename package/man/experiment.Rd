@@ -10,13 +10,13 @@
 \usage{
 experiment(experiment_id)
 
-derived_file(filename = "", experiment_id = NULL, remote = "")
+derived_file(filename = "", experiment_id = NULL, remote = FALSE)
 
-data_file(filename = "", experiment_id = NULL, remote = "")
+data_file(filename = "", experiment_id = NULL, remote = FALSE)
 
-figure_file(filename = "", experiment_id = NULL, remote = "")
+figure_file(filename = "", experiment_id = NULL, remote = FALSE)
 
-result_file(filename = "", experiment_id = NULL, remote = "")
+result_file(filename = "", experiment_id = NULL, remote = FALSE)
 }
 \arguments{
 \item{experiment_id}{id for the experiment}

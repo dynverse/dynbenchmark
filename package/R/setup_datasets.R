@@ -55,7 +55,7 @@ datasetpreproc_subfolder <- function(path) {
 
 #' @rdname dataset_preprocessing
 #' @export
-dataset_source_file <- datasetpreproc_subfolder("derived/1-datasets_preproc/source")
+dataset_source_file <- datasetpreproc_subfolder("derived/01-datasets_preproc/source")
 
 #' Download a file and return its location path
 #' @param url The url of the file to download
@@ -75,7 +75,7 @@ download_dataset_source_file <- function(filename, url, dataset_id = NULL) {
 #' @rdname dataset_preprocessing
 #' @export
 dataset_raw_file <- function(dataset_id) {
-  file <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "1-datasets_preproc/raw")
+  file <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "01-datasets_preproc/raw")
   dir.create(dirname(file), showWarnings = FALSE)
   file
 }
@@ -90,7 +90,7 @@ save_raw_dataset <- function(dataset, dataset_id = get_dataset_preprocessing_id(
 
 #' @rdname dataset_preprocessing
 #' @export
-dataset_file <- datasetpreproc_subfolder("derived/1-datasets")
+dataset_file <- datasetpreproc_subfolder("derived/01-datasets")
 
 #' @rdname dataset_preprocessing
 #' @export
@@ -119,7 +119,7 @@ save_dataset <- function(dataset, dataset_id = NULL, lazy_load = TRUE) {
 #' @export
 list_datasets <- function() {
   dataset_ids <- list.files(
-    derived_file("", experiment_id = "1-datasets"),
+    derived_file("", experiment_id = "01-datasets"),
     "dataset\\.rds",
     recursive = TRUE
   ) %>% dirname()
@@ -142,6 +142,13 @@ load_dataset <- function(dataset_id, as_tibble = FALSE) {
 
   if (as_tibble) {
     dataset <- list_as_tibble(list(dataset))
+
+    if ("date" %in% colnames(dataset)) {
+      dataset$date <- as.Date(dataset$date, origin = "1970-01-01")
+    }
+    if ("creation_date" %in% colnames(dataset)) {
+      dataset$creation_date = as.POSIXct(dataset$creation_date, origin = "1970-01-01")
+    }
   }
 
   dataset
@@ -153,12 +160,11 @@ load_dataset <- function(dataset_id, as_tibble = FALSE) {
 load_datasets <- function(dataset_ids = list_datasets()$dataset_id, as_tibble = TRUE) {
   testthat::expect_true(is.character(dataset_ids))
 
-  datasets <- map(dataset_ids, load_dataset)
+  datasets <- map(dataset_ids, load_dataset, as_tibble = as_tibble)
 
   if (as_tibble) {
-    datasets %>% list_as_tibble()
+    bind_rows(datasets)
   } else {
     datasets
   }
-  # read_rds(derived_file("datasets.rds", experiment_id = "1-datasets"))
 }
