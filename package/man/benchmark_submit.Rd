@@ -4,10 +4,10 @@
 \alias{benchmark_submit}
 \title{A benchmark suite with which to run all the methods on the different datasets}
 \usage{
-benchmark_submit(design, dataset_ids, methods, parameters,
-  timeout_per_execution, max_memory_per_execution, metrics, num_repeats,
+benchmark_submit(design, timeout_per_execution = 3600,
+  max_memory_per_execution = "10G", metrics = "correlation",
   local_output_folder, remote_output_folder, execute_before = NULL,
-  verbose = FALSE)
+  verbose = TRUE)
 }
 \arguments{
 \item{design}{Design tibble of the experiment:

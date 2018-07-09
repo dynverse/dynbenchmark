@@ -84,7 +84,7 @@ benchmark_submit <- function(
   timeout_per_execution = 3600,
   max_memory_per_execution = "10G",
   metrics = "correlation",
-  local_output_folder = derived_file(""),
+  local_output_folder,
   remote_output_folder,
   execute_before = NULL,
   verbose = TRUE
@@ -231,9 +231,11 @@ benchmark_run_evaluation <- function(
   metrics,
   verbose
 ) {
+  testthat::expect_is(design_row, "tbl")
+
   # read dataset
   dataset_id <- design_row$dataset_id
-  dataset <- load_dataset(dataset_id, as_tibble = T)
+  dataset <- load_dataset(dataset_id, as_tibble = TRUE)
 
   # get parameters
   parameters <- design_row$parameters
@@ -247,7 +249,7 @@ benchmark_run_evaluation <- function(
 
   # start evaluation
   out <- evaluate_ti_method(
-    datasets = datasets,
+    datasets = dataset,
     method = method,
     parameters = parameters,
     metrics = metrics,
@@ -259,16 +261,13 @@ benchmark_run_evaluation <- function(
 
   # create summary
   bind_cols(
-    grid[grid_i,] %>% select(-dataset_id),
-    tibble(
-      grid_i,
-      params_notrafo = list(parm_df),
-      params_trafo = list(parm_list),
-      model = out$models
-    ),
+    design_row,
     out$summary %>%
       mutate(error_message = ifelse(is.null(error[[1]]), "", error[[1]]$message)) %>%
-      select(-error)
+      select(-error, -method_id, -method_name, -dataset_id), # remove duplicate columns with design row
+    tibble(
+      model = out$models
+    )
   )
 }
 
