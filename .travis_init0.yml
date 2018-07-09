@@ -6,6 +6,9 @@ services:
 - docker
 cache: packages
 warnings_are_errors: true
+env:
+  global:
+    - _R_CHECK_FORCE_SUGGESTS_="FALSE"
 addons:
   apt:
     packages:
@@ -20,5 +23,9 @@ install:
 - R -e 'devtools::install_cran("covr")'
 - R -e 'setRepositories(ind = 1:2); devtools::install(dependencies = TRUE, upgrade = TRUE)'
 - R -e 'dynmethods::check_dependencies()'
+script:
+ - echo No R CMD check since this is an init.
+r_check_args: "--no-tests --no-manual --no-vignettes --no-build-vignettes --no-examples"
+r_build_args: "--no-build-vignettes"
 after_success:
-- R -e 'covr::codecov()'
+ - echo Init 0 succeeded!
