@@ -125,7 +125,7 @@ benchmark_submit <- function(
     output_file <- file.path(suite_method_folder, "output.rds")
     qsubhandle_file <- file.path(suite_method_folder, "qsubhandle.rds")
 
-    qsub::mkdir_remote(suite_method_folder)
+    qsub:::mkdir_remote(path = suite_method_folder, remote = FALSE)
 
     if (!file.exists(output_file) && !file.exists(qsubhandle_file)) {
       cat("Submitting ", method_id, "\n", sep = "")

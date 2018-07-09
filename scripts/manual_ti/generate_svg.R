@@ -6,7 +6,7 @@ library(dynbenchmark)
 experiment("manual_ti")
 
 # load in all datasets
-datasets <- read_rds(derived_file("datasets.rds", "2-dataset_characterisation"))
+datasets <- read_rds(derived_file("datasets.rds", "02-dataset_characterisation"))
 
 run <- lst(
   dimred_id = "dp",
