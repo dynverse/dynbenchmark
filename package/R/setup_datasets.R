@@ -142,6 +142,13 @@ load_dataset <- function(dataset_id, as_tibble = FALSE) {
 
   if (as_tibble) {
     dataset <- list_as_tibble(list(dataset))
+
+    if ("date" %in% colnames(dataset)) {
+      dataset$date <- as.Date(dataset$date, origin = "1970-01-01")
+    }
+    if ("creation_date" %in% colnames(dataset)) {
+      dataset$creation_date = as.POSIXct(dataset$creation_date, origin = "1970-01-01")
+    }
   }
 
   dataset
@@ -153,13 +160,10 @@ load_dataset <- function(dataset_id, as_tibble = FALSE) {
 load_datasets <- function(dataset_ids = list_datasets()$dataset_id, as_tibble = TRUE) {
   testthat::expect_true(is.character(dataset_ids))
 
-  datasets <- map(dataset_ids, load_dataset)
+  datasets <- map(dataset_ids, load_dataset, as_tibble = as_tibble)
 
   if (as_tibble) {
-    tib <- datasets %>% list_as_tibble()
-    tib$date <- as.Date(tib$date, origin = "1970-01-01")
-    tib$creation_date = as.POSIXct(tib$creation_date, origin = "1970-01-01")
-    tib
+    bind_rows(datasets)
   } else {
     datasets
   }
