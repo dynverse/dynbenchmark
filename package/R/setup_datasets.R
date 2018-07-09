@@ -156,9 +156,11 @@ load_datasets <- function(dataset_ids = list_datasets()$dataset_id, as_tibble = 
   datasets <- map(dataset_ids, load_dataset)
 
   if (as_tibble) {
-    datasets %>% list_as_tibble()
+    tib <- datasets %>% list_as_tibble()
+    tib$date <- as.Date(tib$date, origin = "1970-01-01")
+    tib$creation_date = as.POSIXct(tib$creation_date, origin = "1970-01-01")
+    tib
   } else {
     datasets
   }
-  # read_rds(derived_file("datasets.rds", experiment_id = "01-datasets"))
 }
