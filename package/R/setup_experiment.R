@@ -28,8 +28,6 @@ experiment <- function(experiment_id) {
 # create a helper function
 experiment_subfolder <- function(path) {
   function(filename = "", experiment_id = NULL, remote = "") {
-    if (remote == TRUE) remote <- qsub::get_default_qsub_config()$remote
-
     filename <- paste0(filename, collapse = "")
 
     dyn_folder <- get_dynbenchmark_folder(remote = remote)
