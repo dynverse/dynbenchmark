@@ -117,7 +117,7 @@ benchmark_submit <- function(
   )
 
   ## run evaluation for each method separately
-  run_method <- function(design_method) {
+  submit_method <- function(design_method) {
     testthat::expect_equal(length(unique(design_method$method_id)), 1)
     method_id <- design_method$method_id[[1]]
 
@@ -140,16 +140,14 @@ benchmark_submit <- function(
       )
 
     # which packages to load on the cluster
-    qsub_packages <- c("dplyr", "purrr", "dyneval", "readr")
+    qsub_packages <- c("dplyr", "purrr", "dyneval", "dynmethods", "readr")
 
     # which data objects will need to be transferred to the cluster
-    qsub_environment <-  c(
-      "design_method", "metrics", "verbose"
-    )
+    qsub_environment <-  c("metrics", "verbose")
 
     # submit to the cluster
     qsub_handle <- qsub::qsub_lapply(
-      X = seq_len(nrow(design_method)),
+      X = design_method %>% split(seq_len(nrow(design_method))),
       object_envir = environment(),
       qsub_environment = qsub_environment,
       qsub_packages = qsub_packages,
@@ -173,7 +171,7 @@ benchmark_submit <- function(
     readr::write_rds(metadata, qsubhandle_file)
   }
 
-  walk(design %>% split(design$method_id), run_method)
+  walk(design %>% split(design$method_id), submit_method)
 
   invisible()
 }
@@ -244,6 +242,7 @@ benchmark_run_evaluation <- function(
   parameters <- design_row$parameters
 
   # get method
+  requireNamespace("dynmethods")
   if (identical(error_mode, FALSE)) {
     method_function <- dynmethods::methods %>%
       slice(match(design_row$method_id, method_id)) %>%
@@ -261,7 +260,6 @@ benchmark_run_evaluation <- function(
     method = method,
     parameters = parameters,
     metrics = metrics,
-    extra_metrics = NULL,
     output_model = TRUE,
     mc_cores = 1,
     verbose = TRUE
@@ -428,16 +426,16 @@ benchmark_fetch_results <- function(local_output_folder) {
 #' @importFrom readr read_rds
 #' @export
 benchmark_bind_results <- function(local_output_folder, load_models = FALSE) {
-  method_names <- list.dirs(local_output_folder, full.names = FALSE, recursive = FALSE) %>% discard(~ . == "")
+  method_ids <- list.dirs(local_output_folder, full.names = FALSE, recursive = FALSE) %>% discard(~ . == "")
 
   # process each method separately
-  as_tibble(map_df(method_names, function(method_name) {
-    suite_method_folder <- paste0(local_output_folder, method_name)
-    output_metrics_file <- paste0(suite_method_folder, "/output_metrics.rds")
-    output_models_file <- paste0(suite_method_folder, "/output_models.rds")
+  as_tibble(map_df(method_ids, function(method_id) {
+    suite_method_folder <- file.path(local_output_folder, method_id)
+    output_metrics_file <- file.path(suite_method_folder, "output_metrics.rds")
+    output_models_file <- file.path(suite_method_folder, "output_models.rds")
 
     if (file.exists(output_metrics_file)) {
-      cat(method_name, ": Reading previous output\n", sep = "")
+      cat(method_id, ": Reading previous output\n", sep = "")
       output <- readr::read_rds(output_metrics_file)
 
       # read models, if requested
@@ -448,7 +446,7 @@ benchmark_bind_results <- function(local_output_folder, load_models = FALSE) {
 
       output
     } else {
-      cat(method_name, ": Output not found, skipping\n", sep = "")
+      cat(method_id, ": Output not found, skipping\n", sep = "")
       NULL
     }
   }))
