@@ -18,8 +18,6 @@ make_obj_fun(method, metrics, extra_metrics, noisy = FALSE, verbose = FALSE)
   \item Custom metric function. Format: \code{function(dataset, model) { 1 }}
 }}
 
-\item{extra_metrics}{Extra metrics to calculate but not evaluate with.}
-
 \item{noisy}{Whether or not the metric is noisy or not}
 
 \item{verbose}{Whether or not to print extra information output}
