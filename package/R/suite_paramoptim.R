@@ -428,24 +428,47 @@ make_obj_fun <- function(method, metrics, extra_metrics, noisy = FALSE, verbose 
     has.simple.signature = FALSE,
     par.set = method$par_set,
     fn = function(x, datasets, output_model, mc_cores = 1) {
+
+      calc_metrics <- c(metrics, extra_metrics)
+      calc_metrics <- calc_metrics[!duplicated(calc_metrics)]
+
+      metric_names <- sapply(seq_along(metrics), function(i) {
+        metric <- metrics[[i]]
+        if (is.function(metric)) {
+          names(metrics)[[i]]
+        } else if (is.character(metric)) {
+          metric
+        } else {
+          stop("Unexpected metric, check documentation.")
+        }
+      })
+
       eval_out <- evaluate_ti_method(
         datasets = datasets,
         method = method,
         parameters = x,
-        metrics = metrics,
-        extra_metrics = extra_metrics,
+        metrics = calc_metrics,
         output_model = output_model,
         mc_cores = mc_cores,
         verbose = verbose
       )
 
+      summary <- eval_out$summary
+
+      # Calculate the final score
+      score <- summary %>%
+        summarise_at(metric_names, funs(mean)) %>%
+        as.matrix %>%
+        as.vector %>%
+        setNames(metric_names)
+
       # post process evaluation output to get it
       # in the right format for mlrMBO
-      score <- eval_out$score
       attr(score, "extras") <- list(
-        .summary = eval_out$summary,
+        .summary = summary,
         .models = eval_out$models
       )
+
       score
     }
   )
