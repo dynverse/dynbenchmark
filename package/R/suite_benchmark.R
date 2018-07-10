@@ -239,7 +239,6 @@ benchmark_run_evaluation <- function(
     method = method,
     parameters = parm_list,
     metrics = metrics,
-    extra_metrics = NULL,
     output_model = TRUE,
     mc_cores = 1,
     verbose = verbose
