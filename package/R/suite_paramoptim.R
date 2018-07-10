@@ -259,7 +259,7 @@ paramoptim_run_optimisation <- function(
   datasets <- map(dataset_ids, load_dataset) %>% list_as_tibble()
 
   # create an objective function
-  obj_fun <- make_obj_fun(method = method, metrics = metrics, extra_metrics = NULL, verbose = verbose)
+  obj_fun <- make_obj_fun(method = method, metrics = metrics, verbose = verbose)
 
   ## create a folder to save the intermediate mbo files in
   save_file_path <- paste0(getwd(), "/mlrmbo")
@@ -411,7 +411,7 @@ paramoptim_bind_results <- function(local_output_folder) {
 #'
 #' @importFrom smoof makeSingleObjectiveFunction makeMultiObjectiveFunction
 #' @export
-make_obj_fun <- function(method, metrics, extra_metrics, noisy = FALSE, verbose = FALSE) {
+make_obj_fun <- function(method, metrics, noisy = FALSE, verbose = FALSE) {
   # Use different makefunction if there are multiple metrics versus one
   if (length(metrics) > 1) {
     make_fun <- function(...) makeMultiObjectiveFunction(..., n.objectives = length(metrics))
@@ -433,7 +433,6 @@ make_obj_fun <- function(method, metrics, extra_metrics, noisy = FALSE, verbose 
         method = method,
         parameters = x,
         metrics = metrics,
-        extra_metrics = extra_metrics,
         output_model = output_model,
         mc_cores = mc_cores,
         verbose = verbose
