@@ -242,6 +242,7 @@ benchmark_run_evaluation <- function(
   parameters <- design_row$parameters
 
   # get method
+  setup_singularity_methods()
   requireNamespace("dynmethods")
   if (identical(error_mode, FALSE)) {
     method_function <- dynmethods::methods %>%
