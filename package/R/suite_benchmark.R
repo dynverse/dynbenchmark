@@ -14,7 +14,7 @@
 #' generate_benchmark_design(
 #'   dataset_ids = c("toy/bifurcating_1", "toy/bifurcating_2"),
 #'   method_ids = c("angle", "scorpius", "tscan"),
-#'   parameters = list(scorpius = tibble(paramset_ix = 1), tscan = tibble(paramset_ix = 1:3, clusternum_lower = 4:6, clusternum_upper = 18:20)),
+#'   parameters = list(scorpius = tibble::tibble(paramset_ix = 1), tscan = tibble::tibble(paramset_ix = 1:3, clusternum_lower = 4:6, clusternum_upper = 18:20)),
 #'   give_priors = NULL,
 #'   num_repeats = 2
 #' )
@@ -274,8 +274,8 @@ benchmark_run_evaluation <- function(
       mutate(error_status = case_when(
         error_message == "Memory limit exceeded" ~ "memory_limit",
         error_message == "Time limit exceeded" ~ "time_limit",
-        str_detect(error_message, "^Error status") ~ "execution_error",
-        error_message != "" ~ "method_error",
+        stringr::str_detect(error_message, "^Error status") ~ "execution_error",
+        is.null(out$model[[1]]) ~ "method_error",
         TRUE ~ "no_error"
       )) %>%
       select(-error, -method_id, -method_name, -dataset_id), # remove duplicate columns with design row
