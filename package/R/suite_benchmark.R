@@ -271,6 +271,13 @@ benchmark_run_evaluation <- function(
     design_row,
     out$summary %>%
       mutate(error_message = ifelse(is.null(error[[1]]), "", error[[1]]$message)) %>%
+      mutate(error_status = case_when(
+        error_message == "Memory limit exceeded" ~ "memory_limit",
+        error_message == "Time limit exceeded" ~ "time_limit",
+        str_detect(error_message, "^Error status") ~ "execution_error",
+        error_message != "" ~ "method_error",
+        TRUE ~ "no_error"
+      )) %>%
       select(-error, -method_id, -method_name, -dataset_id), # remove duplicate columns with design row
     tibble(
       model = out$models
