@@ -4,7 +4,7 @@
 \alias{make_obj_fun}
 \title{Used for wrapping an evaluation function around a TI method}
 \usage{
-make_obj_fun(method, metrics, extra_metrics, noisy = FALSE, verbose = FALSE)
+make_obj_fun(method, metrics, noisy = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{method}{The method to evaluate.}

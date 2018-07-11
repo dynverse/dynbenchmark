@@ -2,5 +2,8 @@
 #'
 #' @export
 setup_singularity_methods <- function() {
-  options(dynwrap_singularity_images_folder = derived_file("singularity_images/", experiment_id = "4-method_characterisation"))
+  options(
+    dynwrap_singularity_images_folder = derived_file("singularity_images/", experiment_id = "04-method_characterisation"),
+    dynwrap_run_environment = "singularity"
+  )
 }
