@@ -11,10 +11,14 @@
 #' @inheritParams dynwrap::infer_trajectories
 #'
 #' @examples
+#' library(tibble)
 #' generate_benchmark_design(
 #'   dataset_ids = c("toy/bifurcating_1", "toy/bifurcating_2"),
 #'   method_ids = c("angle", "scorpius", "tscan"),
-#'   parameters = list(scorpius = tibble::tibble(paramset_ix = 1), tscan = tibble::tibble(paramset_ix = 1:3, clusternum_lower = 4:6, clusternum_upper = 18:20)),
+#'   parameters = list(
+#'     scorpius = tibble(paramset_ix = 1),
+#'     tscan = tibble(paramset_ix = 1:3, clusternum_lower = 4:6, clusternum_upper = 18:20)
+#'  ),
 #'   give_priors = NULL,
 #'   num_repeats = 2
 #' )
@@ -33,7 +37,7 @@ generate_benchmark_design <- function(
   testthat::expect_true(is.numeric(num_repeats))
 
   # generate designs of the different parts of the evaluation
-  methods_design <- map2_dfr(method_ids, parameters[method_ids], function(method_id, parameters) {
+  methods_design <- map2_df(method_ids, parameters[method_ids], function(method_id, parameters) {
     if (is.null(parameters)) {
       parameters <- tibble(paramset_ix = 1)
     }
@@ -49,7 +53,7 @@ generate_benchmark_design <- function(
 
   give_priors_design <- tibble(give_priors = list(give_priors))
 
-  num_repeats_design <- tibble(repeat_ix = 1:num_repeats)
+  num_repeats_design <- tibble(repeat_ix = seq_len(num_repeats))
 
   # all combinations of the different parts
   crossing(
@@ -125,7 +129,7 @@ benchmark_submit <- function(
     output_file <- file.path(suite_method_folder, "output.rds")
     qsubhandle_file <- file.path(suite_method_folder, "qsubhandle.rds")
 
-    qsub:::mkdir_remote(path = suite_method_folder, remote = FALSE)
+    qsub::mkdir_remote(path = suite_method_folder, remote = FALSE)
 
     if (!file.exists(output_file) && !file.exists(qsubhandle_file)) {
       cat("Submitting ", method_id, "\n", sep = "")

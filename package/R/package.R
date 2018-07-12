@@ -8,7 +8,8 @@
 #'
 #' @import tibble
 #' @import dplyr
-#' @importFrom purrr %>% map set_names map_dbl map2_dbl map_df walk
+#' @importFrom tidyr crossing
+#' @importFrom purrr %>% map set_names map_dbl map2_dbl map_df map2_df walk
 #' @importFrom stringr str_replace_all str_replace
 #'
 #' @import dynutils

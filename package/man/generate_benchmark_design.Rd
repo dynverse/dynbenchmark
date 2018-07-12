@@ -28,10 +28,14 @@ but must also contain the column \code{paramset_ix}.}
 Generate a benchmarking design
 }
 \examples{
+library(tibble)
 generate_benchmark_design(
   dataset_ids = c("toy/bifurcating_1", "toy/bifurcating_2"),
   method_ids = c("angle", "scorpius", "tscan"),
-  parameters = list(scorpius = tibble::tibble(paramset_ix = 1), tscan = tibble::tibble(paramset_ix = 1:3, clusternum_lower = 4:6, clusternum_upper = 18:20)),
+  parameters = list(
+    scorpius = tibble(paramset_ix = 1),
+    tscan = tibble(paramset_ix = 1:3, clusternum_lower = 4:6, clusternum_upper = 18:20)
+ ),
   give_priors = NULL,
   num_repeats = 2
 )
