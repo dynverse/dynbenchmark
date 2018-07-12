@@ -438,7 +438,7 @@ benchmark_bind_results <- function(local_output_folder, load_models = FALSE) {
   method_ids <- list.dirs(local_output_folder, full.names = FALSE, recursive = FALSE) %>% discard(~ . == "")
 
   # process each method separately
-  as_tibble(map_df(method_ids, function(method_id) {
+  output <- as_tibble(map_df(method_ids, function(method_id) {
     suite_method_folder <- file.path(local_output_folder, method_id)
     output_metrics_file <- file.path(suite_method_folder, "output_metrics.rds")
     output_models_file <- file.path(suite_method_folder, "output_models.rds")
@@ -459,6 +459,40 @@ benchmark_bind_results <- function(local_output_folder, load_models = FALSE) {
       NULL
     }
   }))
+
+  output$error_status <- purrr::pmap_chr(output, extract_error_status)
+
+  output
+}
+
+
+
+#' Extract the error status from an evaluation
+#'
+#' @param stdout
+#' @param stderr
+#' @param error_message
+extract_error_status <- function(model, stdout, stderr, error_message, ...) {
+  memory_messages <- c(
+    "cannot allocate vector of size", # R
+    "MemoryError", # python
+    "OOM when allocating tensor", # tensorflow
+    "nullptr != block->mem" # tensorflow
+  )
+  is_memory_problem <- function(message) {
+    any(map_lgl(memory_messages, ~grepl(., message)))
+  }
+
+  case_when(
+    error_message == "Memory limit exceeded" ~ "memory_limit",
+    is_memory_problem(stderr) ~ "memory_limit",
+    is_memory_problem(error_message) ~ "memory_limit",
+    is_memory_problem(stdout) ~ "memory_limit",
+    error_message == "Time limit exceeded" ~ "time_limit",
+    stringr::str_detect(error_message, "^Error status") ~ "execution_error",
+    is.null(model[[1]]) ~ "method_error",
+    TRUE ~ "no_error"
+  )
 }
 
 
