@@ -460,7 +460,7 @@ make_obj_fun <- function(method, metrics, noisy = FALSE, verbose = FALSE) {
         summarise_at(metric_names, funs(mean)) %>%
         as.matrix %>%
         as.vector %>%
-        setNames(metric_names)
+        set_names(metric_names)
 
       # post process evaluation output to get it
       # in the right format for mlrMBO
