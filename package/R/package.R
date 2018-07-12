@@ -9,7 +9,7 @@
 #' @import tibble
 #' @import dplyr
 #' @importFrom tidyr crossing
-#' @importFrom purrr %>% map set_names map_dbl map2_dbl map_df map2_df walk
+#' @importFrom purrr %>% walk set_names map map_dbl map_lgl map_chr map2 map2_dbl map2_lgl map2_chr
 #' @importFrom stringr str_replace_all str_replace
 #'
 #' @import dynutils

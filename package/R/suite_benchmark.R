@@ -329,7 +329,7 @@ benchmark_fetch_results <- function(local_output_folder) {
         qacct_out <- qsub::qacct(qsub_handle)
 
         # process each job separately
-        outputs <- map_dfr(seq_len(nrow(design_method)), function(design_row_ix) {
+        outputs <- map_df(seq_len(nrow(design_method)), function(design_row_ix) {
           design_row <- design_method[design_row_ix, ]
           out <- output[[design_row_ix]]
 
