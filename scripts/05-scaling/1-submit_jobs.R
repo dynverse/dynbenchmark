@@ -27,7 +27,7 @@ remote_output_folder <- derived_file("suite/", remote = TRUE)
 
 # save configuration
 write_rds(lst(
-  design, metrics, timeout_per_execution, num_repeats,
+  design, metrics, timeout_per_execution,
   max_memory_per_execution, execute_before, verbose,
   local_output_folder, remote_output_folder
 ), derived_file("config.rds"))

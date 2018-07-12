@@ -331,7 +331,11 @@ benchmark_fetch_results <- function(local_output_folder) {
             if (is.null(qacct_out) || !any(qacct_out$taskid == design_row_ix)) {
               qsub_error <- "Job cancelled by user"
             } else {
-              qacct_filt <- qacct_out %>% filter(taskid == design_row_ix) %>% arrange(desc(row_number_i)) %>% slice(1)
+              qacct_filt <-
+                qacct_out %>%
+                filter(taskid == design_row_ix) %>%
+                arrange(desc(row_number_i)) %>%
+                slice(1)
 
               qacct_memory <- process_qsub_memory(qacct_filt$maxvmem)
               qacct_exit_status <- qacct_filt$exit_status %>% str_replace(" +", " ")
