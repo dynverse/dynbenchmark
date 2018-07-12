@@ -33,7 +33,7 @@ generate_benchmark_design <- function(
   testthat::expect_true(is.numeric(num_repeats))
 
   # generate designs of the different parts of the evaluation
-  methods_design <- map2_dfr(method_ids, parameters[method_ids], function(method_id, parameters) {
+  methods_design <- map2_df(method_ids, parameters[method_ids], function(method_id, parameters) {
     if (is.null(parameters)) {
       parameters <- tibble(paramset_ix = 1)
     }
