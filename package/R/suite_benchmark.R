@@ -129,46 +129,46 @@ benchmark_submit <- function(
 
     if (!file.exists(output_file) && !file.exists(qsubhandle_file)) {
       cat("Submitting ", method_id, "\n", sep = "")
-    }
 
-    # set parameters for the cluster
-    qsub_config_method <-
-      qsub::override_qsub_config(
-        qsub_config = qsub_config,
-        name = paste0("D_", method_id),
-        local_tmp_path = paste0(suite_method_folder, "/r2gridengine")
+      # set parameters for the cluster
+      qsub_config_method <-
+        qsub::override_qsub_config(
+          qsub_config = qsub_config,
+          name = paste0("D_", method_id),
+          local_tmp_path = paste0(suite_method_folder, "/r2gridengine")
+        )
+
+      # which packages to load on the cluster
+      qsub_packages <- c("dplyr", "purrr", "dyneval", "dynmethods", "readr")
+
+      # which data objects will need to be transferred to the cluster
+      qsub_environment <-  c("metrics", "verbose")
+
+      # submit to the cluster
+      qsub_handle <- qsub::qsub_lapply(
+        X = design_method %>% split(seq_len(nrow(design_method))),
+        object_envir = environment(),
+        qsub_environment = qsub_environment,
+        qsub_packages = qsub_packages,
+        qsub_config = qsub_config_method,
+        FUN = benchmark_qsub_fun
       )
 
-    # which packages to load on the cluster
-    qsub_packages <- c("dplyr", "purrr", "dyneval", "dynmethods", "readr")
-
-    # which data objects will need to be transferred to the cluster
-    qsub_environment <-  c("metrics", "verbose")
-
-    # submit to the cluster
-    qsub_handle <- qsub::qsub_lapply(
-      X = design_method %>% split(seq_len(nrow(design_method))),
-      object_envir = environment(),
-      qsub_environment = qsub_environment,
-      qsub_packages = qsub_packages,
-      qsub_config = qsub_config_method,
-      FUN = benchmark_qsub_fun
-    )
-
-    # save data and handle to RDS file
-    metadata <- lst(
-      local_output_folder,
-      remote_output_folder,
-      design_method,
-      timeout_per_execution,
-      max_memory_per_execution,
-      metrics,
-      suite_method_folder,
-      output_file,
-      qsubhandle_file,
-      qsub_handle
-    )
-    readr::write_rds(metadata, qsubhandle_file)
+      # save data and handle to RDS file
+      metadata <- lst(
+        local_output_folder,
+        remote_output_folder,
+        design_method,
+        timeout_per_execution,
+        max_memory_per_execution,
+        metrics,
+        suite_method_folder,
+        output_file,
+        qsubhandle_file,
+        qsub_handle
+      )
+      readr::write_rds(metadata, qsubhandle_file)
+    }
   }
 
   walk(design %>% split(design$method_id), submit_method)
