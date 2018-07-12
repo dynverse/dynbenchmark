@@ -13,6 +13,7 @@ create_replacers <- function(to_replace) {
 #' @param replacer Replacer dataframe
 #'
 #' @importFrom xml2 xml_find_all xml_attr xml_attrs xml_new_root read_xml xml_set_attrs xml_add_child xml_remove
+#' @importFrom utils type.convert
 #'
 #' @export
 replace_svg <- function(svg, replacer) {
@@ -40,7 +41,7 @@ replace_svg <- function(svg, replacer) {
       # find correct rect
       rectoi <- rects[[matched_rect]]
 
-      attrs <- xml2::xml_attrs(rectoi) %>% map(type.convert)
+      attrs <- xml2::xml_attrs(rectoi) %>% map(utils::type.convert)
 
       # create sub_svg
       sub_svg <- xml2::xml_new_root(xml2::read_xml(sub_svg_str))

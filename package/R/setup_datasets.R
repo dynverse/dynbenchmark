@@ -62,11 +62,12 @@ dataset_source_file <- datasetpreproc_subfolder("derived/01-datasets_preproc/sou
 #' @param filename What name to give to the file
 #' @param dataset_id An optional dataset_id
 #' @export
+#' @importFrom utils download.file
 download_dataset_source_file <- function(filename, url, dataset_id = NULL) {
   loc <- dataset_source_file(dataset_id = dataset_id, filename = filename)
 
   if (!file.exists(loc)) {
-    download.file(url, loc, method = "libcurl")
+    utils::download.file(url, loc, method = "libcurl")
   }
 
   loc
