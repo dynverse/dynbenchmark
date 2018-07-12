@@ -14,7 +14,7 @@
 #' generate_benchmark_design(
 #'   dataset_ids = c("toy/bifurcating_1", "toy/bifurcating_2"),
 #'   method_ids = c("angle", "scorpius", "tscan"),
-#'   parameters = list(scorpius = tibble(paramset_ix = 1), tscan = tibble(paramset_ix = 1:3, clusternum_lower = 4:6, clusternum_upper = 18:20)),
+#'   parameters = list(scorpius = tibble::tibble(paramset_ix = 1), tscan = tibble::tibble(paramset_ix = 1:3, clusternum_lower = 4:6, clusternum_upper = 18:20)),
 #'   give_priors = NULL,
 #'   num_repeats = 2
 #' )
@@ -129,46 +129,46 @@ benchmark_submit <- function(
 
     if (!file.exists(output_file) && !file.exists(qsubhandle_file)) {
       cat("Submitting ", method_id, "\n", sep = "")
-    }
 
-    # set parameters for the cluster
-    qsub_config_method <-
-      qsub::override_qsub_config(
-        qsub_config = qsub_config,
-        name = paste0("D_", method_id),
-        local_tmp_path = paste0(suite_method_folder, "/r2gridengine")
+      # set parameters for the cluster
+      qsub_config_method <-
+        qsub::override_qsub_config(
+          qsub_config = qsub_config,
+          name = paste0("D_", method_id),
+          local_tmp_path = paste0(suite_method_folder, "/r2gridengine")
+        )
+
+      # which packages to load on the cluster
+      qsub_packages <- c("dplyr", "purrr", "dyneval", "dynmethods", "readr")
+
+      # which data objects will need to be transferred to the cluster
+      qsub_environment <-  c("metrics", "verbose")
+
+      # submit to the cluster
+      qsub_handle <- qsub::qsub_lapply(
+        X = design_method %>% split(seq_len(nrow(design_method))),
+        object_envir = environment(),
+        qsub_environment = qsub_environment,
+        qsub_packages = qsub_packages,
+        qsub_config = qsub_config_method,
+        FUN = benchmark_qsub_fun
       )
 
-    # which packages to load on the cluster
-    qsub_packages <- c("dplyr", "purrr", "dyneval", "dynmethods", "readr")
-
-    # which data objects will need to be transferred to the cluster
-    qsub_environment <-  c("metrics", "verbose")
-
-    # submit to the cluster
-    qsub_handle <- qsub::qsub_lapply(
-      X = design_method %>% split(seq_len(nrow(design_method))),
-      object_envir = environment(),
-      qsub_environment = qsub_environment,
-      qsub_packages = qsub_packages,
-      qsub_config = qsub_config_method,
-      FUN = benchmark_qsub_fun
-    )
-
-    # save data and handle to RDS file
-    metadata <- lst(
-      local_output_folder,
-      remote_output_folder,
-      design_method,
-      timeout_per_execution,
-      max_memory_per_execution,
-      metrics,
-      suite_method_folder,
-      output_file,
-      qsubhandle_file,
-      qsub_handle
-    )
-    readr::write_rds(metadata, qsubhandle_file)
+      # save data and handle to RDS file
+      metadata <- lst(
+        local_output_folder,
+        remote_output_folder,
+        design_method,
+        timeout_per_execution,
+        max_memory_per_execution,
+        metrics,
+        suite_method_folder,
+        output_file,
+        qsubhandle_file,
+        qsub_handle
+      )
+      readr::write_rds(metadata, qsubhandle_file)
+    }
   }
 
   walk(design %>% split(design$method_id), submit_method)
@@ -242,6 +242,7 @@ benchmark_run_evaluation <- function(
   parameters <- design_row$parameters
 
   # get method
+  setup_singularity_methods()
   requireNamespace("dynmethods")
   if (identical(error_mode, FALSE)) {
     method_function <- dynmethods::methods %>%
@@ -270,6 +271,13 @@ benchmark_run_evaluation <- function(
     design_row,
     out$summary %>%
       mutate(error_message = ifelse(is.null(error[[1]]), "", error[[1]]$message)) %>%
+      mutate(error_status = case_when(
+        error_message == "Memory limit exceeded" ~ "memory_limit",
+        error_message == "Time limit exceeded" ~ "time_limit",
+        stringr::str_detect(error_message, "^Error status") ~ "execution_error",
+        is.null(out$model[[1]]) ~ "method_error",
+        TRUE ~ "no_error"
+      )) %>%
       select(-error, -method_id, -method_name, -dataset_id), # remove duplicate columns with design row
     tibble(
       model = out$models
