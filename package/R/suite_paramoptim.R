@@ -111,7 +111,7 @@ paramoptim_submit <- function(
     output_file <- paste0(method_folder, "/output.rds")
     qsubhandle_file <- paste0(method_folder, "/qsubhandle.rds")
 
-    qsub:::mkdir_remote(path = method_folder, remote = FALSE)
+    qsub::mkdir_remote(path = method_folder, remote = FALSE)
 
     ## If no output or qsub handle exists yet
     if (!file.exists(output_file) && !file.exists(qsubhandle_file)) {
