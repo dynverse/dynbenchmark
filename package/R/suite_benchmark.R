@@ -275,13 +275,6 @@ benchmark_run_evaluation <- function(
     design_row,
     out$summary %>%
       mutate(error_message = ifelse(is.null(error[[1]]), "", error[[1]]$message)) %>%
-      mutate(error_status = case_when(
-        error_message == "Memory limit exceeded" ~ "memory_limit",
-        error_message == "Time limit exceeded" ~ "time_limit",
-        stringr::str_detect(error_message, "^Error status") ~ "execution_error",
-        is.null(out$model[[1]]) ~ "method_error",
-        TRUE ~ "no_error"
-      )) %>%
       select(-error, -method_id, -method_name, -dataset_id), # remove duplicate columns with design row
     tibble(
       model = out$models
@@ -357,7 +350,7 @@ benchmark_fetch_results <- function(local_output_folder) {
               qsub_memory <- process_qsub_memory(qacct_filt$maxvmem)
               qsub_user_time <- qsub_handle$max_wall_time
 
-              memory_messages <- c("cannot allocate vector of size", "MemoryError")
+              memory_messages <- c("cannot allocate vector of size", "MemoryError", "OOM when allocating tensor")
               is_memory_problem <- function(message) {
                 any(map_lgl(memory_messages, ~grepl(., message)))
               }
