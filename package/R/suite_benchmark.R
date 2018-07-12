@@ -49,7 +49,7 @@ generate_benchmark_design <- function(
 
   give_priors_design <- tibble(give_priors = list(give_priors))
 
-  num_repeats_design <- tibble(repeat_ix = 1:num_repeats)
+  num_repeats_design <- tibble(repeat_ix = seq_len(num_repeats))
 
   # all combinations of the different parts
   crossing(
