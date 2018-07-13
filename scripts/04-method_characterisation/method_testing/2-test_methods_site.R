@@ -192,7 +192,7 @@ dataset_ids <- sort(unique(output$dataset_id))
 overview_table <- c(
   tags$tr(
       tags$th("Method"),
-      map(dataset_ids, ~tags$th(.))
+      map(dataset_ids, ~tags$th(tags$a(., href=glue("{escape_slashes(.)}.html"))))
   ) %>% list(),
   pmap(methods_output, function(method_id, name, ...) {
     method_output <- output %>% filter(method_id == !!method_id)
@@ -290,6 +290,34 @@ pwalk(methods_output, function(method_id, name, ...) {
     write_file(derived_file(glue("{method_id}.html")))
 })
 
+
+
+##  ............................................................................
+##  Dataset pages                                                           ####
+dimreds <- c("pca", "mds", "tsne", "umap")
+walk(datasets, function(dataset) {
+  dataset_id <- escape_slashes(dataset$id)
+  images <- map(dimreds, function(dimred) {
+    plot <- plot_dimred(
+      dataset,
+      dimred = dyndimred::dimred(get_expression(dataset), dimred, ndim=2),
+      grouping = dataset$prior_information$groups_id %>% deframe(),
+      plot_milestone_network = TRUE
+    ) + ggtitle(dimred)
+
+    image <- get_image(plot, glue("{dataset_id}_{dimred}"))
+  })
+
+  content <- tags$div(images)
+
+  list(
+    sidebar = as.character(generate_sidebar()),
+    title = dataset$id,
+    content = as.character(content)
+  ) %>%
+    whisker.render(template_base, .) %>%
+    write_file(derived_file(glue("{dataset_id}.html")))
+})
 
 
 #   ____________________________________________________________________________
