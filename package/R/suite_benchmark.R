@@ -469,15 +469,20 @@ benchmark_bind_results <- function(local_output_folder, load_models = FALSE) {
 
 #' Extract the error status from an evaluation
 #'
-#' @param stdout
-#' @param stderr
-#' @param error_message
+#' @param model The model
+#' @param stdout The standard output
+#' @param stderr The standard error
+#' @param error_message The error message
+#' @param ... Other columns in the output, ignored
 extract_error_status <- function(model, stdout, stderr, error_message, ...) {
   memory_messages <- c(
     "cannot allocate vector of size", # R
     "MemoryError", # python
     "OOM when allocating tensor", # tensorflow
-    "nullptr != block->mem" # tensorflow
+    "nullptr != block->mem", # tensorflow,
+    "std::bad_alloc", # tensorflow
+    "Bus error", # stemid 2 -> clustexpr
+    "what\\(\\):  Resource temporarily unavailable" # grandprix
   )
   is_memory_problem <- function(message) {
     any(map_lgl(memory_messages, ~grepl(., message)))
@@ -488,8 +493,10 @@ extract_error_status <- function(model, stdout, stderr, error_message, ...) {
     is_memory_problem(stderr) ~ "memory_limit",
     is_memory_problem(error_message) ~ "memory_limit",
     is_memory_problem(stdout) ~ "memory_limit",
-    error_message == "Time limit exceeded" ~ "time_limit",
-    stringr::str_detect(error_message, "^Error status") ~ "execution_error",
+    stringr::str_detect(error_message, "Time limit exceeded") ~ "time_limit",
+    stringr::str_detect(stderr, "Time limit exceeded") ~ "time_limit",
+    stringr::str_detect(error_message, "^Error status [0-9]*.*") ~ "execution_error",
+    stringr::str_detect(stderr, "^Error status [0-9]*.*") ~ "execution_error",
     is.null(model[[1]]) ~ "method_error",
     TRUE ~ "no_error"
   )
