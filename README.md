@@ -1,9 +1,9 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-dynbenchmark
-============
+[![Build Status](https://api.travis-ci.org/dynverse/dynbenchmark.svg)](https://travis-ci.org/dynverse/dynbenchmark) ![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg) <img src="package/man/figures/logo.png" align="right" />
 
-[![Build Status](https://api.travis-ci.org/dynverse/dynbenchmark.svg)](https://travis-ci.org/dynverse/dynbenchmark) ![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
+Benchmarking single-cell trajectory inference methods
+=====================================================
 
 Scripts to reproduce the manuscript
 
