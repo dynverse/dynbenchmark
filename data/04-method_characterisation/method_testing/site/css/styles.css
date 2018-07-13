@@ -1,0 +1,7 @@
+tr.clickable-row {
+  cursor: pointer;
+}
+
+tr.clickable-row:hover {
+  background-color: #DDD
+}
