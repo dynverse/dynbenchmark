@@ -11,7 +11,7 @@ experiment("04-method_characterisation/method_testing/site")
 #   Helper functions                                                        ####
 
 # escape slashes
-escape_slashes <- function(x) {gsub("/", "_", x)}
+escape_slashes <- function(x) {gsub("/", "_", x) %>% gsub("-", "_", .)}
 
 # produce clean stdout/stderr
 get_output_collapsable <- function(x, name) {
@@ -66,7 +66,7 @@ method_statuses <- tribble(
   "execution_error", "#85144b", fontawesome::fa("times", fill="white"),
   "memory_limit", "#FF851B", fontawesome::fa("memory", fill="white"),
   "time_limit", "#FFDC00", fontawesome::fa("clock", fill="white"),
-  "low_correlation", "#01FF70", fontawesome::fa("poo", fill="white"),
+  "low_correlation", "#39CCCC", fontawesome::fa("thumbs-down", fill="white"),
   "success", "#2ECC40", fontawesome::fa("check-circle", fill="white")
 )
 
@@ -88,12 +88,18 @@ generate_method_status_badge <- function(method_status, full = TRUE) {
 output <- read_rds(derived_file("output.rds", experiment = "04-method_characterisation/method_testing"))
 
 # generate method specific pages
-output_plots <- pmap_df(output, function(model, method_id, ...) {
+dataset_ids <- unique(output$dataset_id)
+datasets <- load_datasets(dataset_ids) %>% tmap(identity) %>% set_names(dataset_ids)
+
+output_plots <- pmap_df(output, function(model, method_id, dataset_id,...) {
+  dataset <- datasets[[dataset_id]]
+  grouping <- dataset$prior_information$groups_id %>% deframe()
+
   plot_cells <- if (is_wrapper_with_trajectory(model)) {
     if (is_wrapper_with_dimred(model)) {
-      plot_dimred(model)
+      plot_dimred(model, grouping = grouping)
     } else {
-      plot_graph(model)
+      plot_graph(model, grouping = grouping)
     }
   } else {
     NULL
@@ -179,31 +185,34 @@ generate_sidebar <- function(active = NULL) {
 ##  ............................................................................
 ##  Index page                                                              ####
 
+metric_ids <- intersect(metrics$metric_id, colnames(output))
+dataset_ids <- sort(unique(output$dataset_id))
+
 # generate overview table
 overview_table <- c(
   tags$tr(
       tags$th("Method"),
-      tags$th("Dataset"),
-      tags$th("Status")
+      map(dataset_ids, ~tags$th(.))
   ) %>% list(),
-  pmap(output, function(method_id, dataset_id, method_status, method_output_ix, method_output_n, ...) {
-    name <- methods_output$name[match(method_id, methods_output$method_id)][[1]]
-
-    if (method_output_ix == 1) {
-      td_name <- tags$td(name, rowspan = method_output_n)
-    } else {
-      td_name <- ""
-    }
+  pmap(methods_output, function(method_id, name, ...) {
+    method_output <- output %>% filter(method_id == !!method_id)
 
     tags$tr(
       class = "clickable-row",
-      `data-href` = glue("{method_id}.html#{escape_slashes(dataset_id)}"),
-      td_name,
-      tags$td(dataset_id),
-      tags$td(generate_method_status_badge(method_status))
+      `data-href` = glue("{method_id}.html"),
+      tags$td(name),
+      map(dataset_ids, function(dataset_id) {
+        dataset_output <- method_output %>% filter(dataset_id == !!dataset_id)
+        if (nrow(dataset_output) == 1) {
+          tags$td(generate_method_status_badge(dataset_output$method_status))
+        } else {
+          tags$td()
+        }
+      })
+
     )
   })
-) %>% tags$table(class = "table")
+) %>% tags$table(class = "table table-sm")
 
 # render overview
 list(
@@ -221,6 +230,7 @@ list(
 generate_method_content <- function(method_output) {
   tmap(method_output, function(out) {
     print(out$method_id)
+
     if (!is.null(out$plot_cells) && !is.null(out$plot_topology)) {
       images <-
         tags$div(
@@ -233,7 +243,7 @@ generate_method_content <- function(method_output) {
     }
 
     tags$div(
-      class = paste0("tab-pane fade", ifelse(out$method_output_ix == 1, "", " show active")),
+      class = paste0("tab-pane fade", ifelse(out$method_output_ix == 1, " show active", "")),
       id = escape_slashes(out$dataset_id),
       tags$div(images),
       tags$div(get_output_collapsable(out$stdout, "stdout")),
@@ -251,7 +261,7 @@ pwalk(methods_output, function(method_id, name, ...) {
       class = "nav nav-tabs",
       pmap(method_output, function(dataset_id, method_status, method_output_ix, ...) {
         tags$a(
-          class = paste0("nav-item nav-link", ifelse(method_output_ix == 1, "", " active")),
+          class = paste0("nav-item nav-link", ifelse(method_output_ix == 1, " active", "")),
           `data-toggle` = "tab",
           href = glue("#{escape_slashes(dataset_id)}"),
           dataset_id,
@@ -282,8 +292,7 @@ pwalk(methods_output, function(method_id, name, ...) {
 
 
 
-
 #   ____________________________________________________________________________
 #   Deploy                                                                  ####
-fs::dir_delete("docs/method_testing")
-fs::dir_copy(derived_file(), "docs/method_testing")
+site_folder <- "../sites/dynmethods_automated_testing/"
+system(glue("cp -R {derived_file()}* {site_folder}"))

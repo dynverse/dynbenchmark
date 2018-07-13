@@ -5,3 +5,31 @@ tr.clickable-row {
 tr.clickable-row:hover {
   background-color: #DDD
 }
+
+img#logo {
+  display:block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 150px;
+  max-height: 150px;
+}
+
+div#logo {
+  text-align: center;
+  font-size:1.5em;
+}
+
+#logo a{
+  color:white
+}
+
+/* reset paddings */
+[role="main"] {
+  padding-top: 0px;
+}
+.sidebar{
+  padding: 0px;
+}
+.sidebar-sticky{
+  padding-top:0px;
+}
