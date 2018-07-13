@@ -6,12 +6,16 @@ library(tidyverse)
 experiment("04-method_characterisation/method_testing")
 
 design <- generate_benchmark_design(
-  dataset_ids = c("toy/bifurcating_1", "toy/linear_1"),
+  dataset_ids = c(
+    "toy/bifurcating_1",
+    "toy/linear_1",
+    "real/developing-dendritic-cells_schlitzer",
+    "real/fibroblast-reprogramming_treutlein"
+  ),
   method_ids = dynmethods::methods$method_id,
   give_priors = NULL
 )
 write_rds(design, derived_file("design.rds"))
-
 
 
 design <- read_rds(derived_file("design.rds"))
@@ -51,7 +55,7 @@ output %>%
     facet_wrap(~dataset_id)
 
 
-output %>% filter(method_id == "scoup") %>% pull(stdout)
+output %>% filter(method_id == "cellrouter") %>% pull(stdout) %>% first() %>% cat
 
 output %>% filter(method_id == "fateid") %>% pull(error_message) %>% cat
 
@@ -64,4 +68,4 @@ output %>% filter(str_detect(error_message, "no item called .*")) %>% pull(metho
 testthat::expect_setequal(output$method_id, design$method_id)
 
 
-write_rds(output, derived_file("output.rds"))
+write_rds(output, derived_file("output.rds", experiment_id = "04-method_characterisation/method_testing"))
