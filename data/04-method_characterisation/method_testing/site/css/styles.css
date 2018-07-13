@@ -33,3 +33,17 @@ div#logo {
 .sidebar-sticky{
   padding-top:0px;
 }
+
+
+
+
+
+/* Footer */
+
+.footer {
+  margin: 0 auto;
+}
+
+.footer img {
+  max-height: 75px;
+}
