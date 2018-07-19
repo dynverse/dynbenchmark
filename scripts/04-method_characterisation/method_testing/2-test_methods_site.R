@@ -89,7 +89,7 @@ output <- read_rds(derived_file("output.rds", experiment = "04-method_characteri
 
 # generate method specific pages
 dataset_ids <- unique(output$dataset_id)
-datasets <- load_datasets(dataset_ids) %>% tmap(identity) %>% set_names(dataset_ids)
+datasets <- load_datasets(dataset_ids) %>% mapdf(identity) %>% set_names(dataset_ids)
 
 output_plots <- pmap_df(output, function(model, method_id, dataset_id,...) {
   dataset <- datasets[[dataset_id]]
@@ -228,7 +228,7 @@ list(
 ##  Method pages                                                            ####
 
 generate_method_content <- function(method_output) {
-  tmap(method_output, function(out) {
+  mapdf(method_output, function(out) {
     print(out$method_id)
 
     if (!is.null(out$plot_cells) && !is.null(out$plot_topology)) {
