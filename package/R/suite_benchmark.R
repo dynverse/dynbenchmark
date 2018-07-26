@@ -30,12 +30,10 @@ check_benchmark_design_parameters <- function(
 #' Generate a benchmarking design
 #'
 #' @param datasets The datasets to be used in the evaluation.
-#'   Can be a character vector (the dataset ids), a list of
-#'   dynwrap datasets, or a list of functions each of which will generate
-#'   a dynwrap dataset.
+#'   Must be a named list consisting of dataset ids (character),
+#'   dynwrap::data_wrapper's, or functions that generate dynwrap::data_wrapper's.
 #' @param methods The methods to be evaluated.
-#'   Can be a character vector (the method ids), or a list of
-#'   dynwrap TI methods.
+#'   Must be a named list consisting of method_ids (character) or dynwrap::ti_wrapper's.
 #' @param parameters A named list containing data frames of the parameters to evaluate.
 #'   The names of the list must be present in method_ids.
 #'   The data frames must be of format \code{data_frame(paramset_id = "set1", param1 = "a", param2 = 2.0)}.
@@ -45,12 +43,20 @@ check_benchmark_design_parameters <- function(
 #' @examples
 #' library(tibble)
 #' generate_benchmark_design(
-#'   datasets = c("toy/bifurcating_1", "toy/bifurcating_2"),
-#'   methods = c("angle", "scorpius", "tscan"),
+#'   datasets = list(
+#'     "toy/bifurcating_1",
+#'     dyntoy::generate_dataset(unique_id = "test"),
+#'     test2 = function() dyntoy::generate_dataset(unique_id = "test")
+#'   ),
+#'   methods = list("angle", dynmethods::ti_scorpius(), "tscan"),
 #'   parameters = list(
-#'     scorpius = tibble(paramset_ix = 1),
-#'     tscan = tibble(paramset_ix = 1:3, clusternum_lower = 4:6, clusternum_upper = 18:20)
-#'  ),
+#'     scorpius = tibble(paramset_id = "default"),
+#'     tscan = tibble(
+#'       paramset_id = paste0("test", 1:3),
+#'       clusternum_lower = 4:6,
+#'       clusternum_upper = 18:20
+#'     )
+#'   ),
 #'   give_priors = NULL,
 #'   num_repeats = 2
 #' )
@@ -70,34 +76,70 @@ generate_benchmark_design <- function(
     num_repeats
   )
 
-  method_names <- sapply(methods, function(x) if (is.character(x)) x else x$short_name)
+  # collect the dataset ids
+  dataset_ids <- map_chr(seq_along(datasets), function(di) {
+    d <- datasets[[di]]
 
-  parameters <- parameters %>%
-    group_by(method_id) %>%
-    mutate(param_ix = seq_len(n())) %>%
-    ungroup()
+    if (is.character(d)) {
+      d
+    } else if (dynwrap::is_wrapper_with_expression(d)) {
+      d$id
+    } else if (is.function(d)) {
+      names(datasets)[[di]]
+    } else {
+      stop("datasets must be a named list consisting of dataset ids (character), dynwrap::data_wrapper's, or functions that generate dynwrap::data_wrapper's")
+    }
+  })
 
-  param_df <- parameters %>%
-    select(-paramset, -param_id) %>%
-    mutate(
-      method_id = match(method_id, method_names)
-    )
+  # collect the method_ids
+  method_ids <- map_chr(methods, function(m) {
+    if (is.character(m)) {
+      m
+    } else if (dynwrap::is_ti_method(m)) {
+      m$id
+    } else {
+      stop("methods must be a named list consisting of method_ids (character) or dynwrap::ti_wrapper's")
+    }
+  })
+
+  testthat::expect_false(any(duplicated(dataset_ids)))
+  testthat::expect_false(any(duplicated(method_ids)))
+
+  # check whether all methods are present in the parameter sets
+  for (mn in method_ids) {
+    if (!mn %in% names(parameters)) {
+      parameters[[mn]] <- tibble(paramset_id = "default")
+    }
+  }
+
+  param_df <- map_df(
+    method_ids,
+    function(mn) {
+      parameters[[mn]] %>%
+        mutate(method_id = mn) %>%
+        select(method_id, paramset_id)
+    }
+  ) %>% mutate(
+    method_id = factor(method_id, levels = method_ids)
+  )
 
   # generate designs of the different parts of the evaluation
   crossing <- crossing(
-    dataset = seq_along(datasets),
-    method = seq_along(methods),
+    dataset_id = factor(dataset_ids),
+    method_id = factor(method_ids),
     give_priors = seq_along(give_priors),
-    num_repeats = seq_along(num_repeats)
+    num_repeats = seq_len(num_repeats)
   ) %>%
-    left_join(param_df, by = c("method" = "method_id"))
+    left_join(param_df, by = "method_id")
 
   num_repeats <- seq_len(num_repeats)
 
   # all combinations of the different parts
   list(
     datasets = datasets,
+    dataset_ids = dataset_ids,
     methods = methods,
+    method_ids = method_ids,
     give_priors = give_priors,
     num_repeats = num_repeats,
     parameters = parameters,
