@@ -73,7 +73,7 @@ label_pvalue <- function(p_values, cutoffs = c(0.1, 0.01, 1e-5)) {
   requireNamespace("glue")
 
   breaks <- c(Inf, cutoffs, -Inf)
-  labels <- rev(c("NS", map_chr(seq_len(length(cutoffs)), ~glue::collapse(rep("*", .)))))
+  labels <- rev(c("NS", map_chr(seq_len(length(cutoffs)), ~glue::glue_collapse(rep("*", .)))))
   p_values %>% cut(breaks, labels) %>% as.character()
 }
 

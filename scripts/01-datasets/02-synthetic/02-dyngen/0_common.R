@@ -1,5 +1,5 @@
 library(tidyverse)
-library(PRISM)
+library(qsub)
 library(dynbenchmark)
 
 dataset_id <- "synthetic/v7"

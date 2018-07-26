@@ -55,7 +55,7 @@ replace_svg <- function(svg, replacer) {
       sub_g <- xml2::xml_new_root("g")
 
       # transform the group
-      transform <- glue::collapse(c(
+      transform <- glue::glue_collapse(c(
         "translate({attrs$x}, {attrs$y})", # translate to box
         "translate({(attrs$width - sub_svg_width*scale)/2}, {(attrs$height - sub_svg_height*scale)/2})", # move to center
         "scale({scale})" # scale within box
