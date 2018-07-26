@@ -46,7 +46,7 @@ check_benchmark_design_parameters <- function(
 #' library(tibble)
 #' generate_benchmark_design(
 #'   datasets = c("toy/bifurcating_1", "toy/bifurcating_2"),
-#'   method_ids = c("angle", "scorpius", "tscan"),
+#'   methods = c("angle", "scorpius", "tscan"),
 #'   parameters = list(
 #'     scorpius = tibble(paramset_ix = 1),
 #'     tscan = tibble(paramset_ix = 1:3, clusternum_lower = 4:6, clusternum_upper = 18:20)
