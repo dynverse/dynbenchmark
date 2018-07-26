@@ -59,7 +59,6 @@ output %>% filter(method_id == "cellrouter") %>% pull(stdout) %>% first() %>% ca
 
 output %>% filter(method_id == "fateid") %>% pull(error_message) %>% cat
 
-
 output %>% filter(str_detect(error_message, "no item called .*")) %>% pull(method_id) %>% unique()
 
 
