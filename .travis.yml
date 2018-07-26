@@ -19,6 +19,5 @@ install:
 - R -e 'if ("devtools" %in% rownames(installed.packages())) update.packages(oldPkgs = "devtools", ask = FALSE) else install.packages("devtools")'
 - R -e 'devtools::install_cran("covr")'
 - R -e 'setRepositories(ind = 1:2); devtools::install(dependencies = TRUE, upgrade = TRUE)'
-- R -e 'dynmethods::check_dependencies()'
 after_success:
 - R -e 'covr::codecov()'
