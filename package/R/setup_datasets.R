@@ -173,6 +173,6 @@ load_datasets <- function(dataset_ids = list_datasets()$dataset_id, as_tibble = 
 #' List the platforms
 #' @export
 load_platforms <- function() {
-  folder <- derived_file("", "01-datasets_preproc/platforms")
+  folder <- derived_file("", experiment_id = "01-datasets_preproc/platforms")
   list.files(folder, recursive = TRUE, full.names = TRUE) %>% gsub("(.*)\\.tsv", "\\1", .) %>% map(read_rds)
 }

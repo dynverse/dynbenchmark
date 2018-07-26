@@ -45,6 +45,7 @@ Imports:
   reshape2,
   rvest,
   smoof,
+  splatter,
   stats,
   stringr,
   tidyr,
