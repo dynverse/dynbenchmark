@@ -50,17 +50,15 @@ generate_dyngen_dataset <- function(dataset_id, params) {
     dyngen::wrap_dyngen_dataset(dataset_id, params, model, simulation, gs, experiment, normalisation)
   )
 
-  file <- dataset_file("dataset.rds", dataset_id = dataset_id)
-  dir.create(dirname(file), showWarnings = TRUE, recursive = TRUE)
-  write_rds(dataset, file)
+  save_dataset(dataset, dataset_id)
 
   TRUE
 }
 
-dataset_id <- "synthetic/dyngen/linear_1"
-params <- dyngen::simple_params
-
-generate_dyngen_dataset(dataset_id, params)
+# dataset_id <- "synthetic/dyngen/linear_1"
+# params <- dyngen::simple_params
+#
+# generate_dyngen_dataset(dataset_id, params)
 
 design <- crossing(
   modulenet_name = dyngen::list_modulenets(),
@@ -76,9 +74,6 @@ design$params <- pmap(design, function(modulenet_name, platform, ...) {
 
   params
 })
-
-design$params[[2]]$simulation$nsimulations <- 1
-
 
 qsub_config <- override_qsub_config(memory = "10G", max_wall_time = "24:00:00", num_cores = 1, name = "dyngen", wait = F)
 handle <- mapdf(design, identity) %>%
