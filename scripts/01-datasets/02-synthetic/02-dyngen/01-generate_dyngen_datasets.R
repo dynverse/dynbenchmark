@@ -49,6 +49,7 @@ generate_dyngen_dataset <- function(dataset_id, params) {
     dataset_source_file("dataset.rds"),
     dyngen::wrap_dyngen_dataset(dataset_id, params, model, simulation, gs, experiment, normalisation)
   )
+  dataset$dataset_source <- "synthetic/dyngen"
 
   save_dataset(dataset, dataset_id)
 

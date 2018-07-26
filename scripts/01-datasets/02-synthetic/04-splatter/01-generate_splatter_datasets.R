@@ -88,7 +88,8 @@ handle <- qsub_lapply(
   # wrap dataset
   dataset <- wrap_data(
     id = design_row$dataset_id,
-    cell_ids = rownames(expression)
+    cell_ids = rownames(expression),
+    dataset_source = "synthetic/splatter"
   ) %>%
     add_expression(
       counts = counts,

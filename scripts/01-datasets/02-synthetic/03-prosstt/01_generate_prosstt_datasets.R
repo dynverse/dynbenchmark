@@ -28,17 +28,22 @@ design <- crossing(
   )
 
 design_row <- extract_row_to_list(design, 2)
-design_row <- extract_row_to_list(design, which(design$dataset_id == "synthetic/prosstt/binary_tree_3"))
+design_row <- extract_row_to_list(design, which(design$dataset_id == "synthetic/prosstt/linear_12"))
 
-# generate all datasets
-mapdf(design %>% filter(row_number() > which(design$dataset_id == "synthetic/prosstt/binary_tree_1")), function(design_row) {
+# generate all datasets, this can take some ~ 15 min
+mapdf(design, function(design_row) {
   print(design_row$dataset_id)
 
   # generate milestone network
   milestone_network <- dyntoy::generate_milestone_network(design_row$model)
-  milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
+
+  # special case for the A->B network
+  if (nrow(milestone_network) == 1) {
+    milestone_network <- dyntoy::generate_milestone_network("linear", num_milestones = 2)
+  }
 
   # generate branch network from milestone network
+  milestone_ids <- unique(c(milestone_network$from, milestone_network$to))
   milestone_network$branch_id <- as.character(seq_len(nrow(milestone_network)))
   branches <- milestone_network %>% select(branch_id, length, directed)
   branch_network <- map_df(milestone_ids, function(milestone_id) {
@@ -104,7 +109,7 @@ mapdf(design %>% filter(row_number() > which(design$dataset_id == "synthetic/pro
   ) %>% select(cell_id,branch_id, percentage)
 
   # normalise & filter
-  counts[counts < 0] <- 0
+  counts[counts < 0] <- 0 # in some cases, prosstt produces verry low numbers (eg. -8e564)
   normalised <- dynnormaliser::normalise_filter_counts(counts, verbose = TRUE)
   counts <- normalised$counts
   expression <- normalised$expression
@@ -114,7 +119,8 @@ mapdf(design %>% filter(row_number() > which(design$dataset_id == "synthetic/pro
   # create dataset
   dataset <- wrap_data(
     id = design_row$dataset_id,
-    rownames(counts)
+    rownames(counts),
+    dataset_source = "synthetic/prosstt"
   ) %>%
     add_branch_trajectory(
       branch_network = branch_network,
