@@ -9,13 +9,11 @@ generate_benchmark_design(datasets, methods, parameters = NULL,
 }
 \arguments{
 \item{datasets}{The datasets to be used in the evaluation.
-Can be a character vector (the dataset ids), a list of
-dynwrap datasets, or a list of functions each of which will generate
-a dynwrap dataset.}
+Must be a named list consisting of dataset ids (character),
+dynwrap::data_wrapper's, or functions that generate dynwrap::data_wrapper's.}
 
 \item{methods}{The methods to be evaluated.
-Can be a character vector (the method ids), or a list of
-dynwrap TI methods.}
+Must be a named list consisting of method_ids (character) or dynwrap::ti_wrapper's.}
 
 \item{parameters}{A named list containing data frames of the parameters to evaluate.
 The names of the list must be present in method_ids.
@@ -32,12 +30,20 @@ Generate a benchmarking design
 \examples{
 library(tibble)
 generate_benchmark_design(
-  datasets = c("toy/bifurcating_1", "toy/bifurcating_2"),
-  methods = c("angle", "scorpius", "tscan"),
+  datasets = list(
+    "toy/bifurcating_1",
+    dyntoy::generate_dataset(unique_id = "test"),
+    test2 = function() dyntoy::generate_dataset(unique_id = "test")
+  ),
+  methods = list("angle", dynmethods::ti_scorpius(), "tscan"),
   parameters = list(
-    scorpius = tibble(paramset_ix = 1),
-    tscan = tibble(paramset_ix = 1:3, clusternum_lower = 4:6, clusternum_upper = 18:20)
- ),
+    scorpius = tibble(paramset_id = "default"),
+    tscan = tibble(
+      paramset_id = paste0("test", 1:3),
+      clusternum_lower = 4:6,
+      clusternum_upper = 18:20
+    )
+  ),
   give_priors = NULL,
   num_repeats = 2
 )
