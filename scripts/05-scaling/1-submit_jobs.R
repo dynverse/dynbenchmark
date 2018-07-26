@@ -57,7 +57,7 @@ dataset_funs <- lapply(seq_len(nrow(dim_df)), function(i) {
 
 
 # define methods
-method_ids <- get_ti_methods()$method_id
+method_ids <- dynmethods::methods$id
 
 # create design
 design <- generate_benchmark_design(
