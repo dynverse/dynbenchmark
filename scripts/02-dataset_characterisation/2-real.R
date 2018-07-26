@@ -4,12 +4,11 @@ library(dynbenchmark)
 
 experiment("02-dataset_characterisation/2-real")
 
-datasets_real <- load_datasets(list_datasets() %>% filter(dataset_source == "real") %>% pull(dataset_id), as_tibble = TRUE)
-
+datasets_real <- load_datasets() %>% filter(dataset_source == "real")
 
 #   ____________________________________________________________________________
 #   Add dimensionality reduction                                            ####
-datasets_real <- mapdf(datasets_real, add_dimred, dimred = dyndimred::dimred_umap) %>% list_as_tibble()
+datasets_real <- mapdf_lat(datasets_real, add_dimred, dimred = dyndimred::dimred_umap)
 
 datasets_real_plots <- tibble(
   dataset_id = datasets_real$id,
