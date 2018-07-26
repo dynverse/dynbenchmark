@@ -100,7 +100,7 @@ handle <- qsub_lapply(
     )
 
   # save dataset
-  write_rds(dataset, dataset_file("dataset.rds", dataset_id = dataset$id))
+  save_dataset(dataset, design_row$dataset_id)
 
   TRUE
 })
