@@ -1,11 +1,11 @@
 #' A parameter optimisation suite
 #'
 #' @param dataset_ids The ids of the datasets to be used in the evaluation.
-#' @param methods A tibble of TI methods to use, see \code{\link[dynwrap]{get_ti_methods}}.
+#' @param methods A tibble of TI methods to use, see [dynwrap::get_ti_methods()].
 #' @param timeout_paramoptim The parameter optimisation timeout
 #' @param max_memory_per_core The maximum amount of memory each core is allowed to use
 #' @param num_cores The number of cores to use.
-#' @param metrics Which metrics to evaluate; see \code{\link{calculate_metrics}} for a list of which metrics are available.
+#' @param metrics Which metrics to evaluate; see [calculate_metrics()] for a list of which metrics are available.
 #' @param num_repeats The number of times to repeat the evaluation.
 #' @param num_iterations The number of iterations to run.
 #' @param num_init_params The number of initial parameters to evaluate.
