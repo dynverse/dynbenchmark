@@ -100,6 +100,14 @@ handle <- qsub_lapply(
       progressions = progressions
     )
 
+  dataset$simulation_design <- c(
+    design_row,
+    list(
+      simulator = "splatter",
+      simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "splatter", "dynbenchmark"))
+    )
+  )
+
   # save dataset
   save_dataset(dataset, design_row$dataset_id)
 

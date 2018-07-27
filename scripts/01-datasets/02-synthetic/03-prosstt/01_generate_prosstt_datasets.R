@@ -132,6 +132,14 @@ mapdf(design, function(design_row) {
       expression = expression
     )
 
+  dataset$simulation_design <- c(
+    design_row,
+    list(
+      simulator = "prosstt",
+      simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "prosstt", "splatter", "dynbenchmark"))
+    )
+  )
+
   # save dataset
   save_dataset(dataset, design_row$dataset_id)
 
