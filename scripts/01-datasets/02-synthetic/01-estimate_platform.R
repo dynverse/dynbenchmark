@@ -1,7 +1,8 @@
 library(splatter)
-library(Seurat)
 library(tidyverse)
 library(dynbenchmark)
+
+library(qsub)
 
 experiment("01-datasets_preproc/platforms")
 
@@ -22,47 +23,67 @@ splatEstDropout <- function(norm.counts, params) {
   params <- splatter::setParams(params, dropout.mid = mid, dropout.shape = shape)
   return(params)
 }
-assignInNamespace("splatEstDropout", splatEstDropout, pos = "package:splatter")
 
-# dataset_id <- dataset_ids[[1]]
-platforms <- map(dataset_ids, function(dataset_id) {
-  if (!file.exists(dataset_raw_file(dataset_id))) {
-    warning(dataset_id, " not found")
+# run on cluster
+qsub_config <- override_qsub_config(
+  name = "estimate_platforms",
+  memory = "10G",
+  wait = FALSE
+)
 
-    NULL
-  } else {
-    print(dataset_id)
-    dataset_raw <- read_rds(dataset_raw_file(dataset_id))
+handle <- qsub_lapply(
+  dataset_ids,
+  qsub_config = qsub_config,
+  qsub_packages = c("splatter", "dynbenchmark", "Seurat", "tidyverse"),
+  qsub_environment = "splatEstDropout",
+  function(dataset_id) {
+    platform_location <- derived_file(paste0(platform$platform_id, ".rds"), experiment_id = "01-datasets_preproc/platforms")
 
-    counts <- dataset_raw$counts
+    platform <- load_or_generate(
+      platform_location,
+      {
+        assignInNamespace("splatEstDropout", splatEstDropout, pos = "package:splatter")
 
-    # determine how many features change between trajectory stages
-    seurat <- Seurat::CreateSeuratObject(t(dataset_raw$counts))
-    seurat@ident <- factor(dataset_raw$grouping)
-    changing <- FindAllMarkers(seurat, logfc.treshold = 1, min.pct = 0.4, test.use = "t")
-    n_changing <- changing %>% pull(gene) %>% unique() %>% length()
-    trajectory_dependent_features <- n_changing / ncol(counts)
+        dataset_raw <- read_rds(dataset_raw_file(dataset_id))
 
-    # estimate splatter params
-    estimate <- splatEstimate(t(counts[sample(nrow(counts), min(nrow(counts), 500)), ]))
-    class(estimate) <- "TheMuscularDogBlinkedQuietly." # change the class, so scater won't get magically loaded when the platform is loaded
+        counts <- dataset_raw$counts
 
-    # create platform object
-    platform <- lst(
-      estimate,
-      trajectory_dependent_features,
-      n_cells = nrow(counts),
-      n_features = ncol(counts),
-      platform_id = dataset_id
+        # determine how many features change between trajectory stages
+        seurat <- Seurat::CreateSeuratObject(t(dataset_raw$counts))
+        seurat@ident <- factor(dataset_raw$grouping)
+        changing <- FindAllMarkers(seurat, logfc.treshold = 1, min.pct = 0.4, test.use = "t")
+        n_changing <- changing %>% pull(gene) %>% unique() %>% length()
+        trajectory_dependent_features <- n_changing / ncol(counts)
+
+        # estimate splatter params
+        estimate <- splatEstimate(t(counts[sample(nrow(counts), min(nrow(counts), 500)), ]))
+        class(estimate) <- "TheMuscularDogBlinkedQuietly." # change the class, so scater won't get magically loaded when the platform is loaded
+
+        # create platform object
+        platform <- lst(
+          estimate,
+          trajectory_dependent_features,
+          n_cells = nrow(counts),
+          n_features = ncol(counts),
+          platform_id = dataset_id
+        )
+      }
     )
 
-    platform
+    TRUE
   }
-}) %>% discard(is.null)
+)
 
+write_rds(handle, derived_file("handle.rds"))
+handle <- read_rds(derived_file("handle.rds"))
 
-walk(platforms, function(platform) {
-  file <- derived_file(paste0(platform$platform_id, ".rds"))
-  dir.create(dirname(file), showWarnings = F)
-  write_rds(platform, file)
-})
+qsub_retrieve(handle)
+
+# sync back locally
+qsub::rsync_remote(
+  remote_src = TRUE,
+  path_src = derived_file(remote = TRUE),
+  remote_dest = FALSE,
+  path_dest = derived_file(remote = FALSE),
+  verbose = TRUE
+)
