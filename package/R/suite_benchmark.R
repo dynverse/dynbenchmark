@@ -36,7 +36,7 @@ check_benchmark_design_parameters <- function(
 #'   Must be a named list consisting of method_ids (character) or dynwrap::ti_wrapper's.
 #' @param parameters A named list containing data frames of the parameters to evaluate.
 #'   The names of the list must be present in method_ids.
-#'   The data frames must be of format \code{data_frame(paramset_id = "set1", param1 = "a", param2 = 2.0)}.
+#'   The data frames must be of format `data_frame(paramset_id = "set1", param1 = "a", param2 = 2.0)`.
 #' @param num_repeats The number of times to repeat the evaluation.
 #' @inheritParams dynwrap::infer_trajectories
 #'
@@ -156,7 +156,7 @@ generate_benchmark_design <- function(
 #' @param design Design tibble of the experiment, created by [generate_benchmark_design()].
 #' @param timeout_per_execution The maximum number of seconds each execution is allowed to run, otherwise it will fail.
 #' @param max_memory_per_execution The maximum amount of memory each execution is allowed to use, otherwise it will fail.
-#' @param metrics Which metrics to evaluate; see \code{\link{calculate_metrics}} for a list of which metrics are available.
+#' @param metrics Which metrics to evaluate; see [calculate_metrics()] for a list of which metrics are available.
 #' @param local_output_folder A folder in which to output intermediate and final results.
 #' @param remote_output_folder A folder in which to store intermediate results in a remote directory when using the qsub package.
 #' @param execute_before Shell commands to execute before running R.

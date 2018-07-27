@@ -10,13 +10,13 @@ benchmark_submit(design, timeout_per_execution = 3600,
   verbose = TRUE)
 }
 \arguments{
-\item{design}{Design tibble of the experiment, created by [generate_benchmark_design()].}
+\item{design}{Design tibble of the experiment, created by \code{\link[=generate_benchmark_design]{generate_benchmark_design()}}.}
 
 \item{timeout_per_execution}{The maximum number of seconds each execution is allowed to run, otherwise it will fail.}
 
 \item{max_memory_per_execution}{The maximum amount of memory each execution is allowed to use, otherwise it will fail.}
 
-\item{metrics}{Which metrics to evaluate; see \code{\link{calculate_metrics}} for a list of which metrics are available.}
+\item{metrics}{Which metrics to evaluate; see \code{\link[=calculate_metrics]{calculate_metrics()}} for a list of which metrics are available.}
 
 \item{local_output_folder}{A folder in which to output intermediate and final results.}
 
