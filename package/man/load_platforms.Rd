@@ -2,10 +2,13 @@
 % Please edit documentation in R/setup_platforms.R
 \name{load_platforms}
 \alias{load_platforms}
+\alias{load_simple_platform}
 \alias{select_platforms}
 \title{List and load the platforms}
 \usage{
 load_platforms()
+
+load_simple_platform()
 
 select_platforms(n_platforms)
 }

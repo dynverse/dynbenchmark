@@ -55,7 +55,11 @@ Imports:
   tidygraph,
   xml2
 Suggests:
-  qsub
+  qsub,
+  SingleCellExperiment,
+  devtools,
+  igraph,
+  reticulate
 Remotes:
   dynverse/dyneval,
   dynverse/dyngen,

@@ -5,6 +5,17 @@ load_platforms <- function() {
   list.files(folder, recursive = TRUE, full.names = TRUE) %>% gsub("(.*)\\.tsv", "\\1", .) %>% map(read_rds)
 }
 
+#' @rdname load_platforms
+#' @export
+load_simple_platform <- function() {
+  list(
+    platform_id = "simple",
+    estimate = splatter::newSplatParams(),
+    n_cells = 100L,
+    n_features = 100L,
+    trajectory_dependent_features = 0.1
+  )
+}
 
 #' @rdname load_platforms
 #' @param n_platforms Number of platforms to select
