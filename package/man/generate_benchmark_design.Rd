@@ -28,6 +28,7 @@ The data frames must be of format \code{data_frame(paramset_id = "set1", param1 
 Generate a benchmarking design
 }
 \examples{
+\donttest{
 library(tibble)
 generate_benchmark_design(
   datasets = list(
@@ -35,7 +36,7 @@ generate_benchmark_design(
     dyntoy::generate_dataset(unique_id = "test"),
     test2 = function() dyntoy::generate_dataset(unique_id = "test")
   ),
-  methods = list("angle", dynmethods::ti_scorpius(), "tscan"),
+  methods = list("scorpius", dynmethods::ti_scorpius(), "tscan"),
   parameters = list(
     scorpius = tibble(paramset_id = "default"),
     tscan = tibble(
@@ -47,4 +48,5 @@ generate_benchmark_design(
   give_priors = NULL,
   num_repeats = 2
 )
+}
 }

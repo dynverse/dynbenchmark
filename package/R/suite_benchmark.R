@@ -41,6 +41,7 @@ check_benchmark_design_parameters <- function(
 #' @inheritParams dynwrap::infer_trajectories
 #'
 #' @examples
+#' \donttest{
 #' library(tibble)
 #' generate_benchmark_design(
 #'   datasets = list(
@@ -48,7 +49,7 @@ check_benchmark_design_parameters <- function(
 #'     dyntoy::generate_dataset(unique_id = "test"),
 #'     test2 = function() dyntoy::generate_dataset(unique_id = "test")
 #'   ),
-#'   methods = list("angle", dynmethods::ti_scorpius(), "tscan"),
+#'   methods = list("scorpius", dynmethods::ti_scorpius(), "tscan"),
 #'   parameters = list(
 #'     scorpius = tibble(paramset_id = "default"),
 #'     tscan = tibble(
@@ -60,6 +61,7 @@ check_benchmark_design_parameters <- function(
 #'   give_priors = NULL,
 #'   num_repeats = 2
 #' )
+#' }
 #' @export
 generate_benchmark_design <- function(
   datasets,
