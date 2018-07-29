@@ -1,4 +1,10 @@
 library(dynbenchmark)
+library(dyntoy)
+
+
+design <- names(dyntoy::network_models)
+
+
 
 toy_datasets <- dyntoy::toy_datasets
 toy_datasets$dataset_source <- "synthetic/dyntoy"
