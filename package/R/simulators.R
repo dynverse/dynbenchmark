@@ -26,6 +26,8 @@ simulate_splatter <- function(
   path.sigmaFac = runif(1, 0, 1),
   bcv.common.factor = runif(1, 10, 200)
 ) {
+  if (missing(dataset_id)) stop("dataset_id is required")
+
   splatter_params <- platform$estimate
   class(splatter_params) <- "SplatParams"
 
@@ -117,6 +119,11 @@ simulate_prosstt <- function(
   alpha = exp(rnorm(1, log(0.2), log(1.5))),
   beta = exp(rnorm(1, log(1), log(1.5))) + 1
 ) {
+  if (missing(dataset_id)) stop("dataset_id is required")
+
+  # pip3 install git+https://github.com/soedinglab/prosstt
+  # based on https://github.com/soedinglab/prosstt/blob/master/examples/generate_simN.py
+
   # load prosstt python package
   requireNamespace("reticulate")
 
@@ -254,6 +261,8 @@ simulate_dyntoy <- function(
   sample_dispersion_count = function(mean) map_dbl(mean, ~runif(1, ./10, ./4)),
   dropout_probability_factor = runif(1, 10, 200)
 ) {
+  if (missing(dataset_id)) stop("dataset_id is required")
+
   dataset <- dyntoy::generate_dataset(
     dataset_id,
     model = topology_model,
@@ -289,6 +298,8 @@ simulate_dyngen <- function(
   modulenet_name = "linear",
   platform = load_simple_platform()
 ) {
+  if (missing(dataset_id)) stop("dataset_id is required")
+
   dataset_preprocessing(dataset_id)
 
   # generate dyngen params
