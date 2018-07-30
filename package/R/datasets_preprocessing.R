@@ -73,9 +73,6 @@ process_raw_dataset <- function(
   # save the dataset
   save_dataset(dataset, dataset_id = id)
 
-  # save the counts before filtering/normalisation
-  write_rds(counts_prefilter, dataset_file(dataset_id = id, filename = "counts_prefilter.rds"))
-
   # save the normalisation plots
   grDevices::pdf(dataset_file(dataset_id = id, "normalisation.pdf"))
   walk(norm_out$normalisation_plots, print)
