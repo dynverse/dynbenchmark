@@ -14,7 +14,8 @@ design <- crossing(
     beta = exp(rnorm(n(), log(1), log(1.5))) + 1
   ) %>%
   mutate(
-    dataset_id = paste0("synthetic/prosstt/", topology_model, "_", platform_ix)
+    dataset_id = paste0("synthetic/prosstt/", topology_model, "_", platform_ix),
+    seed = sample(1:100000, n())
   ) %>%
   select(-platform_ix)
 
