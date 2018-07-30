@@ -8,7 +8,6 @@ rm_remote(dataset_file(dataset_id = "synthetic/dyngen", remote = TRUE), remote =
 
 # create design
 set.seed(1)
-
 design <- crossing(
   modulenet_name = dyngen::list_modulenets(),
   platform = tibble(platform = select_platforms(10))
