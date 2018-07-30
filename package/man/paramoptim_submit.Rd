@@ -4,10 +4,10 @@
 \alias{paramoptim_submit}
 \title{A parameter optimisation suite}
 \usage{
-paramoptim_submit(dataset_ids, methods, timeout_paramoptim, max_memory_per_core,
-  num_cores, metrics, num_repeats, num_iterations, num_init_params,
-  local_output_folder, remote_output_folder, execute_before = NULL,
-  verbose = FALSE)
+paramoptim_submit(dataset_ids, methods, timeout_paramoptim,
+  max_memory_per_core, num_cores, metrics, num_repeats, num_iterations,
+  num_init_params, local_output_folder, remote_output_folder,
+  execute_before = NULL, verbose = FALSE)
 }
 \arguments{
 \item{dataset_ids}{The ids of the datasets to be used in the evaluation.}
