@@ -11,7 +11,8 @@ design <- crossing(
     path.nonlinearProb = runif(n(), 0, 1),
     path.sigmaFac = runif(n(), 0, 1),
     bcv.common.factor = runif(n(), 10, 200),
-    dataset_id = paste0("synthetic/splatter/", topology_model, "_", platform_ix)
+    dataset_id = paste0("synthetic/splatter/", topology_model, "_", platform_ix),
+    seed = sample(1:100000, n())
   ) %>%
   select(-platform_ix)
 
