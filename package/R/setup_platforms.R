@@ -74,10 +74,9 @@ splatEstDropout <- function(norm.counts, params) {
 #' @param dataset_id The dataset_id from which the platform will be estimated, using the files in datasets_preproc/raw
 #' @export
 estimate_platform <- function(dataset_id) {
-  library("splatter")
   requireNamespace("Seurat")
-
-  assignInNamespace("splatEstDropout", dynbenchmark:::splatEstDropout, pos = "package:splatter")
+  requireNamespace("splatter")
+  assignInNamespace("splatEstDropout", dynbenchmark:::splatEstDropout, asNamespace("splatter"))
 
   platform_location <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "01-datasets_preproc/platforms")
   platform <- load_or_generate(
