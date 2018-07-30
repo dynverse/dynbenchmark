@@ -290,17 +290,24 @@ simulate_dyntoy <- function(
 
 
 #' @inheritParams dyngen::generate_model_from_modulenet
+#' @param use_cache Whether to allow the cache (stored in the dataset preprocessing source files)
 #'
 #' @rdname simulate_dataset
 #' @export
 simulate_dyngen <- function(
   dataset_id,
   modulenet_name = "linear",
-  platform = load_simple_platform()
+  platform = load_simple_platform(),
+  use_cache = TRUE
 ) {
   if (missing(dataset_id)) stop("dataset_id is required")
 
   dataset_preprocessing(dataset_id)
+
+  # if cache disallowed, clear cache files
+  if (!use_cache) {
+    qsub::rm_remote(dataset_source_file(), remote = NULL, recursive = TRUE, force = TRUE)
+  }
 
   # generate dyngen params
   params <- dyngen::base_params
