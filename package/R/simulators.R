@@ -7,6 +7,7 @@
 #' @param platform The platform to use as reference
 #' @param dataset_id The id of the dataset
 #' @param n_steps_per_length Number of simulation steps per length unit (for splatter and prosstt)
+#' @param seed The seed to use, will use the current seed if not given
 NULL
 
 
@@ -24,9 +25,12 @@ simulate_splatter <- function(
   path.skew = runif(1, 0, 1),
   path.nonlinearProb = runif(1, 0, 1),
   path.sigmaFac = runif(1, 0, 1),
-  bcv.common.factor = runif(1, 10, 200)
+  bcv.common.factor = runif(1, 10, 200),
+  seed = NULL
 ) {
   if (missing(dataset_id)) stop("dataset_id is required")
+
+  if (!is.null(seed)) set.seed(seed)
 
   splatter_params <- platform$estimate
   class(splatter_params) <- "SplatParams"
@@ -117,7 +121,8 @@ simulate_prosstt <- function(
   intra_branch_tol = runif(1, 0, 0.9),
   inter_branch_tol = runif(1, 0, 0.9),
   alpha = exp(rnorm(1, log(0.2), log(1.5))),
-  beta = exp(rnorm(1, log(1), log(1.5))) + 1
+  beta = exp(rnorm(1, log(1), log(1.5))) + 1,
+  seed = NULL
 ) {
   if (missing(dataset_id)) stop("dataset_id is required")
 
@@ -130,6 +135,8 @@ simulate_prosstt <- function(
   tree <- reticulate::import("prosstt.tree")
   sim <- reticulate::import("prosstt.simulation")
   sut <- reticulate::import("prosstt.sim_utils")
+
+  if (!is.null(seed)) reticulate::py_set_seed(seed)
 
   # generate milestone network
   milestone_network <- dyntoy::generate_milestone_network(topology_model)
@@ -259,9 +266,12 @@ simulate_dyntoy <- function(
   platform = load_simple_platform(),
   sample_mean_count = function() rgamma(1, shape = platform$estimate@mean.shape, rate = platform$estimate@mean.rate),
   sample_dispersion_count = function(mean) map_dbl(mean, ~runif(1, ./10, ./4)),
-  dropout_probability_factor = runif(1, 10, 200)
+  dropout_probability_factor = runif(1, 10, 200),
+  seed = NULL
 ) {
   if (missing(dataset_id)) stop("dataset_id is required")
+
+  if (!is.null(seed)) set.seed(seed)
 
   dataset <- dyntoy::generate_dataset(
     dataset_id,
@@ -298,16 +308,18 @@ simulate_dyngen <- function(
   dataset_id,
   modulenet_name = "linear",
   platform = load_simple_platform(),
-  use_cache = TRUE
+  use_cache = TRUE,
+  seed = NULL
 ) {
   if (missing(dataset_id)) stop("dataset_id is required")
-
   dataset_preprocessing(dataset_id)
 
   # if cache disallowed, clear cache files
   if (!use_cache) {
     qsub::rm_remote(dataset_source_file(), remote = NULL, recursive = TRUE, force = TRUE)
   }
+
+  if (!is.null(seed)) set.seed(seed)
 
   # generate dyngen params
   params <- dyngen::base_params
