@@ -3,7 +3,7 @@
 #' @param dataset_id The ID of the dataset to be used
 #' @param dataset Dataset object to save
 #' @param filename Custom filename
-#' @param relative Whether or not to output relative paths
+#' @inheritParams experiment
 #' @param lazy_load Whether or not to allow for lazy loading of large objects in the dataset
 #'
 #' @export
@@ -30,26 +30,14 @@ get_dataset_preprocessing_id <- function() {
 }
 
 # create a helper function
+#' @include setup_experiment.R
 datasetpreproc_subfolder <- function(path) {
-  function(filename = "", dataset_id = NULL, relative = FALSE) {
-    dyn_fold <- get_dynbenchmark_folder()
-
-    if (relative) {
-      dyn_fold = ""
-    }
-
+  function(filename = "", dataset_id = NULL, remote = FALSE) {
     if (is.null(dataset_id)) {
       dataset_id <- get_dataset_preprocessing_id()
     }
 
-    # determine the full path
-    full_path <- paste0(dyn_fold, "/", path, "/", dataset_id, "/")
-
-    # create if necessary
-    dir.create(full_path, recursive = TRUE, showWarnings = FALSE)
-
-    # get complete filename
-    paste0(full_path, filename)
+    experiment_subfolder(path)(filename = filename, experiment_id = dataset_id, remote = remote)
   }
 }
 
