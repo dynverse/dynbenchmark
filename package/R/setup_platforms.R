@@ -10,7 +10,7 @@ load_platforms <- function() {
 load_simple_platform <- function() {
   list(
     platform_id = "simple",
-    estimate = splatter::newSplatParams(),
+    estimate = splatter::newSplatParams(mean.rate = 0.01, mean.shape = 1),
     n_cells = 100L,
     n_features = 100L,
     trajectory_dependent_features = 0.1

@@ -2,9 +2,10 @@ library(tidyverse)
 library(dynbenchmark)
 library(qsub)
 
+# generate design
 design <- crossing(
   topology_model = c("linear", "bifurcating", "multifurcating", "binary_tree", "tree"),
-  tibble(platform = load_platforms()) %>% mutate(platform_ix = row_number())
+  tibble(platform = select_platforms(10)) %>% mutate(platform_ix = row_number())
 ) %>%
   mutate(
     path.skew = runif(n(), 0, 1),
@@ -16,6 +17,7 @@ design <- crossing(
   ) %>%
   select(-platform_ix)
 
+# simulate datasets
 qsub_config <- override_qsub_config(memory = "10G", max_wall_time = "24:00:00", num_cores = 1, name = "dyngen", wait = F)
 
 qsub_pmap(
@@ -23,3 +25,5 @@ qsub_pmap(
   simulate_splatter,
   qsub_config = qsub_config
 )
+
+qsub_retrieve(handle)

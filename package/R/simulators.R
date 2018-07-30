@@ -91,13 +91,11 @@ simulate_splatter <- function(
     )
 
   # add information on the simulation itself
-  dataset$simulation_design <- c(
-    match.call(),
+  dataset$simulation_design <-
     list(
       simulator = "splatter",
       simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "splatter", "dynnormaliser", "dynbenchmark"))
     )
-  )
 
   # save dataset
   save_dataset(dataset, dataset_id)
@@ -241,13 +239,11 @@ simulate_prosstt <- function(
       expression = expression
     )
 
-  dataset$simulation_design <- c(
-    match.call(),
+  dataset$simulation_design <-
     list(
       simulator = "prosstt",
       simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "prosstt", "splatter", "dynbenchmark", "dynnormaliser"))
     )
-  )
 
   # save dataset
   save_dataset(dataset, dataset_id)
@@ -283,12 +279,9 @@ simulate_dyntoy <- function(
     dropout_probability_factor = dropout_probability_factor
   )
 
-  dataset$simulation_design <- c(
-    match.call(),
-    list(
-      simulator = "dyntoy",
-      simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "splatter", "dynbenchmark", "dynnormaliser"))
-    )
+  dataset$simulation_design <- list(
+    simulator = "dyntoy",
+    simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "splatter", "dynbenchmark", "dynnormaliser"))
   )
 
   # save dataset
@@ -363,12 +356,9 @@ simulate_dyngen <- function(
     dyngen::wrap_dyngen_dataset(dataset_id, params, model, simulation, gs, experiment, normalisation)
   )
   dataset$dataset_source <- "synthetic/dyngen"
-  dataset$simulation_design <- c(
-    match.call(),
-    list(
-      simulator = "dyngen",
-      simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyngen","splatter", "dynbenchmark"))
-    )
+  dataset$simulation_design <- list(
+    simulator = "dyngen",
+    simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyngen","splatter", "dynbenchmark"))
   )
 
   # save dataset

@@ -6,7 +6,7 @@ library(tidyverse)
 # remove all datasets
 rm_remote(dataset_file(dataset_id = "synthetic/dyngen", remote = TRUE), remote = TRUE, recursive = TRUE)
 
-# for reproducibility
+# create design
 set.seed(1)
 
 design <- crossing(
@@ -18,11 +18,13 @@ design <- crossing(
     seed = sample(1:100000, n())
   )
 
+# simulate datasets
 qsub_config <- override_qsub_config(memory = "10G", max_wall_time = "24:00:00", num_cores = 1, name = "dyngen", wait = F)
 
 handle <- qsub_pmap(
   design,
   simulate_dyngen,
+  use_cache = FALSE,
   qsub_config = qsub_config
 )
 

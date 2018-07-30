@@ -4,7 +4,7 @@ library(dynbenchmark)
 # generate design of models, platforms and (randomised) splatter parameters
 design <- crossing(
   topology_model = c("linear", "bifurcating", "multifurcating", "binary_tree", "tree"),
-  tibble(platform = load_platforms()) %>% mutate(platform_ix = row_number())
+  tibble(platform = select_platforms(10)) %>% mutate(platform_ix = row_number())
 ) %>%
   mutate(
     a = runif(n(), 0.01, 0.1),
@@ -19,5 +19,5 @@ design <- crossing(
   ) %>%
   select(-platform_ix)
 
-
+# simulate datasets
 pmap(design, simulate_prosstt)
