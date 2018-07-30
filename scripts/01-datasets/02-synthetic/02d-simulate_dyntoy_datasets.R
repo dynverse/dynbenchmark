@@ -7,6 +7,7 @@ library(qsub)
 rm_remote(dataset_file(dataset_id = "synthetic/dyntoy", remote = TRUE), remote = TRUE, recursive = TRUE)
 
 # generate design
+set.seed(1)
 design <- crossing(
   topology_model = names(dyntoy::topology_models),
   tibble(platform = select_platforms(10)) %>% mutate(platform_ix = row_number())
@@ -30,4 +31,3 @@ write_rds(handle, "handle_dyntoy.rds")
 
 handle <- read_rds("handle_dyntoy.rds")
 qsub::qsub_retrieve(handle)
-

@@ -260,14 +260,24 @@ simulate_dyntoy <- function(
   dataset_id,
   topology_model = "linear",
   platform = load_simple_platform(),
-  sample_mean_count = function() rgamma(1, shape = platform$estimate@mean.shape, rate = platform$estimate@mean.rate),
-  sample_dispersion_count = function(mean) map_dbl(mean, ~runif(1, ./10, ./4)),
+  count_mean_shape = runif(1, 1, 10),
+  count_mean_scale = runif(1, 1, 10),
   dropout_probability_factor = runif(1, 10, 200),
   seed = NULL
 ) {
   if (missing(dataset_id)) stop("dataset_id is required")
 
   if (!is.null(seed)) set.seed(seed)
+
+  if (platform$estimate@mean.shape / platform$estimate@mean.rate < 1) {
+    shape <- platform$estimate@mean.shape / platform$estimate@mean.rate
+  } else {
+    shape <- platform$estimate@mean.shape
+  }
+
+  # sample_mean_count <- function() rgamma(1, shape = shape, rate = platform$estimate@mean.rate)
+  sample_mean_count <- function() rgamma(1, shape = count_mean_shape, scale = count_mean_scale)
+  sample_dispersion_count = function(mean) map_dbl(mean, ~runif(1, ./10, ./4))
 
   dataset <- dyntoy::generate_dataset(
     dataset_id,
