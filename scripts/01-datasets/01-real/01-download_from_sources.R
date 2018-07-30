@@ -5,7 +5,7 @@ library(dynbenchmark)
 
 experiment("01-datasets/real/run_all_datasets")
 
-dataset_scripts <- list.files(path = "scripts/01-datasets/real/1_download_from_sources/", pattern = "^dataset_.*\\.R", full.names = TRUE)
+dataset_scripts <- list.files(path = "scripts/01-datasets/01-real/01-download_from_sources-helpers/", pattern = "^dataset_.*\\.R", full.names = TRUE)
 # dataset_scripts <- dataset_scripts[!str_detect(dataset_scripts, "mouse-cell-atlas")]
 
 script_contents <- map_chr(dataset_scripts, read_file)
@@ -29,7 +29,7 @@ handle <- qsub::qsub_lapply(
 
     TRUE
   },
-  qsub_environment = NA,
+  qsub_environment = new.env(),
   qsub_config = qsub_config
 )
 
