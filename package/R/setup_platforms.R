@@ -23,6 +23,12 @@ load_simple_platform <- function() {
 select_platforms <- function(n_platforms) {
   platforms <- load_platforms()
 
+  if (n_platforms == length(platforms)) {
+    return(platforms)
+  } else if (n_platforms > length(platforms)) {
+    stop("Not enough platforms available (", length(platforms), ") for requested number of platforms (", n_platforms, ")")
+  }
+
   # select features
   features <- map(platforms, function(platform) {
     c(
@@ -68,15 +74,15 @@ splatEstDropout <- function(norm.counts, params) {
 #' @param dataset_id The dataset_id from which the platform will be estimated, using the files in datasets_preproc/raw
 #' @export
 estimate_platform <- function(dataset_id) {
-  requireNamespace("splatter")
+  library("splatter")
   requireNamespace("Seurat")
+
+  assignInNamespace("splatEstDropout", dynbenchmark:::splatEstDropout, pos = "package:splatter")
 
   platform_location <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "01-datasets_preproc/platforms")
   platform <- load_or_generate(
     platform_location,
     {
-      assignInNamespace("splatEstDropout", dynbenchmark:::splatEstDropout, pos = "package:splatter")
-
       dataset_raw <- read_rds(dataset_raw_file(dataset_id))
 
       counts <- dataset_raw$counts
@@ -84,12 +90,12 @@ estimate_platform <- function(dataset_id) {
       # determine how many features change between trajectory stages
       seurat <- Seurat::CreateSeuratObject(t(dataset_raw$counts))
       seurat@ident <- factor(dataset_raw$grouping)
-      changing <- FindAllMarkers(seurat, logfc.treshold = 1, min.pct = 0.4, test.use = "t")
+      changing <- Seurat::FindAllMarkers(seurat, logfc.treshold = 1, min.pct = 0.4, test.use = "t")
       n_changing <- changing %>% pull(gene) %>% unique() %>% length()
       trajectory_dependent_features <- n_changing / ncol(counts)
 
       # estimate splatter params
-      estimate <- splatEstimate(t(counts[sample(nrow(counts), min(nrow(counts), 500)), ]))
+      estimate <- splatter::splatEstimate(t(counts[sample(nrow(counts), min(nrow(counts), 500)), ]))
       class(estimate) <- "TheMuscularDogBlinkedQuietly." # change the class, so scater won't get magically loaded when the platform is loaded
 
       # create platform object
