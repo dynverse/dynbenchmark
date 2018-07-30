@@ -1,9 +1,7 @@
 ## Estimation of the platforms from real data
 
-library(splatter)
 library(tidyverse)
 library(dynbenchmark)
-
 library(qsub)
 
 experiment("01-datasets_preproc/platforms")
@@ -13,7 +11,7 @@ dataset_ids <- list_datasets() %>% filter(dataset_source == "real") %>% pull(dat
 
 # run on cluster
 qsub_config <- override_qsub_config(
-  name = "estimate_platforms",
+  name = "platform_estim",
   memory = "10G",
   wait = FALSE
 )
@@ -21,7 +19,6 @@ qsub_config <- override_qsub_config(
 handle <- qsub_lapply(
   dataset_ids,
   qsub_config = qsub_config,
-  qsub_environment = "splatEstDropout",
   estimate_platform
 )
 
