@@ -27,7 +27,7 @@ simulate_dyntoy(dataset_id, topology_model = "linear",
   10, 200))
 
 simulate_dyngen(dataset_id, modulenet_name = "linear",
-  platform = load_simple_platform())
+  platform = load_simple_platform(), use_cache = TRUE)
 }
 \arguments{
 \item{dataset_id}{The id of the dataset}
@@ -63,6 +63,8 @@ simulate_dyngen(dataset_id, modulenet_name = "linear",
 \item{dropout_probability_factor}{Factor used to calculate the probabilities of dropouts, relative to expression. Higher values (> 10000) have a lot of dropouts, lower values (< 10) have almost none}
 
 \item{modulenet_name}{A modulenet_name as defined in data/modulenetworks or `tree` to generate a random tree}
+
+\item{use_cache}{Whether to allow the cache (stored in the dataset preprocessing source files)}
 }
 \description{
 Simulating a trajectory dataset
