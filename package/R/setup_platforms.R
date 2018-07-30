@@ -5,6 +5,15 @@ load_platforms <- function() {
   list.files(folder, recursive = TRUE, full.names = TRUE) %>% gsub("(.*)\\.tsv", "\\1", .) %>% map(read_rds)
 }
 
+#' Load a platform
+#' @rdname load_platforms
+#' @param platform_id Platform identifier
+#' @export
+load_platform <- function(platform_id) {
+  folder <- derived_file("", experiment_id = "01-datasets_preproc/platforms/")
+  read_rds(paste0(folder, "/", platform_id, ".rds"))
+}
+
 #' @rdname load_platforms
 #' @export
 load_simple_platform <- function() {
