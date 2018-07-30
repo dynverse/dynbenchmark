@@ -3,6 +3,9 @@ library(tidyverse)
 
 dataset_preprocessing("real/whole-schmidtea-mediterranea_plass")
 
+# get settings
+source("scripts/01-datasets/01-real/01-download_from_sources-helpers/helper_planaria-plass.R")
+
 # counts
 counts_file <- download_dataset_source_file(
   "dge.txt.gz",
@@ -26,9 +29,6 @@ cell_info_file <- download_dataset_source_file(
 cell_info_all <- tibble(group_id = read_lines(cell_info_file))
 cell_info_all$cell_id <- rownames(counts_all)
 
-
-# get settings
-source("scripts/01-datasets/01-real/01-download_from_sources-helpers/helper_planaria-plass.R")
 
 for (setting in settings) {
   print(setting$id)
