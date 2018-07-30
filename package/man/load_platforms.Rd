@@ -2,19 +2,26 @@
 % Please edit documentation in R/setup_platforms.R
 \name{load_platforms}
 \alias{load_platforms}
+\alias{load_platform}
 \alias{load_simple_platform}
 \alias{select_platforms}
 \title{List and load the platforms}
 \usage{
 load_platforms()
 
+load_platform(platform_id)
+
 load_simple_platform()
 
 select_platforms(n_platforms)
 }
 \arguments{
+\item{platform_id}{Platform identifier}
+
 \item{n_platforms}{Number of platforms to select}
 }
 \description{
 List and load the platforms
+
+Load a platform
 }
