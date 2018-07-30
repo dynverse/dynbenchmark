@@ -28,7 +28,7 @@ cell_info_all$cell_id <- rownames(counts_all)
 
 
 # get settings
-source("scripts/01-datasets/real/1_download_from_sources/helper_planaria-plass.R")
+source("scripts/01-datasets/01-real/01-download_from_sources-helpers/helper_planaria-plass.R")
 
 for (setting in settings) {
   print(setting$id)
