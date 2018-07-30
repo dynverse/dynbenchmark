@@ -11,21 +11,20 @@
 simulate_splatter(dataset_id, topology_model = "linear",
   platform = load_simple_platform(), n_steps_per_length = 100,
   path.skew = runif(1, 0, 1), path.nonlinearProb = runif(1, 0, 1),
-  path.sigmaFac = runif(1, 0, 1), bcv.common.factor = runif(1, 10, 200),
-  seed = NULL)
+  path.sigmaFac = runif(1, 0, 1), bcv.common.factor = runif(1, 10,
+  200), seed = NULL)
 
 simulate_prosstt(dataset_id, topology_model = "linear",
   platform = load_simple_platform(), n_steps_per_length = 100,
-  a = as.integer(round(runif(1, 1, 10))), intra_branch_tol = runif(1, 0,
-  0.9), inter_branch_tol = runif(1, 0, 0.9), alpha = exp(rnorm(1, log(0.2),
-  log(1.5))), beta = exp(rnorm(1, log(1), log(1.5))) + 1, seed = NULL)
+  a = as.integer(round(runif(1, 1, 10))), intra_branch_tol = runif(1,
+  0, 0.9), inter_branch_tol = runif(1, 0, 0.9), alpha = exp(rnorm(1,
+  log(0.2), log(1.5))), beta = exp(rnorm(1, log(1), log(1.5))) + 1,
+  seed = NULL)
 
 simulate_dyntoy(dataset_id, topology_model = "linear",
-  platform = load_simple_platform(), sample_mean_count = function()
-  rgamma(1, shape = platform$estimate@mean.shape, rate =
-  platform$estimate@mean.rate), sample_dispersion_count = function(mean)
-  map_dbl(mean, ~runif(1, ./10, ./4)), dropout_probability_factor = runif(1,
-  10, 200), seed = NULL)
+  platform = load_simple_platform(), count_mean_shape = runif(1, 1,
+  10), count_mean_scale = runif(1, 1, 10),
+  dropout_probability_factor = runif(1, 10, 200), seed = NULL)
 
 simulate_dyngen(dataset_id, modulenet_name = "linear",
   platform = load_simple_platform(), use_cache = TRUE, seed = NULL)
@@ -58,10 +57,6 @@ simulate_dyngen(dataset_id, modulenet_name = "linear",
 \item{alpha}{PROSSTT param}
 
 \item{beta}{PROSSTT param}
-
-\item{sample_mean_count}{Function used to sample the mean expression}
-
-\item{sample_dispersion_count}{Function to sample the dispersion (size) of the negative biniomal given the expression. Higher dispersion values generate less noise}
 
 \item{dropout_probability_factor}{Factor used to calculate the probabilities of dropouts, relative to expression. Higher values (> 10000) have a lot of dropouts, lower values (< 10) have almost none}
 
