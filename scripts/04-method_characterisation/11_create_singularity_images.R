@@ -5,16 +5,15 @@ library(tidyverse)
 
 # get methods
 data("methods", package = "dynmethods")
-methods <- methods %>% filter(containerised)
 
 setup_singularity_methods()
 
 success <- map(
-  methods$docker_container,
-  function(docker_container) {
+  methods$docker_repository,
+  function(docker_repository) {
   tryCatch(
     {
-      dynwrap::pull_singularity_ti_method(docker_container)
+      dynwrap::pull_singularity_ti_method(docker_repository)
       TRUE
     },
     error = function(e) e
