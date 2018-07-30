@@ -273,7 +273,7 @@ simulate_dyntoy <- function(
     dataset_id,
     model = topology_model,
     num_cells = platform$n_cells,
-    num_features = platform$n_features,
+    num_features = ceiling(platform$n_features * platform$trajectory_dependent_features),
     sample_mean_count = sample_mean_count,
     sample_dispersion_count = sample_dispersion_count,
     dropout_probability_factor = dropout_probability_factor
