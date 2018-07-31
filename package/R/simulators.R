@@ -90,7 +90,8 @@ simulate_splatter <- function(
     add_trajectory(
       milestone_network = milestone_network,
       progressions = progressions
-    )
+    ) %>%
+    add_prior_information()
 
   # add information on the simulation itself
   dataset$simulation_design <-
@@ -239,7 +240,8 @@ simulate_prosstt <- function(
     add_expression(
       counts = counts,
       expression = expression
-    )
+    ) %>%
+    add_prior_information()
 
   dataset$simulation_design <-
     list(
