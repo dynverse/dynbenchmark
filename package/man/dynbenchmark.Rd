@@ -11,5 +11,5 @@ evaluate trajectory inference methods for dynamic processes.
 }
 \details{
 The dynbenchmark package contains the code to generate/preprocess datasets, evaluate TI methods on these datasets, and finally wrap all results together in a scientific paper.
-The code within this package can be run locally, but can also be run within a docker environment, for which the scripts are contained in the `scripts` folder.
+The code within this package can be run locally, but can also be run within a docker environment, for which the scripts are contained in the \code{scripts} folder.
 }

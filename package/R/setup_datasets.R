@@ -3,7 +3,7 @@
 #' @param dataset_id The ID of the dataset to be used
 #' @param dataset Dataset object to save
 #' @param filename Custom filename
-#' @param relative Whether or not to output relative paths
+#' @inheritParams experiment
 #' @param lazy_load Whether or not to allow for lazy loading of large objects in the dataset
 #'
 #' @export
@@ -30,26 +30,14 @@ get_dataset_preprocessing_id <- function() {
 }
 
 # create a helper function
+#' @include setup_experiment.R
 datasetpreproc_subfolder <- function(path) {
-  function(filename = "", dataset_id = NULL, relative = FALSE) {
-    dyn_fold <- get_dynbenchmark_folder()
-
-    if (relative) {
-      dyn_fold = ""
-    }
-
+  function(filename = "", dataset_id = NULL, remote = FALSE) {
     if (is.null(dataset_id)) {
       dataset_id <- get_dataset_preprocessing_id()
     }
 
-    # determine the full path
-    full_path <- paste0(dyn_fold, "/", path, "/", dataset_id, "/")
-
-    # create if necessary
-    dir.create(full_path, recursive = TRUE, showWarnings = FALSE)
-
-    # get complete filename
-    paste0(full_path, filename)
+    experiment_subfolder(path)(filename = filename, experiment_id = dataset_id, remote = remote)
   }
 }
 
@@ -62,11 +50,12 @@ dataset_source_file <- datasetpreproc_subfolder("derived/01-datasets_preproc/sou
 #' @param filename What name to give to the file
 #' @param dataset_id An optional dataset_id
 #' @export
+#' @importFrom utils download.file
 download_dataset_source_file <- function(filename, url, dataset_id = NULL) {
   loc <- dataset_source_file(dataset_id = dataset_id, filename = filename)
 
   if (!file.exists(loc)) {
-    download.file(url, loc, method = "libcurl")
+    utils::download.file(url, loc, method = "libcurl")
   }
 
   loc
@@ -99,16 +88,18 @@ save_dataset <- function(dataset, dataset_id = NULL, lazy_load = TRUE) {
 
   if (lazy_load) {
     for (col in c("expression", "counts")) {
-      col_file <- dataset_file(filename = paste0(col, ".rds"), dataset_id = dataset_id)
-      write_rds(dataset[[col]], col_file)
+      if (!is.function(dataset[[col]])) {
+        col_file <- dataset_file(filename = paste0(col, ".rds"), dataset_id = dataset_id)
+        write_rds(dataset[[col]], col_file)
 
-      env <- new.env(baseenv())
-      assign("dataset_id", dataset_id, env)
-      assign("col", col, env)
-      dataset[[col]] <- function() {
-        readr::read_rds(dataset_file(paste0(col, ".rds"), dataset_id = dataset_id))
+        env <- new.env(baseenv())
+        assign("dataset_id", dataset_id, env)
+        assign("col", col, env)
+        dataset[[col]] <- function() {
+          readr::read_rds(dynbenchmark::dataset_file(paste0(col, ".rds"), dataset_id = dataset_id))
+        }
+        environment(dataset[[col]]) <- env
       }
-      environment(dataset[[col]]) <- env
     }
   }
 

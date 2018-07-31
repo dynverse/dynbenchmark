@@ -39,7 +39,6 @@ Imports:
   ParamHelpers (>= 1.11),
   pbapply,
   purrr,
-  qsub,
   randomForest,
   RColorBrewer,
   readr,
@@ -54,6 +53,13 @@ Imports:
   testthat,
   tidygraph,
   xml2
+Suggests:
+  qsub,
+  SingleCellExperiment,
+  devtools,
+  igraph,
+  reticulate,
+  splatter
 Remotes:
   dynverse/dyneval,
   dynverse/dyngen,
@@ -67,4 +73,24 @@ Remotes:
   mlr-org/mlrMBO,
   jakobbossek/smoof,
   rcannood/qsub
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
+Roxygen: list(markdown = TRUE)
+Collate: 
+    'data.R'
+    'datasets_preprocessing.R'
+    'google_scholar.R'
+    'load_dyneval_model.R'
+    'package.R'
+    'plotting_labels.R'
+    'plotting_priors_mini.R'
+    'plotting_svg_replacement.R'
+    'qsub.R'
+    'setup_experiment.R'
+    'setup_datasets.R'
+    'setup_get_dynbenchmark_folder.R'
+    'setup_methods.R'
+    'setup_pipeline.R'
+    'setup_platforms.R'
+    'simulators.R'
+    'suite_benchmark.R'
+    'suite_paramoptim.R'

@@ -14,13 +14,13 @@ dataset_preprocessing(dataset_id)
 
 get_dataset_preprocessing_id()
 
-dataset_source_file(filename = "", dataset_id = NULL, relative = FALSE)
+dataset_source_file(filename = "", dataset_id = NULL, remote = FALSE)
 
 dataset_raw_file(dataset_id)
 
 save_raw_dataset(dataset, dataset_id = get_dataset_preprocessing_id())
 
-dataset_file(filename = "", dataset_id = NULL, relative = FALSE)
+dataset_file(filename = "", dataset_id = NULL, remote = FALSE)
 
 save_dataset(dataset, dataset_id = NULL, lazy_load = TRUE)
 }
@@ -29,7 +29,7 @@ save_dataset(dataset, dataset_id = NULL, lazy_load = TRUE)
 
 \item{filename}{Custom filename}
 
-\item{relative}{Whether or not to output relative paths}
+\item{remote}{The remote to access, "" if working locally, TRUE if using default qsub_config remote}
 
 \item{dataset}{Dataset object to save}
 

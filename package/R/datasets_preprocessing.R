@@ -8,6 +8,7 @@
 #' @importFrom dynnormaliser normalise_filter_counts
 #' @importFrom dynwrap generate_prior_information
 #' @importFrom testthat expect_match
+#' @importFrom grDevices graphics.off pdf
 #'
 #' @export
 process_raw_dataset <- function(
@@ -72,13 +73,10 @@ process_raw_dataset <- function(
   # save the dataset
   save_dataset(dataset, dataset_id = id)
 
-  # save the counts before filtering/normalisation
-  write_rds(counts_prefilter, dataset_file(dataset_id = id, filename = "counts_prefilter.rds"))
-
   # save the normalisation plots
-  pdf(dataset_file(dataset_id = id, "normalisation.pdf"))
+  grDevices::pdf(dataset_file(dataset_id = id, "normalisation.pdf"))
   walk(norm_out$normalisation_plots, print)
-  graphics.off()
+  grDevices::graphics.off()
 
   return(invisible())
 }

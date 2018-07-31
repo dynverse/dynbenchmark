@@ -1,16 +1,162 @@
+check_benchmark_design_parameters <- function(
+  datasets,
+  methods,
+  parameters,
+  give_priors,
+  num_repeats
+) {
+  if (!is.character(datasets)) {
+    check <- is.list(datasets) && all(sapply(datasets, function(x) is.character(x) || is.function(x) || dynwrap::is_wrapper_with_expression(x)))
+    if (!check) {
+      stop("datasets is supposed be a vector of dataset ids, a list of dynwrap datasets, or a list of functions which will generate a dynwrap dataset")
+    }
+  }
+
+  if (!is.character(methods)) {
+    check <- is.list(methods) && all(sapply(methods, function(x) is.character(x) || dynwrap::is_ti_method(x)))
+    if (!check) {
+      stop("methods is supposed be a vector of methods ids, or a list of dynwrap ti methods")
+    }
+    method_names <- sapply(methods, function(x) if (is.character(x)) x else x$short_name)
+  } else {
+    method_names <- methods
+  }
+
+  testthat::expect_true(all(parameters$method_id %in% method_names))
+
+  testthat::expect_true(is.numeric(num_repeats))
+}
+
+#' Generate a benchmarking design
+#'
+#' @param datasets The datasets to be used in the evaluation.
+#'   Must be a named list consisting of dataset ids (character),
+#'   dynwrap::data_wrapper's, or functions that generate dynwrap::data_wrapper's.
+#' @param methods The methods to be evaluated.
+#'   Must be a named list consisting of method_ids (character) or dynwrap::ti_wrapper's.
+#' @param parameters A named list containing data frames of the parameters to evaluate.
+#'   The names of the list must be present in method_ids.
+#'   The data frames must be of format `data_frame(paramset_id = "set1", param1 = "a", param2 = 2.0)`.
+#' @param num_repeats The number of times to repeat the evaluation.
+#' @inheritParams dynwrap::infer_trajectories
+#'
+#' @examples
+#' \donttest{
+#' library(tibble)
+#' generate_benchmark_design(
+#'   datasets = list(
+#'     "toy/bifurcating_1",
+#'     dyntoy::generate_dataset(unique_id = "test"),
+#'     test2 = function() dyntoy::generate_dataset(unique_id = "test")
+#'   ),
+#'   methods = list("scorpius", dynmethods::ti_scorpius(), "tscan"),
+#'   parameters = list(
+#'     scorpius = tibble(paramset_id = "default"),
+#'     tscan = tibble(
+#'       paramset_id = paste0("test", 1:3),
+#'       clusternum_lower = 4:6,
+#'       clusternum_upper = 18:20
+#'     )
+#'   ),
+#'   give_priors = NULL,
+#'   num_repeats = 2
+#' )
+#' }
+#' @export
+generate_benchmark_design <- function(
+  datasets,
+  methods,
+  parameters = NULL,
+  give_priors = NULL,
+  num_repeats = 1
+) {
+  check_benchmark_design_parameters(
+    datasets,
+    methods,
+    parameters,
+    give_priors,
+    num_repeats
+  )
+
+  # collect the dataset ids
+  dataset_ids <- map_chr(seq_along(datasets), function(di) {
+    d <- datasets[[di]]
+
+    if (is.character(d)) {
+      d
+    } else if (dynwrap::is_wrapper_with_expression(d)) {
+      d$id
+    } else if (is.function(d)) {
+      names(datasets)[[di]]
+    } else {
+      stop("datasets must be a named list consisting of dataset ids (character), dynwrap::data_wrapper's, or functions that generate dynwrap::data_wrapper's")
+    }
+  })
+
+  # collect the method_ids
+  method_ids <- map_chr(methods, function(m) {
+    if (is.character(m)) {
+      m
+    } else if (dynwrap::is_ti_method(m)) {
+      m$id
+    } else {
+      stop("methods must be a named list consisting of method_ids (character) or dynwrap::ti_wrapper's")
+    }
+  })
+
+  testthat::expect_false(any(duplicated(dataset_ids)))
+  testthat::expect_false(any(duplicated(method_ids)))
+
+  # check whether all methods are present in the parameter sets
+  for (mn in method_ids) {
+    if (!mn %in% names(parameters)) {
+      parameters[[mn]] <- tibble(paramset_id = "default")
+    }
+  }
+
+  param_df <- map_df(
+    method_ids,
+    function(mn) {
+      parameters[[mn]] %>%
+        mutate(method_id = mn) %>%
+        select(method_id, paramset_id)
+    }
+  ) %>% mutate(
+    method_id = factor(method_id, levels = method_ids)
+  )
+
+  # generate designs of the different parts of the evaluation
+  crossing <- crossing(
+    dataset_id = factor(dataset_ids),
+    method_id = factor(method_ids),
+    give_priors = seq_along(give_priors),
+    num_repeats = seq_len(num_repeats)
+  ) %>%
+    left_join(param_df, by = "method_id")
+
+  num_repeats <- seq_len(num_repeats)
+
+  # all combinations of the different parts
+  list(
+    datasets = datasets,
+    dataset_ids = dataset_ids,
+    methods = methods,
+    method_ids = method_ids,
+    give_priors = give_priors,
+    num_repeats = num_repeats,
+    parameters = parameters,
+    crossing = crossing
+  )
+}
+
+
+
 #' A benchmark suite with which to run all the methods on the different datasets
 #'
-#' @param dataset_ids The ids of the datasets to be used in the evaluation.
-#' @param methods A tibble of TI methods to use, see \code{\link[dynwrap]{get_ti_methods}}.
-#' @param parameters A named list containing data frames of the parameters to evaluate.
-#'   The names of the list must be equal to the \code{short_name} column of \code{methods}.
-#'   The data frames must correspond to the parameter set \code{par_set} of each method,
-#'   e.g. as generated by \code{\link[ParamHelpers]{generateDesignOfDefaults}},
-#'   but must also contain the column \code{paramset_id}.
+#' @param design Design tibble of the experiment, created by [generate_benchmark_design()].
 #' @param timeout_per_execution The maximum number of seconds each execution is allowed to run, otherwise it will fail.
 #' @param max_memory_per_execution The maximum amount of memory each execution is allowed to use, otherwise it will fail.
-#' @param metrics Which metrics to evaluate; see \code{\link{calculate_metrics}} for a list of which metrics are available.
-#' @param num_repeats The number of times to repeat the evaluation.
+#' @param metrics Which metrics to evaluate; see [calculate_metrics()] for a list of which metrics are available.
 #' @param local_output_folder A folder in which to output intermediate and final results.
 #' @param remote_output_folder A folder in which to store intermediate results in a remote directory when using the qsub package.
 #' @param execute_before Shell commands to execute before running R.
@@ -21,28 +167,22 @@
 #'
 #' @export
 benchmark_submit <- function(
-  dataset_ids,
-  methods,
-  parameters,
-  timeout_per_execution,
-  max_memory_per_execution,
-  metrics,
-  num_repeats,
+  design,
+  timeout_per_execution = 3600,
+  max_memory_per_execution = "10G",
+  metrics = "correlation",
   local_output_folder,
   remote_output_folder,
   execute_before = NULL,
-  verbose = FALSE
+  verbose = TRUE
 ) {
   requireNamespace("qsub")
 
   benchmark_submit_check(
-    dataset_ids,
-    methods,
-    parameters,
+    design,
     timeout_per_execution,
     max_memory_per_execution,
     metrics,
-    num_repeats,
     local_output_folder,
     remote_output_folder,
     execute_before,
@@ -58,56 +198,49 @@ benchmark_submit <- function(
     num_cores = 1,
     memory = max_memory_per_execution,
     max_wall_time = timeout_per_execution,
-    r_module = NULL,
     execute_before = execute_before,
     local_tmp_path = local_output_folder,
     remote_tmp_path = remote_output_folder
   )
 
   ## run evaluation for each method separately
-  map(seq_len(nrow(methods)), function(methodi) {
-    method <- dynutils::extract_row_to_list(methods, methodi)
+  submit_method <- function (config) {
+    datasets <- config$dataset
+    config <- config %>% select(-dataset) %>% unique
 
-    # determine where to store certain outputs
-    method_folder <- paste0(local_output_folder, "/", method$short_name)
-    output_file <- paste0(method_folder, "/output.rds")
-    qsubhandle_file <- paste0(method_folder, "/qsubhandle.rds")
+    method_name <- design$methods[[settings$method]]
+    if (!is.character(method_name)) method_name <- method_name$short_name
 
-    qsub:::mkdir_remote(path = method_folder, remote = FALSE)
+    params <- design$parameters %>% filter(method_id == method_name, param_ix == settings$param_ix)
 
-    ## If no output or qsub handle exists yet
+    # check whether results already exist
+    folder_name <- paste0(params$param_id, "_rep", config$num_repeats)
+    suite_method_folder <- file.path(local_output_folder, method_name, folder_name)
+    output_file <- file.path(suite_method_folder, "output.rds")
+    qsubhandle_file <- file.path(suite_method_folder, "qsubhandle.rds")
+
+    qsub::mkdir_remote(path = suite_method_folder, remote = FALSE)
+
     if (!file.exists(output_file) && !file.exists(qsubhandle_file)) {
-      cat("Submitting ", method$name, "\n", sep = "")
-
-      # fetch parameters
-      parms <- parameters[[method$short_name]]
-
-      ## create a grid for each of the datasets, paramsets, and repeats
-      grid <- crossing(
-        dataset_id = dataset_ids,
-        paramset_id = parms$paramset_id,
-        repeat_i = seq_len(num_repeats)
-      )
+      cat("Submitting ", method_id, "\n", sep = "")
 
       # set parameters for the cluster
       qsub_config_method <-
         qsub::override_qsub_config(
           qsub_config = qsub_config,
-          name = paste0("D_", method$short_name),
-          local_tmp_path = paste0(method_folder, "/r2gridengine")
+          name = paste0("D_", method_id),
+          local_tmp_path = paste0(suite_method_folder, "/r2gridengine")
         )
 
       # which packages to load on the cluster
-      qsub_packages <- c("dplyr", "purrr", "dyneval", "readr")
+      qsub_packages <- c("dplyr", "purrr", "dyneval", "dynmethods", "readr")
 
       # which data objects will need to be transferred to the cluster
-      qsub_environment <-  c(
-        "grid", "parms", "method", "metrics", "verbose"
-      )
+      qsub_environment <-  c("metrics", "verbose", "design", "config")
 
       # submit to the cluster
       qsub_handle <- qsub::qsub_lapply(
-        X = seq_len(nrow(grid)),
+        X = datasets,
         object_envir = environment(),
         qsub_environment = qsub_environment,
         qsub_packages = qsub_packages,
@@ -119,77 +252,63 @@ benchmark_submit <- function(
       metadata <- lst(
         local_output_folder,
         remote_output_folder,
-        dataset_ids,
-        method,
+        design,
+        config,
         timeout_per_execution,
         max_memory_per_execution,
         metrics,
-        num_repeats,
-        grid,
-        method_folder,
+        suite_method_folder,
         output_file,
         qsubhandle_file,
-        parms,
         qsub_handle
       )
       readr::write_rds(metadata, qsubhandle_file)
-
-      NULL
     }
-  })
+  }
+
+  # run benchmark per method seperately
+  runs <- design$crossing %>% split(., paste0(.$method, "_", .$param_ix, "_", .$num_repeats))
+  for (i in seq_along(runs))  {
+    submit_method(runs[[i]])
+  }
 
   invisible()
 }
 
 #' @importFrom testthat expect_equal expect_is
-#' @importFrom ParamHelpers dfRowToList
 benchmark_submit_check <- function(
-  dataset_ids,
-  methods,
-  parameters,
+  design,
   timeout_per_execution,
   max_memory_per_execution,
   metrics,
-  num_repeats,
   local_output_folder,
   remote_output_folder,
   execute_before,
   verbose
 ) {
-  # check datasets
-  # TODO: check whether all datasets are present, local and remote
+  # design should be generated by `generate_benchmark_design`
+  # and should this always be of the correct format
+  # (is this a little too optimistic?)
 
-  # check methods
-  testthat::expect_is(methods, "tbl")
-
-  # check parameters
-  testthat::expect_is(parameters, "list")
-  testthat::expect_equal(sort(names(parameters)), sort(methods$short_name))
-
-  # check parameters
-  for (mi in seq_len(nrow(methods))) {
-    # fetch par_set and short_name
-    par_set <- methods$par_set[[mi]]
-    short_name <- methods$short_name[[mi]]
-
-    cat("Checking parameters for ", sQuote(short_name), "\n", sep = "")
-
-    # extract given_parameters, and check that paramset_id is present
-    given_params <- parameters[[short_name]]
-    testthat::expect_true("paramset_id" %in% colnames(given_params))
-
-    # convert given params to list to avoid problems with vector parameters
-    param_list <-
-      given_params %>%
-      select(-paramset_id) %>%
-      ParamHelpers::dfRowToList(par_set, 1)
-
-    # filter tunable params in par_set
-    tunable_pars <- par_set$pars
-
-    # compare that indeed the params in param_list and tunable_pars are the same
-    testthat::expect_true(all(names(param_list) %in% names(tunable_pars)))
-  }
+  # # check datasets
+  # testthat::expect_true(all(design$dataset_id %in% list_datasets()$dataset_id))
+  #
+  # # check methods
+  # testthat::expect_is(design$method_id, "character")
+  # testthat::expect_true(all(design$method_id %in% dynmethods::methods$method_id))
+  #
+  # # check parameters
+  # testthat::expect_true(all(map_lgl(design$parameters, is.list)))
+  #
+  # walk2(
+  #   dynmethods::methods %>% slice(match(design$method_id, method_id)) %>% pull(inputs),
+  #   design$parameters,
+  #   function(inputs, parameters) {
+  #     testthat::expect_true(all(
+  #       names(parameters) %in% (inputs %>% filter(type == "parameter") %>% pull(input_id))
+  #     ))
+  #   }
+  # )
 
   # check timeout_per_execution
   testthat::expect_is(timeout_per_execution, "numeric")
@@ -201,61 +320,83 @@ benchmark_submit_check <- function(
 
 #' Helper function for benchmark suite
 #'
-#' @param grid_i Benchmark config index
-benchmark_qsub_fun <- function(grid_i) {
+#' @param design_row Row of a design dataframe
+benchmark_qsub_fun <- function(design_row) {
   # call helper function
-  benchmark_run_evaluation(grid, grid_i, parms, method, metrics, verbose)
+  benchmark_run_evaluation(design_row, metrics, verbose, design, config)
 }
 
 #' @importFrom readr read_rds
-#' @importFrom ParamHelpers dfRowToList trafoValue
 benchmark_run_evaluation <- function(
-  grid,
-  grid_i,
-  parms,
-  method,
+  design_row,
   metrics,
-  verbose
+  verbose,
+  design,
+  config,
+  error_mode = FALSE
 ) {
-  # fetch grid arguments
-  tid <- grid[grid_i,]$dataset_id
-  pid <- grid[grid_i,]$paramset_id
+  testthat::expect_is(design_row, "tbl")
 
   # read dataset
-  dataset <- load_dataset(tid)
+  dataset <- design$datasets[[design_row]]
+  if (is.character(dataset)) {
+    dataset <- load_dataset(dataset, as_tibble = TRUE)
+    dataset_id <- dataset$id
+  } else if (is.function(dataset)) {
+    dataset <- dataset()
+    dataset_id <- dataset$id
+  } else if (dynwrap::is_data_wrapper(dataset)) {
+    dataset_id <- dataset$id
+  }
 
-  # get param set
-  parm_df <- parms %>% filter(paramset_id == pid)
-  parm_list <- ParamHelpers::dfRowToList(
-    df = parm_df %>% select(-paramset_id),
-    par.set = method$par_set,
-    i = 1
-  ) %>%
-    ParamHelpers::trafoValue(method$par_set, .)
+  # get method
+  method <- design$methods[[config$method]]
+  method_name <- ifelse(is.character(method), method, method$short_name)
+
+  if (!dynwrap::is_ti_method(method) && is.character(method)) {
+    setup_singularity_methods()
+    requireNamespace("dynmethods")
+    if (identical(error_mode, FALSE)) {
+      method <- dynmethods::methods %>%
+        slice(match(method, method_id)) %>%
+        pull(fun_name) %>%
+        get("package:dynmethods") %>%
+        {.()}
+    } else {
+      # create a method that will just return the error generated by qsub
+      method <- create_ti_method("error", run_fun = function(...) message(error_mode))()
+    }
+  }
+
+  # get parameters
+  param_id <- design$parameters %>%
+    filter(method_id == method_name, param_ix == config$param_ix) %>%
+    pull(param_id)
+  params <- design$parameters %>%
+    filter(method_id == method_name, param_ix == config$param_ix) %>%
+    pull(paramset) %>%
+    .[[1]]
 
   # start evaluation
   out <- evaluate_ti_method(
     datasets = dataset,
     method = method,
-    parameters = parm_list,
+    parameters = params,
     metrics = metrics,
     output_model = TRUE,
     mc_cores = 1,
-    verbose = verbose
+    verbose = TRUE
   )
 
   # create summary
   bind_cols(
-    grid[grid_i,] %>% select(-dataset_id),
-    tibble(
-      grid_i,
-      params_notrafo = list(parm_df),
-      params_trafo = list(parm_list),
-      model = out$models
-    ),
+    data_frame(method_id = method_name, dataset_id, param_id),
     out$summary %>%
       mutate(error_message = ifelse(is.null(error[[1]]), "", error[[1]]$message)) %>%
-      select(-error)
+      select(-error, -method_id, -method_name, -dataset_id), # remove duplicate columns with design row
+    tibble(
+      model = out$models
+    )
   )
 }
 
@@ -268,22 +409,22 @@ benchmark_run_evaluation <- function(
 benchmark_fetch_results <- function(local_output_folder) {
   requireNamespace("qsub")
 
-  method_names <- list.dirs(local_output_folder, full.names = FALSE, recursive = FALSE) %>% discard(~ . == "")
+  method_ids <- list.dirs(local_output_folder, full.names = FALSE, recursive = FALSE) %>% discard(~ . == "")
 
   # process each method separately
-  map(method_names, function(method_name) {
-    method_folder <- paste0(local_output_folder, "/", method_name)
-    output_metrics_file <- paste0(method_folder, "/output_metrics.rds")
-    output_models_file <- paste0(method_folder, "/output_models.rds")
-    qsubhandle_file <- paste0(method_folder, "/qsubhandle.rds")
+  map(method_ids, function(method_id) {
+    suite_method_folder <- paste0(local_output_folder, "/", method_id)
+    output_metrics_file <- paste0(suite_method_folder, "/output_metrics.rds")
+    output_models_file <- paste0(suite_method_folder, "/output_models.rds")
+    qsubhandle_file <- paste0(suite_method_folder, "/qsubhandle.rds")
 
     # if the output has not been processed yet, but a qsub handle exists,
     # attempt to fetch the results from the cluster
     if (!file.exists(output_metrics_file) && file.exists(qsubhandle_file)) {
 
-      cat(method_name, ": Attempting to retrieve output from cluster: ", sep = "")
+      cat(method_id, ": Attempting to retrieve output from cluster: ", sep = "")
       metadata <- readr::read_rds(qsubhandle_file)
-      grid <- metadata$grid
+      design_method <- metadata$design_method
       qsub_handle <- metadata$qsub_handle
       num_datasets <- qsub_handle$num_datasets
 
@@ -296,35 +437,38 @@ benchmark_fetch_results <- function(local_output_folder) {
       if (!is.null(output)) {
         cat("Output found! Saving output.\n", sep = "")
 
-        suppressWarnings({
-          qacct_out <- qsub::qacct(qsub_handle)
-        })
+        qacct_out <- qsub::qacct(qsub_handle)
 
         # process each job separately
-        outputs <- map_df(seq_len(nrow(grid)), function(grid_i) {
-          out <- output[[grid_i]]
+        outputs <- map_df(seq_len(nrow(design_method)), function(design_row_ix) {
+          design_row <- design_method[design_row_ix, ]
+          out <- output[[design_row_ix]]
 
           if (length(out) != 1 || !is.na(out)) {
             # hooray, the benchmark suite ran fine!
             out
 
           } else {
-            # if qacct is empty or the correct datasetid cannot be found, then
+            # if qacct is empty or the correct taskid cannot be found, then
             # this job never ran
-            if (is.null(qacct_out) || !any(qacct_out$datasetid == grid_i)) {
+            if (is.null(qacct_out) || !any(qacct_out$taskid == design_row_ix)) {
               qsub_error <- "Job cancelled by user"
             } else {
-              qacct_filt <- qacct_out %>% filter(datasetid == grid_i) %>% arrange(desc(row_number_i)) %>% slice(1)
+              qacct_filt <-
+                qacct_out %>%
+                filter(taskid == design_row_ix) %>%
+                arrange(desc(row_number_i)) %>%
+                slice(1)
 
-              qacct_memory <- qacct_filt$maxvmem %>% str_replace("GB$", "") %>% as.numeric
+              qacct_memory <- process_qsub_memory(qacct_filt$maxvmem)
               qacct_exit_status <- qacct_filt$exit_status %>% str_replace(" +", " ")
               qacct_exit_status_number <- qacct_exit_status %>% str_replace(" .*", "")
               qacct_user_time <- qacct_filt$ru_stime %>% str_replace("s$", "") %>% as.numeric
 
-              qsub_memory <- qsub_handle$memory %>% str_replace("G$", "") %>% as.numeric
+              qsub_memory <- process_qsub_memory(qacct_filt$maxvmem)
               qsub_user_time <- qsub_handle$max_wall_time
 
-              memory_messages <- c("cannot allocate vector of size", "MemoryError")
+              memory_messages <- c("cannot allocate vector of size", "MemoryError", "OOM when allocating tensor")
               is_memory_problem <- function(message) {
                 any(map_lgl(memory_messages, ~grepl(., message)))
               }
@@ -335,28 +479,19 @@ benchmark_fetch_results <- function(local_output_folder) {
                 } else if (qacct_exit_status_number %in% c("137", "140", "9", "64")) {
                   "Time limit exceeded"
                 } else if (qacct_exit_status_number != "0") {
-                  qacct_exit_status
+                  paste0("Error status ", qacct_exit_status, "\n", attr(out, "qsub_error"))
                 } else {
                   attr(out, "qsub_error")
                 }
             }
 
-            # create a method that will just return the error generated by qsub
-            method_failer <- metadata$method
-            method_failer$run_fun <- function(...) {
-              stop(qsub_error)
-            }
-            formals(method_failer$run_fun) <- formals(metadata$method$run_fun)
-
-            # "rerun" the evaluation, in order to generate the expected output except with
+            # "rerun" the evaluation in error mode, in order to generate the expected output except with
             # the default fail-scores for each of the metrics
             out <- benchmark_run_evaluation(
-              grid = grid,
-              grid_i = grid_i,
-              parms = metadata$parms,
-              method = method_failer,
+              design_row = design_row,
               metrics = metadata$metrics,
-              verbose = FALSE
+              verbose = FALSE,
+              error_mode = qsub_error
             )
           }
         })
@@ -396,9 +531,9 @@ benchmark_fetch_results <- function(local_output_folder) {
       NULL
     } else {
       if (file.exists(output_metrics_file)) {
-        cat(method_name, ": Output already present.\n", sep = "")
+        cat(method_id, ": Output already present.\n", sep = "")
       } else {
-        cat(method_name, ": No qsub file was found.\n", sep = "")
+        cat(method_id, ": No qsub file was found.\n", sep = "")
       }
       NULL
     }
@@ -418,16 +553,16 @@ benchmark_fetch_results <- function(local_output_folder) {
 #' @importFrom readr read_rds
 #' @export
 benchmark_bind_results <- function(local_output_folder, load_models = FALSE) {
-  method_names <- list.dirs(local_output_folder, full.names = FALSE, recursive = FALSE) %>% discard(~ . == "")
+  method_ids <- list.dirs(local_output_folder, full.names = FALSE, recursive = FALSE) %>% discard(~ . == "")
 
   # process each method separately
-  as_tibble(map_df(method_names, function(method_name) {
-    method_folder <- paste0(local_output_folder, method_name)
-    output_metrics_file <- paste0(method_folder, "/output_metrics.rds")
-    output_models_file <- paste0(method_folder, "/output_models.rds")
+  output <- as_tibble(map_df(method_ids, function(method_id) {
+    suite_method_folder <- file.path(local_output_folder, method_id)
+    output_metrics_file <- file.path(suite_method_folder, "output_metrics.rds")
+    output_models_file <- file.path(suite_method_folder, "output_models.rds")
 
     if (file.exists(output_metrics_file)) {
-      cat(method_name, ": Reading previous output\n", sep = "")
+      cat(method_id, ": Reading previous output\n", sep = "")
       output <- readr::read_rds(output_metrics_file)
 
       # read models, if requested
@@ -438,8 +573,61 @@ benchmark_bind_results <- function(local_output_folder, load_models = FALSE) {
 
       output
     } else {
-      cat(method_name, ": Output not found, skipping\n", sep = "")
+      cat(method_id, ": Output not found, skipping\n", sep = "")
       NULL
     }
   }))
+
+  output$error_status <- purrr::pmap_chr(output, extract_error_status)
+
+  output
+}
+
+
+
+#' Extract the error status from an evaluation
+#'
+#' @param model The model
+#' @param stdout The standard output
+#' @param stderr The standard error
+#' @param error_message The error message
+#' @param ... Other columns in the output, ignored
+extract_error_status <- function(model, stdout, stderr, error_message, ...) {
+  memory_messages <- c(
+    "cannot allocate vector of size", # R
+    "MemoryError", # python
+    "OOM when allocating tensor", # tensorflow
+    "nullptr != block->mem", # tensorflow,
+    "std::bad_alloc", # tensorflow
+    "Bus error", # stemid 2 -> clustexpr
+    "what\\(\\):  Resource temporarily unavailable" # grandprix
+  )
+  is_memory_problem <- function(message) {
+    any(map_lgl(memory_messages, ~grepl(., message)))
+  }
+
+  case_when(
+    error_message == "Memory limit exceeded" ~ "memory_limit",
+    is_memory_problem(stderr) ~ "memory_limit",
+    is_memory_problem(error_message) ~ "memory_limit",
+    is_memory_problem(stdout) ~ "memory_limit",
+    stringr::str_detect(error_message, "Time limit exceeded") ~ "time_limit",
+    stringr::str_detect(stderr, "Time limit exceeded") ~ "time_limit",
+    stringr::str_detect(error_message, "^Error status [0-9]*.*") ~ "execution_error",
+    stringr::str_detect(stderr, "^Error status [0-9]*.*") ~ "execution_error",
+    is.null(model[[1]]) ~ "method_error",
+    TRUE ~ "no_error"
+  )
+}
+
+
+
+process_qsub_memory <- function(qsub_memory) {
+  if (str_detect(qsub_memory, "[0-9\\.]*MB")) {
+    as.numeric(str_replace_all(qsub_memory, "([0-9\\.]*)MB", "\\1")) / 1024
+  } else if (str_detect(qsub_memory, "[0-9\\.]*GB")) {
+    as.numeric(str_replace_all(qsub_memory, "([0-9\\.]*)GB", "\\1"))
+  } else {
+    stop("Cannot process qsub memory: ", qsub_memory)
+  }
 }

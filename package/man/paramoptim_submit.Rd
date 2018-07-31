@@ -4,15 +4,15 @@
 \alias{paramoptim_submit}
 \title{A parameter optimisation suite}
 \usage{
-paramoptim_submit(dataset_ids, methods, timeout_paramoptim, max_memory_per_core,
-  num_cores, metrics, num_repeats, num_iterations, num_init_params,
-  local_output_folder, remote_output_folder, execute_before = NULL,
-  verbose = FALSE)
+paramoptim_submit(dataset_ids, methods, timeout_paramoptim,
+  max_memory_per_core, num_cores, metrics, num_repeats, num_iterations,
+  num_init_params, local_output_folder, remote_output_folder,
+  execute_before = NULL, verbose = FALSE)
 }
 \arguments{
 \item{dataset_ids}{The ids of the datasets to be used in the evaluation.}
 
-\item{methods}{A tibble of TI methods to use, see \code{\link[dynwrap]{get_ti_methods}}.}
+\item{methods}{A tibble of TI methods to use, see \code{\link[dynwrap:get_ti_methods]{dynwrap::get_ti_methods()}}.}
 
 \item{timeout_paramoptim}{The parameter optimisation timeout}
 
@@ -20,7 +20,7 @@ paramoptim_submit(dataset_ids, methods, timeout_paramoptim, max_memory_per_core,
 
 \item{num_cores}{The number of cores to use.}
 
-\item{metrics}{Which metrics to evaluate; see \code{\link{calculate_metrics}} for a list of which metrics are available.}
+\item{metrics}{Which metrics to evaluate; see \code{\link[=calculate_metrics]{calculate_metrics()}} for a list of which metrics are available.}
 
 \item{num_repeats}{The number of times to repeat the evaluation.}
 

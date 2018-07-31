@@ -13,6 +13,7 @@ create_replacers <- function(to_replace) {
 #' @param replacer Replacer dataframe
 #'
 #' @importFrom xml2 xml_find_all xml_attr xml_attrs xml_new_root read_xml xml_set_attrs xml_add_child xml_remove
+#' @importFrom utils type.convert
 #'
 #' @export
 replace_svg <- function(svg, replacer) {
@@ -40,7 +41,7 @@ replace_svg <- function(svg, replacer) {
       # find correct rect
       rectoi <- rects[[matched_rect]]
 
-      attrs <- xml2::xml_attrs(rectoi) %>% map(type.convert)
+      attrs <- xml2::xml_attrs(rectoi) %>% map(utils::type.convert)
 
       # create sub_svg
       sub_svg <- xml2::xml_new_root(xml2::read_xml(sub_svg_str))
@@ -54,7 +55,7 @@ replace_svg <- function(svg, replacer) {
       sub_g <- xml2::xml_new_root("g")
 
       # transform the group
-      transform <- glue::collapse(c(
+      transform <- glue::glue_collapse(c(
         "translate({attrs$x}, {attrs$y})", # translate to box
         "translate({(attrs$width - sub_svg_width*scale)/2}, {(attrs$height - sub_svg_height*scale)/2})", # move to center
         "scale({scale})" # scale within box
