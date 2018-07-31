@@ -1,3 +1,6 @@
+## Downloading and processing the quality control worksheet
+## Downloads the quality control values from the google sheet and processes it into a tidy format
+
 library(tidyverse)
 library(googlesheets)
 library(dynbenchmark)
@@ -8,7 +11,7 @@ experiment("04-method_characterisation")
 ##  QC sheet processing                                                     ####
 # Download qc & initial processing
 tool_qc_sheet <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
-  gs_read(ws = "QualityControl")
+  gs_read(ws = "qc")
 
 categories <- unique(tool_qc_sheet$category) %>% discard(is.na)
 applications <- c("developer_friendly", "user_friendly", "good_science")
@@ -52,8 +55,7 @@ tool_qc_processed$answer <- ifelse(is.na(tool_qc_processed$answer), 0, tool_qc_p
 tool_qc <- tool_qc_processed
 
 write_rds(tool_qc_processed, derived_file("tool_qc.rds"))
-write_rds(checks, derived_file("checks.rds"))
-write_rds(checks, result_file("checks.rds"))
+write_rds(checks, derived_file("qc_checks"))
 
 ##  ............................................................................
 ##  Calculate final qc scores                                               ####

@@ -1,27 +1,27 @@
 ## Grouping methods into tools
-
-(1) extra information is added to dynmethods::methods from the google sheet and (2) methods are grouped into
+## (1) Grouping of methods into "tools", based on the google spreadsheet
+## (2) Some postprocessing of the dynmethods::methods
 
 library(tidyverse)
 library(googlesheets)
 library(dynbenchmark)
-library(dynmethods)
 
 experiment("04-method_characterisation")
 
 # If it's your first time running this script, run this:
 # gs_auth()
+sheet <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE")
 
 ##  ............................................................................
 ##  Methods                                                                 ####
 methods <- dynmethods::methods
 
 # tool_id is default id
-methods$tool_id <- ifelse(is.na(methods$tool_id), methods$id, methods$tool_id)
+methods$tool_id <- ifelse(is.na(methods$implementation_id), methods$id, methods$implementation_id)
 
 # join with google sheet
-methods_google <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
-  gs_read(ws = "Methods", skip = 1)
+methods_google <- sheet %>%
+  gs_read(ws = "methods", skip = 1)
 
 if (length(setdiff(methods$id, methods_google$id))) {
   stop(setdiff(methods$id, methods_google$id))
@@ -38,8 +38,8 @@ methods$preprint_date <- as.Date(methods$preprint_date)
 
 #   ____________________________________________________________________________
 #   Implementations                                                         ####
-tools_google <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
-  gs_read(ws = "Implementations", skip = 1) %>%
+tools_google <- sheet %>%
+  gs_read(ws = "tools", skip = 1) %>%
   filter(contains_ti)
 
 tools <- methods %>%
