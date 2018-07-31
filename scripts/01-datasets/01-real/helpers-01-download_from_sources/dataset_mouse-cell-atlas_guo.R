@@ -6,7 +6,7 @@ library(dynbenchmark)
 dataset_preprocessing("real/mouse-cell-atlas_guo")
 
 # get settings
-source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/scripts/01-datasets/01-real/01-download_from_sources-helpers/helper_mouse-cell-atlas_settings.R"))
+source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/scripts/01-datasets/01-real/helpers-01-download_from_sources/helper_mouse-cell-atlas_settings.R"))
 
 # cell info
 cell_assignments_file <- download_dataset_source_file("MCA_CellAssignments.csv", "https://ndownloader.figshare.com/files/11083451?private_link=865e694ad06d5857db4b")
