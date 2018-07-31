@@ -24,9 +24,6 @@ BugReports: https://github.com/dynverse/dynalysis/issues
 Imports: 
   cluster,
   dplyr,
-  dyngen,
-  dyntoy,
-  dynnormaliser,
   emoa,
   ggraph,
   ggplot2,
@@ -36,11 +33,7 @@ Imports:
   mlr,
   mlrMBO,
   parallelMap,
-  ParamHelpers (>= 1.11),
-  pbapply,
   purrr,
-  randomForest,
-  RColorBrewer,
   readr,
   reshape2,
   rvest,
@@ -51,15 +44,21 @@ Imports:
   tidyverse,
   tibble,
   testthat,
-  tidygraph,
   xml2
 Suggests:
+  dyngen,
+  dyntoy,
+  dynnormaliser,
   qsub,
-  SingleCellExperiment,
   devtools,
   igraph,
+  randomForest,
+  ParamHelpers (>= 1.11),
   reticulate,
-  splatter
+  RColorBrewer,
+  splatter,
+  SingleCellExperiment,
+  tidygraph
 Remotes:
   dynverse/dyneval,
   dynverse/dyngen,

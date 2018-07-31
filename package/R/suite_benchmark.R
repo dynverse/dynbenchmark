@@ -162,7 +162,6 @@ generate_benchmark_design <- function(
 #' @param execute_before Shell commands to execute before running R.
 #' @param verbose Whether or not to print extra information.
 #'
-#' @importFrom pbapply pblapply
 #' @importFrom readr read_rds write_rds
 #'
 #' @export

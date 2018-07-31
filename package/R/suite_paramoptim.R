@@ -14,7 +14,6 @@
 #' @param execute_before Shell commands to execute before running R.
 #' @param verbose Whether or not to print extra information.
 #'
-#' @importFrom pbapply pblapply
 #' @importFrom readr read_rds write_rds
 #' @importFrom testthat expect_equal expect_is
 #' @importFrom mlrMBO makeMBOControl setMBOControlTermination setMBOControlInfill makeMBOInfillCritDIB makeMBOInfillCritCB
