@@ -27,4 +27,8 @@ handle <- qsub_pmap(
   qsub_config = qsub_config
 )
 
+write_rds(handle, "handle_dyngen.rds")
+
+##
+handle <- read_rds("handle_dyngen.rds")
 qsub::qsub_retrieve(handle)

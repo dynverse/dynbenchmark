@@ -1,5 +1,6 @@
 library(tidyverse)
 library(dynbenchmark)
+library(qsub)
 
 # generate design of models, platforms and (randomised) splatter parameters
 design <- crossing(
@@ -20,4 +21,16 @@ design <- crossing(
   select(-platform_ix)
 
 # simulate datasets
-pmap(design, simulate_prosstt)
+qsub_config <- override_qsub_config(memory = "10G", max_wall_time = "24:00:00", num_cores = 1, name = "prosstt", wait = F, execute_before = "module load python/x86_64/3.6.5")
+
+handle <- qsub_pmap(
+  design,
+  simulate_prosstt,
+  qsub_config = qsub_config
+)
+
+write_rds(handle, "handle_prosstt.rds")
+
+##
+handle <- read_rds("handle_prosstt.rds")
+qsub::qsub_retrieve(handle)
