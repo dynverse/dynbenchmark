@@ -4,6 +4,15 @@ output: github_document
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, error = FALSE, echo = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(dynbenchmark)
+```
+
 [![Build Status](https://api.travis-ci.org/dynverse/dynbenchmark.svg)](https://travis-ci.org/dynverse/dynbenchmark)
 ![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg) <img src="package/man/figures/logo.png" align="right" />
 
@@ -30,8 +39,44 @@ This repository is structured as follows:
 
 ## Datasets
 
-We include the following datasets. When using any of these datasets, please also cite our preprint: [![DOI](https://zenodo.org/badge/DOI/10.1101/276907.svg)](https://doi.org/10.1101/276907)
+The benchmarking pipeline generates (and uses) the following datasets:
 
-* [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1211533.svg)](https://doi.org/10.5281/zenodo.1211533) Single-cell -omics datasets, both real and synthetic, used to evaluated the trajectory inference methods
-* **Coming soon** Main results of the evaluation, used to rank the methods and construct practical guidelines
+* **Gold standard single-cell datasets**, both real and synthetic, used to evaluated the trajectory inference methods [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1211533.svg)](https://doi.org/10.5281/zenodo.1211533)
 
+```{r, echo = FALSE, message=FALSE}
+datasets <- list_datasets() %>% group_by(dataset_source) %>% sample_n(1) %>% pull(dataset_id) %>% load_datasets()
+
+datasets$plot_dimred <- mapdf(datasets, ~plot_dimred(., dimred = dyndimred::dimred_landmark_mds) + ggtitle(.$dataset_source) + theme(plot.title = element_text(size = 10)))
+p <- patchwork::wrap_plots(datasets$plot_dimred, ncol = nrow(datasets))
+ggplot2::ggsave("package/man/figures/datasets.png", width = nrow(datasets)*3, height = 1*3)
+```
+
+![datasets](package/man/figures/datasets.png)
+
+* **The performance of methods** used in [dynguidelines](https://www.github.com/dynverse/dynguidelines). _Not yet available_
+
+* **General information about trajectory inference methods**, available as a data frame in `dynmethods::methods`
+
+## Scripts
+
+The scripts folder contains all the scripts necessary to fully reproduce the benchmarking manuscript in chronologically ordered subfolders. Each subfolder contains a readme file with further explanations of the different scripts and what they do:
+
+```{r}
+scripts <- read_rds(derived_file("scripts.rds", experiment_id = "12-varia/01-scripts"))
+
+scripts %>% filter(
+  level == 1
+) %>%
+  arrange(ix) %>%
+  mutate(
+    name = str_glue("[{id}](https://github.com/dynverse/dynbenchmark/tree/master/{location})")
+  ) %>% 
+  select(name, title) %>%
+  knitr::kable()
+
+
+```
+
+## Benchmarking your own method
+
+Explanation coming soon. Feel free to make an issue if you want your method to be included.

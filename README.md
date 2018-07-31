@@ -27,7 +27,43 @@ This repository is structured as follows:
 Datasets
 --------
 
-We include the following datasets. When using any of these datasets, please also cite our preprint: [![DOI](https://zenodo.org/badge/DOI/10.1101/276907.svg)](https://doi.org/10.1101/276907)
+The benchmarking pipeline generates (and uses) the following datasets:
 
--   [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1211533.svg)](https://doi.org/10.5281/zenodo.1211533) Single-cell -omics datasets, both real and synthetic, used to evaluated the trajectory inference methods
--   **Coming soon** Main results of the evaluation, used to rank the methods and construct practical guidelines
+-   **Gold standard single-cell datasets**, both real and synthetic, used to evaluated the trajectory inference methods [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1211533.svg)](https://doi.org/10.5281/zenodo.1211533)
+
+![datasets](package/man/figures/datasets.png)
+
+-   **The performance of methods** used in [dynguidelines](https://www.github.com/dynverse/dynguidelines). *Not yet available*
+
+-   **General information about trajectory inference methods**, available as a data frame in `dynmethods::methods`
+
+Scripts
+-------
+
+The scripts folder contains all the scripts necessary to fully reproduce the benchmarking manuscript in chronologically ordered subfolders. Each subfolder contains a readme file with further explanations of the different scripts and what they do:
+
+| name                                                                                                                     | title                                                      |
+|:-------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------|
+| [datasets](https://github.com/dynverse/dynbenchmark/tree/master/scripts/01-datasets)                                     | Generation of datasets                                     |
+| [dataset\_characterisation](https://github.com/dynverse/dynbenchmark/tree/master/scripts/02-dataset_characterisation)    | Characterisation of datasets                               |
+| [metric\_characterisation](https://github.com/dynverse/dynbenchmark/tree/master/scripts/03-metric_characterisation)      | Metrics characterisation and testing                       |
+| [method\_characterisation](https://github.com/dynverse/dynbenchmark/tree/master/scripts/04-method_characterisation)      | Methods characterisation and testing                       |
+| [scaling](https://github.com/dynverse/dynbenchmark/tree/master/scripts/05-scaling)                                       | Scalability assessments of the methods on toy data         |
+| [optimise\_parameters](https://github.com/dynverse/dynbenchmark/tree/master/scripts/06-optimise_parameters)              | Optimisation of parametersof the methods on synthetic data |
+| [benchmark](https://github.com/dynverse/dynbenchmark/tree/master/scripts/07-benchmark)                                   | Benchmarking of methods on real and synthetic data         |
+| [aggregate](https://github.com/dynverse/dynbenchmark/tree/master/scripts/08-aggregate)                                   |                                                            |
+| [user\_guidelines](https://github.com/dynverse/dynbenchmark/tree/master/scripts/09-user_guidelines)                      |                                                            |
+| [checks](https://github.com/dynverse/dynbenchmark/tree/master/scripts/10-checks)                                         |                                                            |
+| [plots](https://github.com/dynverse/dynbenchmark/tree/master/scripts/11-plots)                                           |                                                            |
+| [varia](https://github.com/dynverse/dynbenchmark/tree/master/scripts/12-varia)                                           |                                                            |
+| [oldprior\_information](https://github.com/dynverse/dynbenchmark/tree/master/scripts/old10-prior_information)            |                                                            |
+| [oldevaluation\_robustness](https://github.com/dynverse/dynbenchmark/tree/master/scripts/old11-evaluation_robustness)    |                                                            |
+| [oldexample\_predictions](https://github.com/dynverse/dynbenchmark/tree/master/scripts/old14-example_predictions)        |                                                            |
+| [old6-performance\_predictors](https://github.com/dynverse/dynbenchmark/tree/master/scripts/old6-performance_predictors) |                                                            |
+| [old7-user\_guidelines](https://github.com/dynverse/dynbenchmark/tree/master/scripts/old7-user_guidelines)               |                                                            |
+| [old8-topology\_detection](https://github.com/dynverse/dynbenchmark/tree/master/scripts/old8-topology_detection)         |                                                            |
+
+Benchmarking your own method
+----------------------------
+
+Explanation coming soon. Feel free to make an issue if you want your method to be included.
