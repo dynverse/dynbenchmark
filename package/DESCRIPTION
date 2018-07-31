@@ -59,7 +59,6 @@ Suggests:
   devtools,
   igraph,
   reticulate,
-  Seurat,
   splatter
 Remotes:
   dynverse/dyneval,
