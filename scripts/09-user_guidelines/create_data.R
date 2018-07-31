@@ -9,9 +9,9 @@ read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-agg
 methods <-
   left_join(
     methods,
-    read_rds(derived_file("implementation_qc_application_scores.rds", "04-method_characterisation")) %>%
+    read_rds(derived_file("tool_qc_application_scores.rds", "04-method_characterisation")) %>%
       spread("application", "score"),
-    "implementation_id"
+    "tool_id"
   ) %>%
   filter(type %in% c("algorithm", "control"))
 
