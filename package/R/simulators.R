@@ -7,6 +7,8 @@
 #' @param platform The platform to use as reference
 #' @param dataset_id The id of the dataset
 #' @param n_steps_per_length Number of simulation steps per length unit (for splatter and prosstt)
+#' @param seed The seed to use, will use the current seed if not given
+#' @param use_cache Whether to allow the cache (stored in the dataset preprocessing source files)
 NULL
 
 
@@ -24,35 +26,58 @@ simulate_splatter <- function(
   path.skew = runif(1, 0, 1),
   path.nonlinearProb = runif(1, 0, 1),
   path.sigmaFac = runif(1, 0, 1),
-  bcv.common.factor = runif(1, 10, 200)
+  bcv.common.factor = runif(1, 10, 200),
+  seed = NULL,
+  use_cache = TRUE
 ) {
+  requireNamespace("splatter")
+
   if (missing(dataset_id)) stop("dataset_id is required")
+  dataset_preprocessing(dataset_id)
 
-  splatter_params <- platform$estimate
-  class(splatter_params) <- "SplatParams"
+  # if cache disallowed, clear cache files
+  if (!use_cache) {
+    qsub::rm_remote(dataset_source_file(), remote = NULL, recursive = TRUE, force = TRUE)
+  }
 
-  milestone_network <- dyntoy::generate_milestone_network(topology_model)
+  if (!is.null(seed)) set.seed(seed)
 
-  # extract path.from, root is 0
-  root <- setdiff(milestone_network$from, milestone_network$to)
-  path.to <- c(root, milestone_network$to)
-  path.from <- as.numeric(factor(milestone_network$from, levels = path.to)) - 1
+  # simulate splatter
+  sim <- load_or_generate(
+    dataset_source_file("sim.rds"),
+    {
+      # get splatter parameters
+      splatter_params <- platform$estimate
+      class(splatter_params) <- "SplatParams"
 
-  # factor added to bcv.common, influences how strong the biological effect is
-  splatter_params@bcv.common <- splatter_params@bcv.common / bcv.common.factor
+      # extract path from milestone network
+      milestone_network <- dyntoy::generate_milestone_network(topology_model)
 
-  # simulate
-  sim <- splatter::splatSimulatePaths(
-    splatter_params,
-    batchCells = platform$n_cells,
-    nGenes = platform$n_features,
-    group.prob = milestone_network$length/sum(milestone_network$length),
-    path.from = path.from,
-    path.length = ceiling(milestone_network$length*n_steps_per_length),
-    path.nonlinearProb = path.nonlinearProb,
-    path.sigmaFac = path.sigmaFac,
-    path.skew = path.skew
+      root <- setdiff(milestone_network$from, milestone_network$to)
+      path.to <- c(root, milestone_network$to)
+      path.from <- as.numeric(factor(milestone_network$from, levels = path.to)) - 1
+
+      # factor added to bcv.common, influences how strong the biological effect is
+      splatter_params@bcv.common <- splatter_params@bcv.common / bcv.common.factor
+
+      # simulate
+      sim <- splatter::splatSimulatePaths(
+        splatter_params,
+        batchCells = platform$n_cells,
+        nGenes = platform$n_features,
+        group.prob = milestone_network$length/sum(milestone_network$length),
+        path.from = path.from,
+        path.length = ceiling(milestone_network$length*n_steps_per_length),
+        path.nonlinearProb = path.nonlinearProb,
+        path.sigmaFac = path.sigmaFac,
+        path.skew = path.skew
+      )
+
+      sim
+    }
   )
+
+  # get counts
   counts <- t(SingleCellExperiment::counts(sim))
   # expression <- t(exprs(scater::normalise(sim)))
 
@@ -84,16 +109,15 @@ simulate_splatter <- function(
     add_trajectory(
       milestone_network = milestone_network,
       progressions = progressions
-    )
+    ) %>%
+    add_prior_information()
 
   # add information on the simulation itself
-  dataset$simulation_design <- c(
-    match.call(),
+  dataset$simulation_design <-
     list(
       simulator = "splatter",
       simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "splatter", "dynnormaliser", "dynbenchmark"))
     )
-  )
 
   # save dataset
   save_dataset(dataset, dataset_id)
@@ -117,7 +141,8 @@ simulate_prosstt <- function(
   intra_branch_tol = runif(1, 0, 0.9),
   inter_branch_tol = runif(1, 0, 0.9),
   alpha = exp(rnorm(1, log(0.2), log(1.5))),
-  beta = exp(rnorm(1, log(1), log(1.5))) + 1
+  beta = exp(rnorm(1, log(1), log(1.5))) + 1,
+  seed = NULL
 ) {
   if (missing(dataset_id)) stop("dataset_id is required")
 
@@ -127,9 +152,19 @@ simulate_prosstt <- function(
   # load prosstt python package
   requireNamespace("reticulate")
 
-  tree <- reticulate::import("prosstt.tree")
-  sim <- reticulate::import("prosstt.simulation")
-  sut <- reticulate::import("prosstt.sim_utils")
+  tryCatch({
+    reticulate::use_python(system("which python3", intern=TRUE))
+
+    tree <- reticulate::import("prosstt.tree")
+    sim <- reticulate::import("prosstt.simulation")
+    sut <- reticulate::import("prosstt.sim_utils")
+  },
+  error = function(e) {
+    stop("PROSSTT seems not to be correctly installed, run pip3 install git+https://github.com/soedinglab/prosstt ", e)
+  })
+
+  # set seed
+  if (!is.null(seed)) reticulate::py_set_seed(seed)
 
   # generate milestone network
   milestone_network <- dyntoy::generate_milestone_network(topology_model)
@@ -232,15 +267,14 @@ simulate_prosstt <- function(
     add_expression(
       counts = counts,
       expression = expression
-    )
+    ) %>%
+    add_prior_information()
 
-  dataset$simulation_design <- c(
-    match.call(),
+  dataset$simulation_design <-
     list(
       simulator = "prosstt",
       simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "prosstt", "splatter", "dynbenchmark", "dynnormaliser"))
     )
-  )
 
   # save dataset
   save_dataset(dataset, dataset_id)
@@ -257,28 +291,40 @@ simulate_dyntoy <- function(
   dataset_id,
   topology_model = "linear",
   platform = load_simple_platform(),
-  sample_mean_count = function() rgamma(1, shape = platform$estimate@mean.shape, rate = platform$estimate@mean.rate),
-  sample_dispersion_count = function(mean) map_dbl(mean, ~runif(1, ./10, ./4)),
-  dropout_probability_factor = runif(1, 10, 200)
+  count_mean_shape = runif(1, 1, 10),
+  count_mean_scale = runif(1, 1, 10),
+  dropout_probability_factor = runif(1, 10, 200),
+  seed = NULL
 ) {
   if (missing(dataset_id)) stop("dataset_id is required")
+
+  if (!is.null(seed)) set.seed(seed)
+
+  if (platform$estimate@mean.shape / platform$estimate@mean.rate < 1) {
+    shape <- platform$estimate@mean.shape / platform$estimate@mean.rate
+  } else {
+    shape <- platform$estimate@mean.shape
+  }
+
+  # sample_mean_count <- function() rgamma(1, shape = shape, rate = platform$estimate@mean.rate)
+  sample_mean_count <- function() rgamma(1, shape = count_mean_shape, scale = count_mean_scale)
+  sample_dispersion_count = function(mean) map_dbl(mean, ~runif(1, ./10, ./4))
 
   dataset <- dyntoy::generate_dataset(
     dataset_id,
     model = topology_model,
     num_cells = platform$n_cells,
-    num_features = platform$n_features,
+    num_features = ceiling(platform$n_features * platform$trajectory_dependent_features),
     sample_mean_count = sample_mean_count,
     sample_dispersion_count = sample_dispersion_count,
     dropout_probability_factor = dropout_probability_factor
   )
 
-  dataset$simulation_design <- c(
-    match.call(),
-    list(
-      simulator = "dyntoy",
-      simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "splatter", "dynbenchmark", "dynnormaliser"))
-    )
+  dataset$dataset_source <- "synthetic/dyntoy"
+
+  dataset$simulation_design <- list(
+    simulator = "dyntoy",
+    simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "splatter", "dynbenchmark", "dynnormaliser"))
   )
 
   # save dataset
@@ -296,11 +342,19 @@ simulate_dyntoy <- function(
 simulate_dyngen <- function(
   dataset_id,
   modulenet_name = "linear",
-  platform = load_simple_platform()
+  platform = load_simple_platform(),
+  use_cache = TRUE,
+  seed = NULL
 ) {
   if (missing(dataset_id)) stop("dataset_id is required")
-
   dataset_preprocessing(dataset_id)
+
+  # if cache disallowed, clear cache files
+  if (!use_cache) {
+    qsub::rm_remote(dataset_source_file(), remote = NULL, recursive = TRUE, force = TRUE)
+  }
+
+  if (!is.null(seed)) set.seed(seed)
 
   # generate dyngen params
   params <- dyngen::base_params
@@ -344,12 +398,9 @@ simulate_dyngen <- function(
     dyngen::wrap_dyngen_dataset(dataset_id, params, model, simulation, gs, experiment, normalisation)
   )
   dataset$dataset_source <- "synthetic/dyngen"
-  dataset$simulation_design <- c(
-    match.call(),
-    list(
-      simulator = "dyngen",
-      simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyngen","splatter", "dynbenchmark"))
-    )
+  dataset$simulation_design <- list(
+    simulator = "dyngen",
+    simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyngen","splatter", "dynbenchmark"))
   )
 
   # save dataset

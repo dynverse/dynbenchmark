@@ -5,7 +5,8 @@
 \title{Creates a prior mini svg}
 \usage{
 generate_prior_mini(method_priors,
-  svg = xml2::read_xml(figure_file("priors.svg", experiment_id = "priors")))
+  svg = xml2::read_xml(figure_file("priors.svg", experiment_id =
+  "priors")))
 }
 \arguments{
 \item{method_priors}{Dataframe containing a prior_id and a prior_usage}
