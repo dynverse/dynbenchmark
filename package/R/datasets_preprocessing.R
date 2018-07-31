@@ -5,7 +5,6 @@
 #' @inheritParams dynwrap::add_cluster_graph
 #' @param root_milestone_id The root milestone, optional
 #'
-#' @importFrom dynnormaliser normalise_filter_counts
 #' @importFrom dynwrap generate_prior_information
 #' @importFrom testthat expect_match
 #' @importFrom grDevices graphics.off pdf
@@ -20,6 +19,8 @@ process_raw_dataset <- function(
   cell_info = tibble(cell_id = rownames(counts)),
   feature_info = tibble(feature_id = colnames(counts))
 ) {
+  requireNamespace("dynnormaliser")
+
   testthat::expect_match(id, ".+/.+")
 
   # convert symbols

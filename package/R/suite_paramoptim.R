@@ -14,14 +14,11 @@
 #' @param execute_before Shell commands to execute before running R.
 #' @param verbose Whether or not to print extra information.
 #'
-#' @importFrom pbapply pblapply
 #' @importFrom readr read_rds write_rds
 #' @importFrom testthat expect_equal expect_is
 #' @importFrom mlrMBO makeMBOControl setMBOControlTermination setMBOControlInfill makeMBOInfillCritDIB makeMBOInfillCritCB
 #' @importFrom mlr makeLearner configureMlr
-#' @importFrom ParamHelpers generateDesignOfDefaults generateDesign
 #' @importFrom parallelMap parallelStartMulticore parallelStop
-#' @importFrom randomForest randomForest
 #' @importFrom emoa emoa_control
 #' @importFrom dynwrap get_ti_methods
 #'
@@ -42,6 +39,7 @@ paramoptim_submit <- function(
   verbose = FALSE
 ) {
   requireNamespace("qsub")
+  requireNamespace("randomForest")
 
   paramoptim_submit_check(
     dataset_ids,
@@ -186,7 +184,6 @@ paramoptim_submit <- function(
 }
 
 #' @importFrom testthat expect_equal expect_is
-#' @importFrom ParamHelpers dfRowToList
 paramoptim_submit_check <- function(
   dataset_ids,
   methods,
@@ -236,7 +233,6 @@ paramoptim_qsub_fun <- function(grid_i) {
 }
 
 #' @importFrom readr read_rds
-#' @importFrom ParamHelpers dfRowToList trafoValue
 #' @importFrom parallelMap parallelStartMulticore parallelStop
 #' @importFrom mlrMBO mbo
 #' @importFrom mlr configureMlr
