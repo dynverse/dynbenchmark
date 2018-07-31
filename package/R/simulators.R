@@ -35,7 +35,7 @@ simulate_splatter <- function(
   if (!is.null(seed)) set.seed(seed)
 
   splatter_params <- platform$estimate
-  class(splatter_params) <- "Params"
+  class(splatter_params) <- "SplatParams"
 
   milestone_network <- dyntoy::generate_milestone_network(topology_model)
 
