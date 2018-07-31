@@ -6,6 +6,7 @@
 \alias{data_file}
 \alias{figure_file}
 \alias{result_file}
+\alias{scripts_file}
 \title{Helper function for controlling experiments}
 \usage{
 experiment(experiment_id)
@@ -17,6 +18,8 @@ data_file(filename = "", experiment_id = NULL, remote = FALSE)
 figure_file(filename = "", experiment_id = NULL, remote = FALSE)
 
 result_file(filename = "", experiment_id = NULL, remote = FALSE)
+
+scripts_file(filename = "", experiment_id = NULL, remote = FALSE)
 }
 \arguments{
 \item{experiment_id}{id for the experiment}
