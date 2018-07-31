@@ -28,12 +28,14 @@ simulate_splatter <- function(
   bcv.common.factor = runif(1, 10, 200),
   seed = NULL
 ) {
+  requireNamespace("splatter")
+
   if (missing(dataset_id)) stop("dataset_id is required")
 
   if (!is.null(seed)) set.seed(seed)
 
   splatter_params <- platform$estimate
-  class(splatter_params) <- "SplatParams"
+  class(splatter_params) <- "Params"
 
   milestone_network <- dyntoy::generate_milestone_network(topology_model)
 
