@@ -4,7 +4,7 @@ library(tidyverse)
 dataset_preprocessing("real/whole-schmidtea-mediterranea_plass")
 
 # get settings
-source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/scripts/01-datasets/01-real/01-download_from_sources-helpers/helper_planaria-plass.R"))
+source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/scripts/01-datasets/01-real/helpers-01-download_from_sources/helper_planaria-plass.R"))
 
 # counts
 counts_file <- download_dataset_source_file(
