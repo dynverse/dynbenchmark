@@ -4,19 +4,19 @@ from=$1
 to=$2
 
 if [ -d data/$from ]; then 
-	git mv data/$from data/$to
+	mv data/$from data/$to
 fi
 
 if [ -d figures/$from ]; then
-	git mv figures/$from figures/$to
+	mv figures/$from figures/$to
 fi
 
 if [ -d results/$from ]; then
-	git mv results/$from results/$to
+	mv results/$from results/$to
 fi
 
 if [ -d scripts/$from ]; then
-	git mv scripts/$from scripts/$to
+	mv scripts/$from scripts/$to
 fi
 
 if [ -d derived/$from ]; then
