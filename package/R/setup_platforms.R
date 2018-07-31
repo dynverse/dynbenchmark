@@ -83,7 +83,6 @@ splatEstDropout <- function(norm.counts, params) {
 #' @param dataset_id The dataset_id from which the platform will be estimated, using the files in datasets_preproc/raw
 #' @export
 estimate_platform <- function(dataset_id) {
-  requireNamespace("Seurat")
   requireNamespace("splatter")
   assignInNamespace("splatEstDropout", dynbenchmark:::splatEstDropout, asNamespace("splatter"))
 
@@ -96,11 +95,37 @@ estimate_platform <- function(dataset_id) {
       counts <- dataset_raw$counts
 
       # determine how many features change between trajectory stages
-      seurat <- Seurat::CreateSeuratObject(t(dataset_raw$counts))
-      seurat@ident <- factor(dataset_raw$grouping)
-      changing <- Seurat::FindAllMarkers(seurat, logfc.treshold = 1, min.pct = 0.4, test.use = "t")
-      n_changing <- changing %>% pull(gene) %>% unique() %>% length()
-      trajectory_dependent_features <- n_changing / ncol(counts)
+      group_ids <- unique(dataset_raw$grouping)
+      min.pct <- 0.4
+      counts <- dataset_raw$counts[, apply(dataset_raw$counts, 2, function(x) mean(x>0) > min.pct)]
+      diffexp <- map_df(group_ids, function(group_id) {
+        inside <- dataset_raw$grouping == group_id
+        outside <- dataset_raw$grouping != group_id
+
+        expression_inside <- log2(counts[inside, ] + 1)
+        expression_outside <- log2(counts[outside, ] + 1)
+
+        result <- map_df(colnames(expression_inside), function(feature_id) {
+          pvalue <- wilcox.test(expression_inside[, feature_id], expression_outside[, feature_id])$p.value
+          log2fc <- mean(expression_inside[, feature_id]) - mean(expression_outside[, feature_id])
+
+          tibble(
+            pvalue = pvalue,
+            log2fc = log2fc,
+            feature_id = feature_id,
+            group_id = group_id
+          )
+        })
+      })
+
+      diffexp_features <- diffexp %>% filter(
+        pvalue < 0.05,
+        abs(log2fc) > 1
+      ) %>%
+        pull(feature_id) %>%
+        unique()
+
+      trajectory_dependent_features <- length(diffexp_features) / ncol(dataset_raw$counts)
 
       # estimate splatter params
       estimate <- splatter::splatEstimate(t(counts[sample(nrow(counts), min(nrow(counts), 500)), ]))
