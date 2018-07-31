@@ -5,6 +5,9 @@ library(dynbenchmark)
 
 dataset_preprocessing("real/mouse-cell-atlas_guo")
 
+# get settings
+source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/scripts/01-datasets/01-real/helpers-01-download_from_sources/helper_mouse-cell-atlas_settings.R"))
+
 # cell info
 cell_assignments_file <- download_dataset_source_file("MCA_CellAssignments.csv", "https://ndownloader.figshare.com/files/11083451?private_link=865e694ad06d5857db4b")
 all_cell_info <- read_csv(cell_assignments_file) %>%
@@ -63,9 +66,6 @@ get_counts <- function(cell_info) {
 
   counts
 }
-
-# get settings
-source("scripts/01-datasets/real/1_download_from_sources/helper_mouse-cell-atlas_settings.R")
 
 # process setting
 for (setting in settings) {

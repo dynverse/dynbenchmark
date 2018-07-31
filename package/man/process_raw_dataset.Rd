@@ -5,8 +5,9 @@
 \title{Process a raw real or synthetic dataset}
 \usage{
 process_raw_dataset(id, counts, milestone_network, grouping,
-  root_milestone_id = NULL, cell_info = tibble(cell_id = rownames(counts)),
-  feature_info = tibble(feature_id = colnames(counts)))
+  root_milestone_id = NULL, cell_info = tibble(cell_id =
+  rownames(counts)), feature_info = tibble(feature_id =
+  colnames(counts)))
 }
 \arguments{
 \item{id}{A unique identifier for the data}

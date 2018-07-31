@@ -1,10 +1,11 @@
 library(tidyverse)
 library(dynbenchmark)
+library(qsub)
 
 # generate design of models, platforms and (randomised) splatter parameters
 design <- crossing(
   topology_model = c("linear", "bifurcating", "multifurcating", "binary_tree", "tree"),
-  tibble(platform = load_platforms()) %>% mutate(platform_ix = row_number())
+  tibble(platform = select_platforms(10)) %>% mutate(platform_ix = row_number())
 ) %>%
   mutate(
     a = runif(n(), 0.01, 0.1),
@@ -14,9 +15,22 @@ design <- crossing(
     beta = exp(rnorm(n(), log(1), log(1.5))) + 1
   ) %>%
   mutate(
-    dataset_id = paste0("synthetic/prosstt/", topology_model, "_", platform_ix)
+    dataset_id = paste0("synthetic/prosstt/", topology_model, "_", platform_ix),
+    seed = sample(1:100000, n())
   ) %>%
   select(-platform_ix)
 
+# simulate datasets
+qsub_config <- override_qsub_config(memory = "10G", max_wall_time = "24:00:00", num_cores = 1, name = "prosstt", wait = F, execute_before = "module load python/x86_64/3.6.5")
 
-pmap(design, simulate_prosstt)
+handle <- qsub_pmap(
+  design,
+  simulate_prosstt,
+  qsub_config = qsub_config
+)
+
+write_rds(handle, "handle_prosstt.rds")
+
+##
+handle <- read_rds("handle_prosstt.rds")
+qsub::qsub_retrieve(handle)

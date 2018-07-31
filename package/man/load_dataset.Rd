@@ -10,7 +10,8 @@ list_datasets()
 
 load_dataset(dataset_id, as_tibble = FALSE)
 
-load_datasets(dataset_ids = list_datasets()$dataset_id, as_tibble = TRUE)
+load_datasets(dataset_ids = list_datasets()$dataset_id,
+  as_tibble = TRUE)
 }
 \arguments{
 \item{dataset_id}{The ID of the dataset to be used}
