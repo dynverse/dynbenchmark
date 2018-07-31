@@ -69,9 +69,10 @@ scripts %>% filter(
 ) %>%
   arrange(ix) %>%
   mutate(
-    name = str_glue("[{id}](https://github.com/dynverse/dynbenchmark/tree/master/{location})")
+    name = str_glue("[{id}](https://github.com/dynverse/dynbenchmark/tree/master/{location})"),
+    order = ifelse(is.na(ix), "", ix)
   ) %>% 
-  select(name, title) %>%
+  select(order, subfolder = name, description = title) %>%
   knitr::kable()
 
 
@@ -79,4 +80,4 @@ scripts %>% filter(
 
 ## Benchmarking your own method
 
-Explanation coming soon. Feel free to make an issue if you want your method to be included.
+Explanation coming soon. Feel free to make an issue or send us an e-mail if you want your method to be included.
