@@ -285,6 +285,9 @@ simulate_prosstt <- function(
 
 #' @inheritParams dyntoy::generate_dataset
 #'
+#' @param count_mean_shape The shape of the gamma distribution from which the mean counts will be sampled
+#' @param count_mean_scale The scale of the gamma distribution from which the mean counts will be sampled
+#'
 #' @rdname simulate_dataset
 #' @export
 simulate_dyntoy <- function(
