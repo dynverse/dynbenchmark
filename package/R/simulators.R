@@ -153,7 +153,7 @@ simulate_prosstt <- function(
   requireNamespace("reticulate")
 
   tryCatch({
-    reticulate::use_python(system("which python3"))
+    reticulate::use_python(system("which python3", intern=TRUE))
 
     tree <- reticulate::import("prosstt.tree")
     sim <- reticulate::import("prosstt.simulation")
