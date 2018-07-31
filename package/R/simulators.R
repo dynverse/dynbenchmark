@@ -8,6 +8,7 @@
 #' @param dataset_id The id of the dataset
 #' @param n_steps_per_length Number of simulation steps per length unit (for splatter and prosstt)
 #' @param seed The seed to use, will use the current seed if not given
+#' @param use_cache Whether to allow the cache (stored in the dataset preprocessing source files)
 NULL
 
 
@@ -26,39 +27,57 @@ simulate_splatter <- function(
   path.nonlinearProb = runif(1, 0, 1),
   path.sigmaFac = runif(1, 0, 1),
   bcv.common.factor = runif(1, 10, 200),
-  seed = NULL
+  seed = NULL,
+  use_cache = TRUE
 ) {
   requireNamespace("splatter")
 
   if (missing(dataset_id)) stop("dataset_id is required")
+  dataset_preprocessing(dataset_id)
+
+  # if cache disallowed, clear cache files
+  if (!use_cache) {
+    qsub::rm_remote(dataset_source_file(), remote = NULL, recursive = TRUE, force = TRUE)
+  }
 
   if (!is.null(seed)) set.seed(seed)
 
-  splatter_params <- platform$estimate
-  class(splatter_params) <- "SplatParams"
+  # simulate splatter
+  sim <- load_or_generate(
+    dataset_source_file("sim.rds"),
+    {
+      # get splatter parameters
+      splatter_params <- platform$estimate
+      class(splatter_params) <- "SplatParams"
 
-  milestone_network <- dyntoy::generate_milestone_network(topology_model)
+      # extract path from milestone network
+      milestone_network <- dyntoy::generate_milestone_network(topology_model)
 
-  # extract path.from, root is 0
-  root <- setdiff(milestone_network$from, milestone_network$to)
-  path.to <- c(root, milestone_network$to)
-  path.from <- as.numeric(factor(milestone_network$from, levels = path.to)) - 1
+      root <- setdiff(milestone_network$from, milestone_network$to)
+      path.to <- c(root, milestone_network$to)
+      path.from <- as.numeric(factor(milestone_network$from, levels = path.to)) - 1
 
-  # factor added to bcv.common, influences how strong the biological effect is
-  splatter_params@bcv.common <- splatter_params@bcv.common / bcv.common.factor
+      # factor added to bcv.common, influences how strong the biological effect is
+      splatter_params@bcv.common <- splatter_params@bcv.common / bcv.common.factor
 
-  # simulate
-  sim <- splatter::splatSimulatePaths(
-    splatter_params,
-    batchCells = platform$n_cells,
-    nGenes = platform$n_features,
-    group.prob = milestone_network$length/sum(milestone_network$length),
-    path.from = path.from,
-    path.length = ceiling(milestone_network$length*n_steps_per_length),
-    path.nonlinearProb = path.nonlinearProb,
-    path.sigmaFac = path.sigmaFac,
-    path.skew = path.skew
+      # simulate
+      sim <- splatter::splatSimulatePaths(
+        splatter_params,
+        batchCells = platform$n_cells,
+        nGenes = platform$n_features,
+        group.prob = milestone_network$length/sum(milestone_network$length),
+        path.from = path.from,
+        path.length = ceiling(milestone_network$length*n_steps_per_length),
+        path.nonlinearProb = path.nonlinearProb,
+        path.sigmaFac = path.sigmaFac,
+        path.skew = path.skew
+      )
+
+      sim
+    }
   )
+
+  # get counts
   counts <- t(SingleCellExperiment::counts(sim))
   # expression <- t(exprs(scater::normalise(sim)))
 
@@ -293,6 +312,8 @@ simulate_dyntoy <- function(
     dropout_probability_factor = dropout_probability_factor
   )
 
+  dataset$dataset_source <- "synthetic/dyntoy"
+
   dataset$simulation_design <- list(
     simulator = "dyntoy",
     simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "splatter", "dynbenchmark", "dynnormaliser"))
@@ -307,7 +328,6 @@ simulate_dyntoy <- function(
 
 
 #' @inheritParams dyngen::generate_model_from_modulenet
-#' @param use_cache Whether to allow the cache (stored in the dataset preprocessing source files)
 #'
 #' @rdname simulate_dataset
 #' @export
