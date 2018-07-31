@@ -73,3 +73,6 @@ figure_file <- experiment_subfolder("figures")
 #' @export
 result_file <- experiment_subfolder("results")
 
+#' @rdname experiment
+#' @export
+scripts_file <- experiment_subfolder("scripts")
