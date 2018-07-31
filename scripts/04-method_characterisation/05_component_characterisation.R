@@ -9,7 +9,7 @@ experiment("04-method_characterisation")
 methods <- read_rds(derived_file("methods.rds")) %>%
   filter(type == "algorithm") # only really interested in algorithms
 
-method_components <- methods %>% select(method_id, components) %>%
+method_components <- methods %>% select(id, components) %>%
   mutate(components = gsub("\\(.*?\\)", "", components)) %>%  # remove anything between ()
   unnest_tokens(component_id, components, "regex", pattern = "[\\{\\}\\[\\]\\|\\+\\ = ]", to_lower = FALSE) %>%
   mutate(component_id = trimws(component_id)) %>%
