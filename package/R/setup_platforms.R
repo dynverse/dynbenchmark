@@ -1,7 +1,7 @@
 #' List and load the platforms
 #' @export
 load_platforms <- function() {
-  folder <- derived_file("", experiment_id = "01-datasets_preproc/platforms/real")
+  folder <- derived_file("", experiment_id = "01-platforms/")
   list.files(folder, recursive = TRUE, full.names = TRUE) %>% gsub("(.*)\\.tsv", "\\1", .) %>% map(read_rds)
 }
 
@@ -10,7 +10,7 @@ load_platforms <- function() {
 #' @param platform_id Platform identifier
 #' @export
 load_platform <- function(platform_id) {
-  folder <- derived_file("", experiment_id = "01-datasets_preproc/platforms/")
+  folder <- derived_file("", experiment_id = "01-platforms/")
   read_rds(paste0(folder, "/", platform_id, ".rds"))
 }
 
@@ -86,7 +86,7 @@ estimate_platform <- function(dataset_id) {
   requireNamespace("splatter")
   assignInNamespace("splatEstDropout", dynbenchmark:::splatEstDropout, asNamespace("splatter"))
 
-  platform_location <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "01-datasets_preproc/platforms")
+  platform_location <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "01-platforms")
   platform <- load_or_generate(
     platform_location,
     {
