@@ -152,10 +152,18 @@ simulate_prosstt <- function(
   # load prosstt python package
   requireNamespace("reticulate")
 
-  tree <- reticulate::import("prosstt.tree")
-  sim <- reticulate::import("prosstt.simulation")
-  sut <- reticulate::import("prosstt.sim_utils")
+  tryCatch({
+    reticulate::use_python(system("which python3"))
 
+    tree <- reticulate::import("prosstt.tree")
+    sim <- reticulate::import("prosstt.simulation")
+    sut <- reticulate::import("prosstt.sim_utils")
+  },
+  error = function(e) {
+    stop("PROSSTT seems not to be correctly installed, run pip3 install git+https://github.com/soedinglab/prosstt ", e)
+  })
+
+  # set seed
   if (!is.null(seed)) reticulate::py_set_seed(seed)
 
   # generate milestone network
