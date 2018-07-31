@@ -4,34 +4,34 @@ library(dynbenchmark)
 
 experiment("04-method_characterisation")
 
-implementations <- read_rds(derived_file("implementations.rds"))
+tools <- read_rds(derived_file("tools.rds"))
 
-implementations <- implementations %>%
+tools <- tools %>%
   filter(contains_ti) %>%
   arrange(date)
 
 # process priors
-prdf <- implementations %>%
-  select(implementation_id, !!priors$prior_id) %>%
-  gather(prior_id, value, -implementation_id) %>%
+prdf <- tools %>%
+  select(tool_id, !!priors$prior_id) %>%
+  gather(prior_id, value, -tool_id) %>%
   left_join(priors, by = "prior_id")
 pr_required <- prdf %>%
   filter(!is.na(value)) %>%
   mutate(required = grepl("required", value)) %>%
-  group_by(implementation_id) %>%
+  group_by(tool_id) %>%
   summarise(prior_required = ifelse(any(required), paste(prior_name[required], collapse = ", "), "None"))
 pr_optional <- prdf %>%
   filter(!is.na(value)) %>%
   mutate(optional = grepl("can_use", value)) %>%
-  group_by(implementation_id) %>%
+  group_by(tool_id) %>%
   summarise(prior_optional = ifelse(any(optional), paste(prior_name[optional], collapse = ", "), "None"))
 
-implementations <- implementations %>%
-  left_join(pr_required, by = "implementation_id") %>%
-  left_join(pr_optional, by = "implementation_id")
+tools <- tools %>%
+  left_join(pr_required, by = "tool_id") %>%
+  left_join(pr_optional, by = "tool_id")
 
 # add non inclusion footnotes
-implementations$non_inclusion_reasons_footnotes <- implementations$non_inclusion_reasons_split %>%
+tools$non_inclusion_reasons_footnotes <- tools$non_inclusion_reasons_split %>%
   map(function(reasons) {
     slice(non_inclusion_reasons, match(reasons, id))$footnote %>% sort()
   })
@@ -68,8 +68,8 @@ citation_format <- c(
 )
 
 imp_table <- map(c("latex", "html"), function(format) {
-  implementations_table <-
-    implementations %>%
+  tools_table <-
+    tools %>%
     filter(type == "algorithm") %>%
     arrange(date) %>%
     mutate(
@@ -91,8 +91,8 @@ imp_table <- map(c("latex", "html"), function(format) {
             map(~replace(., is.na(.), "#666666")),
           color = "#FFFFFF"
         ),
-      implementation_name = kableExtra::cell_spec(
-        implementation_name,
+      tool_name = kableExtra::cell_spec(
+        tool_name,
         format,
         link = code_location
       ),
@@ -120,23 +120,23 @@ imp_table <- map(c("latex", "html"), function(format) {
         escape = FALSE
       )
     ) %>%
-    select(method = implementation_name, date, maximal_trajectory_type,evaluated, reference) %>%
+    select(method = tool_name, date, maximal_trajectory_type,evaluated, reference) %>%
     rename_all(label_long)
 
   # force newline most complex trajectory type -_-
   if(format == "latex") {
-    implementations_table <- implementations_table %>%
+    tools_table <- tools_table %>%
       rename_at(label_long("maximal_trajectory_type"), ~paste0("\\pbox{20cm}{", label_wrap(., 20, "\\\\[-0.5em]"), "}")) %>%
       mutate_all(~gsub("\\#", "\\\\#", .)) # craze regular expressions :p
   }
 
-  table <- implementations_table %>%
+  table <- tools_table %>%
     knitr::kable(format, escape = F) %>%
     kableExtra::kable_styling(bootstrap_options = c("striped", "hover","condensed"), font_size = ifelse(format == "latex", 7, 12))
   table
 }) %>% set_names(c("latex", "html"))
 imp_table
-write_rds(imp_table, figure_file("implementations_table.rds"))
+write_rds(imp_table, figure_file("tools_table.rds"))
 
 
 
@@ -152,7 +152,7 @@ cite <- function(doi) ifelse(is.na(doi), "", url(pritt("https://doi.org/{doi}"),
 date <- function(x) x
 columns <- tribble(
   ~sheet_id, ~local_id, ~processor,
-  "Name", "implementation_name", direct,
+  "Name", "tool_name", direct,
   "Most complex trajectory type", "maximal_trajectory_type", label_simple_trajectory_types,
   "Earliest publishing date", "date", date,
   "Fixes topology", "topology_inference_type", label_tbd,
@@ -170,7 +170,7 @@ sheet_columns <- gs_read(sheet) %>%
   left_join(columns, "sheet_id")
 
 newsheet <- sheet_columns %>% pmap(function(local_id, processor, ...) {
-  implementations[[local_id]] %>%
+  tools[[local_id]] %>%
     processor() %>% str_replace_all("'", "\"")
 }) %>% set_names(sheet_columns$sheet_id) %>% as_tibble()
 

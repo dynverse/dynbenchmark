@@ -25,8 +25,8 @@ meta <- read_rds(derived_file("methods_evaluated.rds", "04-method_characterisati
   )
 
 # read qc scores
-qc_category_scores <- read_rds(derived_file("implementation_qc_category_scores.rds", "04-method_characterisation"))
-qc_application_scores <- read_rds(derived_file("implementation_qc_application_scores.rds", "04-method_characterisation"))
+qc_category_scores <- read_rds(derived_file("tool_qc_category_scores.rds", "04-method_characterisation"))
+qc_application_scores <- read_rds(derived_file("tool_qc_application_scores.rds", "04-method_characterisation"))
 
 
 ## START GATHERING COLUMNS
@@ -77,8 +77,8 @@ part_method_characterisation <-
   select(
     method_short_name = method_id,
     method_name,
-    implementation_id,
-    implementation_name,
+    tool_id,
+    tool_name,
     output_transformation,
     topology_inference_type,
     maximal_trajectory_types,
@@ -94,18 +94,18 @@ part_qc_category <-
   qc_category_scores %>%
   mutate(category = paste0("qc_cat_", category)) %>%
   spread(category, qc_score) %>%
-  right_join(meta %>% select(implementation_id, method_id), by = "implementation_id") %>%
+  right_join(meta %>% select(tool_id, method_id), by = "tool_id") %>%
   select(method_short_name = method_id, everything()) %>%
-  select(-implementation_id) %>%
+  select(-tool_id) %>%
   mutate(overall_qccat = apply(.[,colnames(.)[grepl("^qc_cat_", colnames(.))]], 1, mean))
 
 part_qc_application <-
   qc_application_scores %>%
   mutate(application = paste0("qc_app_", application)) %>%
   spread(application, score) %>%
-  right_join(meta %>% select(implementation_id, method_id), by = "implementation_id") %>%
+  right_join(meta %>% select(tool_id, method_id), by = "tool_id") %>%
   select(method_short_name = method_id, everything()) %>%
-  select(-implementation_id) %>%
+  select(-tool_id) %>%
   mutate(overall_qcapp = apply(.[,colnames(.)[grepl("^qc_app_", colnames(.))]], 1, mean))
 
 ## COMBINE_COLUMNS
