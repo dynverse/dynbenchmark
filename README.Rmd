@@ -16,9 +16,9 @@ library(dynbenchmark)
 [![Build Status](https://api.travis-ci.org/dynverse/dynbenchmark.svg)](https://travis-ci.org/dynverse/dynbenchmark)
 ![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg) <img src="package/man/figures/logo.png" align="right" />
 
-# Benchmarking single-cell trajectory inference methods
+# Benchmarking trajectory inference methods
 
-Scripts to reproduce the manuscript
+This repo contains the scripts to reproduce the manuscript
 
 A comparison of single-cell trajectory inference methods: towards more accurate and robust tools  
 Wouter Saelens\*, Robrecht Cannoodt\*, Helena Todorov, Yvan Saeys  
@@ -44,6 +44,8 @@ The benchmarking pipeline generates (and uses) the following datasets:
 * **Gold standard single-cell datasets**, both real and synthetic, used to evaluated the trajectory inference methods [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1211533.svg)](https://doi.org/10.5281/zenodo.1211533)
 
 ```{r, echo = FALSE, message=FALSE}
+set.seed(1)
+
 datasets <- list_datasets() %>% group_by(dataset_source) %>% sample_n(1) %>% pull(dataset_id) %>% load_datasets()
 
 datasets$plot_dimred <- mapdf(datasets, ~plot_dimred(., dimred = dyndimred::dimred_landmark_mds) + ggtitle(.$dataset_source) + theme(plot.title = element_text(size = 10)))

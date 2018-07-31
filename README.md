@@ -2,10 +2,10 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 [![Build Status](https://api.travis-ci.org/dynverse/dynbenchmark.svg)](https://travis-ci.org/dynverse/dynbenchmark) ![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg) <img src="package/man/figures/logo.png" align="right" />
 
-Benchmarking single-cell trajectory inference methods
-=====================================================
+Benchmarking trajectory inference methods
+=========================================
 
-Scripts to reproduce the manuscript
+This repo contains the scripts to reproduce the manuscript
 
 A comparison of single-cell trajectory inference methods: towards more accurate and robust tools
 Wouter Saelens\*, Robrecht Cannoodt\*, Helena Todorov, Yvan Saeys
