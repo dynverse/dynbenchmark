@@ -18,12 +18,12 @@ design <- crossing(
   )
 
 # simulate datasets
-qsub_config <- override_qsub_config(memory = "10G", max_wall_time = "24:00:00", num_cores = 1, name = "dyngen", wait = F)
+qsub_config <- override_qsub_config(memory = "10G", max_wall_time = "24:00:00", num_cores = 1, name = "dyngen", wait = F, stop_on_error = FALSE)
 
 handle <- qsub_pmap(
   design,
   simulate_dyngen,
-  use_cache = FALSE,
+  use_cache = TRUE,
   qsub_config = qsub_config
 )
 

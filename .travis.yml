@@ -9,7 +9,6 @@ warnings_are_errors: true
 addons:
   apt:
     packages:
-    - libgsl0-dev                         # gsl > topicmodels > cellTree > dynmethods
     - libudunits2-dev                     # units > ggforce > ggraph > patchwork > dynplot
     - libssh-dev                          # ssh > qsub
 before_install:

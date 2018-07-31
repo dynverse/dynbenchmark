@@ -4,7 +4,10 @@ library(tidyverse)
 library(dynbenchmark)
 library(qsub)
 
-experiment("01-datasets_preproc/platforms")
+experiment("01-platforms")
+
+# remove all platforms
+rm_remote(derived_file("", remote = TRUE), remote = TRUE, recursive = TRUE)
 
 # use all real dataset for platform estimation
 dataset_ids <- list_datasets() %>% filter(dataset_source == "real") %>% pull(dataset_id)

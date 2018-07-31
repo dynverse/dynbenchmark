@@ -22,7 +22,7 @@ design <- crossing(
   select(-platform_ix)
 
 # simulate datasets
-qsub_config <- override_qsub_config(memory = "10G", max_wall_time = "24:00:00", num_cores = 1, name = "splatter", wait = F)
+qsub_config <- override_qsub_config(memory = "10G", max_wall_time = "24:00:00", num_cores = 1, name = "splatter", wait = F, stop_on_error = FALSE)
 
 handle <- qsub_pmap(
   design,
