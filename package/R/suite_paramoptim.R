@@ -440,7 +440,7 @@ make_obj_fun <- function(method, metrics, noisy = FALSE, verbose = FALSE) {
       })
 
       eval_out <- evaluate_ti_method(
-        datasets = datasets,
+        dataset = datasets,
         method = method,
         parameters = x,
         metrics = calc_metrics,

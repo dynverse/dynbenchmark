@@ -226,7 +226,7 @@ benchmark_run_evaluation <- function(
 
   # start evaluation
   out <- evaluate_ti_method(
-    datasets = dataset,
+    dataset = dataset,
     method = method,
     parameters = params,
     metrics = metrics,
