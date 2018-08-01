@@ -2,12 +2,127 @@
 
 library(dynbenchmark)
 library(tidyverse)
+library(dyntoy)
 
 experiment("03-metric_characterisation/01-reference_vs_perturbation")
 
+source(scripts_file("helper-01-perturbations.R"))
+
+## create datasets
+datasets_design <- crossing(
+  topology_model = names(topology_models),
+  num_cells = c(2, seq(100, 1000, by = 1000))
+) %>%
+  mutate(
+    dataset_id = str_glue("{topology_model}_{num_cells}")
+  )
+
+datasets <- pmap(datasets_design, function(dataset_id, topology_model, num_cells, ...) {
+  print(dataset_id)
+  dyntoy::generate_dataset(
+    unique_id = dataset_id,
+    model = topology_model,
+    num_cells = num_cells,
+    normalise = FALSE,
+    num_features = 10,
+    add_prior_information = FALSE
+  ) %>%
+    add_cell_waypoints()
+}) %>% set_names(datasets_design$dataset_id)
+
+###
+metrics <- formals(calculate_metrics)$metrics %>% eval %>% as.list() %>% {set_names(., as.character(.))} %>% discard(~. == "featureimp_cor")
 
 
-toys_blueprint <- tribble(
+assess_defined <- function(datasets_design, metrics) {
+  perturbation_design <- crossing(
+    dataset_id = datasets_design$dataset_id,
+    perturbator_id = "gs"
+  )
+  scores_summary <- score_perturbation_design(perturbation_design)
+
+  lst(
+    assessment = scores_summary %>%
+      group_by(metric_id) %>%
+      summarise(check = all(!is.na(score))) %>%
+      mutate(rule_id = "defined"),
+    plot = scores_summary %>%
+      ggplot(aes())
+  )
+}
+
+
+assess_equal_gold_standard_score <- function(datasets_design, metrics) {
+  scores_summary <- crossing(
+    datasets_design,
+    perturbator_id = "gs"
+  ) %>% score_perturbation_design()
+
+  approx_unique <- function(x, tolerance = .Machine$double.eps ^ 0.5) {
+    abs(first(sort(x)) - last(sort(x))) < tolerance
+  }
+
+  lst(
+    assessment = scores_summary %>%
+      group_by(metric_id) %>%
+      summarise(check = approx_unique(score)) %>%
+      mutate(rule_id = "equal_gold_standard_score")
+    ,
+    plot = scores_summary %>%
+      ggplot(aes(metric_id, score)) +
+      ggbeeswarm::geom_quasirandom()
+  )
+}
+
+assess_switch_cells <- function(datasets_design, metrics) {
+  scores_summary <- crossing(
+    datasets_design,
+    perturbator_id =
+  ) %>% score_perturbation_design()
+}
+
+assessment <- assess_defined(datasets_design)
+assessment <- assess_equal_gold_standard_score(datasets_design)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+design <- crossing(
+  topology_model = names(topology_models),
+  num_cells = c(2, seq(50, 1000, length.out = 10))
+) %>% mutate(
+
+)
+
+score_design <- function(topology_model, num_cells, perturbator_id, ...) {
+  print("--")
+
+
+
+}
+
+scores <- pmap(design, score_design)
+
+
+
+
+
+design_manual <- tribble(
   ~topology_model, ~perturbator_id,
   "simple_linear", "gs",
   "simple_linear", "switch_two_cells",
@@ -38,16 +153,31 @@ toys_blueprint <- tribble(
   "cycle", "hairy",
   "cycle", "remove_cells",
   "cycle", "add_distant_edge"
-) %>%
-  bind_rows(tibble(trajectory_model="simple_linear", perturbator_id=paste0("switch_", percs * 100))) %>%
-  bind_rows(crossing(trajectory_model=trajectory_models, perturbator_id=paste0("change_network_", trajectory_models)) %>% mutate(ncells = 5)) %>%
-  rowwise() %>%
-  mutate(
-    perturbator=list(get(paste0("perturb_", perturbator_id)))
-  )
+)
+
+design_switch_n <- tibble(
+  topology_model="simple_linear",
+  switch_cells_perc = seq(0, 1, 0.1),
+  perturbator_id = "switch_perc_cells"
+)
+
+design_topology_changes <- crossing(
+  topology_model=names(topology_models),
+  perturbator_id=paste0("change_network_", names(topology_models))
+) %>% mutate(num_cells = 5)
+
+num_cells <-
+design <- crossing(
+  bind_rows(
+    design_manual,
+    design_switch_n,
+    design_topology_changes
+  ),
+  tibble(num_cells = c)
+)
 
 # replicate
-nreplicates <- 1
+
 toys <- toys_blueprint %>% slice(rep(1:n(), each=nreplicates)) %>% mutate(
   replicate=seq_len(nrow(.))%%nreplicates,
   toy_category=paste0(trajectory_model, "-", perturbator_id),
