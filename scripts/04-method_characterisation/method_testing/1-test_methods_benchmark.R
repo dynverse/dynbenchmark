@@ -28,6 +28,8 @@ benchmark_fetch_results(local_output_folder)
 output <- benchmark_bind_results(local_output_folder, load_models = TRUE)
 
 
+
+
 extract_method_status <- function(error_status, correlation, ...) {
   case_when(
     error_status != "no_error" ~ error_status,
