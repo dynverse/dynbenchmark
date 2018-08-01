@@ -7,11 +7,13 @@
 benchmark_fetch_results <- function(local_output_folder) {
   requireNamespace("qsub")
 
-  method_ids <- list.dirs(local_output_folder, full.names = FALSE, recursive = FALSE) %>% discard(~ . == "")
+  # find all 2nd level folders with individual tasks
+  dirs <- list.dirs(local_output_folder, full.names = FALSE, recursive = TRUE) %>%
+    stringr::str_subset("^[^/]+/[^/]+$")
 
   # process each method separately
-  map(method_ids, function(method_id) {
-    suite_method_folder <- paste0(local_output_folder, "/", method_id)
+  map(dirs, function(dir) {
+    suite_method_folder <- paste0(local_output_folder, "/", dir, "/")
     output_metrics_file <- paste0(suite_method_folder, "/output_metrics.rds")
     output_models_file <- paste0(suite_method_folder, "/output_models.rds")
     qsubhandle_file <- paste0(suite_method_folder, "/qsubhandle.rds")
@@ -19,8 +21,7 @@ benchmark_fetch_results <- function(local_output_folder) {
     # if the output has not been processed yet, but a qsub handle exists,
     # attempt to fetch the results from the cluster
     if (!file.exists(output_metrics_file) && file.exists(qsubhandle_file)) {
-
-      cat(method_id, ": Attempting to retrieve output from cluster: ", sep = "")
+      cat(dir, ": Attempting to retrieve output from cluster: ", sep = "")
       metadata <- readr::read_rds(qsubhandle_file)
       subdesign <- metadata$subdesign
       qsub_handle <- metadata$qsub_handle
@@ -38,7 +39,7 @@ benchmark_fetch_results <- function(local_output_folder) {
         qacct_out <- qsub::qacct(qsub_handle)
 
         # process each job separately
-        outputs <- map_df(seq_len(nrow(subdesign)), function(i) {
+        outputs <- map_df(seq_len(nrow(subdesign$crossing)), function(i) {
           out <- output[[i]]
 
           if (length(out) != 1 || !is.na(out)) {
@@ -84,6 +85,8 @@ benchmark_fetch_results <- function(local_output_folder) {
 
             # "rerun" the evaluation in error mode, in order to generate the expected output except with
             # the default fail-scores for each of the metrics
+            browser()
+
             out <- benchmark_run_evaluation(
               i = i,
               subdesign = metadata$subdesign,
@@ -129,9 +132,9 @@ benchmark_fetch_results <- function(local_output_folder) {
       NULL
     } else {
       if (file.exists(output_metrics_file)) {
-        cat(method_id, ": Output already present.\n", sep = "")
+        cat(dir, ": Output already present.\n", sep = "")
       } else {
-        cat(method_id, ": No qsub file was found.\n", sep = "")
+        cat(dir, ": No qsub file was found.\n", sep = "")
       }
       NULL
     }
