@@ -151,7 +151,6 @@ benchmark_fetch_results <- function() {
 benchmark_bind_results <- function(load_models = FALSE) {
   local_output_folder <- derived_file("suite")
 
-
   # find all 2nd level folders with individual tasks
   files <- list.files(local_output_folder, pattern = "output_metrics.rds", recursive = TRUE, full.names = TRUE)
 
@@ -191,7 +190,7 @@ benchmark_bind_results <- function(load_models = FALSE) {
 #' @param stderr The standard error
 #' @param error_message The error message
 #' @param ... Other columns in the output, ignored
-extract_error_status <- function(model, stdout, stderr, error_message, ...) {
+extract_error_status <- function(stdout, stderr, error_message, ...) {
   memory_messages <- c(
     "cannot allocate vector of size", # R
     "MemoryError", # python
@@ -214,7 +213,7 @@ extract_error_status <- function(model, stdout, stderr, error_message, ...) {
     stringr::str_detect(stderr, "Time limit exceeded") ~ "time_limit",
     stringr::str_detect(error_message, "^Error status [0-9]*.*") ~ "execution_error",
     stringr::str_detect(stderr, "^Error status [0-9]*.*") ~ "execution_error",
-    is.null(model[[1]]) ~ "method_error",
+    nchar(error_message) > 0 ~ "method_error",
     TRUE ~ "no_error"
   )
 }
