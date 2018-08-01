@@ -167,6 +167,7 @@ benchmark_submit_check <- function(
   testthat::expect_false(any(duplicated(design$datasets$id)))
   testthat::expect_true(all(design$datasets$type %in% c("character", "dynwrap", "function")))
   testthat::expect_true(design$datasets$fun %>% map_lgl(is.function) %>% all)
+  testthat::expect_true(all(design$crossing$dataset_id %in% design$datasets$id))
   ix <- which(design$datasets$type == "character")
   testthat::expect_true(all(design$datasets$id[ix] %in% list_datasets()$dataset_id))
 
