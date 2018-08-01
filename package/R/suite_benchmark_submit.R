@@ -89,11 +89,11 @@ benchmark_submit <- function(
 
     qsub::mkdir_remote(path = suite_method_folder, remote = FALSE)
 
-    if (file.exists(output_file) || file.exists(qsubhandle_file)) {
+    if (file.exists(output_file) || file.exists(qsub_handle_file)) {
       return()
     }
 
-    if (verbose) cat("Submitting ", deparse(grouping_values), "\n", sep = "")
+    if (verbose) cat("Submitting ", dirname, "\n", sep = "")
 
     # set parameters for the cluster
     if (is.function(qsub_params)) {
