@@ -17,7 +17,7 @@
 #' library(tibble)
 #'
 #' datasets <- list(
-#'   "toy/bifurcating_1",
+#'   "synthetic/dyntoy/bifurcating_1",
 #'   dyntoy::generate_dataset(unique_id = "test1"),
 #'   test2 = function() dyntoy::generate_dataset()
 #' )
@@ -46,6 +46,23 @@
 #' priors <- list(
 #'   list(id = "none"),
 #'   list(id = "some", set = c("start_id", "end_n"))
+#' )
+#'
+#' qsub_parameters <- list(
+#'   tibble(
+#'     method_id = "scorpius",
+#'     memory = "3G"
+#'   ),
+#'   tibble(
+#'     dataset_id = "synthetic/dyntoy/bifurcating_1",
+#'     max_wall_time = "02:00:00"
+#'   ),
+#'   tibble(
+#'     method_id = "scorpius",
+#'     dataset_id = "synthetic/dyntoy/bifurcating_1",
+#'     memory = "10G",
+#'     max_wall_time = "66:66:66"
+#'   )
 #' )
 #'
 #' benchmark_generate_design(

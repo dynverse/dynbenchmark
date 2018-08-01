@@ -4,28 +4,50 @@
 \alias{benchmark_submit}
 \title{A benchmark suite with which to run all the methods on the different datasets}
 \usage{
-benchmark_submit(design, timeout_per_execution = 3600,
-  max_memory_per_execution = "10G", metrics = "correlation",
-  local_output_folder, remote_output_folder, execute_before = NULL,
-  verbose = TRUE)
+benchmark_submit(design, metrics = "correlation",
+  qsub_grouping = "{method_id}/{param_id}", qsub_params = list(timeout
+  = 3600, memory = "10G"), verbose = TRUE)
 }
 \arguments{
 \item{design}{Design tibble of the experiment, created by \code{\link[=benchmark_generate_design]{benchmark_generate_design()}}.}
 
-\item{timeout_per_execution}{The maximum number of seconds each execution is allowed to run, otherwise it will fail.}
-
-\item{max_memory_per_execution}{The maximum amount of memory each execution is allowed to use, otherwise it will fail.}
-
 \item{metrics}{Which metrics to evaluate; see \code{\link[=calculate_metrics]{calculate_metrics()}} for a list of which metrics are available.}
 
-\item{local_output_folder}{A folder in which to output intermediate and final results.}
+\item{qsub_grouping}{A character used to partition the design into separate jobs. Any of the column names
+in \code{design$crossing} is allowed to be used. This string will later be parsed by \code{\link[glue:glue]{glue::glue()}}.}
 
-\item{remote_output_folder}{A folder in which to store intermediate results in a remote directory when using the qsub package.}
-
-\item{execute_before}{Shell commands to execute before running R.}
+\item{qsub_params}{A list used to define execution parameters for each row in the design tibble.
+\code{memory} is used to define the amount of memory, \code{time} is used to define the maximum wall time.
+Optionally, a function in the format \code{function(XXX, YYY, ...) { ZZZ }} is possible, where XXX and YYY
+are equal to the groups defined by \code{qsub_grouping} (default \code{method_id} and \code{param_id}),
+and ZZZ is equal to some logic which always produces a \code{list(memory = ..., time = ...)}.}
 
 \item{verbose}{Whether or not to print extra information.}
 }
 \description{
 A benchmark suite with which to run all the methods on the different datasets
+}
+\examples{
+\dontrun{
+library(tibble)
+
+datasets <- c("synthetic/dyntoy/bifurcating_1", "synthetic/dyntoy/bifurcating_2")
+methods <- dynmethods::methods$id
+
+design <- benchmark_generate_design(
+  datasets = datasets,
+  methods = methods
+)
+
+benchmark_submit(
+  design = design,
+  metrics = c("correlation", "rf_mse"),
+  qsub_grouping = "{method_id}/{replicate_ix}",
+  qsub_params = function(method_id, replicate_ix) {
+    params <- lst(memory = "10G", time = 3600)
+    if (method_id == "scorpius") params$memory <- "5G"
+    params
+  }
+)
+}
 }

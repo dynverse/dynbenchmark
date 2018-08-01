@@ -7,7 +7,7 @@
 benchmark_qsub_fun(i)
 }
 \arguments{
-\item{design_row}{Row of a design dataframe}
+\item{i}{Row of a design dataframe}
 }
 \description{
 Helper function for benchmark suite

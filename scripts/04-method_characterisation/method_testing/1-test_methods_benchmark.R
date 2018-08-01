@@ -1,8 +1,6 @@
 library(dynbenchmark)
 library(tidyverse)
 
-# devtools::install_github("dynverse/dynbenchmark/package@adapt_benchmarking_suite", dep=F)
-
 experiment("04-method_characterisation/method_testing")
 
 design <- benchmark_generate_design(

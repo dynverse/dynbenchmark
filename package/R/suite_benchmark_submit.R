@@ -1,37 +1,65 @@
 #' A benchmark suite with which to run all the methods on the different datasets
 #'
 #' @param design Design tibble of the experiment, created by [benchmark_generate_design()].
-#' @param timeout_per_execution The maximum number of seconds each execution is allowed to run, otherwise it will fail.
-#' @param max_memory_per_execution The maximum amount of memory each execution is allowed to use, otherwise it will fail.
 #' @param metrics Which metrics to evaluate; see [calculate_metrics()] for a list of which metrics are available.
-#' @param local_output_folder A folder in which to output intermediate and final results.
-#' @param remote_output_folder A folder in which to store intermediate results in a remote directory when using the qsub package.
-#' @param execute_before Shell commands to execute before running R.
+#' @param qsub_params A list used to define execution parameters for each row in the design tibble.
+#'   \code{memory} is used to define the amount of memory, \code{time} is used to define the maximum wall time.
+#'   Optionally, a function in the format \code{function(XXX, YYY, ...) { ZZZ }} is possible, where XXX and YYY
+#'   are equal to the groups defined by \code{qsub_grouping} (default \code{method_id} and \code{param_id}),
+#'   and ZZZ is equal to some logic which always produces a \code{list(memory = ..., time = ...)}.
+#' @param qsub_grouping A character used to partition the design into separate jobs. Any of the column names
+#'   in \code{design$crossing} is allowed to be used. This string will later be parsed by [glue::glue()].
 #' @param verbose Whether or not to print extra information.
 #'
 #' @importFrom readr read_rds write_rds
 #'
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tibble)
+#'
+#' datasets <- c("synthetic/dyntoy/bifurcating_1", "synthetic/dyntoy/bifurcating_2")
+#' methods <- dynmethods::methods$id
+#'
+#' design <- benchmark_generate_design(
+#'   datasets = datasets,
+#'   methods = methods
+#' )
+#'
+#' benchmark_submit(
+#'   design = design,
+#'   metrics = c("correlation", "rf_mse"),
+#'   qsub_grouping = "{method_id}/{replicate_ix}",
+#'   qsub_params = function(method_id, replicate_ix) {
+#'     params <- lst(memory = "10G", time = 3600)
+#'     if (method_id == "scorpius") params$memory <- "5G"
+#'     params
+#'   }
+#' )
+#' }
 benchmark_submit <- function(
   design,
-  timeout_per_execution = 3600,
-  max_memory_per_execution = "10G",
   metrics = "correlation",
-  local_output_folder,
-  remote_output_folder,
-  execute_before = NULL,
+  qsub_grouping = "{method_id}/{param_id}",
+  qsub_params = list(timeout = 3600, memory = "10G"),
   verbose = TRUE
 ) {
   requireNamespace("qsub")
 
+  local_output_folder <- derived_file("suite")
+  remote_output_folder <- derived_file("suite", remote = TRUE)
+
+  grouping_variables <- qsub_grouping %>%
+    str_extract_all("\\{([^\\}]*)\\}") %>%
+    .[[1]] %>%
+    str_replace_all("[\\{\\}]", "")
+
   benchmark_submit_check(
     design,
-    timeout_per_execution,
-    max_memory_per_execution,
     metrics,
-    local_output_folder,
-    remote_output_folder,
-    execute_before,
+    qsub_params,
+    qsub_grouping,
     verbose
   )
 
@@ -42,9 +70,6 @@ benchmark_submit <- function(
     stop_on_error = FALSE,
     verbose = FALSE,
     num_cores = 1,
-    memory = max_memory_per_execution,
-    max_wall_time = timeout_per_execution,
-    execute_before = execute_before,
     local_tmp_path = local_output_folder,
     remote_tmp_path = remote_output_folder
   )
@@ -53,11 +78,13 @@ benchmark_submit <- function(
   submit_method <- function (subcrossing) {
     subdesign <- subset_design(design, subcrossing)
 
-    method_id <- subdesign$method$id[[1]]
-    param_id <- subdesign$parameters$id[[1]]
+    grouping_values <- subcrossing %>%
+      select(one_of(grouping_variables)) %>%
+      extract_row_to_list(1)
 
     # check whether results already exist
-    suite_method_folder <- file.path(local_output_folder, method_id, param_id)
+    dirname <- with(grouping_values, glue::glue(qsub_grouping))
+    suite_method_folder <- file.path(local_output_folder, dirname)
     output_file <- file.path(suite_method_folder, "output.rds")
     qsubhandle_file <- file.path(suite_method_folder, "qsubhandle.rds")
 
@@ -67,15 +94,20 @@ benchmark_submit <- function(
       cat("Submitting ", method_id, "\n", sep = "")
 
       # set parameters for the cluster
+      if (is.function(qsub_params)) {
+        qsub_params <- do.call(qsub_params, grouping_values)
+      }
       qsub_config_method <-
         qsub::override_qsub_config(
           qsub_config = qsub_config,
-          name = paste0("D_", method_id),
+          name = "dynbenchmark",
+          memory = qsub_params$memory,
+          max_wall_time = qsub_params$time,
           local_tmp_path = paste0(suite_method_folder, "/r2gridengine")
         )
 
       # which packages to load on the cluster
-      qsub_packages <- c("dplyr", "purrr", "dyneval", "dynmethods", "readr")
+      qsub_packages <- c("dplyr", "purrr", "dyneval", "dynmethods", "readr", "dynbenchmark")
 
       # which data objects will need to be transferred to the cluster
       qsub_environment <-  c("metrics", "verbose", "subdesign")
@@ -94,13 +126,16 @@ benchmark_submit <- function(
       metadata <- lst(
         local_output_folder,
         remote_output_folder,
-        subdesign,
-        timeout_per_execution,
-        max_memory_per_execution,
         metrics,
+        verbose,
+        subdesign,
+        grouping_variables,
+        grouping_values,
+        dirname,
         suite_method_folder,
         output_file,
-        qsubhandle_file,
+        qsub_handle_file,
+        qsub_params,
         qsub_handle
       )
       readr::write_rds(metadata, qsubhandle_file)
@@ -108,10 +143,9 @@ benchmark_submit <- function(
   }
 
   # run benchmark per method seperately
-  runs <- design$crossing %>% split(., paste0(.$method_id, "_", .$param_id))
-  for (i in seq_along(runs))  {
-    submit_method(runs[[i]])
-  }
+  runs <- design$crossing %>% split(., glue::glue_data(., qsub_grouping))
+
+  walk(runs, submit_method)
 
   invisible()
 }
@@ -119,12 +153,9 @@ benchmark_submit <- function(
 #' @importFrom testthat expect_equal expect_is
 benchmark_submit_check <- function(
   design,
-  timeout_per_execution,
-  max_memory_per_execution,
   metrics,
-  local_output_folder,
-  remote_output_folder,
-  execute_before,
+  qsub_params,
+  qsub_grouping,
   verbose
 ) {
   # check datasets
@@ -157,21 +188,44 @@ benchmark_submit_check <- function(
       method_inputs <- design$methods %>%
         filter(id == l$method_id) %>%
         pull(fun) %>%
-        {.()} %>%
+        {.[[1]]()} %>%
         .$inputs %>%
         filter(type == "parameter") %>%
         pull(input_id)
       params <- l$params
-      testthat::expect_true(all(names(parameters) %in% method_inputs))
+      testthat::expect_true(all(names(params) %in% method_inputs))
     }
   )
 
+  # check grouping character
+  testthat::expect_is(qsub_grouping, "character")
+  qsub_config_no_braces <- qsub_grouping %>% str_replace_all("\\{[^\\}]*\\}", "")
+  testthat::expect_match(qsub_config_no_braces, "^[a-zA-Z_\\-\\.0-9/\\]*$")
+
+  grouping_variables <-
+    qsub_grouping %>%
+    str_extract_all("\\{([^\\}]*)\\}") %>%
+    .[[1]] %>%
+    str_replace_all("[\\{\\}]", "")
+  testthat::expect_true(all(grouping_variables %in% colnames(design$crossing)))
+
+
+  # if qsub_params is a function, check it runs when provided all of these arguments
+  if (is.function(qsub_params)) {
+    testthat::expect_true(all(formalArgs(qsub_params) %in% grouping_variables))
+    qsub_params <- do.call(qsub_params, as.list(set_names(rep("", length(grouping_variables)), grouping_variables)))
+  }
+
+  # make sure it has the correct format
+  testthat::expect_is(qsub_params, "list")
+  testthat::expect_equal(sort(names(qsub_params)), c("memory", "time"))
+
   # check timeout_per_execution
-  testthat::expect_is(timeout_per_execution, "numeric")
+  testthat::expect_is(qsub_params[["time"]], "numeric")
 
   # check max_memory_per_execution
-  testthat::expect_is(max_memory_per_execution, "character")
-  testthat::expect_match(max_memory_per_execution, "[0-9]+G")
+  testthat::expect_is(qsub_params[["memory"]], "character")
+  testthat::expect_match(qsub_params[["memory"]], "[0-9]+G")
 }
 
 subset_design <- function(design, subcrossing) {
@@ -193,7 +247,7 @@ subset_design <- function(design, subcrossing) {
 
 #' Helper function for benchmark suite
 #'
-#' @param design_row Row of a design dataframe
+#' @param i Row of a design dataframe
 benchmark_qsub_fun <- function(i) {
   # call helper function
   benchmark_run_evaluation(i, subdesign, metrics, verbose)
