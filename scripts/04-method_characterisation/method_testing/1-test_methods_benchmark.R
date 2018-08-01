@@ -5,7 +5,7 @@ library(tidyverse)
 
 experiment("04-method_characterisation/method_testing")
 
-design <- generate_benchmark_design(
+design <- benchmark_generate_design(
   dataset_ids = c(
     "toy/bifurcating_1",
     "toy/linear_1",
