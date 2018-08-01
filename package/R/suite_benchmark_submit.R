@@ -3,10 +3,10 @@
 #' @param design Design tibble of the experiment, created by [benchmark_generate_design()].
 #' @param metrics Which metrics to evaluate; see [calculate_metrics()] for a list of which metrics are available.
 #' @param qsub_params A list used to define execution parameters for each row in the design tibble.
-#'   \code{memory} is used to define the amount of memory, \code{time} is used to define the maximum wall time.
+#'   \code{memory} is used to define the amount of memory, \code{timeout} is used to define the maximum wall time.
 #'   Optionally, a function in the format \code{function(XXX, YYY, ...) { ZZZ }} is possible, where XXX and YYY
 #'   are equal to the groups defined by \code{qsub_grouping} (default \code{method_id} and \code{param_id}),
-#'   and ZZZ is equal to some logic which always produces a \code{list(memory = ..., time = ...)}.
+#'   and ZZZ is equal to some logic which always produces a \code{list(memory = ..., timeout = ...)}.
 #' @param qsub_grouping A character used to partition the design into separate jobs. Any of the column names
 #'   in \code{design$crossing} is allowed to be used. This string will later be parsed by [glue::glue()].
 #' @param verbose Whether or not to print extra information.
@@ -32,7 +32,7 @@
 #'   metrics = c("correlation", "rf_mse"),
 #'   qsub_grouping = "{method_id}/{replicate_ix}",
 #'   qsub_params = function(method_id, replicate_ix) {
-#'     params <- lst(memory = "10G", time = 3600)
+#'     params <- lst(memory = "10G", timeout = 3600)
 #'     if (method_id == "scorpius") params$memory <- "5G"
 #'     params
 #'   }
@@ -102,7 +102,7 @@ benchmark_submit <- function(
           qsub_config = qsub_config,
           name = "dynbenchmark",
           memory = qsub_params$memory,
-          max_wall_time = qsub_params$time,
+          max_wall_time = qsub_params$timeout,
           local_tmp_path = paste0(suite_method_folder, "/r2gridengine")
         )
 
@@ -218,10 +218,10 @@ benchmark_submit_check <- function(
 
   # make sure it has the correct format
   testthat::expect_is(qsub_params, "list")
-  testthat::expect_equal(sort(names(qsub_params)), c("memory", "time"))
+  testthat::expect_equal(sort(names(qsub_params)), c("memory", "timeout"))
 
   # check timeout_per_execution
-  testthat::expect_is(qsub_params[["time"]], "numeric")
+  testthat::expect_is(qsub_params[["timeout"]], "numeric")
 
   # check max_memory_per_execution
   testthat::expect_is(qsub_params[["memory"]], "character")
