@@ -90,5 +90,7 @@ Collate:
     'setup_pipeline.R'
     'setup_platforms.R'
     'simulators.R'
-    'suite_benchmark.R'
+    'suite_benchmark_fetch_results.R'
+    'suite_benchmark_generate_design.R'
+    'suite_benchmark_submit.R'
     'suite_paramoptim.R'
