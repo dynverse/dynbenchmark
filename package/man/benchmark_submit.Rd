@@ -17,10 +17,10 @@ benchmark_submit(design, metrics = "correlation",
 in \code{design$crossing} is allowed to be used. This string will later be parsed by \code{\link[glue:glue]{glue::glue()}}.}
 
 \item{qsub_params}{A list used to define execution parameters for each row in the design tibble.
-\code{memory} is used to define the amount of memory, \code{time} is used to define the maximum wall time.
+\code{memory} is used to define the amount of memory, \code{timeout} is used to define the maximum wall time.
 Optionally, a function in the format \code{function(XXX, YYY, ...) { ZZZ }} is possible, where XXX and YYY
 are equal to the groups defined by \code{qsub_grouping} (default \code{method_id} and \code{param_id}),
-and ZZZ is equal to some logic which always produces a \code{list(memory = ..., time = ...)}.}
+and ZZZ is equal to some logic which always produces a \code{list(memory = ..., timeout = ...)}.}
 
 \item{verbose}{Whether or not to print extra information.}
 }
@@ -44,7 +44,7 @@ benchmark_submit(
   metrics = c("correlation", "rf_mse"),
   qsub_grouping = "{method_id}/{replicate_ix}",
   qsub_params = function(method_id, replicate_ix) {
-    params <- lst(memory = "10G", time = 3600)
+    params <- lst(memory = "10G", timeout = 3600)
     if (method_id == "scorpius") params$memory <- "5G"
     params
   }
