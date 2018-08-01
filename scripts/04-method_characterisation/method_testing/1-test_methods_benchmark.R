@@ -16,16 +16,9 @@ write_rds(design, derived_file("design.rds"))
 
 design <- read_rds(derived_file("design.rds"))
 
-local_output_folder <- derived_file("suite")
-remote_output_folder <- derived_file("suite", remote = TRUE)
-
-benchmark_submit(
-  design = design,
-  local_output_folder = local_output_folder,
-  remote_output_folder = remote_output_folder
-)
-benchmark_fetch_results(local_output_folder)
-output <- benchmark_bind_results(local_output_folder, load_models = TRUE)
+benchmark_submit(design = design)
+benchmark_fetch_results()
+output <- benchmark_bind_results(load_models = TRUE)
 
 
 

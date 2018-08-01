@@ -8,20 +8,18 @@ benchmark_fetch_results <- function() {
   local_output_folder <- derived_file("suite")
 
   # find all 2nd level folders with individual tasks
-  dirs <- list.dirs(local_output_folder, full.names = FALSE, recursive = TRUE) %>%
-    stringr::str_subset("^[^/]+/[^/]+$")
+  handles <- list.files(local_output_folder, pattern = "qsubhandle.rds", recursive = TRUE, full.names = TRUE)
 
   # process each method separately
-  map(dirs, function(dir) {
-    suite_method_folder <- paste0(local_output_folder, "/", dir, "/")
-    output_metrics_file <- paste0(suite_method_folder, "/output_metrics.rds")
-    output_models_file <- paste0(suite_method_folder, "/output_models.rds")
-    qsubhandle_file <- paste0(suite_method_folder, "/qsubhandle.rds")
+  map(handles, function(qsubhandle_file) {
+    name <- qsubhandle_file %>% gsub(local_output_folder, "", ., fixed = TRUE) %>% gsub("qsubhandle.rds", "", ., fixed = TRUE)
+    output_metrics_file <- gsub("qsubhandle.rds", "output_metrics.rds", qsubhandle_file, fixed = TRUE)
+    output_models_file <- gsub("qsubhandle.rds", "output_models.rds", qsubhandle_file, fixed = TRUE)
 
     # if the output has not been processed yet, but a qsub handle exists,
     # attempt to fetch the results from the cluster
     if (!file.exists(output_metrics_file) && file.exists(qsubhandle_file)) {
-      cat(dir, ": Attempting to retrieve output from cluster: ", sep = "")
+      cat("Attempting to retrieve output from cluster: ", name, sep = "")
       metadata <- readr::read_rds(qsubhandle_file)
       subdesign <- metadata$subdesign
       qsub_handle <- metadata$qsub_handle
@@ -34,7 +32,7 @@ benchmark_fetch_results <- function() {
       )
 
       if (!is.null(output)) {
-        cat("Output found! Saving output.\n", sep = "")
+        cat(" Output found! Saving output.\n", sep = "")
 
         qacct_out <- qsub::qacct(qsub_handle)
 
@@ -85,9 +83,7 @@ benchmark_fetch_results <- function() {
 
             # "rerun" the evaluation in error mode, in order to generate the expected output except with
             # the default fail-scores for each of the metrics
-            browser()
-
-            out <- benchmark_run_evaluation(
+            benchmark_run_evaluation(
               i = i,
               subdesign = metadata$subdesign,
               metrics = metadata$metrics,
@@ -126,15 +122,15 @@ benchmark_fetch_results <- function() {
             "qsub_retrieve of results failed -- no output was produced, but job is not running any more"
           }
 
-        cat("Output not found. ", error_message, ".\n", sep = "")
+        cat(" Output not found. ", error_message, ".\n", sep = "")
       }
 
       NULL
     } else {
       if (file.exists(output_metrics_file)) {
-        cat(dir, ": Output already present.\n", sep = "")
+        cat(" Output already present.\n", sep = "")
       } else {
-        cat(dir, ": No qsub file was found.\n", sep = "")
+        cat(" No qsub file was found.\n", sep = "")
       }
       NULL
     }
@@ -155,16 +151,17 @@ benchmark_fetch_results <- function() {
 benchmark_bind_results <- function(load_models = FALSE) {
   local_output_folder <- derived_file("suite")
 
-  method_ids <- list.dirs(local_output_folder, full.names = FALSE, recursive = FALSE) %>% discard(~ . == "")
+
+  # find all 2nd level folders with individual tasks
+  files <- list.files(local_output_folder, pattern = "output_metrics.rds", recursive = TRUE, full.names = TRUE)
 
   # process each method separately
-  output <- as_tibble(map_df(method_ids, function(method_id) {
-    suite_method_folder <- file.path(local_output_folder, method_id)
-    output_metrics_file <- file.path(suite_method_folder, "output_metrics.rds")
-    output_models_file <- file.path(suite_method_folder, "output_models.rds")
+  output <- as_tibble(map_df(files, function(output_metrics_file) {
+    name <- output_metrics_file %>% gsub(local_output_folder, "", ., fixed = TRUE) %>% gsub("output_metrics.rds", "", ., fixed = TRUE)
+    output_models_file <- gsub("output_metrics.rds", "output_models.rds", output_metrics_file, fixed = TRUE)
 
     if (file.exists(output_metrics_file)) {
-      cat(method_id, ": Reading previous output\n", sep = "")
+      cat("Reading previous output", name, "\n", sep = "")
       output <- readr::read_rds(output_metrics_file)
 
       # read models, if requested
@@ -175,7 +172,7 @@ benchmark_bind_results <- function(load_models = FALSE) {
 
       output
     } else {
-      cat(method_id, ": Output not found, skipping\n", sep = "")
+      cat("Output not found, skipping", name, "\n", sep = "")
       NULL
     }
   }))

@@ -6,9 +6,6 @@
 \usage{
 benchmark_fetch_results()
 }
-\arguments{
-\item{local_output_folder}{The folder in which to output intermediate and final results.}
-}
 \description{
 Fetch the results of the benchmark jobs from the cluster.
 }

@@ -4,11 +4,9 @@
 \alias{benchmark_bind_results}
 \title{Gather and bind the results of the benchmark jobs}
 \usage{
-benchmark_bind_results(local_output_folder, load_models = FALSE)
+benchmark_bind_results(load_models = FALSE)
 }
 \arguments{
-\item{local_output_folder}{The folder in which to output intermediate and final results.}
-
 \item{load_models}{Whether or not to load the models as well.}
 }
 \description{
