@@ -282,11 +282,11 @@ benchmark_run_evaluation <- function(
 
   # get parameters
   param_id <- as.character(row$param_id)
-  params <- design$parameters %>% filter(id == param_id, method_id == !!method_id) %>% pull(params) %>% .[[1]]
+  params <- subdesign$parameters %>% filter(id == param_id, method_id == !!method_id) %>% pull(params) %>% .[[1]]
 
   # get priors
   prior_id <- as.character(row$prior_id)
-  priors <- design$priors %>% filter(id == prior_id) %>% pull(set) %>% .[[1]]
+  priors <- subdesign$priors %>% filter(id == prior_id) %>% pull(set) %>% .[[1]]
 
   # start evaluation
   out <- evaluate_ti_method(
