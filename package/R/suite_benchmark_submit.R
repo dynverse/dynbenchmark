@@ -208,6 +208,7 @@ benchmark_run_evaluation <- function(
   dataset <- subdesign$datasets %>% filter(id == dataset_id) %>% pull(fun) %>% {.[[1]]()}
 
   # get method
+  setup_singularity_methods()
   method_id <- as.character(row$method_id)
   if (identical(error_mode, FALSE)) {
     method <- subdesign$methods %>% filter(id == method_id) %>% pull(fun) %>% {.[[1]]()}
