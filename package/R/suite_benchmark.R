@@ -87,6 +87,7 @@ generate_benchmark_design <- function(
     } else if (dynwrap::is_wrapper_with_expression(d)) {
       d$id
     } else if (is.function(d)) {
+      if (is.null(names(datasets)[[di]])) {stop("Dataset functions should be named")}
       names(datasets)[[di]]
     } else {
       stop("datasets must be a named list consisting of dataset ids (character), dynwrap::data_wrapper's, or functions that generate dynwrap::data_wrapper's")
