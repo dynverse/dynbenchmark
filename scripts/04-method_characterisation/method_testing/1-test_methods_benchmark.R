@@ -3,24 +3,27 @@ library(tidyverse)
 
 experiment("04-method_characterisation/method_testing")
 
-design <- generate_benchmark_design(
+design <- benchmark_generate_design(
   datasets = c(
-    "toy/bifurcating_1",
-    "toy/linear_1",
+    "synthetic/dyntoy/bifurcating_1",
+    "synthetic/dyntoy/linear_1",
     "real/developing-dendritic-cells_schlitzer",
     "real/fibroblast-reprogramming_treutlein"
   ),
-  methods = dynmethods::methods$id,
-  give_priors = NULL
+  methods = dynmethods::methods$id
 )
 write_rds(design, derived_file("design.rds"))
 
 design <- read_rds(derived_file("design.rds"))
 
 local_output_folder <- derived_file("suite")
-remote_output_folder <- derived_file("suite", remote = T)
+remote_output_folder <- derived_file("suite", remote = TRUE)
 
-benchmark_submit(design, local_output_folder = local_output_folder, remote_output_folder = remote_output_folder)
+benchmark_submit(
+  design = design,
+  local_output_folder = local_output_folder,
+  remote_output_folder = remote_output_folder
+)
 benchmark_fetch_results(local_output_folder)
 output <- benchmark_bind_results(local_output_folder, load_models = TRUE)
 
