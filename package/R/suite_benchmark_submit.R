@@ -93,7 +93,7 @@ benchmark_submit <- function(
       return()
     }
 
-    if (verbose) cat("Submitting ", deparse(grouping_values), "\n", sep = "")
+    if (verbose) cat("Submitting ", dirname, "\n", sep = "")
 
     # set parameters for the cluster
     if (is.function(qsub_params)) {
