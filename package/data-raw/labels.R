@@ -7,7 +7,7 @@ common_labels <- tribble(
   "ngenes", "Number of genes", "# genes",
   "ncells", "Number of cells", "# cells",
   "n_methods", "Number of methods", "# methods",
-  "n_implementations", "Number of methods", "# methods",
+  "n_tools", "Number of tools", "# tools",
   "silver", "Silver standard", "Silver",
   "gold", "Gold standard", "Gold",
   "gse", "Source(s)", "Source(s)",
