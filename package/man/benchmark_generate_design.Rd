@@ -28,7 +28,7 @@ Check \code{\link[dynwrap:priors]{dynwrap::priors}} for a list of possible prior
 Generate a benchmarking design
 }
 \examples{
-\donttest{
+\dontrun{
 library(tibble)
 
 datasets <- list(
@@ -69,6 +69,6 @@ benchmark_generate_design(
   parameters = parameters,
   priors = priors,
   num_repeats = 2
-) -> design
+)
 }
 }
