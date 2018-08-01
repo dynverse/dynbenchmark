@@ -1,12 +1,11 @@
 #' Fetch the results of the benchmark jobs from the cluster.
 #'
-#' @param local_output_folder The folder in which to output intermediate and final results.
-#'
 #' @importFrom readr read_rds write_rds
 #' @export
 benchmark_fetch_results <- function() {
-  local_output_folder <- derived_file(local_output_folder)
   requireNamespace("qsub")
+
+  local_output_folder <- derived_file("suite")
 
   # find all 2nd level folders with individual tasks
   dirs <- list.dirs(local_output_folder, full.names = FALSE, recursive = TRUE) %>%
@@ -149,12 +148,13 @@ benchmark_fetch_results <- function() {
 
 #' Gather and bind the results of the benchmark jobs
 #'
-#' @param local_output_folder The folder in which to output intermediate and final results.
 #' @param load_models Whether or not to load the models as well.
 #'
 #' @importFrom readr read_rds
 #' @export
-benchmark_bind_results <- function(local_output_folder, load_models = FALSE) {
+benchmark_bind_results <- function(load_models = FALSE) {
+  local_output_folder <- derived_file("suite")
+
   method_ids <- list.dirs(local_output_folder, full.names = FALSE, recursive = FALSE) %>% discard(~ . == "")
 
   # process each method separately
