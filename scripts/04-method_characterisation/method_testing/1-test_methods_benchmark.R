@@ -12,14 +12,14 @@ design <- benchmark_generate_design(
   ),
   methods = dynmethods::methods$id
 )
-write_rds(design, derived_file("design.rds"))
-
-design <- read_rds(derived_file("design.rds"))
 
 benchmark_submit(design = design)
+write_rds(design, derived_file("design.rds"))
+
 benchmark_fetch_results()
 output <- benchmark_bind_results(load_models = TRUE)
 
+design <- read_rds(derived_file("design.rds"))
 
 
 
