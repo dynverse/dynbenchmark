@@ -140,7 +140,7 @@ benchmark_submit_check <- function(
   testthat::expect_true(all(c("id", "type", "fun") %in% colnames(design$methods)))
   testthat::expect_is(design$methods$id, "character")
   testthat::expect_false(any(duplicated(design$methods$id)))
-  testthat::expect_true(all(design$methods$type == "character" | !(design$methods$id %in% dynmethods::methods$id)))
+  testthat::expect_true(all(design$methods$type != "character" | design$methods$id %in% dynmethods::methods$id))
 
   # check priors
   testthat::expect_true(all(c("id", "set") %in% colnames(design$priors)))
@@ -157,6 +157,7 @@ benchmark_submit_check <- function(
       method_inputs <- design$methods %>%
         filter(id == l$method_id) %>%
         pull(fun) %>%
+        first() %>%
         {.()} %>%
         .$inputs %>%
         filter(type == "parameter") %>%
