@@ -85,7 +85,7 @@ benchmark_submit <- function(
     dirname <- with(grouping_values, glue::glue(qsub_grouping))
     suite_method_folder <- file.path(local_output_folder, dirname)
     output_file <- file.path(suite_method_folder, "output.rds")
-    qsubhandle_file <- file.path(suite_method_folder, "qsubhandle.rds")
+    qsub_handle_file <- file.path(suite_method_folder, "qsubhandle.rds")
 
     qsub::mkdir_remote(path = suite_method_folder, remote = FALSE)
 
@@ -141,7 +141,7 @@ benchmark_submit <- function(
       qsub_handle
     )
 
-    readr::write_rds(metadata, qsubhandle_file)
+    readr::write_rds(metadata, qsub_handle_file)
 
     invisible()
   }
