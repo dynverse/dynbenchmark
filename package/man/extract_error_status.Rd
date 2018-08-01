@@ -14,8 +14,6 @@ extract_error_status(stdout, stderr, error_message, ...)
 \item{error_message}{The error message}
 
 \item{...}{Other columns in the output, ignored}
-
-\item{model}{The model}
 }
 \description{
 Extract the error status from an evaluation

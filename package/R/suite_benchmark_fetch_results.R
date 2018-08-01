@@ -185,7 +185,6 @@ benchmark_bind_results <- function(load_models = FALSE) {
 
 #' Extract the error status from an evaluation
 #'
-#' @param model The model
 #' @param stdout The standard output
 #' @param stderr The standard error
 #' @param error_message The error message
