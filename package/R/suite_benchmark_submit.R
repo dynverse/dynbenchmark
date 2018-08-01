@@ -103,7 +103,7 @@ benchmark_submit <- function(
     qsub_config_method <-
       qsub::override_qsub_config(
         qsub_config = qsub_config,
-        name = "dynbenchmark",
+        name = dirname,
         memory = qsub_params$memory,
         max_wall_time = qsub_params$timeout,
         local_tmp_path = paste0(suite_method_folder, "/r2gridengine")
