@@ -59,8 +59,7 @@ benchmark_submit <- function(
     design,
     metrics,
     qsub_params,
-    qsub_grouping,
-    verbose
+    qsub_grouping
   )
 
   ## prepare for remote execution; create a qsub config
@@ -68,7 +67,7 @@ benchmark_submit <- function(
     wait = FALSE,
     remove_tmp_folder = FALSE,
     stop_on_error = FALSE,
-    verbose = FALSE,
+    verbose = verbose >= 2,
     num_cores = 1,
     local_tmp_path = local_output_folder,
     remote_tmp_path = remote_output_folder
@@ -90,56 +89,61 @@ benchmark_submit <- function(
 
     qsub::mkdir_remote(path = suite_method_folder, remote = FALSE)
 
-    if (!file.exists(output_file) && !file.exists(qsubhandle_file)) {
-      cat("Submitting ", method_id, "\n", sep = "")
-
-      # set parameters for the cluster
-      if (is.function(qsub_params)) {
-        qsub_params <- do.call(qsub_params, grouping_values)
-      }
-      qsub_config_method <-
-        qsub::override_qsub_config(
-          qsub_config = qsub_config,
-          name = "dynbenchmark",
-          memory = qsub_params$memory,
-          max_wall_time = qsub_params$timeout,
-          local_tmp_path = paste0(suite_method_folder, "/r2gridengine")
-        )
-
-      # which packages to load on the cluster
-      qsub_packages <- c("dplyr", "purrr", "dyneval", "dynmethods", "readr", "dynbenchmark")
-
-      # which data objects will need to be transferred to the cluster
-      qsub_environment <-  c("metrics", "verbose", "subdesign")
-
-      # submit to the cluster
-      qsub_handle <- qsub::qsub_lapply(
-        X = seq_len(nrow(subcrossing)),
-        object_envir = environment(),
-        qsub_environment = qsub_environment,
-        qsub_packages = qsub_packages,
-        qsub_config = qsub_config_method,
-        FUN = benchmark_qsub_fun
-      )
-
-      # save data and handle to RDS file
-      metadata <- lst(
-        local_output_folder,
-        remote_output_folder,
-        metrics,
-        verbose,
-        subdesign,
-        grouping_variables,
-        grouping_values,
-        dirname,
-        suite_method_folder,
-        output_file,
-        qsub_handle_file,
-        qsub_params,
-        qsub_handle
-      )
-      readr::write_rds(metadata, qsubhandle_file)
+    if (file.exists(output_file) || file.exists(qsubhandle_file)) {
+      return()
     }
+
+    if (verbose) cat("Submitting ", deparse(grouping_values), "\n", sep = "")
+
+    # set parameters for the cluster
+    if (is.function(qsub_params)) {
+      qsub_params <- do.call(qsub_params, grouping_values)
+    }
+
+    qsub_config_method <-
+      qsub::override_qsub_config(
+        qsub_config = qsub_config,
+        name = "dynbenchmark",
+        memory = qsub_params$memory,
+        max_wall_time = qsub_params$timeout,
+        local_tmp_path = paste0(suite_method_folder, "/r2gridengine")
+      )
+
+    # which packages to load on the cluster
+    qsub_packages <- c("dplyr", "purrr", "dyneval", "dynmethods", "readr", "dynbenchmark")
+
+    # which data objects will need to be transferred to the cluster
+    qsub_environment <-  c("metrics", "verbose", "subdesign")
+
+    # submit to the cluster
+    qsub_handle <- qsub::qsub_lapply(
+      X = seq_len(nrow(subcrossing)),
+      object_envir = environment(),
+      qsub_environment = qsub_environment,
+      qsub_packages = qsub_packages,
+      qsub_config = qsub_config_method,
+      FUN = benchmark_qsub_fun
+    )
+
+    # save data and handle to RDS file
+    metadata <- lst(
+      local_output_folder,
+      remote_output_folder,
+      metrics,
+      subdesign,
+      grouping_variables,
+      grouping_values,
+      dirname,
+      suite_method_folder,
+      output_file,
+      qsub_handle_file,
+      qsub_params,
+      qsub_handle
+    )
+
+    readr::write_rds(metadata, qsubhandle_file)
+
+    invisible()
   }
 
   # run benchmark per method seperately
@@ -155,8 +159,7 @@ benchmark_submit_check <- function(
   design,
   metrics,
   qsub_params,
-  qsub_grouping,
-  verbose
+  qsub_grouping
 ) {
   # check datasets
   testthat::expect_true(all(c("id", "type", "fun") %in% colnames(design$datasets)))
