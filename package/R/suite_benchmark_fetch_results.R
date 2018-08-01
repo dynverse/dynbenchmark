@@ -4,7 +4,8 @@
 #'
 #' @importFrom readr read_rds write_rds
 #' @export
-benchmark_fetch_results <- function(local_output_folder) {
+benchmark_fetch_results <- function() {
+  local_output_folder <- derived_file(local_output_folder)
   requireNamespace("qsub")
 
   # find all 2nd level folders with individual tasks
