@@ -15,22 +15,22 @@ wrap <- function(milestone_network, progressions) {
 
 
 generate_linear <- function(ncells = 100) {
-  milestone_network <- dyngen::generate_milestone_network("linear")
-  progressions <- dyngen::random_progressions(milestone_network, ncells)
+  milestone_network <- dyntoy::generate_milestone_network("linear")
+  progressions <- dyntoy::random_progressions(milestone_network, ncells)
 
   wrap(milestone_network, progressions)
 }
 
 generate_bifurcating <- function(ncells = 100) {
-  milestone_network <- dyngen::generate_milestone_network("bifurcating")
-  progressions <- dyngen::random_progressions(milestone_network, ncells)
+  milestone_network <- dyntoy::generate_milestone_network("bifurcating")
+  progressions <- dyntoy::random_progressions(milestone_network, ncells)
 
   wrap(milestone_network, progressions)
 }
 
 generate_cycle <- function(ncells = 100) {
-  milestone_network <- dyngen::generate_milestone_network("cycle")
-  progressions <- dyngen::random_progressions(milestone_network, ncells)
+  milestone_network <- dyntoy::generate_milestone_network("cycle")
+  progressions <- dyntoy::random_progressions(milestone_network, ncells)
 
   wrap(milestone_network, progressions)
 }

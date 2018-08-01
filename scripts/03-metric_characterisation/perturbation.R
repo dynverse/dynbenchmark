@@ -10,10 +10,9 @@ perturb_switch_n_cells <- function(dataset, n = length(dataset$cell_ids)) {
   mapper <- set_names(dataset$cell_ids, dataset$cell_ids)
   mapper[match(the_chosen_ones, mapper)] <- rev(the_chosen_ones)
 
-  dataset$milestone_percentages$cell_id <- mapper[dataset$milestone_percentages$cell_id]
-  dataset$progression$cell_id <- mapper[dataset$progression$cell_id]
+  dataset$progressions$cell_id <- mapper[dataset$progressions$cell_id]
 
-  recreate_dataset(dataset)
+  dataset
 }
 
 perturb_switch_two_cells <- function(dataset) perturb_switch_n_cells(dataset, 2)
@@ -282,23 +281,6 @@ change_network <- function(dataset, trajectory_type = "linear") {
 trajectory_models <- eval(formals(dyntoy:::generate_milestone_network)$model)
 
 map(trajectory_models, function(x) function(dataset) change_network(dataset, x)) %>% setNames(paste0("perturb_change_network_", trajectory_models)) %>% list2env(.GlobalEnv)
-
-
-### Some helper functions-------------------
-# Recreate dataset, forcing a reculaculation of geodesic distances
-recreate_dataset <- function(dataset) {
-  dataset <- dynutils::wrap_ti_prediction(
-    dataset$trajectory_type,
-    dataset$id,
-    dataset$cell_ids,
-    dataset$milestone_ids,
-    dataset$milestone_network,
-    progression = dataset$progression
-  )
-  dataset$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(dataset)
-
-  dataset
-}
 
 
 rename_toy <- function(dataset, toy_id) {dataset$id<-toy_id;dataset}
