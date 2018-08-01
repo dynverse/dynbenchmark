@@ -22,7 +22,7 @@ benchmark_fetch_results <- function(local_output_folder) {
 
       cat(method_id, ": Attempting to retrieve output from cluster: ", sep = "")
       metadata <- readr::read_rds(qsubhandle_file)
-      design_method <- metadata$design_method
+      subdesign <- metadata$subdesign
       qsub_handle <- metadata$qsub_handle
       num_datasets <- qsub_handle$num_datasets
 
@@ -38,9 +38,8 @@ benchmark_fetch_results <- function(local_output_folder) {
         qacct_out <- qsub::qacct(qsub_handle)
 
         # process each job separately
-        outputs <- map_df(seq_len(nrow(design_method)), function(design_row_ix) {
-          design_row <- design_method[design_row_ix, ]
-          out <- output[[design_row_ix]]
+        outputs <- map_df(seq_len(nrow(subdesign)), function(i) {
+          out <- output[[i]]
 
           if (length(out) != 1 || !is.na(out)) {
             # hooray, the benchmark suite ran fine!
@@ -49,12 +48,12 @@ benchmark_fetch_results <- function(local_output_folder) {
           } else {
             # if qacct is empty or the correct taskid cannot be found, then
             # this job never ran
-            if (is.null(qacct_out) || !any(qacct_out$taskid == design_row_ix)) {
+            if (is.null(qacct_out) || !any(qacct_out$taskid == i)) {
               qsub_error <- "Job cancelled by user"
             } else {
               qacct_filt <-
                 qacct_out %>%
-                filter(taskid == design_row_ix) %>%
+                filter(taskid == i) %>%
                 arrange(desc(row_number_i)) %>%
                 slice(1)
 
@@ -86,7 +85,8 @@ benchmark_fetch_results <- function(local_output_folder) {
             # "rerun" the evaluation in error mode, in order to generate the expected output except with
             # the default fail-scores for each of the metrics
             out <- benchmark_run_evaluation(
-              design_row = design_row,
+              i = i,
+              subdesign = metadata$subdesign,
               metrics = metadata$metrics,
               verbose = FALSE,
               error_mode = qsub_error
