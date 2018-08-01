@@ -4,11 +4,9 @@
 \alias{extract_error_status}
 \title{Extract the error status from an evaluation}
 \usage{
-extract_error_status(model, stdout, stderr, error_message, ...)
+extract_error_status(stdout, stderr, error_message, ...)
 }
 \arguments{
-\item{model}{The model}
-
 \item{stdout}{The standard output}
 
 \item{stderr}{The standard error}
@@ -16,6 +14,8 @@ extract_error_status(model, stdout, stderr, error_message, ...)
 \item{error_message}{The error message}
 
 \item{...}{Other columns in the output, ignored}
+
+\item{model}{The model}
 }
 \description{
 Extract the error status from an evaluation
