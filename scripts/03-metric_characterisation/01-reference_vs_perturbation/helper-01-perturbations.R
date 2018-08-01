@@ -1,122 +1,142 @@
-## Again gold standard
-perturb_gs <- function(dataset) {
-  dataset
-}
+
+## Identity
+perturb_identity <- function(dataset) dataset
 
 ## Switch cells
-perturb_switch_n_cells <- function(dataset, n = length(dataset$cell_ids)) {
-  the_chosen_ones <- sample(dataset$cell_ids, n)
+perturb_switch_n_cells <- function(dataset, switch_n = Inf) {
+  switch_n <- min(switch_n, length(dataset$cell_ids))
+
+  the_chosen_ones <- sample(dataset$cell_ids, switch_n)
 
   mapper <- set_names(dataset$cell_ids, dataset$cell_ids)
   mapper[match(the_chosen_ones, mapper)] <- rev(the_chosen_ones)
 
   dataset$progressions$cell_id <- mapper[dataset$progressions$cell_id]
 
-  dataset
-}
-
-perturb_switch_two_cells <- function(dataset) perturb_switch_n_cells(dataset, 2)
-
-perturb_switch_all_cells <- function(dataset) perturb_switch_n_cells(dataset, length(unique(dataset$progressions$cell_id)))
-
-percs <- seq(0, 1, 0.1)
-perc_perturbators <- map(percs, function(perc) {function(dataset) perturb_switch_n_cells(dataset, length(dataset$cell_id) * perc)}) %>%
-  set_names(paste0("perturb_switch_", percs * 100))
-perc_perturbators %>% list2env(.GlobalEnv)
-
-
-# Break cycle
-# this should be easier, no?
-perturb_break_cycles <- function(dataset) {
-  # dataset <- generate_cycle()
-
-  net <- dataset$milestone_network %>% mutate(linkid = seq_len(n()))
-  visited <- c()
-  remove_links <- c()
-
-  walker <- function(net, curmilestone, curlinkid) {
-    if(curmilestone %in% visited) {
-      remove_links <<- c(remove_links, curlinkid)
-    } else {
-      visited <<- c(visited, curmilestone)
-      net %>%
-        filter(from == curmilestone) %>%
-        {walk2(.$to, .$linkid, function(to, linkid) {walker(net, to, linkid)})}
-    }
-  }
-
-  walker(net, net$from[[1]], NULL)
-
-  new_milestone_n <- 1
-  for(remove_link in remove_links) {
-    from <- dataset$milestone_network[remove_link, ]$from
-    to <- dataset$milestone_network[remove_link, ]$to
-    length <- dataset$milestone_network[remove_link, ]$length
-
-    newto <- paste0("NM", new_milestone_n)
-    new_milestone_n <- new_milestone_n + 1
-
-    dataset$progressions[(dataset$progressions$from == from) & (dataset$progressions$to == to),]$to = newto
-    dataset$milestone_network <- dataset$milestone_network %>% add_row(from = from, to = newto, length = length)
-
-    dataset$milestone_ids <- c(dataset$milestone_ids, newto)
-  }
-
-  dataset$milestone_network <- dataset$milestone_network[-remove_links, ]
-
-  recreate_dataset(dataset)
-}
-
-# Join linear
-perturb_join_linear <- function(dataset) {
-  # dataset <- generate_linear()
-  if(nrow(dataset$milestone_network) != 1) {stop("joining non-linear trajectories not supported")}
-
-  length <- dataset$milestone_network$length
-
-  dataset$milestone_network <- tibble::tribble(
-    ~from, ~to,
-    "M1", "M2",
-    "M2", "M3",
-    "M3", "M1"
-  ) %>% mutate(length = length/3, directed = TRUE)
-
-  dataset$milestone_ids <- c("M1", "M2", "M3")
-
-  dataset$progressions <- dataset$progressions %>%
-    mutate(
-      from = dataset$milestone_ids[as.numeric(percentage*3) + 1],
-      to = dataset$milestone_ids[((as.numeric(percentage*3) +1) %% 3 + 1)],
-      percentage = (percentage * 3) %% 1
+  dataset %>%
+    add_trajectory(
+      milestone_network = dataset$milestone_network,
+      progressions = dataset$progressions,
+      divergence_regions = dataset$divergence_regions
     )
+}
 
-  recreate_dataset(dataset)
+perturb_switch_perc_cells <- function(dataset, switch_perc = 1) {
+    perturb_switch_n_cells(dataset, switch_n = length(dataset$cell_ids) * switch_perc)
+}
+
+
+
+##  ............................................................................
+##  Simplifying divergences                                                 ####
+# Merge the branch after bifurcations
+perturb_merge_bifurcation <- function(dataset) {
+  if (nrow(dataset$milestone_network) != 3) {
+    stop("Requires a bifurcating dataset with three milestone edges")
+  }
+  if (nrow(dataset$divergence_regions) > 0) {
+    stop("Dataset cannot contain divergence regions")
+  }
+
+  to_milestones <- dataset$milestone_network %>% group_by(from) %>% filter(n() == 2) %>% pull(to)
+
+  milestone_network <- dataset$milestone_network %>%
+    mutate(to = ifelse(to %in% to_milestones, "END", to)) %>%
+    group_by(from, to) %>%
+    filter(row_number() == 1) %>%
+    ungroup()
+  progressions <- dataset$progressions %>% mutate(to = ifelse(to %in% to_milestones, "END", to))
+
+  dataset %>%
+    add_trajectory(
+      milestone_network = milestone_network,
+      progressions = progressions
+    )
+}
+
+# Put one of the bifurcation
+perturb_concatentate_bifurcation <- function(dataset) {
+  if (nrow(dataset$milestone_network) != 3) {
+    stop("Requires a bifurcating dataset with three milestone edges")
+  }
+  if (nrow(dataset$divergence_regions) > 0) {
+    stop("Dataset cannot contain divergence regions")
+  }
+
+  to_milestones <- dataset$milestone_network %>% group_by(from) %>% filter(n() == 2) %>% pull(to)
+
+  milestone_network <- dataset$milestone_network %>%
+    mutate(from = ifelse(to == to_milestones[[2]], to_milestones[[1]], from))
+  progressions <- dataset$progressions %>%
+    mutate(from = ifelse(to == to_milestones[[2]], to_milestones[[1]], from))
+
+  dataset %>%
+    add_trajectory(
+      milestone_network = milestone_network,
+      progressions = progressions
+    )
+}
+
+
+##  ............................................................................
+##  Changing cyclic trajectories                                            ####
+perturb_break_cycles <- function(dataset) {
+  if (dataset$trajectory_type != "directed_cycle") {stop("Need a cyclic dataset")}
+
+  unlink_milestone <- sample(dataset$milestone_ids, 1)
+
+  milestone_network <- dataset$milestone_network %>% mutate(to = ifelse(to == unlink_milestone, "END", to))
+  progressions <- dataset$progressions %>% mutate(to = ifelse(to == unlink_milestone, "END", to))
+
+  dataset %>%
+    add_trajectory(
+      milestone_network = milestone_network,
+      progressions = progressions
+    )
+}
+
+
+##  ............................................................................
+##  Chaning linear trajectories                                             ####
+perturb_join_linear <- function(dataset) {
+  if(dataset$trajectory_type != "directed_linear") {stop("joining non-linear trajectories not supported")}
+  if(nrow(dataset$milestone_network) < 3) {stop("Need at least 3 edges in the linear dataset to be able to join")}
+
+  start_milestone_id <- setdiff(dataset$milestone_network$from, dataset$milestone_network$to)
+  end_milestone_id <- setdiff(dataset$milestone_network$to, dataset$milestone_network$from)
+
+  milestone_network <- dataset$milestone_network %>% mutate(to = ifelse(to == end_milestone_id, start_milestone_id, to))
+  progressions <- dataset$progressions %>% mutate(to = ifelse(to == end_milestone_id, start_milestone_id, to))
+
+  dataset %>%
+    add_trajectory(
+      milestone_network = milestone_network,
+      progressions = progressions
+    )
 }
 
 
 # Split linear to bifurcation
-perturb_split_linear <- function(dataset) {
-  # dataset <- generate_linear()
-  if(nrow(dataset$milestone_network) != 1) {stop("joining non-linear trajectories not supported")}
+perturb_move_terminal_branch <- function(dataset) {
+  terminal_milestone <- sample(setdiff(dataset$milestone_network$to, dataset$milestone_network$from), 1)
 
-  length <- dataset$milestone_network$length
+  intermediate_milestones <- intersect(dataset$milestone_network$from, dataset$milestone_network$to)
+  possible_milestones <- dataset$milestone_network %>%
+    filter(
+      from %in% intermediate_milestones,
+      to != terminal_milestone
+    ) %>%
+    pull(from)
+  if (length(possible_milestones) == 0) {stop("No possible intermediate milestone on which the branch can be put")}
 
-  dataset$milestone_network <- tibble::tribble(
-    ~from, ~to,
-    "M1", "M2",
-    "M2", "M3",
-    "M2", "M4"
-  ) %>% mutate(length = length/2, directed = TRUE)
+  milestone_network <- dataset$milestone_network %>% mutate(from = ifelse(to == terminal_milestone, selected_milestone, from))
+  progressions <- dataset$progressions %>% mutate(from = ifelse(to == terminal_milestone, selected_milestone, from))
 
-  dataset$milestone_ids <- c("M1", "M2", "M3", "M4")
-
-  dataset$progressions <- dataset$progressions %>%
-    mutate(
-      from = ifelse(percentage > 0.5, "M2", "M1"),
-      to = ifelse(percentage > 0.5, sample(c("M3", "M4"), n(), replace = TRUE), "M2"),
-      percentage = (percentage * 2) %% 1
+  dataset %>%
+    add_trajectory(
+      milestone_network = milestone_network,
+      progressions = progressions
     )
-  recreate_dataset(dataset)
 }
 
 
@@ -286,7 +306,7 @@ map(trajectory_models, function(x) function(dataset) change_network(dataset, x))
 rename_toy <- function(dataset, toy_id) {dataset$id<-toy_id;dataset}
 
 # same dataset, but with the cell_percentages grouped at their maximal milestone, simulating the effect of a "marker-based" or "clustering-based" gold standard for real data
-group_dataset <- function(dataset) {
+perturb_group_dataset <- function(dataset) {
   dataset$milestone_percentages <- dataset$milestone_percentages %>%
     group_by(cell_id) %>%
     mutate(percentage = ifelse(percentage == max(percentage), 1, 0)) %>%
@@ -303,3 +323,15 @@ group_dataset <- function(dataset) {
   dataset$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(dataset)
   dataset
 }
+
+
+
+
+
+## Simply the gold standard
+perturbation_methods <- ls() %>% str_subset("^perturb_") %>% map(function(x) {
+  id <- str_replace(x, "perturb_(.*)", "\\1")
+  run_fun <- get(x)
+
+  create_ti_method(id = id, run_fun = run_fun)
+})
