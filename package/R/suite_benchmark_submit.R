@@ -154,7 +154,13 @@ benchmark_submit_check <- function(
   walkdf(
     design$parameters,
     function(l) {
-      method_inputs <- design$methods %>% filter(id == l$method_id) %>% pull(fun) %>% .() %>% .$inputs %>% filter(type == "parameter") %>% pull(input_id)
+      method_inputs <- design$methods %>%
+        filter(id == l$method_id) %>%
+        pull(fun) %>%
+        {.()} %>%
+        .$inputs %>%
+        filter(type == "parameter") %>%
+        pull(input_id)
       params <- l$params
       testthat::expect_true(all(names(parameters) %in% method_inputs))
     }
