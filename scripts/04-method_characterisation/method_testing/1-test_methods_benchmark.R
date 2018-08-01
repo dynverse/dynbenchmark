@@ -1,22 +1,19 @@
 library(dynbenchmark)
 library(tidyverse)
 
-# devtools::install_github("dynverse/dynbenchmark/package@adapt_benchmarking_suite", dep=F)
-
 experiment("04-method_characterisation/method_testing")
 
 design <- generate_benchmark_design(
-  dataset_ids = c(
+  datasets = c(
     "toy/bifurcating_1",
     "toy/linear_1",
     "real/developing-dendritic-cells_schlitzer",
     "real/fibroblast-reprogramming_treutlein"
   ),
-  method_ids = dynmethods::methods$method_id,
+  methods = dynmethods::methods$id,
   give_priors = NULL
 )
 write_rds(design, derived_file("design.rds"))
-
 
 design <- read_rds(derived_file("design.rds"))
 
@@ -26,6 +23,8 @@ remote_output_folder <- derived_file("suite", remote = T)
 benchmark_submit(design, local_output_folder = local_output_folder, remote_output_folder = remote_output_folder)
 benchmark_fetch_results(local_output_folder)
 output <- benchmark_bind_results(local_output_folder, load_models = TRUE)
+
+
 
 
 extract_method_status <- function(error_status, correlation, ...) {
