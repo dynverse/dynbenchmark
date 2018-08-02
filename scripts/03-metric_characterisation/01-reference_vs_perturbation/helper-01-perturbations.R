@@ -1,7 +1,10 @@
-
-## Identity
+##  ............................................................................
+##  Controls                                                                ####
 perturb_identity <- function(dataset) dataset
 
+
+##  ............................................................................
+##  Changing cell ordering                                                  ####
 ## Switch cells
 perturb_switch_n_cells <- function(dataset, switch_n = Inf) {
   switch_n <- min(switch_n, length(dataset$cell_ids))
@@ -9,7 +12,7 @@ perturb_switch_n_cells <- function(dataset, switch_n = Inf) {
   the_chosen_ones <- sample(dataset$cell_ids, switch_n)
 
   mapper <- set_names(dataset$cell_ids, dataset$cell_ids)
-  mapper[match(the_chosen_ones, mapper)] <- rev(the_chosen_ones)
+  mapper[match(the_chosen_ones, mapper)] <- sample(the_chosen_ones)
 
   dataset$progressions$cell_id <- mapper[dataset$progressions$cell_id]
 
@@ -21,21 +24,58 @@ perturb_switch_n_cells <- function(dataset, switch_n = Inf) {
     )
 }
 
-perturb_switch_perc_cells <- function(dataset, switch_perc = 1) {
+perturb_switch_cells <- function(dataset, switch_perc = 1) {
     perturb_switch_n_cells(dataset, switch_n = length(dataset$cell_ids) * switch_perc)
 }
 
+## Switch edges
+perturb_switch_n_edges <- function(dataset, switch_n = Inf) {
+  if (nrow(dataset$divergence_regions)) {stop("To switch branches, dataset cannot have divergence regions")}
 
+  switch_n = min(switch_n, nrow(dataset$milestone_network))
+
+  # create an edge id and add it to the progressions
+  milestone_network <- dataset$milestone_network %>%
+    mutate(edge_id = row_number())
+
+  progressions <- dataset$progressions %>%
+    left_join(milestone_network, c("from", "to")) %>%
+    select(-from, -to)
+
+  # shuffle edges
+  the_chosen_ones <- sample(milestone_network$edge_id, switch_n)
+  mapper <- set_names(milestone_network$edge_id, milestone_network$edge_id)
+  mapper[match(the_chosen_ones, mapper)] <- sample(the_chosen_ones)
+
+  # change in milestone_network and join with progressions
+  milestone_network$edge_id <- mapper[as.character(milestone_network$edge_id)]
+
+  progressions <- left_join(progressions, milestone_network, "edge_id") %>%
+    select(cell_id, from, to, percentage)
+
+  milestone_network <- milestone_network %>% select(-edge_id)
+
+  dataset %>%
+    add_trajectory(
+      milestone_network = milestone_network,
+      progressions = progressions,
+      divergence_regions = dataset$divergence_regions
+    )
+}
+
+perturb_switch_edges <- function(dataset, switch_perc = 1) {
+  perturb_switch_n_edges(dataset, switch_n = nrow(dataset$milestone_network) * switch_perc)
+}
 
 ##  ............................................................................
-##  Simplifying divergences                                                 ####
+##  Changing bifurcating trajectories                                       ####
 # Merge the branch after bifurcations
 perturb_merge_bifurcation <- function(dataset) {
   if (nrow(dataset$milestone_network) != 3) {
-    stop("Requires a bifurcating dataset with three milestone edges")
+    stop("Merge bifurcations requires a bifurcating dataset with three milestone edges")
   }
   if (nrow(dataset$divergence_regions) > 0) {
-    stop("Dataset cannot contain divergence regions")
+    stop("Dataset cannot contain divergence regions when merging bifurcations")
   }
 
   to_milestones <- dataset$milestone_network %>% group_by(from) %>% filter(n() == 2) %>% pull(to)
@@ -54,7 +94,7 @@ perturb_merge_bifurcation <- function(dataset) {
     )
 }
 
-# Put one of the bifurcation
+# Put one of the bifurcation edges at the end of the other bifurcation edge
 perturb_concatentate_bifurcation <- function(dataset) {
   if (nrow(dataset$milestone_network) != 3) {
     stop("Requires a bifurcating dataset with three milestone edges")
@@ -97,7 +137,7 @@ perturb_break_cycles <- function(dataset) {
 
 
 ##  ............................................................................
-##  Chaning linear trajectories                                             ####
+##  Changing linear trajectories                                            ####
 perturb_join_linear <- function(dataset) {
   if(dataset$trajectory_type != "directed_linear") {stop("joining non-linear trajectories not supported")}
   if(nrow(dataset$milestone_network) < 3) {stop("Need at least 3 edges in the linear dataset to be able to join")}
@@ -140,7 +180,8 @@ perturb_move_terminal_branch <- function(dataset) {
 }
 
 
-# Make a trajectory hairy
+##  ............................................................................
+##  Adding extra edges to the topology                                      ####
 #dataset <- generate_linear()
 
 perturb_hairy <- function(dataset, nhairs = 10, overall_hair_length = 1) {
@@ -229,7 +270,9 @@ perturb_hairy_small <- function(dataset) {perturb_hairy(dataset, nhairs = 2)}
 perturb_hairy_large <- function(dataset) {perturb_hairy(dataset, nhairs = 20)}
 # perturb_hairy_long <- function(dataset) {perturb_hairy(dataset, overall_hair_length = 2)}
 
-# Warping the times
+
+##  ............................................................................
+##  Warping the times                                                       ####
 # very quick and dirty way to wrap, but it works :p
 perturb_warp <- function(dataset) {
   # dataset <- generate_linear()
