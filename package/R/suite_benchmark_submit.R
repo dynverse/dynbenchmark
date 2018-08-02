@@ -204,11 +204,11 @@ benchmark_submit_check <- function(
     str_replace_all("[\\{\\}]", "")
   testthat::expect_true(all(grouping_variables %in% colnames(design$crossing)))
 
-
   # if qsub_params is a function, check it runs when provided all of these arguments
   if (is.function(qsub_params)) {
     testthat::expect_true(all(formalArgs(qsub_params) %in% grouping_variables))
-    qsub_params <- do.call(qsub_params, as.list(set_names(rep("", length(grouping_variables)), grouping_variables)))
+    example <- design$crossing %>% slice(1) %>% select(one_of(grouping_variables)) %>% extract_row_to_list(1)
+    qsub_params <- do.call(qsub_params, example)
   }
 
   # make sure it has the correct format
