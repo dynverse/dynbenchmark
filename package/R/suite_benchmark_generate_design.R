@@ -7,7 +7,7 @@
 #'   Must be a named list consisting of method_ids (character) or dynwrap::ti_wrapper's.
 #' @param parameters A named list containing data frames of the parameters to evaluate.
 #'   The names of the list must be present in method_ids.
-#'   The data frames must be of format `data_frame(paramset_id = "set1", param1 = "a", param2 = 2.0)`.
+#'   The data frames must be of format `data_frame(id = "set1", param1 = "a", param2 = 2.0)`.
 #' @param priors A list of lists. Each sublist contains a list of priors that each method is allowed to optionally use.
 #'   Check \code{\link[dynwrap:priors]{dynwrap::priors}} for a list of possible priors.
 #' @param num_repeats The number of times to repeat the evaluation.
