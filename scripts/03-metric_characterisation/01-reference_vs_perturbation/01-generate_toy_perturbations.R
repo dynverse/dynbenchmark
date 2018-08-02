@@ -20,7 +20,7 @@ datasets_design <- crossing(
 datasets <- pmap(datasets_design, function(dataset_id, topology_model, num_cells, ...) {
   print(dataset_id)
   dyntoy::generate_dataset(
-    unique_id = dataset_id,
+    id = dataset_id,
     model = topology_model,
     num_cells = num_cells,
     normalise = FALSE,

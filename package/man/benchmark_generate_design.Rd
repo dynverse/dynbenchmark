@@ -33,7 +33,7 @@ library(tibble)
 
 datasets <- list(
   "synthetic/dyntoy/bifurcating_1",
-  dyntoy::generate_dataset(unique_id = "test1"),
+  dyntoy::generate_dataset(id = "test1"),
   test2 = function() dyntoy::generate_dataset()
 )
 
