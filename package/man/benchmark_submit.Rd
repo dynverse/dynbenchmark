@@ -6,7 +6,7 @@
 \usage{
 benchmark_submit(design, metrics = "correlation",
   qsub_grouping = "{method_id}/{param_id}", qsub_params = list(timeout
-  = 3600, memory = "10G"), verbose = TRUE)
+  = 3600, memory = "10G"), verbose = TRUE, output_models = TRUE)
 }
 \arguments{
 \item{design}{Design tibble of the experiment, created by \code{\link[=benchmark_generate_design]{benchmark_generate_design()}}.}
