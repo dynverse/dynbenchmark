@@ -30,7 +30,7 @@ parameters <- map(methods_suite$id, function(method_id) {
       if(method_id %in% names(rule$parameters)) {
         rule$parameters[[method_id]]
       } else {
-        tibble(id = character(), params = list())
+        tibble(id = character())
       }
     }) %>% bind_rows()
   parameters
@@ -56,6 +56,7 @@ metrics <- c("correlation", "rf_mse", "rf_rsq", "rf_nmse", "lm_mse", "lm_rsq", "
 # results <- benchmark_bind_results()
 
 # run evaluation locally
+benchmark_submit_check(design, metrics)
 results <- map_df(seq_len(nrow(design$crossing)), benchmark_run_evaluation, subdesign = design, metric = metrics, verbose = TRUE) %>%
   mutate(error_status = "no_error")
 
@@ -63,11 +64,12 @@ results <- map_df(seq_len(nrow(design$crossing)), benchmark_run_evaluation, subd
 scores <- results %>%
   filter(error_status == "no_error") %>%
   gather("metric_id", "score", intersect(metrics, colnames(results))) %>%
-  select(method_id, dataset_id, param_id, metric_id, score)
+  select(method_id, dataset_id, param_id, metric_id, score, model)
+
+write_rds(scores, derived_file("scores.rds"))
+##
 
 split(scores, scores$metric_id) %>% map(function(scores) {
   scores %>%
     ggplot(aes(dataset_id, paste0(method_id, "_", param_id))) + geom_raster(aes(fill = score)) + ggtitle(scores$metric_id[[1]])
 }) %>% patchwork::wrap_plots()
-
-write_rds(scores, derived_file("scores.rds"))
