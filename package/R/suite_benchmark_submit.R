@@ -165,7 +165,7 @@ benchmark_submit_check <- function(
   qsub_grouping
 ) {
   check_design_datasets(design$datasets)
-  testthat::expect_true(all(design$crossing$dataset_id %in% datasets$id))
+  testthat::expect_true(all(design$crossing$dataset_id %in% design$datasets$id))
 
   check_design_methods(design$methods)
 
