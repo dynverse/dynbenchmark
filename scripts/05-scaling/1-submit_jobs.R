@@ -50,7 +50,7 @@ gen_gen_dataset <- function(lnrow, lncol) {
 }
 
 datasets <-
-  seq(log10(100), log10(100000), by = log10(10) / 4) %>%
+  seq(log10(100), log10(100000) - .4, by = log10(10) / 5) %>%
   crossing(lnrow = ., lncol = .) %>%
   as_tibble() %>%
   mutate(
@@ -61,16 +61,17 @@ datasets <-
     ncol = ceiling(10 ^ lncol),
     lsum = lnrow + lncol,
     memory = case_when(
-      lsum >= 8.5 ~ "32G",
-      lsum >= 7 ~ "10G",
+      lsum >= 8 ~ "32G",
+      lsum >= 6 ~ "10G",
       TRUE ~ "5G"
     )
   ) %>%
-  select(id, type, fun, everything())
+  select(id, type, fun, everything()) %>%
+  filter(memory != "32G") # disable 32G for now
 
 # define methods
-# method_ids <- dynmethods::methods$id
-method_ids <- c("scorpius", "identity")
+method_ids <- dynmethods::methods$id
+# method_ids <- c("scorpius", "identity")
 
 # create design
 design <- benchmark_generate_design(

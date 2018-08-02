@@ -10,22 +10,22 @@
 \alias{save_dataset}
 \title{Helper functions for creating new datasets}
 \usage{
-dataset_preprocessing(dataset_id)
+dataset_preprocessing(id)
 
 get_dataset_preprocessing_id()
 
-dataset_source_file(filename = "", dataset_id = NULL, remote = FALSE)
+dataset_source_file(filename = "", id = NULL, remote = FALSE)
 
-dataset_raw_file(dataset_id)
+dataset_raw_file(id)
 
-save_raw_dataset(dataset, dataset_id = get_dataset_preprocessing_id())
+save_raw_dataset(dataset, id = get_dataset_preprocessing_id())
 
-dataset_file(filename = "", dataset_id = NULL, remote = FALSE)
+dataset_file(filename = "", id = NULL, remote = FALSE)
 
-save_dataset(dataset, dataset_id = NULL, lazy_load = TRUE)
+save_dataset(dataset, id = NULL, lazy_load = TRUE)
 }
 \arguments{
-\item{dataset_id}{The ID of the dataset to be used}
+\item{id}{The ID of the dataset to be used}
 
 \item{filename}{Custom filename}
 

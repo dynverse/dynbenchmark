@@ -64,7 +64,7 @@ benchmark_fetch_results <- function() {
               qsub_memory <- process_qsub_memory(qacct_filt$maxvmem)
               qsub_user_time <- qsub_handle$max_wall_time
 
-              memory_messages <- c("cannot allocate vector of size", "MemoryError", "OOM when allocating tensor")
+              memory_messages <- c("cannot allocate vector of size", "MemoryError", "OOM when allocating tensor", "error writing to connection")
               is_memory_problem <- function(message) {
                 any(map_lgl(memory_messages, ~grepl(., message)))
               }

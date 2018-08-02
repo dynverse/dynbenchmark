@@ -4,7 +4,7 @@ library(dynbenchmark)
 library(tidyverse)
 
 # remove all datasets
-rm_remote(dataset_file(dataset_id = "synthetic/dyngen", remote = TRUE), remote = TRUE, recursive = TRUE)
+rm_remote(dataset_file(id = "synthetic/dyngen", remote = TRUE), remote = TRUE, recursive = TRUE)
 
 # create design
 set.seed(1)
