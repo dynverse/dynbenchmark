@@ -46,9 +46,9 @@ The benchmarking pipeline generates (and uses) the following datasets:
 ```{r, echo = FALSE, message=FALSE}
 set.seed(1)
 
-datasets <- list_datasets() %>% group_by(dataset_source) %>% sample_n(1) %>% pull(dataset_id) %>% load_datasets()
+datasets <- list_datasets() %>% group_by(source) %>% sample_n(1) %>% pull(id) %>% load_datasets()
 
-datasets$plot_dimred <- mapdf(datasets, ~plot_dimred(., dimred = dyndimred::dimred_landmark_mds) + ggtitle(.$dataset_source) + theme(plot.title = element_text(size = 10)))
+datasets$plot_dimred <- mapdf(datasets, ~plot_dimred(., dimred = dyndimred::dimred_landmark_mds) + ggtitle(.$source) + theme(plot.title = element_text(size = 10)))
 p <- patchwork::wrap_plots(datasets$plot_dimred, ncol = nrow(datasets))
 ggplot2::ggsave("package/man/figures/datasets.png", width = nrow(datasets)*3, height = 1*3)
 ```

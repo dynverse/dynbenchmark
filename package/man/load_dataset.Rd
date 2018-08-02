@@ -8,17 +8,16 @@
 \usage{
 list_datasets()
 
-load_dataset(dataset_id, as_tibble = FALSE)
+load_dataset(id, as_tibble = FALSE)
 
-load_datasets(dataset_ids = list_datasets()$dataset_id,
-  as_tibble = TRUE)
+load_datasets(ids = list_datasets()$id, as_tibble = TRUE)
 }
 \arguments{
-\item{dataset_id}{The ID of the dataset to be used}
+\item{id}{The ID of the dataset to be used}
 
 \item{as_tibble}{Return the datasets as a tibble or as a list of datasets?}
 
-\item{dataset_ids}{Character vector of dataset identifiers}
+\item{ids}{Character vector of dataset identifiers}
 }
 \description{
 Load datasets

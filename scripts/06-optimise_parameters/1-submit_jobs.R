@@ -16,7 +16,7 @@ execute_before <- "export DYNBENCHMARK_PATH=/group/irc/shared/dynbenchmark/; sin
 verbose <- TRUE
 
 # define important folders
-dataset_ids <- load_datasets() %>% filter(dataset_source == "synthetic") %>% pull(id)
+dataset_ids <- load_datasets() %>% filter(source == "synthetic") %>% pull(id)
 local_output_folder <- derived_file("suite/")
 remote_output_folder <- paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynbenchmark_experiment_id"), "/")
 

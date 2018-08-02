@@ -4,30 +4,20 @@ library(tidyverse)
 experiment("07-benchmark")
 
 # settings
-methods <- get_ti_methods(packages = c("dynwrap", "dynmethods")) %>% filter(short_name %in% c("scorpius", "embeddr"))
+method_ids <- dynmethods::methods$id %>% keep(~ . != c("calista", "ouija", "pseudogp"))
 metrics <- c("correlation", "rf_mse", "edge_flip", "featureimp_cor")
-timeout_per_execution <- 60 * 60 * 6
+qsub_params <- function(method_id, param_id) {
+  prm <- lst(timeout = 6 * 60 * 60, memory = "8G")
+  if (method_id %in% c("ctgibbs", "scimitar", "ouijaflow", "ouija", "pseudogp")) {
+    prm$memory <- "32G"
+  }
+  prm
+}
+
 num_repeats <- 4
-execute_before <- "export DYNBENCHMARK_PATH=/group/irc/shared/dynbenchmark/; singularity exec -B /scratch:/scratch -B /group:/group /scratch/irc/shared/dynbenchmark.simg \\"
 verbose <- TRUE
 
-# run most methods
-max_memory_per_execution <- "8G"
-method_filter <- c("mnclica", "recat", "ctgibbs", "scimitar", "ouijaflw", "ouija", "pseudogp")
-
-# run methods that require more memory
-# max_memory_per_execution <- "32G"
-# method_filter <- c("ouija", "pseudogp")
-
-# # execute ouija and pseudogp last because they will jam up other methods
-# max_memory_per_execution <- "8G"
-# method_filter <- c()
-
-
-# define important folders
-local_output_folder <- derived_file("suite/")
-remote_output_folder <- paste0("/scratch/irc/shared/dynverse_derived/", getOption("dynbenchmark_experiment_id"), "/")
-dataset_ids <- list_datasets() %>% head(10)
+dataset_ids <- list_datasets()$dataset_id
 
 # use previous output to determine method ordering based on its running time
 # read_rds("analysis/data/derived_data/06-optimise_parameters-previousresults/180226-derived_data/3-evaluate_parameters/outputs_postprocessed.rds") %>%
