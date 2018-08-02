@@ -70,8 +70,8 @@ datasets <-
   filter(memory != "32G") # disable 32G for now
 
 # define methods
-method_ids <- dynmethods::methods$id
-# method_ids <- c("scorpius", "identity")
+# method_ids <- dynmethods::methods$id
+method_ids <- c("scorpius", "identity", "error")
 
 # create design
 design <- benchmark_generate_design(
