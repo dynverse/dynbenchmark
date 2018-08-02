@@ -43,7 +43,8 @@ benchmark_submit <- function(
   metrics = "correlation",
   qsub_grouping = "{method_id}/{param_id}",
   qsub_params = list(timeout = 3600, memory = "10G"),
-  verbose = TRUE
+  verbose = TRUE,
+  output_models = TRUE
 ) {
   requireNamespace("qsub")
 
@@ -113,7 +114,7 @@ benchmark_submit <- function(
     qsub_packages <- c("dplyr", "purrr", "dyneval", "dynmethods", "readr", "dynbenchmark")
 
     # which data objects will need to be transferred to the cluster
-    qsub_environment <-  c("metrics", "verbose", "subdesign")
+    qsub_environment <-  c("metrics", "verbose", "subdesign", "output_models")
 
     # submit to the cluster
     qsub_handle <- qsub::qsub_lapply(
@@ -138,7 +139,8 @@ benchmark_submit <- function(
       output_file,
       qsub_handle_file,
       qsub_params,
-      qsub_handle
+      qsub_handle,
+      output_models
     )
 
     readr::write_rds(metadata, qsub_handle_file)
@@ -282,7 +284,14 @@ subset_design <- function(design, subcrossing) {
 #' @param i Row of a design dataframe
 benchmark_qsub_fun <- function(i) {
   # call helper function
-  benchmark_run_evaluation(i, subdesign, metrics, verbose)
+  benchmark_run_evaluation(
+    i = i,
+    subdesign = subdesign,
+    metrics = metrics,
+    verbose = verbose,
+    error_mode = FALSE,
+    output_models = output_models
+  )
 }
 
 #' @importFrom readr read_rds
@@ -291,7 +300,8 @@ benchmark_run_evaluation <- function(
   subdesign,
   metrics,
   verbose,
-  error_mode = FALSE
+  error_mode = FALSE,
+  output_models = TRUE
 ) {
   row <- subdesign$crossing %>% extract_row_to_list(i)
 
@@ -324,19 +334,24 @@ benchmark_run_evaluation <- function(
     parameters = params,
     metrics = metrics,
     give_priors = priors,
-    output_model = TRUE,
+    output_model = output_models,
     mc_cores = 1,
     verbose = TRUE
   )
 
   # create summary
-  bind_cols(
+  out <- bind_cols(
     data_frame(method_id, dataset_id, param_id, prior_id, repeat_ix = row$repeat_ix),
     out$summary %>%
       mutate(error_message = ifelse(is.null(error[[1]]), "", error[[1]]$message)) %>%
       select(-error, -method_id, -method_name, -dataset_id), # remove duplicate columns with design row
-    tibble(
-      model = out$models
-    )
   )
+
+  if (output_models) {
+    out <- out %>% bind_cols(
+      tibble(model = out$models)
+    )
+  }
+
+  out
 }

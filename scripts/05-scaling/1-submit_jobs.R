@@ -77,5 +77,6 @@ benchmark_submit(
   design = design,
   qsub_params = list(timeout = 3600, memory = "8G"),
   metrics = list( dummy = function(dataset, model) { 1 } ),
-  verbose = TRUE
+  verbose = TRUE,
+  output_models = FALSE
 )
