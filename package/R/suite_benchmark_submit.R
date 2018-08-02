@@ -164,6 +164,7 @@ benchmark_submit_check <- function(
   qsub_grouping
 ) {
   check_design_datasets(design$datasets)
+  testthat::expect_true(all(design$crossing$dataset_id %in% datasets$id))
 
   check_design_methods(design$methods)
 
@@ -247,7 +248,6 @@ check_design_datasets <- function(datasets, generate_error = TRUE) {
     testthat::expect_false(any(duplicated(datasets$id)))
     testthat::expect_true(all(datasets$type %in% c("character", "dynwrap", "function")))
     testthat::expect_true(datasets$fun %>% map_lgl(is.function) %>% all)
-    testthat::expect_true(all(design$crossing$dataset_id %in% datasets$id))
     testthat::expect_true(all(datasets$type != "character" | datasets$id %in% list_datasets()$dataset_id))
   })
 }
