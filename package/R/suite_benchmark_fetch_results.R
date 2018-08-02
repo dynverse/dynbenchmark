@@ -215,6 +215,7 @@ extract_error_status <- function(stdout, stderr, error_message, ...) {
     stringr::str_detect(stderr, "Time limit exceeded") ~ "time_limit",
     stringr::str_detect(error_message, "^Error status [0-9]*.*") ~ "execution_error",
     stringr::str_detect(stderr, "^Error status [0-9]*.*") ~ "execution_error",
+    stringr::str_detect(stderr, "^Job cancelled by user") ~ "cancelled",
     nchar(error_message) > 0 ~ "method_error",
     TRUE ~ "no_error"
   )
