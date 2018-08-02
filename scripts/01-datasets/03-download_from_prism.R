@@ -11,8 +11,13 @@ qsub::rsync_remote(
   verbose = TRUE
 )
 
-
-
+# qsub::rsync_remote(
+#   remote_src = FALSE,
+#   path_src = derived_file(remote = FALSE),
+#   remote_dest = TRUE,
+#   path_dest = derived_file(remote = TRUE),
+#   verbose = TRUE
+# )
 
 
 
