@@ -115,7 +115,7 @@ benchmark_submit <- function(
     qsub_packages <- c("dplyr", "purrr", "dyneval", "dynmethods", "readr", "dynbenchmark")
 
     # which data objects will need to be transferred to the cluster
-    qsub_environment <-  c("metrics", "verbose", "subdesign", "output_models", "benchmark_run_evaluation")
+    qsub_environment <-  c("metrics", "verbose", "subdesign", "output_models")
 
     # submit to the cluster
     qsub_handle <- qsub::qsub_lapply(
