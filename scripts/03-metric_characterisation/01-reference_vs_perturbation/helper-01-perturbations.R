@@ -1,7 +1,10 @@
-
-## Identity
+##  ............................................................................
+##  Controls                                                                ####
 perturb_identity <- function(dataset) dataset
 
+
+##  ............................................................................
+##  Changing cell ordering                                                  ####
 ## Switch cells
 perturb_switch_n_cells <- function(dataset, switch_n = Inf) {
   switch_n <- min(switch_n, length(dataset$cell_ids))
@@ -9,7 +12,7 @@ perturb_switch_n_cells <- function(dataset, switch_n = Inf) {
   the_chosen_ones <- sample(dataset$cell_ids, switch_n)
 
   mapper <- set_names(dataset$cell_ids, dataset$cell_ids)
-  mapper[match(the_chosen_ones, mapper)] <- rev(the_chosen_ones)
+  mapper[match(the_chosen_ones, mapper)] <- sample(the_chosen_ones)
 
   dataset$progressions$cell_id <- mapper[dataset$progressions$cell_id]
 
@@ -21,11 +24,48 @@ perturb_switch_n_cells <- function(dataset, switch_n = Inf) {
     )
 }
 
-perturb_switch_perc_cells <- function(dataset, switch_perc = 1) {
+perturb_switch_cells <- function(dataset, switch_perc = 1) {
     perturb_switch_n_cells(dataset, switch_n = length(dataset$cell_ids) * switch_perc)
 }
 
+## Switch edges
+perturb_switch_n_edges <- function(dataset, switch_n = Inf) {
+  if (nrow(dataset$divergence_regions)) {stop("To switch branches, dataset cannot have divergence regions")}
 
+  switch_n = min(switch_n, nrow(dataset$milestone_network))
+
+  # create an edge id and add it to the progressions
+  milestone_network <- dataset$milestone_network %>%
+    mutate(edge_id = n())
+
+  progressions <- dataset$progressions %>%
+    left_join(milestone_network, c("from", "to")) %>%
+    select(-from, -to)
+
+  # shuffle edges
+  the_chosen_ones <- sample(milestone_network$edge_id, switch_n)
+  mapper <- set_names(milestone_network$edge_id, milestone_network$edge_id)
+  mapper[match(the_chosen_ones, mapper)] <- sample(the_chosen_ones)
+
+  # change in milestone_network and join with progressions
+  milestone_network$edge_id <- mapper[as.character(milestone_network$edge_id)]
+
+  progressions <- left_join(progressions, milestone_network, "edge_id") %>%
+    select(cell_id, from, to, percentage)
+
+  milestone_network <- milestone_network %>% select(-edge_id)
+
+  dataset %>%
+    add_trajectory(
+      milestone_network = milestone_network,
+      progressions = progressions,
+      divergence_regions = dataset$divergence_regions
+    )
+}
+
+perturb_switch_edges <- function(dataset, switch_perc = 1) {
+  perturb_switch_n_edges(dataset, switch_n = nrow(dataset$milestone_network) * switch_perc)
+}
 
 ##  ............................................................................
 ##  Simplifying divergences                                                 ####
