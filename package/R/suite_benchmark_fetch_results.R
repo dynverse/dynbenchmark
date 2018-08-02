@@ -158,7 +158,6 @@ extract_error_status <- function(stdout, stderr, job_exit_status, produced_model
   case_when(
     job_exit_status %in% c("134", "139") ~ "memory_limit",
     is_memory_problem(stderr) ~ "memory_limit",
-    is_memory_problem(error_message) ~ "memory_limit",
     is_memory_problem(stdout) ~ "memory_limit",
     job_exit_status %in% c("137", "140", "9", "64") ~ "time_limit",
     job_exit_status != "0" ~ "execution_error",
