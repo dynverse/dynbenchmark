@@ -117,7 +117,7 @@ check_benchmark_design_parameters <- function(
     if (!check) {
       stop("methods is supposed be a vector of methods ids, or a list of dynwrap ti methods")
     }
-    method_names <- sapply(methods, function(x) if (is.character(x)) x else x$short_name)
+    method_names <- sapply(methods, function(x) if (is.character(x)) x else x$id)
   } else {
     method_names <- methods
   }
