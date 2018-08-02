@@ -36,7 +36,7 @@ perturb_switch_n_edges <- function(dataset, switch_n = Inf) {
 
   # create an edge id and add it to the progressions
   milestone_network <- dataset$milestone_network %>%
-    mutate(edge_id = n())
+    mutate(edge_id = row_number())
 
   progressions <- dataset$progressions %>%
     left_join(milestone_network, c("from", "to")) %>%
