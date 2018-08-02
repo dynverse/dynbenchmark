@@ -6,7 +6,7 @@
 \usage{
 benchmark_submit(design, metrics = "correlation",
   qsub_grouping = "{method_id}/{param_id}", qsub_params = list(timeout
-  = 3600, memory = "10G"), verbose = TRUE)
+  = 3600, memory = "10G"), verbose = TRUE, output_models = TRUE)
 }
 \arguments{
 \item{design}{Design tibble of the experiment, created by \code{\link[=benchmark_generate_design]{benchmark_generate_design()}}.}
@@ -23,6 +23,8 @@ are equal to the groups defined by \code{qsub_grouping} (default \code{method_id
 and ZZZ is equal to some logic which always produces a \code{list(memory = ..., timeout = ...)}.}
 
 \item{verbose}{Whether or not to print extra information.}
+
+\item{output_models}{Whether or not the model will be outputted.}
 }
 \description{
 A benchmark suite with which to run all the methods on the different datasets
