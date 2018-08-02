@@ -67,9 +67,6 @@ Remotes:
   dynverse/dynutils,
   dynverse/dyntoy,
   dynverse/dynwrap,
-  mlr-org/mlr,
-  mlr-org/mlrMBO,
-  jakobbossek/smoof,
   rcannood/qsub@devel
 RoxygenNote: 6.1.0
 Roxygen: list(markdown = TRUE)
