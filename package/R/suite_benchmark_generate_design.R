@@ -120,14 +120,16 @@ check_benchmark_design_parameters <- function(
   priors,
   num_repeats
 ) {
-  if (!is.character(datasets)) {
+  if (!check_design_datasets(datasets, generate_error = FALSE) && !is.character(datasets)) {
     check <- is.list(datasets) && all(sapply(datasets, function(x) is.character(x) || is.function(x) || dynwrap::is_wrapper_with_expression(x)))
     if (!check) {
       stop("datasets is supposed be a vector of dataset ids, a list of dynwrap datasets, or a list of functions which will generate a dynwrap dataset")
     }
   }
 
-  if (!is.character(methods)) {
+  if (check_design_methods(methods, generate_error = FALSE)) {
+    method_names <- methods$id
+  } else if (!is.character(methods)) {
     check <- is.list(methods) && all(sapply(methods, function(x) is.character(x) || dynwrap::is_ti_method(x)))
     if (!check) {
       stop("methods is supposed be a vector of methods ids, or a list of dynwrap ti methods")
@@ -143,6 +145,9 @@ check_benchmark_design_parameters <- function(
 }
 
 process_datasets_design <- function(datasets) {
+  if (check_design_datasets(datasets, generate_error = FALSE)) {
+    return(datasets)
+  }
   out <- map_df(seq_along(datasets), function(di) {
     d <- datasets[[di]]
 
@@ -160,8 +165,10 @@ process_datasets_design <- function(datasets) {
           fun = list(function() d)
         )
       } else if (is.function(d)) {
+        id <- names(datasets)[[di]]
+        testthat::expect_false(is.null(id), info = "dataset functions need to be named")
         tibble(
-          id = names(datasets)[[di]],
+          id = id,
           type = "function",
           fun = list(d)
         )
@@ -184,6 +191,9 @@ process_datasets_design <- function(datasets) {
 }
 
 process_methods_design <- function(methods) {
+  if (check_design_methods(methods, generate_error = FALSE)) {
+    return(methods)
+  }
   out <- map_df(methods, function(m) {
     if (is.character(m)) {
       get_ti_methods(method_ids = m) %>%

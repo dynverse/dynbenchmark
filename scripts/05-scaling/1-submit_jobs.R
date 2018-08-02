@@ -17,7 +17,7 @@ generate_dataset <- function(lnrow, lncol, seed = 1) {
   counts <- round(2^expression) + 1
 
   cell_ids <- paste0("Cell", seq_len(nrow))
-  gene_ids <- paste0("Gene", seq_len(nrow))
+  gene_ids <- paste0("Gene", seq_len(ncol))
   dimnames(counts) <- dimnames(expression) <- list(cell_ids, gene_ids)
 
   set.seed(seed)
@@ -42,53 +42,52 @@ generate_dataset <- function(lnrow, lncol, seed = 1) {
 
   dataset
 }
+gen_gen_dataset <- function(lnrow, lncol) {
+  f <- generate_dataset
+  formals(f)$lnrow <- lnrow
+  formals(f)$lncol <- lncol
+  f
+}
 
-dim_test <- seq(log10(100), log10(100000), by = log10(10) / 4)
-dim_df <- crossing(
-  nrow = dim_test,
-  ncol = dim_test
-)
-dataset_funs <- lapply(seq_len(nrow(dim_df)), function(i) {
-  fun <- generate_dataset
-  formals(fun)$lnrow <- dim_df$nrow[[i]]
-  formals(fun)$lncol <- dim_df$ncol[[i]]
-  fun
-})
-
+datasets <-
+  seq(log10(100), log10(100000), by = log10(10) / 4) %>%
+  crossing(lnrow = ., lncol = .) %>%
+  as_tibble() %>%
+  mutate(
+    id = sprintf(paste0("scaling_%0", ceiling(log10(n())), "d"), seq_len(n())),
+    type = "function",
+    fun = pmap(lst(lnrow, lncol), gen_gen_dataset),
+    nrow = ceiling(10 ^ lnrow),
+    ncol = ceiling(10 ^ lncol),
+    lsum = lnrow + lncol,
+    memory = case_when(
+      lsum >= 8.5 ~ "32G",
+      lsum >= 7 ~ "10G",
+      TRUE ~ "5G"
+    )
+  ) %>%
+  select(id, type, fun, everything())
 
 # define methods
-method_ids <- dynmethods::methods$id
+# method_ids <- dynmethods::methods$id
+method_ids <- c("scorpius", "identity")
 
 # create design
 design <- benchmark_generate_design(
-  dataset_ids = dataset_ids,
-  method_ids = method_ids
+  datasets = datasets,
+  methods = method_ids
 )
 
-# define other parameters
-metrics <- list( dummy = function(dataset, model) { 1 } )
-timeout_per_execution <- 60 * 60
-execute_before <- ""
-# execute_before <- "export DYNBENCHMARK_PATH=/group/irc/shared/dynbenchmark/; singularity exec -B /scratch:/scratch -B /group:/group /scratch/irc/shared/dynbenchmark.simg \\"
-verbose <- TRUE
-max_memory_per_execution <- "8G"
-local_output_folder <- derived_file("suite/")
-remote_output_folder <- derived_file("suite/", remote = TRUE)
+design$crossing <- design$crossing %>% left_join(datasets %>% select(dataset_id = id, memory), by = "dataset_id")
 
 # save configuration
-write_rds(lst(
-  design, metrics, timeout_per_execution,
-  max_memory_per_execution, execute_before, verbose,
-  local_output_folder, remote_output_folder
-), derived_file("config.rds"))
+write_rds(design, derived_file("design.rds"))
 
 benchmark_submit(
   design = design,
-  timeout_per_execution = timeout_per_execution,
-  max_memory_per_execution = max_memory_per_execution,
-  metrics = metrics,
-  local_output_folder = local_output_folder,
-  remote_output_folder = remote_output_folder,
-  execute_before = execute_before,
-  verbose = verbose
+  qsub_grouping = "{method_id}/{memory}",
+  qsub_params = function(method_id, memory) list(timeout = 3600, memory = memory),
+  metrics = list( dummy = function(dataset, model) { 1 } ),
+  verbose = TRUE,
+  output_models = FALSE
 )
