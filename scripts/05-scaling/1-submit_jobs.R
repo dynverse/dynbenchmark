@@ -42,21 +42,25 @@ generate_dataset <- function(lnrow, lncol, seed = 1) {
 
   dataset
 }
-gen_gen_dataset <- function(nrow, ncol) {
+gen_gen_dataset <- function(lnrow, lncol) {
   f <- generate_dataset
-  formals(f)$lnrow <- nrow
-  formals(f)$lncol <- ncol
+  formals(f)$lnrow <- lnrow
+  formals(f)$lncol <- lncol
   f
 }
 
 datasets <-
   seq(log10(100), log10(100000), by = log10(10) / 4) %>%
-  crossing(nrow = ., ncol = .) %>%
+  crossing(lnrow = ., lncol = .) %>%
   as_tibble() %>%
   mutate(
     id = sprintf(paste0("scaling_%0", ceiling(log10(n())), "d"), seq_len(n())),
     type = "function",
-    fun = pmap(lst(nrow, ncol), gen_gen_dataset)
+    fun = pmap(lst(lnrow, lncol), gen_gen_dataset),
+    nrow = ceiling(10 ^ lnrow),
+    ncol = ceiling(10 ^ lncol),
+    lsum = lnrow + lncol,
+    memory = ifelse(lsum <= 8, "5G", "32G")
   ) %>%
   select(id, type, fun, everything())
 
@@ -70,12 +74,15 @@ design <- benchmark_generate_design(
   methods = method_ids
 )
 
+design$crossing <- design$crossing %>% left_join(datasets %>% select(dataset_id = id, memory), by = "dataset_id")
+
 # save configuration
 write_rds(design, derived_file("design.rds"))
 
 benchmark_submit(
   design = design,
-  qsub_params = list(timeout = 3600, memory = "8G"),
+  qsub_grouping = "{method_id}/{memory}",
+  qsub_params = function(method_id, memory) list(timeout = 3600, memory = memory),
   metrics = list( dummy = function(dataset, model) { 1 } ),
   verbose = TRUE,
   output_models = FALSE
