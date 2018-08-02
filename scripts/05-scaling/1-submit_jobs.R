@@ -17,7 +17,7 @@ generate_dataset <- function(lnrow, lncol, seed = 1) {
   counts <- round(2^expression) + 1
 
   cell_ids <- paste0("Cell", seq_len(nrow))
-  gene_ids <- paste0("Gene", seq_len(nrow))
+  gene_ids <- paste0("Gene", seq_len(ncol))
   dimnames(counts) <- dimnames(expression) <- list(cell_ids, gene_ids)
 
   set.seed(seed)

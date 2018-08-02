@@ -8,10 +8,10 @@ experiment("05-scaling")
 ##########################################################
 
 # fetch results from cluster
-benchmark_fetch_results(local_output_folder = derived_file("suite/"))
+benchmark_fetch_results()
 
 # bind results in one data frame (without models)
-outputs <- benchmark_bind_results(derived_file("suite/"), load_models = FALSE)
+outputs <- benchmark_bind_results(load_models = FALSE)
 
 # load datasets info
 not_list <- function(x) !is.list(x)
