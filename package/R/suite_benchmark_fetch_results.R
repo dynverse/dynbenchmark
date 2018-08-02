@@ -68,8 +68,9 @@ benchmark_fetch_results <- function() {
           out$error_status <- with(out, extract_error_status(
             stdout = stdout,
             stderr = stderr,
+            error_message = error_message,
             job_exit_status = job_exit_status,
-            produced_model = is.null(model) || identical(model, FALSE)
+            produced_model = (!"model" %in% colnames(out)) && !is.null(model) && !identical(model, FALSE)
           ))
 
           out
@@ -140,7 +141,7 @@ extract_job_exit_status <- function(qacct_out, task_id) {
   }
 }
 
-extract_error_status <- function(stdout, stderr, job_exit_status, produced_model) {
+extract_error_status <- function(stdout, stderr, error_message, job_exit_status, produced_model) {
   memory_messages <- c(
     "cannot allocate vector of size", # R
     "MemoryError", # python
@@ -159,6 +160,7 @@ extract_error_status <- function(stdout, stderr, job_exit_status, produced_model
     job_exit_status %in% c("134", "139") ~ "memory_limit",
     is_memory_problem(stderr) ~ "memory_limit",
     is_memory_problem(stdout) ~ "memory_limit",
+    is_memory_problem(error_message) ~ "memory_limit",
     job_exit_status %in% c("137", "140", "9", "64") ~ "time_limit",
     job_exit_status != "0" ~ "execution_error",
     !produced_model ~ "method_error",
