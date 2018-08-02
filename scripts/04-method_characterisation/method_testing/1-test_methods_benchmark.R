@@ -3,6 +3,9 @@ library(tidyverse)
 
 experiment("04-method_characterisation/method_testing")
 
+# generate default design
+method_ids <- dynmethods::methods$id
+
 design <- benchmark_generate_design(
   datasets = c(
     "synthetic/dyntoy/bifurcating_1",
@@ -10,12 +13,45 @@ design <- benchmark_generate_design(
     "real/developing-dendritic-cells_schlitzer",
     "real/fibroblast-reprogramming_treutlein"
   ),
-  methods = dynmethods::methods$id
+  methods = method_ids
 )
 
-benchmark_submit(design = design)
+# also include dynmethods container examples
+examples <- map_df(
+  method_ids,
+  function(method_id) {
+    file <- paste0("../dynmethods/containers/", method_id, "/example.R")
+    params <- list()
+    source(file)
+
+    tibble(
+      method_id = method_id,
+      dataset = list(data),
+      dataset_id = data$id,
+      params = list(list(params)),
+      param_id = "example"
+    )
+  }
+)
+design$parameters <- bind_rows(
+  design$parameters,
+  examples %>% select(id = params_id, method_id, params)
+)
+design$crossing <- bind_rows(
+  design$crossing,
+  examples %>% mutate(prior_id = "none", repeat_ix = 1) %>% select(dataset_id, method_id, prior_id, repeat_ix, param_id)
+)
+design$datasets <- bind_rows(
+  design$datasets,
+  dynbenchmark:::process_datasets_design(examples$dataset)
+)
+
+# save and submit benchmark design
 write_rds(design, derived_file("design.rds"))
 
+benchmark_submit(design = design)
+
+# fetch the results, once they're in
 benchmark_fetch_results()
 output <- benchmark_bind_results(load_models = TRUE)
 
