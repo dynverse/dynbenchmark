@@ -68,14 +68,14 @@ perturb_switch_edges <- function(dataset, switch_perc = 1) {
 }
 
 ##  ............................................................................
-##  Simplifying divergences                                                 ####
+##  Changing bifurcating trajectories                                       ####
 # Merge the branch after bifurcations
 perturb_merge_bifurcation <- function(dataset) {
   if (nrow(dataset$milestone_network) != 3) {
-    stop("Requires a bifurcating dataset with three milestone edges")
+    stop("Merge bifurcations requires a bifurcating dataset with three milestone edges")
   }
   if (nrow(dataset$divergence_regions) > 0) {
-    stop("Dataset cannot contain divergence regions")
+    stop("Dataset cannot contain divergence regions when merging bifurcations")
   }
 
   to_milestones <- dataset$milestone_network %>% group_by(from) %>% filter(n() == 2) %>% pull(to)
@@ -94,7 +94,7 @@ perturb_merge_bifurcation <- function(dataset) {
     )
 }
 
-# Put one of the bifurcation
+# Put one of the bifurcation edges at the end of the other bifurcation edge
 perturb_concatentate_bifurcation <- function(dataset) {
   if (nrow(dataset$milestone_network) != 3) {
     stop("Requires a bifurcating dataset with three milestone edges")
@@ -137,7 +137,7 @@ perturb_break_cycles <- function(dataset) {
 
 
 ##  ............................................................................
-##  Chaning linear trajectories                                             ####
+##  Changing linear trajectories                                            ####
 perturb_join_linear <- function(dataset) {
   if(dataset$trajectory_type != "directed_linear") {stop("joining non-linear trajectories not supported")}
   if(nrow(dataset$milestone_network) < 3) {stop("Need at least 3 edges in the linear dataset to be able to join")}
@@ -180,7 +180,8 @@ perturb_move_terminal_branch <- function(dataset) {
 }
 
 
-# Make a trajectory hairy
+##  ............................................................................
+##  Adding extra edges to the topology                                      ####
 #dataset <- generate_linear()
 
 perturb_hairy <- function(dataset, nhairs = 10, overall_hair_length = 1) {
@@ -269,7 +270,9 @@ perturb_hairy_small <- function(dataset) {perturb_hairy(dataset, nhairs = 2)}
 perturb_hairy_large <- function(dataset) {perturb_hairy(dataset, nhairs = 20)}
 # perturb_hairy_long <- function(dataset) {perturb_hairy(dataset, overall_hair_length = 2)}
 
-# Warping the times
+
+##  ............................................................................
+##  Warping the times                                                       ####
 # very quick and dirty way to wrap, but it works :p
 perturb_warp <- function(dataset) {
   # dataset <- generate_linear()
