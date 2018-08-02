@@ -19,9 +19,9 @@ list_datasets_remote <- function() {
 
 dataset_ids_to_process <- setdiff(list_raw_datasets_remote(), list_datasets_remote())
 
-process_raw_dataset_wrapper <- function(dataset_id) {
-  raw_dataset <- readr::read_rds(dynbenchmark::dataset_raw_file(dataset_id))
-  raw_dataset$id <- dataset_id
+process_raw_dataset_wrapper <- function(id) {
+  raw_dataset <- readr::read_rds(dynbenchmark::dataset_raw_file(id))
+  raw_dataset$id <- id
 
   do.call(dynbenchmark::process_raw_dataset, raw_dataset)
   TRUE

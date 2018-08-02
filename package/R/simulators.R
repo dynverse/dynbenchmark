@@ -102,7 +102,7 @@ simulate_splatter <- function(
   dataset <- wrap_data(
     id = dataset_id,
     cell_ids = rownames(expression),
-    dataset_source = "synthetic/splatter"
+    source = "synthetic/splatter"
   ) %>%
     add_expression(
       counts = counts,
@@ -258,8 +258,8 @@ simulate_prosstt <- function(
   # create dataset
   dataset <- wrap_data(
     id = dataset_id,
-    rownames(counts),
-    dataset_source = "synthetic/prosstt"
+    cell_ids = rownames(counts),
+    source = "synthetic/prosstt"
   ) %>%
     add_branch_trajectory(
       branch_network = branch_network,
@@ -325,7 +325,7 @@ simulate_dyntoy <- function(
     dropout_probability_factor = dropout_probability_factor
   )
 
-  dataset$dataset_source <- "synthetic/dyntoy"
+  dataset$source <- "synthetic/dyntoy"
 
   dataset$simulation_design <- list(
     simulator = "dyntoy",
@@ -402,7 +402,7 @@ simulate_dyngen <- function(
     dataset_source_file("dataset.rds"),
     dyngen::wrap_dyngen_dataset(dataset_id, params, model, simulation, gs, experiment, normalisation)
   )
-  dataset$dataset_source <- "synthetic/dyngen"
+  dataset$source <- "synthetic/dyngen"
   dataset$simulation_design <- list(
     simulator = "dyngen",
     simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyngen","splatter", "dynbenchmark"))

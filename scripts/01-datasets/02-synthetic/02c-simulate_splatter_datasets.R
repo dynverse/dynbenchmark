@@ -3,7 +3,7 @@ library(dynbenchmark)
 library(qsub)
 
 # remove all datasets
-rm_remote(dataset_file(dataset_id = "synthetic/splatter", remote = TRUE), remote = TRUE, recursive = TRUE)
+rm_remote(dataset_file(id = "synthetic/splatter", remote = TRUE), remote = TRUE, recursive = TRUE)
 
 # generate design
 set.seed(1)

@@ -4,7 +4,7 @@ library(tidyverse)
 library(qsub)
 
 # remove all datasets
-rm_remote(dataset_file(dataset_id = "synthetic/dyntoy", remote = TRUE), remote = TRUE, recursive = TRUE)
+rm_remote(dataset_file(id = "synthetic/dyntoy", remote = TRUE), remote = TRUE, recursive = TRUE)
 
 # generate design
 set.seed(1)

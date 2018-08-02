@@ -249,7 +249,7 @@ check_design_datasets <- function(datasets, generate_error = TRUE) {
     testthat::expect_false(any(duplicated(datasets$id)))
     testthat::expect_true(all(datasets$type %in% c("character", "dynwrap", "function")))
     testthat::expect_true(datasets$fun %>% map_lgl(is.function) %>% all)
-    testthat::expect_true(all(datasets$type != "character" | datasets$id %in% list_datasets()$dataset_id))
+    testthat::expect_true(all(datasets$type != "character" | datasets$id %in% list_datasets()$id))
   })
 }
 
