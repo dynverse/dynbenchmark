@@ -12,7 +12,7 @@ benchmark_fetch_results <- function() {
 
   # process each method separately
   map(handles, function(qsubhandle_file) {
-    name <- qsubhandle_file %>% gsub(local_output_folder, "", ., fixed = TRUE) %>% gsub("qsubhandle.rds", "", ., fixed = TRUE)
+    name <- qsubhandle_file %>% gsub(paste0(local_output_folder, "/"), "", ., fixed = TRUE) %>% gsub("/qsubhandle.rds", "", ., fixed = TRUE)
     output_metrics_file <- gsub("qsubhandle.rds", "output_metrics.rds", qsubhandle_file, fixed = TRUE)
     output_models_file <- gsub("qsubhandle.rds", "output_models.rds", qsubhandle_file, fixed = TRUE)
 
@@ -156,7 +156,7 @@ benchmark_bind_results <- function(load_models = FALSE) {
 
   # process each method separately
   output <- as_tibble(map_df(files, function(output_metrics_file) {
-    name <- output_metrics_file %>% gsub(local_output_folder, "", ., fixed = TRUE) %>% gsub("output_metrics.rds", "", ., fixed = TRUE)
+    name <- output_metrics_file %>% gsub(paste0(local_output_folder, "/"), "", ., fixed = TRUE) %>% gsub("/output_metrics.rds", "", ., fixed = TRUE)
     output_models_file <- gsub("output_metrics.rds", "output_models.rds", output_metrics_file, fixed = TRUE)
 
     if (file.exists(output_metrics_file)) {
