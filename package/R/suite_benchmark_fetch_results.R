@@ -19,7 +19,7 @@ benchmark_fetch_results <- function() {
     # if the output has not been processed yet, but a qsub handle exists,
     # attempt to fetch the results from the cluster
     if (!file.exists(output_metrics_file) && file.exists(qsubhandle_file)) {
-      cat("Attempting to retrieve output from cluster: ", name, sep = "")
+      cat(name, ": Attempting to retrieve output from cluster. ", sep = "")
       metadata <- readr::read_rds(qsubhandle_file)
       subdesign <- metadata$subdesign
       qsub_handle <- metadata$qsub_handle
@@ -32,7 +32,7 @@ benchmark_fetch_results <- function() {
       )
 
       if (!is.null(output)) {
-        cat(" Output found! Saving output.\n", sep = "")
+        cat("Output found! Saving output.\n", sep = "")
 
         qacct_out <- qsub::qacct(qsub_handle)
 
@@ -88,23 +88,26 @@ benchmark_fetch_results <- function() {
               subdesign = metadata$subdesign,
               metrics = metadata$metrics,
               verbose = FALSE,
-              error_mode = qsub_error
+              error_mode = qsub_error,
+              output_models = metadata$output_models
             )
           }
         })
 
         # save models separately
-        models <- outputs$model
-        model_ids <- map_chr(models, function(model) {
-          if (!is.null(model)) {
-            model$id
-          } else {
-            NA
-          }
-        })
-        models <- models %>% set_names(model_ids)
-        outputs <- outputs %>% select(-model) %>% mutate(model_i = seq_len(n()), model_id = model_ids)
-        readr::write_rds(models, output_models_file)
+        if (metadata$output_models) {
+          models <- outputs$model
+          model_ids <- map_chr(models, function(model) {
+            if (!is.null(model)) {
+              model$id
+            } else {
+              NA
+            }
+          })
+          models <- models %>% set_names(model_ids)
+          outputs <- outputs %>% select(-model) %>% mutate(model_i = seq_len(n()), model_id = model_ids)
+          readr::write_rds(models, output_models_file)
+        }
 
         # save output
         readr::write_rds(outputs, output_metrics_file)
@@ -122,15 +125,15 @@ benchmark_fetch_results <- function() {
             "qsub_retrieve of results failed -- no output was produced, but job is not running any more"
           }
 
-        cat(" Output not found. ", error_message, ".\n", sep = "")
+        cat("Output not found. ", error_message, ".\n", sep = "")
       }
 
       NULL
     } else {
       if (file.exists(output_metrics_file)) {
-        cat(" Output already present.\n", sep = "")
+        cat(name, ": Output already present.\n", sep = "")
       } else {
-        cat(" No qsub file was found.\n", sep = "")
+        cat(name, ": No qsub file was found.\n", sep = "")
       }
       NULL
     }
@@ -160,7 +163,7 @@ benchmark_bind_results <- function(load_models = FALSE) {
     output_models_file <- gsub("output_metrics.rds", "output_models.rds", output_metrics_file, fixed = TRUE)
 
     if (file.exists(output_metrics_file)) {
-      cat("Reading previous output", name, "\n", sep = "")
+      cat(name, ": Reading previous output\n", sep = "")
       output <- readr::read_rds(output_metrics_file)
 
       # read models, if requested
