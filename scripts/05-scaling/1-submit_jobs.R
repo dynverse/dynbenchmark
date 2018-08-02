@@ -60,13 +60,17 @@ datasets <-
     nrow = ceiling(10 ^ lnrow),
     ncol = ceiling(10 ^ lncol),
     lsum = lnrow + lncol,
-    memory = ifelse(lsum <= 8, "5G", "32G")
+    memory = case_when(
+      lsum >= 8.5 ~ "32G",
+      lsum >= 7 ~ "10G",
+      TRUE ~ "5G"
+    )
   ) %>%
   select(id, type, fun, everything())
 
 # define methods
 # method_ids <- dynmethods::methods$id
-method_ids <- "scorpius"
+method_ids <- c("scorpius", "identity")
 
 # create design
 design <- benchmark_generate_design(
