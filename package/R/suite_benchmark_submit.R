@@ -161,13 +161,14 @@ benchmark_submit <- function(
 benchmark_submit_check <- function(
   design,
   metrics,
-  qsub_params,
-  qsub_grouping
+  qsub_grouping = "{method_id}/{param_id}",
+  qsub_params = list(timeout = 3600, memory = "10G")
 ) {
   check_design_datasets(design$datasets)
   testthat::expect_true(all(design$crossing$dataset_id %in% design$datasets$id))
 
   check_design_methods(design$methods)
+  testthat::expect_true(all(design$crossing$method_id %in% design$methods$id))
 
   # check priors
   testthat::expect_true(all(c("id", "set") %in% colnames(design$priors)))

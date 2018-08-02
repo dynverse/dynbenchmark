@@ -95,9 +95,9 @@ perturb_merge_bifurcation <- function(dataset) {
 }
 
 # Put one of the bifurcation edges at the end of the other bifurcation edge
-perturb_concatentate_bifurcation <- function(dataset) {
+perturb_concatenate_bifurcation <- function(dataset) {
   if (nrow(dataset$milestone_network) != 3) {
-    stop("Requires a bifurcating dataset with three milestone edges")
+    stop("Concatenating bifurcations requires a bifurcating dataset with three milestone edges")
   }
   if (nrow(dataset$divergence_regions) > 0) {
     stop("Dataset cannot contain divergence regions")
