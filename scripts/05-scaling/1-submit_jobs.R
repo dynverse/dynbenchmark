@@ -71,7 +71,7 @@ datasets <-
 
 # define methods
 # method_ids <- dynmethods::methods$id
-method_ids <- c("scorpius", "identity", "error")
+method_ids <- c("scorpius", "identity", "error", "embeddr")
 
 # create design
 design <- benchmark_generate_design(
@@ -88,7 +88,7 @@ benchmark_submit(
   design = design,
   qsub_grouping = "{method_id}/{memory}",
   qsub_params = function(method_id, memory) list(timeout = 3600, memory = memory),
-  metrics = list( dummy = function(dataset, model) { 1 } ),
+  metrics = list(dummy = function(dataset, model) 1),
   verbose = TRUE,
   output_models = FALSE
 )
