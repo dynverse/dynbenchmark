@@ -23,6 +23,8 @@ are equal to the groups defined by \code{qsub_grouping} (default \code{method_id
 and ZZZ is equal to some logic which always produces a \code{list(memory = ..., timeout = ...)}.}
 
 \item{verbose}{Whether or not to print extra information.}
+
+\item{output_models}{Whether or not the model will be outputted.}
 }
 \description{
 A benchmark suite with which to run all the methods on the different datasets

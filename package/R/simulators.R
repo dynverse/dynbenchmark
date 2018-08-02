@@ -17,6 +17,8 @@ NULL
 #' @param path.nonlinearProb Splatter parameter
 #' @param path.sigmaFac Splatter parameter
 #' @param bcv.common.factor Splatter parameter
+#'
+#' @importFrom qsub rm_remote
 #' @export
 simulate_splatter <- function(
   dataset_id,

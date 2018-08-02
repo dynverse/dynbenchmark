@@ -10,6 +10,7 @@
 #' @param qsub_grouping A character used to partition the design into separate jobs. Any of the column names
 #'   in \code{design$crossing} is allowed to be used. This string will later be parsed by [glue::glue()].
 #' @param verbose Whether or not to print extra information.
+#' @param output_models Whether or not the model will be outputted.
 #'
 #' @importFrom readr read_rds write_rds
 #'
