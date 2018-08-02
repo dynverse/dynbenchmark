@@ -12,13 +12,14 @@ dataset_design <- crossing(
     "linear", model_linear(num_milestones = 5),
     "bifurcation", model_bifurcating(max_degree = 3)
   ),
-  num_cells = c(2, 10, 50, 100, 200, 500)
+  num_cells = c(2, 10, 50, 100, 200, 500),
+  repeat_ix = 1
 ) %>%
   mutate(
-    dataset_id = str_glue("{topology_id}_{num_cells}")
+    dataset_id = str_glue("{topology_id}_{num_cells}_{repeat_ix}")
   )
 
-datasets_suite <- pmap(dataset_design, function(dataset_id, topology_model, num_cells, ...) {
+datasets <- pmap(dataset_design, function(dataset_id, topology_model, num_cells, ...) {
   generate_dataset(
     unique_id = dataset_id,
     model = topology_model,
@@ -26,7 +27,8 @@ datasets_suite <- pmap(dataset_design, function(dataset_id, topology_model, num_
     add_prior_information = FALSE,
     normalise = FALSE
   )
-}) %>% process_datasets_design()
+})
+datasets_suite <- datasets %>% process_datasets_design()
 
 write_rds(dataset_design, derived_file("dataset_design.rds"))
 write_rds(datasets_suite, derived_file("datasets_suite.rds"))
