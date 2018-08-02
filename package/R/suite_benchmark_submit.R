@@ -161,21 +161,9 @@ benchmark_submit_check <- function(
   qsub_params,
   qsub_grouping
 ) {
-  # check datasets
-  testthat::expect_true(all(c("id", "type", "fun") %in% colnames(design$datasets)))
-  testthat::expect_is(design$datasets$id, "character")
-  testthat::expect_false(any(duplicated(design$datasets$id)))
-  testthat::expect_true(all(design$datasets$type %in% c("character", "dynwrap", "function")))
-  testthat::expect_true(design$datasets$fun %>% map_lgl(is.function) %>% all)
-  testthat::expect_true(all(design$crossing$dataset_id %in% design$datasets$id))
-  ix <- which(design$datasets$type == "character")
-  testthat::expect_true(all(design$datasets$id[ix] %in% list_datasets()$dataset_id))
+  check_design_datasets(design$datasets)
 
-  # check methods
-  testthat::expect_true(all(c("id", "type", "fun") %in% colnames(design$methods)))
-  testthat::expect_is(design$methods$id, "character")
-  testthat::expect_false(any(duplicated(design$methods$id)))
-  testthat::expect_true(all(design$methods$type != "character" | design$methods$id %in% dynmethods::methods$id))
+  check_design_methods(design$methods)
 
   # check priors
   testthat::expect_true(all(c("id", "set") %in% colnames(design$priors)))
@@ -230,6 +218,46 @@ benchmark_submit_check <- function(
   # check max_memory_per_execution
   testthat::expect_is(qsub_params[["memory"]], "character")
   testthat::expect_match(qsub_params[["memory"]], "[0-9]+G")
+}
+
+logical_error_wrapper <- function(expr, generate_error) {
+  tryCatch({
+    expr
+    if (generate_error) {
+      invisible()
+    } else {
+      TRUE
+    }
+  }, error = function(e) {
+    if (generate_error) {
+      stop(e)
+    } else {
+      FALSE
+    }
+  })
+}
+
+check_design_datasets <- function(datasets, generate_error = TRUE) {
+  # check datasets
+  logical_error_wrapper(generate_error = generate_error, expr = {
+    testthat::expect_true(all(c("id", "type", "fun") %in% colnames(datasets)))
+    testthat::expect_is(datasets$id, "character")
+    testthat::expect_false(any(duplicated(datasets$id)))
+    testthat::expect_true(all(datasets$type %in% c("character", "dynwrap", "function")))
+    testthat::expect_true(datasets$fun %>% map_lgl(is.function) %>% all)
+    testthat::expect_true(all(design$crossing$dataset_id %in% datasets$id))
+    testthat::expect_true(all(datasets$type != "character" | datasets$id %in% list_datasets()$dataset_id))
+  })
+}
+
+check_design_methods <- function(methods, generate_error = TRUE) {
+  # check methods
+  logical_error_wrapper(generate_error = generate_error, expr = {
+    testthat::expect_true(all(c("id", "type", "fun") %in% colnames(methods)))
+    testthat::expect_is(methods$id, "character")
+    testthat::expect_false(any(duplicated(methods$id)))
+    testthat::expect_true(all(methods$type != "character" | methods$id %in% dynmethods::methods$id))
+  })
 }
 
 subset_design <- function(design, subcrossing) {
