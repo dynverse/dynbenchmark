@@ -12,7 +12,7 @@ benchmark_fetch_results()
 
 # bind results in one data frame (without models)
 outputs <- benchmark_bind_results(load_models = FALSE) %>%
-  mutate(error_status = ifelse(time_postprocessing < .1 & error_status == "no_error", "execution_error", error_status))
+  mutate(error_status = ifelse(time_postprocessing < .1 & error_status == "no_error" & method_id != "identity", "execution_error", error_status))
 design <- read_rds(derived_file("design.rds"))
 datasets <- design$datasets
 
@@ -43,7 +43,7 @@ g2 <- ggplot(joined %>% filter(error_status == "no_error"), aes(lnrow, time_meth
   scale_colour_distiller(palette = "RdYlBu") +
   theme_classic() +
   theme(legend.position = "bottom")+
-  facet_wrap(~method_id, ncol = 1)
+  facet_wrap(~method_id, ncol = 1, scales = "free_y")
 
 g3 <- ggplot(joined %>% filter(error_status == "no_error"), aes(lncol, time_method, group = lnrow, colour = lnrow)) +
   geom_point() +
@@ -53,6 +53,12 @@ g3 <- ggplot(joined %>% filter(error_status == "no_error"), aes(lncol, time_meth
   scale_colour_distiller(palette = "RdYlBu") +
   theme_classic() +
   theme(legend.position = "bottom")+
-  facet_wrap(~method_id, ncol = 1)
+  facet_wrap(~method_id, ncol = 1, scales = "free_y")
 
 patchwork::wrap_plots(g1, g2, g3, nrow = 1)
+
+
+dat <- joined %>% filter(error_status == "no_error", method_id == "scorpius")
+fit <- lm(log10(time_method) ~ lnrow + lncol, dat)
+# fit <- lm(time_method ~ nrow + ncol + nrow2 + ncol2, dat %>% mutate(nrow2 = nrow^2, ncol2 = ncol^2))
+fit$coefficients
