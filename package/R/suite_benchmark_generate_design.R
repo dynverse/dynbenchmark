@@ -160,8 +160,10 @@ process_datasets_design <- function(datasets) {
           fun = list(function() d)
         )
       } else if (is.function(d)) {
+        id <- names(datasets)[[di]]
+        testthat::expect_false(is.null(id), info = "dataset functions need to be named")
         tibble(
-          id = names(datasets)[[di]],
+          id = id,
           type = "function",
           fun = list(d)
         )
