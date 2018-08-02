@@ -68,7 +68,7 @@ perturb_switch_edges <- function(dataset, switch_perc = 1) {
 }
 
 ##  ............................................................................
-##  Changing bifurcating trajectories                                       ####
+##  Chaning bifurcating trajectories                                        ####
 # Merge the branch after bifurcations
 perturb_merge_bifurcation <- function(dataset) {
   if (nrow(dataset$milestone_network) != 3) {
@@ -168,6 +168,7 @@ perturb_move_terminal_branch <- function(dataset) {
     ) %>%
     pull(from)
   if (length(possible_milestones) == 0) {stop("No possible intermediate milestone on which the branch can be put")}
+  selected_milestone <- sample(possible_milestones, 1)
 
   milestone_network <- dataset$milestone_network %>% mutate(from = ifelse(to == terminal_milestone, selected_milestone, from))
   progressions <- dataset$progressions %>% mutate(from = ifelse(to == terminal_milestone, selected_milestone, from))
@@ -184,102 +185,78 @@ perturb_move_terminal_branch <- function(dataset) {
 ##  Adding extra edges to the topology                                      ####
 #dataset <- generate_linear()
 
-perturb_hairy <- function(dataset, nhairs = 10, overall_hair_length = 1) {
-  if(overall_hair_length < 1) {stop("hair length should be larger than 1")}
-
-  newmilestone_network <- dataset$milestone_network
-  newprogressions <- dataset$progressions
+perturb_hairy <- function(dataset, nhairs = 10, sample_hair_length = function() 0.5) {
+  milestone_network <- dataset$milestone_network
+  progressions <- dataset$progressions
 
   new_milestone_i <- 1
 
   for (i in seq_len(nhairs)) {
-    chosen_milestone_edge <- sample(seq_len(nrow(newmilestone_network)), 1, prob = newmilestone_network$length)
-    chosen_edge <- as.list(newmilestone_network[chosen_milestone_edge, ])
-    hair_length <- runif(1, 0.1, 0.2)
+    chosen_milestone_edge <- sample(seq_len(nrow(milestone_network)), 1, prob = milestone_network$length)
+    chosen_edge <- as.list(milestone_network[chosen_milestone_edge, ])
+    hair_length <- sample_hair_length()
     window_start <- runif(1, 0, 1-hair_length)
     window_end <- window_start + hair_length
 
-    new_from <- paste0("NM_", new_milestone_i)
-    new_to <- paste0("NM_", new_milestone_i + 1)
-    new_milestone_i <- new_milestone_i + 2
+    new_from <- paste0("NI_", new_milestone_i)
+    new_to <- paste0("NT_", new_milestone_i)
+    new_milestone_i <- new_milestone_i + 1
 
     subset_window <- (
-      newprogressions$from == chosen_edge$from &
-        newprogressions$to == chosen_edge$to &
-        newprogressions$percentage >= window_start &
-        newprogressions$percentage <= window_end
+      progressions$from == chosen_edge$from &
+        progressions$to == chosen_edge$to &
+        progressions$percentage >= window_start &
+        progressions$percentage <= window_end
     )
-    newprogressions[subset_window, ] <- newprogressions[subset_window, ] %>%
+    progressions[subset_window, ] <- progressions[subset_window, ] %>%
       mutate(
         from = new_from,
         to = new_to,
-        percentage = ((percentage - min(percentage)) / (window_end - window_start)) / overall_hair_length
+        percentage = ((percentage - min(percentage)) / (window_end - window_start))
       )
 
     subset_before <- (
-      newprogressions$from == chosen_edge$from &
-        newprogressions$to == chosen_edge$to &
-        newprogressions$percentage < window_start
+      progressions$from == chosen_edge$from &
+        progressions$to == chosen_edge$to &
+        progressions$percentage < window_start
     )
 
-    newprogressions[subset_before, ] <- newprogressions[subset_before, ] %>%
+    progressions[subset_before, ] <- progressions[subset_before, ] %>%
       mutate(
         from = from,
         to = new_from,
         percentage = percentage / window_start
       )
 
-
     subset_after <- (
-      newprogressions$from == chosen_edge$from &
-        newprogressions$to == chosen_edge$to &
-        newprogressions$percentage > window_end
+      progressions$from == chosen_edge$from &
+        progressions$to == chosen_edge$to &
+        progressions$percentage > window_end
     )
 
-    newprogressions[subset_after, ] <- newprogressions[subset_after, ] %>%
+    progressions[subset_after, ] <- progressions[subset_after, ] %>%
       mutate(
         from = new_from,
         to = to,
         percentage = (percentage - window_end) / (1 - window_end)
       )
 
-    newmilestone_network <- newmilestone_network %>%
+    milestone_network <- milestone_network %>%
       filter(!(from == chosen_edge$from & to == chosen_edge$to)) %>%
       bind_rows(tibble(
         from = c(chosen_edge$from, new_from, new_from),
         to = c(new_from, new_to, chosen_edge$to),
-        length = chosen_edge$length * c(window_start, window_end - window_start, 1-window_end) * overall_hair_length
+        length = chosen_edge$length * c(window_start, window_end - window_start, 1-window_end),
+        directed = TRUE
       ))
   }
 
-  newdataset <- dynutils::wrap_ti_prediction(
-    dataset$trajectory_type,
-    dataset$id,
-    dataset$cell_ids,
-    unique(c(newmilestone_network$from, newmilestone_network$to)),
-    newmilestone_network,
-    progressions = newprogressions
-  )
-
-  newdataset$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(newdataset)
-
-  newdataset
-}
-
-perturb_hairy_small <- function(dataset) {perturb_hairy(dataset, nhairs = 2)}
-perturb_hairy_large <- function(dataset) {perturb_hairy(dataset, nhairs = 20)}
-# perturb_hairy_long <- function(dataset) {perturb_hairy(dataset, overall_hair_length = 2)}
-
-
-##  ............................................................................
-##  Warping the times                                                       ####
-# very quick and dirty way to wrap, but it works :p
-perturb_warp <- function(dataset) {
-  # dataset <- generate_linear()
-
-  dataset$progressions$percentage <- dataset$progressions$percentage^(2^runif(1, -2, 2))
-
-  recreate_dataset(dataset)
+  dataset %>%
+    add_trajectory(
+      milestone_network = milestone_network,
+      progressions = progressions,
+      divergence_regions = dataset$divergence_regions
+    )
 }
 
 ## Extreme trajectories
@@ -288,45 +265,69 @@ perturb_extreme_beginning <- function() {}
 
 
 ## Remove cells
-perturb_remove_cells <- function(dataset) {
-  allcells <- dataset$cell_ids
-  retained_cells <- sample(allcells, length(allcells) * 0.6)
-  dataset$progressions <- dataset$progressions %>% filter(cell_id %in% retained_cells)
+perturb_remove_cells <- function(dataset, retain_perc = 0.6) {
+  retain_cell_ids <- sample(dataset$cell_ids, length(dataset$cell_ids) * retain_perc)
+  progressions <- dataset$progressions %>% filter(cell_id %in% retain_cell_ids)
 
-  recreate_dataset(dataset)
+  dataset %>%
+    add_trajectory(
+      milestone_network = dataset$milestone_network,
+      progressions = progressions,
+      divergence_regions = dataset$divergence_regions
+    )
 }
 
 
-## Add distant edge, chaning the structure but not the cell distances
-perturb_add_distant_edge <- function(dataset) {
-  dataset$milestone_network <- bind_rows(
+## Add distant edge, chaning the topology but not the cell distances
+perturb_add_leaf_edge <- function(dataset) {
+  choosen_edge <- sample(intersect(dataset$milestone_network$from, dataset$milestone_network$to), 1)
+
+  milestone_network <- bind_rows(
     dataset$milestone_network,
-    tibble(from = c(dataset$milestone_ids[[1]], "NEWM"), to = c("NEWM", dataset$milestone_ids[[2]]), length = sum(dataset$milestone_network$length)/2, directed = TRUE)
+    tibble(from = choosen_edge, to = "END", length = sum(dataset$milestone_network$length)/2, directed = TRUE)
   )
-  dataset$milestone_ids <- c(dataset$milestone_ids, "NEWM")
-  recreate_dataset(dataset)
+
+  dataset %>%
+    add_trajectory(
+      milestone_network = milestone_network,
+      progressions = dataset$progressions,
+      divergence_regions = dataset$divergence_regions
+    )
 }
 
-## Change lengths
+
+##  ............................................................................
+##  Warping the times                                                       ####
+# warping the cells within an edge
+perturb_warp <- function(dataset) {
+  progressions <- dataset$progressions %>% mutate(percentage = percentage^(2^runif(1, -2, 2)))
+  milestone_network <- dataset$milestone_network %>% mutate(length = sample(length))
+
+  dataset %>%
+    add_trajectory(
+      milestone_network = milestone_network,
+      progressions = progressions,
+      divergence_regions = dataset$divergence_regions
+    )
+}
+
 # randomly change all lengths
-perturb_change_lengths <- function(dataset) {
-  dataset$milestone_network <- dataset$milestone_network %>%
+perturb_shuffle_lengths <- function(dataset) {
+  milestone_network <- dataset$milestone_network %>%
     mutate(length = runif(n()))
-  recreate_dataset(dataset)
+
+  dataset %>%
+    add_trajectory(
+      milestone_network = milestone_network,
+      progressions = dataset$progressions,
+      divergence_regions = dataset$divergence_regions
+    )
 }
 
-# change lengths of only terminal edges, while keeping the distances constant
-perturb_change_terminal_lengths <- function(dataset) {
-  dataset$milestone_network <- dataset$milestone_network %>%
-    mutate(length = ifelse(to %in% from, length, length*2))
-  dataset$progressions <- dataset$progressions %>%
-    mutate(percentage = ifelse(to %in% from, percentage, percentage/2))
-  recreate_dataset(dataset)
-}
-
-
-## Perturb structure and position
-perturb_structure_and_position <- function(dataset) {
+##  ............................................................................
+##  Combined perturbations                                                  ####
+## Perturb topology and position
+perturb_topology_and_position <- function(dataset) {
   dataset <- perturb_switch_all_cells(dataset)
   dataset <- perturb_add_distant_edge(dataset)
   dataset
@@ -376,5 +377,5 @@ perturbation_methods <- ls() %>% str_subset("^perturb_") %>% map(function(x) {
   id <- str_replace(x, "perturb_(.*)", "\\1")
   run_fun <- get(x)
 
-  create_ti_method(id = id, run_fun = run_fun)
+  create_ti_method(id = id, run_fun = run_fun)()
 })
