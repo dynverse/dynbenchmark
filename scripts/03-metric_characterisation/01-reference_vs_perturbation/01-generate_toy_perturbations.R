@@ -6,12 +6,11 @@ library(dyntoy)
 
 experiment("03-metric_characterisation/01-reference_vs_perturbation")
 
-source(scripts_file("helper-01-perturbations.R"))
-
 ## create datasets
 datasets_design <- crossing(
   topology_model = names(topology_models),
-  num_cells = c(2, seq(100, 1000, by = 1000))
+  num_cells = c(2, seq(100, 1000, by = 1000)),
+
 ) %>%
   mutate(
     dataset_id = str_glue("{topology_model}_{num_cells}")
