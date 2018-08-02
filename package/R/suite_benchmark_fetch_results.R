@@ -65,13 +65,13 @@ benchmark_fetch_results <- function() {
 
           out$job_exit_status <- extract_job_exit_status(qacct_out, i)
 
-          out$error_status <- with(out, extract_error_status(
-            stdout = stdout,
-            stderr = stderr,
-            error_message = error_message,
-            job_exit_status = job_exit_status,
-            produced_model = (!"model" %in% colnames(out)) && !is.null(model) && !identical(model, FALSE)
-          ))
+          out$error_status <- extract_error_status(
+            stdout = out$stdout,
+            stderr = out$stderr,
+            error_message = out$error_message,
+            job_exit_status = out$job_exit_status,
+            produced_model = ("model" %in% colnames(out)) && !is.null(out$model[[1]]) && !identical(out$model[[1]], FALSE)
+          )
 
           out
         })
@@ -150,6 +150,7 @@ extract_error_status <- function(stdout, stderr, error_message, job_exit_status,
     "std::bad_alloc", # tensorflow
     "Bus error", # stemid 2 -> clustexpr
     "what\\(\\):  Resource temporarily unavailable", # grandprix
+    "Could not allocate metaspace", # cellrouter, something with "initialisation of vm"
     "error writing to connection"
   )
   is_memory_problem <- function(message) {

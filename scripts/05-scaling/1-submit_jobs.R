@@ -51,6 +51,7 @@ gen_gen_dataset <- function(lnrow, lncol) {
 
 datasets <-
   seq(log10(100), log10(100000) - .4, by = log10(10) / 5) %>%
+  # seq(log10(100), log10(10000), by = log10(10)) %>%  # test run
   crossing(lnrow = ., lncol = .) %>%
   as_tibble() %>%
   mutate(
@@ -70,8 +71,8 @@ datasets <-
   filter(memory != "32G") # disable 32G for now
 
 # define methods
-# method_ids <- dynmethods::methods$id
-method_ids <- c("scorpius", "identity", "error", "embeddr")
+method_ids <- dynmethods::methods$id
+# method_ids <- c("scorpius", "identity", "error", "embeddr") # test run
 
 # create design
 design <- benchmark_generate_design(

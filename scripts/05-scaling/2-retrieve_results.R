@@ -11,8 +11,7 @@ experiment("05-scaling")
 benchmark_fetch_results()
 
 # bind results in one data frame (without models)
-outputs <- benchmark_bind_results(load_models = FALSE) %>%
-  mutate(error_status = ifelse(time_postprocessing < .1 & error_status == "no_error" & method_id != "identity", "execution_error", error_status))
+outputs <- benchmark_bind_results(load_models = TRUE)
 design <- read_rds(derived_file("design.rds"))
 datasets <- design$datasets
 
@@ -35,30 +34,45 @@ g1 <-
   theme(legend.position = "bottom") +
   facet_wrap(~method_id, ncol = 1)
 
-g2 <- ggplot(joined %>% filter(error_status == "no_error"), aes(lnrow, time_method, group = lncol, colour = lncol)) +
-  geom_point() +
-  geom_line() +
-  scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-  scale_y_log10() +
-  scale_colour_distiller(palette = "RdYlBu") +
-  theme_classic() +
-  theme(legend.position = "bottom")+
-  facet_wrap(~method_id, ncol = 1, scales = "free_y")
+timings <- joined %>% group_by(method_id) %>% do({ df <- filter(., error_status == "no_error"); if (nrow(df) > 0) df else slice(., 1) }) %>% ungroup()
 
-g3 <- ggplot(joined %>% filter(error_status == "no_error"), aes(lncol, time_method, group = lnrow, colour = lnrow)) +
+g2 <- ggplot(timings, aes(lnrow, time_method, group = lncol, colour = lncol, alpha = error_status == "no_error")) +
   geom_point() +
   geom_line() +
   scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
   scale_y_log10() +
   scale_colour_distiller(palette = "RdYlBu") +
+  scale_alpha_manual(values = c("TRUE" = 1, "FALSE" = 0)) +
   theme_classic() +
   theme(legend.position = "bottom")+
-  facet_wrap(~method_id, ncol = 1, scales = "free_y")
+  facet_wrap(~method_id, ncol = 1, scales = "free_y") +
+  labs(alpha = NULL)
+
+g3 <- ggplot(timings, aes(lncol, time_method, group = lnrow, colour = lnrow, alpha = error_status == "no_error")) +
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+  scale_y_log10() +
+  scale_colour_distiller(palette = "RdYlBu") +
+  scale_alpha_manual(values = c("TRUE" = 1, "FALSE" = 0)) +
+  theme_classic() +
+  theme(legend.position = "bottom")+
+  facet_wrap(~method_id, ncol = 1, scales = "free_y") +
+  labs(alpha = NULL)
 
 patchwork::wrap_plots(g1, g2, g3, nrow = 1)
 
+intercepts <- joined %>%
+  filter(error_status == "no_error", time_method > 3) %>%
+  group_by(method_id) %>%
+  do({
+    dat <- .
+    fit <- lm(log10(time_method) ~ lnrow + lncol, dat)
+    t(fit$coefficients) %>% as.data.frame() %>% mutate(method_id = dat$method_id[[1]])
+  }) %>%
+  ungroup()
 
-dat <- joined %>% filter(error_status == "no_error", method_id == "scorpius")
-fit <- lm(log10(time_method) ~ lnrow + lncol, dat)
-# fit <- lm(time_method ~ nrow + ncol + nrow2 + ncol2, dat %>% mutate(nrow2 = nrow^2, ncol2 = ncol^2))
-fit$coefficients
+ggplot(intercepts, aes(lnrow, lncol)) +
+  geom_point() +
+  geom_text(aes(label = method_id), nudge_y = .03) +
+  theme_classic()
