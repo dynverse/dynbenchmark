@@ -75,7 +75,6 @@ spaces <- map(seq_len(nrow(selected_datasets)), function(dataset_i) {
   tibble(
     plot = list(plot),
     id = dataset$id,
-    dataset_id = dataset$id,
     x_scale = max(space$Comp1) - min(space$Comp1),
     y_scale = max(space$Comp2) - min(space$Comp2),
     x_shift = min(space$Comp1),

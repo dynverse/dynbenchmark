@@ -4,7 +4,7 @@ library(dynbenchmark)
 
 experiment("02-dataset_characterisation/2-real")
 
-datasets_real <- load_datasets() %>% filter(dataset_source == "real")
+datasets_real <- load_datasets() %>% filter(source == "real")
 
 #   ____________________________________________________________________________
 #   Add dimensionality reduction                                            ####
