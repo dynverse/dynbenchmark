@@ -23,4 +23,4 @@ script:
 r_check_args: "--no-tests --no-manual --no-vignettes --no-build-vignettes --no-examples"
 r_build_args: "--no-build-vignettes"
 after_success:
-- R -e 'covr::codecov()'
+- echo No codecov since this is an init.
