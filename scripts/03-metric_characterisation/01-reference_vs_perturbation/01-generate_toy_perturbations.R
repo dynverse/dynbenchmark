@@ -17,19 +17,6 @@ datasets_design <- crossing(
     dataset_id = str_glue("{topology_model}_{num_cells}")
   )
 
-datasets <- pmap(datasets_design, function(dataset_id, topology_model, num_cells, ...) {
-  print(dataset_id)
-  dyntoy::generate_dataset(
-    unique_id = dataset_id,
-    model = topology_model,
-    num_cells = num_cells,
-    normalise = FALSE,
-    num_features = 10,
-    add_prior_information = FALSE
-  ) %>%
-    add_cell_waypoints()
-}) %>% set_names(datasets_design$dataset_id)
-
 ###
 metrics <- formals(calculate_metrics)$metrics %>% eval %>% as.list() %>% {set_names(., as.character(.))} %>% discard(~. == "featureimp_cor")
 
