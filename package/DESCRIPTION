@@ -44,12 +44,12 @@ Imports:
   tidyverse,
   tibble,
   testthat,
+  qsub,
   xml2
 Suggests:
   dyngen,
   dyntoy,
   dynnormaliser,
-  qsub,
   devtools,
   igraph,
   randomForest,
