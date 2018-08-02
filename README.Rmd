@@ -61,26 +61,9 @@ ggplot2::ggsave("package/man/figures/datasets.png", width = nrow(datasets)*3, he
 
 * **General information about trajectory inference methods**, available as a data frame in `dynmethods::methods`
 
-## Scripts
-
-The scripts folder contains all the scripts necessary to fully reproduce the benchmarking manuscript in chronologically ordered subfolders. Each subfolder contains a readme file with further explanations of the different scripts and what they do:
-
-```{r}
-scripts <- read_rds(derived_file("scripts.rds", experiment_id = "12-varia/01-scripts"))
-
-scripts %>% filter(
-  level == 1
-) %>%
-  arrange(ix) %>%
-  mutate(
-    name = str_glue("[{id}](https://github.com/dynverse/dynbenchmark/tree/master/{location})"),
-    order = ifelse(is.na(ix), "", ix)
-  ) %>% 
-  select(order, subfolder = name, description = title) %>%
-  knitr::kable()
-
-
+```{r child='scripts/README.Rmd'}
 ```
+
 
 ## Benchmarking your own method
 
