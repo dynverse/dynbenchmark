@@ -143,6 +143,9 @@ check_benchmark_design_parameters <- function(
 }
 
 process_datasets_design <- function(datasets) {
+  if (check_design_datasets(datasets, generate_error = FALSE)) {
+    return(datasets)
+  }
   out <- map_df(seq_along(datasets), function(di) {
     d <- datasets[[di]]
 
@@ -186,6 +189,9 @@ process_datasets_design <- function(datasets) {
 }
 
 process_methods_design <- function(methods) {
+  if (check_design_methods(methods, generate_error = FALSE)) {
+    return(methods)
+  }
   out <- map_df(methods, function(m) {
     if (is.character(m)) {
       get_ti_methods(method_ids = m) %>%
