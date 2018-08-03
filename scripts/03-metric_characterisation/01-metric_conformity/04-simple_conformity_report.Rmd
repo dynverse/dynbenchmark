@@ -1,0 +1,26 @@
+---
+output: html_document
+params:
+  assessment: ""
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+assessment <- params$assessment
+```
+
+# `r assessment$rule_id`
+
+```{r}
+assessment$conformity %>% 
+  knitr::kable()
+```
+
+```{r}
+assessment$plot_datasets
+```
+
+```{r}
+assessment$plot_scores
+```
