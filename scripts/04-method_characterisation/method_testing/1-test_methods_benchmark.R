@@ -7,9 +7,9 @@ experiment("04-method_characterisation/method_testing")
 method_ids <- dynmethods::methods$id
 
 design <- benchmark_generate_design(
-  datasets = c(
-    "synthetic/dyntoy/bifurcating_1",
-    "synthetic/dyntoy/linear_1",
+  datasets = list(
+    dyntoy::generate_dataset(id = "example_linear", model = "linear", num_cells = 99, num_features = 101),
+    dyntoy::generate_dataset(id = "example_bifurcating", model = "bifurcating", num_cells = 99, num_features = 101),
     "real/developing-dendritic-cells_schlitzer",
     "real/fibroblast-reprogramming_treutlein"
   ),
@@ -17,25 +17,24 @@ design <- benchmark_generate_design(
 )
 
 # also include dynmethods container examples
-examples <- map_df(
+examples <- bind_rows(pbapply::pblapply(
   method_ids,
+  cl = 8,
   function(method_id) {
     file <- paste0("../dynmethods/containers/", method_id, "/example.R")
-    params <- list()
     source(file)
-
     tibble(
       method_id = method_id,
       dataset = list(data),
       dataset_id = data$id,
-      params = list(list(params)),
+      params = list(params),
       param_id = "example"
     )
   }
-)
+))
 design$parameters <- bind_rows(
   design$parameters,
-  examples %>% select(id = params_id, method_id, params)
+  examples %>% select(id = param_id, method_id, params)
 )
 design$crossing <- bind_rows(
   design$crossing,
@@ -49,7 +48,12 @@ design$datasets <- bind_rows(
 # save and submit benchmark design
 write_rds(design, derived_file("design.rds"))
 
-benchmark_submit(design = design)
+benchmark_submit(
+  design = design,
+  qsub_grouping = "examples_{repeat_ix}",
+  qsub_params = lst(timeout = 600, memory = "10G"),
+  metrics = c("correlation", "edge_flip", "rf_rsq", "featureimp_cor")
+)
 
 # fetch the results, once they're in
 benchmark_fetch_results()
