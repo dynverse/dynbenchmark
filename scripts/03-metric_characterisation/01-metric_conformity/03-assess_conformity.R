@@ -1,0 +1,69 @@
+## Assess whether the metrics follow certain rules
+
+library(tidyverse)
+library(dynbenchmark)
+
+experiment("03-metric_characterisation/01-metric_conformity")
+
+dataset_design <- read_rds(derived_file("dataset_design.rds"))
+
+# load rules
+source(scripts_file("helper-02-rules.R"))
+
+# load scores and models
+scores <- read_rds(derived_file("scores.rds"))
+models <- read_rds(derived_file("models.rds"))
+
+# functions to assess conformity
+filter_based_on_crossing <- function(x, crossing) {
+  if (!all(colnames(crossing) %in% colnames(x))) {
+    stop("All colnames in crossing should also be present in x")
+  }
+
+  y <- x %>% inner_join(crossing, colnames(crossing))
+
+  if (nrow(y) < nrow(crossing)) {
+    warning("Missing some results for: ", crossing %>% anti_join(x, colnames(crossing)), call. = FALSE)
+  }
+
+  y
+}
+
+assess_conformity <- function(rule, scores, models) {
+  # extract only the relevant parts
+  scores <- filter_based_on_crossing(scores, rule$crossing)
+  models <- filter_based_on_crossing(models, rule$crossing)
+
+  rule$assessment(scores, rule, models)
+}
+
+
+assessments <- mapdf(rules, assess_conformity, scores=scores, models=models) %>% list_as_tibble() %>% mutate(rule_id = rules$id)
+
+
+
+assessments %>%
+  unnest(conformity) %>%
+  ggplot(aes(rule_id, metric_id)) +
+  geom_tile(aes(fill = conforms)) +
+  scale_fill_manual(values = c(`TRUE` = "#2ECC40", `FALSE` = "#FF4136"))
+
+mapdf(assessments, function(assessment) {
+  rmarkdown::render(
+    scripts_file("04-simple_conformity_report.Rmd"),
+    params = lst(assessment),
+    output_file = glue::glue("{assessment$rule_id}.html"),
+    output_dir = result_file("reports")
+  )
+})
+
+
+
+
+#
+#
+#
+#
+# ## test/create one new rule
+# rule <- rules %>% extract_row_to_list(which(id == "merge_bifurcation"))
+# assess_conformity(rule, scores, models)
