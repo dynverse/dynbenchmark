@@ -50,7 +50,7 @@ write_rds(design, derived_file("design.rds"))
 
 benchmark_submit(
   design = design,
-  qsub_grouping = "examples_{repeat_ix}",
+  qsub_grouping = "{method_id}",
   qsub_params = lst(timeout = 600, memory = "10G"),
   metrics = c("correlation", "edge_flip", "rf_rsq", "featureimp_cor")
 )
@@ -71,6 +71,7 @@ extract_method_status <- function(error_status, correlation, ...) {
   )
 }
 output$method_status <- pmap_chr(output, extract_method_status)
+output$dataset_id <- ifelse(grepl("_example", output$dataset_id), "personalised_example", output$dataset_id)
 
 
 method_status_colors <- c(
@@ -96,6 +97,7 @@ output %>% filter(method_id == "fateid") %>% pull(error_message) %>% cat
 
 output %>% filter(str_detect(error_message, "no item called .*")) %>% pull(method_id) %>% unique()
 
+output %>% filter(method_id == "urd", method_status == "method_error") %>% select(method_id, dataset_id, stdout, stderr, error_message) %>% pull(stdout)
 
 
 # make sure all output is present
