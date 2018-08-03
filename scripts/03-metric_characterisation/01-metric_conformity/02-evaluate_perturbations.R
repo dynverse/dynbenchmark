@@ -7,11 +7,11 @@ dataset_design <- read_rds(derived_file("dataset_design.rds"))
 datasets <- read_rds(derived_file("datasets.rds"))
 
 # load perturbations = dynwrap::ti_methods
-source(scripts_file("helper-02-perturbations.R"))
+source(scripts_file("helper-perturbations.R"))
 methods_suite <- perturbation_methods %>% process_methods_design()
 
 # load rules
-source(scripts_file("helper-02-rules.R"))
+source(scripts_file("helper-rules.R"))
 
 dataset <- datasets$linear_10_1
 model <- perturb_remove_cells(datasets$linear_10_1, 1)

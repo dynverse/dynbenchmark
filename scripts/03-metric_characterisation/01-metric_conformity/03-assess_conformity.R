@@ -8,7 +8,7 @@ experiment("03-metric_characterisation/01-metric_conformity")
 dataset_design <- read_rds(derived_file("dataset_design.rds"))
 
 # load rules
-source(scripts_file("helper-02-rules.R"))
+source(scripts_file("helper-rules.R"))
 
 # load scores and models
 scores <- read_rds(derived_file("scores.rds"))
