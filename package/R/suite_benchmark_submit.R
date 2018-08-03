@@ -58,10 +58,10 @@ benchmark_submit <- function(
     str_replace_all("[\\{\\}]", "")
 
   benchmark_submit_check(
-    design,
-    metrics,
-    qsub_params,
-    qsub_grouping
+    design = design,
+    metrics = metrics,
+    qsub_params = qsub_params,
+    qsub_grouping = qsub_grouping
   )
 
   ## prepare for remote execution; create a qsub config
@@ -161,8 +161,8 @@ benchmark_submit <- function(
 benchmark_submit_check <- function(
   design,
   metrics,
-  qsub_grouping = "{method_id}/{param_id}",
-  qsub_params = list(timeout = 3600, memory = "10G")
+  qsub_grouping,
+  qsub_params
 ) {
   check_design_datasets(design$datasets)
   testthat::expect_true(all(design$crossing$dataset_id %in% design$datasets$id))
@@ -182,15 +182,19 @@ benchmark_submit_check <- function(
   walkdf(
     design$parameters,
     function(l) {
-      method_inputs <- design$methods %>%
-        filter(id == l$method_id) %>%
-        pull(fun) %>%
-        {.[[1]]()} %>%
-        .$inputs %>%
-        filter(type == "parameter") %>%
-        pull(input_id)
       params <- l$params
-      testthat::expect_true(all(names(params) %in% method_inputs))
+      if (length(params) != 0) {
+        method_inputs <-
+          design$methods %>%
+          filter(id == l$method_id) %>%
+          pull(fun) %>%
+          first() %>%
+          invoke() %>%
+          .$inputs %>%
+          filter(type == "parameter") %>%
+          pull(input_id)
+        testthat::expect_true(all(names(params) %in% method_inputs))
+      }
     }
   )
 
