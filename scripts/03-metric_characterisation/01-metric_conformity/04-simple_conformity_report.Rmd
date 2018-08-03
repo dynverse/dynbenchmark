@@ -1,7 +1,7 @@
 ---
 output: html_document
 params:
-  assessment: ""
+  assessment: NULL
 ---
 
 ```{r setup, include=FALSE}
