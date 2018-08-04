@@ -353,7 +353,8 @@ rules <- list(
   # switch_edges,
   # time_warping,
   # shuffle_lengths,
-  change_topology
+  change_topology,
+  group_to_milestones
 ) %>% map(~list(.) %>% list_as_tibble()) %>% bind_rows()
 
 # check rules for contents
