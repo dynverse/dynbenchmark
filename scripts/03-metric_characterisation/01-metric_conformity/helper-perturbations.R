@@ -389,8 +389,23 @@ perturb_change_topology <- function(dataset, topology_id = "linear") {
 
 
 
+##  ............................................................................
+##  Group cells on milestones                                               ####
+# mimicking the effect of real data where cells are all on
 
+perturb_group_to_milestones <- function(dataset) {
+  milestone_percentages <- dataset$milestone_percentages %>%
+    group_by(cell_id) %>%
+    mutate(percentage = ifelse(percentage == max(percentage), 1, 0)) %>%
+    ungroup()
 
+  dataset %>%
+    add_trajectory(
+      milestone_network = dataset$milestone_network,
+      divergence_regions = dataset$divergence_regions,
+      milestone_percentages = milestone_percentages
+    )
+}
 
 
 
@@ -409,6 +424,8 @@ perturb_group_dataset <- function(dataset) {
     group_by(cell_id) %>%
     mutate(percentage = ifelse(percentage == max(percentage), 1, 0)) %>%
     ungroup()
+
+
 
   dataset <- dynutils::wrap_ti_prediction(
     dataset$trajectory_type,
