@@ -86,17 +86,19 @@ generate_method_status_badge <- function(method_status, full = TRUE) {
 
 # read outputs
 output <- read_rds(derived_file("output.rds", experiment = "04-method_characterisation/method_testing"))
+design <- read_rds(derived_file("design.rds", experiment = "04-method_characterisation/method_testing"))
 
 # generate method specific pages
-dataset_ids <- unique(output$dataset_id)
-datasets <- load_datasets(dataset_ids) %>% mapdf(identity) %>% set_names(dataset_ids)
+dataset_ids <- design$datasets$id
+datasets <- design$datasets$fun %>% map(invoke) %>% set_names(dataset_ids)
 
-output_plots <- pmap_df(output, function(model, method_id, dataset_id,...) {
+output_plots <- pmap_df(output, function(model, method_id, dataset_id, ...) {
+  cat(method_id, " - ", dataset_id, "\n", sep = "")
   dataset <- datasets[[dataset_id]]
   grouping <- dataset$prior_information$groups_id %>% deframe()
 
   plot_cells <- if (is_wrapper_with_trajectory(model)) {
-    if (is_wrapper_with_dimred(model)) {
+    if (is_wrapper_with_dimred(model) && !(method_id %in% c("wanderlust", "wishbone"))) { # should look at the wanderlust dimred
       plot_dimred(model, grouping = grouping)
     } else {
       plot_graph(model, grouping = grouping)
@@ -128,7 +130,7 @@ output <- output %>%
   ) %>%
   ungroup()
 
-methods_output <- output %>% group_by(method_id) %>% summarise() %>% left_join(dynmethods::methods, "method_id")
+methods_output <- output %>% group_by(method_id) %>% summarise() %>% left_join(dynmethods::methods %>% rename(method_id = id), "method_id")
 
 
 #   ____________________________________________________________________________
