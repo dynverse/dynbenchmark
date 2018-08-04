@@ -6,7 +6,7 @@ derived/*
 analysis_output.tar
 .rds
 .httr-oauth
-*.html
+manuscript/*.html
 manuscript/paper*.md
 manuscript/paper*.tex
 *.aux
