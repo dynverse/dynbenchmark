@@ -5,7 +5,7 @@
 \title{Generate a benchmarking design}
 \usage{
 benchmark_generate_design(datasets, methods, parameters = NULL,
-  priors = NULL, num_repeats = 1)
+  priors = NULL, num_repeats = 1, crossing = NULL)
 }
 \arguments{
 \item{datasets}{The datasets to be used in the evaluation.
@@ -20,9 +20,12 @@ The names of the list must be present in method_ids.
 The data frames must be of format \code{data_frame(id = "set1", param1 = "a", param2 = 2.0)}.}
 
 \item{priors}{A list of lists. Each sublist contains a list of priors that each method is allowed to optionally use.
-Check \code{\link[dynwrap:priors]{dynwrap::priors}} for a list of possible priors.}
+Check \code{\link[dynwrap:priors]{dynwrap::priors}} for a list of possible priors. Default priors given is "none"}
 
 \item{num_repeats}{The number of times to repeat the evaluation.}
+
+\item{crossing}{A data frame containing the combinations of methods, datasets, parameters and priors to be evaluated.
+Must be a data frame containing the columns dataset_id, method_id, prior_id, repeat_ix and param_id}
 }
 \description{
 Generate a benchmarking design
