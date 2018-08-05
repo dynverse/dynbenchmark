@@ -309,7 +309,11 @@ change_topology <- lst(
   assessment = function(scores, rule, models) {
     # join with dataset design to know the topology of the dataset
     scores <- scores %>%
-      left_join(dataset_design, c("dataset_id"))
+      left_join(dataset_design, c("dataset_id")) %>%
+      mutate(
+        topology_id = factor(topology_id, levels = unique(dataset_design$topology_id)),
+        param_id = factor(param_id, levels = levels(topology_id))
+      )
 
     # calculate scores when topologies stay the same
     top_scores <- scores %>%
@@ -317,17 +321,35 @@ change_topology <- lst(
       select(dataset_id, metric_id, top_score = score)
 
     # check that when the topology has changed, the score decreased
-    conformity <- scores %>%
+    scores <- scores %>%
       filter(param_id != topology_id) %>%
       left_join(top_scores, c("dataset_id", "metric_id")) %>%
+      mutate(conforms = score < top_score)
+
+    conformity <- scores %>%
       group_by(metric_id) %>%
-      summarise(conforms = all(score < top_score))
+      summarise(conforms = all(conforms))
 
-    plot_scores <- ggplot(scores) +
-      geom_tile(aes(topology_id, param_id, fill = score)) +
-      facet_wrap(~metric_id)
+    # plot the scores for every metric
+    plot_scores <-
+      split(scores, scores$metric_id) %>% map(function(scores) {
+        ggplot(scores, aes(topology_id, param_id)) +
+          geom_tile(aes(fill = score)) +
+          geom_text(aes(label = ifelse(conforms, "", "x"))) +
+          scale_fill_viridis_c() +
+          ggtitle(scores$metric_id)
+      }) %>% patchwork::wrap_plots()
 
-    plot_datasets <- NULL
+    # plot every topology
+    models <- models %>%
+      group_by(param_id) %>%
+      filter(row_number() == 1) %>%
+      ungroup() %>%
+      mutate(param_id = factor(param_id, levels = levels(scores$topology_id)))
+
+    plot_datasets <- map2(models$param_id, models$model, function(title, model) {
+      dynplot::plot_topology(model) + ggtitle(title)
+    }) %>% patchwork::wrap_plots()
 
     lst(
       conformity,
@@ -353,8 +375,8 @@ rules <- list(
   # switch_edges,
   # time_warping,
   # shuffle_lengths,
-  change_topology,
-  group_to_milestones
+  change_topology
+  # group_to_milestones
 ) %>% map(~list(.) %>% list_as_tibble()) %>% bind_rows()
 
 # check rules for contents
