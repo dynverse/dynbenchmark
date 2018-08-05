@@ -9,8 +9,10 @@
 #'   The names of the list must be present in method_ids.
 #'   The data frames must be of format `data_frame(id = "set1", param1 = "a", param2 = 2.0)`.
 #' @param priors A list of lists. Each sublist contains a list of priors that each method is allowed to optionally use.
-#'   Check \code{\link[dynwrap:priors]{dynwrap::priors}} for a list of possible priors.
+#'   Check \code{\link[dynwrap:priors]{dynwrap::priors}} for a list of possible priors. Default priors given is "none"
 #' @param num_repeats The number of times to repeat the evaluation.
+#' @param crossing A data frame containing the combinations of methods, datasets, parameters and priors to be evaluated.
+#'   Must be a data frame containing the columns dataset_id, method_id, prior_id, repeat_ix and param_id
 #'
 #' @examples
 #' \dontrun{
@@ -62,7 +64,8 @@ benchmark_generate_design <- function(
   methods,
   parameters = NULL,
   priors = NULL,
-  num_repeats = 1
+  num_repeats = 1,
+  crossing = NULL
 ) {
   check_benchmark_design_parameters(
     datasets,
@@ -77,14 +80,18 @@ benchmark_generate_design <- function(
   parameters <- process_parameters_design(methods, parameters)
   priors <- process_priors_design(priors)
 
-  # generate designs of the different parts of the evaluation
-  crossing <- crossing(
-    dataset_id = factor(datasets$id),
-    method_id = factor(methods$id),
-    prior_id = factor(priors$id),
-    repeat_ix = seq_len(num_repeats)
-  ) %>%
-    left_join(parameters %>% select(param_id = id, method_id), by = "method_id")
+  if (is.null(crossing)) {
+    # generate designs of the different parts of the evaluation
+    crossing <- crossing(
+      dataset_id = factor(datasets$id),
+      method_id = factor(methods$id),
+      prior_id = factor(priors$id),
+      repeat_ix = seq_len(num_repeats)
+    ) %>%
+      left_join(parameters %>% select(param_id = id, method_id), by = "method_id")
+  } else {
+    testthat::expect_true(all(c("method_id", "dataset_id", "repeat_ix", "prior_id", "param_id") %in% colnames(crossing)))
+  }
 
   # all combinations of the different parts
   list(
