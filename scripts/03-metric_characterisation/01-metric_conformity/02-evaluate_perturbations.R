@@ -8,18 +8,9 @@ datasets <- read_rds(derived_file("datasets.rds"))
 
 # load perturbations = dynwrap::ti_methods
 source(scripts_file("helper-perturbations.R"))
-methods_suite <- perturbation_methods %>% process_methods_design()
 
 # load rules
 source(scripts_file("helper-rules.R"))
-
-dataset <- datasets$linear_10_1
-model <- perturb_remove_cells(datasets$linear_10_1, 1)
-
-write_rds(dataset, "~/dataset.rds")
-write_rds(model, "~/model.rds")
-
-calculate_metrics(dataset, model)
 
 
 ##  ............................................................................
@@ -48,9 +39,14 @@ parameters <- map(methods_suite$id, function(method_id) {
   parameters <- parameters[!duplicated(parameters),]
   parameters
 }) %>% set_names(methods_suite$id)
-parameters_suite <- process_parameters_design(methods_suite, parameters)
 
-datasets_suite <- datasets %>% process_datasets_design()
+design <- benchmark_generate_design(
+  datasets = datasets,
+  methods = perturbation_methods,
+  parameters = parameters,
+  num_repeats = 1,
+  crossing = crossing
+)
 
 design <- lst(
   datasets = datasets_suite,
