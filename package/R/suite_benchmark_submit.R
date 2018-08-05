@@ -158,76 +158,80 @@ benchmark_submit <- function(
 }
 
 #' @importFrom testthat expect_equal expect_is
-benchmark_submit_check <- function(
-  design,
-  metrics,
-  qsub_grouping,
-  qsub_params
-) {
-  check_design_datasets(design$datasets)
-  testthat::expect_true(all(design$crossing$dataset_id %in% design$datasets$id))
+benchmark_submit_check <-
+  dynutils::inherit_default_params(
+    benchmark_submit,
+    function(
+    design,
+    metrics,
+    qsub_grouping,
+    qsub_params
+  ) {
+    check_design_datasets(design$datasets)
+    testthat::expect_true(all(design$crossing$dataset_id %in% design$datasets$id))
 
-  check_design_methods(design$methods)
-  testthat::expect_true(all(design$crossing$method_id %in% design$methods$id))
+    check_design_methods(design$methods)
+    testthat::expect_true(all(design$crossing$method_id %in% design$methods$id))
 
-  # check priors
-  testthat::expect_true(all(c("id", "set") %in% colnames(design$priors)))
-  testthat::expect_is(design$priors$id, "character")
+    # check priors
+    testthat::expect_true(all(c("id", "set") %in% colnames(design$priors)))
+    testthat::expect_is(design$priors$id, "character")
 
-  # check parameters
-  testthat::expect_true(all(c("id", "method_id", "params") %in% colnames(design$parameters)))
-  testthat::expect_is(design$parameters$id, "character")
-  testthat::expect_false(any(duplicated(paste0(design$parameters$id, "_", design$parameters$method_id))))
+    # check parameters
+    testthat::expect_true(all(c("id", "method_id", "params") %in% colnames(design$parameters)))
+    testthat::expect_is(design$parameters$id, "character")
+    testthat::expect_false(any(duplicated(paste0(design$parameters$id, "_", design$parameters$method_id))))
 
-  walkdf(
-    design$parameters,
-    function(l) {
-      params <- l$params
-      if (length(params) != 0) {
-        method_inputs <-
-          design$methods %>%
-          filter(id == l$method_id) %>%
-          pull(fun) %>%
-          first() %>%
-          invoke() %>%
-          .$inputs %>%
-          filter(type == "parameter") %>%
-          pull(input_id)
-        testthat::expect_true(all(names(params) %in% method_inputs))
+    walkdf(
+      design$parameters,
+      function(l) {
+        params <- l$params
+        if (length(params) != 0) {
+          method_inputs <-
+            design$methods %>%
+            filter(id == l$method_id) %>%
+            pull(fun) %>%
+            first() %>%
+            invoke() %>%
+            .$inputs %>%
+            filter(type == "parameter") %>%
+            pull(input_id)
+          testthat::expect_true(all(names(params) %in% method_inputs))
+        }
       }
+    )
+
+    # check grouping character
+    testthat::expect_is(qsub_grouping, "character")
+    qsub_config_no_braces <- qsub_grouping %>% str_replace_all("\\{[^\\}]*\\}", "")
+    testthat::expect_match(qsub_config_no_braces, "^[a-zA-Z_\\-\\.0-9/\\]*$")
+
+    grouping_variables <-
+      qsub_grouping %>%
+      str_extract_all("\\{([^\\}]*)\\}") %>%
+      .[[1]] %>%
+      str_replace_all("[\\{\\}]", "")
+    testthat::expect_true(all(grouping_variables %in% colnames(design$crossing)))
+
+    # if qsub_params is a function, check it runs when provided all of these arguments
+    if (is.function(qsub_params)) {
+      testthat::expect_true(all(formalArgs(qsub_params) %in% grouping_variables))
+      example <- design$crossing %>% slice(1) %>% select(one_of(grouping_variables)) %>% extract_row_to_list(1)
+      qsub_params <- do.call(qsub_params, example)
     }
-  )
 
-  # check grouping character
-  testthat::expect_is(qsub_grouping, "character")
-  qsub_config_no_braces <- qsub_grouping %>% str_replace_all("\\{[^\\}]*\\}", "")
-  testthat::expect_match(qsub_config_no_braces, "^[a-zA-Z_\\-\\.0-9/\\]*$")
+    # make sure it has the correct format
+    testthat::expect_is(qsub_params, "list")
+    testthat::expect_equal(sort(names(qsub_params)), c("memory", "timeout"))
 
-  grouping_variables <-
-    qsub_grouping %>%
-    str_extract_all("\\{([^\\}]*)\\}") %>%
-    .[[1]] %>%
-    str_replace_all("[\\{\\}]", "")
-  testthat::expect_true(all(grouping_variables %in% colnames(design$crossing)))
+    # check timeout_per_execution
+    testthat::expect_is(qsub_params[["timeout"]], "numeric")
 
-  # if qsub_params is a function, check it runs when provided all of these arguments
-  if (is.function(qsub_params)) {
-    testthat::expect_true(all(formalArgs(qsub_params) %in% grouping_variables))
-    example <- design$crossing %>% slice(1) %>% select(one_of(grouping_variables)) %>% extract_row_to_list(1)
-    qsub_params <- do.call(qsub_params, example)
+    # check max_memory_per_execution
+    testthat::expect_is(qsub_params[["memory"]], "character")
+    testthat::expect_match(qsub_params[["memory"]], "[0-9]+G")
   }
-
-  # make sure it has the correct format
-  testthat::expect_is(qsub_params, "list")
-  testthat::expect_equal(sort(names(qsub_params)), c("memory", "timeout"))
-
-  # check timeout_per_execution
-  testthat::expect_is(qsub_params[["timeout"]], "numeric")
-
-  # check max_memory_per_execution
-  testthat::expect_is(qsub_params[["memory"]], "character")
-  testthat::expect_match(qsub_params[["memory"]], "[0-9]+G")
-}
+)
 
 logical_error_wrapper <- function(expr, generate_error) {
   tryCatch({
