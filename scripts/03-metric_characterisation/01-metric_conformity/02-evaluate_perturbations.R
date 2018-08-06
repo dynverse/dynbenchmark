@@ -8,6 +8,12 @@ datasets <- read_rds(derived_file("datasets.rds"))
 
 # load perturbations = dynwrap::ti_methods
 source(scripts_file("helper-perturbations.R"))
+perturbation_methods <- ls() %>% str_subset("^perturb_") %>% map(function(x) {
+  id <- str_replace(x, "perturb_(.*)", "\\1")
+  run_fun <- get(x)
+
+  create_ti_method(id = id, run_fun = run_fun)()
+})
 
 # load rules
 source(scripts_file("helper-rules.R"))

@@ -27,7 +27,7 @@ perturb_switch_n_cells <- function(dataset, switch_n = Inf) {
 perturb_switch_cells <- function(dataset, switch_perc = 1) {
   source(scripts_file("helper-perturbations.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
 
-    perturb_switch_n_cells(dataset, switch_n = length(dataset$cell_ids) * switch_perc)
+  perturb_switch_n_cells(dataset, switch_n = length(dataset$cell_ids) * switch_perc)
 }
 
 ## Switch edges
@@ -529,12 +529,3 @@ perturb_switch_cells_and_add_connecting_edges <- function(dataset, switch_perc =
 
   dataset
 }
-
-
-# create methods
-perturbation_methods <- ls() %>% str_subset("^perturb_") %>% map(function(x) {
-  id <- str_replace(x, "perturb_(.*)", "\\1")
-  run_fun <- get(x)
-
-  create_ti_method(id = id, run_fun = run_fun)()
-})
