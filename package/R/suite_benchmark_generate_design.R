@@ -146,7 +146,7 @@ process_datasets_design <- function(datasets) {
         tibble(
           id = d,
           type = "character",
-          fun = list(function() load_dataset(d, as_tibble = TRUE))
+          fun = list(function() load_dataset(d, as_tibble = FALSE))
         )
       } else if (dynwrap::is_wrapper_with_expression(d)) {
         tibble(
