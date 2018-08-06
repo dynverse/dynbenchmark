@@ -107,7 +107,6 @@ perturb_switch_cells_edgewise <- function(dataset) {
     )
 }
 
-
 #   ____________________________________________________________________________
 #   Changing the topology                                                   ####
 ##  ............................................................................
@@ -499,7 +498,7 @@ perturb_change_topology <- function(dataset, topology_id = "linear") {
 
 ##  ............................................................................
 ##  Group cells on milestones                                               ####
-# mimicking the effect of real data where cells are all on
+# mimicking the effect of real data where cells are all on one milestone
 perturb_switch_cells_grouped <- function(dataset, switch_perc = 1) {
   source(scripts_file("helper-perturbations.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
 
