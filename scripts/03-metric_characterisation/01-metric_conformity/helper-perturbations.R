@@ -25,7 +25,7 @@ perturb_switch_n_cells <- function(dataset, switch_n = Inf) {
 }
 
 perturb_switch_cells <- function(dataset, switch_perc = 1) {
-  source(scripts_file("helper-perturbations.R"))
+  source(scripts_file("helper-perturbations.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
 
     perturb_switch_n_cells(dataset, switch_n = length(dataset$cell_ids) * switch_perc)
 }
@@ -70,7 +70,7 @@ perturb_switch_n_edges <- function(dataset, switch_n = Inf) {
 }
 
 perturb_switch_edges <- function(dataset, switch_perc = 1) {
-  source(scripts_file("helper-perturbations.R"))
+  source(scripts_file("helper-perturbations.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
 
   perturb_switch_n_edges(dataset, switch_n = round(nrow(dataset$milestone_network) * switch_perc))
 }
@@ -464,7 +464,7 @@ perturb_topology_and_position <- function(dataset) {
 
 ## Change topology, although the position of the cells on the edges stays the same
 perturb_change_topology <- function(dataset, topology_id = "linear") {
-  source(scripts_file("helper-topologies.R"))
+  source(scripts_file("helper-topologies.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
 
   if (nrow(dataset$milestone_network) != 5) {stop("Can only change topology if there are 5 edges")}
   if (nrow(dataset$divergence_regions)) {stop("To change the topology, dataset cannot have divergence regions")}
@@ -501,7 +501,7 @@ perturb_change_topology <- function(dataset, topology_id = "linear") {
 ##  Group cells on milestones                                               ####
 # mimicking the effect of real data where cells are all on
 perturb_switch_cells_grouped <- function(dataset, switch_perc = 1) {
-  source(scripts_file("helper-perturbations.R"))
+  source(scripts_file("helper-perturbations.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
 
   milestone_percentages <- dataset$milestone_percentages %>%
     group_by(cell_id) %>%
@@ -522,7 +522,7 @@ perturb_switch_cells_grouped <- function(dataset, switch_perc = 1) {
 ##  ............................................................................
 ##  Combined perturbations                                                  ####
 perturb_switch_cells_and_add_connecting_edges <- function(dataset, switch_perc = 0.2, n_edges = 1) {
-  source(scripts_file("helper-perturbations.R"))
+  source(scripts_file("helper-perturbations.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
 
   dataset <- perturb_add_connecting_edges(dataset, n_edges)
   dataset <- perturb_switch_cells(dataset, switch_perc)
