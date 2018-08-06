@@ -80,14 +80,15 @@ mapdf(assessments, function(assessment) {
 
 
 
-rule <- rules %>% filter(id == "time_warping_parabole") %>% extract_row_to_list(1)
+rule <- rules %>% filter(id == "move_cells_subedges_magnified") %>% extract_row_to_list(1)
 assess_conformity(rule, scores, models)$plot_scores
+assess_conformity(rule, scores, models)$plot_datasets
 
 
 
 
-
-
+rule <- rules %>% filter(id == "switch_cells") %>% extract_row_to_list(1)
+assess_conformity(rule, scores, models)$plot_scores
 
 
 #

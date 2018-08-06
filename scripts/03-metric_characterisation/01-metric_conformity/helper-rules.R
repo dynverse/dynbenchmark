@@ -26,23 +26,6 @@ is_monotonic_changing <- function(x, y, decreasing = TRUE) {
   )
 }
 
-group_trajectory_edges <- function(trajectory, group_template = "{from}->{to}") {
-  # first map cells to largest percentage (in case of divergence regions)
-  progressions <- trajectory$progressions %>%
-    group_by(cell_id) %>%
-    arrange(-percentage) %>%
-    slice(1) %>%
-    ungroup()
-
-  # do the actual grouping
-  progressions %>%
-    group_by(from, to) %>%
-    mutate(group_id = as.character(glue::glue(group_template))) %>%
-    ungroup() %>%
-    select(cell_id, group_id) %>%
-    deframe()
-}
-
 equal_identity <- lst(
   id = "equal_identity",
   description = "The score should always be the same when comparing the gold standard to itself",
@@ -113,7 +96,7 @@ rule_lower <- function(
         ungroup() %>%
         arrange(factor(method_id, levels=levels(scores$method_id)))
 
-      grouping <- group_trajectory_edges(models$model[[1]])
+      grouping <- dynwrap::group_onto_trajectory_edges(models$model[[1]])
       plot_datasets <- map2(
         models$model,
         models$method_id,
@@ -133,7 +116,7 @@ rule_lower <- function(
 
 switch_cells_edgewise <- rule_lower(
   id = "switch_cells_edgewise",
-  description = "Switching the positions of cells within each cell should lower the score smoothly",
+  description = "Switching the positions of cells within each edge should lower the score",
   dataset_ids = dataset_design %>% filter(topology_id %in% c("linear", "bifurcation")) %>% pull(dataset_id),
   method_id = "switch_cells_edgewise"
 )
@@ -222,7 +205,7 @@ rule_monotonic <- function(
       slice(1)
 
     # do the actual plotting
-    grouping <- group_trajectory_edges(models$model[[1]])
+    grouping <- group_onto_trajectory_edges(models$model[[1]])
     plot_datasets <- map2(
       models$model,
       glue::glue("{label_long(models$method_id)} ({varied_parameter_id}={models[[varied_parameter_id]]})"),
@@ -409,7 +392,7 @@ switch_cells_grouped <- lst(
       spread(method_id, score) %>%
       group_by(metric_id) %>%
       summarise(cor = cor(switch_cells, switch_cells_grouped)) %>%
-      mutate(conforms = cor > 0.9)
+      mutate(conforms = ifelse(is.na(cor), TRUE, cor > 0.8))
 
     # plot the relation between the scores on the continuous and grouped datasets
     plot_scores <- scores %>%
@@ -505,7 +488,7 @@ combined_position_topology <- lst(
       slice(1) %>%
       arrange(method_id)
 
-    grouping <- group_trajectory_edges(models$model[[1]])
+    grouping <- group_onto_trajectory_edges(models$model[[1]])
 
     plot_datasets <- map2(
       models$model,
@@ -539,7 +522,7 @@ rules <- list(
   add_leaf_edges,
   add_connecting_edges,
   switch_edges,
-  time_warping,
+  time_warping_start,
   time_warping_parabole,
   shuffle_lengths,
   change_topology,
