@@ -14,6 +14,25 @@ source(scripts_file("helper-rules.R"))
 scores <- read_rds(derived_file("scores.rds"))
 models <- read_rds(derived_file("models.rds"))
 
+calculate_harmonic_mean <- function(...) {
+  inputs <- list(...)
+
+  testthat::expect_equal(length(unique(map_int(inputs, length))), 1)
+
+  n <- length(inputs)
+  x <- do.call(cbind, inputs)
+
+  n / rowSums(1/x)
+}
+
+scores <- scores %>% bind_rows(
+  scores %>%
+    spread(metric_id, score) %>%
+    mutate(harm_mean = calculate_harmonic_mean(correlation, lm_nmse, edge_flip)) %>%
+    gather("metric_id", "score", harm_mean) %>%
+    select(-metrics)
+)
+
 # functions to assess conformity
 filter_based_on_crossing <- function(x, crossing) {
   if (!all(colnames(crossing) %in% colnames(x))) {
@@ -44,9 +63,10 @@ assessments <- mapdf(rules, assess_conformity, scores=scores, models=models) %>%
 
 assessments %>%
   unnest(conformity) %>%
-  ggplot(aes(rule_id, metric_id)) +
+  ggplot(aes(metric_id, rule_id)) +
   geom_tile(aes(fill = conforms)) +
-  scale_fill_manual(values = c(`TRUE` = "#2ECC40", `FALSE` = "#FF4136"))
+  scale_fill_manual(values = c(`TRUE` = "#2ECC40", `FALSE` = "#FF4136", `NA` = "red")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 mapdf(assessments, function(assessment) {
   rmarkdown::render(
@@ -56,6 +76,16 @@ mapdf(assessments, function(assessment) {
     output_dir = result_file("reports")
   )
 })
+
+
+
+
+rule <- rules %>% filter(id == "time_warping_parabole") %>% extract_row_to_list(1)
+assess_conformity(rule, scores, models)$plot_scores
+
+
+
+
 
 
 

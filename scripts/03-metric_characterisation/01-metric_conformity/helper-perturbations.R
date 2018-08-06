@@ -25,6 +25,8 @@ perturb_switch_n_cells <- function(dataset, switch_n = Inf) {
 }
 
 perturb_switch_cells <- function(dataset, switch_perc = 1) {
+  source(scripts_file("helper-perturbations.R"))
+
     perturb_switch_n_cells(dataset, switch_n = length(dataset$cell_ids) * switch_perc)
 }
 
@@ -34,46 +36,50 @@ perturb_switch_n_edges <- function(dataset, switch_n = Inf) {
 
   switch_n = min(switch_n, nrow(dataset$milestone_network))
 
-  browser()
+  if (switch_n == 1) {
+    dataset
+  } else {
+    # create an edge id and add it to the progressions
+    milestone_network <- dataset$milestone_network %>%
+      mutate(edge_id = row_number())
 
-  # create an edge id and add it to the progressions
-  milestone_network <- dataset$milestone_network %>%
-    mutate(edge_id = row_number())
+    progressions <- dataset$progressions %>%
+      left_join(milestone_network %>% select(from, to, edge_id), c("from", "to")) %>%
+      select(-from, -to)
 
-  progressions <- dataset$progressions %>%
-    left_join(milestone_network %>% select(from, to, edge_id), c("from", "to")) %>%
-    select(-from, -to)
+    # shuffle edges
+    the_chosen_ones <- sample(milestone_network$edge_id, switch_n)
+    mapper <- set_names(milestone_network$edge_id, milestone_network$edge_id)
+    mapper[match(the_chosen_ones, mapper)] <- sample(the_chosen_ones, size = length(the_chosen_ones))
 
-  # shuffle edges
-  the_chosen_ones <- sample(milestone_network$edge_id, switch_n)
-  mapper <- set_names(milestone_network$edge_id, milestone_network$edge_id)
-  mapper[match(the_chosen_ones, mapper)] <- sample(the_chosen_ones, length(the_chosen_ones))
+    # change in milestone_network and join with progressions
+    milestone_network$edge_id <- mapper[as.character(milestone_network$edge_id)]
 
-  # change in milestone_network and join with progressions
-  milestone_network$edge_id <- mapper[as.character(milestone_network$edge_id)]
+    progressions <- left_join(progressions, milestone_network, "edge_id") %>%
+      select(cell_id, from, to, percentage)
 
-  progressions <- left_join(progressions, milestone_network, "edge_id") %>%
-    select(cell_id, from, to, percentage)
+    milestone_network <- milestone_network %>% select(-edge_id)
 
-  milestone_network <- milestone_network %>% select(-edge_id)
-
-  dataset %>%
-    add_trajectory(
-      milestone_network = milestone_network,
-      progressions = progressions,
-      divergence_regions = dataset$divergence_regions
-    )
+    dataset %>%
+      add_trajectory(
+        milestone_network = milestone_network,
+        progressions = progressions,
+        divergence_regions = dataset$divergence_regions
+      )
+  }
 }
 
 perturb_switch_edges <- function(dataset, switch_perc = 1) {
+  source(scripts_file("helper-perturbations.R"))
+
   perturb_switch_n_edges(dataset, switch_n = round(nrow(dataset$milestone_network) * switch_perc))
 }
 
 
 ## Remove cells
-perturb_remove_cells <- function(dataset, remove_perc = 0.6) {
-  remove_cell_ids <- sample(dataset$cell_ids, length(dataset$cell_ids) * remove_perc)
-  progressions <- dataset$progressions %>% filter(!(cell_id %in% remove_cell_ids))
+perturb_filter_cells <- function(dataset, filter_perc = 0.6) {
+  filter_cell_ids <- sample(dataset$cell_ids, length(dataset$cell_ids) * filter_perc)
+  progressions <- dataset$progressions %>% filter(!(cell_id %in% filter_cell_ids))
 
   dataset %>%
     add_trajectory(
@@ -84,6 +90,22 @@ perturb_remove_cells <- function(dataset, remove_perc = 0.6) {
 }
 
 
+## Shuffle within edge
+perturb_switch_cells_edgewise <- function(dataset) {
+  progressions <- dataset$progressions %>%
+    group_by(from, to) %>%
+    mutate(
+      cell_id = set_names(sample(unique(cell_id)), unique(cell_id))[cell_id]
+    ) %>%
+    ungroup()
+
+  dataset %>%
+    add_trajectory(
+      milestone_network = dataset$milestone_network,
+      progressions = progressions,
+      divergence_regions = dataset$divergence_regions
+    )
+}
 
 
 #   ____________________________________________________________________________
@@ -290,7 +312,41 @@ perturb_move_cells_subedges <- function(
 }
 
 ## Add edges, changing the topology but not the cell distances
-perturb_add_edges <- function(dataset, n_edges = 1) {
+perturb_add_intermediate_edges <- function(dataset, n_edges = 1) {
+  # select milestones with at least one from, if the n_edges parameter is too large, cap it at the number of edges
+  choosen_milestones <- sample(unique(dataset$milestone_network$from), n_edges, replace = TRUE) %>% unique()
+  n_edges <- length(choosen_milestones)
+
+  milestone_network <- bind_rows(
+    dataset$milestone_network %>%
+      mutate(
+        from = ifelse(from %in% choosen_milestones, paste0("INT_", from), from),
+        to = ifelse(from %in% choosen_milestones, paste0("INT_", from), to)
+      ),
+    tibble(
+      from = paste0(choosen_milestones),
+      to = paste0("INT_", choosen_milestones),
+      length = sample(dataset$milestone_network$length, length(choosen_milestones), replace = TRUE),
+      directed = TRUE
+    )
+  )
+
+  progressions <- dataset$progressions %>%
+    mutate(
+      from = ifelse(from %in% choosen_milestones, paste0("INT_", from), from),
+      to = ifelse(from %in% choosen_milestones, paste0("INT_", from), to)
+    )
+
+  dataset %>%
+    add_trajectory(
+      milestone_network = milestone_network,
+      progressions = progressions,
+      divergence_regions = dataset$divergence_regions
+    )
+}
+
+
+perturb_add_leaf_edges <- function(dataset, n_edges = 1) {
   choosen_froms <- sample(dataset$milestone_ids, n_edges, replace = TRUE)
 
   milestone_network <- bind_rows(
@@ -311,6 +367,47 @@ perturb_add_edges <- function(dataset, n_edges = 1) {
     )
 }
 
+perturb_add_connecting_edges <- function(dataset, n_edges = 1) {
+  # select n_edges combinations which are not yet in dataset$milestone_network (also not in reverse direction!)
+  possible_edges <- tidyr::complete(
+    bind_rows(
+      dataset$milestone_network,
+      dataset$milestone_network %>% rename(from = to, to = from)
+    ),
+    from,
+    to
+    ) %>%
+    filter(is.na(length)) %>%
+    filter(from != to)
+  n_edges <- min(nrow(possible_edges), n_edges)
+
+  new_edges <- bind_rows(
+    possible_edges %>% mutate(to = paste0("INT_", row_number())),
+    possible_edges %>% mutate(from = paste0("INT_", row_number()))
+  ) %>%
+    mutate(
+      directed = TRUE,
+      length = sample(dataset$milestone_network$length, n(), replace = TRUE)
+    )
+
+  milestone_network <- bind_rows(
+    dataset$milestone_network,
+    possible_edges %>%
+      sample_n(n_edges) %>%
+      mutate(
+        directed = TRUE,
+        length = sample(dataset$milestone_network$length, n(), replace = TRUE)
+      )
+  )
+
+  dataset %>%
+    add_trajectory(
+      milestone_network = milestone_network,
+      progressions = dataset$progressions,
+      divergence_regions = dataset$divergence_regions
+    )
+}
+
 
 ## Extreme trajectories
 # all cells except one at the beginning
@@ -320,8 +417,20 @@ perturb_extreme_beginning <- function() {}
 ##  ............................................................................
 ##  Warping the times                                                       ####
 # warping the cells within an edge
-perturb_time_warping <- function(dataset, warp_magnitude = 1) {
+perturb_time_warping_start <- function(dataset, warp_magnitude = 1) {
   progressions <- dataset$progressions %>% mutate(percentage = percentage^(exp(runif(n(), -warp_magnitude, warp_magnitude))))
+
+  dataset %>%
+    add_trajectory(
+      milestone_network = dataset$milestone_network,
+      progressions = progressions,
+      divergence_regions = dataset$divergence_regions
+    )
+}
+
+# move cells closer to the end or beginning of the edge
+perturb_time_warping_parabole <- function(dataset, warp_magnitude = 1) {
+  progressions <- dataset$progressions %>% mutate(percentage = ((abs(percentage - 0.5) * 2)^(1/warp_magnitude)) * sign(percentage - 0.5) / 2 + 0.5)
 
   dataset %>%
     add_trajectory(
@@ -354,8 +463,9 @@ perturb_topology_and_position <- function(dataset) {
 }
 
 ## Change topology, although the position of the cells on the edges stays the same
-source(scripts_file("helper-topologies.R"))
 perturb_change_topology <- function(dataset, topology_id = "linear") {
+  source(scripts_file("helper-topologies.R"))
+
   if (nrow(dataset$milestone_network) != 5) {stop("Can only change topology if there are 5 edges")}
   if (nrow(dataset$divergence_regions)) {stop("To change the topology, dataset cannot have divergence regions")}
 
@@ -387,60 +497,38 @@ perturb_change_topology <- function(dataset, topology_id = "linear") {
 }
 
 
-
-
 ##  ............................................................................
 ##  Group cells on milestones                                               ####
 # mimicking the effect of real data where cells are all on
+perturb_switch_cells_grouped <- function(dataset, switch_perc = 1) {
+  source(scripts_file("helper-perturbations.R"))
 
-perturb_group_to_milestones <- function(dataset) {
   milestone_percentages <- dataset$milestone_percentages %>%
     group_by(cell_id) %>%
     mutate(percentage = ifelse(percentage == max(percentage), 1, 0)) %>%
     ungroup()
 
-  dataset %>%
+  dataset <- dataset %>%
     add_trajectory(
       milestone_network = dataset$milestone_network,
       divergence_regions = dataset$divergence_regions,
       milestone_percentages = milestone_percentages
     )
+
+  perturb_switch_cells(dataset, switch_perc)
 }
 
 
+##  ............................................................................
+##  Combined perturbations                                                  ####
+perturb_switch_cells_and_add_connecting_edges <- function(dataset, switch_perc = 0.2, n_edges = 1) {
+  source(scripts_file("helper-perturbations.R"))
 
+  dataset <- perturb_add_connecting_edges(dataset, n_edges)
+  dataset <- perturb_switch_cells(dataset, switch_perc)
 
-
-
-
-
-
-
-
-
-# same dataset, but with the cell_percentages grouped at their maximal milestone, simulating the effect of a "marker-based" or "clustering-based" gold standard for real data
-perturb_group_dataset <- function(dataset) {
-  dataset$milestone_percentages <- dataset$milestone_percentages %>%
-    group_by(cell_id) %>%
-    mutate(percentage = ifelse(percentage == max(percentage), 1, 0)) %>%
-    ungroup()
-
-
-
-  dataset <- dynutils::wrap_ti_prediction(
-    dataset$trajectory_type,
-    dataset$id,
-    dataset$cell_ids,
-    dataset$milestone_ids,
-    dataset$milestone_network,
-    dataset$milestone_percentages
-  )
-  dataset$geodesic_dist <- dynutils:::compute_tented_geodesic_distances(dataset)
   dataset
 }
-
-
-
 
 
 # create methods
