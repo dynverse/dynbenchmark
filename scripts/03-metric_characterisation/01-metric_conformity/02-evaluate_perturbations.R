@@ -27,7 +27,7 @@ crossing <- mapdf(rules, function(rule) {
 crossing <- crossing[!duplicated(crossing),]
 
 # join all parameters from the different rules and remove duplicates
-parameters <- map(methods_suite$id, function(method_id) {
+parameters <- map(perturbation_methods %>% map_chr("id"), function(method_id) {
   parameters <- rules %>% mapdf(
     function(rule) {
       if(method_id %in% names(rule$parameters)) {
@@ -38,7 +38,7 @@ parameters <- map(methods_suite$id, function(method_id) {
     }) %>% bind_rows()
   parameters <- parameters[!duplicated(parameters),]
   parameters
-}) %>% set_names(methods_suite$id)
+}) %>% set_names(perturbation_methods %>% map_chr("id"))
 
 design <- benchmark_generate_design(
   datasets = datasets,
@@ -48,33 +48,28 @@ design <- benchmark_generate_design(
   crossing = crossing
 )
 
-design <- lst(
-  datasets = datasets_suite,
-  methods = methods_suite,
-  crossing,
-  parameters = parameters_suite,
-  priors = NULL %>% process_priors_design(),
-  num_repeats = 1
-)
-
 
 ##  ............................................................................
 ##  Run the crossing                                                        ####
 metrics <- c("correlation", "rf_mse", "rf_rsq", "rf_nmse", "lm_mse", "lm_rsq", "lm_nmse", "edge_flip")
 
 # run evaluation on cluster
-# benchmark_submit(design, metrics = metrics, qsub_params = list(memory = "2G", timeout = 3600))
-# benchmark_fetch_results()
-#
-# results <- benchmark_bind_results()
+benchmark_submit(design, metrics = metrics, qsub_params = list(memory = "2G", timeout = 3600), qsub_grouping = "{method_id}")
+
+benchmark_fetch_results()
+
+results <- benchmark_bind_results(load_models = TRUE)
 
 # run evaluation locally
-benchmark_submit_check(design, metrics)
-results <- pbapply::pblapply(cl=8, seq_len(nrow(design$crossing)), benchmark_run_evaluation, subdesign = design, metric = metrics, verbose = TRUE) %>%
-  bind_rows() %>%
-  mutate(error_status = "no_error")
+# benchmark_submit_check(design, metrics)
+# results <- pbapply::pblapply(cl=8, seq_len(nrow(design$crossing)), benchmark_run_evaluation, subdesign = design, metric = metrics, verbose = TRUE) %>%
+#   bind_rows() %>%
+#   mutate(error_status = ifelse(error_message == "", "no_error", "method_error"))
 
-if (any(results$error_message != "")) stop("Errors: ", results %>% filter(error_message != "") %>% pull(method_id) %>% unique() %>% glue::glue_collapse(", "))
+###
+if (any(results$error_status != "no_error")) stop("Errors: ", results %>% filter(error_status != "no_error") %>% pull(method_id) %>% unique() %>% glue::glue_collapse(", "))
+
+results %>% filter(error_status != "no_error") %>% select(method_id, error_message) %>% distinct()
 
 # extract scores from successful results
 scores <- results %>%
@@ -82,12 +77,14 @@ scores <- results %>%
   gather("metric_id", "score", intersect(metrics, colnames(results))) %>%
   select(method_id, dataset_id, param_id, metric_id, score)
 
+if (any(is.na(scores$score))) stop("Some scores are NA!", score %>% filter(is.na(score)) %>% pull(metric_id) %>% unique())
+
 models <- results %>%
   select(method_id, dataset_id, param_id, model)
 
 write_rds(scores, derived_file("scores.rds"))
 write_rds(models, derived_file("models.rds"))
-##
+
 #
 # split(scores, scores$metric_id) %>% map(function(scores) {
 #   scores %>%

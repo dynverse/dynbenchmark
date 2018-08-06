@@ -19,7 +19,7 @@ dataset_design <-
       )
     ),
     num_cells = c(10, 50, 100, 200, 500),
-    repeat_ix = 1
+    repeat_ix = 1:5
   ) %>%
   mutate(
     dataset_id = as.character(str_glue("{topology_id}_{num_cells}_{repeat_ix}"))
