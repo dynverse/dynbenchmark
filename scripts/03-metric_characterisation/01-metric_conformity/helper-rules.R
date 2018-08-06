@@ -149,10 +149,10 @@ join_linear <- rule_lower(
   method_id = "join_linear"
 )
 
-move_terminal_branch <- rule_lower(
-  id = "move_leaf_branch",
-  description = "Moving a leaf branch should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id %in% c("linear", "tree")) %>% pull(dataset_id),
+split_linear <- rule_lower(
+  id = "split_linear",
+  description = "Splitting a linear trajectory into a bifurcation should lower the score",
+  dataset_ids = dataset_design %>% filter(topology_id == "bifurcation_simple") %>% pull(dataset_id),
   method_id = "move_terminal_branch"
 )
 
