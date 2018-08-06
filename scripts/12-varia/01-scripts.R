@@ -1,6 +1,6 @@
 library(dynbenchmark)
 library(fs)
-library(readr)
+library(tidyverse)
 
 experiment("12-varia/01-scripts")
 
