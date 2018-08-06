@@ -189,28 +189,38 @@ generate_sidebar <- function(active = NULL) {
 
 metric_ids <- intersect(metrics$metric_id, colnames(output))
 dataset_ids <- sort(unique(output$dataset_id))
-
+dataset_filt_ids <- dataset_ids %>% discard(grepl("_example$", .))
 # generate overview table
 overview_table <- c(
   tags$tr(
       tags$th("Method"),
-      map(dataset_ids, ~tags$th(tags$a(., href=glue("{escape_slashes(.)}.html"))))
+      map(dataset_filt_ids, ~tags$th(tags$a(., href=glue("{escape_slashes(.)}.html")))),
+      tags$th("personalised_example")
   ) %>% list(),
   pmap(methods_output, function(method_id, name, ...) {
-    method_output <- output %>% filter(method_id == !!method_id)
+    method_output <- output %>%
+      filter(method_id == !!method_id)
 
     tags$tr(
       class = "clickable-row",
       `data-href` = glue("{method_id}.html"),
       tags$td(name),
-      map(dataset_ids, function(dataset_id) {
+      map(dataset_filt_ids, function(dataset_id) {
         dataset_output <- method_output %>% filter(dataset_id == !!dataset_id)
         if (nrow(dataset_output) == 1) {
           tags$td(generate_method_status_badge(dataset_output$method_status))
         } else {
           tags$td()
         }
-      })
+      }),
+      {
+        dataset_output <- method_output %>% filter(grepl("_example$", dataset_id))
+        if (nrow(dataset_output) == 1) {
+          tags$td(generate_method_status_badge(dataset_output$method_status))
+        } else {
+          tags$td()
+        }
+      }
 
     )
   })
@@ -296,18 +306,31 @@ pwalk(methods_output, function(method_id, name, ...) {
 
 ##  ............................................................................
 ##  Dataset pages                                                           ####
-dimreds <- c("pca", "mds", "tsne", "umap")
-walk(datasets, function(dataset) {
+dimreds <- list(
+  pca = dyndimred::dimred_pca,
+  mds = dyndimred::dimred_mds,
+  # tsne = dyndimred::dimred_tsne,
+  umap = dyndimred::dimred_umap
+)
+pbapply::pblapply(datasets, cl = 8, function(dataset) {
+  if (is_tibble(dataset)) {
+    dataset <- dataset %>% extract_row_to_list(1)
+  }
+
+  cat("Processing ", dataset$id, "\n", sep = "")
+
   dataset_id <- escape_slashes(dataset$id)
-  images <- map(dimreds, function(dimred) {
+
+  images <- map(names(dimreds), function(dimred_nam) {
+    dimred <- dimreds[[dimred_nam]]
     plot <- plot_dimred(
       dataset,
-      dimred = dyndimred::dimred(get_expression(dataset), dimred, ndim=2),
+      dimred = dimred,
       grouping = dataset$prior_information$groups_id %>% deframe(),
       plot_milestone_network = TRUE
-    ) + ggtitle(dimred)
+    ) + ggtitle(dataset_id)
 
-    image <- get_image(plot, glue("{dataset_id}_{dimred}"))
+    image <- get_image(plot, glue("{dataset_id}_{dimred_nam}"))
   })
 
   content <- tags$div(images)
@@ -319,6 +342,8 @@ walk(datasets, function(dataset) {
   ) %>%
     whisker.render(template_base, .) %>%
     write_file(derived_file(glue("{dataset_id}.html")))
+
+  invisible()
 })
 
 
