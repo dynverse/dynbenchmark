@@ -45,7 +45,7 @@ design <- benchmark_generate_design(
   methods = perturbation_methods,
   parameters = parameters,
   num_repeats = 1,
-  crossing = crossing
+  crossing = crossing %>% filter(method_id == "switch_cells")
 )
 
 
