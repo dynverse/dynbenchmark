@@ -57,7 +57,7 @@ design <- benchmark_generate_design(
 
 ##  ............................................................................
 ##  Run the crossing                                                        ####
-metrics <- c("correlation", "rf_mse", "rf_rsq", "rf_nmse", "lm_mse", "lm_rsq", "lm_nmse", "edge_flip")
+metrics <- c("correlation", "rf_mse", "rf_rsq", "rf_nmse", "lm_mse", "lm_rsq", "lm_nmse", "edge_flip", "featureimp_cor")
 
 # run evaluation on cluster
 benchmark_submit(design, metrics = metrics, qsub_params = list(memory = "2G", timeout = 3600), qsub_grouping = "{method_id}")
@@ -68,7 +68,7 @@ results <- benchmark_bind_results(load_models = TRUE)
 
 # run evaluation locally
 # benchmark_submit_check(design, metrics)
-# results <- pbapply::pblapply(cl=8, seq_len(nrow(design$crossing)), benchmark_run_evaluation, subdesign = design, metric = metrics, verbose = TRUE) %>%
+# results <- pbapply::pblapply(cl=8, seq_len(nrow(design$crossing))[1:10], benchmark_run_evaluation, subdesign = design, metric = metrics, verbose = TRUE) %>%
 #   bind_rows() %>%
 #   mutate(error_status = ifelse(error_message == "", "no_error", "method_error"))
 
