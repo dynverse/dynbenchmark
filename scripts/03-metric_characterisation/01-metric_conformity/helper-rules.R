@@ -496,12 +496,16 @@ change_topology <- lst(
 # we set a seed here so that the shuffling between the milestone and edge
 milestone_vs_edge <- lst(
   id = "milestone_vs_edge",
-  description = "Changing the position of the cells in a continuous or grouped dataset should lower the score similarly",
+  description = "Changing the cell positions should influence the score similarly when the cells are in milestones (as is the case in real datasets) or on the edges between milestones (as is the case in synthetic datasets)",
   parameters = lst(
     switch_cells = switch_cells$parameters$switch_cells %>% mutate(seed = 1, id = paste0("fixed_seed_", row_number())),
     switch_cells_grouped = switch_cells
   ),
-  crossing = bind_rows(switch_cells$crossing, switch_cells$crossing %>% mutate(method_id = "switch_cells_grouped")),
+  crossing = crossing(
+    dataset_id = unique(switch_cells$crossing$dataset_id),
+    method_id = names(parameters),
+    param_id = parameters$switch_cells$id
+  ),
   assessment = function(scores, rule, models) {
     # check if scores are highly correlated
     conformity <- scores %>%
@@ -536,8 +540,8 @@ milestone_vs_edge <- lst(
             hjust = 0,
             vjust = 0
           ) +
-          scale_y_continuous("Score with cell grouping", limits = limits, breaks = breaks) +
-          scale_x_continuous("Score without cell grouping", limits = limits, breaks = breaks) +
+          scale_y_continuous("Score with cells on milestones", limits = limits, breaks = breaks) +
+          scale_x_continuous("Score with cells on edges", limits = limits, breaks = breaks) +
           theme(
             panel.grid.minor = element_blank(),
             panel.border = element_blank()
