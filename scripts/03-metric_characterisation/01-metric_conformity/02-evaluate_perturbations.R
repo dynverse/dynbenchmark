@@ -70,7 +70,7 @@ results <- benchmark_bind_results(load_models = TRUE)
 # benchmark_submit_check(design, metrics)
 # results <- pbapply::pblapply(
 #   cl=1,
-#   design$crossing %>% mutate(x = row_number()) %>% filter(method_id == "switch_cells") %>% pull(x),
+#   design$crossing %>% mutate(x = row_number()) %>% filter(method_id == "switch_cells_grouped") %>% sample_n(10) %>% pull(x),
 #   benchmark_run_evaluation,
 #   subdesign = design,
 #   metric = metrics,

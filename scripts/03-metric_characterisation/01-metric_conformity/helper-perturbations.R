@@ -503,7 +503,7 @@ perturb_switch_cells_grouped <- function(dataset, switch_perc = 1, seed = NULL) 
       milestone_percentages = milestone_percentages
     )
 
-  perturb_switch_cells(dataset, switch_perc, seed = seed)
+  perturb_switch_cells(dataset, switch_perc = switch_perc, seed = seed)
 }
 
 
