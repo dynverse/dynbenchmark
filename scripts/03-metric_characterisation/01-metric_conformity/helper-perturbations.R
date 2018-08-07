@@ -7,7 +7,7 @@ perturb_identity <- function(dataset) dataset
 ##  Changing cell ordering                                                  ####
 ## Switch cells
 perturb_switch_n_cells <- function(dataset, switch_n = Inf, seed = NULL) {
-  if (is.numeric(seed)) set.seed(seed)
+  if (is.numeric(seed) && !is.na(seed)) set.seed(seed)
 
   switch_n <- min(switch_n, length(dataset$cell_ids))
 
