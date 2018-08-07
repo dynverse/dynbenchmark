@@ -91,7 +91,7 @@ mapdf(assessments, function(assessment) {
 
 
 
-rule <- combined_merge_bifurcation_switch_cells
+rule <- milestone_vs_edge
 assessment <- assess_conformity(rule, scores, models)
 assessment$conformity
 assessment$plot_scores
