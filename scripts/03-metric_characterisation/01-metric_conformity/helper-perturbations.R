@@ -407,12 +407,6 @@ perturb_add_connecting_edges <- function(dataset, n_edges = 1) {
     )
 }
 
-
-## Extreme trajectories
-# all cells except one at the beginning
-perturb_extreme_beginning <- function() {}
-
-
 ##  ............................................................................
 ##  Warping the times                                                       ####
 # warping the cells within an edge
@@ -452,16 +446,9 @@ perturb_shuffle_lengths <- function(dataset) {
     )
 }
 
-##  ............................................................................
-##  Combined perturbations                                                  ####
-## Perturb topology and position
-perturb_topology_and_position <- function(dataset) {
-  dataset <- perturb_switch_all_cells(dataset)
-  dataset <- perturb_add_distant_edge(dataset)
-  dataset
-}
 
-## Change topology, although the position of the cells on the edges stays the same
+##  ............................................................................
+##  Direct topological changes                                              ####
 perturb_change_topology <- function(dataset, topology_id = "linear") {
   source(scripts_file("helper-topologies.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
 
