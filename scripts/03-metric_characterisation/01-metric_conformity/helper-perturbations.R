@@ -517,3 +517,12 @@ perturb_switch_cells_and_add_connecting_edges <- function(dataset, switch_perc =
 
   dataset
 }
+
+perturb_switch_cells_and_merge_bifurcation <- function(dataset, switch_perc = 0.2) {
+  source(scripts_file("helper-perturbations.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
+
+  dataset <- perturb_merge_bifurcation(dataset)
+  dataset <- perturb_switch_cells(dataset, switch_perc)
+
+  dataset
+}
