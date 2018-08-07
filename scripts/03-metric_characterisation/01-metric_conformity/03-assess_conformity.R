@@ -7,12 +7,14 @@ experiment("03-metric_characterisation/01-metric_conformity")
 
 dataset_design <- read_rds(derived_file("dataset_design.rds"))
 
-# load rules
-source(scripts_file("helper-rules.R"))
-
 # load scores and models
 scores <- read_rds(derived_file("scores.rds"))
 models <- read_rds(derived_file("models.rds"))
+
+metrics <- unique(scores$metric_id)
+
+# load rules
+source(scripts_file("helper-rules.R"))
 
 calculate_harmonic_mean <- function(...) {
   inputs <- list(...)
@@ -28,9 +30,9 @@ calculate_harmonic_mean <- function(...) {
 scores <- scores %>% bind_rows(
   scores %>%
     spread(metric_id, score) %>%
-    mutate(harm_mean = calculate_harmonic_mean(correlation, lm_nmse, edge_flip)) %>%
+    mutate(harm_mean = calculate_harmonic_mean(correlation, edge_flip, lm_nmse, featureimp_cor)) %>%
     gather("metric_id", "score", harm_mean) %>%
-    select(-metrics)
+    select(-one_of(metrics))
 )
 
 # functions to assess conformity
@@ -53,7 +55,11 @@ assess_conformity <- function(rule, scores, models) {
   scores <- filter_based_on_crossing(scores, rule$crossing)
   models <- filter_based_on_crossing(models, rule$crossing)
 
-  rule$assessment(scores, rule, models)
+  if (nrow(scores) == 0) {
+    warning(rule$id)
+  } else {
+    rule$assessment(scores, rule, models)
+  }
 }
 
 
@@ -80,14 +86,14 @@ mapdf(assessments, function(assessment) {
 
 
 
-rule <- rules %>% filter(id == "move_cells_subedges_magnified") %>% extract_row_to_list(1)
+rule <- rules %>% filter(id == "equal_identity") %>% extract_row_to_list(1)
 assess_conformity(rule, scores, models)$plot_scores
 assess_conformity(rule, scores, models)$plot_datasets
 
 
 
 
-rule <- rules %>% filter(id == "switch_cells") %>% extract_row_to_list(1)
+rule <- rules %>% filter(id == "filter_cells") %>% extract_row_to_list(1)
 assess_conformity(rule, scores, models)$plot_scores
 
 

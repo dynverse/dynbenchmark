@@ -34,14 +34,21 @@ equal_identity <- lst(
     method_id = "identity"
   ),
   assessment = function(scores, rule, models) {
+    metric_cutoffs <- dyneval::metrics %>%
+      mutate(cutoff = perfect - (perfect - worst) * 0.01) %>%
+      select(metric_id, cutoff) %>%
+      deframe()
+    metric_cutoffs[setdiff(scores$metric_id, names(metric_cutoffs))] <- 0.99
+
     lst(
       conformity = scores %>%
         group_by(metric_id) %>%
-        summarise(conforms = approx_unique(score))
+        summarise(conforms = all(score >= metric_cutoffs[metric_id]))
       ,
       plot_scores = scores %>%
         ggplot(aes(metric_id, score)) +
-        geom_boxplot()
+        geom_boxplot() +
+        geom_hline(aes(yintercept = cutoff), data = metric_cutoffs %>% enframe("metric_id", "cutoff"))
       ,
       plot_datasets = models %>%
         left_join(dataset_design, "dataset_id") %>%
@@ -530,7 +537,7 @@ rules <- list(
   combined_position_topology
 ) %>% map(~list(.) %>% list_as_tibble()) %>% bind_rows()
 
-# rules <- rules %>% filter(id %in% c("time_warping_parabole"))
+# rules <- rules %>% filter(id %in% c("equal_identity"))
 
 # check rules for contents
 walkdf(rules, function(rule) {
