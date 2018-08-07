@@ -42,7 +42,7 @@ handle <- qsub::qsub_lapply(
     # create link for every file in the global cache to the local cache
     cached_files <- list.files(file.path(global_cache, "/docker"))
     walk(cached_files, function(file) {
-      cat("Lnking from global to local cache: ", file, "\n", sep = "")
+      cat("Linking from global to local cache: ", file, "\n", sep = "")
       cache_file <- file.path(cachedir, "docker", file)
       global_file <- file.path(global_cache, "docker", file)
       file.symlink(global_file, cache_file)
