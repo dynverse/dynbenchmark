@@ -68,7 +68,14 @@ results <- benchmark_bind_results(load_models = TRUE)
 
 # run evaluation locally
 # benchmark_submit_check(design, metrics)
-# results <- pbapply::pblapply(cl=8, seq_len(nrow(design$crossing))[1:10], benchmark_run_evaluation, subdesign = design, metric = metrics, verbose = TRUE) %>%
+# results <- pbapply::pblapply(
+#   cl=1,
+#   design$crossing %>% mutate(x = row_number()) %>% filter(method_id == "switch_cells") %>% pull(x),
+#   benchmark_run_evaluation,
+#   subdesign = design,
+#   metric = metrics,
+#   verbose = TRUE
+# ) %>%
 #   bind_rows() %>%
 #   mutate(error_status = ifelse(error_message == "", "no_error", "method_error"))
 

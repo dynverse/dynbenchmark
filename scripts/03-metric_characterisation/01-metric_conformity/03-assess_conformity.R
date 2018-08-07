@@ -16,6 +16,7 @@ metrics <- unique(scores$metric_id)
 # load rules
 source(scripts_file("helper-rules.R"))
 
+# calculate the harmonic mean manually (for now)
 calculate_harmonic_mean <- function(...) {
   inputs <- list(...)
 
@@ -33,7 +34,11 @@ scores <- scores %>% bind_rows(
     mutate(harm_mean = calculate_harmonic_mean(correlation, edge_flip, lm_nmse, featureimp_cor)) %>%
     gather("metric_id", "score", harm_mean) %>%
     select(-one_of(metrics))
-)
+) %>%
+  filter(!metric_id %in% c("rf_mse", "lm_mse"))
+
+# fix order of metrics
+scores$metric_id <- factor(scores$metric_id, levels = unique(scores$metric_id))
 
 # functions to assess conformity
 filter_based_on_crossing <- function(x, crossing) {
@@ -86,14 +91,16 @@ mapdf(assessments, function(assessment) {
 
 
 
-rule <- rules %>% filter(id == "equal_identity") %>% extract_row_to_list(1)
-assess_conformity(rule, scores, models)$plot_scores
-assess_conformity(rule, scores, models)$plot_datasets
+rule <- combined_merge_bifurcation_switch_cells
+assessment <- assess_conformity(rule, scores, models)
+assessment$conformity
+assessment$plot_scores
+assessment$plot_datasets
 
 
 
 
-rule <- rules %>% filter(id == "filter_cells") %>% extract_row_to_list(1)
+rule <- rules %>% filter(id == "switch_cells") %>% extract_row_to_list(1)
 assess_conformity(rule, scores, models)$plot_scores
 
 
