@@ -6,7 +6,9 @@ perturb_identity <- function(dataset) dataset
 ##  ............................................................................
 ##  Changing cell ordering                                                  ####
 ## Switch cells
-perturb_switch_n_cells <- function(dataset, switch_n = Inf) {
+perturb_switch_n_cells <- function(dataset, switch_n = Inf, seed = NULL) {
+  if (!is.null(seed)) set.seed(seed)
+
   switch_n <- min(switch_n, length(dataset$cell_ids))
 
   the_chosen_ones <- sample(dataset$cell_ids, switch_n)
@@ -24,10 +26,10 @@ perturb_switch_n_cells <- function(dataset, switch_n = Inf) {
     )
 }
 
-perturb_switch_cells <- function(dataset, switch_perc = 1) {
+perturb_switch_cells <- function(dataset, switch_perc = 1, seed = NULL) {
   source(scripts_file("helper-perturbations.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
 
-  perturb_switch_n_cells(dataset, switch_n = length(dataset$cell_ids) * switch_perc)
+  perturb_switch_n_cells(dataset, switch_n = length(dataset$cell_ids) * switch_perc, seed = seed)
 }
 
 ## Switch edges
@@ -486,7 +488,7 @@ perturb_change_topology <- function(dataset, topology_id = "linear") {
 ##  ............................................................................
 ##  Group cells on milestones                                               ####
 # mimicking the effect of real data where cells are all on one milestone
-perturb_switch_cells_grouped <- function(dataset, switch_perc = 1) {
+perturb_switch_cells_grouped <- function(dataset, switch_perc = 1, seed = NULL) {
   source(scripts_file("helper-perturbations.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
 
   milestone_percentages <- dataset$milestone_percentages %>%
@@ -501,7 +503,7 @@ perturb_switch_cells_grouped <- function(dataset, switch_perc = 1) {
       milestone_percentages = milestone_percentages
     )
 
-  perturb_switch_cells(dataset, switch_perc)
+  perturb_switch_cells(dataset, switch_perc, seed = seed)
 }
 
 
