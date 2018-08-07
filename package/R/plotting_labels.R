@@ -82,3 +82,36 @@ label_pvalue <- function(p_values, cutoffs = c(0.1, 0.01, 1e-5)) {
   p_values %>% cut(breaks, labels) %>% as.character()
 }
 
+
+#' Label the metrics
+#' @param metric_id metric id
+#' @param parse Whether to parse the label into an expression
+#'
+#' @export
+label_metric <- function(metric_id, parse = FALSE) {
+  if (length(metric_id) > 1) {stop("Needs only one metric_id")}
+
+  if (metric_id %in% dyneval::metrics$metric_id) {
+    label <- dyneval::metrics$name[match(metric_id, dyneval::metrics$metric_id)]
+  } else {
+    label <- label_long(metric_id)
+  }
+
+  if (parse) {
+    label <- gsub(" ", " ~~ ", label) # space -> ~~
+    label <- parse(text = label)
+  }
+
+  label
+}
+
+#' Get the limits of a metric
+#' @param metric_id metric id
+#' @export
+limits_metric <- function(metric_id) {
+  if (metric_id %in% dyneval::metrics$metric_id) {
+    extract_row_to_list(dyneval::metrics, which(dyneval::metrics == metric_id))[c("worst", "perfect")] %>% unlist()
+  } else {
+    c(worst = 0, perfect = 1)
+  }
+}
