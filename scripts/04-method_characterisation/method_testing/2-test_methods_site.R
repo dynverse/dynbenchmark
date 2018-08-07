@@ -128,9 +128,13 @@ output <- output %>%
     method_output_ix = row_number(),
     method_output_n = n()
   ) %>%
-  ungroup()
+  ungroup() %>%
+  mutate(dataset_id = gsub("specific_example/.*", "specific_example", dataset_id))
 
-methods_output <- output %>% group_by(method_id) %>% summarise() %>% left_join(dynmethods::methods %>% rename(method_id = id), "method_id")
+methods_output <- output %>%
+  group_by(method_id) %>%
+  summarise() %>%
+  left_join(dynmethods::methods %>% rename(method_id = id), "method_id")
 
 
 #   ____________________________________________________________________________
@@ -189,13 +193,17 @@ generate_sidebar <- function(active = NULL) {
 
 metric_ids <- intersect(metrics$metric_id, colnames(output))
 dataset_ids <- sort(unique(output$dataset_id))
-dataset_filt_ids <- dataset_ids %>% discard(grepl("_example$", .))
 # generate overview table
 overview_table <- c(
   tags$tr(
       tags$th("Method"),
-      map(dataset_filt_ids, ~tags$th(tags$a(., href=glue("{escape_slashes(.)}.html")))),
-      tags$th("personalised_example")
+      map(dataset_ids, function(id) {
+        if (id != "specific_example") {
+          tags$th(tags$a(id, href=glue("{escape_slashes(id)}.html")))
+        } else {
+          tags$th(id)
+        }
+      })
   ) %>% list(),
   pmap(methods_output, function(method_id, name, ...) {
     method_output <- output %>%
@@ -205,23 +213,14 @@ overview_table <- c(
       class = "clickable-row",
       `data-href` = glue("{method_id}.html"),
       tags$td(name),
-      map(dataset_filt_ids, function(dataset_id) {
+      map(dataset_ids, function(dataset_id) {
         dataset_output <- method_output %>% filter(dataset_id == !!dataset_id)
         if (nrow(dataset_output) == 1) {
           tags$td(generate_method_status_badge(dataset_output$method_status))
         } else {
           tags$td()
         }
-      }),
-      {
-        dataset_output <- method_output %>% filter(grepl("_example$", dataset_id))
-        if (nrow(dataset_output) == 1) {
-          tags$td(generate_method_status_badge(dataset_output$method_status))
-        } else {
-          tags$td()
-        }
-      }
-
+      })
     )
   })
 ) %>% tags$table(class = "table table-sm")
