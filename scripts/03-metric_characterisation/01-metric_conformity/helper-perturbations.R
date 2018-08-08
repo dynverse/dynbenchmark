@@ -438,7 +438,7 @@ perturb_time_warping_parabole <- function(dataset, warp_magnitude = 1) {
 # randomly change all lengths
 perturb_shuffle_lengths <- function(dataset) {
   milestone_network <- dataset$milestone_network %>%
-    mutate(length = runif(n()))
+    mutate(length = length[sample.int(length(length))])
 
   dataset %>%
     add_trajectory(
@@ -482,28 +482,6 @@ perturb_change_topology <- function(dataset, topology_id = "linear") {
       progressions = progressions,
       divergence_regions = dataset$divergence_regions
     )
-}
-
-
-##  ............................................................................
-##  Group cells on milestones                                               ####
-# mimicking the effect of real data where cells are all on one milestone
-perturb_switch_cells_grouped <- function(dataset, switch_perc = 1, seed = NULL) {
-  source(scripts_file("helper-perturbations.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
-
-  milestone_percentages <- dataset$milestone_percentages %>%
-    group_by(cell_id) %>%
-    mutate(percentage = ifelse(percentage == max(percentage), 1, 0)) %>%
-    ungroup()
-
-  dataset <- dataset %>%
-    add_trajectory(
-      milestone_network = dataset$milestone_network,
-      divergence_regions = dataset$divergence_regions,
-      milestone_percentages = milestone_percentages
-    )
-
-  perturb_switch_cells(dataset, switch_perc = switch_perc, seed = seed)
 }
 
 
