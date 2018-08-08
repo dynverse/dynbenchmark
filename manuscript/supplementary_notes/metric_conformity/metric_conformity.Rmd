@@ -1,0 +1,34 @@
+---
+title: "Method conformity"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+library(dynbenchmark)
+
+experiment("03-metric_characterisation/01-metric_conformity")
+```
+
+```{r}
+assessments <- read_rds(derived_file("assessments.rds"))
+rules <- read_rds(derived_file("rules.rds"))
+
+rules <- rules %>% 
+  mutate(
+    image_location = map_chr(id, function(id) figure_file(paste0("images/", id, ".png"))),
+    image_found = file.exists(image_location)
+  )
+
+if (any(!rules$image_found)) {stop("Files not found: ", basename(rules$image_location[!rules$image_found]))}
+```
+
+
+```{r results='asis'}
+walkdf(assessments, function(assessment) {
+  cat(knitr::knit_child("assessment.Rmd", quiet=TRUE, envir = environment()))
+  cat("\n------------------------------\n")
+})
+```

@@ -1,0 +1,34 @@
+---
+title: "assessment"
+output: html_document
+params:
+  assessment: NULL
+---
+
+```{r}
+rule <- dynutils::extract_row_to_list(rules, which(rules$id == assessment$rule_id))
+```
+
+## `r knitr::include_graphics(rule$image_location)` `r label_long(assessment$rule_id)`
+
+`r rule$description`
+
+```{r}
+width <- ifelse(is.null(assessment$plot_datasets$width), 1, assessment$plot_datasets$width)
+height <- ifelse(is.null(assessment$plot_datasets$height), 1, assessment$plot_datasets$height)
+```
+```{r, fig.width=width, fig.height=height}
+assessment$plot_datasets
+```
+
+
+
+
+
+```{r}
+width <- ifelse(is.null(assessment$plot_scores$width), 1, assessment$plot_scores$width)
+height <- ifelse(is.null(assessment$plot_scores$height), 1, assessment$plot_scores$height)
+```
+```{r, fig.width=width, fig.height=height}
+assessment$plot_scores
+```
