@@ -111,18 +111,18 @@ for (tool_id in tool_ids) {
   }) %>% glue::collapse(", ", last = " and ")
 
   code_text <- if(nrow(methods_oi) == 1) {
-    glue::glue("[a docker container]({github_url(methods_oi$docker_wrapper_location)})")
+    glue::glue("[a docker container]({methods_oi$container_url})")
   } else {
     paste0(
       "docker containers",
       glue::collapse(
-        glue::glue("[[{seq_len(nrow(methods_oi))}]]({github_url(methods_oi$docker_wrapper_location)})")
+        glue::glue("[[{seq_len(nrow(methods_oi))}]]({methods_oi$container_url})")
       )
     )
   }
 
-  definition_text <- glue::glue("[definition.yml]({github_url(methods_oi$docker_definition_location %>% first_non_na)})")
-  entrypoint_text <- glue::glue("[{basename(methods_oi$docker_entrypoint_location %>% first_non_na)}]({github_url(methods_oi$docker_entrypoint_location %>% first_non_na)})")
+  definition_text <- glue::glue("[definition.yml]({paste0(methods_oi$container_url, '/definition.yml') %>% first_non_na})")
+  entrypoint_text <- glue::glue("[{basename(methods_oi$container_url %>% first_non_na)}]({methods_oi$container_url %>% first_non_na})")
 
   tool_information <- if(nrow(methods_oi) == 1) {
     ""
@@ -130,7 +130,7 @@ for (tool_id in tool_ids) {
     if (any(is.na(methods_oi$method_note))) {stop("Need a note when having multiple methods")}
     c(
       glue::glue("We created {nrow(methods_oi)} separate wrappers:"),
-      glue::glue("- [**{methods_oi$method_name}**]({github_url(methods_oi$docker_wrapper_location)}): {methods_oi$method_note}")
+      glue::glue("- [**{methods_oi$name}**]({methods_oi$container_url}): {methods_oi$method_note}")
     ) %>% glue::collapse("\n")
   }
 
@@ -170,12 +170,12 @@ We are creating this issue to ensure your method is being evaluated in the way i
   - Are the answers we wrote down for your method correct and up to date? Do you disagree with certain answers? (Feel free to leave a comment in the worksheet)
     - You can improve the QC score of your method by implementing the required changes and letting us know. *Do not gloss over this, as it is the easiest way to improve the overall ranking of your TI method in our study!*
 
-The most convenient way for you to test and adapt the wrapper is to install [dyno](https://github.com/dynverse/dyno), download and modify [these files]({github_url(methods_oi$docker_wrapper_location)[[1]]}), and run your method on a dataset of interest or one of our synthetic toy datasets. This is further described in [this vignette](https://dynverse.github.io/dynwrap/articles/create_ti_method_docker.html). Once finished, we prefer that you [fork the dynmethods repository](https://github.com/dynverse/dynmethods), make the necessary changes, and send us a pull request. Alternatively, you can also send us the files and we will make the necessary changes.
+The most convenient way for you to test and adapt the wrapper is to install [dyno](https://github.com/dynverse/dyno), download and modify [these files]({methods_oi$container_url[[1]]}), and run your method on a dataset of interest or one of our synthetic toy datasets. This is further described in [this vignette](https://dynverse.github.io/dynwrap/articles/create_ti_method_docker.html). Once finished, we prefer that you [fork the dynmethods repository](https://github.com/dynverse/dynmethods), make the necessary changes, and send us a pull request. Alternatively, you can also send us the files and we will make the necessary changes.
 
 If you have any further questions or remarks, feel free to reply to this issue.
 
 Kind regards,
-{glue::collapse(sample(c('@rcannood', '@zouter')), ' and ')}
+{glue::glue_collapse(sample(c('@rcannood', '@zouter')), ' and ')}
 ")
 
   blueprint %>% clipr::write_clip()
