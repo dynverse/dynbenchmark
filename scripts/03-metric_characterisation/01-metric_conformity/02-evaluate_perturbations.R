@@ -11,13 +11,13 @@ source(scripts_file("helper-perturbations.R"))
 perturbation_methods <- ls() %>% str_subset("^perturb_") %>% map(function(x) {
   id <- str_replace(x, "perturb_(.*)", "\\1")
   run_fun <- get(x)
+  environment(run_fun) <- emptyenv()
 
   create_ti_method(id = id, run_fun = run_fun)()
 })
 
 # load rules
 source(scripts_file("helper-rules.R"))
-
 
 ##  ............................................................................
 ##  Define which combinations of methods and datasets should be run         ####
@@ -69,8 +69,12 @@ results <- benchmark_bind_results(load_models = TRUE)
 # run evaluation locally
 # benchmark_submit_check(design, metrics)
 # results <- pbapply::pblapply(
-#   cl=1,
-#   design$crossing %>% mutate(x = row_number()) %>% filter(method_id == "switch_cells_grouped") %>% sample_n(10) %>% pull(x),
+#   cl=8,
+#   design$crossing %>%
+#     mutate(x = row_number()) %>%
+#     # filter(method_id == "switch_cells_grouped") %>%
+#     # sample_n(10) %>%
+#     pull(x),
 #   benchmark_run_evaluation,
 #   subdesign = design,
 #   metric = metrics,

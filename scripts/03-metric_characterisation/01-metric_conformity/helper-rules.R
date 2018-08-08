@@ -6,12 +6,22 @@ approx_equal <- function(x, y, tolerance = .Machine$double.eps ^ 0.5) {
   abs(x - y) < tolerance
 }
 
-# is the value of y monotonically increasing/decreasing with increasing x?
+# is the value of y monotonically approximately increasing/decreasing with increasing x?
 is_monotonic <- function(x, y, decreasing = TRUE) {
+  y <- round(y, 2)
   if (decreasing) {
     all(diff(y[order(x)]) <= 0)
   } else {
     all(diff(y[order(x)]) >= 0)
+  }
+}
+
+# correlation which is 1 if there is only one unique value
+cor0 <- function(x, y) {
+  if (length(unique(x)) == 1 || length(unique(y)) == 1) {
+    1
+  } else {
+    cor(x, y)
   }
 }
 
@@ -30,10 +40,10 @@ equal_identity <- lst(
   id = "equal_identity",
   description = "The score should always be the same when comparing the gold standard to itself",
   crossing = crossing(
-    dataset_id = dataset_design %>% filter(topology_id == "bifurcation") %>% pull(dataset_id), ## TODO: add all datasets here
+    dataset_id = dataset_design %>% filter(topology_id %in% names(topologies), num_cells > 50) %>% pull(dataset_id),
     method_id = "identity"
   ),
-  assessment = function(scores, rule, models) {
+  assessment = function(scores) {
     metric_cutoffs <- dyneval::metrics %>%
       filter(metric_id %in% scores$metric_id) %>%
       mutate(cutoff = perfect - (perfect - worst) * 0.01) %>%
@@ -46,32 +56,43 @@ equal_identity <- lst(
       map_chr(as.character) %>%
       parse(text = .)
 
+    plot_scores <- scores %>%
+      ggplot(aes(metric_id, score)) +
+      geom_boxplot() +
+      geom_hline(aes(yintercept = cutoff), data = metric_cutoffs %>% enframe("metric_id", "cutoff"), linetype = "dashed") +
+      scale_y_reverse(limits = c(1, 0.9)) +
+      scale_x_discrete(NULL, labels = labels) +
+      coord_flip() +
+      theme_bw() +
+      theme(
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank()
+      )
+
+    plot_scores$width <- 4
+    plot_scores$height <- 4
+
     lst(
       conformity = scores %>%
         mutate(higher_or_equal = score >= metric_cutoffs[as.character(metric_id)]) %>%
         group_by(metric_id) %>%
         summarise(conforms = all(higher_or_equal))
       ,
-      plot_scores = scores %>%
-        ggplot(aes(metric_id, score)) +
-        geom_boxplot() +
-        geom_hline(aes(yintercept = cutoff), data = metric_cutoffs %>% enframe("metric_id", "cutoff"), linetype = "dashed") +
-        scale_y_reverse() +
-        scale_x_discrete(labels = labels) +
-        coord_flip() +
-        theme_bw() +
-        theme(
-          panel.grid.minor = element_blank(),
-          panel.border = element_blank()
-        )
-      ,
-      plot_datasets = models %>%
-        left_join(dataset_design, "dataset_id") %>%
-        filter(num_cells == 100) %>%
-        pull(model) %>%
-        first() %>%
-        {plot_graph(.) + ggtitle("Identity")}
+      plot_scores
     )
+  },
+  plot_datasets = function(models) {
+    plot_datasets <- models %>%
+      left_join(dataset_design, "dataset_id") %>%
+      filter(num_cells == 100) %>%
+      pull(model) %>%
+      first() %>%
+      {plot_graph(.) + ggtitle("Identity")}
+
+    plot_datasets$width <- 4
+    plot_datasets$height <- length(unique(scores$metric_id)) / 2
+
+    plot_datasets
   }
 )
 
@@ -90,7 +111,7 @@ rule_lower <- function(
       dataset_id = dataset_ids,
       method_id = c("identity", method_id)
     ),
-    assessment = function(scores, rule, models) {
+    assessment = function(scores) {
       # sort so that identity gets first
       scores <- scores %>%
         mutate(method_id = factor(method_id, levels = c("identity", !!method_id))) %>%
@@ -129,7 +150,15 @@ rule_lower <- function(
           panel.border = element_blank()
         )
 
-      # plot the models
+      plot_scores$width <- 6
+      plot_scores$height <- length(unique(scores$metric_id)) / 2
+
+      lst(
+        conformity,
+        plot_scores
+      )
+    },
+    plot_datasets = function(models) {
       models <- models %>%
         left_join(dataset_design, "dataset_id") %>%
         group_by(method_id) %>%
@@ -145,13 +174,12 @@ rule_lower <- function(
         function(model, title) {
           plot_graph(model, grouping=grouping) + ggtitle(label_long(title)) + theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
         }) %>%
-        patchwork::wrap_plots()
+        patchwork::wrap_plots(nrow = 1)
 
-      lst(
-        conformity,
-        plot_scores,
-        plot_datasets
-      )
+      plot_datasets$width <- 4 * 2
+      plot_datasets$height <- 4
+
+      plot_datasets
     }
   )
 }
@@ -159,7 +187,7 @@ rule_lower <- function(
 switch_cells_edgewise <- rule_lower(
   id = "switch_cells_edgewise",
   description = "Switching the positions of cells within each edge should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id %in% c("linear", "bifurcation")) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies), cell_positioning != "milestones", num_cells > 50) %>% pull(dataset_id),
   method_id = "switch_cells_edgewise"
 )
 
@@ -201,7 +229,11 @@ split_linear <- rule_lower(
 shuffle_lengths <- rule_lower(
   id = "shuffle_lengths",
   description = "Shuffling the lengths of the milestone network topology should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id %in% c("linear", "bifurcation", "tree")) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(
+    topology_id %in% names(topologies),
+    cell_positioning != "milestones",
+    num_cells >= 100
+  ) %>% pull(dataset_id),
   method_id = "shuffle_lengths"
 )
 
@@ -219,7 +251,7 @@ rule_monotonic <- function(
   varied_parameter_name = varied_parameter_id,
   varied_parameter_labeller = identity
 ) {
-  assessment <- function(scores, rule, models) {
+  assessment <- function(scores) {
     varied_parameter_sym <- rlang::sym(varied_parameter_id)
 
     # join scores with the parameters
@@ -267,6 +299,18 @@ rule_monotonic <- function(
       })
     plot_scores <- patchwork::wrap_plots(plots, ncol = 4)
 
+    plot_scores$width <- 12
+    plot_scores$height <- ceiling(length(plots)/4) * 3
+
+    lst(
+      conformity,
+      plot_scores
+    )
+  }
+
+  plot_datasets <- function(models) {
+    varied_parameter_sym <- rlang::sym(varied_parameter_id)
+
     # select models to plot
     models <- models %>%
       left_join(dataset_design, "dataset_id") %>%
@@ -286,11 +330,10 @@ rule_monotonic <- function(
       }) %>%
       patchwork::wrap_plots()
 
-    lst(
-      conformity,
-      plot_scores,
-      plot_datasets
-    )
+    plot_datasets$width <- 12
+    plot_datasets$height <- 4
+
+    plot_datasets
   }
 
   lst(
@@ -302,15 +345,16 @@ rule_monotonic <- function(
       method_id = method_id,
       param_id = parameters[[method_id]]$id
     ),
-    assessment
+    assessment,
+    plot_datasets
   )
 }
 
 
 switch_cells <- rule_monotonic(
   id = "switch_cells",
-  description = "Switching the positions of cells should lower the score smoothly",
-  dataset_ids = dataset_design %>% filter(topology_id %in% c("linear", "bifurcation")) %>% pull(dataset_id),
+  description = "Switching the positions of cells should lower the score",
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
   method_id = "switch_cells",
   parameters = list(switch_cells = tibble(switch_perc = seq(0, 1, 0.1)) %>% mutate(id = as.character(switch_perc*10))),
   varied_parameter_id = "switch_perc",
@@ -320,8 +364,8 @@ switch_cells <- rule_monotonic(
 
 filter_cells <- rule_monotonic(
   id = "filter_cells",
-  description = "Removing cells from the trajectory should lower the score smoothly",
-  dataset_ids = dataset_design %>% filter(topology_id %in% c("linear")) %>% pull(dataset_id),
+  description = "Removing cells from the trajectory should lower the score",
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
   method_id = "filter_cells",
   parameters = list(filter_cells = tibble(filter_perc = seq(0, 1, 0.1)) %>% mutate(id = as.character(filter_perc*10))),
   varied_parameter_id = "filter_perc",
@@ -331,8 +375,8 @@ filter_cells <- rule_monotonic(
 
 switch_edges <- rule_monotonic(
   id = "switch_edges",
-  description = "Switching the edges should lower the score smoothly",
-  dataset_ids = dataset_design %>% filter(topology_id %in% c("tree")) %>% pull(dataset_id),
+  description = "Switching the edges should lower the score",
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
   method_id = "switch_edges",
   parameters = list(switch_edges = tibble(switch_perc = seq(0, 1, 0.25)) %>% mutate(id = as.character(switch_perc*10))),
   varied_parameter_id = "switch_perc",
@@ -343,7 +387,7 @@ switch_edges <- rule_monotonic(
 move_cells_subedges <- rule_monotonic(
   id = "move_cells_subedges",
   description = "Moving some cells into short subedges should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id %in% c("linear", "bifurcation")) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
   method_id = "move_cells_subedges",
   parameters = list(move_cells_subedges = tibble(n_edges = seq(0, 6), subedge_length_magnification = 1) %>% mutate(id = as.character(n_edges))),
   varied_parameter_id = "n_edges",
@@ -363,7 +407,7 @@ move_cells_subedges <- rule_monotonic(
 add_leaf_edges <- rule_monotonic(
   id = "add_leaf_edges",
   description = "Adding extra edges only connected to one existing milestone should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id %in% c("linear", "bifurcation")) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
   parameters = list(add_leaf_edges = tibble(n_edges = seq(0, 6)) %>% mutate(id = as.character(n_edges))),
   varied_parameter_id = "n_edges",
   method_id = "add_leaf_edges",
@@ -373,7 +417,7 @@ add_leaf_edges <- rule_monotonic(
 add_connecting_edges <- rule_monotonic(
   id = "add_connecting_edges",
   description = "Adding new edges between existing milestones should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id %in% c("linear", "bifurcation")) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
   parameters = list(add_connecting_edges = tibble(n_edges = seq(0, 4)) %>% mutate(id = as.character(n_edges))),
   varied_parameter_id = "n_edges",
   method_id = "add_connecting_edges",
@@ -382,8 +426,8 @@ add_connecting_edges <- rule_monotonic(
 
 time_warping_start <- rule_monotonic(
   id = "time_warping_start",
-  description = "Warping the positions of the cells within each edge should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id %in% c("linear", "bifurcation")) %>% pull(dataset_id),
+  description = "Moving the cells closer to their start milestone should lower the score",
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
   parameters = list(time_warping_start = tibble(warp_magnitude = seq(0, 6)) %>% mutate(id = as.character(warp_magnitude))),
   varied_parameter_id = "warp_magnitude",
   method_id = "time_warping_start",
@@ -392,8 +436,8 @@ time_warping_start <- rule_monotonic(
 
 time_warping_parabole <- rule_monotonic(
   id = "time_warping_parabole",
-  description = "Warping the positions of the cells within each edge should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id %in% c("linear", "bifurcation")) %>% pull(dataset_id),
+  description = "Moving the cells closer to their nearest milestone should lower the score",
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
   parameters = list(time_warping_parabole = tibble(warp_magnitude = seq(1, 20, 2)) %>% mutate(id = as.character(warp_magnitude))),
   varied_parameter_id = "warp_magnitude",
   method_id = "time_warping_parabole",
@@ -403,14 +447,14 @@ time_warping_parabole <- rule_monotonic(
 source(scripts_file("helper-topologies.R"))
 change_topology <- lst(
   id = "change_topology",
-  description = "A change in topology should lower the score",
+  description = "Changing the topology of the trajectory should lower the score",
   parameters = list(change_topology = tibble(topology_id = names(topologies), id = topology_id)),
   crossing = crossing(
     dataset_id = dataset_design %>% filter(num_cells == 100) %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
     method_id = "change_topology",
     param_id = parameters[[method_id]]$id
   ),
-  assessment = function(scores, rule, models) {
+  assessment = function(scores) {
     # join with dataset design to know the topology of the dataset
     scores <- scores %>%
       left_join(dataset_design, c("dataset_id")) %>%
@@ -472,63 +516,69 @@ change_topology <- lst(
         strip.text.y = element_text(angle = 180)
       )
 
+    plot_scores$width <- length(unique(scores$metric_id))*1.5
+    plot_scores$height <- length(unique(scores$from_topology))*1.5
+
+    lst(
+      conformity,
+      plot_scores
+    )
+  },
+  plot_datasets = function(models) {
     # plot every topology
     models <- models %>%
       group_by(param_id) %>%
       filter(row_number() == 1) %>%
       ungroup() %>%
-      mutate(topology = factor(param_id, levels = levels(scores$to_topology))) %>%
+      mutate(topology = factor(param_id, levels = unique(dataset_design$topology_id))) %>%
       arrange(topology)
 
     plot_datasets <- map2(models$topology, models$model, function(title, model) {
       dynplot::plot_topology(model) + ggtitle(title)
     }) %>% patchwork::wrap_plots(ncol = 4)
 
-    lst(
-      conformity,
-      plot_scores,
-      plot_datasets
-    )
+    plot_datasets$width <- 4 * 4
+    plot_datasets$height <- 4 * ceiling(nrow(models) / 4)
+
+    plot_datasets
   }
 )
 
 
 # we set a seed here so that the shuffling between the milestone and edge
-milestone_vs_edge <- lst(
-  id = "milestone_vs_edge",
-  description = "Changing the cell positions should influence the score similarly when the cells are in milestones (as is the case in real datasets) or on the edges between milestones (as is the case in synthetic datasets)",
-  parameters = lst(
-    switch_cells = switch_cells$parameters$switch_cells %>% mutate(seed = 1, id = paste0("fixed_seed_", row_number())),
-    switch_cells_grouped = switch_cells
-  ),
-  crossing = crossing(
-    dataset_id = unique(switch_cells$crossing$dataset_id),
-    method_id = names(parameters),
-    param_id = parameters$switch_cells$id
-  ),
-  assessment = function(scores, rule, models) {
+cell_gathering <- lst(
+  id = "cell_gathering",
+  description = "A score should behave similarly both when cells are located on the milestones (as is the case in real datasets) or on the edges between milestones (as is the case in synthetic datasets).",
+  parameters = switch_cells$parameters,
+  crossing = switch_cells$crossing,
+  assessment = function(scores) {
+    scores_spread <- scores %>%
+      left_join(dataset_design, "dataset_id") %>%
+      select(-dataset_id) %>%
+      spread(cell_positioning, score)
+
+    if (any(xor(is.na(scores_spread$edges), is.na(scores_spread$milestones)))) stop("Spreading the edge and milestone scores failed for some datasets")
+
     # check if scores are highly correlated
-    conformity <- scores %>%
-      spread(method_id, score) %>%
+    conformity <- scores_spread %>%
       group_by(metric_id) %>%
-      summarise(cor = cor(switch_cells, switch_cells_grouped)) %>%
+      summarise(cor = cor0(milestones, edges)) %>%
       mutate(conforms = ifelse(is.na(cor), TRUE, cor > 0.8))
 
     # plot the relation between the scores on the continuous and grouped datasets
-    plots <- scores %>%
+    plots <- scores_spread %>%
       nest(-metric_id, .key = "scores") %>%
       mutate(metric_id = as.character(metric_id)) %>%
-      pmap(function(metric_id, scores) {
+      pmap(function(metric_id, scores_spread) {
         limits <- sort(limits_metric(metric_id))
         breaks <- unname(limits)
 
         cor <- conformity$cor[conformity$metric_id == metric_id]
 
-        scores %>%
-          spread(method_id, score) %>%
-          ggplot(aes(switch_cells, switch_cells_grouped)) +
+        scores_spread %>%
+          ggplot(aes(edges, milestones)) +
             geom_point(alpha = 0.5) +
-            geom_smooth(se = FALSE, method = lm) +
+            geom_smooth(se = FALSE, method = lm, color = "red") +
           theme_bw() +
           geom_hline(aes(yintercept = value), data = limits_metric(metric_id) %>% enframe(), linetype = "dashed") +
           geom_vline(aes(xintercept = value), data = limits_metric(metric_id) %>% enframe(), linetype = "dashed") +
@@ -538,7 +588,7 @@ milestone_vs_edge <- lst(
             x = first(limits) + diff(limits)*0.1,
             y = first(limits) + diff(limits)*0.9,
             hjust = 0,
-            vjust = 0
+            vjust = 1
           ) +
           scale_y_continuous("Score with cells on milestones", limits = limits, breaks = breaks) +
           scale_x_continuous("Score with cells on edges", limits = limits, breaks = breaks) +
@@ -554,26 +604,44 @@ milestone_vs_edge <- lst(
       })
     plot_scores <- patchwork::wrap_plots(plots, ncol = 4)
 
-    # plot a continuous and grouped model
-    models <- models %>%
-      left_join(dataset_design, "dataset_id") %>%
-      filter(param_id == 0, num_cells == 100) %>%
-      group_by(method_id) %>%
-      slice(1)
-
-    plot_datasets <- map2(
-      models$model,
-      models$method_id,
-      function(model, title) {
-        plot_graph(model, color_cells = "milestone") + ggtitle(label_long(title)) + theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
-      }) %>%
-      patchwork::wrap_plots()
+    plot_scores$width <- 4*4
+    plot_scores$height <- 4 * ceiling(length(plots) / 4)
 
     lst(
       conformity,
-      plot_scores,
-      plot_datasets
+      plot_scores
     )
+  },
+  plot_datasets = function(models) {
+    # plot a continuous and grouped model
+    models_oi <- models %>%
+      left_join(dataset_design, "dataset_id") %>%
+      filter(param_id %in% c("0", "8"), num_cells == 100, topology_id == "bifurcation") %>%
+      group_by(cell_positioning, param_id) %>%
+      slice(1) %>%
+      ungroup()
+
+    grouping <- group_onto_nearest_milestones(models_oi$model[[1]])
+
+    plot_datasets <- map2(
+      models_oi$model,
+      paste0(
+        "Cells on ",
+        models_oi$cell_positioning,
+        "\n",
+        ifelse(models_oi$param_id == "0", "Identity", "Switched cells")
+      ),
+      function(model, title) {
+        plot_dendro(model, grouping = grouping) +
+          ggtitle(label_long(title)) +
+          theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+      }) %>%
+      patchwork::wrap_plots(ncol = 4)
+
+    plot_datasets$width <- 4 * 4
+    plot_datasets$height <- 4 * ceiling(nrow(models_oi) / 4)
+
+    plot_datasets
   }
 )
 
@@ -589,11 +657,11 @@ rule_combined <- function(
 ) {
   testthat::expect_true(length(method_ids) == 3)
 
-  middle_method_id1 <- rlang::sym(method_ids[1])
-  middle_method_id2 <- rlang::sym(method_ids[2])
-  end_method_id <- rlang::sym(method_ids[3])
+  a <- rlang::sym(method_ids[1])
+  b <- rlang::sym(method_ids[2])
+  a_plus_b <- rlang::sym(method_ids[3])
 
-  assessment <- function(scores, rule, models) {
+  assessment <- function(scores) {
     scores <- scores %>%
       mutate(
         method_id = factor(method_id, levels = c("identity", method_ids))
@@ -603,12 +671,14 @@ rule_combined <- function(
     conformity <- scores %>%
       select(-param_id) %>%
       spread(method_id, score) %>%
+      mutate(
+        lower_a = !!a < identity,
+        lower_b = !!b < identity,
+        lower_a_plus_b = (!!a_plus_b < !!a) && (!!a_plus_b < !!b)
+      ) %>%
       group_by(metric_id) %>%
       summarise(
-        end_quantile = quantile(!!end_method_id, 0.75),
-        mid_quantile1 = quantile(!!middle_method_id1, 0.25),
-        mid_quantile2 = quantile(!!middle_method_id2, 0.25),
-        conforms = (end_quantile < mid_quantile1) & (end_quantile < mid_quantile2)
+        conforms = all(lower_a) && all(lower_b) && all(lower_a_plus_b)
       )
 
     # plot the scores of the two individual methods and the combined
@@ -642,9 +712,19 @@ rule_combined <- function(
       })
     plot_scores <- patchwork::wrap_plots(plots, nrow = 1)
 
+    plot_scores$width <- length(unique(scores$metric_id)) * 2
+    plot_scores$height <- 4
+
+    lst(
+      conformity,
+      plot_scores
+    )
+  }
+
+  plot_datasets <- function(models) {
     # plot the four models
     models <- models %>%
-      mutate(method_id = factor(method_id, levels = levels(scores$method_id))) %>%
+      mutate(method_id = factor(method_id, levels = c("identity", method_ids))) %>%
       left_join(dataset_design, "dataset_id") %>%
       filter(num_cells == 100) %>%
       group_by(method_id) %>%
@@ -655,17 +735,16 @@ rule_combined <- function(
 
     plot_datasets <- map2(
       models$model,
-      models$method_id,
+      paste0(models$method_id, c("", "(a) ", "(b) ", "(a+b) ")),
       function(model, title) {
         plot_graph(model, grouping = grouping) + ggtitle(label_long(title)) + theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
       }) %>%
-      patchwork::wrap_plots()
+      patchwork::wrap_plots(ncol = 4)
 
-    lst(
-      conformity,
-      plot_scores,
-      plot_datasets
-    )
+    plot_datasets$width <- 4 * 4
+    plot_datasets$height <- 4
+
+    plot_datasets
   }
 
   lst(
@@ -683,7 +762,8 @@ rule_combined <- function(
         )
       }
     ),
-    assessment = assessment
+    assessment,
+    plot_datasets
   )
 }
 
@@ -702,7 +782,7 @@ combined_position_topology <- rule_combined(
 
 combined_merge_bifurcation_switch_cells <- rule_combined(
   id = "combined_merge_bifurcation_switch_cells",
-  description = "Merging the two branches of a bifurcation and the cells positions should lower the score more than any of the two individually",
+  description = "Merging the two branches of a bifurcation and changing the cells positions should lower the score more than any of the two individually",
   parameters = list(
     identity = tibble(id = "default"),
     switch_cells = tibble(switch_perc = 0.25, id = "combination"),
@@ -733,12 +813,14 @@ rules <- list(
   time_warping_parabole,
   shuffle_lengths,
   change_topology,
-  milestone_vs_edge,
+  cell_gathering,
   combined_position_topology,
   combined_merge_bifurcation_switch_cells
 ) %>% map(~list(.) %>% list_as_tibble()) %>% bind_rows()
 
-# rules <- rules %>% filter(id %in% c("equal_identity"))
+# rules$assessment <- rules$assessment %>% map(function(x) {environment(x) <- new.env();x})
+
+# rules <- rules %>% filter(id %in% c("cell_gathering"))
 
 # check rules for contents
 walkdf(rules, function(rule) {

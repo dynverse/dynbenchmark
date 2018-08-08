@@ -19,24 +19,33 @@ dataset_design <-
       )
     ),
     num_cells = c(10, 50, 100, 200, 500),
-    repeat_ix = 1:5
+    repeat_ix = 1,
+    cell_positioning = c("edges", "milestones")
   ) %>%
   mutate(
-    dataset_id = as.character(str_glue("{topology_id}_{num_cells}_{repeat_ix}"))
+    dataset_id = as.character(str_glue("{topology_id}_{num_cells}_{cell_positioning}_{repeat_ix}")),
+    seed = repeat_ix
   )
 
-datasets <- pmap(dataset_design, function(dataset_id, topology_model, num_cells, ...) {
-  generate_dataset(
+datasets <- pmap(dataset_design, function(dataset_id, topology_model, num_cells, seed, cell_positioning, ...) {
+  print(dataset_id)
+  set.seed(seed)
+  dataset <- generate_dataset(
     id = dataset_id,
     model = topology_model,
     num_cells = num_cells,
-    num_features = 20,
+    num_features = 200,
     allow_tented_progressions = FALSE,
     add_prior_information = FALSE,
     normalise = FALSE
   )
+
+  if (cell_positioning == "milestones") {
+    dataset <- dataset %>% gather_cells_at_milestones()
+  }
+
+  dataset
 }) %>% set_names(dataset_design$dataset_id)
-datasets_suite <- datasets %>% process_datasets_design()
 
 write_rds(dataset_design, derived_file("dataset_design.rds"))
 write_rds(datasets, derived_file("datasets.rds"))
