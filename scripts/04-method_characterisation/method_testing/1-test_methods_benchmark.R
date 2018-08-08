@@ -3,7 +3,6 @@ library(tidyverse)
 
 experiment("04-method_characterisation/method_testing")
 
-
 ###################################################
 ###                   DESIGN                    ###
 ###################################################
@@ -16,7 +15,11 @@ design <- benchmark_generate_design(
     "real/developing-dendritic-cells_schlitzer",
     "real/fibroblast-reprogramming_treutlein"
   ),
-  methods = method_ids
+  methods = method_ids,
+  parameters = list(
+    fateid = tibble(id = "default", params = list(list(force = TRUE))),
+    stemnet = tibble(id = "default", params = list(list(force = TRUE)))
+  )
 )
 
 # also include dynmethods container examples
@@ -35,6 +38,8 @@ examples <- bind_rows(pbapply::pblapply(
     )
   }
 ))
+testthat::expect_equal(examples$dataset_id %>% str_replace_all("^specific_example/", ""), examples$method_id)
+
 design$parameters <- bind_rows(
   design$parameters,
   examples %>% select(id = param_id, method_id, params)
@@ -48,15 +53,17 @@ design$datasets <- bind_rows(
   dynbenchmark:::process_datasets_design(examples$dataset)
 )
 
+write_rds(design, derived_file("design.rds"))
+
 ###################################################
 ###                    SUBMIT                   ###
 ###################################################
-write_rds(design, derived_file("design.rds"))
+design <- read_rds(derived_file("design.rds"))
 
 benchmark_submit(
   design = design,
   qsub_grouping = "{method_id}",
-  qsub_params = lst(timeout = 600, memory = "10G"),
+  qsub_params = function(method_id) lst(timeout = 1200, memory = ifelse(method_id %in% c("ouija", "ouijaflow", "paga", "scimitar"), "32G", "10G")),
   metrics = c("correlation", "edge_flip", "rf_rsq", "featureimp_cor")
 )
 
@@ -88,21 +95,27 @@ method_status_colors <- c(
 )
 output %>%
   mutate(dataset_id = gsub("specific_example/.*", "specific_example", dataset_id)) %>%
-  ggplot(aes(fct_rev(method_id), correlation)) +
-    geom_label(aes(label = method_status, fill = method_status)) +
-    coord_flip() +
-    scale_fill_manual(values = method_status_colors) +
-    scale_y_continuous(expand = c(0.5, 0)) +
-    facet_wrap(~dataset_id)
+  ggplot(aes(correlation, fct_rev(method_id))) +
+  geom_label(aes(label = method_status, fill = method_status)) +
+  scale_fill_manual(values = method_status_colors) +
+  scale_x_continuous(expand = c(0.5, 0)) +
+  facet_wrap(~dataset_id, nrow = 1) +
+  theme_bw()
 
 
-# output %>% filter(method_id == "cellrouter") %>% pull(stdout) %>% first() %>% cat
-#
-# output %>% filter(method_id == "fateid") %>% pull(error_message) %>% cat
-#
-# output %>% filter(str_detect(error_message, "no item called .*")) %>% pull(method_id) %>% unique()
-#
-# output %>% filter(method_id == "urd", method_status == "method_error") %>% select(method_id, dataset_id, stdout, stderr, error_message) %>% pull(stdout)
+#' @examples
+#' output %>% filter(method_id == "cellrouter") %>% pull(stderr) %>% first() %>% cat
+#' output %>% filter(method_id == "stemnet") %>% pull(stdout) %>% first() %>% cat
+#'
+#' output %>% filter(method_id == "pcreode", grepl("fibro", dataset_id)) %>% pull(stdout) %>% first() %>% cat
+#'
+#' output %>% filter(method_id == "projected_dpt", grepl("schl", dataset_id)) %>% pull(stderr) %>% first() %>% cat
+#'
+#' output %>% filter(method_id == "merlot") %>% pull(stdout) %>% cat
+#'
+#' output %>% filter(str_detect(error_message, "no item called .*")) %>% pull(method_id) %>% unique()
+#'
+#' output %>% filter(method_id == "urd", method_status == "method_error") %>% select(method_id, dataset_id, stdout, stderr, error_message) %>% pull(stdout)
 
 
 write_rds(output, derived_file("output.rds", experiment_id = "04-method_characterisation/method_testing"))
