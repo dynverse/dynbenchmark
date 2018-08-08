@@ -16,22 +16,10 @@ metrics <- unique(scores$metric_id)
 # load rules
 source(scripts_file("helper-rules.R"))
 
-# calculate the harmonic mean manually (for now)
-calculate_harmonic_mean <- function(...) {
-  inputs <- list(...)
-
-  testthat::expect_equal(length(unique(map_int(inputs, length))), 1)
-
-  n <- length(inputs)
-  x <- do.call(cbind, inputs)
-
-  n / rowSums(1/x)
-}
-
 scores <- scores %>% bind_rows(
   scores %>%
     spread(metric_id, score) %>%
-    mutate(harm_mean = calculate_harmonic_mean(correlation, edge_flip, lm_nmse, featureimp_cor)) %>%
+    mutate(harm_mean = dyneval:::calculate_harmonic_mean(correlation, edge_flip, lm_nmse, featureimp_cor)) %>%
     gather("metric_id", "score", harm_mean) %>%
     select(-one_of(metrics))
 ) %>%
@@ -63,14 +51,16 @@ assess_conformity <- function(rule, scores, models) {
   if (nrow(scores) == 0) {
     warning(rule$id)
   } else {
-    rule$assessment(scores, rule, models)
+    assessment <- rule$assessment(scores)
+    assessment$plot_datasets <- rule$plot_datasets(models)
   }
+  assessment$rule_id <- rule$id
+
+  assessment
 }
 
 
 assessments <- mapdf(rules, assess_conformity, scores=scores, models=models) %>% list_as_tibble() %>% mutate(rule_id = rules$id)
-
-
 
 assessments %>%
   unnest(conformity) %>%
@@ -79,35 +69,23 @@ assessments %>%
   scale_fill_manual(values = c(`TRUE` = "#2ECC40", `FALSE` = "#FF4136", `NA` = "red")) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-mapdf(assessments, function(assessment) {
-  rmarkdown::render(
-    scripts_file("04-simple_conformity_report.Rmd"),
-    params = lst(assessment),
-    output_file = glue::glue("{assessment$rule_id}.html"),
-    output_dir = result_file("reports")
-  )
-})
-
-
-
-
-rule <- milestone_vs_edge
+# test one rule
+rule <- rules %>% extract_row_to_list(which(rules$id == "filter_cells"))
 assessment <- assess_conformity(rule, scores, models)
 assessment$conformity
 assessment$plot_scores
 assessment$plot_datasets
 
 
+pdf("test.pdf", width=assessment$plot_scores$width, height = assessment$plot_scores$height)
+assessment$plot_scores
+dev.off()
+
+pdf("test.pdf", width=assessment$plot_datasets$width, height = assessment$plot_datasets$height)
+assessment$plot_datasets
+dev.off()
 
 
-rule <- rules %>% filter(id == "switch_cells") %>% extract_row_to_list(1)
-assess_conformity(rule, scores, models)$plot_scores
-
-
-#
-#
-#
-#
-# ## test/create one new rule
-# rule <- rules %>% extract_row_to_list(which(id == "merge_bifurcation"))
-# assess_conformity(rule, scores, models)
+# save
+write_rds(assessments, derived_file("assessments.rds"))
+write_rds(rules, derived_file("rules.rds"))
