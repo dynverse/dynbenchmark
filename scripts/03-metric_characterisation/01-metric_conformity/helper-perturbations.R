@@ -94,10 +94,7 @@ perturb_filter_cells <- function(dataset, filter_perc = 0.6) {
 
 ## Shuffle within edge
 perturb_switch_cells_edgewise <- function(dataset) {
-  progressions <- dataset$progressions %>%
-    mutate(
-      percentage = runif(n())
-    )
+  progressions <- dataset$progressions %>% mutate(percentage = runif(n()))
 
   dataset %>%
     add_trajectory(

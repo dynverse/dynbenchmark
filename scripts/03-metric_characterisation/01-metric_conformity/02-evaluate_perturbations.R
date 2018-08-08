@@ -11,7 +11,6 @@ source(scripts_file("helper-perturbations.R"))
 perturbation_methods <- ls() %>% str_subset("^perturb_") %>% map(function(x) {
   id <- str_replace(x, "perturb_(.*)", "\\1")
   run_fun <- get(x)
-  environment(run_fun) <- emptyenv()
 
   create_ti_method(id = id, run_fun = run_fun)()
 })
@@ -69,11 +68,11 @@ results <- benchmark_bind_results(load_models = TRUE)
 # run evaluation locally
 # benchmark_submit_check(design, metrics)
 # results <- pbapply::pblapply(
-#   cl=8,
+#   cl=1,
 #   design$crossing %>%
 #     mutate(x = row_number()) %>%
-#     # filter(method_id == "switch_cells_grouped") %>%
-#     # sample_n(10) %>%
+#     filter(method_id == "switch_cells") %>%
+#     sample_n(10) %>%
 #     pull(x),
 #   benchmark_run_evaluation,
 #   subdesign = design,
@@ -101,9 +100,3 @@ models <- results %>%
 
 write_rds(scores, derived_file("scores.rds"))
 write_rds(models, derived_file("models.rds"))
-
-#
-# split(scores, scores$metric_id) %>% map(function(scores) {
-#   scores %>%
-#     ggplot(aes(dataset_id, paste0(method_id, "_", param_id))) + geom_raster(aes(fill = score)) + ggtitle(scores$metric_id[[1]])
-# }) %>% patchwork::wrap_plots()

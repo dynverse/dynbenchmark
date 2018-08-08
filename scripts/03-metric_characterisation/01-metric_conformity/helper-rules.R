@@ -1,3 +1,5 @@
+source(scripts_file("helper-topologies.R"))
+
 approx_unique <- function(x, tolerance = .Machine$double.eps ^ 0.5) {
   abs(first(sort(x)) - last(sort(x))) < tolerance
 }
@@ -186,7 +188,7 @@ rule_lower <- function(
 
 switch_cells_edgewise <- rule_lower(
   id = "switch_cells_edgewise",
-  description = "Switching the positions of cells within each edge should lower the score",
+  description = "Switching the positions of cells within each edge should lower the score. This can be seen as a local randomisation in cellular ordering",
   dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies), cell_positioning != "milestones", num_cells > 50) %>% pull(dataset_id),
   method_id = "switch_cells_edgewise"
 )
@@ -353,7 +355,7 @@ rule_monotonic <- function(
 
 switch_cells <- rule_monotonic(
   id = "switch_cells",
-  description = "Switching the positions of cells should lower the score",
+  description = "Switching the positions of cells should lower the score. This can be seen as changing the cellular position both locally and globally.",
   dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
   method_id = "switch_cells",
   parameters = list(switch_cells = tibble(switch_perc = seq(0, 1, 0.1)) %>% mutate(id = as.character(switch_perc*10))),
@@ -375,7 +377,7 @@ filter_cells <- rule_monotonic(
 
 switch_edges <- rule_monotonic(
   id = "switch_edges",
-  description = "Switching the edges should lower the score",
+  description = "Switching the edges should lower the score. This can be seen as changing the cellular positions only globally.",
   dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
   method_id = "switch_edges",
   parameters = list(switch_edges = tibble(switch_perc = seq(0, 1, 0.25)) %>% mutate(id = as.character(switch_perc*10))),
@@ -793,6 +795,19 @@ combined_merge_bifurcation_switch_cells <- rule_combined(
   dataset_ids = dataset_design %>% filter(num_cells == 100, topology_id == "bifurcation_simple") %>% pull(dataset_id)
 )
 
+combined_local_global_position_change <- rule_combined(
+  id = "combined_local_global_position_change",
+  description = "Changing the cellular position locally AND globally should lower the score more than any of the two individually.",
+  parameters = list(
+    identity = tibble(id = "default"),
+    switch_edges = switch_edges$parameters$switch_edges %>% filter(switch_perc == 1),
+    switch_cells_edgewise = tibble(id = "default"),
+    switch_cells = switch_cells$parameters$switch_cells %>% filter(switch_perc == 1)
+  ),
+  method_ids = c("switch_edges", "switch_cells_edgewise", "switch_cells"),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies), cell_positioning != "milestones", num_cells > 50) %>% pull(dataset_id)
+)
+
 
 # combine rules
 rules <- list(
@@ -815,7 +830,8 @@ rules <- list(
   change_topology,
   cell_gathering,
   combined_position_topology,
-  combined_merge_bifurcation_switch_cells
+  combined_merge_bifurcation_switch_cells,
+  combined_local_global_position_change
 ) %>% map(~list(.) %>% list_as_tibble()) %>% bind_rows()
 
 # rules$assessment <- rules$assessment %>% map(function(x) {environment(x) <- new.env();x})
