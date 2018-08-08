@@ -146,11 +146,13 @@ extract_error_status <- function(stdout, stderr, error_message, job_exit_status,
     "cannot allocate vector of size", # R
     "MemoryError", # python
     "OOM when allocating tensor", # tensorflow
+    "could not allocate memory", # ouija
     "nullptr != block->mem", # tensorflow,
     "std::bad_alloc", # tensorflow
     "Bus error", # stemid 2 -> clustexpr
     "what\\(\\):  Resource temporarily unavailable", # grandprix
     "Could not allocate metaspace", # cellrouter, something with "initialisation of vm"
+    "space available for allocation", # paga
     "error writing to connection"
   )
   is_memory_problem <- function(message) {
