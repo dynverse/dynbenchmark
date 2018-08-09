@@ -5,7 +5,7 @@ library(htmltools)
 library(glue)
 library(whisker)
 
-experiment("04-method_characterisation/method_testing/site")
+experiment("05-method_testing/site")
 
 #   ____________________________________________________________________________
 #   Helper functions                                                        ####
@@ -85,8 +85,8 @@ generate_method_status_badge <- function(method_status, full = TRUE) {
 #   Process outputs                                                         ####
 
 # read outputs
-output <- read_rds(derived_file("output.rds", experiment = "04-method_characterisation/method_testing"))
-design <- read_rds(derived_file("design.rds", experiment = "04-method_characterisation/method_testing"))
+output <- read_rds(derived_file("output.rds", experiment = "05-method_testing"))
+design <- read_rds(derived_file("design.rds", experiment = "05-method_testing"))
 
 # generate method specific pages
 dataset_ids <- design$datasets$id
