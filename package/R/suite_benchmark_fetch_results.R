@@ -61,6 +61,10 @@ benchmark_fetch_results <- function() {
               error_mode = stderr,
               output_models = metadata$output_models
             )
+
+            # invalidate timings for errored methods
+            out <- out %>%
+              mutate_at(vars(starts_with("time_")), function(x) NA)
           }
 
           out$job_exit_status <- extract_job_exit_status(qacct_out, i)
@@ -164,6 +168,7 @@ extract_error_status <- function(stdout, stderr, error_message, job_exit_status,
     is_memory_problem(stderr) ~ "memory_limit",
     is_memory_problem(stdout) ~ "memory_limit",
     is_memory_problem(error_message) ~ "memory_limit",
+    grepl("prior information", tolower(stdout)) ~ "missing_prior",
     job_exit_status %in% c("137", "140", "9", "64") ~ "time_limit",
     job_exit_status != "0" ~ "execution_error",
     !produced_model ~ "method_error",
