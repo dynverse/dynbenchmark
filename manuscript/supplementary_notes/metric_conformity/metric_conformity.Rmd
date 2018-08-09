@@ -1,10 +1,17 @@
 ---
-title: "Method conformity"
-output: html_document
+title: "Metric conformity"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: true
+mainfont: DejaVu Sans
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(
+  echo = FALSE
+)
+options(knitr.duplicate.label = 'allow')
 
 library(tidyverse)
 library(dynbenchmark)
@@ -15,20 +22,34 @@ experiment("03-metric_characterisation/01-metric_conformity")
 ```{r}
 assessments <- read_rds(derived_file("assessments.rds"))
 rules <- read_rds(derived_file("rules.rds"))
-
-rules <- rules %>% 
-  mutate(
-    image_location = map_chr(id, function(id) figure_file(paste0("images/", id, ".png"))),
-    image_found = file.exists(image_location)
-  )
-
-if (any(!rules$image_found)) {stop("Files not found: ", basename(rules$image_location[!rules$image_found]))}
 ```
 
+## Summary
+
+```{r}
+assessments %>%
+  left_join(rules %>% select(id, name), by = c("rule_id" = "id")) %>%
+  unnest(conformity) %>%
+  mutate(
+    metric_id = label_metrics(metric_id, label_type = "latex") %>% paste0("$", ., "$") %>% forcats::fct_inorder(),
+    conforms = kableExtra::cell_spec(
+      ifelse(conforms, "\U2714", "\U2716"),
+      background = ifelse(conforms, "#2ECC40", "#FF4136"),
+      format = "latex"
+    )
+  ) %>%
+  spread(metric_id, conforms) %>%
+  select(-rule_id) %>% 
+  knitr::kable(format = "latex", escape = FALSE) %>%
+  kableExtra::kable_styling(row_label_position = "r")
+```
+
+\pagebreak
 
 ```{r results='asis'}
-walkdf(assessments, function(assessment) {
+# assessment <- dynutils::extract_row_to_list(assessments, 1)
+
+walkdf(assessments[1, ], function(assessment) {
   cat(knitr::knit_child("assessment.Rmd", quiet=TRUE, envir = environment()))
-  cat("\n------------------------------\n")
 })
 ```

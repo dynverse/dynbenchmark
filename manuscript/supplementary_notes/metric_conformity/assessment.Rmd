@@ -1,6 +1,5 @@
 ---
 title: "assessment"
-output: html_document
 params:
   assessment: NULL
 ---
@@ -9,26 +8,52 @@ params:
 rule <- dynutils::extract_row_to_list(rules, which(rules$id == assessment$rule_id))
 ```
 
-## `r knitr::include_graphics(rule$image_location)` `r label_long(assessment$rule_id)`
+\begin{center}
+```{r, out.width="2in", out.height="10in", dpi = 300}
+knitr::include_graphics(rule$image_location)
+```
+\end{center}
 
 `r rule$description`
+
+A metric conforms to this rule if: $`r rule$conforms_if`$
+
+```{r}
+assessment$conformity %>% 
+  select(metric_id, conforms) %>% 
+  arrange(metric_id) %>% 
+  mutate(
+    metric_id = label_metrics(metric_id, label_type = "latex") %>% paste0("$", ., "$") %>% forcats::fct_inorder(),
+    conforms = kableExtra::cell_spec(
+      ifelse(conforms, "\U2714", "\U2716"), 
+      background = ifelse(conforms, "#2ECC40", "#FF4136"),
+      format = "latex"
+    )
+  ) %>% 
+  spread(metric_id, conforms) %>% 
+  knitr::kable(format = "latex", escape = FALSE) %>% 
+  kableExtra::kable_styling() %>% 
+  kableExtra::row_spec(0, hline_after = FALSE)
+```
 
 ```{r}
 width <- ifelse(is.null(assessment$plot_datasets$width), 1, assessment$plot_datasets$width)
 height <- ifelse(is.null(assessment$plot_datasets$height), 1, assessment$plot_datasets$height)
 ```
-```{r, fig.width=width, fig.height=height}
+```{r A, fig.width=width, fig.height=height, out.width=paste0(width/2, "in")}
 assessment$plot_datasets
 ```
-
-
-
-
 
 ```{r}
 width <- ifelse(is.null(assessment$plot_scores$width), 1, assessment$plot_scores$width)
 height <- ifelse(is.null(assessment$plot_scores$height), 1, assessment$plot_scores$height)
 ```
-```{r, fig.width=width, fig.height=height}
+```{r B, fig.width=width, fig.height=height, out.width=paste0(width/2, "in")}
 assessment$plot_scores
 ```
+
+
+----------------------------------------------------------------------------
+
+
+\pagebreak

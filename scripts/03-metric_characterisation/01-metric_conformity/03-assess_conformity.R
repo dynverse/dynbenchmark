@@ -70,7 +70,7 @@ assessments %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # test one rule
-rule <- rules %>% extract_row_to_list(which(rules$id == "combined_local_global_position_change"))
+rule <- rules %>% extract_row_to_list(which(rules$id == "cell_gathering"))
 assessment <- assess_conformity(rule, scores, models)
 assessment$conformity
 assessment$plot_scores
@@ -86,6 +86,17 @@ assessment$plot_datasets
 dev.off()
 
 
-# save
+# save assessment
 write_rds(assessments, derived_file("assessments.rds"))
+
+# add image location to rules and save
+# source(script_file("helper-create_perturbation_images.R))
+rules <- rules %>%
+  mutate(
+    image_location = map_chr(id, function(id) figure_file(paste0("images/", id, ".png"))),
+    image_found = file.exists(image_location)
+  )
+
+if (any(!rules$image_found)) {stop("Files not found: ", basename(rules$image_location[!rules$image_found]))}
+
 write_rds(rules, derived_file("rules.rds"))
