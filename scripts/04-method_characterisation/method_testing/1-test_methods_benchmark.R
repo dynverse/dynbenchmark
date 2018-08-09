@@ -93,7 +93,7 @@ method_status_colors <- c(
   low_correlation = "#01FF70",
   success = "#2ECC40"
 )
-output %>%
+g <- output %>%
   mutate(dataset_id = gsub("specific_example/.*", "specific_example", dataset_id)) %>%
   ggplot(aes(correlation, fct_rev(method_id))) +
   geom_label(aes(label = method_status, fill = method_status)) +
@@ -102,6 +102,7 @@ output %>%
   facet_wrap(~dataset_id, nrow = 1) +
   theme_bw()
 
+ggsave(derived_file("method_status.pdf"), g, width = 16, height = 16)
 
 #' @examples
 #' output %>% filter(method_id == "cellrouter") %>% pull(stderr) %>% first() %>% cat
