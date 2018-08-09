@@ -70,7 +70,7 @@ datasets <-
   select(id, type, fun, everything())
 
 # define methods
-checks <- read_rds(derived_file("checks.rds", experiment_id = "04-method_characterisation/method_testing"))
+checks <- read_rds(derived_file("checks.rds", experiment_id = "05-method_testing"))
 
 method_ids <- checks %>% filter(ran > 0) %>% pull(method_id)
 # method_ids <- dynmethods::methods$id
