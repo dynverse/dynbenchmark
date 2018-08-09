@@ -84,7 +84,7 @@ methods <-
     l
   }) %>%
   list_as_tibble() %>%
-  select(id, type, fun, everything()s)
+  select(id, type, fun, everything())
 
 # create design
 design <- benchmark_generate_design(
@@ -96,8 +96,8 @@ design$crossing <- design$crossing %>%
   left_join(datasets %>% select(dataset_id = id, memory), by = "dataset_id") %>%
   mutate(
     memory = case_when(
-      method_id == "cellrouter" & memory == "5G" ~ "10G", # cellrouter needs a bit more attention
-      method_id == "cellrouter" & memory == "10G" ~ "20G", # cellrouter needs a bit more attention
+      method_id %in% c("cellrouter", "grandprix") & memory == "5G" ~ "10G",
+      method_id %in% c("cellrouter", "grandprix") & memory == "10G" ~ "20G"
       TRUE ~ memory
     )
   )
