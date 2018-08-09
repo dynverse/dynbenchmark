@@ -88,11 +88,14 @@ label_pvalue <- function(p_values, cutoffs = c(0.1, 0.01, 1e-5)) {
 #' @param parse Whether to parse the label into an expression
 #'
 #' @export
-label_metric <- function(metric_id, parse = FALSE) {
+label_metric <- function(metric_id, label_type = c("plotmath", "latex", "long_name"), parse = FALSE) {
+  label_type <- match.arg(label_type)
+
   if (length(metric_id) > 1) {stop("Needs only one metric_id")}
 
   if (metric_id %in% dyneval::metrics$metric_id) {
-    label <- dyneval::metrics$name[match(metric_id, dyneval::metrics$metric_id)]
+    if (!label_type %in% colnames(dyneval::metrics)) stop(label_type, " not found in dyneval::metrics")
+    label <- dyneval::metrics[[label_type]][match(metric_id, dyneval::metrics$metric_id)]
   } else {
     label <- label_long(metric_id)
   }
@@ -103,6 +106,12 @@ label_metric <- function(metric_id, parse = FALSE) {
   }
 
   label
+}
+
+#' @rdname label_metric
+#' @export
+label_metrics <- function(metric_ids, ...) {
+  map_chr(metric_ids, label_metric, ...)
 }
 
 #' Get the limits of a metric
