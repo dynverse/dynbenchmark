@@ -164,6 +164,7 @@ extract_error_status <- function(stdout, stderr, error_message, job_exit_status,
   }
 
   case_when(
+    produced_model ~ "no_error",
     job_exit_status %in% c("134", "139") ~ "memory_limit",
     is_memory_problem(stderr) ~ "memory_limit",
     is_memory_problem(stdout) ~ "memory_limit",
@@ -171,8 +172,7 @@ extract_error_status <- function(stdout, stderr, error_message, job_exit_status,
     grepl("prior information", tolower(stdout)) ~ "missing_prior",
     job_exit_status %in% c("137", "140", "9", "64") ~ "time_limit",
     job_exit_status != "0" ~ "execution_error",
-    !produced_model ~ "method_error",
-    TRUE ~ "no_error"
+    TRUE ~ "method_error"
   )
 }
 
