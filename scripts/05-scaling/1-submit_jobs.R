@@ -67,8 +67,7 @@ datasets <-
       TRUE ~ "5G"
     )
   ) %>%
-  select(id, type, fun, everything()) %>%
-  filter(memory != "32G") # disable 32G for now
+  select(id, type, fun, everything())
 
 # define methods
 checks <- read_rds(derived_file("checks.rds", experiment_id = "04-method_characterisation/method_testing"))
@@ -76,22 +75,42 @@ checks <- read_rds(derived_file("checks.rds", experiment_id = "04-method_charact
 method_ids <- checks %>% filter(ran > 0) %>% pull(method_id)
 # method_ids <- dynmethods::methods$id
 # method_ids <- c("scorpius", "identity", "error", "embeddr") # test run
+methods <-
+  dynwrap::get_ti_methods(method_ids, evaluate = FALSE) %>%
+  mapdf(function(m) {
+    l <- m$method_func()
+    l$fun <- m$method_func
+    l$type <- "function"
+    l
+  }) %>%
+  list_as_tibble() %>%
+  select(id, type, fun, everything()s)
 
 # create design
 design <- benchmark_generate_design(
   datasets = datasets,
-  methods = method_ids
+  methods = methods
 )
 
-design$crossing <- design$crossing %>% left_join(datasets %>% select(dataset_id = id, memory), by = "dataset_id")
+design$crossing <- design$crossing %>%
+  left_join(datasets %>% select(dataset_id = id, memory), by = "dataset_id") %>%
+  mutate(
+    memory = case_when(
+      method_id == "cellrouter" & memory == "5G" ~ "10G", # cellrouter needs a bit more attention
+      method_id == "cellrouter" & memory == "10G" ~ "20G", # cellrouter needs a bit more attention
+      TRUE ~ memory
+    )
+  )
 
 # save configuration
 write_rds(design, derived_file("design.rds"))
 
-design <- read_rds(derived_file("design.rds"))
+design_filt <- read_rds(derived_file("design.rds"))
+
+design_filt$crossing <- design_filt$crossing %>% filter(memory %in% c("5G", "10G")) # disable larger networks for now
 
 benchmark_submit(
-  design = design,
+  design = design_filt,
   qsub_grouping = "{method_id}/{memory}",
   qsub_params = function(method_id, memory) list(timeout = 3600, memory = memory),
   metrics = list(dummy = function(dataset, model) 1),
