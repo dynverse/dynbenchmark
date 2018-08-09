@@ -1,0 +1,20 @@
+---
+title: "Datasets"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The datasets are split in real datasets and synthetic datasets. The real datasets are downloaded and preprocessed first, and characteristics from these datasets (such as the number of cells and genes, library sizes, dropout probabilities, ...) are used to generate synthetic datasets. Finally, these dataset are uploaded to zenodo.
+
+All datasets can be downloaded from zenodo using the [00-download_from_zenodo.R](00-download_from_zenodo.R) script.
+
+```{r child='01-real/README.Rmd'}
+
+```
+
+```{r child='02-synthetic/README.Rmd'}
+
+```
