@@ -25,22 +25,35 @@ data <-
 
 axis_scale <- data %>% select(lnrow, nrow) %>% unique() %>% filter(lnrow %% 1 == 0)
 
+dat <- data %>% filter(error_status == "no_error", time_method > 1) %>% as_tibble() %>% filter(method_id == "calista") %>% filter(n() > 10)
+
 models <-
   data %>%
   filter(error_status == "no_error", time_method > 1) %>%
   as_tibble() %>%
   group_by(method_id) %>%
   filter(n() > 10) %>% # need at least a few data points
-  summarise(
-    method_name = method_name[[1]],
-    model = list(glm(log10(time_method) ~ lnrow + lncol))
-  ) %>%
-  mutate(
-    intercept = map_dbl(model, ~ .$coefficients[[1]]),
-    lnrow = map_dbl(model, ~ .$coefficients[[2]]),
-    lncol = map_dbl(model, ~ .$coefficients[[3]]),
-    lpredtime = map_dbl(model, ~sum(predict(., datasets_info)))
-  )
+  do({
+    dat <- .
+    out <- dat %>% select(method_id, method_name) %>% unique()
+    model <- glm(log10(time_method) ~ lnrow + lncol, data = dat)
+    # model <- glm(log10(time_method) ~ lnrow + lncol + lnrow * lncol, data = dat)
+    sum <- summary(model)
+
+    coef_names <- c("(Intercept)" = "intercept", "lnrow" = "lnrow", "lncol" = "lncol", "lnrow:lncol" = "lnrow_lncol")[rownames(sum$coefficients)]
+    coef_values <- set_names(
+      c(sum$coefficients[,1], sum$coefficients[,4]),
+      c(coef_names, paste0("p_", coef_names))
+    )
+
+    lpredtime <- predict(model, datasets_info) %>% sum()
+
+    out %>%
+      mutate(model = list(model)) %>%
+      bind_cols(as.data.frame(t(coef_values))) %>%
+      mutate(lpredtime)
+  }) %>%
+  ungroup()
 
 data_pred <- mapdf_dfr(models, function(model) {
   dat <- datasets_info %>% select(dataset_id = id, lnrow, lncol)
@@ -155,8 +168,9 @@ columns <-
     id = c("lpredtime", "baseline", "# genes", "# features"),
     x = c(1.1, 2.2, 3.3, 4.4) + .5
   )
-g1 <- models %>%
-  mutate_if(is.numeric, function(x) dynutils::scale_minmax(x)) %>%
+g <- models %>%
+  # mutate_at(vars(starts_with("p_")), function(x) log10(x)) %>%
+  mutate_at(c("lpredtime", "lnrow", "lncol", "intercept"), function(x) dynutils::scale_minmax(x)) %>%
   arrange(lpredtime) %>%
   mutate(
     method_id_f = factor(method_id, levels = method_id),
@@ -167,23 +181,66 @@ g1 <- models %>%
   geom_text(aes(1, y, label = method_name), hjust = 1) +
   geom_text(aes(x, 0, label = id), columns) +
   geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 1.1, xmax = 1.1 + lpredtime)) +
-  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 2.2, xmax = 2.2 + lnrow)) +
-  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 3.3, xmax = 3.3 + lncol)) +
-  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 4.4, xmax = 4.4 + intercept)) +
-  cowplot::theme_nothing() +
-  expand_limits(x = -.5)
+  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 2.2, xmax = 2.2 + lnrow, fill = p_lnrow)) +
+  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 3.3, xmax = 3.3 + lncol, fill = p_lncol)) +
+  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 4.4, xmax = 4.4 + intercept, fill = p_intercept)) +
+  theme_clean() +
+  theme(
+    panel.border = element_blank(),
+    axis.ticks = element_blank(),
+    panel.grid = element_blank(),
+    axis.title = element_blank(),
+    axis.text = element_blank()
+  ) +
+  expand_limits(x = -.5) +
+  scale_fill_distiller(palette = "RdYlBu") +
+  labs(fill = "Coefficient\n-log pvalue")
+
+ggsave(derived_file("overview_ranking.pdf"), g, width = 10, height = 10)
+
 
 g2 <-
   ggplot(models, aes(lnrow, lncol)) +
   geom_point(aes(size = intercept, colour = intercept)) +
-  ggrepel::geom_text_repel(aes(label = method_id)) +
+  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
   theme_classic() +
-  scale_colour_distiller(palette = "RdYlBu")
+  scale_colour_distiller(palette = "RdYlBu") +
+  theme(legend.position = "bottom") +
+  labs(x = "# cells", y = "# features", colour = "baseline", size = "baseline")
+
+g3 <-
+  ggplot(models, aes(lnrow, -log10(p_lnrow))) +
+  geom_point(aes(colour = lpredtime, size = lpredtime)) +
+  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
+  theme_classic() +
+  scale_colour_distiller(palette = "RdYlBu") +
+  theme(legend.position = "bottom") +
+  labs(x = "# cells", y = "-log10(p_cells)")
+
+g4 <-
+  ggplot(models, aes(lncol, -log10(p_lncol))) +
+  geom_point(aes(colour = lpredtime, size = lpredtime)) +
+  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
+  theme_classic() +
+  scale_colour_distiller(palette = "RdYlBu") +
+  theme(legend.position = "bottom") +
+  labs(x = "# features", y = "-log10(p_features)")
+
+g5 <-
+  ggplot(models, aes(intercept, -log10(p_intercept))) +
+  geom_point(aes(colour = lpredtime, size = lpredtime)) +
+  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
+  theme_classic() +
+  scale_colour_distiller(palette = "RdYlBu") +
+  theme(legend.position = "bottom") +
+  labs(x = "baseline", y = "-log10(p_baseline)")
 
 g <- patchwork::wrap_plots(
-  g1 + labs(title = "Prediction overview"),
-  g2 + labs(title = "Coefficient plot"),
-  widths = c(1.5, 2),
-  nrow = 1
+  g2,
+  g3,
+  g4,
+  g5,
+  nrow = 2
 )
-ggsave(derived_file("overview.pdf"), g, width = 18, height = 8)
+ggsave(derived_file("overview.pdf"), g, width = 12, height = 12)
+
