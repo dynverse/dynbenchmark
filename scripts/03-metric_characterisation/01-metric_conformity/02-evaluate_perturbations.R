@@ -50,7 +50,7 @@ design <- benchmark_generate_design(
   methods = perturbation_methods,
   parameters = parameters,
   num_repeats = 1,
-  crossing = crossing# %>% filter(method_id == "switch_cells") %>% sample_n(10)
+  crossing = crossing# %>% filter(method_id == "remove_divergence_regions") %>% sample_n(3)
 )
 
 
@@ -71,7 +71,7 @@ results <- benchmark_bind_results(load_models = TRUE)
 #   cl=1,
 #   design$crossing %>%
 #     mutate(x = row_number()) %>%
-#     filter(method_id == "switch_cells") %>%
+#     filter(method_id == "shuffle_cells") %>%
 #     sample_n(10) %>%
 #     pull(x),
 #   benchmark_run_evaluation,

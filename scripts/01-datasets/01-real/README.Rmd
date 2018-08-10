@@ -11,4 +11,15 @@ knitr::opts_chunk$set(echo = TRUE)
 The generation of the real datasets is divided in two parts:
 
 1. The datasets are downloaded from their respective sources (such as GEO) using sets of scripts specific for each dataset in [01-download_from_sources.R](01-download_from_sources.R) (these scripts are located in [helpers-download_from_sources](helpers-download_from_sources))
-2. These datasets are filtered and normalised in [02-filter_and_normalise.R](02-filter_and_normalise.R)
+2. These datasets are filtered and normalised in [02-filter_and_normalise.R](02-filter_and_normalise.R). This is done using the dynbenchmark::process_raw_dataset function.
+
+Following datasets were ultimately generated:
+
+```{r}
+# library(tidyverse)
+# library(dynbenchmark)
+# list_datasets() %>% 
+#   filter(source == "real") %>% 
+#   select(name)
+```
+

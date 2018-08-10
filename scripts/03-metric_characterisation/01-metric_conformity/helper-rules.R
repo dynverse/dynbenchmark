@@ -64,9 +64,8 @@ equal_identity <- lst(
       ggplot(aes(metric_id, score)) +
       geom_boxplot() +
       geom_hline(aes(yintercept = cutoff), data = metric_cutoffs %>% enframe("metric_id", "cutoff"), linetype = "dashed") +
-      scale_y_reverse(limits = c(1, 0.9)) +
+      scale_y_continuous(limits = c(0.9, 1)) +
       scale_x_discrete(NULL, labels = labels) +
-      coord_flip() +
       theme_bw() +
       theme(
         panel.grid.minor = element_blank(),
@@ -91,7 +90,7 @@ equal_identity <- lst(
       filter(num_cells == 100) %>%
       pull(model) %>%
       first() %>%
-      {plot_graph(.) + ggtitle("Identity")}
+      {plot_graph(.) + ggtitle("Identity") + theme(legend.position = "none", plot.title = element_text(hjust = 0.5))}
 
     plot_datasets$width <- 4
     plot_datasets$height <- length(unique(scores$metric_id)) / 2
@@ -148,6 +147,7 @@ rule_lower <- function(
         ggplot(aes(metric_id, difference)) +
         ggbeeswarm::geom_quasirandom() +
         geom_hline(yintercept = 0, linetype = "dashed") +
+        geom_point(data = differences_mean, color = "red", size = 4) +
         scale_x_discrete(NULL, position = "top", labels = labels) +
         scale_y_continuous("Score difference", limits = c(-1, max(differences$difference, 0))) +
         theme_bw() +
@@ -156,7 +156,7 @@ rule_lower <- function(
           panel.border = element_blank()
         )
 
-      plot_scores$width <- length(unique(scores$metric_id)) * 1.5
+      plot_scores$width <- length(unique(scores$metric_id))
       plot_scores$height <- 4
 
       lst(
@@ -166,6 +166,7 @@ rule_lower <- function(
     },
     plot_datasets = function(models) {
       models <- models %>%
+        mutate(method_id = factor(method_id, levels = c("identity", !!method_id))) %>%
         left_join(dataset_design, "dataset_id") %>%
         group_by(method_id) %>%
         filter(num_cells == 100) %>%
@@ -176,7 +177,7 @@ rule_lower <- function(
       grouping <- dynwrap::group_onto_trajectory_edges(models$model[[1]])
       plot_datasets <- map2(
         models$model,
-        models$method_id,
+        c("Dataset", models$method_id[[2]]),
         function(model, title) {
           plot_graph(model, grouping=grouping) + ggtitle(label_long(title)) + theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
         }) %>%
@@ -250,6 +251,17 @@ shuffle_lengths <- rule_lower(
   method_id = "shuffle_lengths"
 )
 
+remove_divergence_regions <- rule_lower(
+  id = "remove_divergence_regions",
+  name = "Removing divergence regions",
+  description = "Removing divergence regions should lower the score",
+  dataset_ids = dataset_design %>% filter(
+    topology_id == "bifurcation_tented",
+    cell_positioning != "milestones",
+    num_cells >= 100
+  ) %>% pull(dataset_id),
+  method_id = "remove_divergence_regions"
+)
 
 
 
@@ -525,8 +537,8 @@ change_topology <- lst(
       scale_x_discrete(NULL, labels = NULL) +
       scale_y_continuous(position = "right") +
       scale_color_manual(values = topology_colors) +
-      scale_fill_manual(values = topology_colors) +
-      facet_grid(from_topology ~ metric_id, shuffle = "y", labeller = function(tib) {
+      scale_fill_manual("Predicted topology", values = topology_colors) +
+      facet_grid(from_topology ~ metric_id, switch = "y", labeller = function(tib) {
         if ("metric_id" %in% colnames(tib)) {
           tib$metric_id <- map(tib$metric_id, label_metric, parse = TRUE)
         }
@@ -560,7 +572,9 @@ change_topology <- lst(
       arrange(topology)
 
     plot_datasets <- map2(models$topology, models$model, function(title, model) {
-      dynplot::plot_topology(model) + ggtitle(title)
+      dynplot::plot_topology(model) +
+        ggtitle(title) +
+        theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
     }) %>% patchwork::wrap_plots(ncol = 4)
 
     plot_datasets$width <- 3 * 4
@@ -852,6 +866,7 @@ rules <- list(
   combined_local_global_position_change,
 
   filter_cells,
+  remove_divergence_regions,
 
   time_warping_start,
   time_warping_parabole,

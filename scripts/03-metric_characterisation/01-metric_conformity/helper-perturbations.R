@@ -104,6 +104,20 @@ perturb_shuffle_cells_edgewise <- function(dataset) {
     )
 }
 
+
+## Remove cells
+perturb_remove_divergence_regions <- function(dataset) {
+  progressions <- dataset$progressions %>% group_by(cell_id) %>% arrange(-percentage) %>% slice(1) %>% ungroup()
+  divergence_regions <- dataset$divergence_regions %>% filter(FALSE)
+
+  dataset %>%
+    add_trajectory(
+      milestone_network = dataset$milestone_network,
+      progressions = progressions,
+      divergence_regions = divergence_regions
+    )
+}
+
 #   ____________________________________________________________________________
 #   Changing the topology                                                   ####
 ##  ............................................................................
