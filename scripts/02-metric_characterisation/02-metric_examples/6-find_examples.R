@@ -3,7 +3,7 @@ library(dynbenchmark)
 library(dynplot)
 library(PRISM)
 
-experiment("03-metric_characterisation/6-find_examples")
+experiment("02-metric_characterisation/6-find_examples")
 
 cells_per_group <- 5
 num_groups <- 3

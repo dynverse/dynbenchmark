@@ -634,7 +634,7 @@ A comparison of edge flip scores between common trajectory topologies is illustr
 
 ```{r}
 add_sfig(
-  figure_file("edge_flip_comparison.svg", experiment_id="03-metric_characterisation/4-edge_flip"), 
+  figure_file("edge_flip_comparison.svg", experiment_id="02-metric_characterisation/4-edge_flip"), 
   "edge_flip_comparison", 
  "Edge flip score values for common trajectory topologies",
   ""

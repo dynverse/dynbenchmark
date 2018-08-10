@@ -18,7 +18,7 @@ options(knitr.duplicate.label = 'allow')
 library(tidyverse)
 library(dynbenchmark)
 
-experiment("03-metric_characterisation/01-metric_conformity")
+experiment("02-metric_characterisation/01-metric_conformity")
 ```
 
 ```{r}

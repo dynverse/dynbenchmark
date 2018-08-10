@@ -4,7 +4,7 @@ library(tidyverse)
 library(dynbenchmark)
 library(dynutils)
 
-experiment("03-metric_characterisation/5-score_aspects")
+experiment("02-metric_characterisation/5-score_aspects")
 
 wrap <- function(x) {
   wrap_prediction_model(

@@ -4,7 +4,7 @@ library(tidyverse)
 library(dynbenchmark)
 library(dyntoy)
 
-experiment("03-metric_characterisation/01-metric_conformity")
+experiment("02-metric_characterisation/01-metric_conformity")
 
 source(scripts_file("helper-topologies.R"))
 
