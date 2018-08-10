@@ -1,7 +1,7 @@
 library(tidyverse)
 library(dynbenchmark)
 
-experiment("03-metric_characterisation/01-metric_conformity")
+experiment("02-metric_characterisation/01-metric_conformity")
 
 dataset_design <- read_rds(derived_file("dataset_design.rds"))
 datasets <- read_rds(derived_file("datasets.rds"))
