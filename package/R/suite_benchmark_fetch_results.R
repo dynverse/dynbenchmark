@@ -146,7 +146,8 @@ extract_job_exit_status <- function(qacct_out, task_id) {
 }
 
 extract_error_status <- function(stdout, stderr, error_message, job_exit_status, produced_model) {
-  memory_messages <- c(
+  txt <- tolower(paste0(stdout, " ", stderr, " ", error_message))
+  memory_messages <- tolower(c(
     "cannot allocate vector of size", # R
     "MemoryError", # python
     "OOM when allocating tensor", # tensorflow
@@ -157,8 +158,10 @@ extract_error_status <- function(stdout, stderr, error_message, job_exit_status,
     "what\\(\\):  Resource temporarily unavailable", # grandprix
     "Could not allocate metaspace", # cellrouter, something with "initialisation of vm"
     "space available for allocation", # paga
+    "out of memory", # dpt
+    "allocate working memory", # embeddr
     "error writing to connection"
-  )
+  ))
   is_memory_problem <- function(message) {
     any(map_lgl(memory_messages, ~grepl(., message)))
   }
@@ -166,10 +169,8 @@ extract_error_status <- function(stdout, stderr, error_message, job_exit_status,
   case_when(
     produced_model ~ "no_error",
     job_exit_status %in% c("134", "139") ~ "memory_limit",
-    is_memory_problem(stderr) ~ "memory_limit",
-    is_memory_problem(stdout) ~ "memory_limit",
-    is_memory_problem(error_message) ~ "memory_limit",
-    grepl("prior information", tolower(stdout)) ~ "missing_prior",
+    is_memory_problem(txt) ~ "memory_limit",
+    grepl("prior information", txt) ~ "missing_prior",
     job_exit_status %in% c("137", "140", "9", "64") ~ "time_limit",
     job_exit_status != "0" ~ "execution_error",
     TRUE ~ "method_error"
