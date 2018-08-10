@@ -70,7 +70,7 @@ assessments %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # test one rule
-rule <- rules %>% extract_row_to_list(which(rules$id == "shuffle_edges"))
+rule <- rules %>% extract_row_to_list(which(rules$id == "equal_identity"))
 assessment <- assess_conformity(rule, scores, models)
 assessment$conformity
 assessment$plot_scores
