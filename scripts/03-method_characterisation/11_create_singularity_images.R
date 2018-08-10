@@ -17,7 +17,7 @@ handle <- qsub::qsub_lapply(
   qsub_config = qsub::override_qsub_config(
     name = "singbuild",
     memory = "10G",
-    num_cores = 6,
+    num_cores = 2,
     wait = FALSE,
     stop_on_error = FALSE
   ),
@@ -28,16 +28,24 @@ handle <- qsub::qsub_lapply(
     # determine path location of global cache and local cache
     global_cache <- "/scratch/irc/shared/dynverse/.singularity_cache"
     cachedir <- paste0(global_cache, "_", method_id)
-    tempdir <- paste0("/tmp/singularity_", method_id)
+    tempdir <- paste0("/data/singularity_tmp/singularity_", method_id)
 
     # remove local cache
     if (dir.exists(cachedir)) {
       unlink(cachedir, recursive = TRUE)
     }
+    if (dir.exists(cachedir)) {
+      unlink(tempdir, recursive = TRUE)
+    }
 
     # create cache folders
     dir.create(file.path(cachedir, "/docker"), recursive = TRUE, showWarnings = FALSE)
     dir.create(file.path(global_cache, "/docker"), recursive = TRUE, showWarnings = FALSE)
+    dir.create(file.path(tempdir, "/docker"), recursive = TRUE, showWarnings = FALSE)
+
+    # remove tempdir and local cache after singularity build
+    on.exit(unlink(cachedir, recursive = TRUE))
+    on.exit(unlink(tempdir, recursive = TRUE))
 
     # create link for every file in the global cache to the local cache
     cached_files <- list.files(file.path(global_cache, "/docker"))
@@ -54,10 +62,8 @@ handle <- qsub::qsub_lapply(
     # configure singularity to use correct cache and tempdirs
     Sys.setenv(SINGULARITY_CACHEDIR = cachedir)
     Sys.setenv(SINGULARITY_LOCALCACHEDIR = tempdir)
-
-    # remove tempdir and local cache after singularity build
-    on.exit(unlink(cachedir, recursive = TRUE))
-    on.exit(unlink(tempdir, recursive = TRUE))
+    Sys.setenv(SINGULARITY_TMPDIR = tempdir)
+    Sys.setenv(TEMPDIR = tempdir) # not taking any chances
 
     # build singularity image
     cat("Building singularity image\n")
@@ -87,4 +93,6 @@ qsub::rsync_remote(
   path_dest = derived_file(remote = FALSE),
   verbose = TRUE
 )
+
+qsub::run_remote("for i in $(seq 1 8); do ssh prismcls0$i 'rm -rf /data/singularity_tmp'; done")
 
