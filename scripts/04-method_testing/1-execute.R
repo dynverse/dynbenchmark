@@ -17,8 +17,8 @@ design <- benchmark_generate_design(
   ),
   methods = method_ids,
   parameters = list(
-    fateid = tibble(id = "default", params = list(list(force = TRUE))),
-    stemnet = tibble(id = "default", params = list(list(force = TRUE)))
+    fateid = tibble(id = "default", params = list(force = TRUE)),
+    stemnet = tibble(id = "default", params = list(force = TRUE))
   )
 )
 
@@ -80,24 +80,16 @@ extract_method_status <- function(error_status, correlation, ...) {
   case_when(
     error_status != "no_error" ~ error_status,
     correlation < 0.5 ~ "low_correlation",
-    TRUE ~ "success"
+    TRUE ~ "no_error"
   )
 }
 output$method_status <- pmap_chr(output, extract_method_status)
 
-method_status_colors <- c(
-  method_error = "#FF4136",
-  execution_error = "#85144b",
-  memory_limit = "#FF851B",
-  time_limit = "#FFDC00",
-  low_correlation = "#01FF70",
-  success = "#2ECC40"
-)
 g <- output %>%
   mutate(dataset_id = gsub("specific_example/.*", "specific_example", dataset_id)) %>%
   ggplot(aes(correlation, fct_rev(method_id))) +
   geom_label(aes(label = method_status, fill = method_status)) +
-  scale_fill_manual(values = method_status_colors) +
+  scale_fill_manual(values = dynbenchmark::method_status_colours) +
   scale_x_continuous(expand = c(0.5, 0)) +
   facet_wrap(~dataset_id, nrow = 1) +
   theme_bw()
@@ -112,7 +104,7 @@ ggsave(derived_file("method_status.pdf"), g, width = 16, height = 16)
 #'
 #' output %>% filter(method_id == "projected_dpt", grepl("schl", dataset_id)) %>% pull(stderr) %>% first() %>% cat
 #'
-#' output %>% filter(method_id == "merlot") %>% pull(stdout) %>% cat
+#' output %>% filter(method_id == "comp1", method_status == "method_error") %>% pull(stdout) %>% cat
 #'
 #' output %>% filter(str_detect(error_message, "no item called .*")) %>% pull(method_id) %>% unique()
 #'
