@@ -2,9 +2,13 @@
 % Please edit documentation in R/plotting_labels.R
 \name{label_metric}
 \alias{label_metric}
+\alias{label_metrics}
 \title{Label the metrics}
 \usage{
-label_metric(metric_id, parse = FALSE)
+label_metric(metric_id, label_type = c("plotmath", "latex", "long_name"),
+  parse = FALSE)
+
+label_metrics(metric_ids, ...)
 }
 \arguments{
 \item{metric_id}{metric id}
