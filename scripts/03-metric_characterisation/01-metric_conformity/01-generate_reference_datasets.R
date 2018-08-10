@@ -12,10 +12,11 @@ source(scripts_file("helper-topologies.R"))
 dataset_design <-
   crossing(
     bind_rows(
-      topologies %>% enframe("topology_id", "topology_model"),
+      topologies %>% enframe("topology_id", "topology_model") %>% mutate(allow_tented_progressions = FALSE),
       tribble(
-        ~topology_id, ~topology_model,
-        "bifurcation_simple", dyntoy::model_bifurcating(max_degree = 1)
+        ~topology_id, ~topology_model, ~allow_tented_progressions,
+        "bifurcation_simple", dyntoy::model_bifurcating(max_degree = 1), FALSE,
+        "bifurcation_tented", dyntoy::model_bifurcating(max_degree = 1), TRUE
       )
     ),
     num_cells = c(10, 50, 100, 200, 500),
@@ -27,7 +28,7 @@ dataset_design <-
     seed = repeat_ix
   )
 
-datasets <- pmap(dataset_design, function(dataset_id, topology_model, num_cells, seed, cell_positioning, ...) {
+datasets <- pmap(dataset_design, function(dataset_id, topology_model, num_cells, seed, cell_positioning, allow_tented_progressions, ...) {
   print(dataset_id)
   set.seed(seed)
   dataset <- generate_dataset(
@@ -35,7 +36,7 @@ datasets <- pmap(dataset_design, function(dataset_id, topology_model, num_cells,
     model = topology_model,
     num_cells = num_cells,
     num_features = 200,
-    allow_tented_progressions = FALSE,
+    allow_tented_progressions = allow_tented_progressions,
     add_prior_information = FALSE,
     normalise = FALSE
   )
