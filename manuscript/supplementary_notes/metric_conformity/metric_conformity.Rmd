@@ -4,6 +4,8 @@ output:
   pdf_document:
     latex_engine: xelatex
     keep_tex: true
+header-includes:
+  - \usepackage{tabularx}
 mainfont: DejaVu Sans
 ---
 
@@ -36,12 +38,17 @@ assessments %>%
       ifelse(conforms, "\U2714", "\U2716"),
       background = ifelse(conforms, "#2ECC40", "#FF4136"),
       format = "latex"
-    )
+    ),
+    rule_id = forcats::fct_inorder(rule_id)
   ) %>%
   spread(metric_id, conforms) %>%
   select(-rule_id) %>% 
-  knitr::kable(format = "latex", escape = FALSE) %>%
-  kableExtra::kable_styling(row_label_position = "r")
+  knitr::kable(format = "latex", escape = FALSE, booktabs = TRUE) %>%
+  kableExtra::kable_styling(full_width = FALSE) %>% 
+  kableExtra::column_spec(1, width="15em") %>% 
+  kableExtra::column_spec(2:20, width = "3em") %>% 
+  kableExtra::row_spec(0, angle = 30) %>% 
+  gsub("\\\\addlinespace", "", .)
 ```
 
 \pagebreak
@@ -49,7 +56,7 @@ assessments %>%
 ```{r results='asis'}
 # assessment <- dynutils::extract_row_to_list(assessments, 1)
 
-walkdf(assessments[1, ], function(assessment) {
+walkdf(assessments[, ], function(assessment) {
   cat(knitr::knit_child("assessment.Rmd", quiet=TRUE, envir = environment()))
 })
 ```

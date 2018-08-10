@@ -5,38 +5,24 @@ output: html_document
 
 
 ```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+```{r}
 library(dynbenchmark)
 library(tidyverse)
 library(dyneval)
 library(cowplot)
-```
 
-```{r}
-experiment("3-score_rules/4-edge_flip")
-
-knitr::opts_chunk$set(echo = TRUE)
+experiment("03-score_rules/02-metric_examples")
 ```
 
 Generate different trajectory topologies
 ```{r}
 topologies <- eval(formals(dyntoy:::generate_milestone_network)$model)
-topologies <- topologies[topologies != "BA"]
-networks_synthetic <- map(topologies, dyntoy:::generate_milestone_network) %>% tibble(milestone_network = ., topology = topologies)
-```
+networks <- map(topologies, dyntoy:::generate_milestone_network) %>% tibble(milestone_network = ., topology = topologies)
 
-Add SCORPIUS predictions
-```{r}
-ti_methods <- list(ti_scorpius())
-data <- dyntoy::generate_toy_datasets(c("linear"), num_replicates=1, num_cells=30, num_genes=10) %>% dynutils::extract_row_to_list(1)
-
-results <- map(ti_methods, ~.$run_fun(data$counts))
-
-networks_methods <- tibble(topology=map_chr(ti_methods, "name"), milestone_network=map(results, "milestone_network"))
-```
-
-```{r}
-networks <- bind_rows(networks_synthetic, networks_methods)
 design <- crossing(networks, networks)
 ```
 
@@ -46,7 +32,7 @@ scores <- design %>% as.list() %>% pmap(function(milestone_network, milestone_ne
   # print(topology1)
   
   start <- Sys.time()
-  score <- dyneval:::calculate_edge_flip(milestone_network, milestone_network1)
+  score <- dyneval:::calculate_edge_flip(milestone_network, milestone_network1, limit_flips = 10)
   time <- Sys.time() - start
   tibble(score=score, time=time)
 }) %>% bind_rows()

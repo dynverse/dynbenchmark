@@ -11,6 +11,7 @@ dataset_design <- read_rds(derived_file("dataset_design.rds"))
 scores <- read_rds(derived_file("scores.rds"))
 models <- read_rds(derived_file("models.rds"))
 
+scores <- scores %>% filter(metric_id %in% evaluated_metrics)
 metrics <- unique(scores$metric_id)
 
 # load rules
@@ -19,11 +20,10 @@ source(scripts_file("helper-rules.R"))
 scores <- scores %>% bind_rows(
   scores %>%
     spread(metric_id, score) %>%
-    mutate(harm_mean = dyneval:::calculate_harmonic_mean(correlation, edge_flip, lm_nmse, featureimp_cor)) %>%
+    mutate(harm_mean = dyneval:::calculate_harmonic_mean(correlation, edge_flip, featureimp_cor, F1_milestones)) %>%
     gather("metric_id", "score", harm_mean) %>%
     select(-one_of(metrics))
-) %>%
-  filter(!metric_id %in% c("rf_mse", "lm_mse"))
+)
 
 # fix order of metrics
 scores$metric_id <- factor(scores$metric_id, levels = unique(scores$metric_id))
@@ -70,7 +70,7 @@ assessments %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # test one rule
-rule <- rules %>% extract_row_to_list(which(rules$id == "cell_gathering"))
+rule <- rules %>% extract_row_to_list(which(rules$id == "shuffle_edges"))
 assessment <- assess_conformity(rule, scores, models)
 assessment$conformity
 assessment$plot_scores
