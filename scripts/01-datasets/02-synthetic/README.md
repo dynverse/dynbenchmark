@@ -19,4 +19,4 @@ Next, we simulate datasets using different simulators:
 
 Each simulation script (02a-02d) first creates a design dataframe, which links particular platforms, different topologies, seeds and other parameters specific for a simulator.
 
-Next it calls the wrappers around the simulators (see [/package/R/simulators.R](/package/R/simulators.R))
+The data is then simulated using wrappers around the simulators (see [/package/R/simulators.R](/package/R/simulators.R)), so that they all return datasets in a format consistent with dynwrap.

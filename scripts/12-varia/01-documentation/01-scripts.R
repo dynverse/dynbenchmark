@@ -2,7 +2,7 @@ library(dynbenchmark)
 library(fs)
 library(tidyverse)
 
-experiment("12-varia/01-scripts")
+experiment("12-varia/01-documentation")
 
 script_locations <- dir_ls("scripts", recursive = TRUE)
 scripts <- tibble(
