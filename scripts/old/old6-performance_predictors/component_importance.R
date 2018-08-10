@@ -6,9 +6,9 @@ experiment("6-performance_predictors")
 
 read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
-method_components <- read_rds(derived_file("method_components.rds", experiment_id = "04-method_characterisation"))
-component_categories <- read_rds(derived_file("component_categories.rds", experiment_id = "04-method_characterisation"))
-component_category_colors <- read_rds(derived_file("component_category_colors.rds", experiment_id = "04-method_characterisation"))
+method_components <- read_rds(derived_file("method_components.rds", experiment_id = "03-method_characterisation"))
+component_categories <- read_rds(derived_file("component_categories.rds", experiment_id = "03-method_characterisation"))
+component_category_colors <- read_rds(derived_file("component_category_colors.rds", experiment_id = "03-method_characterisation"))
 
 #   ____________________________________________________________________________
 #   Component importance                                                    ####

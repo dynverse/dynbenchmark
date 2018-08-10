@@ -3,7 +3,7 @@ library(dynbenchmark)
 
 experiment("11-evaluation_robustness")
 
-methods <- read_rds(derived_file("methods.rds", experiment_id = "04-method_characterisation")) %>%
+methods <- read_rds(derived_file("methods.rds", experiment_id = "03-method_characterisation")) %>%
   filter(type %in% c("algorithm", "control"))
 outputs_list <- read_rds(derived_file("outputs_postprocessed.rds", "06-optimise_parameters/3-evaluate_parameters"))
 

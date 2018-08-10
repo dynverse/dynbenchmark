@@ -2,7 +2,7 @@ library(googlesheets)
 library(tidyverse)
 library(dynbenchmark)
 
-experiment("04-method_characterisation")
+experiment("03-method_characterisation")
 
 tools <- read_rds(derived_file("tools.rds"))
 

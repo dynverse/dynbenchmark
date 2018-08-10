@@ -13,7 +13,7 @@ library(cowplot)
 ```
 
 ```{r message=F}
-experiment("04-method_characterisation")
+experiment("03-method_characterisation")
 
 implementation_qc <- readRDS(derived_file("implementation_qc.rds"))
 implementations_evaluated <- readRDS(derived_file("implementations_evaluated.rds"))

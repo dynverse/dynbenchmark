@@ -93,7 +93,7 @@ Other methods attempt to infer the topology computationally, which increases the
 
 ```{r, results='asis' }
 add_stable(
-  read_rds(figure_file("implementations_table.rds", "04-method_characterisation"))[[params$table_format]],
+  read_rds(figure_file("implementations_table.rds", "03-method_characterisation"))[[params$table_format]],
 "implementations",
 paste0("Overview of the trajectory inference methods included in this study. ", glue::glue_data(non_inclusion_reasons, "{footnote}: {long}") %>% glue::collapse("; "))
 )
@@ -276,7 +276,7 @@ We found that most methods fulfilled the basic criteria, such as free availabili
 
 ```{r echo=FALSE, results="asis"}
 add_fig(
-  fig_path = figure_file("implementation_qc_overview.tmp.pdf", experiment_id = "04-method_characterisation"),
+  fig_path = figure_file("implementation_qc_overview.tmp.pdf", experiment_id = "03-method_characterisation"),
   ref_id = "implementation_qc_overview", 
   caption_main = "Overview of the quality control results for every method.", 
   caption_text = glue::glue("Shown is the score given for each method on every item from our quality control score sheet ({ref('stable', 'qc_checks')}). Each aspect of the quality control was part of a category, and each category was weighted so that it contributed equally to the final quality score. Within each category, each aspect also received a weight depending on how often it was mentioned in a set of papers discussing good practices in tool development and evaluation. This is represented in the plot as the height on the y-axis. Top: Average QC score for each method. Right: The average score of each quality control item. Shown into more detail are those items which had a score lower than 0.5.")
@@ -716,7 +716,7 @@ We created a transparent scoring scheme to check the quality of each method base
 add_stable(
   read_rds(figure_file(
     "qc_checks.rds",
-    "04-method_characterisation"
+    "03-method_characterisation"
   ))[[params$table_format]], 
   "qc_checks", 
   "Scoring scheme for method quality control. Each quality aspect was given a weight based on how many times it was mentioned in a set of articles discussing best practices for tool development."

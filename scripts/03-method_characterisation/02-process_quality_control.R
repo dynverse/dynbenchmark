@@ -5,7 +5,7 @@ library(tidyverse)
 library(googlesheets)
 library(dynbenchmark)
 
-experiment("04-method_characterisation")
+experiment("03-method_characterisation")
 
 ##  ............................................................................
 ##  QC sheet processing                                                     ####
