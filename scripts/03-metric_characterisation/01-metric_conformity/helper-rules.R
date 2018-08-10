@@ -145,20 +145,19 @@ rule_lower <- function(
         parse(text = .)
 
       plot_scores <- differences %>%
-        ggplot(aes(difference, metric_id)) +
-        geom_point(shape = "|", size = 4) +
-        geom_point(data = differences_mean, color = "red", size = 3) +
-        geom_vline(xintercept = 0, linetype = "dashed") +
-        scale_y_discrete(NULL, expand = c(0.1, 0), labels = labels) +
-        scale_x_reverse("Score difference", limits = c(max(differences$difference, 0), -1)) +
+        ggplot(aes(metric_id, difference)) +
+        ggbeeswarm::geom_quasirandom() +
+        geom_hline(yintercept = 0, linetype = "dashed") +
+        scale_x_discrete(NULL, position = "top", labels = labels) +
+        scale_y_continuous("Score difference", limits = c(-1, max(differences$difference, 0))) +
         theme_bw() +
         theme(
           panel.grid.minor = element_blank(),
           panel.border = element_blank()
         )
 
-      plot_scores$width <- 6
-      plot_scores$height <- length(unique(scores$metric_id)) / 2
+      plot_scores$width <- length(unique(scores$metric_id)) * 1.5
+      plot_scores$height <- 4
 
       lst(
         conformity,
@@ -191,12 +190,12 @@ rule_lower <- function(
   )
 }
 
-switch_cells_edgewise <- rule_lower(
-  id = "switch_cells_edgewise",
+shuffle_cells_edgewise <- rule_lower(
+  id = "shuffle_cells_edgewise",
   name = "Local cell shuffling",
   description = "Shuffling the positions of cells within each edge should lower the score. This is equivalent to shuffling the cellular position locally.",
   dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies), cell_positioning != "milestones", num_cells > 50) %>% pull(dataset_id),
-  method_id = "switch_cells_edgewise"
+  method_id = "shuffle_cells_edgewise"
 )
 
 merge_bifurcation <- rule_lower(
@@ -211,7 +210,7 @@ concatenate_bifurcation <- rule_lower(
   id = "concatenate_bifurcation",
   name = "Bifurcation concatentation",
   description = "Concatenating one branch of a bifurcation to the other bifurcation branch should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id == "bifurcation_simple") %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id == "bifurcation_simple", num_cells > 50) %>% pull(dataset_id),
   method_id = "concatenate_bifurcation"
 )
 
@@ -235,7 +234,7 @@ split_linear <- rule_lower(
   id = "split_linear",
   name = "Linear splitting",
   description = "Splitting a linear trajectory into a bifurcation should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id == "linear") %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id == "linear", num_cells > 50) %>% pull(dataset_id),
   method_id = "move_terminal_branch"
 )
 
@@ -339,7 +338,7 @@ rule_monotonic <- function(
     grouping <- group_onto_trajectory_edges(models$model[[1]])
     plot_datasets <- map2(
       models$model,
-      glue::glue("{varied_parameter_name}: {varied_parameter_labeller(models[[varied_parameter_id]])})"),
+      glue::glue("{varied_parameter_name}: {varied_parameter_labeller(models[[varied_parameter_id]])}"),
       function(model, title) {
         plot_graph(model, grouping=grouping) + ggtitle(label_long(title)) + theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
       }) %>%
@@ -368,15 +367,15 @@ rule_monotonic <- function(
 }
 
 
-switch_cells <- rule_monotonic(
-  id = "switch_cells",
+shuffle_cells <- rule_monotonic(
+  id = "shuffle_cells",
   name = "Local and global cell shuffling",
   description = "Shuffling the positions of cells should lower the score. This is equivalent to shuffling the cellular position both locally and globally.",
   dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
-  method_id = "switch_cells",
-  parameters = list(switch_cells = tibble(switch_perc = seq(0, 1, 0.1)) %>% mutate(id = as.character(switch_perc*10))),
-  varied_parameter_id = "switch_perc",
-  varied_parameter_name = "Switched cells",
+  method_id = "shuffle_cells",
+  parameters = list(shuffle_cells = tibble(shuffle_perc = seq(0, 1, 0.1)) %>% mutate(id = as.character(shuffle_perc*10))),
+  varied_parameter_id = "shuffle_perc",
+  varied_parameter_name = "shuffleed cells",
   varied_parameter_labeller = scales::percent
 )
 
@@ -392,15 +391,15 @@ filter_cells <- rule_monotonic(
   varied_parameter_labeller = scales::percent
 )
 
-switch_edges <- rule_monotonic(
-  id = "switch_edges",
+shuffle_edges <- rule_monotonic(
+  id = "shuffle_edges",
   name = "Edge shuffling",
   description = "Shuffling the edges in the milestone network should lower the score. This can be seen as changing the cellular positions only globally.",
   dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
-  method_id = "switch_edges",
-  parameters = list(switch_edges = tibble(switch_perc = seq(0, 1, 0.25)) %>% mutate(id = as.character(switch_perc*10))),
-  varied_parameter_id = "switch_perc",
-  varied_parameter_name = "Switched edges",
+  method_id = "shuffle_edges",
+  parameters = list(shuffle_edges = tibble(shuffle_perc = seq(0, 1, 0.25)) %>% mutate(id = as.character(shuffle_perc*10))),
+  varied_parameter_id = "shuffle_perc",
+  varied_parameter_name = "shuffleed edges",
   varied_parameter_labeller = scales::percent
 )
 
@@ -527,7 +526,7 @@ change_topology <- lst(
       scale_y_continuous(position = "right") +
       scale_color_manual(values = topology_colors) +
       scale_fill_manual(values = topology_colors) +
-      facet_grid(from_topology ~ metric_id, switch = "y", labeller = function(tib) {
+      facet_grid(from_topology ~ metric_id, shuffle = "y", labeller = function(tib) {
         if ("metric_id" %in% colnames(tib)) {
           tib$metric_id <- map(tib$metric_id, label_metric, parse = TRUE)
         }
@@ -578,8 +577,8 @@ cell_gathering <- lst(
   name = "Cells on milestones vs edges",
   description = "A score should behave similarly both when cells are located on the milestones (as is the case in real datasets) or on the edges between milestones (as is the case in synthetic datasets).",
   conforms_if = "\\mathit{corr} \\left( \\mathit{score}_{\\textit{edges}} , \\mathit{score}_{\\textit{milestones}} \\right) > 0.9",
-  parameters = switch_cells$parameters,
-  crossing = switch_cells$crossing,
+  parameters = shuffle_cells$parameters,
+  crossing = shuffle_cells$crossing,
   assessment = function(scores) {
     scores_spread <- scores %>%
       left_join(dataset_design, "dataset_id") %>%
@@ -658,7 +657,7 @@ cell_gathering <- lst(
         "Cells on ",
         models_oi$cell_positioning,
         "\n",
-        ifelse(models_oi$param_id == "0", "Identity", "Switched cells")
+        ifelse(models_oi$param_id == "0", "Identity", "shuffleed cells")
       ),
       function(model, title) {
         plot_dendro(model, grouping = grouping) +
@@ -806,25 +805,25 @@ combined_position_topology <- rule_combined(
   description = "Changing both the topology and the cell positions should lower the score more than any of the two individually",
   parameters = list(
     identity = tibble(id = "default"),
-    switch_cells = tibble(switch_perc = 0.25, id = "combination"),
+    shuffle_cells = tibble(shuffle_perc = 0.25, id = "combination"),
     add_connecting_edges = tibble(n_edges = 1, id = "combination"),
-    switch_cells_and_add_connecting_edges = tibble(switch_perc = 0.25, n_edges = 1, id = "combination")
+    shuffle_cells_and_add_connecting_edges = tibble(shuffle_perc = 0.25, n_edges = 1, id = "combination")
   ),
-  method_ids = c("switch_cells", "add_connecting_edges", "switch_cells_and_add_connecting_edges"),
+  method_ids = c("shuffle_cells", "add_connecting_edges", "shuffle_cells_and_add_connecting_edges"),
   dataset_ids = dataset_design %>% filter(num_cells == 100) %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id)
 )
 
-combined_merge_bifurcation_switch_cells <- rule_combined(
-  id = "combined_merge_bifurcation_switch_cells",
+combined_merge_bifurcation_shuffle_cells <- rule_combined(
+  id = "combined_merge_bifurcation_shuffle_cells",
   name = "Bifurcation merging and changing cell positions",
   description = "Merging the two branches of a bifurcation and changing the cells positions should lower the score more than any of the two individually",
   parameters = list(
     identity = tibble(id = "default"),
-    switch_cells = tibble(switch_perc = 0.25, id = "combination"),
+    shuffle_cells = tibble(shuffle_perc = 0.25, id = "combination"),
     merge_bifurcation = tibble(id = "default"),
-    switch_cells_and_merge_bifurcation = tibble(switch_perc = 0.25, id = "combination")
+    shuffle_cells_and_merge_bifurcation = tibble(shuffle_perc = 0.25, id = "combination")
   ),
-  method_ids = c("switch_cells", "merge_bifurcation", "switch_cells_and_merge_bifurcation"),
+  method_ids = c("shuffle_cells", "merge_bifurcation", "shuffle_cells_and_merge_bifurcation"),
   dataset_ids = dataset_design %>% filter(num_cells == 100, topology_id == "bifurcation_simple") %>% pull(dataset_id)
 )
 
@@ -834,11 +833,11 @@ combined_local_global_position_change <- rule_combined(
   description = "Changing the cellular position locally AND globally should lower the score more than any of the two individually.",
   parameters = list(
     identity = tibble(id = "default"),
-    switch_edges = switch_edges$parameters$switch_edges %>% filter(switch_perc == 1),
-    switch_cells_edgewise = tibble(id = "default"),
-    switch_cells = switch_cells$parameters$switch_cells %>% filter(switch_perc == 1)
+    shuffle_edges = shuffle_edges$parameters$shuffle_edges %>% filter(shuffle_perc == 1),
+    shuffle_cells_edgewise = tibble(id = "default"),
+    shuffle_cells = shuffle_cells$parameters$shuffle_cells %>% filter(shuffle_perc == 1)
   ),
-  method_ids = c("switch_edges", "switch_cells_edgewise", "switch_cells"),
+  method_ids = c("shuffle_edges", "shuffle_cells_edgewise", "shuffle_cells"),
   dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies), cell_positioning != "milestones", num_cells > 50) %>% pull(dataset_id)
 )
 
@@ -847,9 +846,9 @@ combined_local_global_position_change <- rule_combined(
 rules <- list(
   equal_identity,
 
-  switch_cells_edgewise,
-  switch_edges,
-  switch_cells,
+  shuffle_cells_edgewise,
+  shuffle_edges,
+  shuffle_cells,
   combined_local_global_position_change,
 
   filter_cells,
@@ -863,7 +862,7 @@ rules <- list(
   add_connecting_edges,
 
   combined_position_topology,
-  combined_merge_bifurcation_switch_cells,
+  combined_merge_bifurcation_shuffle_cells,
 
   merge_bifurcation,
   concatenate_bifurcation,

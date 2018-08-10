@@ -83,9 +83,12 @@ label_pvalue <- function(p_values, cutoffs = c(0.1, 0.01, 1e-5)) {
 }
 
 
+
+
 #' Label the metrics
 #' @param metric_id metric id
 #' @param parse Whether to parse the label into an expression
+#' @param label_type The type of label to return, can be plotmath, latex or long_name
 #'
 #' @export
 label_metric <- function(metric_id, label_type = c("plotmath", "latex", "long_name"), parse = FALSE) {
@@ -109,6 +112,8 @@ label_metric <- function(metric_id, label_type = c("plotmath", "latex", "long_na
 }
 
 #' @rdname label_metric
+#' @param metric_ids The metric ids
+#' @param ... Extra parameters for label_metric
 #' @export
 label_metrics <- function(metric_ids, ...) {
   map_chr(metric_ids, label_metric, ...)
