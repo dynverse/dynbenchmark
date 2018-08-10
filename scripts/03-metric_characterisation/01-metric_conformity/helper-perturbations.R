@@ -5,13 +5,13 @@ perturb_identity <- function(dataset) dataset
 
 ##  ............................................................................
 ##  Changing cell ordering                                                  ####
-## Switch cells
-perturb_switch_n_cells <- function(dataset, switch_n = Inf, seed = NULL) {
+## Shuffle cells
+perturb_shuffle_n_cells <- function(dataset, shuffle_n = Inf, seed = NULL) {
   if (is.numeric(seed) && !is.na(seed)) set.seed(seed)
 
-  switch_n <- min(switch_n, length(dataset$cell_ids))
+  shuffle_n <- min(shuffle_n, length(dataset$cell_ids))
 
-  the_chosen_ones <- sample(dataset$cell_ids, switch_n)
+  the_chosen_ones <- sample(dataset$cell_ids, shuffle_n)
 
   mapper <- set_names(dataset$cell_ids, dataset$cell_ids)
   mapper[match(the_chosen_ones, mapper)] <- sample(the_chosen_ones)
@@ -26,19 +26,19 @@ perturb_switch_n_cells <- function(dataset, switch_n = Inf, seed = NULL) {
     )
 }
 
-perturb_switch_cells <- function(dataset, switch_perc = 1, seed = NULL) {
+perturb_shuffle_cells <- function(dataset, shuffle_perc = 1, seed = NULL) {
   source(scripts_file("helper-perturbations.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
 
-  perturb_switch_n_cells(dataset, switch_n = length(dataset$cell_ids) * switch_perc, seed = seed)
+  perturb_shuffle_n_cells(dataset, shuffle_n = length(dataset$cell_ids) * shuffle_perc, seed = seed)
 }
 
-## Switch edges
-perturb_switch_n_edges <- function(dataset, switch_n = Inf) {
-  if (nrow(dataset$divergence_regions)) {stop("To switch branches, dataset cannot have divergence regions")}
+## Shuffle edges
+perturb_shuffle_n_edges <- function(dataset, shuffle_n = Inf) {
+  if (nrow(dataset$divergence_regions)) {stop("To shuffle branches, dataset cannot have divergence regions")}
 
-  switch_n = min(switch_n, nrow(dataset$milestone_network))
+  shuffle_n = min(shuffle_n, nrow(dataset$milestone_network))
 
-  if (switch_n == 1) {
+  if (shuffle_n == 1) {
     dataset
   } else {
     # create an edge id and add it to the progressions
@@ -50,7 +50,7 @@ perturb_switch_n_edges <- function(dataset, switch_n = Inf) {
       select(-from, -to)
 
     # shuffle edges
-    the_chosen_ones <- sample(milestone_network$edge_id, switch_n)
+    the_chosen_ones <- sample(milestone_network$edge_id, shuffle_n)
     mapper <- set_names(milestone_network$edge_id, milestone_network$edge_id)
     mapper[match(the_chosen_ones, mapper)] <- sample(the_chosen_ones, size = length(the_chosen_ones))
 
@@ -71,10 +71,10 @@ perturb_switch_n_edges <- function(dataset, switch_n = Inf) {
   }
 }
 
-perturb_switch_edges <- function(dataset, switch_perc = 1) {
+perturb_shuffle_edges <- function(dataset, shuffle_perc = 1) {
   source(scripts_file("helper-perturbations.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
 
-  perturb_switch_n_edges(dataset, switch_n = round(nrow(dataset$milestone_network) * switch_perc))
+  perturb_shuffle_n_edges(dataset, shuffle_n = round(nrow(dataset$milestone_network) * shuffle_perc))
 }
 
 
@@ -93,7 +93,7 @@ perturb_filter_cells <- function(dataset, filter_perc = 0.6) {
 
 
 ## Shuffle within edge
-perturb_switch_cells_edgewise <- function(dataset) {
+perturb_shuffle_cells_edgewise <- function(dataset) {
   progressions <- dataset$progressions %>% mutate(percentage = runif(n()))
 
   dataset %>%
@@ -482,20 +482,20 @@ perturb_change_topology <- function(dataset, topology_id = "linear") {
 
 ##  ............................................................................
 ##  Combined perturbations                                                  ####
-perturb_switch_cells_and_add_connecting_edges <- function(dataset, switch_perc = 0.2, n_edges = 1) {
+perturb_shuffle_cells_and_add_connecting_edges <- function(dataset, shuffle_perc = 0.2, n_edges = 1) {
   source(scripts_file("helper-perturbations.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
 
   dataset <- perturb_add_connecting_edges(dataset, n_edges)
-  dataset <- perturb_switch_cells(dataset, switch_perc)
+  dataset <- perturb_shuffle_cells(dataset, shuffle_perc)
 
   dataset
 }
 
-perturb_switch_cells_and_merge_bifurcation <- function(dataset, switch_perc = 0.2) {
+perturb_shuffle_cells_and_merge_bifurcation <- function(dataset, shuffle_perc = 0.2) {
   source(scripts_file("helper-perturbations.R", experiment_id = "03-metric_characterisation/01-metric_conformity"))
 
   dataset <- perturb_merge_bifurcation(dataset)
-  dataset <- perturb_switch_cells(dataset, switch_perc)
+  dataset <- perturb_shuffle_cells(dataset, shuffle_perc)
 
   dataset
 }
