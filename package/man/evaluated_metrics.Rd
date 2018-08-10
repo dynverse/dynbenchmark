@@ -4,7 +4,7 @@
 \name{evaluated_metrics}
 \alias{evaluated_metrics}
 \title{Metrics used in the evaluation}
-\format{An object of class \code{character} of length 10.}
+\format{An object of class \code{character} of length 8.}
 \usage{
 evaluated_metrics
 }

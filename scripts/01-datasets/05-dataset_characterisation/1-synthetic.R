@@ -4,7 +4,7 @@ library(tidyverse)
 library(tidygraph)
 library(ggraph)
 
-experiment("02-dataset_characterisation/1-synthetic")
+experiment("01-datasets/05-dataset_characterisation/1-synthetic")
 datasets <- load_datasets()
 
 
