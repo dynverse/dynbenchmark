@@ -2,7 +2,7 @@
 output: github_document
 ---
 
-```{r setup, echo = FALSE}
+```{r echo = FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE, error = FALSE, echo = FALSE)
 ```
 
@@ -28,6 +28,4 @@ scripts %>% filter(
   ) %>%
   select(order, subfolder = name, description = title) %>%
   knitr::kable()
-
-
 ```
