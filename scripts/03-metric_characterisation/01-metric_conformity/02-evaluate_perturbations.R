@@ -56,7 +56,7 @@ design <- benchmark_generate_design(
 
 ##  ............................................................................
 ##  Run the crossing                                                        ####
-metrics <- c("correlation", "rf_mse", "rf_rsq", "rf_nmse", "lm_mse", "lm_rsq", "lm_nmse", "edge_flip", "featureimp_cor")
+metrics <- dyneval::metrics$metric_id
 
 # run evaluation on cluster
 benchmark_submit(design, metrics = metrics, qsub_params = list(memory = "2G", timeout = 3600), qsub_grouping = "{method_id}")

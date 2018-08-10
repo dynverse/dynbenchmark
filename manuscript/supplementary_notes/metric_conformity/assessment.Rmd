@@ -8,10 +8,14 @@ params:
 rule <- dynutils::extract_row_to_list(rules, which(rules$id == assessment$rule_id))
 ```
 
+\subsection{`r rule$name`}
+
 \begin{center}
 ```{r, out.width="2in", out.height="10in", dpi = 300}
 knitr::include_graphics(rule$image_location)
 ```
+
+
 \end{center}
 
 `r rule$description`
@@ -51,9 +55,6 @@ height <- ifelse(is.null(assessment$plot_scores$height), 1, assessment$plot_scor
 ```{r B, fig.width=width, fig.height=height, out.width=paste0(width/2, "in")}
 assessment$plot_scores
 ```
-
-
-----------------------------------------------------------------------------
 
 
 \pagebreak
