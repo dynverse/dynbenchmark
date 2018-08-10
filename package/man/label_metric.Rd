@@ -13,6 +13,8 @@ label_metrics(metric_ids, ...)
 \arguments{
 \item{metric_id}{metric id}
 
+\item{label_type}{The type of label to return, can be plotmath, latex or long_name}
+
 \item{parse}{Whether to parse the label into an expression}
 
 \item{metric_ids}{The metric ids}
