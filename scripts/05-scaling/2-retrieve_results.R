@@ -244,3 +244,8 @@ g <- patchwork::wrap_plots(
 )
 ggsave(derived_file("overview.pdf"), g, width = 12, height = 12)
 
+
+#' @examples
+#' # examine some errors
+#' execution_output %>% filter(method_id == "calista") %>% filter(error_status == "method_error") %>% mutate(txt = paste0(stdout, stderr, error_message)) %>% pull(txt) %>% head(5) %>% cat
+#'

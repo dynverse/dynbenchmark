@@ -19,7 +19,7 @@ generate_dataset <- function(lnrow, lncol, seed = 1) {
     allow_tented_progressions = FALSE,
     normalise = FALSE,
     add_prior_information = FALSE
-  ) %>% add_cell_waypoints(400)
+  ) %>% dynwrap::add_cell_waypoints(400)
   base_geo <- dynwrap::compute_tented_geodesic_distances(base_traj)
   base_knns <- FNN::get.knn(as.dist(base_geo), k = 10)$nn.index
 
