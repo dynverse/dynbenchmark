@@ -147,7 +147,7 @@ rule_lower <- function(
         ggplot(aes(metric_id, difference)) +
         ggbeeswarm::geom_quasirandom() +
         geom_hline(yintercept = 0, linetype = "dashed") +
-        geom_point(data = differences_mean, color = "red", size = 4) +
+        geom_point(data = differences_mean, color = "red", size = 20, shape = "-") +
         scale_x_discrete(NULL, position = "top", labels = labels) +
         scale_y_continuous("Score difference", limits = c(-1, max(differences$difference, 0))) +
         theme_bw() +
@@ -177,7 +177,7 @@ rule_lower <- function(
       grouping <- dynwrap::group_onto_trajectory_edges(models$model[[1]])
       plot_datasets <- map2(
         models$model,
-        c("Dataset", models$method_id[[2]]),
+        c("Identity", as.character(models$method_id[[2]])),
         function(model, title) {
           plot_graph(model, grouping=grouping) + ggtitle(label_long(title)) + theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
         }) %>%
