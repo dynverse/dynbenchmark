@@ -2,7 +2,7 @@ library(tidyverse)
 library(cowplot)
 library(dynbenchmark)
 
-experiment("02-dataset_characterisation/2-real")
+experiment("01-datasets/05-dataset_characterisation/2-real")
 
 datasets_real <- load_datasets() %>% filter(source == "real")
 

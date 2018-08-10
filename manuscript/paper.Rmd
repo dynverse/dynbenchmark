@@ -445,7 +445,7 @@ We gathered `r sum(tasks_info$task_source == "real")` real datasets by searching
 
 ```{r}
 add_stable(
-  read_rds(figure_file("datasets.rds","02-dataset_characterisation"))[[params$table_format]], 
+  read_rds(figure_file("datasets.rds","01-datasets/05-dataset_characterisation"))[[params$table_format]], 
   "datasets", 
   "Real datasets used in this study."
 )
@@ -546,7 +546,7 @@ Similar to [@schaffter_genenetweaversilicobenchmark_2011], we sample the differe
 add_stable(
   read_rds(figure_file(
     "samplers.rds",
-    "02-dataset_characterisation/3-synthetic")
+    "01-datasets/05-dataset_characterisation/3-synthetic")
   )[[params$table_format]], 
   "samplers", 
   "Distributions from which each parameter in the thermodynamic model was sampled."

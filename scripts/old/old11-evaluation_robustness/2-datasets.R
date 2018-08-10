@@ -6,7 +6,7 @@ experiment("11-evaluation_robustness")
 
 read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
-datasets <- read_rds(derived_file("datasets.rds", "02-dataset_characterisation"))
+datasets <- read_rds(derived_file("datasets.rds", "01-datasets/05-dataset_characterisation"))
 
 source("analysis/analyses/11-evaluation_robustness/functions_rank_methods.R")
 method_scores <- rank_methods(ind_scores)
