@@ -25,8 +25,6 @@ data <-
 
 axis_scale <- data %>% select(lnrow, nrow) %>% unique() %>% filter(lnrow %% 1 == 0)
 
-dat <- data %>% filter(error_status == "no_error", time_method > 1) %>% as_tibble() %>% filter(method_id == "calista") %>% filter(n() > 10)
-
 models <-
   data %>%
   filter(error_status == "no_error", time_method > 1) %>%
@@ -247,5 +245,5 @@ ggsave(derived_file("overview.pdf"), g, width = 12, height = 12)
 
 #' @examples
 #' # examine some errors
-#' execution_output %>% filter(method_id == "calista") %>% filter(error_status == "method_error") %>% mutate(txt = paste0(stdout, stderr, error_message)) %>% pull(txt) %>% head(5) %>% cat
+#' execution_output %>% filter(method_id == "mpath", error_status == "method_error") %>% mutate(txt = paste0(stdout, stderr, error_message)) %>% pull(txt) %>% head(5) %>% cat
 #'
