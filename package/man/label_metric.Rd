@@ -14,6 +14,10 @@ label_metrics(metric_ids, ...)
 \item{metric_id}{metric id}
 
 \item{parse}{Whether to parse the label into an expression}
+
+\item{metric_ids}{The metric ids}
+
+\item{...}{Extra parameters for label_metric}
 }
 \description{
 Label the metrics
