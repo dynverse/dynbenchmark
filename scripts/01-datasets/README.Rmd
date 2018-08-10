@@ -12,9 +12,7 @@ The datasets are split in real datasets and synthetic datasets. The real dataset
 All datasets can be downloaded from zenodo using the [00-download_from_zenodo.R](00-download_from_zenodo.R) script.
 
 ```{r child='01-real/README.Rmd'}
-
 ```
 
 ```{r child='02-synthetic/README.Rmd'}
-
 ```
