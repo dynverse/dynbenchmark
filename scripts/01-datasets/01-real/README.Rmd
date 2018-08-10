@@ -1,0 +1,14 @@
+---
+output: github_document
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Real datasets
+
+The generation of the real datasets is divided in two parts:
+
+1. The datasets are downloaded from their respective sources (such as GEO) using sets of scripts specific for each dataset in [01-download_from_sources.R](01-download_from_sources.R) (these scripts are located in [helpers-download_from_sources](helpers-download_from_sources))
+2. These datasets are filtered and normalised in [02-filter_and_normalise.R](02-filter_and_normalise.R)
