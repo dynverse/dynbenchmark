@@ -1,7 +1,7 @@
 library(dynbenchmark)
 library(tidyverse)
 
-experiment("05-method_testing")
+experiment("04-method_testing")
 
 ###################################################
 ###                   DESIGN                    ###
@@ -119,7 +119,7 @@ ggsave(derived_file("method_status.pdf"), g, width = 16, height = 16)
 #' output %>% filter(method_id == "urd", method_status == "method_error") %>% select(method_id, dataset_id, stdout, stderr, error_message) %>% pull(stdout)
 
 
-write_rds(output, derived_file("output.rds", experiment_id = "05-method_testing"))
+write_rds(output, derived_file("output.rds", experiment_id = "04-method_testing"))
 
 checks <- output %>% group_by(method_id) %>% summarise(ran = mean(!method_status %in% c("method_error", "execution_error")))
-write_rds(checks, derived_file("checks.rds", experiment_id = "05-method_testing"))
+write_rds(checks, derived_file("checks.rds", experiment_id = "04-method_testing"))

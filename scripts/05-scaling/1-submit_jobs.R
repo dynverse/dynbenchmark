@@ -119,7 +119,7 @@ datasets <-
   select(id, type, fun, everything())
 
 # define methods
-checks <- read_rds(derived_file("checks.rds", experiment_id = "05-method_testing"))
+checks <- read_rds(derived_file("checks.rds", experiment_id = "04-method_testing"))
 
 
 cat("NOT RUNNING: ", checks %>% filter(ran == 0) %>% pull(method_id) %>% paste(collapse = ", "), "\n", sep = "")
