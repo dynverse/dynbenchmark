@@ -7,7 +7,7 @@ library(ggraph)
 
 experiment("8-compare_topology")
 
-methods <- read_rds(derived_file("methods.rds", experiment_id = "04-method_characterisation"))
+methods <- read_rds(derived_file("methods.rds", experiment_id = "03-method_characterisation"))
 method_trajtypes <- methods %>%
   gather(trajectory_type, can_handle_trajectory_type, !!trajectory_types$id[trajectory_types$directedness == "directed"])
 

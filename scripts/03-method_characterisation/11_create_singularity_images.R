@@ -3,7 +3,7 @@ library(dynwrap)
 library(dynbenchmark)
 library(tidyverse)
 
-experiment("04-method_characterisation/singularity_images")
+experiment("03-method_characterisation/singularity_images")
 
 # get methods
 data("methods", package = "dynmethods")

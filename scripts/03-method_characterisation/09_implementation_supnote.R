@@ -2,7 +2,7 @@ library(googlesheets)
 library(tidyverse)
 library(dynbenchmark)
 
-experiment("04-method_characterisation")
+experiment("03-method_characterisation")
 
 methods <- read_rds(derived_file("methods_evaluated.rds"))
 methods$run_fun <- paste0("ti_", methods$method_id) %>% map(get, "package:dynmethods") %>% map(~.()) %>% map("run_fun")

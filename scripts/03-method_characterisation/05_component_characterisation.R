@@ -4,7 +4,7 @@ library(patchwork)
 library(tidytext)
 library(svglite)
 
-experiment("04-method_characterisation")
+experiment("03-method_characterisation")
 
 methods <- read_rds(derived_file("methods.rds")) %>%
   filter(type == "algorithm") # only really interested in algorithms

@@ -124,7 +124,7 @@ rank_methods <- function(outputs_ind) {
     mutate(
       overall_benchmark = apply(cbind(overall_metric, overall_source, overall_trajtype), 1, psych::harmonic.mean)
     ) %>%
-    inner_join(read_rds(derived_file("methods.rds", "04-method_characterisation")) %>% filter(type %in% c("control", "algorithm")), "method_short_name")
+    inner_join(read_rds(derived_file("methods.rds", "03-method_characterisation")) %>% filter(type %in% c("control", "algorithm")), "method_short_name")
 
   method_tib
 }
