@@ -85,6 +85,8 @@ handle <- qsub::qsub_lapply(
   }
 )
 
+qsub::qsub_retrieve(handle)
+
 # copy files from cluster to local
 qsub::rsync_remote(
   remote_src = TRUE,
