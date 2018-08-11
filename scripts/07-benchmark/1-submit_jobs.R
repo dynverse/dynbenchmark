@@ -4,7 +4,17 @@ library(tidyverse)
 experiment("07-benchmark")
 
 # collect method ids to evaluate
-method_ids <- dynmethods::methods$id %>% keep(~ . != c("ouija", "pseudogp"))
+method_ids <- dynmethods::methods$id
+methods <-
+  dynwrap::get_ti_methods(method_ids, evaluate = FALSE) %>%
+  mapdf(function(m) {
+    l <- m$method_func()
+    l$fun <- m$method_func
+    l$type <- "function"
+    l
+  }) %>%
+  list_as_tibble() %>%
+  select(id, type, fun, everything())
 
 # combine default params and optimised params... if we had some!
 parameters <- lapply(method_ids, function(mn) {
