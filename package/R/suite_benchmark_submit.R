@@ -150,7 +150,10 @@ benchmark_submit <- function(
   }
 
   # run benchmark per method seperately
-  runs <- design$crossing %>% split(., glue::glue_data(., qsub_grouping))
+  design$crossing <- design$crossing %>% mutate(., qsub_group = glue::glue_data(., qsub_grouping))
+  runs <- design$crossing %>% split(., .$qsub_group)
+  order <- design$crossing %>% pull(qsub_group) %>% unique()
+  runs <- runs[order]
 
   walk(runs, submit_method)
 
