@@ -80,19 +80,19 @@ design$crossing <- design$crossing %>%
   mutate(method_order = match(method_id, method_ids)) %>%
   arrange(memory, method_order)
 
-write_rds(design, result_file("design.rds"), compress = "xz")
+write_rds(design, derived_file("design.rds"), compress = "xz")
 
 
 ##########################################################
 ###############        SUBMIT JOB          ###############
 ##########################################################
-design_filt <- read_rds(result_file("design.rds"))
+design_filt <- read_rds(derived_file("design.rds"))
 
 # only run the next stage when the first has finished
-design_filt$crossing <- design_filt$crossing %>% filter(memory %in% c(10))
-# design_filt$crossing <- design_filt$crossing %>% filter(memory %in% c(10, 20))
-# design_filt$crossing <- design_filt$crossing %>% filter(memory %in% c(10, 20, 64))
-# design_filt$crossing <- design_filt$crossing %>% filter(memory %in% c(10, 20, 64, 200))
+# design_filt$crossing <- design_filt$crossing %>% filter(memory < 20)
+# design_filt$crossing <- design_filt$crossing %>% filter(memory < 50)
+design_filt$crossing <- design_filt$crossing %>% filter(memory < 100)
+# design_filt$crossing <- design_filt$crossing
 
 benchmark_submit(
   design = design_filt,

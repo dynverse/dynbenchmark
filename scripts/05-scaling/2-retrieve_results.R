@@ -70,7 +70,7 @@ method_ids <- unique(data$method_id) %>% setdiff("error")
 ##########################################################
 ###############         SAVE DATA          ###############
 ##########################################################
-write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "xz")
+# write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "xz")
 
 
 ##########################################################
@@ -78,11 +78,10 @@ write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "
 ##########################################################
 columns <-
   data_frame(
-    id = c("lpredtime", "baseline", "# genes", "# features"),
+    id = c("lpredtime", "intercept", "# genes", "# features"),
     x = c(1.1, 2.2, 3.3, 4.4) + .5
   )
 g <- models %>%
-  # mutate_at(vars(starts_with("p_")), function(x) log10(x)) %>%
   mutate_at(c("lpredtime", "lnrow", "lncol", "intercept"), function(x) dynutils::scale_minmax(x)) %>%
   arrange(lpredtime) %>%
   mutate(
@@ -109,8 +108,8 @@ g <- models %>%
   scale_fill_distiller(palette = "RdYlBu") +
   labs(fill = "Coefficient\n-log pvalue")
 
+g
 ggsave(figure_file("ranking.svg"), g, width = 10, height = 10)
-
 
 g2 <-
   ggplot(models, aes(lnrow, lncol)) +
@@ -119,7 +118,7 @@ g2 <-
   theme_classic() +
   scale_colour_distiller(palette = "RdYlBu") +
   theme(legend.position = "bottom") +
-  labs(x = "# cells", y = "# features", colour = "baseline", size = "baseline")
+  labs(x = "# cells", y = "# features", colour = "intercept", size = "intercept")
 
 g3 <-
   ggplot(models, aes(lnrow, -log10(p_lnrow))) +
@@ -146,7 +145,7 @@ g5 <-
   theme_classic() +
   scale_colour_distiller(palette = "RdYlBu") +
   theme(legend.position = "bottom") +
-  labs(x = "baseline", y = "-log10(p_baseline)")
+  labs(x = "intercept", y = "-log10(p_intercept)")
 
 g <- patchwork::wrap_plots(
   g2,
@@ -155,7 +154,8 @@ g <- patchwork::wrap_plots(
   g5,
   nrow = 2
 )
-ggsave(derived_file("overview.pdf"), g, width = 12, height = 12)
+g
+ggsave(figure_file("overview.svg"), g, width = 12, height = 12)
 
 
 
@@ -255,11 +255,17 @@ plots <- map(method_ids, function(method_id) {
     )
 })
 
-pdf(derived_file("results.pdf"), width = 15, height = 12)
-for (p in plots) {
-print(p)
-}
-dev.off()
+dir.create(figure_file("results"), showWarnings = FALSE)
+walk2(method_ids, plots, function(mid, pl) {
+  cat("Plotting ", mid, "\n", sep = "")
+  ggsave(figure_file(c("results/", mid, ".svg")), pl, width = 15, height = 12)
+})
+
+# pdf(figure_file("results.pdf"), width = 15, height = 12)
+# for (p in plots) {
+# print(p)
+# }
+# dev.off()
 
 
 #' @examples
