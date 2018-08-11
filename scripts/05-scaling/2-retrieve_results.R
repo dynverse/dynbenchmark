@@ -5,7 +5,7 @@ library(dynutils)
 experiment("05-scaling")
 
 ##########################################################
-############### PART TWO: RETRIEVE RESULTS ###############
+###############      RETRIEVE RESULTS      ###############
 ##########################################################
 
 # fetch results from cluster
@@ -17,6 +17,10 @@ execution_output <- benchmark_bind_results(load_models = TRUE)
 methods_info <- design$methods
 datasets_info <- design$datasets
 
+##########################################################
+###############         FIT MODELS         ###############
+##########################################################
+
 data <-
   execution_output %>%
   select(method_id, dataset_id, errored = dummy, error_status, starts_with("time_")) %>%
@@ -27,7 +31,7 @@ axis_scale <- data %>% select(lnrow, nrow) %>% unique() %>% filter(lnrow %% 1 ==
 
 models <-
   data %>%
-  filter(error_status == "no_error", time_method > 1) %>%
+  filter(error_status == "no_error") %>%
   as_tibble() %>%
   group_by(method_id) %>%
   filter(n() > 10) %>% # need at least a few data points
@@ -62,6 +66,102 @@ data_pred <- mapdf_dfr(models, function(model) {
 })
 
 method_ids <- unique(data$method_id) %>% setdiff("error")
+
+##########################################################
+###############         SAVE DATA          ###############
+##########################################################
+write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "xz")
+
+
+##########################################################
+###############       CREATE FIGURES       ###############
+##########################################################
+columns <-
+  data_frame(
+    id = c("lpredtime", "baseline", "# genes", "# features"),
+    x = c(1.1, 2.2, 3.3, 4.4) + .5
+  )
+g <- models %>%
+  # mutate_at(vars(starts_with("p_")), function(x) log10(x)) %>%
+  mutate_at(c("lpredtime", "lnrow", "lncol", "intercept"), function(x) dynutils::scale_minmax(x)) %>%
+  arrange(lpredtime) %>%
+  mutate(
+    method_id_f = factor(method_id, levels = method_id),
+    method_name_f = factor(method_name, levels = method_name),
+    y = -as.integer(method_id_f)
+  ) %>%
+  ggplot() +
+  geom_text(aes(1, y, label = method_name), hjust = 1) +
+  geom_text(aes(x, 0, label = id), columns) +
+  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 1.1, xmax = 1.1 + lpredtime)) +
+  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 2.2, xmax = 2.2 + lnrow, fill = p_lnrow)) +
+  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 3.3, xmax = 3.3 + lncol, fill = p_lncol)) +
+  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 4.4, xmax = 4.4 + intercept, fill = p_intercept)) +
+  theme_clean() +
+  theme(
+    panel.border = element_blank(),
+    axis.ticks = element_blank(),
+    panel.grid = element_blank(),
+    axis.title = element_blank(),
+    axis.text = element_blank()
+  ) +
+  expand_limits(x = -.5) +
+  scale_fill_distiller(palette = "RdYlBu") +
+  labs(fill = "Coefficient\n-log pvalue")
+
+ggsave(figure_file("ranking.svg"), g, width = 10, height = 10)
+
+
+g2 <-
+  ggplot(models, aes(lnrow, lncol)) +
+  geom_point(aes(size = intercept, colour = intercept)) +
+  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
+  theme_classic() +
+  scale_colour_distiller(palette = "RdYlBu") +
+  theme(legend.position = "bottom") +
+  labs(x = "# cells", y = "# features", colour = "baseline", size = "baseline")
+
+g3 <-
+  ggplot(models, aes(lnrow, -log10(p_lnrow))) +
+  geom_point(aes(colour = lpredtime, size = lpredtime)) +
+  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
+  theme_classic() +
+  scale_colour_distiller(palette = "RdYlBu") +
+  theme(legend.position = "bottom") +
+  labs(x = "# cells", y = "-log10(p_cells)")
+
+g4 <-
+  ggplot(models, aes(lncol, -log10(p_lncol))) +
+  geom_point(aes(colour = lpredtime, size = lpredtime)) +
+  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
+  theme_classic() +
+  scale_colour_distiller(palette = "RdYlBu") +
+  theme(legend.position = "bottom") +
+  labs(x = "# features", y = "-log10(p_features)")
+
+g5 <-
+  ggplot(models, aes(intercept, -log10(p_intercept))) +
+  geom_point(aes(colour = lpredtime, size = lpredtime)) +
+  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
+  theme_classic() +
+  scale_colour_distiller(palette = "RdYlBu") +
+  theme(legend.position = "bottom") +
+  labs(x = "baseline", y = "-log10(p_baseline)")
+
+g <- patchwork::wrap_plots(
+  g2,
+  g3,
+  g4,
+  g5,
+  nrow = 2
+)
+ggsave(derived_file("overview.pdf"), g, width = 12, height = 12)
+
+
+
+
+
+
 plots <- map(method_ids, function(method_id) {
   methods_info_method <- methods_info %>% filter(id == !!method_id) %>% extract_row_to_list(1)
   data_method <- data %>% filter(method_id == !!method_id)
@@ -161,89 +261,8 @@ print(p)
 }
 dev.off()
 
-columns <-
-  data_frame(
-    id = c("lpredtime", "baseline", "# genes", "# features"),
-    x = c(1.1, 2.2, 3.3, 4.4) + .5
-  )
-g <- models %>%
-  # mutate_at(vars(starts_with("p_")), function(x) log10(x)) %>%
-  mutate_at(c("lpredtime", "lnrow", "lncol", "intercept"), function(x) dynutils::scale_minmax(x)) %>%
-  arrange(lpredtime) %>%
-  mutate(
-    method_id_f = factor(method_id, levels = method_id),
-    method_name_f = factor(method_name, levels = method_name),
-    y = -as.integer(method_id_f)
-  ) %>%
-  ggplot() +
-  geom_text(aes(1, y, label = method_name), hjust = 1) +
-  geom_text(aes(x, 0, label = id), columns) +
-  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 1.1, xmax = 1.1 + lpredtime)) +
-  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 2.2, xmax = 2.2 + lnrow, fill = p_lnrow)) +
-  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 3.3, xmax = 3.3 + lncol, fill = p_lncol)) +
-  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 4.4, xmax = 4.4 + intercept, fill = p_intercept)) +
-  theme_clean() +
-  theme(
-    panel.border = element_blank(),
-    axis.ticks = element_blank(),
-    panel.grid = element_blank(),
-    axis.title = element_blank(),
-    axis.text = element_blank()
-  ) +
-  expand_limits(x = -.5) +
-  scale_fill_distiller(palette = "RdYlBu") +
-  labs(fill = "Coefficient\n-log pvalue")
-
-ggsave(derived_file("overview_ranking.pdf"), g, width = 10, height = 10)
-
-
-g2 <-
-  ggplot(models, aes(lnrow, lncol)) +
-  geom_point(aes(size = intercept, colour = intercept)) +
-  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
-  theme_classic() +
-  scale_colour_distiller(palette = "RdYlBu") +
-  theme(legend.position = "bottom") +
-  labs(x = "# cells", y = "# features", colour = "baseline", size = "baseline")
-
-g3 <-
-  ggplot(models, aes(lnrow, -log10(p_lnrow))) +
-  geom_point(aes(colour = lpredtime, size = lpredtime)) +
-  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
-  theme_classic() +
-  scale_colour_distiller(palette = "RdYlBu") +
-  theme(legend.position = "bottom") +
-  labs(x = "# cells", y = "-log10(p_cells)")
-
-g4 <-
-  ggplot(models, aes(lncol, -log10(p_lncol))) +
-  geom_point(aes(colour = lpredtime, size = lpredtime)) +
-  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
-  theme_classic() +
-  scale_colour_distiller(palette = "RdYlBu") +
-  theme(legend.position = "bottom") +
-  labs(x = "# features", y = "-log10(p_features)")
-
-g5 <-
-  ggplot(models, aes(intercept, -log10(p_intercept))) +
-  geom_point(aes(colour = lpredtime, size = lpredtime)) +
-  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
-  theme_classic() +
-  scale_colour_distiller(palette = "RdYlBu") +
-  theme(legend.position = "bottom") +
-  labs(x = "baseline", y = "-log10(p_baseline)")
-
-g <- patchwork::wrap_plots(
-  g2,
-  g3,
-  g4,
-  g5,
-  nrow = 2
-)
-ggsave(derived_file("overview.pdf"), g, width = 12, height = 12)
-
 
 #' @examples
 #' # examine some errors
 #' execution_output %>% filter(method_id == "mpath", error_status == "method_error") %>% mutate(txt = paste0(stdout, stderr, error_message)) %>% pull(txt) %>% head(5) %>% cat
-#'
+#' execution_output %>% filter(method_id == "dpt", error_status == "method_error") %>% mutate(txt = paste0(stdout, stderr, error_message)) %>% pull(txt) %>% head(5) %>% cat
