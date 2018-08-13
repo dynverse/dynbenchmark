@@ -90,7 +90,7 @@ save_dataset <- function(dataset, id = NULL, lazy_load = TRUE) {
     for (col in c("expression", "counts")) {
       if (!is.function(dataset[[col]])) {
         col_file <- dataset_file(filename = paste0(col, ".rds"), id = id)
-        write_rds(dataset[[col]], col_file)
+        write_rds(dataset[[col]], col_file, compress = "xz")
 
         env <- new.env(baseenv())
         assign("id", id, env)
@@ -103,7 +103,7 @@ save_dataset <- function(dataset, id = NULL, lazy_load = TRUE) {
     }
   }
 
-  write_rds(dataset, dataset_file(filename = "dataset.rds", id = id))
+  write_rds(dataset, dataset_file(filename = "dataset.rds", id = id), compress = "xz")
 }
 
 #' @rdname load_dataset
