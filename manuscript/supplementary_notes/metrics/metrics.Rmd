@@ -1,5 +1,5 @@
 ---
-title: "Metric conformity"
+title: "Evaluation metrics"
 output: 
   pdf_document:
     latex_engine: xelatex
@@ -25,6 +25,15 @@ experiment("02-metric_characterisation/01-metric_conformity")
 assessments <- read_rds(derived_file("assessments.rds"))
 rules <- read_rds(derived_file("rules.rds"))
 ```
+
+A trajectory, as defined in our evaluation, is a model with multiple abstractions. The top abstraction is the topology, represented by a milestone network, which contains information about the paths each cell can take from their starting point. More complex abstractions involve the mapping of each cell to a particular branch within this network, and the ordering of each cells within these branches (both represented in the milestone percentages).
+
+When designing metrics to compare trajectories, we therefore 
+
+- A good overall metric should capture all these different abstractions, so that the resulting trajectory has the best topology, branch assignment and cellular ordering.
+- IndividuSome users are more interested in particular abstractions. For example, the actual
+
+Here we define several metrics 
 
 ## Summary
 
@@ -56,7 +65,7 @@ assessments %>%
 ```{r results='asis'}
 # assessment <- dynutils::extract_row_to_list(assessments, 1)
 
-walkdf(assessments[, ], function(assessment) {
+walkdf(assessments, function(assessment) {
   cat(knitr::knit_child("assessment.Rmd", quiet=TRUE, envir = environment()))
 })
 ```
