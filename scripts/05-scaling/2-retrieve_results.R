@@ -89,7 +89,7 @@ list2env(read_rds(result_file("scaling.rds")), .GlobalEnv)
 columns <-
   data_frame(
     id = c("lpredtime", "pct_errored", "lnrow", "lncol", "intercept"),
-    name = c("Predicted\nlog time", "% errored", "Intercept", "Scalability factor\nw.r.t. # genes", "Scalability factor\nw.r.t. # features"),
+    name = c("Predicted\nlog time", "% errored", "Coefficient\nintercept", "Coefficient\n# cells", "Coefficient\n# features"),
     fill = c(NA, NA, "p_lnrow", "p_lncol", "p_intercept"),
     x = 1.1 * seq_along(id),
     min = map_dbl(id, ~ min(models[[.]])),
