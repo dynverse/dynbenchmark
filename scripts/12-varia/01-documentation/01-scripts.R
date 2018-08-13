@@ -9,6 +9,8 @@ scripts <- tibble(
   location = script_locations
 ) %>%
   filter(!str_detect(location, ".*\\.md")) %>%
+  filter(!str_detect(location, ".*\\.Rmd")) %>%
+  filter(!is_link(location)) %>%
   mutate(
     file = path_file(location),
     parent = path_file(path_dir(location)),
