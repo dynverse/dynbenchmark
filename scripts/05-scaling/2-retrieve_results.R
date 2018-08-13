@@ -70,7 +70,7 @@ method_ids <- unique(data$method_id) %>% setdiff("error")
 ##########################################################
 ###############         SAVE DATA          ###############
 ##########################################################
-# write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "xz")
+write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "xz")
 
 
 ##########################################################
@@ -255,17 +255,16 @@ plots <- map(method_ids, function(method_id) {
     )
 })
 
-dir.create(figure_file("results"), showWarnings = FALSE)
-walk2(method_ids, plots, function(mid, pl) {
+dir.create(derived_file("results"), showWarnings = FALSE)
+pbapply::pblapply(seq_along(method_ids), cl = 8, function(i) {
+  mid <- method_ids[[i]]
+  pl <- plots[[i]]
   cat("Plotting ", mid, "\n", sep = "")
-  ggsave(figure_file(c("results/", mid, ".svg")), pl, width = 15, height = 12)
+  ggsave(derived_file(c("results/", mid, ".svg")), pl, width = 15, height = 12)
 })
 
-# pdf(figure_file("results.pdf"), width = 15, height = 12)
-# for (p in plots) {
-# print(p)
-# }
-# dev.off()
+# compress to figure_file("results.tar.xz")
+# unzip(figure_file("results.tar.xz"), exdir = derived_file("results"), overwrite = TRUE)
 
 
 #' @examples
