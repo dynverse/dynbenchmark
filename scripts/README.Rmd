@@ -16,7 +16,7 @@ library(dynbenchmark)
 The scripts folder contains all the scripts necessary to fully reproduce the benchmarking manuscript in chronologically ordered subfolders. Each subfolder contains a readme file with further explanations of the different scripts and what they do:
 
 ```{r}
-scripts <- read_rds(derived_file("scripts.rds", experiment_id = "12-varia/01-scripts"))
+scripts <- read_rds(derived_file("scripts.rds", experiment_id = "12-varia/01-documentation"))
 
 scripts %>% filter(
   level == 1

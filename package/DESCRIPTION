@@ -80,6 +80,7 @@ Collate:
     'plotting_labels.R'
     'plotting_priors_mini.R'
     'plotting_svg_replacement.R'
+    'plotting_themes.R'
     'qsub.R'
     'setup_experiment.R'
     'setup_datasets.R'

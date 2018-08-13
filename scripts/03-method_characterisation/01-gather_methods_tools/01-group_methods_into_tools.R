@@ -59,7 +59,7 @@ tools$date[replace_date] <- tools$publication_date[replace_date]
 # Altmetrics ----------------------------
 tools_altmetrics <- map(tools$doi, function(doi) {
   tryCatch(
-    rAltmetric::altmetrics(doi = doi) %>% rAltmetric::altmetric_data() %>% select(ends_with("_count")) %>% mutate_all(as.numeric),
+    rAltmetric::altmetrics(doi = doi) %>% rAltmetric::altmetric_data() % >% select(ends_with("_count")) %>% mutate_all(as.numeric),
     error = function(x) tibble(cited_by_posts_count = 0)
   )
 }) %>% bind_rows()
@@ -68,9 +68,6 @@ tools <- bind_cols(tools, tools_altmetrics)
 
 ## Non inclusion reasons ------------------------
 tools$non_inclusion_reasons_split <- tools$non_inclusion_reasons %>% str_split("[ ]?,[ ]?")
-
-## Platforms ------------------
-tools$platforms_split <- tools$platforms %>% str_split("[ ]?,[ ]?")
 
 #   ____________________________________________________________________________
 #   Save output                                                             ####
