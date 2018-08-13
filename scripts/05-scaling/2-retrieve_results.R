@@ -1,83 +1,88 @@
 library(dynbenchmark)
 library(tidyverse)
 library(dynutils)
+library(survival)
 
 experiment("05-scaling")
 
-# ##########################################################
-# ###############      RETRIEVE RESULTS      ###############
-# ##########################################################
-#
-# # fetch results from cluster
-# benchmark_fetch_results()
-#
-# # bind results in one data frame (without models)
-# design <- read_rds(derived_file("design.rds"))
-# execution_output <- benchmark_bind_results(load_models = TRUE)
-# methods_info <- design$methods
-# datasets_info <- design$datasets
-#
-# ##########################################################
-# ###############         FIT MODELS         ###############
-# ##########################################################
-#
-# data <-
-#   execution_output %>%
-#   select(method_id, dataset_id, errored = dummy, error_status, starts_with("time_")) %>%
-#   left_join(datasets_info %>% select(dataset_id = id, lnrow, lncol, lsum, nrow, ncol, memory), by = "dataset_id") %>%
-#   left_join(methods_info %>% select(method_id = id, method_name = name), by = "method_id")
-#
-# axis_scale <- data %>% select(lnrow, nrow) %>% unique() %>% filter(lnrow %% 1 == 0)
-#
-# models <-
-#   data %>%
-#   filter(error_status == "no_error") %>%
-#   as_tibble() %>%
-#   group_by(method_id) %>%
-#   filter(n() > 10) %>% # need at least a few data points
-#   do({
-#     dat <- .
-#     out <- dat %>% select(method_id, method_name) %>% unique()
-#     model <- glm(log10(time_method) ~ lnrow + lncol, data = dat)
-#     # model <- glm(log10(time_method) ~ lnrow + lncol + lnrow * lncol, data = dat)
-#     sum <- summary(model)
-#
-#     coef_names <- c("(Intercept)" = "intercept", "lnrow" = "lnrow", "lncol" = "lncol", "lnrow:lncol" = "lnrow_lncol")[rownames(sum$coefficients)]
-#     coef_values <- set_names(
-#       c(sum$coefficients[,1], sum$coefficients[,4]),
-#       c(coef_names, paste0("p_", coef_names))
-#     )
-#
-#     lpredtime <- predict(model, datasets_info) %>% pmax(0) %>% sum()
-#
-#     out %>%
-#       mutate(model = list(model)) %>%
-#       bind_cols(as.data.frame(t(coef_values))) %>%
-#       mutate(lpredtime)
-#   }) %>%
-#   ungroup() %>%
-#   left_join(data %>% group_by(method_id) %>% summarise(pct_errored = mean(error_status != "no_error")), by = "method_id") %>%
-#   arrange(lpredtime) %>%
-#   mutate(
-#     method_id_f = factor(method_id, levels = method_id),
-#     method_name_f = factor(method_name, levels = method_name),
-#     y = -as.integer(method_id_f)
-#   )
-#
-# data_pred <- mapdf_dfr(models, function(model) {
-#   dat <- datasets_info %>% select(dataset_id = id, lnrow, lncol)
-#   dat$method_id <- model$method_id
-#   dat$method_name <- model$method_name
-#   dat$lpredtime <- predict(model$model, dat) %>% pmax(0)
-#   dat
-# })
-#
-# method_ids <- unique(data$method_id) %>% setdiff("error")
-#
-# ##########################################################
-# ###############         SAVE DATA          ###############
-# ##########################################################
-# write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "xz")
+##########################################################
+###############      RETRIEVE RESULTS      ###############
+##########################################################
+
+# fetch results from cluster
+benchmark_fetch_results()
+
+# bind results in one data frame (without models)
+design <- read_rds(derived_file("design.rds"))
+execution_output <- benchmark_bind_results(load_models = TRUE)
+methods_info <- design$methods
+datasets_info <- design$datasets
+
+##########################################################
+###############         FIT MODELS         ###############
+##########################################################
+
+data <-
+  execution_output %>%
+  select(method_id, dataset_id, errored = dummy, error_status, starts_with("time_"), stderr, stdout, error_message) %>%
+  left_join(datasets_info %>% select(dataset_id = id, lnrow, lncol, lsum, nrow, ncol, memory), by = "dataset_id") %>%
+  left_join(methods_info %>% select(method_id = id, method_name = name), by = "method_id")
+
+axis_scale <- data %>% select(lnrow, nrow) %>% unique() %>% filter(lnrow %% 1 == 0)
+
+models <-
+  data %>%
+  filter(error_status %in% c("no_error", "time_limit")) %>%
+  as_tibble() %>%
+  group_by(method_id) %>%
+  filter(n() > 10) %>% # need at least a few data points
+  do({
+    dat <- .
+    dat2 <- dat %>% mutate(
+      ltime = log10(ifelse(error_status != "no_error", 3600, time_method))
+    )
+    out <- dat %>% select(method_id, method_name) %>% unique()
+
+    model <- VGAM::vglm(ltime ~ lnrow + lncol, VGAM:::tobit(Upper = log10(3600), Lower = -5), data = dat2)
+
+    coef_values <- set_names(
+      model@coefficients[-2],
+      c("intercept", "lnrow", "lncol")
+    )
+
+    lpredtimes <- datasets_info %>%
+      select(dataset_id = id, lnrow, lncol) %>%
+      mutate(
+        method_id = out$method_id[[1]],
+        method_name = out$method_name[[1]],
+        lpredtime = predict(model, datasets_info)[,1]
+      )
+
+    out %>%
+      mutate(
+        model = list(model),
+        predtimes = list(lpredtimes)) %>%
+      bind_cols(as.data.frame(t(coef_values))) %>%
+      mutate(lpredtime = mean(lpredtimes$lpredtime))
+  }) %>%
+  ungroup() %>%
+  left_join(data %>% group_by(method_id) %>% summarise(pct_errored = mean(error_status != "no_error"), pct_timelimit = mean(error_status == "time_limit")), by = "method_id") %>%
+  arrange(lpredtime) %>%
+  mutate(
+    method_id_f = factor(method_id, levels = method_id),
+    method_name_f = factor(method_name, levels = method_name),
+    y = -as.integer(method_id_f)
+  )
+
+data_pred <- bind_rows(models$predtimes)
+models <- models %>% select(-predtimes)
+
+method_ids <- unique(data$method_id) %>% setdiff("error")
+
+##########################################################
+###############         SAVE DATA          ###############
+##########################################################
+write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "xz")
 
 
 ##########################################################
@@ -90,7 +95,8 @@ columns <-
   data_frame(
     id = c("lpredtime", "pct_errored", "lnrow", "lncol", "intercept"),
     name = c("Predicted\nlog time", "% errored", "Coefficient\nintercept", "Coefficient\n# cells", "Coefficient\n# features"),
-    fill = c(NA, NA, "p_lnrow", "p_lncol", "p_intercept"),
+    fill = c(NA, NA, NA, NA, NA),
+    # fill = c(NA, NA, "p_lnrow", "p_lncol", "p_intercept"),
     x = 1.1 * seq_along(id),
     min = map_dbl(id, ~ min(models[[.]])),
     max = map_dbl(id, ~ max(models[[.]]))
@@ -101,8 +107,9 @@ barplot_data <-
 
     colids <- c(row$id, row$fill) %>% set_names("value", "fill") %>%  na.omit
     df <- models %>%
-      select(method_id, y, one_of(colids))
-    colnames(df) <- c("method_id", "y", names(colids))
+      select(method_id, y, one_of(colids)) %>%
+      mutate(column = row$id)
+    colnames(df) <- c("method_id", "y", names(colids), "column")
 
     df %>%
       mutate(value = (value - row$min) / (row$max - row$min)) %>%
@@ -117,8 +124,7 @@ g <-
   geom_text(aes(x, .5, label = round(min, 2)), columns, hjust = 0) +
   geom_text(aes(x + 1, .5, label = round(max, 2)), columns, hjust = 1) +
   geom_segment(aes(y = 0, yend = 0, x = x, xend = x + 1), columns) +
-  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = x, xmax = x + value), barplot_data %>% filter(is.na(fill))) +
-  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = x, xmax = x + value, fill = fill), barplot_data %>% filter(!is.na(fill))) +
+  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = x, xmax = x + value), barplot_data) +
   theme_clean() +
   theme(
     panel.border = element_blank(),
@@ -134,49 +140,73 @@ g <-
 g
 ggsave(figure_file("ranking.svg"), g, width = 10, height = 10)
 
-g2 <-
-  ggplot(models, aes(lnrow, lncol)) +
-  geom_point(aes(size = intercept, colour = intercept)) +
-  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
+g <-
+  models %>%
+  select(method_id, lpredtime, lnrow, lncol, intercept, pct_errored, pct_timelimit) %>%
+  gather(feature, value, -method_id, -lpredtime) %>%
+  ggplot(aes(value, lpredtime)) +
+  ggrepel::geom_text_repel(aes(label = method_id), size = 3, colour = "darkgray") +
+  geom_point() +
   theme_classic() +
   scale_colour_distiller(palette = "RdYlBu") +
   theme(legend.position = "bottom") +
-  labs(x = "# cells", y = "# features", colour = "intercept", size = "intercept")
+  labs(y = "Predicted time", x = "Facet value") +
+  facet_wrap(~feature, scales = "free", nrow = 2)
 
-g3 <-
-  ggplot(models, aes(lnrow, -log10(p_lnrow))) +
-  geom_point(aes(colour = lpredtime, size = lpredtime)) +
-  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
-  theme_classic() +
-  scale_colour_distiller(palette = "RdYlBu") +
-  theme(legend.position = "bottom") +
-  labs(x = "# cells", y = "-log10(p_cells)")
+# g <-
+#   ggplot(models, aes(lnrow, lncol)) +
+#   geom_point(aes(size = intercept, colour = lpredtime)) +
+#   ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
+#   theme_classic() +
+#   scale_colour_distiller(palette = "RdYlBu") +
+#   theme(legend.position = "bottom") +
+#   labs(x = "# cells", y = "# features", colour = "intercept", size = "predtime")
+g
+ggsave(figure_file("overview.svg"), g, width = 18, height = 12)
+#
+# g2 <-
+#   ggplot(models, aes(lnrow, lncol)) +
+#   geom_point(aes(size = intercept, colour = intercept)) +
+#   ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
+#   theme_classic() +
+#   scale_colour_distiller(palette = "RdYlBu") +
+#   theme(legend.position = "bottom") +
+#   labs(x = "# cells", y = "# features", colour = "intercept", size = "intercept")
+#
+# g3 <-
+#   ggplot(models, aes(lnrow, -log10(p_lnrow))) +
+#   geom_point(aes(colour = lpredtime, size = lpredtime)) +
+#   ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
+#   theme_classic() +
+#   scale_colour_distiller(palette = "RdYlBu") +
+#   theme(legend.position = "bottom") +
+#   labs(x = "# cells", y = "-log10(p_cells)")
+#
+# g4 <-
+#   ggplot(models, aes(lncol, -log10(p_lncol))) +
+#   geom_point(aes(colour = lpredtime, size = lpredtime)) +
+#   ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
+#   theme_classic() +
+#   scale_colour_distiller(palette = "RdYlBu") +
+#   theme(legend.position = "bottom") +
+#   labs(x = "# features", y = "-log10(p_features)")
+#
+# g5 <-
+#   ggplot(models, aes(intercept, -log10(p_intercept))) +
+#   geom_point(aes(colour = lpredtime, size = lpredtime)) +
+#   ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
+#   theme_classic() +
+#   scale_colour_distiller(palette = "RdYlBu") +
+#   theme(legend.position = "bottom") +
+#   labs(x = "intercept", y = "-log10(p_intercept)")
 
-g4 <-
-  ggplot(models, aes(lncol, -log10(p_lncol))) +
-  geom_point(aes(colour = lpredtime, size = lpredtime)) +
-  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
-  theme_classic() +
-  scale_colour_distiller(palette = "RdYlBu") +
-  theme(legend.position = "bottom") +
-  labs(x = "# features", y = "-log10(p_features)")
-
-g5 <-
-  ggplot(models, aes(intercept, -log10(p_intercept))) +
-  geom_point(aes(colour = lpredtime, size = lpredtime)) +
-  ggrepel::geom_text_repel(aes(label = method_id), size = 3) +
-  theme_classic() +
-  scale_colour_distiller(palette = "RdYlBu") +
-  theme(legend.position = "bottom") +
-  labs(x = "intercept", y = "-log10(p_intercept)")
-
-g <- patchwork::wrap_plots(
-  g2,
-  g3,
-  g4,
-  g5,
-  nrow = 2
-)
+# g <- patchwork::wrap_plots(
+#   g2,
+#   g3,
+#   g4,
+#   g5,
+#   nrow = 2
+# )
 g
 ggsave(figure_file("overview.svg"), g, width = 12, height = 12)
 
