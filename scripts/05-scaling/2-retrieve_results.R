@@ -113,7 +113,7 @@ barplot_data <-
 g <-
   ggplot() +
   geom_text(aes(1, y, label = method_name), models, hjust = 1) +
-  geom_text(aes(x + .5, 2, label = name), columns, hjust = .5) +
+  geom_text(aes(x + .5, 2.5, label = name), columns, hjust = .5) +
   geom_text(aes(x, .5, label = round(min, 2)), columns, hjust = 0) +
   geom_text(aes(x + 1, .5, label = round(max, 2)), columns, hjust = 1) +
   geom_segment(aes(y = 0, yend = 0, x = x, xend = x + 1), columns) +
