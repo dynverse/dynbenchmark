@@ -4,98 +4,121 @@ library(dynutils)
 
 experiment("05-scaling")
 
-##########################################################
-###############      RETRIEVE RESULTS      ###############
-##########################################################
-
-# fetch results from cluster
-benchmark_fetch_results()
-
-# bind results in one data frame (without models)
-design <- read_rds(derived_file("design.rds"))
-execution_output <- benchmark_bind_results(load_models = TRUE)
-methods_info <- design$methods
-datasets_info <- design$datasets
-
-##########################################################
-###############         FIT MODELS         ###############
-##########################################################
-
-data <-
-  execution_output %>%
-  select(method_id, dataset_id, errored = dummy, error_status, starts_with("time_")) %>%
-  left_join(datasets_info %>% select(dataset_id = id, lnrow, lncol, lsum, nrow, ncol, memory), by = "dataset_id") %>%
-  left_join(methods_info %>% select(method_id = id, method_name = name), by = "method_id")
-
-axis_scale <- data %>% select(lnrow, nrow) %>% unique() %>% filter(lnrow %% 1 == 0)
-
-models <-
-  data %>%
-  filter(error_status == "no_error") %>%
-  as_tibble() %>%
-  group_by(method_id) %>%
-  filter(n() > 10) %>% # need at least a few data points
-  do({
-    dat <- .
-    out <- dat %>% select(method_id, method_name) %>% unique()
-    model <- glm(log10(time_method) ~ lnrow + lncol, data = dat)
-    # model <- glm(log10(time_method) ~ lnrow + lncol + lnrow * lncol, data = dat)
-    sum <- summary(model)
-
-    coef_names <- c("(Intercept)" = "intercept", "lnrow" = "lnrow", "lncol" = "lncol", "lnrow:lncol" = "lnrow_lncol")[rownames(sum$coefficients)]
-    coef_values <- set_names(
-      c(sum$coefficients[,1], sum$coefficients[,4]),
-      c(coef_names, paste0("p_", coef_names))
-    )
-
-    lpredtime <- predict(model, datasets_info) %>% sum()
-
-    out %>%
-      mutate(model = list(model)) %>%
-      bind_cols(as.data.frame(t(coef_values))) %>%
-      mutate(lpredtime)
-  }) %>%
-  ungroup()
-
-data_pred <- mapdf_dfr(models, function(model) {
-  dat <- datasets_info %>% select(dataset_id = id, lnrow, lncol)
-  dat$method_id <- model$method_id
-  dat$method_name <- model$method_name
-  dat$lpredtime <- predict(model$model, dat)
-  dat
-})
-
-method_ids <- unique(data$method_id) %>% setdiff("error")
-
-##########################################################
-###############         SAVE DATA          ###############
-##########################################################
-write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "xz")
+# ##########################################################
+# ###############      RETRIEVE RESULTS      ###############
+# ##########################################################
+#
+# # fetch results from cluster
+# benchmark_fetch_results()
+#
+# # bind results in one data frame (without models)
+# design <- read_rds(derived_file("design.rds"))
+# execution_output <- benchmark_bind_results(load_models = TRUE)
+# methods_info <- design$methods
+# datasets_info <- design$datasets
+#
+# ##########################################################
+# ###############         FIT MODELS         ###############
+# ##########################################################
+#
+# data <-
+#   execution_output %>%
+#   select(method_id, dataset_id, errored = dummy, error_status, starts_with("time_")) %>%
+#   left_join(datasets_info %>% select(dataset_id = id, lnrow, lncol, lsum, nrow, ncol, memory), by = "dataset_id") %>%
+#   left_join(methods_info %>% select(method_id = id, method_name = name), by = "method_id")
+#
+# axis_scale <- data %>% select(lnrow, nrow) %>% unique() %>% filter(lnrow %% 1 == 0)
+#
+# models <-
+#   data %>%
+#   filter(error_status == "no_error") %>%
+#   as_tibble() %>%
+#   group_by(method_id) %>%
+#   filter(n() > 10) %>% # need at least a few data points
+#   do({
+#     dat <- .
+#     out <- dat %>% select(method_id, method_name) %>% unique()
+#     model <- glm(log10(time_method) ~ lnrow + lncol, data = dat)
+#     # model <- glm(log10(time_method) ~ lnrow + lncol + lnrow * lncol, data = dat)
+#     sum <- summary(model)
+#
+#     coef_names <- c("(Intercept)" = "intercept", "lnrow" = "lnrow", "lncol" = "lncol", "lnrow:lncol" = "lnrow_lncol")[rownames(sum$coefficients)]
+#     coef_values <- set_names(
+#       c(sum$coefficients[,1], sum$coefficients[,4]),
+#       c(coef_names, paste0("p_", coef_names))
+#     )
+#
+#     lpredtime <- predict(model, datasets_info) %>% pmax(0) %>% sum()
+#
+#     out %>%
+#       mutate(model = list(model)) %>%
+#       bind_cols(as.data.frame(t(coef_values))) %>%
+#       mutate(lpredtime)
+#   }) %>%
+#   ungroup() %>%
+#   left_join(data %>% group_by(method_id) %>% summarise(pct_errored = mean(error_status != "no_error")), by = "method_id") %>%
+#   arrange(lpredtime) %>%
+#   mutate(
+#     method_id_f = factor(method_id, levels = method_id),
+#     method_name_f = factor(method_name, levels = method_name),
+#     y = -as.integer(method_id_f)
+#   )
+#
+# data_pred <- mapdf_dfr(models, function(model) {
+#   dat <- datasets_info %>% select(dataset_id = id, lnrow, lncol)
+#   dat$method_id <- model$method_id
+#   dat$method_name <- model$method_name
+#   dat$lpredtime <- predict(model$model, dat) %>% pmax(0)
+#   dat
+# })
+#
+# method_ids <- unique(data$method_id) %>% setdiff("error")
+#
+# ##########################################################
+# ###############         SAVE DATA          ###############
+# ##########################################################
+# write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "xz")
 
 
 ##########################################################
 ###############       CREATE FIGURES       ###############
 ##########################################################
+
+list2env(read_rds(result_file("scaling.rds")), .GlobalEnv)
+
 columns <-
   data_frame(
-    id = c("lpredtime", "intercept", "# genes", "# features"),
-    x = c(1.1, 2.2, 3.3, 4.4) + .5
+    id = c("lpredtime", "pct_errored", "lnrow", "lncol", "intercept"),
+    name = c("Predicted\nlog time", "% errored", "Intercept", "Scalability factor\nw.r.t. # genes", "Scalability factor\nw.r.t. # features"),
+    fill = c(NA, NA, "p_lnrow", "p_lncol", "p_intercept"),
+    x = 1.1 * seq_along(id),
+    min = map_dbl(id, ~ min(models[[.]])),
+    max = map_dbl(id, ~ max(models[[.]]))
   )
-g <- models %>%
-  mutate_at(c("lpredtime", "lnrow", "lncol", "intercept"), function(x) dynutils::scale_minmax(x)) %>%
-  arrange(lpredtime) %>%
-  mutate(
-    method_id_f = factor(method_id, levels = method_id),
-    method_name_f = factor(method_name, levels = method_name),
-    y = -as.integer(method_id_f)
-  ) %>%
+barplot_data <-
+  map_df(seq_len(nrow(columns)), function(i) {
+    row <- columns %>% extract_row_to_list(i)
+
+    colids <- c(row$id, row$fill) %>% set_names("value", "fill") %>%  na.omit
+    df <- models %>%
+      select(method_id, y, one_of(colids))
+    colnames(df) <- c("method_id", "y", names(colids))
+
+    df %>%
+      mutate(value = (value - row$min) / (row$max - row$min)) %>%
+      mutate(x = row$x)
+  })
+
+
+g <-
   ggplot() +
-  geom_text(aes(1, y, label = method_name), hjust = 1) +
-  geom_text(aes(x, 0, label = id), columns) +
-  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 1.1, xmax = 1.1 + lpredtime)) +
-  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 2.2, xmax = 2.2 + lnrow, fill = p_lnrow)) +
-  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 3.3, xmax = 3.3 + lncol, fill = p_lncol)) +
-  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = 4.4, xmax = 4.4 + intercept, fill = p_intercept)) +
+  geom_text(aes(1, y, label = method_name), models, hjust = 1) +
+  geom_text(aes(x + .5, 2, label = name), columns, hjust = .5) +
+  geom_text(aes(x, .5, label = round(min, 2)), columns, hjust = 0) +
+  geom_text(aes(x + 1, .5, label = round(max, 2)), columns, hjust = 1) +
+  geom_segment(aes(y = 0, yend = 0, x = x, xend = x + 1), columns) +
+  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = x, xmax = x + value), barplot_data %>% filter(is.na(fill))) +
+  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = x, xmax = x + value, fill = fill), barplot_data %>% filter(!is.na(fill))) +
   theme_clean() +
   theme(
     panel.border = element_blank(),
