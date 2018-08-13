@@ -103,7 +103,7 @@ save_dataset <- function(dataset, id = NULL, lazy_load = TRUE) {
     }
   }
 
-  write_rds(dataset, dataset_file(filename = "dataset.rds", id = id))
+  write_rds(dataset, dataset_file(filename = "dataset.rds", id = id), compress = "xz")
 }
 
 #' @rdname load_dataset
