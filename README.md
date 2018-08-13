@@ -51,10 +51,7 @@ The scripts folder contains all the scripts necessary to fully reproduce the ben
 | 5     | [scaling](https://github.com/dynverse/dynbenchmark/tree/master/scripts/05-scaling)                                  | Assessing the scalability of methods                       |
 | 6     | [optimise\_parameters](https://github.com/dynverse/dynbenchmark/tree/master/scripts/06-optimise_parameters)         | Optimisation of parametersof the methods on synthetic data |
 | 7     | [benchmark](https://github.com/dynverse/dynbenchmark/tree/master/scripts/07-benchmark)                              | Benchmarking of methods on real and synthetic data         |
-| 8     | [aggregate](https://github.com/dynverse/dynbenchmark/tree/master/scripts/08-aggregate)                              |                                                            |
-| 9     | [user\_guidelines](https://github.com/dynverse/dynbenchmark/tree/master/scripts/09-user_guidelines)                 | User guidelines generation based on the benchmark          |
 | 12    | [varia](https://github.com/dynverse/dynbenchmark/tree/master/scripts/12-varia)                                      |                                                            |
-|       | [README.Rmd](https://github.com/dynverse/dynbenchmark/tree/master/scripts/README.Rmd)                               |                                                            |
 |       | [old](https://github.com/dynverse/dynbenchmark/tree/master/scripts/old)                                             |                                                            |
 
 Benchmarking your own method

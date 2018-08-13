@@ -55,7 +55,7 @@ tool_qc_processed$answer <- ifelse(is.na(tool_qc_processed$answer), 0, tool_qc_p
 tool_qc <- tool_qc_processed
 
 write_rds(tool_qc_processed, derived_file("tool_qc.rds"))
-write_rds(checks, derived_file("qc_checks"))
+write_rds(checks, derived_file("qc_checks.rds"))
 
 ##  ............................................................................
 ##  Calculate final qc scores                                               ####
