@@ -28,6 +28,12 @@ methods_evaluated <- methods %>%
 tools_evaluated <- tools %>%
   filter(evaluated)
 
+# check that all non-control evaluated methods & tools have a QC!
+methods_evaluated_nonqc <- methods_evaluated %>% filter(type == "algorithm" & is.na(qc_score))
+if (nrow(methods_evaluated_nonqc) != 0) {
+  stop("Methods ", methods_evaluated_nonqc$id %>% glue::glue_collapse(", "), " dont have a QC score")
+}
+
 # save
 write_rds(tools, derived_file("tools.rds"))
 write_rds(tools_evaluated, derived_file("tools_evaluated.rds"))
