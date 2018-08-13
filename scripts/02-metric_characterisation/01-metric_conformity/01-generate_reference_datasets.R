@@ -28,25 +28,26 @@ dataset_design <-
     seed = repeat_ix
   )
 
-datasets <- pmap(dataset_design, function(dataset_id, topology_model, num_cells, seed, cell_positioning, allow_tented_progressions, ...) {
-  print(dataset_id)
-  set.seed(seed)
-  dataset <- generate_dataset(
-    id = dataset_id,
-    model = topology_model,
-    num_cells = num_cells,
-    num_features = 200,
-    allow_tented_progressions = allow_tented_progressions,
-    add_prior_information = FALSE,
-    normalise = FALSE
-  )
+dataset_design$dataset <- pmap(dataset_design, function(dataset_id, topology_model, num_cells, seed, cell_positioning, allow_tented_progressions, ...) {
+  function() {
+    set.seed(seed)
 
-  if (cell_positioning == "milestones") {
-    dataset <- dataset %>% gather_cells_at_milestones()
+    dataset <- dyntoy::generate_dataset(
+      id = dataset_id,
+      model = topology_model,
+      num_cells = num_cells,
+      num_features = 200,
+      allow_tented_progressions = allow_tented_progressions,
+      add_prior_information = FALSE,
+      normalise = FALSE
+    )
+
+    if (cell_positioning == "milestones") {
+      dataset <- dataset %>% dynwrap::gather_cells_at_milestones()
+    }
+
+    dataset
   }
-
-  dataset
-}) %>% set_names(dataset_design$dataset_id)
+})
 
 write_rds(dataset_design, derived_file("dataset_design.rds"))
-write_rds(datasets, derived_file("datasets.rds"))

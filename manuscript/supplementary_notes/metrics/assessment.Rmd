@@ -40,17 +40,19 @@ assessment$conformity %>%
   kableExtra::row_spec(0, hline_after = FALSE)
 ```
 
+`r rule$observation`
+
 ```{r}
-width <- ifelse(is.null(assessment$plot_datasets$width), 1, assessment$plot_datasets$width)
-height <- ifelse(is.null(assessment$plot_datasets$height), 1, assessment$plot_datasets$height)
+width <- ifelse(is.null(assessment$plot_datasets$width), 10, assessment$plot_datasets$width)
+height <- ifelse(is.null(assessment$plot_datasets$height), 10, assessment$plot_datasets$height)
 ```
 ```{r A, fig.width=width, fig.height=height, out.width=paste0(width/2, "in")}
 assessment$plot_datasets
 ```
 
 ```{r}
-width <- ifelse(is.null(assessment$plot_scores$width), 1, assessment$plot_scores$width)
-height <- ifelse(is.null(assessment$plot_scores$height), 1, assessment$plot_scores$height)
+width <- ifelse(is.null(assessment$plot_scores$width), 10, assessment$plot_scores$width)
+height <- ifelse(is.null(assessment$plot_scores$height), 10, assessment$plot_scores$height)
 ```
 ```{r B, fig.width=width, fig.height=height, out.width=paste0(width/2, "in")}
 assessment$plot_scores

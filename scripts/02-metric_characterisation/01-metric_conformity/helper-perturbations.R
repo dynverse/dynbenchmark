@@ -513,3 +513,17 @@ perturb_shuffle_cells_and_merge_bifurcation <- function(dataset, shuffle_perc = 
 
   dataset
 }
+
+
+
+
+##  ............................................................................
+##  Combine all perturbation methods                                        ####
+perturbation_methods <- ls() %>% str_subset("^perturb_") %>% map(function(x) {
+  id <- str_replace(x, "perturb_(.*)", "\\1")
+  run_fun <- get(x)
+
+  create_ti_method(id = id, run_fun = run_fun)()
+})
+
+perturbation_methods <- dynbenchmark::process_methods_design(perturbation_methods)

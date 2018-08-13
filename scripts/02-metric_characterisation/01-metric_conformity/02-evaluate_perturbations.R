@@ -4,16 +4,9 @@ library(dynbenchmark)
 experiment("02-metric_characterisation/01-metric_conformity")
 
 dataset_design <- read_rds(derived_file("dataset_design.rds"))
-datasets <- read_rds(derived_file("datasets.rds"))
 
 # load perturbations = dynwrap::ti_methods
 source(scripts_file("helper-perturbations.R"))
-perturbation_methods <- ls() %>% str_subset("^perturb_") %>% map(function(x) {
-  id <- str_replace(x, "perturb_(.*)", "\\1")
-  run_fun <- get(x)
-
-  create_ti_method(id = id, run_fun = run_fun)()
-})
 
 # load rules
 source(scripts_file("helper-rules.R"))
@@ -32,7 +25,7 @@ crossing <- mapdf(rules, function(rule) {
 crossing <- crossing[!duplicated(crossing),]
 
 # join all parameters from the different rules and remove duplicates
-parameters <- map(perturbation_methods %>% map_chr("id"), function(method_id) {
+parameters <- map(perturbation_methods$id, function(method_id) {
   parameters <- rules %>% mapdf(
     function(rule) {
       if(method_id %in% names(rule$parameters)) {
@@ -43,27 +36,36 @@ parameters <- map(perturbation_methods %>% map_chr("id"), function(method_id) {
     }) %>% bind_rows()
   parameters <- parameters[!duplicated(parameters),]
   parameters
-}) %>% set_names(perturbation_methods %>% map_chr("id"))
+}) %>% set_names(perturbation_methods$id)
+
+# get dataset functions
+datasets <- dynbenchmark::process_datasets_design(dataset_design %>% select(dataset_id, dataset) %>% deframe())
 
 design <- benchmark_generate_design(
   datasets = datasets,
   methods = perturbation_methods,
   parameters = parameters,
   num_repeats = 1,
-  crossing = crossing# %>% filter(method_id == "remove_divergence_regions") %>% sample_n(3)
+  crossing = crossing# %>% filter(method_id == "identity") %>% sample_n(3)
 )
 
 
 ##  ............................................................................
 ##  Run the crossing                                                        ####
-metrics <- dyneval::metrics$metric_id
+metric_ids <- metrics_characterised$metric_id
 
 # run evaluation on cluster
-benchmark_submit(design, metrics = metrics, qsub_params = list(memory = "2G", timeout = 3600), qsub_grouping = "{method_id}")
+benchmark_submit(
+  design,
+  metrics = metric_ids,
+  qsub_params = list(memory = "2G", timeout = 3600),
+  qsub_grouping = "{method_id}",
+  output_models = FALSE
+)
 
 benchmark_fetch_results()
 
-results <- benchmark_bind_results(load_models = TRUE)
+results <- benchmark_bind_results(load_models = FALSE)
 
 # run evaluation locally
 # benchmark_submit_check(design, metrics)
@@ -85,18 +87,15 @@ results <- benchmark_bind_results(load_models = TRUE)
 ###
 if (any(results$error_status != "no_error")) stop("Errors: ", results %>% filter(error_status != "no_error") %>% pull(method_id) %>% unique() %>% glue::glue_collapse(", "))
 
-results %>% filter(error_status != "no_error") %>% select(method_id, error_message) %>% distinct()
+results %>% filter(error_status != "no_error") %>% select(method_id, error_message, stderr) %>% distinct()
 
 # extract scores from successful results
 scores <- results %>%
   filter(error_status == "no_error") %>%
-  gather("metric_id", "score", intersect(metrics, colnames(results))) %>%
+  gather("metric_id", "score", intersect(metric_ids, colnames(results))) %>%
   select(method_id, dataset_id, param_id, metric_id, score)
 
 if (any(is.na(scores$score))) stop("Some scores are NA!", score %>% filter(is.na(score)) %>% pull(metric_id) %>% unique())
 
-models <- results %>%
-  select(method_id, dataset_id, param_id, model)
-
 write_rds(scores, derived_file("scores.rds"))
-write_rds(models, derived_file("models.rds"))
+

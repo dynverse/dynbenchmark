@@ -9,20 +9,22 @@ dataset_design <- read_rds(derived_file("dataset_design.rds"))
 
 # load scores and models
 scores <- read_rds(derived_file("scores.rds"))
-models <- read_rds(derived_file("models.rds"))
 
-scores <- scores %>% filter(metric_id %in% evaluated_metrics)
-metrics <- unique(scores$metric_id)
+scores <- scores %>% filter(metric_id %in% metrics_characterised$metric_id)
 
 # load rules
 source(scripts_file("helper-rules.R"))
 
+# add harmonic mean
+metric_ids_harm_mean <- metrics_evaluated %>% filter(category != "average") %>% pull(metric_id)
 scores <- scores %>% bind_rows(
   scores %>%
-    spread(metric_id, score) %>%
-    mutate(harm_mean = dyneval:::calculate_harmonic_mean(correlation, edge_flip, featureimp_cor, F1_milestones)) %>%
-    gather("metric_id", "score", harm_mean) %>%
-    select(-one_of(metrics))
+    filter(metric_id %in% metric_ids_harm_mean) %>%
+    group_by(method_id, dataset_id, param_id) %>%
+    summarise(
+      score = dyneval:::calculate_harmonic_mean(score),
+      metric_id = "harm_mean"
+    )
 )
 
 # fix order of metrics
@@ -43,16 +45,17 @@ filter_based_on_crossing <- function(x, crossing) {
   y
 }
 
-assess_conformity <- function(rule, scores, models) {
+assess_conformity <- function(rule, scores) {
   # extract only the relevant parts
   scores <- filter_based_on_crossing(scores, rule$crossing)
-  models <- filter_based_on_crossing(models, rule$crossing)
+
+  print(rule$id)
 
   if (nrow(scores) == 0) {
     warning(rule$id)
   } else {
     assessment <- rule$assessment(scores)
-    assessment$plot_datasets <- rule$plot_datasets(models)
+    assessment$plot_datasets <- rule$plot_datasets()
   }
   assessment$rule_id <- rule$id
 
@@ -60,7 +63,7 @@ assess_conformity <- function(rule, scores, models) {
 }
 
 
-assessments <- mapdf(rules, assess_conformity, scores=scores, models=models) %>% list_as_tibble() %>% mutate(rule_id = rules$id)
+assessments <- mapdf(rules, assess_conformity, scores=scores) %>% list_as_tibble() %>% mutate(rule_id = rules$id)
 
 assessments %>%
   unnest(conformity) %>%
@@ -70,20 +73,19 @@ assessments %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # test one rule
-rule <- rules %>% extract_row_to_list(which(rules$id == "merge_bifurcation"))
-assessment <- assess_conformity(rule, scores, models)
-assessment$conformity
-assessment$plot_scores
-assessment$plot_datasets
-
-
-pdf("test.pdf", width=assessment$plot_scores$width, height = assessment$plot_scores$height)
-assessment$plot_scores
-dev.off()
-
-pdf("test.pdf", width=assessment$plot_datasets$width, height = assessment$plot_datasets$height)
-assessment$plot_datasets
-dev.off()
+# rule <- rules %>% extract_row_to_list(which(rules$id == "add_leaf_edges"))
+# assessment <- assess_conformity(rule, scores)
+# assessment$conformity
+# assessment$plot_scores
+# assessment$plot_datasets$height
+#
+# pdf("test.pdf", width=assessment$plot_scores$width, height = assessment$plot_scores$height)
+# assessment$plot_scores
+# dev.off()
+#
+# pdf("test.pdf", width=assessment$plot_datasets$width, height = assessment$plot_datasets$height)
+# assessment$plot_datasets
+# dev.off()
 
 
 # save assessment
