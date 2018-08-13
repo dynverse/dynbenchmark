@@ -112,7 +112,8 @@ simulate_splatter <- function(
       milestone_network = milestone_network,
       progressions = progressions
     ) %>%
-    add_prior_information()
+    add_prior_information() %>%
+    add_cell_waypoints()
 
   # add information on the simulation itself
   dataset$simulation_design <-
@@ -270,7 +271,8 @@ simulate_prosstt <- function(
       counts = counts,
       expression = expression
     ) %>%
-    add_prior_information()
+    add_prior_information() %>%
+    add_cell_waypoints()
 
   dataset$simulation_design <-
     list(
@@ -331,6 +333,9 @@ simulate_dyntoy <- function(
     simulator = "dyntoy",
     simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "splatter", "dynbenchmark", "dynnormaliser"))
   )
+
+  # add cell waypoints
+  dataset <- dataset %>% dynwrap::add_cell_waypoints()
 
   # save dataset
   save_dataset(dataset, dataset_id)
@@ -407,6 +412,9 @@ simulate_dyngen <- function(
     simulator = "dyngen",
     simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyngen","splatter", "dynbenchmark"))
   )
+
+  # add cell waypoints
+  dataset <- dataset %>% dynwrap::add_cell_waypoints()
 
   # save dataset
   save_dataset(dataset, dataset_id)
