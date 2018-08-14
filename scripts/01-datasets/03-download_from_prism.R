@@ -8,7 +8,8 @@ qsub::rsync_remote(
   path_src = derived_file(remote = TRUE),
   remote_dest = FALSE,
   path_dest = derived_file(remote = FALSE),
-  verbose = TRUE
+  verbose = TRUE,
+  compress = FALSE
 )
 
 # qsub::rsync_remote(
