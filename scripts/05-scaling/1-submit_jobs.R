@@ -8,14 +8,14 @@ experiment("05-scaling")
 ##########################################################
 
 # generate datasets with this range of dimensionality
-scalability_range <- log10(c(
-  10, 20, 40, 60, 80, 100,
-  100, 200, 400, 600, 800,
-  1000, 2000, 4000, 6000, 8000,
-  10000, 20000, 40000, 60000, 100000,
-  200000, 400000, 600000, 800000, 1000000
-))
-# scalability_range <- seq(log10(10), log10(1000000), by = log10(10) / 5)
+# scalability_range <- log10(c(
+#   10, 20, 40, 60, 80, 100,
+#   100, 200, 400, 600, 800,
+#   1000, 2000, 4000, 6000, 8000,
+#   10000, 20000, 40000, 60000, 100000,
+#   200000, 400000, 600000, 800000, 1000000
+# ))
+scalability_range <- seq(log10(10), log10(1000000), by = log10(10) / 5)
 print(round(10 ^ scalability_range))
 
 # use helper function to generate datasets
@@ -80,7 +80,6 @@ cat("NOT RUNNING: ", checks %>% filter(ran == 0) %>% pull(method_id) %>% paste(c
 
 # use methods that were able to at least run on 1 dataset, and arrange them according to execution time
 method_ids <- checks %>% filter(ran > 0) %>% arrange(time) %>% pull(method_id)
-# method_ids <- "identity"
 
 # construct methods tibble
 methods <-
@@ -116,8 +115,9 @@ write_rds(design, derived_file("design.rds"), compress = "xz")
 design_filt <- read_rds(derived_file("design.rds"))
 
 # only run the next stage when the first has finished
+design_filt$crossing <- design_filt$crossing %>% filter(memory < 20, method_id == "angle")
 # design_filt$crossing <- design_filt$crossing %>% filter(memory < 20)
-design_filt$crossing <- design_filt$crossing %>% filter(memory < 50)
+# design_filt$crossing <- design_filt$crossing %>% filter(memory < 50)
 # design_filt$crossing <- design_filt$crossing %>% filter(memory < 100)
 # design_filt$crossing <- design_filt$crossing
 

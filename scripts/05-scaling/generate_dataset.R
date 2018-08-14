@@ -1,3 +1,5 @@
+
+
 # define dataset function. two datasets with the same seed but different
 # dimensionalities should have the same values in overlapping columns and rows.
 generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1) {
@@ -10,59 +12,61 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1) {
   nrow <- round(10 ^ lnrow)
   ncol <- round(10 ^ lncol)
 
+  expand_fun <- function(counts, margin, new_margin_size, knns, seed) {
+    dim_margin <- if (margin == 1) nrow(counts) else ncol(counts)
+
+    set.seed(seed)
+    ref_ixs <- sample.int(dim_margin, new_margin_size, replace = TRUE)
+
+    vecs <- lapply(seq_len(new_margin_size), function(i) {
+      set.seed(i * seed)
+      ref_ix <- ref_ixs[[i]]
+      num_secs <- rnorm(1, 5, 1) %>% pmax(3) %>% pmin(ncol(knns)) %>% round()
+      sec_ixs <- sample(knns[ref_ix, ], num_secs)
+      sec_weights <- runif(num_secs) %>% {. / sum(.)}
+
+      ref_vals <- if (margin == 1) counts[ref_ix, , drop = TRUE] else counts[, ref_ix, drop = TRUE]
+      vals <- if (margin == 1) counts[sec_ixs, ] else counts[, sec_ixs]
+      sec_vals <- vals %>%
+        sweep(MARGIN = margin, STATS = sec_weights, FUN = "*") %>%
+        apply(MARGIN = 3 - margin, FUN = sum)
+
+      sort(ref_vals)[order(order(sec_vals))] %>% set_names(NULL)
+    })
+    bind_fun <- if (margin == 1) rbind else cbind
+    out <- do.call(bind_fun, vecs)
+    attr(out, "ref_ixs") <- ref_ixs
+    out
+  }
+
   cat("SCALINGDATASET: Loading dataset\n")
   base_traj <- dynbenchmark::load_dataset(orig_dataset_id)
   base_traj <- base_traj %>% dynwrap::add_cell_waypoints(min(nrow, 400))
+
   base_geo <- dynwrap::compute_tented_geodesic_distances(base_traj)
   base_geo[!is.finite(base_geo)] <- 10 * max(base_geo[is.finite(base_geo)])
-  base_knns <- FNN::get.knn(as.dist(base_geo), k = min(nrow - 1, 20))$nn.index
-
 
   counts <- dynwrap::get_expression(base_traj, "counts")
+  expression <- dynwrap::get_expression(base_traj, "expression")
 
-  if (ncol < nrow) {
+  #knn_ix <- 1:10
+  knn_ix <- 1:3
+  cell_knns <- FNN::get.knn(as.dist(base_geo), k = 20)$nn.index[, knn_ix, drop = FALSE]
+  space_genes <- dyndimred::dimred_landmark_mds(t(expression), ndim = 10)
+  gene_knns <- FNN::get.knn(space_genes, k = 20)$nn.index[, knn_ix, drop = FALSE]
+
+  if (lncol < lnrow) {
     cat("SCALINGDATASET: Sampling ", ncol, " genes\n", sep = "")
-    counts <- sapply(seq_len(ncol), function(i) {
-      set.seed(i * seed)
-      num_orig_genes <- pmax(rnorm(1, 5, 1), 3)
-      ix <- sample.int(ncol(counts), num_orig_genes)
-      new_c <- round(rowMeans(counts[,ix, drop = FALSE]))
-      num_zero <- rowMeans(counts[,ix, drop = FALSE] == 0)
-      new_c[num_zero > .2] <- 0
-      new_c + rbinom(length(new_c), 100, .005)
-      new_c
-    })
+    counts <- expand_fun(counts = counts, new_margin_size = ncol, margin = 2, knns = gene_knns, seed = seed)
   }
 
   cat("SCALINGDATASET: Sampling ", nrow, " cells\n", sep = "")
-  set.seed(seed)
-  cell_ixs <- sample.int(nrow(counts), nrow, replace = TRUE)
+  counts <- expand_fun(counts = counts, new_margin_size = nrow, margin = 1, knns = cell_knns, seed = seed)
+  cell_ixs <- attr(counts, "ref_ixs")
 
-  counts <- t(sapply(seq_len(nrow), function(i) {
-    set.seed(i * seed)
-    j <- cell_ixs[[i]]
-    num_orig_cells <- round(runif(1, 3, ncol(base_knns)))
-    ix <- base_knns[j, sample.int(ncol(base_knns), num_orig_cells)]
-    new_c <- round(colMeans(counts[ix, , drop = FALSE]))
-    num_zero <- colMeans(counts[ix, , drop = FALSE] == 0)
-    new_c[num_zero > .2] <- 0
-    new_c + rbinom(length(new_c), 100, .005)
-    new_c
-  }))
-
-
-  if (ncol >= nrow) {
+  if (lncol >= lnrow) {
     cat("SCALINGDATASET: Sampling ", ncol, " genes\n", sep = "")
-    counts <- sapply(seq_len(ncol), function(i) {
-      set.seed(i * seed)
-      num_orig_genes <- pmax(rnorm(1, 5, 1), 3)
-      ix <- sample.int(ncol(counts), num_orig_genes)
-      new_c <- round(rowMeans(counts[,ix, drop = FALSE]))
-      num_zero <- rowMeans(counts[,ix, drop = FALSE] == 0)
-      new_c[num_zero > .2] <- 0
-      new_c + rbinom(length(new_c), 100, .005)
-      new_c
-    })
+    counts <- expand_fun(counts = counts, new_margin_size = ncol, margin = 2, knns = gene_knns, seed = seed)
   }
 
   cat("SCALINGDATASET: format counts and expression\n")
@@ -71,12 +75,14 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1) {
   cell_ids <- paste0("Cell", seq_len(nrow))
   gene_ids <- paste0("Gene", seq_len(ncol))
   dimnames(counts) <- dimnames(expression) <- list(cell_ids, gene_ids)
+  cell_id_map <- data_frame(old_id = base_traj$cell_ids[cell_ixs], cell_id = cell_ids)
 
   cat("SCALINGDATASET: create progressions\n")
-  progressions <- base_traj$progressions %>%
-    slice(match(cell_id, base_traj$cell_ids)) %>% # there is no tenting so this should not be an issue
-    slice(cell_ixs) %>%
-    mutate(cell_id = cell_ids)
+  progressions <-
+    base_traj$progressions %>%
+    rename(old_id = cell_id) %>%
+    right_join(cell_id_map, by = "old_id") %>%
+    select(-old_id)
 
   cat("SCALINGDATASET: wrapping trajectory and adding prior information\n")
   set.seed(seed)
