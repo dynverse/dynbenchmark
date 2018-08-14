@@ -332,11 +332,11 @@ benchmark_run_evaluation <- function(
     method <- create_ti_method(id = "error", run_fun = function(...) message(error_mode))()
   } else if (identical(error_mode, FALSE)) {
     # read dataset
-    dataset <- subdesign$datasets %>% filter(id == dataset_id) %>% pull(fun) %>% first() %>% invoke()
+    dataset <- subdesign$datasets %>% filter(id == !!dataset_id) %>% pull(fun) %>% first() %>% invoke()
 
     # get method
     setup_singularity_methods()
-    method <- subdesign$methods %>% filter(id == method_id) %>% pull(fun) %>% first() %>% invoke()
+    method <- subdesign$methods %>% filter(id == !!method_id) %>% pull(fun) %>% first() %>% invoke()
   } else {
     stop("Invalid error_mode")
   }
