@@ -31,7 +31,6 @@ benchmark_fetch_results <- function(remote = NULL) {
     output_metrics_file <- gsub("qsubhandle.rds", "output_metrics.rds", handle, fixed = TRUE)
     output_models_file <- gsub("qsubhandle.rds", "output_models.rds", handle, fixed = TRUE)
 
-
     if (!file.exists(handle)) {
       cat(name, ": No qsub file was found.\n", sep = "")
       return(FALSE)
@@ -109,7 +108,21 @@ benchmark_fetch_results <- function(remote = NULL) {
           mutate_at(vars(starts_with("time_")), function(x) NA)
       }
 
-      out$job_exit_status <- extract_job_exit_status(qacct_out, i)
+      qacct_variables <-
+        qacct_out %>%
+        filter(taskid == i) %>%
+        arrange(desc(row_number_i)) %>%
+        slice(1) %>%
+        transmute(
+          job_exit_status = exit_status %>% str_replace(" +", " ") %>% str_replace(" .*", ""),
+          mem_io = qacct_process_memory(mem),
+          disk_io = qacct_process_memory(io),
+          max_mem = qacct_process_memory(maxvmem),
+          mem_io_gb = mem_io / 1e9,
+          disk_io_gb = disk_io / 1e9,
+          max_mem_gb = max_mem / 1e9
+        )
+      out <- bind_cols(out, qacct_variables)
 
       out$error_status <- extract_error_status(
         stdout = out$stdout,
@@ -161,6 +174,23 @@ extract_job_exit_status <- function(qacct_out, task_id) {
     NA
   }
 }
+
+qacct_process_memory <- function(str) {
+  value <- str %>% gsub("[^0-9\\.]*", "", .) %>% as.numeric()
+  exp <- str %>% gsub("[0-9\\.s]*", "", .)
+  map <- c(
+    "B" = 0,
+    "KB" = 3,
+    "MB" = 6,
+    "GB" = 9,
+    "TB" = 12,
+    "PB" = 15,
+    "EB" = 18,
+    "ZB" = 21 # should be enough for now
+  )
+  value * 10^map[exp]
+}
+
 
 extract_error_status <- function(stdout, stderr, error_message, job_exit_status, produced_model) {
   txt <- tolower(paste0(stdout, " ", stderr, " ", error_message))
