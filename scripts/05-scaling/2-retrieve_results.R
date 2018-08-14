@@ -10,7 +10,7 @@ experiment("05-scaling")
 ##########################################################
 
 # fetch results from cluster
-benchmark_fetch_results()
+benchmark_fetch_results(TRUE)
 
 # bind results in one data frame (without models)
 design <- read_rds(derived_file("design.rds"))
@@ -25,7 +25,7 @@ datasets_info <- design$datasets
 data <-
   execution_output %>%
   select(method_id, dataset_id, errored = dummy, error_status, starts_with("time_"), stderr, stdout, error_message) %>%
-  left_join(datasets_info %>% select(dataset_id = id, lnrow, lncol, lsum, nrow, ncol, memory), by = "dataset_id") %>%
+  left_join(datasets_info %>% select(dataset_id = id, orig_dataset_id, lnrow, lncol, lsum, nrow, ncol, memory), by = "dataset_id") %>%
   left_join(methods_info %>% select(method_id = id, method_name = name), by = "method_id")
 
 axis_scale <- data %>% select(lnrow, nrow) %>% unique() %>% filter(lnrow %% 1 == 0)
@@ -43,10 +43,10 @@ models <-
     )
     out <- dat %>% select(method_id, method_name) %>% unique()
 
-    model <- VGAM::vglm(ltime ~ lnrow + lncol, VGAM:::tobit(Upper = log10(3600), Lower = -5), data = dat2)
+    model <- VGAM::vglm(ltime ~ lnrow + lncol + orig_dataset_id, VGAM:::tobit(Upper = log10(3600), Lower = -5), data = dat2)
 
     coef_values <- set_names(
-      model@coefficients[-2],
+      model@coefficients[c("(Intercept):1", "lnrow", "lncol")],
       c("intercept", "lnrow", "lncol")
     )
 

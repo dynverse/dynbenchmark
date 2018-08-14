@@ -232,13 +232,7 @@ plots <- map(method_ids, function(method_id) {
   ) +
     patchwork::plot_annotation(
       title = paste0("Scalability results for ", methods_info_method$name),
-      theme = th
-
-      #' @examples
-      #' # examine some errors
-      #' execution_output %>% filter(method_id == "mpath", error_status == "method_error") %>% mutate(txt = paste0(stdout, stderr, error_message)) %>% pull(txt) %>% head(5) %>% cat
-      #' execution_output %>% filter(method_id == "dpt", error_status == "method_error") %>% mutate(txt = paste0(stdout, stderr, error_message)) %>% pull(txt) %>% head(5) %>% cat
-      eme(title = element_text(size = 20))
+      theme = theme(title = element_text(size = 20))
     )
 })
 
