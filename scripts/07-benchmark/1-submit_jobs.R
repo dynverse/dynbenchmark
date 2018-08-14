@@ -78,12 +78,14 @@ design$crossing <- design$crossing %>%
   arrange(method_order)
 
 # save configuration
-write_rds(design, derived_file("design.rds"))
+write_rds(design, derived_file("design.rds"), compress = "xz")
 
 ##########################################################
 ###############        SUBMIT JOB          ###############
 ##########################################################
-design <- read_rds(derived_file("design.rds"))
+design_filt <- read_rds(derived_file("design.rds"))
+design_filt$crossing <- design_filt$crossing %>% filter(method_id == "identity")
+
 
 qsub_params <- function(method_id, param_id) {
   prm <- lst(timeout = 6 * 60 * 60, memory = "10G")
@@ -95,7 +97,7 @@ qsub_params <- function(method_id, param_id) {
 
 # submit job
 benchmark_submit(
-  design = design,
+  design = design_filt,
   qsub_grouping = "{method_id}/{param_id}",
   qsub_params = qsub_params,
   metrics = metrics_evaluated$metric_id %>% setdiff("harm_mean"),
