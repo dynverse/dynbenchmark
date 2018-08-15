@@ -88,7 +88,9 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1, cores = 1,
   matching_cell_ids <- base_traj$cell_ids[cell_ixs]
   features_id <- gene_ids
   start_id <- cell_ids[match(prio$start_id, matching_cell_ids)]
+  if (length(start_id) == 1 && is.na(start_id)) start_id <- NULL
   end_id <- cell_ids[match(prio$end_id, matching_cell_ids)]
+  if (length(end_id) == 1 && is.na(end_id)) end_id <- NULL
   groups_id <- prio$groups_id %>%
     rename(old_id = cell_id) %>%
     right_join(cell_id_map, by = "old_id") %>%
@@ -113,11 +115,11 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1, cores = 1,
       expression = expression
     ) %>%
     dynwrap::add_prior_information(
-      start_id = start_id,
-      end_id = end_id,
-      groups_id = groups_id,
-      groups_network = groups_network,
-      groups_n = groups_n,
+      # start_id = start_id,
+      # end_id = end_id,
+      # groups_id = groups_id,
+      # groups_network = groups_network,
+      # groups_n = groups_n,
       features_id = features_id,
       verbose = TRUE
     ) %>%

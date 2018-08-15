@@ -54,9 +54,9 @@ datasets <-
   select(id, type, fun, everything())
 
 # create datasets and save at the remote's derived file folder
-num_cores <- 4
+num_cores <- 1
 handle <- qsub::qsub_lapply(
-  X = rev(seq_len(nrow(datasets))),
+  X = rev(seq_len(nrow(datasets))), # submit in reverse order so the first tasks will take the longest
   qsub_packages = c("tidyverse", "dynbenchmark", "dynwrap"),
   qsub_environment = c("datasets", "num_cores", "generate_dataset"),
   qsub_config = qsub::override_qsub_config(name = "datascaling", memory = "10G", num_cores = num_cores, wait = FALSE, max_wall_time = "12:00:00"),
