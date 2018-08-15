@@ -83,7 +83,18 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1, cores = 1,
     right_join(cell_id_map, by = "old_id") %>%
     select(-old_id)
 
+  if (verbose) cat("SCALINGDATASET: determine prior information\n")
   prio <- base_traj$prior_information
+  matching_cell_ids <- base_traj$cell_ids[cell_ixs]
+  features_id <- gene_ids
+  start_id <- cell_ids[match(prio$start_id, matching_cell_ids)]
+  end_id <- cell_ids[match(prio$end_id, matching_cell_ids)]
+  groups_id <- prio$groups_id %>%
+    rename(old_id = cell_id) %>%
+    right_join(cell_id_map, by = "old_id") %>%
+    select(-old_id)
+  groups_network <- prio$groups_network
+  groups_n <- prio$groups_n
 
   if (verbose) cat("SCALINGDATASET: wrapping trajectory and adding prior information\n")
   set.seed(seed)
@@ -91,39 +102,27 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1, cores = 1,
     dynwrap::wrap_data(
       id = paste0("scaling_", lnrow, "_", lncol),
       cell_ids = cell_ids
-    )
-  dataset <- dataset %>% dynwrap::add_trajectory(
+    ) %>%
+    dynwrap::add_trajectory(
       milestone_ids = base_traj$milestone_ids,
       milestone_network = base_traj$milestone_network,
       progressions = progressions
-    )
-  dataset <- dataset %>% dynwrap::add_expression(
+    ) %>%
+    dynwrap::add_expression(
       counts = counts,
       expression = expression
-    )
-  dataset <- dataset %>% dynwrap::add_prior_information(
-    features_id = gene_ids
-
-  )
-  dataset <- dataset %>% dynwrap::add_cell_waypoints(100)
-  dataset <- dataset %>% dynwrap::add_root("Cell1")
-  # dataset <-
-  #   dynwrap::wrap_data(
-  #     id = paste0("scaling_", lnrow, "_", lncol),
-  #     cell_ids = cell_ids
-  #   ) %>%
-  #   dynwrap::add_trajectory(
-  #     milestone_ids = base_traj$milestone_ids,
-  #     milestone_network = base_traj$milestone_network,
-  #     progressions = progressions
-  #   ) %>%
-  #   dynwrap::add_expression(
-  #     counts = counts,
-  #     expression = expression
-  #   ) %>%
-  #   dynwrap::add_prior_information() %>%
-  #   dynwrap::add_cell_waypoints(100) %>%
-  #   dynwrap::add_root("Cell1")
+    ) %>%
+    dynwrap::add_prior_information(
+      start_id = start_id,
+      end_id = end_id,
+      groups_id = groups_id,
+      groups_network = groups_network,
+      groups_n = groups_n,
+      features_id = features_id,
+      verbose = TRUE
+    ) %>%
+    dynwrap::add_cell_waypoints(100) %>%
+    dynwrap::add_root("Cell1")
 
   if (verbose) cat("SCALINGDATASET: returning trajectory\n")
   set.seed(prev_seed)
