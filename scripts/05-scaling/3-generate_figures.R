@@ -92,6 +92,11 @@ plots <- map(method_ids, function(method_id) {
   timings_method <- data_method %>% filter(error_status == "no_error")
   pred_method <- data_pred %>% filter(method_id == !!method_id)
 
+  timings_method <- bind_rows(
+    timings_method,
+    timings_method %>% group_by(method_id, lnrow, lncol) %>% select_if(is.numeric) %>% summarise_if(is.numeric, mean) %>% mutate(orig_dataset_id = "mean") %>% ungroup()
+  )
+
   g1 <-
     ggplot(data_method) +
     geom_tile(aes(lnrow, lncol, fill = error_status)) +
@@ -103,71 +108,86 @@ plots <- map(method_ids, function(method_id) {
     labs(x = "# cells", y = "# features", fill = "Status") +
     facet_wrap(~ orig_dataset_id, ncol = 1) +
     coord_equal()
+  g1
 
-  if (nrow(model_method) > 0) {
-    g2 <-
-      ggplot(timings_method, aes(lnrow, time_method, group = paste0(orig_dataset_id, "__", lncol), colour = lncol)) +
-      geom_point() +
-      geom_line() +
-      scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-      scale_y_log10(breaks = 10^seq(-5, 9)) +
-      scale_colour_distiller(palette = "RdYlBu") +
-      theme_classic() +
-      theme(legend.position = "bottom") +
-      labs(x = "# cells", y = "Log10(Time)", colour = "# features") +
-      facet_wrap(~ orig_dataset_id, ncol = 1)
+  g2 <-
+    ggplot(timings_method) +
+    geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
+    geom_tile(aes(lnrow, lncol, fill = log10(time_method))) +
+    scale_fill_distiller(palette = "RdYlBu") +
+    scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+    scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+    theme_classic() +
+    theme(legend.position = "bottom") +
+    labs(x = "# cells", y = "# features", fill = "Log10(Time)") +
+    facet_wrap(~ orig_dataset_id, ncol = 1) +
+    coord_equal()
+  g2
 
-    g3 <-
-      ggplot(timings_method, aes(lncol, time_method, group = paste0(orig_dataset_id, "__", lnrow), colour = lnrow)) +
-      geom_point() +
-      geom_line() +
-      scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-      scale_y_log10(breaks = 10^seq(-5, 9)) +
-      scale_colour_distiller(palette = "RdYlBu") +
-      theme_classic() +
-      theme(legend.position = "bottom") +
-      labs(x = "# features", y = "Log10(Time)", colour = "# cells") +
-      facet_wrap(~ orig_dataset_id, ncol = 1)
+  g3 <-
+    ggplot(timings_method) +
+    geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
+    geom_tile(aes(lnrow, lncol, fill = log10(max_mem))) +
+    scale_fill_distiller(palette = "RdYlBu") +
+    scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+    scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+    theme_classic() +
+    theme(legend.position = "bottom") +
+    labs(x = "# cells", y = "# features", fill = "Log10(Max mem)") +
+    facet_wrap(~ orig_dataset_id, ncol = 1) +
+    coord_equal()
+  g3
 
-    g4 <-
-      ggplot(timings_method) +
-      geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
-      geom_tile(aes(lnrow, lncol, fill = log10(time_method))) +
-      scale_fill_distiller(palette = "RdYlBu") +
-      scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-      scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-      theme_classic() +
-      theme(legend.position = "bottom") +
-      labs(x = "# cells", y = "# features", fill = "Log10(Time)") +
-      facet_wrap(~ orig_dataset_id, ncol = 1) +
-      coord_equal()
+  g4 <-
+    ggplot(timings_method) +
+    geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
+    geom_tile(aes(lnrow, lncol, fill = log10(mem_io))) +
+    scale_fill_distiller(palette = "RdYlBu") +
+    scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+    scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+    theme_classic() +
+    theme(legend.position = "bottom") +
+    labs(x = "# cells", y = "# features", fill = "Log10(Mem IO)") +
+    facet_wrap(~ orig_dataset_id, ncol = 1) +
+    coord_equal()
+  g4
 
-    g5 <-
-      ggplot(pred_method) +
-      geom_tile(aes(lnrow, lncol, fill = lpredtime)) +
-      scale_fill_distiller(palette = "RdYlBu") +
-      scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-      scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-      theme_classic() +
-      theme(legend.position = "bottom") +
-      labs(x = "# cells", y = "# features", fill = "Log10(Pred. Time)") +
-      coord_equal()
-  } else {
-    g2 <- patchwork::plot_spacer()
-    g3 <- patchwork::plot_spacer()
-    g4 <- patchwork::plot_spacer()
-    g5 <- patchwork::plot_spacer()
-  }
+  g5 <-
+    ggplot(timings_method) +
+    geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
+    geom_tile(aes(lnrow, lncol, fill = log10(disk_io))) +
+    scale_fill_distiller(palette = "RdYlBu") +
+    scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+    scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+    theme_classic() +
+    theme(legend.position = "bottom") +
+    labs(x = "# cells", y = "# features", fill = "Log10(Disk IO)") +
+    facet_wrap(~ orig_dataset_id, ncol = 1) +
+    coord_equal()
+  g5
+
+  g6 <-
+    ggplot(pred_method) +
+    geom_tile(aes(lnrow, lncol, fill = lpredtime)) +
+    scale_fill_distiller(palette = "RdYlBu") +
+    scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+    scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+    theme_classic() +
+    theme(legend.position = "bottom") +
+    labs(x = "# cells", y = "# features", fill = "Log10(Pred. Time)") +
+    coord_equal()
+  g6
 
   patchwork::wrap_plots(
     patchwork::wrap_plots(
       g1 + labs(title = "Execution information"),
-      g2 + labs(title = "Time versus # cells"),
-      g3 + labs(title = "Time versus # genes"),
-      g4 + labs(title = "Timings grid"),
+      g2 + labs(title = "Timings grid"),
+      g3 + labs(title = "Memory grid"),
+      g4 + labs(title = "Mem IO grid"),
+      g5 + labs(title = "Disk IO grid"),
       nrow = 1
     ),
-    g5 + labs(title = "Predicted timings"),
+    g6 + labs(title = "Predicted timings"),
     nrow = 1,
     widths = c(4, 1)
   ) +
@@ -182,7 +202,7 @@ pbapply::pblapply(seq_along(method_ids), cl = 8, function(i) {
   mid <- method_ids[[i]]
   pl <- plots[[i]]
   cat("Plotting ", mid, "\n", sep = "")
-  ggsave(derived_file(c("results/", mid, ".svg")), pl, width = 15, height = 12)
+  ggsave(derived_file(c("results/", mid, ".svg")), pl, width = 18, height = 12)
 })
 
 # compress to figure_file("results.tar.xz")
