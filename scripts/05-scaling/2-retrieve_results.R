@@ -28,18 +28,16 @@ data <-
   left_join(datasets_info %>% select(dataset_id = id, orig_dataset_id, lnrow, lncol, lsum, nrow, ncol, memory), by = "dataset_id") %>%
   left_join(methods_info %>% select(method_id = id, method_name = name), by = "method_id")
 
-axis_scale <- data %>% select(lnrow, nrow) %>% unique() %>% filter(lnrow %% 1 == 0)
-
 #' @examples
 #' dat <- data %>% filter(method_id == "scorpius")
 #' dat <- data %>% filter(method_id == "scorpius", error_status %in% c("no_error", "time_limit")) %>% filter(n() > 10)
-data %>%
-  group_by(method_id, error_status) %>%
-  summarise(n = n()) %>%
-  mutate(n = n / sum(n)) %>%
-  ungroup() %>%
-  reshape2::acast(method_id ~ error_status, value.var = "n", fill = 0) %>%
-  pheatmap::pheatmap()
+#' data %>%
+#'   group_by(method_id, error_status) %>%
+#'   summarise(n = n()) %>%
+#'   mutate(n = n / sum(n)) %>%
+#'   ungroup() %>%
+#'   reshape2::acast(method_id ~ error_status, value.var = "n", fill = 0) %>%
+#'   pheatmap::pheatmap(cluster_cols = FALSE, cluster_rows = FALSE)
 
 execution_time_models <-
   data %>%
@@ -90,9 +88,8 @@ execution_time_models <-
 data_pred <- bind_rows(execution_time_models$predtimes)
 execution_time_models <- execution_time_models %>% select(-predtimes)
 
-method_ids <- unique(data$method_id) %>% setdiff("error")
-
 ##########################################################
 ###############         SAVE DATA          ###############
 ##########################################################
-write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "xz")
+write_rds(lst(data, data_pred, execution_time_models), result_file("scaling.rds"), compress = "xz")
+
