@@ -16,12 +16,12 @@ dataset_ids <- c(
   "synthetic/dyngen/25"
 )
 orig_dataset_id <- dataset_ids[[1]]
-lnrow <- log10(1000)
-lncol <- log10(1500)
+lnrow <- log10(10000)
+lncol <- log10(10000)
 seed <- 1
 
 data <- generate_dataset(orig_dataset_id, lnrow, lncol, seed)
-
+write_rds(data, "~/test.rds", compress = "xz")
 orig_data <- load_dataset(orig_dataset_id)
 
 patchwork::wrap_plots(
