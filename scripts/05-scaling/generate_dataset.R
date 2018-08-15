@@ -2,7 +2,7 @@
 
 # define dataset function. two datasets with the same seed but different
 # dimensionalities should have the same values in overlapping columns and rows.
-generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1) {
+generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1, cores = 1, verbose = TRUE) {
   prev_seed <- .Random.seed[[1]]
 
   set.seed(seed)
@@ -18,7 +18,7 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1) {
     set.seed(seed)
     ref_ixs <- sample.int(dim_margin, new_margin_size, replace = TRUE)
 
-    vecs <- lapply(seq_len(new_margin_size), function(i) {
+    vecs <- pbapply::pblapply(seq_len(new_margin_size), cl = cores, function(i) {
       set.seed(i * seed)
       ref_ix <- ref_ixs[[i]]
       num_secs <- rnorm(1, 5, 1) %>% pmax(3) %>% pmin(ncol(knns)) %>% round()
@@ -39,7 +39,7 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1) {
     out
   }
 
-  cat("SCALINGDATASET: Loading dataset\n")
+  if (verbose) cat("SCALINGDATASET: Loading dataset\n")
   base_traj <- dynbenchmark::load_dataset(orig_dataset_id)
   base_traj <- base_traj %>% dynwrap::add_cell_waypoints(min(nrow, 400))
 
@@ -49,18 +49,17 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1) {
   counts <- dynwrap::get_expression(base_traj, "counts")
   expression <- dynwrap::get_expression(base_traj, "expression")
 
-  #knn_ix <- 1:10
-  knn_ix <- 1:3
+  knn_ix <- 1:10
   cell_knns <- FNN::get.knn(as.dist(base_geo), k = 20)$nn.index[, knn_ix, drop = FALSE]
   space_genes <- dyndimred::dimred_landmark_mds(t(expression), ndim = 10)
   gene_knns <- FNN::get.knn(space_genes, k = 20)$nn.index[, knn_ix, drop = FALSE]
 
   if (lncol < lnrow) {
-    cat("SCALINGDATASET: Sampling ", ncol, " genes\n", sep = "")
+    if (verbose) cat("SCALINGDATASET: Sampling ", ncol, " genes\n", sep = "")
     counts <- expand_fun(counts = counts, new_margin_size = ncol, margin = 2, knns = gene_knns, seed = seed)
   }
 
-  cat("SCALINGDATASET: Sampling ", nrow, " cells\n", sep = "")
+  if (verbose) cat("SCALINGDATASET: Sampling ", nrow, " cells\n", sep = "")
   counts <- expand_fun(counts = counts, new_margin_size = nrow, margin = 1, knns = cell_knns, seed = seed)
   cell_ixs <- attr(counts, "ref_ixs")
 
@@ -69,7 +68,7 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1) {
     counts <- expand_fun(counts = counts, new_margin_size = ncol, margin = 2, knns = gene_knns, seed = seed)
   }
 
-  cat("SCALINGDATASET: format counts and expression\n")
+  if (verbose) cat("SCALINGDATASET: Format counts and expression\n")
   expression <- log2(counts + 1)
 
   cell_ids <- paste0("Cell", seq_len(nrow))
@@ -77,39 +76,61 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1) {
   dimnames(counts) <- dimnames(expression) <- list(cell_ids, gene_ids)
   cell_id_map <- data_frame(old_id = base_traj$cell_ids[cell_ixs], cell_id = cell_ids)
 
-  cat("SCALINGDATASET: create progressions\n")
+  if (verbose) cat("SCALINGDATASET: create progressions\n")
   progressions <-
     base_traj$progressions %>%
     rename(old_id = cell_id) %>%
     right_join(cell_id_map, by = "old_id") %>%
     select(-old_id)
 
-  cat("SCALINGDATASET: wrapping trajectory and adding prior information\n")
+  prio <- base_traj$prior_information
+
+  if (verbose) cat("SCALINGDATASET: wrapping trajectory and adding prior information\n")
   set.seed(seed)
   dataset <-
     dynwrap::wrap_data(
       id = paste0("scaling_", lnrow, "_", lncol),
       cell_ids = cell_ids
-    ) %>%
-    dynwrap::add_trajectory(
+    )
+  dataset <- dataset %>% dynwrap::add_trajectory(
       milestone_ids = base_traj$milestone_ids,
       milestone_network = base_traj$milestone_network,
       progressions = progressions
-    ) %>%
-    dynwrap::add_expression(
+    )
+  dataset <- dataset %>% dynwrap::add_expression(
       counts = counts,
       expression = expression
-    ) %>%
-    dynwrap::add_prior_information() %>%
-    dynwrap::add_cell_waypoints(100) %>%
-    dynwrap::add_root("Cell1")
+    )
+  dataset <- dataset %>% dynwrap::add_prior_information(
+    features_id = gene_ids
 
-  cat("SCALINGDATASET: returning trajectory\n")
+  )
+  dataset <- dataset %>% dynwrap::add_cell_waypoints(100)
+  dataset <- dataset %>% dynwrap::add_root("Cell1")
+  # dataset <-
+  #   dynwrap::wrap_data(
+  #     id = paste0("scaling_", lnrow, "_", lncol),
+  #     cell_ids = cell_ids
+  #   ) %>%
+  #   dynwrap::add_trajectory(
+  #     milestone_ids = base_traj$milestone_ids,
+  #     milestone_network = base_traj$milestone_network,
+  #     progressions = progressions
+  #   ) %>%
+  #   dynwrap::add_expression(
+  #     counts = counts,
+  #     expression = expression
+  #   ) %>%
+  #   dynwrap::add_prior_information() %>%
+  #   dynwrap::add_cell_waypoints(100) %>%
+  #   dynwrap::add_root("Cell1")
+
+  if (verbose) cat("SCALINGDATASET: returning trajectory\n")
   set.seed(prev_seed)
 
   time1 <- Sys.time()
 
-  cat("SCALINGDATASET: time elapsed ", round(as.numeric(difftime(time1, time0, units = "secs")), 2), " s\n", sep = "")
+  if (verbose) cat("SCALINGDATASET: time elapsed ", round(as.numeric(difftime(time1, time0, units = "secs")), 2), " s\n", sep = "")
 
   dataset
 }
