@@ -53,7 +53,7 @@ write_rds(design, derived_file("design.rds"), compress = "xz")
 design_filt <- read_rds(derived_file("design.rds"))
 
 # only run the next stage when the first has finished
-# design_filt$crossing <- design_filt$crossing %>% filter(memory < 20, method_id == "angle")
+# design_filt$crossing <- design_filt$crossing %>% filter(memory < 20, method_id %in% c("angle", "paga"))
 design_filt$crossing <- design_filt$crossing %>% filter(memory < 20)
 # design_filt$crossing <- design_filt$crossing %>% filter(memory < 50)
 # design_filt$crossing <- design_filt$crossing %>% filter(memory < 100)
