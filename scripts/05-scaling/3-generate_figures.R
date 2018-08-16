@@ -1,7 +1,6 @@
 library(dynbenchmark)
 library(tidyverse)
 library(dynutils)
-library(survival)
 
 experiment("05-scaling")
 
@@ -19,82 +18,77 @@ method_ids <- unique(data$method_id) %>% setdiff("error")
 ###############       CREATE FIGURES       ###############
 ##########################################################
 
+models <-
+  models %>%
+  mutate(score = 1 - dynutils::scale_minmax(dyneval:::calculate_harmonic_mean(lpredtime, lpredmem, pct_errored))) %>%
+  arrange(desc(score)) %>%
+  mutate(
+    method_id_f = factor(method_id, levels = method_id),
+    method_name_f = factor(method_name, levels = method_name),
+    y = -as.integer(method_id_f)
+  )
+
 columns <-
   data_frame(
-    id = c("lpredtime", "pct_errored", "lnrow", "lncol", "intercept"),
-    name = c("Predicted\nlog time", "% errored", "Coefficient\nintercept", "Coefficient\n# cells", "Coefficient\n# features"),
-    fill = c(NA, NA, NA, NA, NA),
-    # fill = c(NA, NA, "p_lnrow", "p_lncol", "p_intercept"),
+    id = c("score", "lpredtime", "time_lnrow", "time_lncol", "time_intercept", "lpredmem", "mem_lnrow", "mem_lncol", "mem_intercept", "pct_errored"),
+    name = c("Score", "Predicted\nlog time", "Time coeff.\nintercept", "Time coeff.\n# cells", "Time coeff.\n# features", "Predicted\nlog memory", "Mem coeff.\nintercept", "Mem coeff.\n# cells", "Mem coeff.\n# features", "% errored"),
+    fill = c("overall", "time", "time", "time", "time", "memory", "memory", "memory", "memory", "errors"),
     x = 1.1 * seq_along(id),
-    min = map_dbl(id, ~ min(execution_time_models[[.]])),
-    max = map_dbl(id, ~ max(execution_time_models[[.]]))
+    min = map_dbl(id, ~ min(models[[.]])),
+    max = map_dbl(id, ~ max(models[[.]]))
   )
 barplot_data <-
   map_df(seq_len(nrow(columns)), function(i) {
     row <- columns %>% extract_row_to_list(i)
 
-    colids <- c(row$id, row$fill) %>% set_names("value", "fill") %>%  na.omit
-    df <- execution_time_models %>%
-      select(method_id, y, one_of(colids)) %>%
-      mutate(column = row$id)
-    colnames(df) <- c("method_id", "y", names(colids), "column")
-
-    df %>%
-      mutate(value = (value - row$min) / (row$max - row$min)) %>%
-      mutate(x = row$x)
+    df <- models %>%
+      select(method_id, y, value = !!row$id) %>%
+      mutate(
+        column = row$id,
+        value = (value - row$min) / (row$max - row$min),
+        x = row$x,
+        fill = row$fill
+      )
   })
 
 
 g <-
   ggplot() +
-  geom_text(aes(1, y, label = method_name), execution_time_models, hjust = 1) +
+  geom_text(aes(1, y, label = method_name), models, hjust = 1) +
   geom_text(aes(x + .5, 2.5, label = name), columns, hjust = .5) +
   geom_text(aes(x, .5, label = round(min, 2)), columns, hjust = 0) +
   geom_text(aes(x + 1, .5, label = round(max, 2)), columns, hjust = 1) +
   geom_segment(aes(y = 0, yend = 0, x = x, xend = x + 1), columns) +
-  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = x, xmax = x + value), barplot_data) +
+  geom_rect(aes(ymin = y - .45, ymax = y + .45, xmin = x, xmax = x + value, fill = fill), barplot_data) +
   theme_clean() +
   theme(
     panel.border = element_blank(),
     axis.ticks = element_blank(),
     panel.grid = element_blank(),
     axis.title = element_blank(),
-    axis.text = element_blank()
+    axis.text = element_blank(),
+    legend.position = "bottom"
   ) +
   expand_limits(x = -.5) +
-  scale_fill_distiller(palette = "RdYlBu") +
-  labs(fill = "Coefficient\n-log pvalue")
+  scale_fill_brewer(palette = "Dark2") +
+  labs(
+    title = "Analysis on scalability of TI methods",
+    subtitle = "Summary of linear models trained on execution time and memory in function of dataset size",
+    fill = "Type"
+  )
 
 g
-ggsave(figure_file("ranking.svg"), g, width = 10, height = 10)
-
-g <-
-  execution_time_models %>%
-  select(method_id, lpredtime, lnrow, lncol, intercept, pct_errored, pct_timelimit) %>%
-  gather(feature, value, -method_id, -lpredtime) %>%
-  ggplot(aes(value, lpredtime)) +
-  ggrepel::geom_text_repel(aes(label = method_id), size = 3, colour = "darkgray") +
-  geom_point() +
-  theme_classic() +
-  scale_colour_distiller(palette = "RdYlBu") +
-  theme(legend.position = "bottom") +
-  labs(y = "Predicted time", x = "Facet value") +
-  facet_wrap(~feature, scales = "free", nrow = 2)
-
-g
-ggsave(figure_file("overview.svg"), g, width = 18, height = 12)
-
-
+ggsave(figure_file("ranking.svg"), g, width = 14, height = 12)
 
 plots <- map(method_ids, function(method_id) {
   data_method <- data %>% filter(method_id == !!method_id)
-  model_method <- execution_time_models %>% filter(method_id == !!method_id)
-  timings_method <- data_method %>% filter(error_status == "no_error")
+  model_method <- models %>% filter(method_id == !!method_id)
+  data_noerror <- data_method %>% filter(error_status == "no_error")
   pred_method <- data_pred %>% filter(method_id == !!method_id)
 
-  timings_method <- bind_rows(
-    timings_method,
-    timings_method %>% group_by(method_id, lnrow, lncol) %>% select_if(is.numeric) %>% summarise_if(is.numeric, mean) %>% mutate(orig_dataset_id = "mean") %>% ungroup()
+  data_noerror <- bind_rows(
+    data_noerror,
+    data_noerror %>% group_by(method_id, lnrow, lncol) %>% select_if(is.numeric) %>% summarise_if(is.numeric, mean) %>% mutate(orig_dataset_id = "mean") %>% ungroup()
   )
 
   g1 <-
@@ -111,7 +105,7 @@ plots <- map(method_ids, function(method_id) {
   g1
 
   g2 <-
-    ggplot(timings_method) +
+    ggplot(data_noerror) +
     geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
     geom_tile(aes(lnrow, lncol, fill = log10(time_method))) +
     scale_fill_distiller(palette = "RdYlBu") +
@@ -125,7 +119,7 @@ plots <- map(method_ids, function(method_id) {
   g2
 
   g3 <-
-    ggplot(timings_method) +
+    ggplot(data_noerror) +
     geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
     geom_tile(aes(lnrow, lncol, fill = log10(max_mem))) +
     scale_fill_distiller(palette = "RdYlBu") +
@@ -138,35 +132,7 @@ plots <- map(method_ids, function(method_id) {
     coord_equal()
   g3
 
-  g4 <-
-    ggplot(timings_method) +
-    geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
-    geom_tile(aes(lnrow, lncol, fill = log10(mem_io))) +
-    scale_fill_distiller(palette = "RdYlBu") +
-    scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-    scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-    theme_classic() +
-    theme(legend.position = "bottom") +
-    labs(x = "# cells", y = "# features", fill = "Log10(Mem IO)") +
-    facet_wrap(~ orig_dataset_id, ncol = 1) +
-    coord_equal()
-  g4
-
-  g5 <-
-    ggplot(timings_method) +
-    geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
-    geom_tile(aes(lnrow, lncol, fill = log10(disk_io))) +
-    scale_fill_distiller(palette = "RdYlBu") +
-    scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-    scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-    theme_classic() +
-    theme(legend.position = "bottom") +
-    labs(x = "# cells", y = "# features", fill = "Log10(Disk IO)") +
-    facet_wrap(~ orig_dataset_id, ncol = 1) +
-    coord_equal()
-  g5
-
-  g6 <-
+  g4a <-
     ggplot(pred_method) +
     geom_tile(aes(lnrow, lncol, fill = lpredtime)) +
     scale_fill_distiller(palette = "RdYlBu") +
@@ -174,22 +140,33 @@ plots <- map(method_ids, function(method_id) {
     scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
     theme_classic() +
     theme(legend.position = "bottom") +
-    labs(x = "# cells", y = "# features", fill = "Log10(Pred. Time)") +
+    labs(x = "# cells", y = "# features", fill = "Predicted time") +
     coord_equal()
-  g6
+  g4b <-
+    ggplot(pred_method) +
+    geom_tile(aes(lnrow, lncol, fill = lpredmem)) +
+    scale_fill_distiller(palette = "RdYlBu") +
+    scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+    scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+    theme_classic() +
+    theme(legend.position = "bottom") +
+    labs(x = "# cells", y = "# features", fill = "Predicted memory") +
+    coord_equal()
 
   patchwork::wrap_plots(
     patchwork::wrap_plots(
       g1 + labs(title = "Execution information"),
       g2 + labs(title = "Timings grid"),
       g3 + labs(title = "Memory grid"),
-      g4 + labs(title = "Mem IO grid"),
-      g5 + labs(title = "Disk IO grid"),
       nrow = 1
     ),
-    g6 + labs(title = "Predicted timings"),
+    patchwork::wrap_plots(
+      g4a + labs(title = "Predicted timings"),
+      g4b + labs(title = "Predicted memory"),
+      ncol = 1
+    ),
     nrow = 1,
-    widths = c(4, 1)
+    widths = c(3, 1)
   ) +
     patchwork::plot_annotation(
       title = paste0("Scalability results for ", data_method$method_name[[1]]),
@@ -202,8 +179,7 @@ pbapply::pblapply(seq_along(method_ids), cl = 8, function(i) {
   mid <- method_ids[[i]]
   pl <- plots[[i]]
   cat("Plotting ", mid, "\n", sep = "")
-  ggsave(derived_file(c("results/", mid, ".svg")), pl, width = 18, height = 12)
+  ggsave(derived_file(c("results/", mid, ".svg")), pl, width = 16, height = 12)
 })
 
-# compress to figure_file("results.tar.xz")
-# unzip(figure_file("results.tar.xz"), exdir = derived_file("results"), overwrite = TRUE)
+zip::zip(zipfile = figure_file("results.zip"), files = "derived/05-scaling/results")
