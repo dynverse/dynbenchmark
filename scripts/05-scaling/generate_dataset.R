@@ -12,11 +12,11 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1, cores = 1,
   nrow <- round(10 ^ lnrow)
   ncol <- round(10 ^ lncol)
 
-  expand_fun <- function(counts, margin, new_margin_size, knns, seed) {
+  expand_fun <- function(counts, margin, new_margin_size, knns, seed, must_have = c()) {
     dim_margin <- if (margin == 1) nrow(counts) else ncol(counts)
 
     set.seed(seed)
-    ref_ixs <- sample.int(dim_margin, new_margin_size, replace = TRUE)
+    ref_ixs <- c(must_have, sample.int(dim_margin, new_margin_size - length(must_have), replace = TRUE))
 
     vecs <- pbapply::pblapply(seq_len(new_margin_size), cl = cores, function(i) {
       set.seed(i * seed)
@@ -41,18 +41,17 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1, cores = 1,
 
   if (verbose) cat("SCALINGDATASET: Loading dataset\n")
   base_traj <- dynbenchmark::load_dataset(orig_dataset_id)
-  base_traj <- base_traj %>% dynwrap::add_cell_waypoints(min(nrow, 400))
-
-  base_geo <- dynwrap::compute_tented_geodesic_distances(base_traj)
-  base_geo[!is.finite(base_geo)] <- 10 * max(base_geo[is.finite(base_geo)])
+  base_traj <- base_traj %>% dynwrap::add_cell_waypoints(min(nrow, 100))
 
   counts <- dynwrap::get_expression(base_traj, "counts")
   expression <- dynwrap::get_expression(base_traj, "expression")
 
-  knn_ix <- 1:10
-  cell_knns <- FNN::get.knn(as.dist(base_geo), k = 20)$nn.index[, knn_ix, drop = FALSE]
+  must_have_cells <- match(base_traj$prior_information %>% {c(.$start_id, .$end_id)} %>% unique(), base_traj$cell_ids)
+
+  space_cells <- dyndimred::dimred_landmark_mds(expression, ndim = 10)
+  cell_knns <- FNN::get.knn(space_cells, k = 10)$nn.index
   space_genes <- dyndimred::dimred_landmark_mds(t(expression), ndim = 10)
-  gene_knns <- FNN::get.knn(space_genes, k = 20)$nn.index[, knn_ix, drop = FALSE]
+  gene_knns <- FNN::get.knn(space_genes, k = 10)$nn.index
 
   if (lncol < lnrow) {
     if (verbose) cat("SCALINGDATASET: Sampling ", ncol, " genes\n", sep = "")
@@ -60,7 +59,7 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1, cores = 1,
   }
 
   if (verbose) cat("SCALINGDATASET: Sampling ", nrow, " cells\n", sep = "")
-  counts <- expand_fun(counts = counts, new_margin_size = nrow, margin = 1, knns = cell_knns, seed = seed)
+  counts <- expand_fun(counts = counts, new_margin_size = nrow, margin = 1, knns = cell_knns, seed = seed, must_have = must_have_cells)
   cell_ixs <- attr(counts, "ref_ixs")
 
   if (lncol >= lnrow) {
@@ -88,15 +87,15 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1, cores = 1,
   matching_cell_ids <- base_traj$cell_ids[cell_ixs]
   features_id <- gene_ids
   start_id <- cell_ids[match(prio$start_id, matching_cell_ids)]
-  if (length(start_id) == 1 && is.na(start_id)) start_id <- NULL
   end_id <- cell_ids[match(prio$end_id, matching_cell_ids)]
-  if (length(end_id) == 1 && is.na(end_id)) end_id <- NULL
   groups_id <- prio$groups_id %>%
     rename(old_id = cell_id) %>%
     right_join(cell_id_map, by = "old_id") %>%
     select(-old_id)
   groups_network <- prio$groups_network
   groups_n <- prio$groups_n
+  timecourse_continuous <- prio$timecourse_continuous[matching_cell_ids] %>% set_names(cell_ids)
+  timecourse_discrete <- prio$timecourse_discrete[matching_cell_ids] %>% set_names(cell_ids)
 
   if (verbose) cat("SCALINGDATASET: wrapping trajectory and adding prior information\n")
   set.seed(seed)
@@ -115,12 +114,14 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1, cores = 1,
       expression = expression
     ) %>%
     dynwrap::add_prior_information(
-      # start_id = start_id,
-      # end_id = end_id,
-      # groups_id = groups_id,
-      # groups_network = groups_network,
-      # groups_n = groups_n,
+      start_id = start_id,
+      end_id = end_id,
+      groups_id = groups_id,
+      groups_network = groups_network,
+      groups_n = groups_n,
       features_id = features_id,
+      timecourse_continuous = timecourse_continuous,
+      timecourse_discrete = timecourse_discrete,
       verbose = TRUE
     ) %>%
     dynwrap::add_cell_waypoints(100) %>%
