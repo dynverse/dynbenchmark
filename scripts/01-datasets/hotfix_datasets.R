@@ -9,6 +9,8 @@ for (i in seq_along(dataset_ids)) {
   cat(i, "/", length(dataset_ids), ": ", id, "\n", sep = "")
   dataset <- load_dataset(id)
 
+  dataset <- dataset %>% dynwrap::add_prior_information()
+
   # # rewrap dataset
   # dataset <- with(
   #   dataset,
