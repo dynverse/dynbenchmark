@@ -8,14 +8,19 @@ list2env(read_rds(result_file("scaling.rds")), .GlobalEnv)
 
 #' @examples
 #' # examine some errors
-#' execution_output %>% filter(method_id == "mpath", error_status == "method_error") %>% mutate(txt = paste0(stdout, stderr, error_message)) %>% pull(txt) %>% head(5) %>% cat
-#' execution_output %>% filter(method_id == "dpt", error_status == "method_error") %>% mutate(txt = paste0(stdout, stderr, error_message)) %>% pull(txt) %>% head(5) %>% cat
+#' data %>% filter(method_id == "calista", error_status == "method_error", nrow > 100, ncol > 100) %>% select(dataset_id, stdout) %>% pull(stdout)%>% head(5)
+#' data %>% filter(method_id == "calista", error_status == "method_error") %>% pull(dataset_id) %>% head(5)
+#' data %>% filter(method_id == "calista", error_status == "method_error") %>% mutate(txt = paste0(stdout, stderr, error_message)) %>% pull(txt) %>% head(5) %>% cat
+#' data %>% filter(method_id == "dpt", error_status == "method_error") %>% mutate(txt = paste0(stdout, stderr, error_message)) %>% pull(txt) %>% head(5) %>% cat
+#'
+#' data <- readr::read_rds(dynbenchmark::derived_file("datasets.rds", experiment_id = "05-scaling")) %>% filter(id == "scaling_0001") %>% pull(fun) %>% first() %>% invoke()
+
 
 axis_scale <- data_frame(lnrow = seq(1, 6), nrow = 10^lnrow)
 method_ids <- unique(data$method_id) %>% setdiff("error")
 
 ##########################################################
-###############       CREATE FIGURES       ###############
+###############  GENERATE SUMMARY FIGURE   ###############
 ##########################################################
 
 models <-
@@ -23,7 +28,8 @@ models <-
   mutate(
     score = 1 - dyneval:::calculate_harmonic_mean(dynutils::scale_minmax(lpredtime), dynutils::scale_minmax(lpredmem), dynutils::scale_minmax(pct_errored))
   ) %>%
-  arrange(desc(score)) %>%
+  # arrange(desc(score)) %>%
+  arrange(method_id) %>%
   mutate(
     method_id_f = factor(method_id, levels = method_id),
     method_name_f = factor(method_name, levels = method_name),
@@ -82,6 +88,10 @@ g <-
 g
 ggsave(figure_file("ranking.svg"), g, width = 14, height = 12)
 
+
+##########################################################
+############### GENERATE INDIVIDUAL FIGURE ###############
+##########################################################
 plots <- map(method_ids, function(method_id) {
   data_method <- data %>% filter(method_id == !!method_id)
   model_method <- models %>% filter(method_id == !!method_id)
@@ -176,12 +186,89 @@ plots <- map(method_ids, function(method_id) {
     )
 })
 
-dir.create(derived_file("results"), showWarnings = FALSE)
+dir.create(figure_file("results"), showWarnings = FALSE)
 pbapply::pblapply(seq_along(method_ids), cl = 8, function(i) {
   mid <- method_ids[[i]]
   pl <- plots[[i]]
   cat("Plotting ", mid, "\n", sep = "")
-  ggsave(derived_file(c("results/", mid, ".svg")), pl, width = 16, height = 12)
+  ggsave(figure_file(c("results/", mid, ".svg")), pl, width = 16, height = 12)
 })
 
-zip::zip(zipfile = figure_file("results.zip"), files = "derived/05-scaling/results")
+
+
+
+##########################################################
+###############     GENERATE ERROR LOGS    ###############
+##########################################################
+last_lines <- function(s, num) {
+  s %>%
+    stringr::str_split(pattern = "\n") %>%
+    first() %>%
+    keep(~ . != "") %>%
+    tail(num) %>%
+    paste(collapse = "\n")
+}
+cluster <- function(s, num_diffs) {
+  clusters <- c(1, rep(NA, length(s) - 1))
+  for (i in seq_len(length(s) - 1)) {
+    cli <- clusters[seq_len(i)]
+    ixs <- map_int(unique(cli), ~ first(which(cli == .)))
+    dists <- utils::adist(s[ixs], s[i+1])[,1]
+    ix <- ixs[dists <= num_diffs]
+    clusters[[i+1]] <-
+      if (length(ix) > 0) {
+        cli[[ix[[1]]]]
+      } else {
+        max(clusters, na.rm = TRUE) + 1
+      }
+  }
+  clusters
+}
+
+
+pbapply::pblapply(method_ids, cl = 8, function(mid) {
+  selection <-
+    data %>%
+    filter(method_id == mid, error_status == "method_error") %>%
+    mutate(
+      error_text = paste0(stdout, "\n", stderr, "\n", error_message),
+      error_truncated = map_chr(error_text, last_lines, num = 5)
+    )
+
+  if (nrow(selection) > 2) {
+    clusts <- cluster(s = selection$error_truncated, num_diffs = 10)
+  } else if (nrow(selection) == 1) {
+    clusts <- 1
+  } else {
+    clusts <- c()
+  }
+
+  cluster_lines <- unlist(lapply(unique(clusts), function(cl) {
+    ixs <- which(clusts == cl)
+    ix <- ixs %>% first()
+    vals <- selection %>% dynutils::extract_row_to_list(ix)
+    c(
+      "## ERROR CLUSTER ", cl, "\n",
+      "\n",
+      " * Number of instances: ", length(ixs), "\n",
+      " * Dataset ids: ", paste(selection$dataset_id[ixs], collapse = ", "), "\n",
+      "\n",
+      "Last 5 lines of ", selection$dataset_id[ix], ":\n",
+      "```\n",
+      vals$error_truncated, "\n",
+      "```\n",
+      "\n"
+    )
+  }))
+
+  lines <- paste0(c(
+    "# ", mid, "\n",
+    "![Overview](", mid, ".svg)\n",
+    "\n",
+    cluster_lines
+  ), collapse = "")
+
+  readr::write_lines(lines, figure_file(c("results/", mid, "_overview.md")))
+
+  invisible()
+})
