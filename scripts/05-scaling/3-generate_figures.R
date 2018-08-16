@@ -20,7 +20,9 @@ method_ids <- unique(data$method_id) %>% setdiff("error")
 
 models <-
   models %>%
-  mutate(score = 1 - dynutils::scale_minmax(dyneval:::calculate_harmonic_mean(lpredtime, lpredmem, pct_errored))) %>%
+  mutate(
+    score = 1 - dyneval:::calculate_harmonic_mean(dynutils::scale_minmax(lpredtime), dynutils::scale_minmax(lpredmem), dynutils::scale_minmax(pct_errored))
+  ) %>%
   arrange(desc(score)) %>%
   mutate(
     method_id_f = factor(method_id, levels = method_id),
