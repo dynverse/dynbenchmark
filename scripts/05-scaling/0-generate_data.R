@@ -95,3 +95,15 @@ handle <- qsub::qsub_lapply(
 )
 
 readr::write_rds(datasets, path = derived_file("datasets.rds"), compress = "xz")
+
+#' @examples
+#' download datasets from prism
+#' qsub::rsync_remote(
+#'   remote_src = TRUE,
+#'   path_src = derived_file(experiment_id = "05-scaling/dataset", remote = TRUE),
+#'   remote_dest = FALSE,
+#'   path_dest = derived_file(experiment_id = "05-scaling/dataset", remote = FALSE),
+#'   verbose = TRUE,
+#'   compress = FALSE
+#' )
+
