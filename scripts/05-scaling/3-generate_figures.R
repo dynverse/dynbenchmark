@@ -231,12 +231,16 @@ pbapply::pblapply(method_ids, cl = 8, function(mid) {
     data %>%
     filter(method_id == mid, error_status == "method_error") %>%
     mutate(
-      error_text = paste0(stdout, "\n", stderr, "\n", error_message),
-      error_truncated = map_chr(error_text, last_lines, num = 5)
+      error_text = paste0(stdout, "\n", stderr, "\n", error_message)
     )
 
   if (nrow(selection) > 2) {
-    clusts <- cluster(s = selection$error_truncated, num_diffs = 10)
+    clusts <-
+      selection$error_text %>%
+      map_chr(last_lines, num = 5) %>%
+      str_replace_all("Rtmp[^\\n ]*", "") %>%
+      str_replace_all("[^a-zA-Z]", "") %>%
+      cluster(num_diffs = 10)
   } else if (nrow(selection) == 1) {
     clusts <- 1
   } else {
@@ -253,9 +257,9 @@ pbapply::pblapply(method_ids, cl = 8, function(mid) {
       " * Number of instances: ", length(ixs), "\n",
       " * Dataset ids: ", paste(selection$dataset_id[ixs], collapse = ", "), "\n",
       "\n",
-      "Last 5 lines of ", selection$dataset_id[ix], ":\n",
+      "Last 10 lines of ", selection$dataset_id[ix], ":\n",
       "```\n",
-      vals$error_truncated, "\n",
+      last_lines(vals$error_text, num = 10), "\n",
       "```\n",
       "\n"
     )
