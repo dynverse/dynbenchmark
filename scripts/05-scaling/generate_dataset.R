@@ -67,6 +67,10 @@ generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1, cores = 1,
     counts <- expand_fun(counts = counts, new_margin_size = ncol, margin = 2, knns = gene_knns, seed = seed)
   }
 
+  set.seed(1)
+  counts[seq_len(nrow), 1] <- sample.int(nrow)
+  counts[1, seq_len(ncol)] <- sample.int(ncol)
+
   if (verbose) cat("SCALINGDATASET: Format counts and expression\n")
   expression <- log2(counts + 1)
 
