@@ -21,11 +21,20 @@ print(round(10 ^ scalability_range))
 # use helper function to generate datasets
 source(scripts_file("generate_dataset.R"))
 
-dataset_ids <- c(
-  "real/embronic-mesenchyme-neuron-differentiation_mca",
-  "real/mouse-cell-atlas-combination-4",
-  "real/kidney-collecting-duct-subclusters_park"
-)
+set.seed(1)
+
+# dataset_ids <- "real/embronic-mesenchyme-neuron-differentiation_mca"
+
+dataset_ids <-
+  load_datasets() %>%
+  mutate(n_cells = map_int(cell_ids, length)) %>%
+  filter(
+    n_cells > 1000,
+    source == "real",
+    !trajectory_type %in% c("directed_linear", "directed_cycle", "convergence", "undirected_linear")
+  ) %>%
+  sample_n(5) %>%
+  pull(id)
 
 # construct datasets tibble
 datasets <-
