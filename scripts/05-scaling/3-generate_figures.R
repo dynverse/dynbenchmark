@@ -26,10 +26,11 @@ method_ids <- unique(data$method_id) %>% setdiff("error")
 models <-
   models %>%
   mutate(
-    score = 1 - dyneval:::calculate_harmonic_mean(dynutils::scale_minmax(lpredtime), dynutils::scale_minmax(lpredmem), dynutils::scale_minmax(pct_errored))
+    score = 1 - dyneval:::calculate_arithmetic_mean(dynutils::scale_minmax(lpredtime), dynutils::scale_minmax(lpredmem), dynutils::scale_minmax(pct_errored))
   ) %>%
-  # arrange(desc(score)) %>%
-  arrange(method_id) %>%
+  bind_rows(data %>% select(method_id, method_name) %>% distinct() %>% filter(!method_id %in% models$method_id) %>% mutate(score = 0, pct_errored = 1)) %>%
+  arrange(desc(score)) %>%
+  # arrange(method_id) %>%
   mutate(
     method_id_f = factor(method_id, levels = method_id),
     method_name_f = factor(method_name, levels = method_name),
@@ -42,8 +43,8 @@ columns <-
     name = c("Score", "Predicted\nlog time", "Time coeff.\nintercept", "Time coeff.\n# cells", "Time coeff.\n# features", "Predicted\nlog memory", "Mem coeff.\nintercept", "Mem coeff.\n# cells", "Mem coeff.\n# features", "% errored"),
     fill = c("overall", "time", "time", "time", "time", "memory", "memory", "memory", "memory", "errors"),
     x = 1.1 * seq_along(id),
-    min = map_dbl(id, ~ min(models[[.]])),
-    max = map_dbl(id, ~ max(models[[.]]))
+    min = map_dbl(id, ~ min(models[[.]], na.rm = TRUE)),
+    max = map_dbl(id, ~ max(models[[.]], na.rm = TRUE))
   )
 barplot_data <-
   map_df(seq_len(nrow(columns)), function(i) {
@@ -116,74 +117,84 @@ plots <- map(method_ids, function(method_id) {
     coord_equal()
   g1
 
-  g2 <-
-    ggplot(data_noerror) +
-    geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
-    geom_tile(aes(lnrow, lncol, fill = log10(time_method))) +
-    scale_fill_distiller(palette = "RdYlBu") +
-    scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-    scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-    theme_classic() +
-    theme(legend.position = "bottom") +
-    labs(x = "# cells", y = "# features", fill = "Log10(Time)") +
-    facet_wrap(~ orig_dataset_id, ncol = 1) +
-    coord_equal()
-  g2
+  if (nrow(data_noerror) > 0) {
+    g2 <-
+      ggplot(data_noerror) +
+      geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
+      geom_tile(aes(lnrow, lncol, fill = log10(time_method))) +
+      scale_fill_distiller(palette = "RdYlBu") +
+      scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+      scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+      theme_classic() +
+      theme(legend.position = "bottom") +
+      labs(x = "# cells", y = "# features", fill = "Log10(Time)") +
+      facet_wrap(~ orig_dataset_id, ncol = 1) +
+      coord_equal()
+    g2
 
-  g3 <-
-    ggplot(data_noerror) +
-    geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
-    geom_tile(aes(lnrow, lncol, fill = log10(max_mem))) +
-    scale_fill_distiller(palette = "RdYlBu") +
-    scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-    scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-    theme_classic() +
-    theme(legend.position = "bottom") +
-    labs(x = "# cells", y = "# features", fill = "Log10(Max mem)") +
-    facet_wrap(~ orig_dataset_id, ncol = 1) +
-    coord_equal()
-  g3
+    g3 <-
+      ggplot(data_noerror) +
+      geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
+      geom_tile(aes(lnrow, lncol, fill = log10(max_mem))) +
+      scale_fill_distiller(palette = "RdYlBu") +
+      scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+      scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+      theme_classic() +
+      theme(legend.position = "bottom") +
+      labs(x = "# cells", y = "# features", fill = "Log10(Max mem)") +
+      facet_wrap(~ orig_dataset_id, ncol = 1) +
+      coord_equal()
+    g3
 
-  g4a <-
-    ggplot(pred_method) +
-    geom_tile(aes(lnrow, lncol, fill = lpredtime)) +
-    scale_fill_distiller(palette = "RdYlBu") +
-    scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-    scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-    theme_classic() +
-    theme(legend.position = "bottom") +
-    labs(x = "# cells", y = "# features", fill = "Predicted time") +
-    coord_equal()
-  g4b <-
-    ggplot(pred_method) +
-    geom_tile(aes(lnrow, lncol, fill = lpredmem)) +
-    scale_fill_distiller(palette = "RdYlBu") +
-    scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-    scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-    theme_classic() +
-    theme(legend.position = "bottom") +
-    labs(x = "# cells", y = "# features", fill = "Predicted memory") +
-    coord_equal()
+    g4a <-
+      ggplot(pred_method) +
+      geom_tile(aes(lnrow, lncol, fill = lpredtime)) +
+      scale_fill_distiller(palette = "RdYlBu") +
+      scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+      scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+      theme_classic() +
+      theme(legend.position = "bottom") +
+      labs(x = "# cells", y = "# features", fill = "Predicted time") +
+      coord_equal()
+    g4b <-
+      ggplot(pred_method) +
+      geom_tile(aes(lnrow, lncol, fill = lpredmem)) +
+      scale_fill_distiller(palette = "RdYlBu") +
+      scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+      scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+      theme_classic() +
+      theme(legend.position = "bottom") +
+      labs(x = "# cells", y = "# features", fill = "Predicted memory") +
+      coord_equal()
 
-  patchwork::wrap_plots(
     patchwork::wrap_plots(
-      g1 + labs(title = "Execution information"),
-      g2 + labs(title = "Timings grid"),
-      g3 + labs(title = "Memory grid"),
-      nrow = 1
-    ),
+      patchwork::wrap_plots(
+        g1 + labs(title = "Execution information"),
+        g2 + labs(title = "Timings grid"),
+        g3 + labs(title = "Memory grid"),
+        nrow = 1
+      ),
+      patchwork::wrap_plots(
+        g4a + labs(title = "Predicted timings"),
+        g4b + labs(title = "Predicted memory"),
+        ncol = 1
+      ),
+      nrow = 1,
+      widths = c(3, 1)
+    ) +
+      patchwork::plot_annotation(
+        title = paste0("Scalability results for ", data_method$method_name[[1]]),
+        theme = theme(title = element_text(size = 20))
+      )
+  } else {
     patchwork::wrap_plots(
-      g4a + labs(title = "Predicted timings"),
-      g4b + labs(title = "Predicted memory"),
-      ncol = 1
-    ),
-    nrow = 1,
-    widths = c(3, 1)
-  ) +
-    patchwork::plot_annotation(
-      title = paste0("Scalability results for ", data_method$method_name[[1]]),
-      theme = theme(title = element_text(size = 20))
-    )
+      g1 + labs(title = "Execution information")
+    ) +
+      patchwork::plot_annotation(
+        title = paste0("Scalability results for ", data_method$method_name[[1]]),
+        theme = theme(title = element_text(size = 20))
+      )
+  }
 })
 
 dir.create(figure_file("results"), showWarnings = FALSE)

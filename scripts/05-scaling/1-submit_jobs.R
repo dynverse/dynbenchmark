@@ -36,7 +36,11 @@ methods <-
 ##########################################################
 design <- benchmark_generate_design(
   datasets = datasets,
-  methods = methods
+  methods = methods,
+  parameters = list(
+    fateid = tibble(id = "default", force = TRUE),
+    stemnet = tibble(id = "default", force = TRUE)
+  )
 )
 
 design$crossing <- design$crossing %>%
