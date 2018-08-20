@@ -5,8 +5,8 @@
 \alias{label_metrics}
 \title{Label the metrics}
 \usage{
-label_metric(metric_id, label_type = c("plotmath", "latex", "long_name"),
-  parse = FALSE)
+label_metric(metric_id, label_type = c("plotmath", "latex", "long_name",
+  "category"), parse = FALSE)
 
 label_metrics(metric_ids, ...)
 }
