@@ -27,8 +27,15 @@ label_wrap <- function(x, width = 10, collapse = "\n") {
 label_long <- function(x) {
   tibble(id = as.character(x)) %>%
     left_join(dynbenchmark::labels, "id") %>%
-    mutate(long = ifelse(is.na(long), label_capitalise(id), long)) %>%
+    mutate(long = ifelse(is.na(long), label_capitalise(label_n(id)), long)) %>%
     pull(long)
+}
+
+#' Label with replacement of n_ -> #
+#' @param x The text
+#' @export
+label_n <- function(x) {
+  x %>% gsub("^n_", "# ", .)
 }
 
 #' Capitalise label
