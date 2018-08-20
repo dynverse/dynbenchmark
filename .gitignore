@@ -2,8 +2,6 @@
 .Rhistory
 .RData
 derived/*
-results/*
-figures/*
 *log
 analysis_output.tar
 .rds
