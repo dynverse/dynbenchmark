@@ -38,19 +38,29 @@ parameters <- lapply(method_ids, function(mn) {
 ##########################################################
 ###############       DEFINE DATASETS      ###############
 ##########################################################
-datasets <- load_datasets() %>%
-  mutate(lnrow = log10(map_dbl(cell_ids, length)), lncol = log10(map_dbl(feature_info, nrow))) %>%
-  select(id, lnrow, lncol)
+datasets <-
+  load_datasets() %>%
+  mutate(
+    lnrow = log10(map_dbl(cell_ids, length)),
+    lncol = log10(map_dbl(feature_info, nrow))
+  ) %>%
+  select_if(is.atomic) %>%
+  mutate(
+    type = "character",
+    fun = map(id, ~ function() load_dataset(., as_tibble = FALSE))
+  )
+
 
 ##########################################################
 ###############       CREATE DESIGN        ###############
 ##########################################################
-design <- benchmark_generate_design(
-  datasets = datasets$id,
-  methods = methods,
-  parameters = parameters,
-  num_repeats = 1
-)
+design <-
+  benchmark_generate_design(
+    datasets = datasets,
+    methods = methods,
+    parameters = parameters,
+    num_repeats = 1
+  )
 
 # determine method execution order by predicting
 # the running times of each method
@@ -64,7 +74,7 @@ predicted_times <-
   }) %>%
   mutate(predtime = 10^lpredtime, predmem = 10^lpredmem)
 
-method_ids <-
+method_ord <-
   predicted_times %>%
   group_by(method_id) %>%
   summarise(lpredtime = mean(lpredtime), lpredmem = mean(lpredmem)) %>%
@@ -73,7 +83,7 @@ method_ids <-
 
 design$crossing <- design$crossing %>%
   left_join(predicted_times, by = c("method_id", "dataset_id")) %>%
-  mutate(method_order = match(method_id, method_ids)) %>%
+  mutate(method_order = match(method_id, method_ord)) %>%
   arrange(method_order)
 
 # save configuration
