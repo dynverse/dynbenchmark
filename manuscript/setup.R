@@ -48,7 +48,7 @@ add_sfig <- function(fig_path, ref_id, caption_main, caption_text, width = 15, h
 }
 
 figs <- tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width = numeric(), height = numeric())
-add_fig <- function(fig_path, ref_id, caption_main, caption_text, width = 5, height = 7) {
+add_fig <- function(fig_path, ref_id, caption_main, caption_text = "", width = 5, height = 7) {
   # save it because why not
   figs <<- figs %>% add_row(
     ref_id = ref_id,

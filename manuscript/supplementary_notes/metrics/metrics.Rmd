@@ -1,11 +1,14 @@
 ---
-title: "Evaluation metrics"
+title: "Supplementary Note 1: Evaluation metrics"
 output: 
   pdf_document:
     latex_engine: xelatex
     keep_tex: true
+    number_sections: true
 header-includes:
   - \usepackage{tabularx}
+  - \newcommand{\hideFromPandoc}[1]{#1}
+  - \hideFromPandoc{\newenvironment{myfigure}[1]{\begin{figure}[#1]}{\end{figure}}}
 mainfont: DejaVu Sans
 ---
 
@@ -13,29 +16,89 @@ mainfont: DejaVu Sans
 knitr::opts_chunk$set(
   echo = FALSE
 )
-options(knitr.duplicate.label = 'allow')
+options(knitr.duplicate.label='allow')
 
 library(tidyverse)
 library(dynbenchmark)
 
 experiment("02-metric_characterisation/01-metric_conformity")
+
+refs <- setup_refs()
+figs <- setup_figs()
 ```
+
+A trajectory, as defined in our evaluation, is a model with multiple abstractions. The top abstraction is the topology which contains information about the paths each cell can take from their starting point. Deeper abstractions involve the mapping of each cell to a particular branch within this network, and the position (or ordering) of each cells within these branches. Internally, the topology is represented by the milestone network and regions of delayed commitment, the branch assignment and cellular positions are represented by the milestone percentages (`r ref("fig", "trajectory_model_example")`).
+
+```{r, results = "asis"}
+add_fig(
+  figure_file("trajectory_model_example.svg", "manual_figures"),
+  "trajectory_model_example",
+  "An example trajectory that will be used throughout this section.",
+  "It contains contains four milestones (W to Z) and five cells (a to e)."
+)
+```
+
+Given the multilayered complexity of a trajectory model, it is not trivial to compare two trajectory models (for example a gold standard a prediction). We therefore sought to use different comparison metrics, each belonging to one particular type:
+
+- **Specific metrics** investigate one particular aspect of the trajectory. This would allow us to find particular weak points for methods, e.g. that a method is very good at ordering but does not frequently find the correct topology. Moreover, this makes it possible to create personalised rankings of methods, for example for users which are primarily interested in using the method correct topology.
+- **Overall metrics** should capture all the different abstractions, i.e. it measures whether the resulting trajectory has a good topology, that the cells belong to similar branches _and_ that they are ordered correctly.
+- **Application metrics** focus on the quality of a downstream analysis using the trajectory. For example, it measures whether the trajectory can be used to find accurate differentially expressed genes.
+
+Here, we first described and illustrate several possible metrics which we defined (`r ref("section", "metrics")`). Next, we tested these metrics on several test cases, to make sure they were robustly identify different type of "wrong" trajectory predictions (`r ref("section", "conformity")`). Based on this robustness assessment, we chose 4 metrics for the final evaluation (`r ref("section", "final")`).
+
+# Metrics
+
+All metrics described here were implemented within our dyneval R package ([https://github.com/dynverse/dyneval](https://github.com/dynverse/dyneval)).
+
+## $`r label_metric("correlation", "latex")`$: Correlation between geodesic distances
+
+When the position of a cell is the same in both the gold standard and the prediction, its distances to all other cells in the trajectory should also be the same. This observation is the basis for the $`r label_metric("correlation", "latex")`$ metric.
+
+```{r, results = "asis"}
+add_fig(
+  figure_file("metrics_geodesic.svg", "manual_figures"),
+  "metrics_geodesic",
+  "The calculation of geodesic distances on a small example trajectory.",
+  "a) A toy example containing four milestones (W to Z) and five cells (a to e). b) The corresponding milestone network, milestone percentages and regions of delayed commitment, when the toy trajectory is converted to the common trajectory model. c) The calculations made for calculating the pairwise geodesic distances. d) A heatmap representation of the pairwise geodesic distances."
+)
+```
+
+The geodesic distance is the distance a cell has to through the trajectory space to get from one position to another (`r ref("fig", "metrics_geodesic")`). The way this distance is calculated depends on how two cells are positioned:
+
+- **Both cells are on the same edge in the milestone network.** In this case, the distance is defined as the product of the difference in milestone percentages and the length of the transition they both reside on. The geodesic distance is defined as the product of the difference in milestone percentages and the length of their common edge. For cells $a$ and $b$ in the example, $d(a, b)$ is equal to $1 \times (0.9 - 0.2) = 0.7$.
+- **Cells reside on different edges in the milestone network.** First, the distance of the cell to all its nearby milestones is calculated, based on its percentage within the edge and the length of the edge. These distances in combination with the milestone network are used to calculate the shortest path distance between the two cells. For cells $a$ and $c$ in the example, $d(a, X) = 1 \times 0.9$ and $d(c, X) = 3 \times 0.2$, and therefore $d(a, c) = 1 \times 0.9 + 3 \times 0.2$. 
+
+The geodesic distance can be easily extended towards cells within regions of delayed commitment. When both cells are part of the same region of delayed commitment, the geodesic distance was defined as the manhattan distances between the milestone percentages weighted by the lengths from the milestone network. For cells $d$ and $e$ in the example, $d(d, e)$ is equal to $0 \times (0.3 - 0.2) + 2 \times (0.7 - 0.2) + 3 \times(0.4 - 0.1)$, which is equal to $1.9$. The distance between two cells where one is part of a region of delayed commitment is calculated similarly to the previous paragraph, by first calculating the distance between the cells and their neighbouring milestones first, then calculating the shortest path distances between the two.
+
+Calculating the pairwise distances between cells scales quadratically with the number of cells, and would therefore not be scaleable for large datasets. For this reason, a set of waypoint cells are defined *a priori*, and only the distances between the waypoint cells and all other cells is calculated, in order to calculate the correlation of geodesic distances of two trajectories. The waypoints are determined by viewing each milestone, transition and region of delayed commitment as a collection of cells, and sampling cells from the different collections weighted by the total number of cells within that collection. For calculating the $`r label_metric("correlation", "latex")`$ between two trajectories, the distances between all cells and the union of both waypoint sets is computed. For the benchmark evaluation, the total number of waypoints sampled from a trajectory was set to 100.
+
+## $`r label_metric("rf_nmse", "latex")`$ and $`r label_metric("lm_nmse", "latex")`$: Using the positions of the cells within one trajectory to predict the cellular positions in the other trajectory
+
+An alternative approach to detect whether the positions of cells are similar between two trajectories, is to use the positions of one trajectory to predict the positions within the other trajectory. If the prediction error for a particular cell is low, the more similar its positions are between the two trajectories.
+
+Specifically, we implemented two metrics which predict the milestone percentages from the gold standards by using the predicted milestone percentages as features  (`r ref("fig", "metrics_prediction")`). We did this with two regression methods, linear regression ($\textit{lm}$, using the R `lm` function) and Random Forest ($\textit{rf}$, implemented in the *ranger* package [@wright_rangerfastimplementation_2017]). In both cases, the accuracy of the prediction was measured using the Mean Squared error ($\mathit{MSE}$), in the case of Random forest we used the out-of-bag mean-squared error. Next, we calculated $\mathit{MSE}_{worst}$ equal to the $\mathit{MSE}$ when predicting all milestone percentages as the average. We used this to calculate the normalised mean squared error as $\mathit{NMSE} = 1 - \frac{\mathit{MSE}}{\mathit{MSE}_{worst}}$. We created a regression model for every milestone in the gold standard, and averaged the $\mathit{NMSE}$ values to finally obtain the $`r label_metric("rf_nmse", "latex")`$ and $`r label_metric("lm_nmse", "latex")`$ scores.
+
+```{r, results = "asis"}
+add_fig(
+  figure_file("metrics_prediction.svg", "manual_figures"),
+  "metrics_prediction",
+  glue::glue("The calculation of ${label_metric('lm_nmse', 'latex')}$ distances on a small example trajectory."),
+  ""
+)
+```
+
+## $`r label_metric("edgeflip", "latex")`$: Number of edge additions and removals to convert one topology to another
+
+We first simplified each network, by merging consecutive linear edges into one edge, and adding new milestones within self loops such that $A \rightarrow A$ would be converted $A \rightarrow B \rightarrow C \rightarrow D$, by adding an intermediate node to linear networks. Because we are interested in the overall similarity between two topologies irrespective of the direction of the edges, the network was made undirected. Next, we define the edge flip score as the minimal number of edges which should be added or removed to convert one network into the other, divided by the total number of edges in both networks. This problem is equivalent to the maximum common edge subgraph problem, a known NP-hard problem without a scalable solution [@bahiense_maximumcommonedge_2012]. We implemented a branch and bound approach for this problem, by first enumerating all possible edge additions and removals with the minimal number of edges (the edge difference between the two networks) and if none of the new networks was isomorphic, we tried out all solutions with additional two edge changes. To further limit the search space, we made sure the degree distributions between the two networks were  similar, before assessing whether the two networks were isomorphic using the BLISS algorithm [@junttila_engineeringefficientcanonical_2007], as implemented in the R *igraph* package.
+
+## $`r label_metric("edgeflip", "latex")`$: Number of edge additions and removals to convert one topology to another
+
+# Metric conformity
 
 ```{r}
 assessments <- read_rds(derived_file("assessments.rds"))
 rules <- read_rds(derived_file("rules.rds"))
 ```
-
-A trajectory, as defined in our evaluation, is a model with multiple abstractions. The top abstraction is the topology, represented by a milestone network, which contains information about the paths each cell can take from their starting point. More complex abstractions involve the mapping of each cell to a particular branch within this network, and the ordering of each cells within these branches (both represented in the milestone percentages).
-
-When designing metrics to compare trajectories, we therefore 
-
-- A good overall metric should capture all these different abstractions, so that the resulting trajectory has the best topology, branch assignment and cellular ordering.
-- IndividuSome users are more interested in particular abstractions. For example, the actual
-
-Here we define several metrics 
-
-## Summary
 
 ```{r}
 assessments %>%
@@ -65,7 +128,7 @@ assessments %>%
 ```{r results='asis'}
 # assessment <- dynutils::extract_row_to_list(assessments, 1)
 
-walkdf(assessments, function(assessment) {
+walkdf(assessments[1,], function(assessment) {
   cat(knitr::knit_child("assessment.Rmd", quiet=TRUE, envir = environment()))
 })
 ```

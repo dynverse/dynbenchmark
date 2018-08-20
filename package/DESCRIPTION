@@ -25,10 +25,12 @@ Imports:
   cluster,
   dplyr,
   emoa,
+  fs,
   ggraph,
   ggplot2,
   glue,
   httr,
+  knitr,
   mlr,
   mlrMBO,
   ParamHelpers (>= 1.11),
@@ -93,3 +95,4 @@ Collate:
     'suite_benchmark_generate_design.R'
     'suite_benchmark_submit.R'
     'suite_paramoptim.R'
+    'text_ref.R'
