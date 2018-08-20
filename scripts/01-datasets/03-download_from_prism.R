@@ -24,7 +24,7 @@ qsub::rsync_remote(
 
 
 
-datasets <- load_datasets(list_datasets()$id)
+datasets <- load_datasets()
 # datasets <- load_datasets()
 datasets <- datasets %>%
   mutate(

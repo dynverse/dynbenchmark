@@ -8,10 +8,10 @@ experiment("07-benchmark")
 ##########################################################
 
 # fetch results from cluster
-benchmark_fetch_results(derived_file("suite/"))
+benchmark_fetch_results(TRUE)
 
 # bind results in one data frame (without models)
-outputs <- benchmark_bind_results(derived_file("suite/"), load_models = FALSE)
+output <- benchmark_bind_results(load_models = TRUE)
 
 # load datasets info
 not_list <- function(x) !is.list(x)
