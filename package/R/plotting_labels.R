@@ -31,9 +31,6 @@ label_long <- function(x) {
     pull(long)
 }
 
-#' Label with replacement of n_ -> #
-#' @param x The text
-#' @export
 label_n <- function(x) {
   x %>% gsub("^n_", "# ", .)
 }
