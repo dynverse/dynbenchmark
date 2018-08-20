@@ -3,7 +3,7 @@ library(esfiji)
 
 experiment("02-metric_characterisation/01-metric_conformity")
 
-svg_location <- data_file("perturbations.svg", experiment_id = "02-metric_characterisation")
+svg_location <- figure_file("perturbations.svg", experiment_id = "manual_figures")
 
 folder <- figure_file("images")
 dir.create(folder)
