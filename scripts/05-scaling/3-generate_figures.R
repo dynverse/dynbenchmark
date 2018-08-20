@@ -87,7 +87,7 @@ g <-
   )
 
 g
-ggsave(figure_file("ranking.svg"), g, width = 14, height = 12)
+ggsave(result_file("ranking.svg"), g, width = 14, height = 12)
 
 
 ##########################################################
@@ -197,12 +197,12 @@ plots <- map(method_ids, function(method_id) {
   }
 })
 
-dir.create(figure_file("results"), showWarnings = FALSE)
+dir.create(result_file("results"), showWarnings = FALSE)
 pbapply::pblapply(seq_along(method_ids), cl = 8, function(i) {
   mid <- method_ids[[i]]
   pl <- plots[[i]]
   cat("Plotting ", mid, "\n", sep = "")
-  ggsave(figure_file(c("results/", mid, ".svg")), pl, width = 16, height = 12)
+  ggsave(result_file(c("results/", mid, ".svg")), pl, width = 16, height = 12)
 })
 
 
@@ -283,7 +283,7 @@ pbapply::pblapply(method_ids, cl = 8, function(mid) {
     cluster_lines
   ), collapse = "")
 
-  readr::write_lines(lines, figure_file(c("results/", mid, "_overview.md")))
+  readr::write_lines(lines, result_file(c("results/", mid, "_overview.md")))
 
   invisible()
 })

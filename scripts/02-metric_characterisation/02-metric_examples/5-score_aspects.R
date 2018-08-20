@@ -167,4 +167,4 @@ connections
 
 score_aspects_plot <- cowplot::plot_grid(connections, scores_heatmap, rel_widths = c(0.6, 0.2))
 score_aspects_plot
-ggsave(figure_file("score_aspects.svg"), score_aspects_plot, width = 15, height = 8)
+ggsave(result_file("score_aspects.svg"), score_aspects_plot, width = 15, height = 8)

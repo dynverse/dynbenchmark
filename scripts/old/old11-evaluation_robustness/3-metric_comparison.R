@@ -38,8 +38,8 @@ g <- ggplot(cross_df) +
   scale_y_continuous(breaks = c(0, 1))
 g
 
-ggsave(figure_file("metrics_comparison.svg"), g, width = 14, height = 5)
-write_rds(g, figure_file("metrics_comparison.rds"))
+ggsave(result_file("metrics_comparison.svg"), g, width = 14, height = 5)
+write_rds(g, result_file("metrics_comparison.rds"))
 
 df <- outputs_list$outputs_summtrajtype_totalsx2 %>%
   filter(dataset_source == "mean") %>%
@@ -59,4 +59,4 @@ h <- ggplot(df) +
   scale_y_continuous(breaks = c(0, 1))
 h
 
-ggsave(figure_file("errormetric_comparison.svg"), h, width = 10, height = 5)
+ggsave(result_file("errormetric_comparison.svg"), h, width = 10, height = 5)

@@ -142,7 +142,7 @@ table <- map(c("latex", "html"), function(format) {
 }) %>% set_names(c("latex", "html"))
 table
 
-table %>% write_rds(figure_file("component_importance.rds"))
+table %>% write_rds(result_file("component_importance.rds"))
 
 ##  ............................................................................
 ##  Plot                                                                    ####
@@ -208,4 +208,4 @@ method_components_scores_dots
 
 
 
-method_components_scores_dots %>% ggsave(figure_file("method_components_scores.svg"),., width = 12, height = 10)
+method_components_scores_dots %>% ggsave(result_file("method_components_scores.svg"),., width = 12, height = 10)

@@ -135,5 +135,5 @@ method_components_plot <-
   cowplot::plot_grid(., method_components_categories_plot, ncol = 1, rel_heights = c(0.6, 0.4), labels = c("", "c"))
 method_components_plot
 
-cowplot::save_plot(figure_file("method_components.svg"), method_components_plot, base_width=15, base_height=12)
+cowplot::save_plot(result_file("method_components.svg"), method_components_plot, base_width=15, base_height=12)
 

@@ -32,7 +32,7 @@ plot_tool_ordering <- tools_evaluated %>%
   theme(legend.position="top")
 
 plot_tool_ordering
-plot_tool_ordering %>% write_rds(figure_file("plot_tool_ordering.rds"))
+plot_tool_ordering %>% write_rds(result_file("plot_tool_ordering.rds"))
 
 ##  ............................................................................
 ##  Heatmap of the individual aspects of each methods                       ####
@@ -160,7 +160,7 @@ plot_qc_overview <- wrap_plots(
 
 ggsave(
   plot = plot_qc_overview,
-  figure_file("qc_overview.svg"),
+  result_file("qc_overview.svg"),
   width=15,
   height=18
 )

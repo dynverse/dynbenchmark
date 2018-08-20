@@ -13,7 +13,7 @@
 #' experiment("test_plots")
 #'
 #' data <- matrix(runif(200), ncol = 2)
-#' pdf(figure_file("testplot.pdf"), 5, 5)
+#' pdf(result_file("testplot.pdf"), 5, 5)
 #' plot(data)
 #' dev.off()
 #' }
@@ -67,11 +67,7 @@ data_file <- experiment_subfolder("data")
 
 #' @rdname experiment
 #' @export
-figure_file <- experiment_subfolder("figures")
-
-#' @rdname experiment
-#' @export
-result_file <- experiment_subfolder("results")
+result_file <- experiment_subfolder("figures")
 
 #' @rdname experiment
 #' @export

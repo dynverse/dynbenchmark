@@ -64,7 +64,7 @@ trajtype_handle_comparison <- method_trajtypes_scores %>%
   annotate("segment", x = -Inf, xend = -Inf, y = -Inf, yend = Inf) +
   theme(panel.spacing = unit(0, "cm"))
 trajtype_handle_comparison
-trajtype_handle_comparison %>% ggsave(figure_file("trajtype_handle_comparison.svg"), ., width = 15, height = 8)
+trajtype_handle_comparison %>% ggsave(result_file("trajtype_handle_comparison.svg"), ., width = 15, height = 8)
 
 
 ##  ............................................................................
@@ -112,7 +112,7 @@ linear_split_comparison <- linear_split_scores %>%
   scale_fill_manual(values = set_names(trajectory_types$colour[match(c("directed_linear", "rooted_tree"), trajectory_types$id)], c("linear_method", "non-linear_method"))) +
   theme(legend.position = "none", strip.text.y = element_text(angle = 0))
 linear_split_comparison
-ggsave(figure_file("linear_split_comparison.svg"), linear_split_comparison, width = 6, height = 8)
+ggsave(result_file("linear_split_comparison.svg"), linear_split_comparison, width = 6, height = 8)
 
 
 ##  ............................................................................

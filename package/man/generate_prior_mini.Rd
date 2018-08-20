@@ -5,7 +5,7 @@
 \title{Creates a prior mini svg}
 \usage{
 generate_prior_mini(method_priors,
-  svg = xml2::read_xml(figure_file("priors.svg", experiment_id =
+  svg = xml2::read_xml(result_file("priors.svg", experiment_id =
   "priors")))
 }
 \arguments{

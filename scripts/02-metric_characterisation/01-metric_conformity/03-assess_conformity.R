@@ -95,7 +95,7 @@ write_rds(assessments, derived_file("assessments.rds"))
 # source(script_file("helper-create_perturbation_images.R))
 rules <- rules %>%
   mutate(
-    image_location = map_chr(id, function(id) figure_file(paste0("images/", id, ".png"))),
+    image_location = map_chr(id, function(id) result_file(paste0("images/", id, ".png"))),
     image_found = file.exists(image_location)
   )
 
