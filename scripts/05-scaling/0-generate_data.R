@@ -8,13 +8,6 @@ experiment("05-scaling")
 ##########################################################
 
 # generate datasets with this range of dimensionality
-# scalability_range <- log10(c(
-#   10, 20, 40, 60, 80, 100,
-#   100, 200, 400, 600, 800,
-#   1000, 2000, 4000, 6000, 8000,
-#   10000, 20000, 40000, 60000, 100000,
-#   200000, 400000, 600000, 800000, 1000000
-# ))
 scalability_range <- seq(log10(10), log10(1000000), by = log10(10) / 5)
 print(round(10 ^ scalability_range))
 
@@ -23,15 +16,17 @@ source(scripts_file("generate_dataset.R"))
 
 set.seed(1)
 
-# dataset_ids <- "real/embronic-mesenchyme-neuron-differentiation_mca"
+dataset_ids <- select_platforms(n_platforms = 5) %>% map_chr(~ .$platform_id)
+
+ggplot(datasets) +
+  geom_point(aes(n_milestones, pct_zeros, colour = n_cells > 1000 & n_features > 1000)) +
+  theme_classic()
 
 dataset_ids <-
-  load_datasets() %>%
-  mutate(n_cells = map_int(cell_ids, length)) %>%
+  datasets %>%
   filter(
     n_cells > 1000,
-    source == "real",
-    !trajectory_type %in% c("directed_linear", "directed_cycle", "convergence", "undirected_linear")
+    n_features > 1000
   ) %>%
   sample_n(5) %>%
   pull(id)

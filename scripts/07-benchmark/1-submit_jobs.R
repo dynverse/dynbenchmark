@@ -10,9 +10,7 @@ experiment("07-benchmark")
 scaling <- read_rds(result_file("scaling.rds", "05-scaling"))
 
 # need to look into scaling results of these methods first
-method_ids <- scaling$models %>%
-  filter(!method_id %in% c("merlot", "raceid", "slice", "urd", "slingshot", "projected_slingshot", "dpt", "projected_dpt", "gpfates", "cellrouter", "pcreode")) %>%
-  pull(method_id)
+method_ids <- scaling$models$method_id
 
 methods <-
   dynwrap::get_ti_methods(method_ids, evaluate = FALSE) %>%
@@ -57,18 +55,19 @@ design <- benchmark_generate_design(
 # determine method execution order by predicting
 # the running times of each method
 predicted_times <-
-  pmap_df(scaling$models, function(method_id, model, ...) {
+  pmap_df(scaling$models, function(method_id, model_time, model_mem, ...) {
     datasets2 <- datasets %>% rename(dataset_id = id)
     datasets2$method_id <- method_id
-    datasets2$lpredtime = predict(model, datasets2)[,1]
+    datasets2$lpredtime = predict(model_time, datasets2)[,1]
+    datasets2$lpredmem = predict(model_mem, datasets2)[,1]
     datasets2
   }) %>%
-  mutate(predtime = 10^lpredtime)
+  mutate(predtime = 10^lpredtime, predmem = 10^lpredmem)
 
 method_ids <-
   predicted_times %>%
   group_by(method_id) %>%
-  summarise(lpredtime = mean(lpredtime)) %>%
+  summarise(lpredtime = mean(lpredtime), lpredmem = mean(lpredmem)) %>%
   arrange(lpredtime) %>%
   pull(method_id)
 
@@ -84,7 +83,7 @@ write_rds(design, derived_file("design.rds"), compress = "xz")
 ###############        SUBMIT JOB          ###############
 ##########################################################
 design_filt <- read_rds(derived_file("design.rds"))
-design_filt$crossing <- design_filt$crossing %>% filter(method_id == "identity")
+# design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("identity", "scorpius", "paga"))
 
 
 qsub_params <- function(method_id, param_id) {
