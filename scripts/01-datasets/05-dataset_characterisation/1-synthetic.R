@@ -90,7 +90,7 @@ plots <- map(modulenet_names, function(modulenet_name) {
 })
 
 ggrid <- cowplot::plot_grid(plotlist = plots, ncol = 1)
-ggsave(figure_file("modulenets.svg"), ggrid, width = 12, height = 35)
+ggsave(result_file("modulenets.svg"), ggrid, width = 12, height = 35)
 
 
 
@@ -110,4 +110,4 @@ table <- map(c("latex", "html"), function(format) {
   table
 }) %>% set_names(c("latex", "html"))
 
-write_rds(table, figure_file("samplers.rds"))
+write_rds(table, result_file("samplers.rds"))

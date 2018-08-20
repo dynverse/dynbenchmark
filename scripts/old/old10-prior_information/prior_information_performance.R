@@ -54,7 +54,7 @@ required_priors_performance_comparison <- method_priors_scores %>%
     theme(panel.spacing = unit(0, "cm"), legend.position = "none")
 required_priors_performance_comparison
 
-ggsave(figure_file("required_priors_performance_comparison.svg"), required_priors_performance_comparison, width = 14, height = 6)
+ggsave(result_file("required_priors_performance_comparison.svg"), required_priors_performance_comparison, width = 14, height = 6)
 
 
 

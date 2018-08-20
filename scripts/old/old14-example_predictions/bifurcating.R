@@ -309,5 +309,5 @@ bifurcating_example <- cowplot::plot_grid(
 
 bifurcating_example
 
-cowplot::save_plot(figure_file("bifurcating_example.svg"), bifurcating_example, base_height = 10, base_width = 20)
+cowplot::save_plot(result_file("bifurcating_example.svg"), bifurcating_example, base_height = 10, base_width = 20)
 

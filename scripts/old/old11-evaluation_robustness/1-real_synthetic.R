@@ -57,5 +57,5 @@ real_synthetic_comparison <- trajtype_source_scores %>%
     legend.position = "none", panel.grid = element_blank()
   )
 real_synthetic_comparison
-real_synthetic_comparison %>% write_rds(figure_file("real_synthetic_comparison.rds"))
-real_synthetic_comparison %>% ggsave(figure_file("real_synthetic_comparison.svg"), ., width = 15, height = 5)
+real_synthetic_comparison %>% write_rds(result_file("real_synthetic_comparison.rds"))
+real_synthetic_comparison %>% ggsave(result_file("real_synthetic_comparison.svg"), ., width = 15, height = 5)

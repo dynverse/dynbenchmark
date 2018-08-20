@@ -149,8 +149,8 @@ n_tools_over_time <- publication_cumulative_by_type_interpolated %>%
   geom_text(aes(date, nrow(tools)+1, label = ifelse(year == "2018", pritt("{year}: +{n} so far"), pritt("{year}: +{n}"))), data = tools_per_year) +
   geom_vline(aes(xintercept = min), data = tools_per_year, linetype = "dashed", color = "grey")
 n_tools_over_time
-# ggsave(figure_file("n_tools_over_time.png"), n_tools_over_time, width = 15, height = 8)
-write_rds(n_tools_over_time %>% ggdraw(), figure_file("n_tools_over_time.rds"))
+# ggsave(result_file("n_tools_over_time.png"), n_tools_over_time, width = 15, height = 8)
+write_rds(n_tools_over_time %>% ggdraw(), result_file("n_tools_over_time.rds"))
 
 
 ##  ............................................................................
@@ -171,7 +171,7 @@ platforms <- tools %>% separate_rows(platform = platforms, sep = ", ") %>%
     coord_flip() +
     coord_polar("y")
 platforms
-write_rds(platforms, figure_file("platforms.rds"))
+write_rds(platforms, result_file("platforms.rds"))
 
 
 ##  ............................................................................
@@ -212,7 +212,7 @@ trajectory_components_over_time <- trajectory_components_gathered %>%
 
 trajectory_components_over_time
 
-write_rds(trajectory_components_over_time, figure_file("trajectory_components_over_time.rds"))
+write_rds(trajectory_components_over_time, result_file("trajectory_components_over_time.rds"))
 
 
 ##  ............................................................................
@@ -243,13 +243,13 @@ topology_inference_timeline <- topology_inference_timeline_data %>% ggplot() +
   scale_y_continuous(label_long("n_tools"), expand = c(0,0)) +
   theme(legend.position = "none")
 topology_inference_timeline
-write_rds(topology_inference_timeline, figure_file("topology_inference_timeline.rds"))
+write_rds(topology_inference_timeline, result_file("topology_inference_timeline.rds"))
 
 ##  ............................................................................
 ##  Create timeline overview figure                                         ####
-n_tools_over_time <- read_rds(figure_file("n_tools_over_time.rds"))
-trajectory_components_over_time <- read_rds(figure_file("trajectory_components_over_time.rds"))
-topology_inference_timeline <- read_rds(figure_file("topology_inference_timeline.rds"))
+n_tools_over_time <- read_rds(result_file("n_tools_over_time.rds"))
+trajectory_components_over_time <- read_rds(result_file("trajectory_components_over_time.rds"))
+topology_inference_timeline <- read_rds(result_file("topology_inference_timeline.rds"))
 
 tools_timeline <- cowplot::plot_grid(
   plotlist = list(
@@ -262,7 +262,7 @@ tools_timeline <- cowplot::plot_grid(
   labels = "auto"
 )
 tools_timeline
-tools_timeline %>% save_plot(figure_file("tools_timeline.svg"), ., base_width = 10, base_height = 10)
+tools_timeline %>% save_plot(result_file("tools_timeline.svg"), ., base_width = 10, base_height = 10)
 
 ##  ............................................................................
 ##  Small tool timeline                                                   ####
@@ -292,11 +292,11 @@ tool_small_history <- tool_small_history_data %>%
   theme(legend.position = "none")
 tool_small_history
 
-ggsave(figure_file("tool_small_history.svg"), tool_small_history, height = 4.5, width = 10)
+ggsave(result_file("tool_small_history.svg"), tool_small_history, height = 4.5, width = 10)
 
 # move lines to back
 library(xml2)
-svg <- xml2::read_xml(figure_file("tool_small_history.svg"))
+svg <- xml2::read_xml(result_file("tool_small_history.svg"))
 
 children <- svg %>% xml_children()
 front <- xml_name(children) %in% c("line")
@@ -314,7 +314,7 @@ walk(texts, function(text) {
 })
 
 
-xml2::write_xml(svg, figure_file("tool_small_history.svg"))
+xml2::write_xml(svg, result_file("tool_small_history.svg"))
 
 
 
@@ -336,7 +336,7 @@ tool_small_distribution <- tools %>%
   scale_y_continuous(expand = c(0, 2)) +
   theme(legend.position = "None")
 tool_small_distribution
-ggsave(figure_file("tool_small_distribution.svg"), tool_small_distribution, height = 2, width = 5)
+ggsave(result_file("tool_small_distribution.svg"), tool_small_distribution, height = 2, width = 5)
 
 
 

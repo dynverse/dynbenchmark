@@ -172,7 +172,7 @@ extract_top_methods <- function(leaf_id, n_top) {
 
 n_top <- 4
 
-svg <- read_xml(figure_file("tree_raw2.svg"))
+svg <- read_xml(result_file("tree_raw2.svg"))
 
 leaf_nodeset <- svg %>% xml_find_all(".//svg:text[@class = 'methods']")
 leaf_ids <- xml_attr(leaf_nodeset, "id")
@@ -245,6 +245,6 @@ leaf_methods <- map(leaf_ids, function(leaf_id) {
 date <- xml_child(xml_find_first(svg, ".//svg:text[@id = 'date']"))
 xml_text(date) <- paste0("Generated at ", as.character(Sys.Date()))
 
-svg %>% write_xml(figure_file("tree.svg"))
+svg %>% write_xml(result_file("tree.svg"))
 
-system(pritt("inkscape {figure_file('tree.svg')} --export-png {figure_file('tree.png')} -d 300"))
+system(pritt("inkscape {result_file('tree.svg')} --export-png {result_file('tree.png')} -d 300"))

@@ -103,7 +103,7 @@ boxes <- cowplot::plot_grid(
   ))
 boxes
 
-ggsave(figure_file("dataset_characterisation_boxes.svg"), boxes, width = 10, height = 5.5)
+ggsave(result_file("dataset_characterisation_boxes.svg"), boxes, width = 10, height = 5.5)
 
 
 # Generate small pie plots as an alternative for the previous box plots
@@ -165,7 +165,7 @@ pies <- cowplot::plot_grid(
   )
 )
 
-ggsave(figure_file("dataset_characterisation_pies_small.svg"), pies, width = 6, height = 3)
+ggsave(result_file("dataset_characterisation_pies_small.svg"), pies, width = 6, height = 3)
 
 
 
@@ -208,7 +208,7 @@ dotplots <- cowplot::plot_grid(
 
 dotplots
 
-ggsave(figure_file("dataset_characterisation_distributions.svg"), dotplots, width = 10, height = 4.5)
+ggsave(result_file("dataset_characterisation_distributions.svg"), dotplots, width = 10, height = 4.5)
 
 
 # Combined plot
@@ -219,7 +219,7 @@ combined <- cowplot::plot_grid(
   ncol = 1
 )
 combined
-ggsave(figure_file("dataset_characterisation.svg"), combined, width = 10, height = 10)
+ggsave(result_file("dataset_characterisation.svg"), combined, width = 10, height = 10)
 
 
 
@@ -287,7 +287,7 @@ table <- map(c("latex", "html"), function(format) {
 }) %>% set_names(c("latex", "html"))
 table
 
-write_rds(table, figure_file("datasets.rds"))
+write_rds(table, result_file("datasets.rds"))
 
 
 

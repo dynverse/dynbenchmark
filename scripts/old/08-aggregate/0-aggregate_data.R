@@ -149,8 +149,8 @@ for (n in names(part_list)) {
 
 # construct minis
 trajectory_types_mini <- tibble(
-  id = list.files(figure_file("", "trajectory_types/mini")) %>% str_replace(".svg$", ""),
-  svg = id %>% map(~as.character(xml2::read_xml(figure_file(paste0(., ".svg"), "trajectory_types/mini"))))
+  id = list.files(result_file("", "trajectory_types/mini")) %>% str_replace(".svg$", ""),
+  svg = id %>% map(~as.character(xml2::read_xml(result_file(paste0(., ".svg"), "trajectory_types/mini"))))
 )
 
 minis <- trajectory_types_mini %>% create_replacers()

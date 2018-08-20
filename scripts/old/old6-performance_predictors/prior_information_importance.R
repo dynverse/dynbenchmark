@@ -54,7 +54,7 @@ required_priors_performance_comparison <- method_priors_scores %>%
     theme(panel.spacing = unit(0, "cm"), legend.position = "none")
 required_priors_performance_comparison
 
-write_rds(required_priors_performance_comparison, figure_file("required_priors_performance_comparison.rds"))
+write_rds(required_priors_performance_comparison, result_file("required_priors_performance_comparison.rds"))
 
 
 

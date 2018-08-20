@@ -427,7 +427,7 @@ g1 <- ggplot(method_tib) +
 
 
 # WRITE FILES
-overview_fig_file <- figure_file("overview.svg")
+overview_fig_file <- result_file("overview.svg")
 ggsave(overview_fig_file, g1, width = 16, height = 15)
 xml2::read_xml(overview_fig_file) %>% replace_svg(minis) %>% xml2::write_xml(overview_fig_file)
 

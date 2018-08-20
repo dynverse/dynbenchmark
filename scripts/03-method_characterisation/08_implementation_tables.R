@@ -136,7 +136,7 @@ imp_table <- map(c("latex", "html"), function(format) {
   table
 }) %>% set_names(c("latex", "html"))
 imp_table
-write_rds(imp_table, figure_file("tools_table.rds"))
+write_rds(imp_table, result_file("tools_table.rds"))
 
 
 

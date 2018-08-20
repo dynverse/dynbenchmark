@@ -4,7 +4,6 @@
 \alias{experiment}
 \alias{derived_file}
 \alias{data_file}
-\alias{figure_file}
 \alias{result_file}
 \alias{scripts_file}
 \title{Helper function for controlling experiments}
@@ -14,8 +13,6 @@ experiment(experiment_id)
 derived_file(filename = "", experiment_id = NULL, remote = FALSE)
 
 data_file(filename = "", experiment_id = NULL, remote = FALSE)
-
-figure_file(filename = "", experiment_id = NULL, remote = FALSE)
 
 result_file(filename = "", experiment_id = NULL, remote = FALSE)
 
@@ -36,7 +33,7 @@ Helper function for controlling experiments
 experiment("test_plots")
 
 data <- matrix(runif(200), ncol = 2)
-pdf(figure_file("testplot.pdf"), 5, 5)
+pdf(result_file("testplot.pdf"), 5, 5)
 plot(data)
 dev.off()
 }

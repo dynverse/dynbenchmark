@@ -197,9 +197,9 @@ cowplot::plot_grid(plotlist = unlist(map(outputs, function(o) {
   s <- o$summary
   o$model$id <- glue::glue("cor = {round(s$correlation, 2)}, rfmse = {round(s$rf_mse, 2)}, edge = {round(s$edge_flip, 2)}")
   list(plot_combined(dataset, o$model), plot_strip_connections(dataset, o$model))
-}), recursive = F), ncol = 8) %>% ggsave(filename = figure_file("aspects.pdf"), width = 40, height = 20)
+}), recursive = F), ncol = 8) %>% ggsave(filename = result_file("aspects.pdf"), width = 40, height = 20)
 
-plot_default(dataset) %>% ggsave(filename = figure_file("dataset.pdf"), width = 5, height = 5)
+plot_default(dataset) %>% ggsave(filename = result_file("dataset.pdf"), width = 5, height = 5)
 
 #
 # plot(ga_fit)

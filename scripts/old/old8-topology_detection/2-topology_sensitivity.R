@@ -48,7 +48,7 @@ topology_sensitivity_plot <- topology_sensitivity %>%
   scale_y_continuous(breaks = -seq_along(method_order), labels = set_names(methods$method_name, methods$method_id)[method_order], expand = c(0.005,0.005)) +
   scale_x_continuous("% of cases where topology was predicted correctly", breaks = c(0.5,1),labels = scales::percent)
 topology_sensitivity_plot
-topology_sensitivity_plot %>% ggsave(figure_file("topology_sensitivity.svg"), ., width = 12, height = 12)
+topology_sensitivity_plot %>% ggsave(result_file("topology_sensitivity.svg"), ., width = 12, height = 12)
 
 
 # table for correct topology prediction
@@ -76,5 +76,5 @@ topology_sensitivity_table <- map(c("html", "latex"), function(format) {
     kableExtra::kable_styling()
 }) %>% set_names(c("html", "latex"))
 topology_sensitivity_table
-write_rds(topology_sensitivity_table, figure_file("topology_sensitivity_table.rds"))
+write_rds(topology_sensitivity_table, result_file("topology_sensitivity_table.rds"))
 
