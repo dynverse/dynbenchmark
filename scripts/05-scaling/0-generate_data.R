@@ -18,19 +18,6 @@ set.seed(1)
 
 dataset_ids <- select_platforms(n_platforms = 5) %>% map_chr(~ .$platform_id)
 
-ggplot(datasets) +
-  geom_point(aes(n_milestones, pct_zeros, colour = n_cells > 1000 & n_features > 1000)) +
-  theme_classic()
-
-dataset_ids <-
-  datasets %>%
-  filter(
-    n_cells > 1000,
-    n_features > 1000
-  ) %>%
-  sample_n(5) %>%
-  pull(id)
-
 # construct datasets tibble
 datasets <-
   crossing(
