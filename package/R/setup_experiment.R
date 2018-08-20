@@ -67,7 +67,7 @@ data_file <- experiment_subfolder("data")
 
 #' @rdname experiment
 #' @export
-result_file <- experiment_subfolder("figures")
+result_file <- experiment_subfolder("results")
 
 #' @rdname experiment
 #' @export
