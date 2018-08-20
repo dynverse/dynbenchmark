@@ -95,7 +95,7 @@ label_pvalue <- function(p_values, cutoffs = c(0.1, 0.01, 1e-5)) {
 #' @param label_type The type of label to return, can be plotmath, latex or long_name
 #'
 #' @export
-label_metric <- function(metric_id, label_type = c("plotmath", "latex", "long_name"), parse = FALSE) {
+label_metric <- function(metric_id, label_type = c("plotmath", "latex", "long_name", "category"), parse = FALSE) {
   label_type <- match.arg(label_type)
 
   if (length(metric_id) > 1) {stop("Needs only one metric_id")}
