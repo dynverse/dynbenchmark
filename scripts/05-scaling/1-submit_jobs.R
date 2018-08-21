@@ -39,7 +39,8 @@ design <- benchmark_generate_design(
   methods = methods,
   parameters = list(
     fateid = tibble(id = "default", force = TRUE),
-    stemnet = tibble(id = "default", force = TRUE)
+    stemnet = tibble(id = "default", force = TRUE),
+    tscan = tibble(id = "default", modelNames = list(c("VVV", "EEE")))
   )
 )
 
