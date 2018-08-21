@@ -188,7 +188,7 @@ process_methods_design <- function(methods) {
     if (is.character(m)) {
       get_ti_methods(method_ids = m) %>%
         mutate(type = "character") %>%
-        select(id, type, fun = method_func)
+        select(id, type, fun)
     } else if (dynwrap::is_ti_method(m)) {
       fun <- function() m
       env <- new.env()

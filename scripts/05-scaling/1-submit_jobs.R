@@ -23,8 +23,8 @@ method_ids <- checks %>% filter(ran > 0) %>% arrange(time) %>% pull(method_id)
 methods <-
   dynwrap::get_ti_methods(method_ids, evaluate = FALSE) %>%
   mapdf(function(m) {
-    l <- m$method_func()
-    l$fun <- m$method_func
+    l <- m$fun()
+    l$fun <- m$fun
     l$type <- "function"
     l
   }) %>%
