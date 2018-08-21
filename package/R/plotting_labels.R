@@ -128,7 +128,7 @@ label_metrics <- function(metric_ids, ...) {
 #' @export
 limits_metric <- function(metric_id) {
   if (metric_id %in% dyneval::metrics$metric_id) {
-    extract_row_to_list(dyneval::metrics, which(dyneval::metrics == metric_id))[c("worst", "perfect")] %>% unlist()
+    extract_row_to_list(dyneval::metrics, which(metric_id == !!metric_id))[c("worst", "perfect")] %>% unlist()
   } else {
     c(worst = 0, perfect = 1)
   }
