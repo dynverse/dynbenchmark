@@ -84,6 +84,14 @@ plot_fig <- function(ref_type, ref_id, fig_path, caption_main, caption_text, wid
   caption_main <- knitr::knit(text = caption_main, quiet = TRUE)
   caption_text <- knitr::knit(text = caption_text, quiet = TRUE)
 
+  # plot figure if rds
+  if (fs::path_ext(fig_path) == "rds") {
+    fig_path_new <- fig_path
+    fs::path_ext(fig_path_new) <- "pdf"
+    ggsave(fig_path_new, read_rds(fig_path), width = width, height = height)
+    fig_path <- fig_path_new
+  }
+
   if (format == "latex") {
     # convert svg to pdf
     if (fs::path_ext(fig_path) == "svg") {
