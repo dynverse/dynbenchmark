@@ -28,9 +28,6 @@ for (oname in str_subset(names(olist), "^data")) {
 list2env(olist, environment())
 rm(olist)
 
-# collect which methods use which prior information
-# prior_df <- outputs_ind %>% select(method_name, prior_str) %>% distinct()
-
 
 ############### OVERALL COMPARISON ###############
 metr_lev <- c(

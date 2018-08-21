@@ -11,7 +11,7 @@ experiment("07-benchmark")
 benchmark_fetch_results(TRUE)
 
 # bind results in one data frame (without models)
-execution_output <- benchmark_bind_results(load_models = TRUE)
+execution_output <- benchmark_bind_results(load_models = FALSE)
 design <- read_rds(derived_file("design.rds"))
 methods_info <- design$methods %>% rename_all(function(x) paste0("method_", x)) %>% select(-method_type) %>% left_join(dynmethods::methods %>% select(method_id = id, method_type = type), by = "method_id")
 datasets_info <- design$datasets %>% rename_all(function(x) paste0("dataset_", x))
@@ -39,23 +39,25 @@ data %>% group_by(method_id, error_status) %>% summarise(n = n()) %>% as.data.fr
 # data <- data %>% filter(method_type %in% c("algorithm", "algorithm_test"))
 
 # scaling disabled for now
-# scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = TRUE) {
-#   xn <- x
-#   if (remove_errored) xn <- xn[xn != 0]
-#   if (max_scale) {
-#     y <- (x - mean(xn)) / max(abs(xn - mean(xn))) * 5
-#   } else {
-#     y <- (x - mean(xn)) / var(xn) * 5
-#   }
-#   sigmoid::sigmoid(y)
-# }
+scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = TRUE) {
+  xn <- x
+  x[is.na(x)] <- 0
+  xn <- xn[!is.na(xn)]
+  # if (remove_errored) xn <- xn[xn != 0]
+  if (max_scale) {
+    y <- (x - mean(xn)) / max(abs(xn - mean(xn))) * 5
+  } else {
+    y <- (x - mean(xn)) / var(xn) * 5
+  }
+  sigmoid::sigmoid(y)
+}
 #
 # # previously:
 # # trafo_fun <- percent_rank
-# trafo_fun <- scalesigmoid_trafo
-trafo_fun <- function(x) {
-  ifelse(is.na(x), 0, x)
-}
+trafo_fun <- scalesigmoid_trafo
+# trafo_fun <- function(x) {
+#   ifelse(is.na(x), 0, x)
+# }
 
 data <- data %>%
   mutate(

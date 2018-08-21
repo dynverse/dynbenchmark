@@ -23,13 +23,20 @@ methods <-
   list_as_tibble() %>%
   select(id, type, fun, everything())
 
+default_parameters <- list(
+  fateid = tibble(id = "default", force = TRUE),
+  stemnet = tibble(id = "default", force = TRUE),
+  tscan = tibble(id = "default", modelNames = list(c("VVV", "EEE")))
+)
+
 # combine default params and optimised params... if we had some!
 parameters <- lapply(method_ids, function(mn) {
-  if (mn %in% c("fateid", "stemnet")) {
-    defaults <- tibble(id = "default", force = TRUE)
-  } else {
-    defaults <- tibble(id = "default")
-  }
+  defaults <-
+    if (mn %in% names(default_parameters)) {
+      default_parameters[[mn]]
+    } else {
+      tibble(id = "default")
+    }
   # best <- ... %>% mutate(id = "optimised")
   # bind_rows(default, best)
   defaults
