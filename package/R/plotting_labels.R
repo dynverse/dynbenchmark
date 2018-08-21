@@ -52,7 +52,7 @@ label_capitalise <- function(x) {
 #' Labeller for facets
 #' @param label_func Which function to use for facet labelling
 #' @export
-label_facet <- function(label_func = label_long) {function(df) {mutate_all(df, label_func)}}
+label_facet <- function(label_func = label_long, ...) {function(df) {mutate_all(df, label_func, ...)}}
 
 #' Label trajectory types simplified
 #' @param x Trajectory types
@@ -120,7 +120,7 @@ label_metric <- function(metric_id, label_type = c("plotmath", "latex", "long_na
 #' @param ... Extra parameters for label_metric
 #' @export
 label_metrics <- function(metric_ids, ...) {
-  map_chr(metric_ids, label_metric, ...)
+  map(metric_ids, label_metric, ...)
 }
 
 #' Get the limits of a metric
