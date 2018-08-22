@@ -1,7 +1,7 @@
 #' Load model from benchmark suite results
 #'
 #' @param method_id The short_name of a method
-#' @param model_id The id of the model to be loaded
+#' @param df A data frame containing the crossing of which models to load
 #' @param auto_gc Whether or not to automatically garbage collect after loading models
 #' @param experiment_id The experiment id (default NULL
 #'
