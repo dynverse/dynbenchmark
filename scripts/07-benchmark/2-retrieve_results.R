@@ -170,4 +170,4 @@ data_trajtype_totalsx2 <- bind_rows(
 # save data structures
 to_save <- environment() %>% as.list()
 to_save <- to_save[c(str_subset(names(to_save), "^data"), "trajtypes", "datasets_info", "methods_info")]
-write_rds(to_save, derived_file("benchmark_results.rds"), compress = "xz")
+write_rds(to_save, result_file("benchmark_results.rds"), compress = "xz")

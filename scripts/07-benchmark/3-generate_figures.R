@@ -9,7 +9,7 @@ experiment("07-benchmark")
 ############### PART THREE: GENERATE FIGURES ###############
 ############################################################
 
-olist <- read_rds(derived_file("benchmark_results.rds"))
+olist <- read_rds(result_file("benchmark_results.rds"))
 olist$datasets_info <- NULL
 
 # get ordering of methods
@@ -83,7 +83,7 @@ g <-
   theme(legend.position = "none")
 g
 
-ggsave(result_file("1_overall_comparison.svg"), g, width = 20, height = 12)
+ggsave(result_file("1_overall_comparison.pdf"), g, width = 20, height = 15)
 
 rm(oc1, oc2, nacor, oc3, overall_comp)
 
