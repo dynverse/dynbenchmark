@@ -4,17 +4,16 @@
 \alias{load_dyneval_model}
 \title{Load model from benchmark suite results}
 \usage{
-load_dyneval_model(method_short_name, model_id, auto_gc = TRUE,
-  experiment_id = NULL)
+load_dyneval_model(method_id, df, auto_gc = TRUE, experiment_id = NULL)
 }
 \arguments{
-\item{method_short_name}{The short_name of a method}
-
-\item{model_id}{The id of the model to be loaded}
+\item{method_id}{The short_name of a method}
 
 \item{auto_gc}{Whether or not to automatically garbage collect after loading models}
 
 \item{experiment_id}{The experiment id (default NULL}
+
+\item{model_id}{The id of the model to be loaded}
 }
 \description{
 Load model from benchmark suite results
