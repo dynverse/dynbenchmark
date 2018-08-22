@@ -63,10 +63,10 @@ scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = TRUE) {
 #
 # # previously:
 # # trafo_fun <- percent_rank
-trafo_fun <- scalesigmoid_trafo
-# trafo_fun <- function(x) {
-#   ifelse(is.na(x), 0, x)
-# }
+# trafo_fun <- scalesigmoid_trafo
+trafo_fun <- function(x) {
+  ifelse(is.na(x), 0, x) %>% pmax(0) %>% pmin(1)
+}
 
 data <-
   execution_output %>%

@@ -185,9 +185,22 @@ g2 <-
   facet_wrap(~method_id, scales = "free") +
   scale_color_distiller(palette = "RdYlBu", limits = c(-4, 4))
 
-pdf(result_file("compare_pred.pdf"), width = 20, height = 15)
+pdf(result_file("compare_pred_ind.pdf"), width = 20, height = 15)
 print(g1 + labs(title = "Timings"))
 print(g2 + labs(title = "Memory"))
 dev.off()
+
+
+g1 <- ggplot(join) +
+  geom_point(aes(lpredtime, ltime, colour = ltime - lpredtime)) +
+  theme_bw() +
+  scale_color_distiller(palette = "RdYlBu", limits = c(-4, 4)) +
+  theme(legend.position = "bottom")
+g2 <- ggplot(join) +
+  geom_point(aes(lpredmem, lmem, colour = lmem - lpredmem)) +
+  theme_bw() +
+  scale_color_distiller(palette = "RdYlBu", limits = c(-4, 4)) +
+  theme(legend.position = "bottom")
+ggsave(result_file("compare_pred_all.pdf"), patchwork::wrap_plots(g1, g2, nrow = 1), width = 16, height = 8)
 
 rm(join, g1, g2)
