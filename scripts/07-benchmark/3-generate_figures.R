@@ -19,7 +19,7 @@ method_ord <- olist$data_trajtype_totalsx2 %>%
   .$method_id
 
 # create method_id_f factor in all data structures
-for (oname in str_subset(names(olist), "^data")) {
+for (oname in str_subset(names(olist), "^data") %>% setdiff("datasets_info")) {
   olist[[oname]] <- olist[[oname]] %>%
     mutate(method_id_f = factor(method_id, levels = rev(method_ord)))
 }
@@ -33,22 +33,43 @@ rm(olist)
 metr_lev <- c(
   "harm_mean", "norm_correlation", "norm_edge_flip", "norm_featureimp_cor", "norm_F1_branches",
   "real", "synthetic/dyngen", "synthetic/dyntoy", "synthetic/prosstt", "synthetic/splatter",
-  "time_method", "max_mem", "rank_time_method", "rank_max_mem", "pct_errored",
+   "rank_time", "rank_mem", "pct_errored", "predtime_cor", "predmem_cor",
   "pct_time_limit", "pct_memory_limit", "pct_execution_error"
 )
+
 
 oc1 <-
   data_trajtype_totalsx2 %>%
   filter(dataset_source == "mean", dataset_trajectory_type_f == "overall") %>%
-  select(method_id, method_name, method_id_f, param_id, one_of(metr_lev)) %>%
+  select(method_id, method_name, method_id_f, param_id, one_of(intersect(colnames(data_trajtype_totalsx2), metr_lev))) %>%
   gather(metric, score, -method_id:-param_id, -method_id_f)
 oc2 <-
   data_trajtype_totalsx2 %>%
   filter(dataset_trajectory_type == "overall") %>%
   select(method_id:param_id, method_id_f, metric = dataset_source, score = harm_mean)
 
+nacor <- function(x, y) {
+  is_na <- is.na(x) | is.na(y)
+  cor(x[!is_na], y[!is_na])
+}
+
+oc3 <-
+  data %>%
+  mutate(
+    time = ifelse(error_status == "memory_limit", NA, time),
+    mem = ifelse(error_status == "time_limit" | mem < log10(100e6), NA, mem),
+    ltime = log10(time),
+    lmem = log10(mem)
+  ) %>%
+  group_by(method_id, method_name, method_id_f, param_id) %>%
+  summarise(
+    predtime_cor = nacor(ltime, lpredtime),
+    predmem_cor = nacor(lmem, lpredmem)
+  ) %>%
+  gather(metric, score, predtime_cor, predmem_cor)
+
 overall_comp <-
-  bind_rows(oc1, oc2) %>%
+  bind_rows(oc1, oc2, oc3) %>%
   filter(metric %in% metr_lev) %>%
   mutate(metric_f = factor(metric, levels = metr_lev))
 
@@ -64,7 +85,7 @@ g
 
 ggsave(result_file("1_overall_comparison.svg"), g, width = 20, height = 12)
 
-rm(oc1, oc2, overall_comp)
+rm(oc1, oc2, nacor, oc3, overall_comp)
 
 
 ############### COMPARISON PER TRAJECTORY TYPE ###############
@@ -98,7 +119,6 @@ ggplot(data_trajtype_totalsx2) +
     x = NULL,
     title = "Correlation"
   )
-
 
 ggplot(data_trajtype_totalsx2) +
   geom_point(aes(method_id_f, norm_edge_flip, colour = method_id_f)) +
@@ -138,3 +158,36 @@ ggplot(data_trajtype_totalsx2) +
 dev.off()
 
 
+############### COMPARISON PREDICTED VERSUS ACTUAL TIMES / MEM USAGE ###############
+
+
+join <-
+  data %>%
+  filter(error_status %in% c("no_error", "time_limit", "memory_limit")) %>%
+  mutate(
+    time = ifelse(error_status == "memory_limit", NA, time),
+    mem = ifelse(error_status == "time_limit" | mem < log10(100e6), NA, mem),
+    ltime = log10(time),
+    lmem = log10(mem)
+  )
+
+g1 <-
+  ggplot(join) +
+  geom_point(aes(lpredtime, ltime, colour = ltime - lpredtime)) +
+  theme_bw() +
+  facet_wrap(~method_id, scales = "free") +
+  scale_color_distiller(palette = "RdYlBu", limits = c(-4, 4))
+
+g2 <-
+  ggplot(join) +
+  geom_point(aes(lpredmem, lmem, colour = lmem - lpredmem)) +
+  theme_bw() +
+  facet_wrap(~method_id, scales = "free") +
+  scale_color_distiller(palette = "RdYlBu", limits = c(-4, 4))
+
+pdf(result_file("compare_pred.pdf"), width = 20, height = 15)
+print(g1 + labs(title = "Timings"))
+print(g2 + labs(title = "Memory"))
+dev.off()
+
+rm(join, g1, g2)
