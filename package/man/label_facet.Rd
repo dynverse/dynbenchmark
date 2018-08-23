@@ -4,7 +4,7 @@
 \alias{label_facet}
 \title{Labeller for facets}
 \usage{
-label_facet(label_func = label_long)
+label_facet(label_func = label_long, ...)
 }
 \arguments{
 \item{label_func}{Which function to use for facet labelling}

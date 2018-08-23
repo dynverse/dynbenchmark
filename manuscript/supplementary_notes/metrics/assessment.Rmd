@@ -5,7 +5,8 @@ params:
 ---
 
 ```{r}
-rule <- dynutils::extract_row_to_list(rules, which(rules$id == assessment$rule_id))
+rule_ix <- which(rules$id == assessment$rule_id)
+rule <- dynutils::extract_row_to_list(rules, rule_ix)
 ```
 
 ## `r rule$name`

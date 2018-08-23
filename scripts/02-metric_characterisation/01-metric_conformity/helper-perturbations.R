@@ -526,4 +526,4 @@ perturbation_methods <- ls() %>% str_subset("^perturb_") %>% map(function(x) {
   create_ti_method(id = id, run_fun = run_fun)()
 })
 
-perturbation_methods <- dynbenchmark::process_methods_design(perturbation_methods)
+perturbation_methods <- dynbenchmark:::process_methods_design(perturbation_methods)
