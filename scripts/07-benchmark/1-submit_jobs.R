@@ -104,8 +104,12 @@ design_filt <- read_rds(derived_file("design.rds"))
 
 
 qsub_params <- function(method_id, param_id) {
+  moremem <- c(
+    "celltree_gibbs", "scimitar", "ouijaflow", "ouija", "pseudogp", "calista", "cellrouter",
+    "grandprix", "ouijaflow", "paga", "projected_paga", "raceid_stemid"
+  )
   prm <- lst(timeout = 6 * 60 * 60, memory = "10G")
-  if (method_id %in% c("celltree_gibbs", "scimitar", "ouijaflow", "ouija", "pseudogp", "calista", "cellrouter", "grandprix", "ouijaflow")) {
+  if (method_id %in% moremem) {
     prm$memory <- "32G"
   }
   prm
