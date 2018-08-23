@@ -18,7 +18,8 @@ design <- benchmark_generate_design(
   methods = method_ids,
   parameters = list(
     fateid = tibble(id = "default", force = TRUE),
-    stemnet = tibble(id = "default", force = TRUE)
+    stemnet = tibble(id = "default", force = TRUE),
+    tscan = tibble(id = "default", modelNames = list(c("VVV", "EEE")))
   )
 )
 
@@ -64,6 +65,6 @@ benchmark_submit(
   design = design,
   qsub_grouping = "{method_id}",
   qsub_params = function(method_id) lst(timeout = 1200, memory = ifelse(method_id %in% c("ouija", "ouijaflow", "paga", "scimitar"), "32G", "10G")),
-  metrics = c("correlation", "edge_flip", "rf_rsq", "featureimp_cor")
+  metrics = c("correlation", "edge_flip", "rf_rsq", "featureimp_cor", "him")
 )
 
