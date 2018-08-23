@@ -15,20 +15,21 @@ handle <- qsub::qsub_lapply(
   qsub_environment = "methods",
   qsub_packages = c("tidyverse", "dynmethods", "dynbenchmark"),
   qsub_config = qsub::override_qsub_config(
+    max_wall_time = "01:00:00",
     name = "singbuild",
     memory = "10G",
-    num_cores = 2,
+    num_cores = 4,
     wait = FALSE,
     stop_on_error = FALSE
   ),
   FUN = function(i) {
-    docker_repository <- methods$docker_repository[[i]]
+    remote_digests <- methods$remote_digests[[i]]
     method_id <- methods$id[[i]]
 
     # determine path location of global cache and local cache
-    global_cache <- "/scratch/irc/shared/dynverse/.singularity_cache"
-    cachedir <- paste0(global_cache, "_", method_id)
-    tempdir <- paste0("/data/singularity_tmp/singularity_", method_id)
+    global_cache <- "/scratch/irc/shared/dynverse/singularity_cache/global"
+    cachedir <- paste0("/scratch/irc/shared/dynverse/singularity_cache/", method_id)
+    tempdir <- paste0("/data/singularity_tmp/singularity/", method_id)
 
     # remove local cache
     if (dir.exists(cachedir)) {
@@ -56,8 +57,6 @@ handle <- qsub::qsub_lapply(
       file.symlink(global_file, cache_file)
     })
 
-    # setup dynbenchmark to place images at the right directory
-    dynbenchmark::setup_singularity_methods()
 
     # configure singularity to use correct cache and tempdirs
     Sys.setenv(SINGULARITY_CACHEDIR = cachedir)
@@ -67,7 +66,10 @@ handle <- qsub::qsub_lapply(
 
     # build singularity image
     cat("Building singularity image\n")
-    dynwrap::pull_singularity_ti_method(docker_repository)
+    dynwrap::create_ti_method_with_container(
+      image = remote_digests[[1]],
+      config = container_singularity(derived_file("singularity_images/", experiment_id = "03-method_characterisation"))
+    )
 
     # copy newly created files from the local cache to the global cache
     new_files <- setdiff(list.files(file.path(cachedir, "/docker")), cached_files)
@@ -87,14 +89,14 @@ handle <- qsub::qsub_lapply(
 
 qsub::qsub_retrieve(handle)
 
-# copy files from cluster to local
-qsub::rsync_remote(
-  remote_src = TRUE,
-  path_src = derived_file(remote = TRUE),
-  remote_dest = FALSE,
-  path_dest = derived_file(remote = FALSE),
-  verbose = TRUE
-)
-
-qsub::run_remote("for i in $(seq 1 8); do ssh prismcls0$i 'rm -rf /data/singularity_tmp'; done")
-
+#' @examples
+#' # copy files from cluster to local
+#' qsub::rsync_remote(
+#'   remote_src = TRUE,
+#'   path_src = derived_file(remote = TRUE),
+#'   remote_dest = FALSE,
+#'   path_dest = derived_file(remote = FALSE),
+#'   verbose = TRUE
+#' )
+#'
+#' qsub::run_remote("for i in $(seq 1 8); do ssh prismcls0$i 'rm -rf /data/singularity_*'; done")
