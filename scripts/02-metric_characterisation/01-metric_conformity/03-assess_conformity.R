@@ -77,8 +77,8 @@ assessments %>%
 rule <- rules %>% extract_row_to_list(which(rules$id == "filter_cells"))
 assessment <- assess_conformity(rule, scores)
 # assessment$conformity
-# assessment$plot_scores
-# assessment$plot_datasets$height
+assessment$plot_scores
+assessment$plot_datasets
 #
 # pdf("test.pdf", width=assessment$plot_scores$width, height = assessment$plot_scores$height)
 # assessment$plot_scores

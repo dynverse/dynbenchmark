@@ -38,15 +38,15 @@ add_fig(
 )
 ```
 
-Given the multilayered complexity of a trajectory model, it is not trivial to compare two trajectory models (for example a gold standard a prediction). We therefore sought to use different comparison metrics, each belonging to one particular type:
+Given the multilayered complexity of a trajectory model, it is not trivial to compare the similarity of two trajectory models. We therefore sought to use different comparison metrics, each serving a different purpose:
 
 - **Specific metrics** investigate one particular aspect of the trajectory. This would allow us to find particular weak points for methods, e.g. that a method is very good at ordering but does not frequently find the correct topology. Moreover, this makes it possible to create personalised rankings of methods, for example for users which are primarily interested in using the method correct topology.
-- **Overall metrics** should capture all the different abstractions, i.e. it measures whether the resulting trajectory has a good topology, that the cells belong to similar branches _and_ that they are ordered correctly.
 - **Application metrics** focus on the quality of a downstream analysis using the trajectory. For example, it measures whether the trajectory can be used to find accurate differentially expressed genes.
+- **Overall metrics** should capture all the different abstractions, i.e. it measures whether the resulting trajectory has a good topology, that the cells belong to similar branches _and_ that they are ordered correctly.
 
-Here, we first described and illustrate several possible metrics which we defined (`r ref("section", "metrics")`). Next, we tested these metrics on several test cases, to make sure they were robustly identify different type of "wrong" trajectory predictions (`r ref("section", "conformity")`). Based on this robustness assessment, we chose 4 metrics for the final evaluation (`r ref("section", "final")`).
+Here, we first described and illustrate several specific, application and overall metrics which we defined. Next, we tested these metrics on several test cases, to make sure they were robustly identify different wrong trajectory predictions. Based on this robustness assessment, we chose 4 metrics for the final evaluation.
 
-# Metrics
+# Specific metrics
 
 All metrics described here were implemented within our dyneval R package ([https://github.com/dynverse/dyneval](https://github.com/dynverse/dyneval)).
 
@@ -96,7 +96,7 @@ We used three different scores to assess the similarity in the topology between 
 For all three scores, we first simplified the topology of the trajectory to make both graph structures comparable:
 
 - As we are only interested in the main structure of the topology without start or end, the graph was made undirected.
-- All nodes with degree 2 were removed. For example in the topology A ⇨ B ⇨ C ⇨ D, C ⇨ D, the nodes B was removed
+- All milestones with degree 2 were removed. For example in the topology A ⇨ B ⇨ C ⇨ D, C ⇨ D, the B milestone was removed
 - A linear topology was converted to A ⇨ B ⇨ C
 - A cyclical topology such as A ⇨ B ⇨ C ⇨ D or A ⇨ B ⇨ A were all simplified to A ⇨ B ⇨ C ⇨ A
 - Duplicated edges such as A ⇨ B, A ⇨ B were decoupled to A ⇨ B, A ⇨ C ⇨ B
@@ -117,7 +117,7 @@ The $`r label_metric("him", "latex")`$ metric (Hamming-Ipsen-Mikhailov distance)
 - The normalised Hamming distance [@doughertyValidationGeneRegulatory2011], which calculates the distance between two graphs by matching individual edges in the adjacency matrix, but disregards overall structural similarity.
 - The normalised Ipsen-Mikhailov distance [@ipsenEvolutionaryReconstructionNetworks2002], which calculates the overall distance of two graphs based on matches between its degree and adjacency matrix, while disregarding local structural similarities. It requires a $\gamma$ parameter, which is usually estimated based on the number of nodes in the graph, but which we fixed at $0.1$ so as to make the score comparable across different graph sizes.
 
-We compared the three scores for several common topologies `r ref("fig", "topology_scores_overview")`. Although conceptually different, the $`r label_metric("edge_flip", "latex")`$ and $`r label_metric("him", "latex")`$ still produce similar scores `r ref("fig", "topology_scores_overview", "b")`, although the $`r label_metric("him", "latex")`$ tends to punish cycles more, while the $`r label_metric("edge_flip", "latex")`$ is more harsh for differences in the number of bifurcations `r ref("fig", "topology_scores_overview", "c")`.
+We compared the three scores for several common topologies `r ref("fig", "topology_scores_overview")`. While conceptually very different, the $`r label_metric("edge_flip", "latex")`$ and $`r label_metric("him", "latex")`$ still produce similar scores `r ref("fig", "topology_scores_overview", "b")`, although the $`r label_metric("him", "latex")`$ tends to punish cycles more, while the $`r label_metric("edge_flip", "latex")`$ is more harsh for differences in the number of bifurcations `r ref("fig", "topology_scores_overview", "c")`. Their main difference is that the $`r label_metric("him", "latex")`$ takes into account edge lengths when comparing two trajectories, as illustrated in `r ref("fig", "topology_scores_overview", "d")`.
 
 ```{r, results = "asis"}
 add_fig(
@@ -130,11 +130,21 @@ add_fig(
 )
 ```
 
-The different topology based scores are useful for different scenarios:
+To summarise, the different topology based scores are useful for different scenarios:
 
-- If the two trajectories are only comparable when the topology is exactly the same, the $`r label_metric("isomorphic", "latex")`$ should be used.
-- If it is important that the topologies are similar (but possible not isomorphic), the $`r label_metric("edge_flip", "latex")`$ is most appropriate.
+- If the two trajectories should only be compared when the topology is exactly the same, the $`r label_metric("isomorphic", "latex")`$ should be used.
+- If it is important that the topologies are similar (but possible exactly isomorphic), the $`r label_metric("edge_flip", "latex")`$ is most appropriate.
 - If the topologies should be similar, but shorter edges should not be punished as hard as longer edges, the $`r label_metric("HIM", "latex")`$ is most appropriate.
+
+## $`r label_metric("F1_branches", "latex")`$ and $`r label_metrics("F1_milestones", "latex")`$: Comparing how well the cells are clustered in the trajectory
+
+
+
+# Application metrics
+
+Although most metrics described above already assess some aspects directly relevant to the user (eg. whether the method is good at finding the right topology), 
+
+## $`r label_metric("featureimp_cor", "latex")`$: The similarity between features differentially expressed along the trajectory
 
 # Metric conformity
 
@@ -171,7 +181,11 @@ assessments %>%
 ```{r results='asis'}
 # assessment <- dynutils::extract_row_to_list(assessments, 1)
 
-walkdf(assessments[1,], function(assessment) {
+walkdf(assessments, function(assessment) {
   cat(knitr::knit_child("assessment.Rmd", quiet=TRUE, envir = environment()))
 })
 ```
+
+# Metrics used in the evaluation
+
+## $`r label_metric("harm_mean", "latex")`$ The harmonic mean
