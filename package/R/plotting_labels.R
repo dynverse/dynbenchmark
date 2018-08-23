@@ -27,12 +27,20 @@ label_wrap <- function(x, width = 10, collapse = "\n") {
 label_long <- function(x) {
   tibble(id = as.character(x)) %>%
     left_join(dynbenchmark::labels, "id") %>%
-    mutate(long = ifelse(is.na(long), label_capitalise(label_n(id)), long)) %>%
+    mutate(
+      long = ifelse(
+        is.na(long),
+        id %>% label_n %>% label_perc %>% label_capitalise,
+        long
+      )
+    ) %>%
     pull(long)
 }
-
 label_n <- function(x) {
   x %>% gsub("^n_", "# ", .)
+}
+label_perc <- function(x) {
+  x %>% gsub("_perc$", "_%", .)
 }
 
 #' Capitalise label
@@ -132,4 +140,19 @@ limits_metric <- function(metric_id) {
   } else {
     c(worst = 0, perfect = 1)
   }
+}
+
+
+
+#' Label time
+#'
+#' @param x Time
+#'
+#' @export
+label_time <- function(x) {
+  case_when(
+    x < 60 ~ paste0(round(x), "s"),
+    x < 60*60 ~ paste0(round(x/60), "m"),
+    TRUE ~ paste0(round(x/(60*60)), "h")
+  )
 }
