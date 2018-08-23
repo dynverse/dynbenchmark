@@ -23,4 +23,5 @@ after_success:
 branches:
   except:
   - git-annex
-  - synced/*
+  - synced/devel
+  - synced/master
