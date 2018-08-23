@@ -12,38 +12,47 @@ benchmark_fetch_results(TRUE)
 
 # bind results in one data frame (without models)
 execution_output <- benchmark_bind_results(load_models = FALSE)
+
+# df <- execution_output %>% filter(edge_flip < 0) %>% select(method_id, dataset_id, param_id, prior_id, repeat_ix)
+# model <- load_dyneval_model(method_id = "celltrails/default", df = df, experiment_id = "07-benchmark")
+
 design <- read_rds(derived_file("design.rds"))
-methods_info <- design$methods %>% rename_all(function(x) paste0("method_", x)) %>% select(-method_type) %>% left_join(dynmethods::methods %>% select(method_id = id, method_type = type), by = "method_id")
+methods_info <- design$methods %>%
+  rename_all(function(x) paste0("method_", x)) %>%
+  select(-method_type) %>%
+  left_join(dynmethods::methods %>% select(method_id = id, method_type = type), by = "method_id")
 datasets_info <- design$datasets %>% rename_all(function(x) paste0("dataset_", x))
-
-data <-
-  execution_output %>%
-  left_join(datasets_info, by = "dataset_id") %>%
-  left_join(methods_info, by = "method_id")
-
 # collect relevant trajectory types
 trajtypes <-
   dynwrap::trajectory_types %>%
   filter(id %in% unique(datasets_info$dataset_trajectory_type)) %>%
   add_row(id = "overall", simplified = "overall", directed = TRUE, directedness = "directed", colour = "#AAAAAA", background_colour = "E6A1A1", ancestors = list(character(0)))
 
-
-data %>% group_by(method_id, error_status) %>% summarise(n = n()) %>% as.data.frame()
-
 ###################################################
 ############### CREATE AGGREGATIONS ###############
 ###################################################
 
+# join <- inner_join(
+#   design$crossing %>% select(-task_source, -settings, -model),
+#   data %>% select(dataset_id, method_id, prior_id, repeat_ix, param_id, error_status, time = time_method, mem = max_mem),
+#   by = c("dataset_id", "method_id", "prior_id", "repeat_ix", "param_id")
+# ) %>%
+#   filter(error_status %in% c("no_error", "time_limit", "memory_limit")) %>%
+#   mutate(
+#     time = ifelse(error_status == "memory_limit", NA, 10^time),
+#     mem = ifelse(error_status == "time_limit" | mem < -100, NA, 10^mem),
+#     ltime = log10(time),
+#     lmem = log10(mem)
+#   )
 
-# filter control methods
-# data <- data %>% filter(method_type %in% c("algorithm", "algorithm_test"))
 
 # scaling disabled for now
 scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = TRUE) {
-  xn <- x
+  x[x < 0] <- 0
+  x[x > 1] <- 1
+  xn <- x[!is.na(x)]
   x[is.na(x)] <- 0
-  xn <- xn[!is.na(xn)]
-  # if (remove_errored) xn <- xn[xn != 0]
+  if (all(x == 0)) return(x)
   if (max_scale) {
     y <- (x - mean(xn)) / max(abs(xn - mean(xn))) * 5
   } else {
@@ -54,15 +63,21 @@ scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = TRUE) {
 #
 # # previously:
 # # trafo_fun <- percent_rank
-trafo_fun <- scalesigmoid_trafo
-# trafo_fun <- function(x) {
-#   ifelse(is.na(x), 0, x)
-# }
+# trafo_fun <- scalesigmoid_trafo
+trafo_fun <- function(x) {
+  ifelse(is.na(x), 0, x) %>% pmax(0) %>% pmin(1)
+}
 
-data <- data %>%
+data <-
+  execution_output %>%
+  left_join(datasets_info %>% select(dataset_id, dataset_trajectory_type, dataset_source), by = "dataset_id") %>%
+  left_join(methods_info %>% select(method_id, method_name), by = "method_id") %>%
+  left_join(design$crossing %>% select(dataset_id, method_id, prior_id, repeat_ix, param_id, lpredtime, lpredmem, predtime, predmem), by = c("dataset_id", "method_id", "prior_id", "repeat_ix", "param_id")) %>%
   mutate(
-    time_method = ifelse(error_status != "no_error", 6 * 3600, time_method) %>% log10,
-    max_mem = ifelse(error_status != "no_error", 32 * 10e9, max_mem) %>% log10,
+    time = ifelse(error_status != "no_error", 6 * 3600, time_method),
+    mem = ifelse(error_status != "no_error", 32 * 10e9, max_mem),
+    ltime = log10(time),
+    lmem = log10(mem),
     pct_errored = (error_status != "no_error") + 0,
     pct_time_limit = (error_status == "time_limit") + 0,
     pct_memory_limit = (error_status == "memory_limit") + 0,
@@ -76,10 +91,13 @@ data <- data %>%
     norm_edge_flip = trafo_fun(edge_flip),
     norm_featureimp_cor = trafo_fun(featureimp_cor),
     norm_F1_branches = trafo_fun(F1_branches),
-    rank_time_method = percent_rank(-time_method),
-    rank_max_mem = percent_rank(-max_mem)
+    rank_time = percent_rank(-ltime),
+    rank_mem = percent_rank(-lmem)
   ) %>%
-  ungroup()
+  ungroup() %>%
+  select(-stdout, -stderr, -error_message)
+
+data %>% group_by(method_id, error_status) %>% summarise(n = n()) %>% as.data.frame()
 
 # aggregate over replicates
 data_repl <- data %>%
@@ -151,5 +169,5 @@ data_trajtype_totalsx2 <- bind_rows(
 
 # save data structures
 to_save <- environment() %>% as.list()
-to_save <- to_save[c(str_subset(names(to_save), "^data"), "trajtypes")]
-write_rds(to_save, derived_file("benchmark_results.rds"), compress = "xz")
+to_save <- to_save[c(str_subset(names(to_save), "^data"), "trajtypes", "datasets_info", "methods_info")]
+write_rds(to_save, result_file("benchmark_results.rds"), compress = "xz")
