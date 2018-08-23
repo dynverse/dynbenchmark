@@ -116,7 +116,7 @@ theme_pub <- function(
       plot.title        = element_text(
         face = "bold",
         size = rel(rel_large),
-        hjust = 0, vjust = 1,
+        hjust = 0.5, vjust = 1,
         margin = margin(b = half_line)
       ),
       plot.subtitle     = element_text(
