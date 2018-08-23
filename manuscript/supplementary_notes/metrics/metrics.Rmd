@@ -31,7 +31,7 @@ A trajectory, as defined in our evaluation, is a model with multiple abstraction
 
 ```{r, results = "asis"}
 add_fig(
-  figure_file("trajectory_model_example.svg", "manual_figures"),
+  result_file("trajectory_model_example.svg", "manual_figures"),
   "trajectory_model_example",
   "An example trajectory that will be used throughout this section.",
   "It contains contains four milestones (W to Z) and five cells (a to e)."
@@ -56,7 +56,7 @@ When the position of a cell is the same in both the gold standard and the predic
 
 ```{r, results = "asis"}
 add_fig(
-  figure_file("metrics_geodesic.svg", "manual_figures"),
+  result_file("metrics_geodesic.svg", "manual_figures"),
   "metrics_geodesic",
   "The calculation of geodesic distances on a small example trajectory.",
   "a) A toy example containing four milestones (W to Z) and five cells (a to e). b) The corresponding milestone network, milestone percentages and regions of delayed commitment, when the toy trajectory is converted to the common trajectory model. c) The calculations made for calculating the pairwise geodesic distances. d) A heatmap representation of the pairwise geodesic distances."
@@ -70,7 +70,9 @@ The geodesic distance is the distance a cell has to through the trajectory space
 
 The geodesic distance can be easily extended towards cells within regions of delayed commitment. When both cells are part of the same region of delayed commitment, the geodesic distance was defined as the manhattan distances between the milestone percentages weighted by the lengths from the milestone network. For cells $d$ and $e$ in the example, $d(d, e)$ is equal to $0 \times (0.3 - 0.2) + 2 \times (0.7 - 0.2) + 3 \times(0.4 - 0.1)$, which is equal to $1.9$. The distance between two cells where one is part of a region of delayed commitment is calculated similarly to the previous paragraph, by first calculating the distance between the cells and their neighbouring milestones first, then calculating the shortest path distances between the two.
 
-Calculating the pairwise distances between cells scales quadratically with the number of cells, and would therefore not be scaleable for large datasets. For this reason, a set of waypoint cells are defined *a priori*, and only the distances between the waypoint cells and all other cells is calculated, in order to calculate the correlation of geodesic distances of two trajectories. The waypoints are determined by viewing each milestone, transition and region of delayed commitment as a collection of cells, and sampling cells from the different collections weighted by the total number of cells within that collection. For calculating the $`r label_metric("correlation", "latex")`$ between two trajectories, the distances between all cells and the union of both waypoint sets is computed. For the benchmark evaluation, the total number of waypoints sampled from a trajectory was set to 100.
+Calculating the pairwise distances between cells scales quadratically with the number of cells, and would therefore not be scaleable for large datasets. For this reason, a set of waypoint cells are defined *a priori*, and only the distances between the waypoint cells and all other cells is calculated, in order to calculate the correlation of geodesic distances of two trajectories. These cell waypoints are determined by viewing each milestone, edge between two milestones and region of delayed commitment as a collection of cells. We do stratified sampling from each collection of cells by weighing them by the total number of cells within that collection. For calculating the $`r label_metric("correlation", "latex")`$ between two trajectories, the distances between all cells and the union of both waypoint sets is computed.
+
+The number of cell waypoints has a trade-off between the accuracy versus the time to calculate $`r label_metric("correlation", "latex")`$. To select an optimal number of cell waypoints, we generated a large dataset with a complex topology, and plotted the accuracy versus the time to compute $`r label_metric("correlation", "latex")`$. 
 
 ## $`r label_metric("rf_nmse", "latex")`$ and $`r label_metric("lm_nmse", "latex")`$: Using the positions of the cells within one trajectory to predict the cellular positions in the other trajectory
 
@@ -80,18 +82,59 @@ Specifically, we implemented two metrics which predict the milestone percentages
 
 ```{r, results = "asis"}
 add_fig(
-  figure_file("metrics_prediction.svg", "manual_figures"),
+  result_file("metrics_prediction.svg", "manual_figures"),
   "metrics_prediction",
   glue::glue("The calculation of ${label_metric('lm_nmse', 'latex')}$ distances on a small example trajectory."),
   ""
 )
 ```
 
-## $`r label_metric("edgeflip", "latex")`$: Number of edge additions and removals to convert one topology to another
+## $`r label_metric("edge_flip", "latex")`$ and $`r label_metric("isomorphic", "latex")`$: Number of edge additions and removals to convert one topology to another
 
-We first simplified each network, by merging consecutive linear edges into one edge, and adding new milestones within self loops such that $A \rightarrow A$ would be converted $A \rightarrow B \rightarrow C \rightarrow D$, by adding an intermediate node to linear networks. Because we are interested in the overall similarity between two topologies irrespective of the direction of the edges, the network was made undirected. Next, we define the edge flip score as the minimal number of edges which should be added or removed to convert one network into the other, divided by the total number of edges in both networks. This problem is equivalent to the maximum common edge subgraph problem, a known NP-hard problem without a scalable solution [@bahiense_maximumcommonedge_2012]. We implemented a branch and bound approach for this problem, by first enumerating all possible edge additions and removals with the minimal number of edges (the edge difference between the two networks) and if none of the new networks was isomorphic, we tried out all solutions with additional two edge changes. To further limit the search space, we made sure the degree distributions between the two networks were  similar, before assessing whether the two networks were isomorphic using the BLISS algorithm [@junttila_engineeringefficientcanonical_2007], as implemented in the R *igraph* package.
+We used three different scores to assess the similarity in the topology between two trajectories, iregardless of where the cells were positioned.
 
-## $`r label_metric("edgeflip", "latex")`$: Number of edge additions and removals to convert one topology to another
+For all three scores, we first simplified the topology of the trajectory to make both graph structures comparable:
+
+- As we are only interested in the main structure of the topology without start or end, the graph was made undirected.
+- All nodes with degree 2 were removed. For example in the topology A ⇨ B ⇨ C ⇨ D, C ⇨ D, the nodes B was removed
+- A linear topology was converted to A ⇨ B ⇨ C
+- A cyclical topology such as A ⇨ B ⇨ C ⇨ D or A ⇨ B ⇨ A were all simplified to A ⇨ B ⇨ C ⇨ A
+- Duplicated edges such as A ⇨ B, A ⇨ B were decoupled to A ⇨ B, A ⇨ C ⇨ B
+
+The $`r label_metric("isomorphic", "latex")`$ score returns 1 if two graphs are isomorphic, and 0 if they were not. For this, we used the used the BLISS algorithm [@junttila_engineeringefficientcanonical_2007], as implemented in the R *igraph* package.
+
+The $`r label_metric("edge_flip", "latex")`$ score was defined as the minimal number of edges which should be added or removed to convert one network into the other, divided by the total number of edges in both networks. This problem is equivalent to the maximum common edge subgraph problem, a known NP-hard problem without a scalable solution [@bahiense_maximumcommonedge_2012]. We implemented a branch and bound approach for this problem, using several heuristics to make speed up the search:
+
+- First check all possible edge additions and removals corresponding to the number of different edges between the two graphs. If no solution is found, check all possible solutions with two extra edge additions/removals.
+- For each possible solution, first check whether:
+  - The maximal degree is the same
+  - The minimal degree is the same
+  - All degrees are the same after sorting
+- Only then check if the two graphs are isomorphic as described earlier.
+
+The $`r label_metric("him", "latex")`$ metric (Hamming-Ipsen-Mikhailov distance) [@jurmanHIMGlocalMetric2015] which was adopted from the R nettools package [https://github.com/filosi/nettools](https://github.com/filosi/nettools). It uses an adjacency matrix which was weighted according to the lengths of each edges within the milestone network. Conceptually, $`r label_metric("him", "latex")`$ is a linear combination of:
+
+- The normalised Hamming distance [@doughertyValidationGeneRegulatory2011], which calculates the distance between two graphs by matching individual edges in the adjacency matrix, but disregards overall structural similarity.
+- The normalised Ipsen-Mikhailov distance [@ipsenEvolutionaryReconstructionNetworks2002], which calculates the overall distance of two graphs based on matches between its degree and adjacency matrix, while disregarding local structural similarities. It requires a $\gamma$ parameter, which is usually estimated based on the number of nodes in the graph, but which we fixed at $0.1$ so as to make the score comparable across different graph sizes.
+
+We compared the three scores for several common topologies `r ref("fig", "topology_scores_overview")`. Although conceptually different, the $`r label_metric("edge_flip", "latex")`$ and $`r label_metric("him", "latex")`$ still produce similar scores `r ref("fig", "topology_scores_overview", "b")`, although the $`r label_metric("him", "latex")`$ tends to punish cycles more, while the $`r label_metric("edge_flip", "latex")`$ is more harsh for differences in the number of bifurcations `r ref("fig", "topology_scores_overview", "c")`.
+
+```{r, results = "asis"}
+add_fig(
+  result_file("topology_scores_overview.rds", experiment = "02-metric_characterisation/02-metric_examples"),
+  "topology_scores_overview",
+  glue::glue("${label_metric('isomorphic', 'latex')}$, ${label_metric('edge_flip', 'latex')}$ and ${label_metric('him', 'latex')}$ ."),
+  "",
+  width = 12,
+  height = 12
+)
+```
+
+The different topology based scores are useful for different scenarios:
+
+- If the two trajectories are only comparable when the topology is exactly the same, the $`r label_metric("isomorphic", "latex")`$ should be used.
+- If it is important that the topologies are similar (but possible not isomorphic), the $`r label_metric("edge_flip", "latex")`$ is most appropriate.
+- If the topologies should be similar, but shorter edges should not be punished as hard as longer edges, the $`r label_metric("HIM", "latex")`$ is most appropriate.
 
 # Metric conformity
 
