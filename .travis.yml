@@ -20,3 +20,7 @@ install:
 - R -e 'setRepositories(ind = 1:2); devtools::install(dependencies = TRUE, upgrade = TRUE)'
 after_success:
 - R -e 'covr::codecov()'
+branches:
+  except:
+  - git-annex
+  - synced/*
