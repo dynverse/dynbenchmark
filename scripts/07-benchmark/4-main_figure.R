@@ -319,20 +319,6 @@ leg_circles <- data_frame(
   colqc = colqc_fun(r*2)
 )
 
-make_scale_legend <- function(scale, range_labels) {
-  g <-
-    ggplot() +
-    geom_point(aes(x, y, col = z), data_frame(x = c(0, 1, runif(1000)), y = c(0, 1, runif(1000)), z = (x + y) / 2)) +
-    scale_colour_gradientn(colours = scale, breaks = c(0, 1), labels = range_labels) +
-    labs(colour = NULL) +
-    theme(legend.position = "bottom")
-  cowplot::get_legend(g)
-}
-
-bench_leg <- make_scale_legend(viridisLite::viridis(101, option = colbench), range_labels = c("low", "high"))
-time_leg <- make_scale_legend(viridisLite::viridis(101, option = coltime), range_labels = c("long", "short"))
-qc_leg <- make_scale_legend(viridisLite::viridis(101, option = colqc), range_labels = c("low", "high"))
-
 error_leg_df <- error_reasons %>%
   rename(fill = colour) %>%
   mutate(
