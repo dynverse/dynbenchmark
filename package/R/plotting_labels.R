@@ -59,8 +59,13 @@ label_capitalise <- function(x) {
 
 #' Labeller for facets
 #' @param label_func Which function to use for facet labelling
+#' @param ... Passed to mutate_all
 #' @export
-label_facet <- function(label_func = label_long, ...) {function(df) {mutate_all(df, label_func, ...)}}
+label_facet <- function(label_func = label_long, ...) {
+  function(df) {
+    mutate_all(df, label_func, ...)
+  }
+}
 
 #' Label trajectory types simplified
 #' @param x Trajectory types

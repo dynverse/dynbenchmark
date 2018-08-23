@@ -8,6 +8,8 @@ label_facet(label_func = label_long, ...)
 }
 \arguments{
 \item{label_func}{Which function to use for facet labelling}
+
+\item{...}{Passed to mutate_all}
 }
 \description{
 Labeller for facets
