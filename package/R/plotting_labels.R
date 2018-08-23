@@ -27,12 +27,20 @@ label_wrap <- function(x, width = 10, collapse = "\n") {
 label_long <- function(x) {
   tibble(id = as.character(x)) %>%
     left_join(dynbenchmark::labels, "id") %>%
-    mutate(long = ifelse(is.na(long), label_capitalise(label_n(id)), long)) %>%
+    mutate(
+      long = ifelse(
+        is.na(long),
+        id %>% label_n %>% label_perc %>% label_capitalise,
+        long
+      )
+    ) %>%
     pull(long)
 }
-
 label_n <- function(x) {
   x %>% gsub("^n_", "# ", .)
+}
+label_perc <- function(x) {
+  x %>% gsub("_perc$", "_%", .)
 }
 
 #' Capitalise label
@@ -52,7 +60,7 @@ label_capitalise <- function(x) {
 #' Labeller for facets
 #' @param label_func Which function to use for facet labelling
 #' @export
-label_facet <- function(label_func = label_long) {function(df) {mutate_all(df, label_func)}}
+label_facet <- function(label_func = label_long, ...) {function(df) {mutate_all(df, label_func, ...)}}
 
 #' Label trajectory types simplified
 #' @param x Trajectory types
@@ -120,7 +128,7 @@ label_metric <- function(metric_id, label_type = c("plotmath", "latex", "long_na
 #' @param ... Extra parameters for label_metric
 #' @export
 label_metrics <- function(metric_ids, ...) {
-  map_chr(metric_ids, label_metric, ...)
+  map(metric_ids, label_metric, ...)
 }
 
 #' Get the limits of a metric
@@ -128,8 +136,23 @@ label_metrics <- function(metric_ids, ...) {
 #' @export
 limits_metric <- function(metric_id) {
   if (metric_id %in% dyneval::metrics$metric_id) {
-    extract_row_to_list(dyneval::metrics, which(dyneval::metrics == metric_id))[c("worst", "perfect")] %>% unlist()
+    extract_row_to_list(dyneval::metrics, which(metric_id == !!metric_id))[c("worst", "perfect")] %>% unlist()
   } else {
     c(worst = 0, perfect = 1)
   }
+}
+
+
+
+#' Label time
+#'
+#' @param x Time
+#'
+#' @export
+label_time <- function(x) {
+  case_when(
+    x < 60 ~ paste0(round(x), "s"),
+    x < 60*60 ~ paste0(round(x/60), "m"),
+    TRUE ~ paste0(round(x/(60*60)), "h")
+  )
 }

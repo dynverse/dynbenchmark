@@ -14,6 +14,7 @@ scores <- scores %>% filter(metric_id %in% metrics_characterised$metric_id)
 
 # load rules
 source(scripts_file("helper-rules.R"))
+source(scripts_file("helper-perturbations.R"))
 
 # add harmonic mean
 metric_ids_harm_mean <- metrics_evaluated %>% filter(category != "average") %>% pull(metric_id)
@@ -73,8 +74,8 @@ assessments %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # test one rule
-# rule <- rules %>% extract_row_to_list(which(rules$id == "add_leaf_edges"))
-# assessment <- assess_conformity(rule, scores)
+rule <- rules %>% extract_row_to_list(which(rules$id == "filter_cells"))
+assessment <- assess_conformity(rule, scores)
 # assessment$conformity
 # assessment$plot_scores
 # assessment$plot_datasets$height
