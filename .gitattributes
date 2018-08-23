@@ -2,3 +2,13 @@ results/*.rds filter=lfs diff=lfs merge=lfs -text
 results/*.svg filter=lfs diff=lfs merge=lfs -text
 results/*.png filter=lfs diff=lfs merge=lfs -text
 results/*.pdf filter=lfs diff=lfs merge=lfs -text
+
+* annex.largefiles=nothing
+*.rds annex.largefiles=anything
+*.png annex.largefiles=anything
+*.svg annex.largefiles=anything
+*.rda annex.largefiles=anything
+*.pdf annex.largefiles=anything
+
+annex.addunlocked true
+annex.thin true
