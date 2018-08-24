@@ -57,7 +57,7 @@ check_correlation <- function(dataset, shuffle_perc, n_cell_waypoints, seed, ...
   if (is.na(n_cell_waypoints)) {
     n_cell_waypoints <- length(perturbed$cell_ids)
   }
-  set.seed(seed+1)
+  set.seed(seed + 1)
   perturbed <- perturbed %>% add_cell_waypoints(n_cell_waypoints)
 
   # calculate correlation
@@ -135,13 +135,13 @@ mean_times <- results %>%
 
 plot_mean_times <- mean_times %>%
   ggplot(aes(n_cell_waypoints, y = time)) +
-    # geom_raster(aes(fill = log10(time))) +
-    geom_bar(aes(y = time), stat = "identity") +
-    geom_text(aes(label = label_time(time)), color = "black", vjust = -0.1) +
-    # scale_fill_viridis_c(option = "A", end = 0.8) +
-    scale_x_discrete(label_long("n_cell_waypoints")) +
-    scale_y_continuous(label_long("Time (seconds)"), expand = expand_scale(mult = c(0, 0.1)), breaks = round(range(mean_times$time))) +
-    theme_pub()
+  # geom_raster(aes(fill = log10(time))) +
+  geom_bar(aes(y = time), stat = "identity") +
+  geom_text(aes(label = label_time(time)), color = "black", vjust = -0.1) +
+  # scale_fill_viridis_c(option = "A", end = 0.8) +
+  scale_x_discrete(label_long("n_cell_waypoints")) +
+  scale_y_continuous(label_long("Time (seconds)"), expand = expand_scale(mult = c(0, 0.1)), breaks = round(range(mean_times$time))) +
+  theme_pub()
 
 plot_correlation_distributions_overview <- wrap_plots(
   plot_mean_times + theme_empty_x_axis,
@@ -160,7 +160,7 @@ dataset <- dyntoy::generate_dataset(model = dyntoy::model_binary_tree(num_branch
 
 trajectory_positions <- with(
   dataset,
-  dynwrap::determine_cell_trajectory_positions(milestone_ids, milestone_network,milestone_percentages, progressions, divergence_regions)
+  dynwrap::determine_cell_trajectory_positions(milestone_ids, milestone_network, milestone_percentages, progressions, divergence_regions)
 )
 
 waypoint_cells <- dataset$waypoint_cells
