@@ -38,7 +38,7 @@ add_fig(
 )
 ```
 
-Given the multilayered complexity of a trajectory model, it is not trivial to compare the similarity of two trajectory models. We therefore sought to use different comparison metrics, each serving a different purpose:
+Given the multilayered complexity of a trajectory model, it is not trivial to compare the similarity of two trajectory models using only one metric. We therefore sought to use different comparison metrics, each serving a different purpose:
 
 - **Specific metrics** investigate one particular aspect of the trajectory. This would allow us to find particular weak points for methods, e.g. that a method is very good at ordering but does not frequently find the correct topology. Moreover, this makes it possible to create personalised rankings of methods, for example for users which are primarily interested in using the method correct topology.
 - **Application metrics** focus on the quality of a downstream analysis using the trajectory. For example, it measures whether the trajectory can be used to find accurate differentially expressed genes.
@@ -50,46 +50,7 @@ Here, we first described and illustrate several specific, application and overal
 
 All metrics described here were implemented within our dyneval R package ([https://github.com/dynverse/dyneval](https://github.com/dynverse/dyneval)).
 
-## $`r label_metric("correlation", "latex")`$: Correlation between geodesic distances
-
-When the position of a cell is the same in both the gold standard and the prediction, its distances to all other cells in the trajectory should also be the same. This observation is the basis for the $`r label_metric("correlation", "latex")`$ metric.
-
-```{r, results = "asis"}
-add_fig(
-  result_file("metrics_geodesic.svg", "manual_figures"),
-  "metrics_geodesic",
-  "The calculation of geodesic distances on a small example trajectory.",
-  "a) A toy example containing four milestones (W to Z) and five cells (a to e). b) The corresponding milestone network, milestone percentages and regions of delayed commitment, when the toy trajectory is converted to the common trajectory model. c) The calculations made for calculating the pairwise geodesic distances. d) A heatmap representation of the pairwise geodesic distances."
-)
-```
-
-The geodesic distance is the distance a cell has to through the trajectory space to get from one position to another (`r ref("fig", "metrics_geodesic")`). The way this distance is calculated depends on how two cells are positioned:
-
-- **Both cells are on the same edge in the milestone network.** In this case, the distance is defined as the product of the difference in milestone percentages and the length of the transition they both reside on. The geodesic distance is defined as the product of the difference in milestone percentages and the length of their common edge. For cells $a$ and $b$ in the example, $d(a, b)$ is equal to $1 \times (0.9 - 0.2) = 0.7$.
-- **Cells reside on different edges in the milestone network.** First, the distance of the cell to all its nearby milestones is calculated, based on its percentage within the edge and the length of the edge. These distances in combination with the milestone network are used to calculate the shortest path distance between the two cells. For cells $a$ and $c$ in the example, $d(a, X) = 1 \times 0.9$ and $d(c, X) = 3 \times 0.2$, and therefore $d(a, c) = 1 \times 0.9 + 3 \times 0.2$. 
-
-The geodesic distance can be easily extended towards cells within regions of delayed commitment. When both cells are part of the same region of delayed commitment, the geodesic distance was defined as the manhattan distances between the milestone percentages weighted by the lengths from the milestone network. For cells $d$ and $e$ in the example, $d(d, e)$ is equal to $0 \times (0.3 - 0.2) + 2 \times (0.7 - 0.2) + 3 \times(0.4 - 0.1)$, which is equal to $1.9$. The distance between two cells where one is part of a region of delayed commitment is calculated similarly to the previous paragraph, by first calculating the distance between the cells and their neighbouring milestones first, then calculating the shortest path distances between the two.
-
-Calculating the pairwise distances between cells scales quadratically with the number of cells, and would therefore not be scaleable for large datasets. For this reason, a set of waypoint cells are defined *a priori*, and only the distances between the waypoint cells and all other cells is calculated, in order to calculate the correlation of geodesic distances of two trajectories. These cell waypoints are determined by viewing each milestone, edge between two milestones and region of delayed commitment as a collection of cells. We do stratified sampling from each collection of cells by weighing them by the total number of cells within that collection. For calculating the $`r label_metric("correlation", "latex")`$ between two trajectories, the distances between all cells and the union of both waypoint sets is computed.
-
-The number of cell waypoints has a trade-off between the accuracy versus the time to calculate $`r label_metric("correlation", "latex")`$. To select an optimal number of cell waypoints, we generated a large dataset with a complex topology, and plotted the accuracy versus the time to compute $`r label_metric("correlation", "latex")`$. 
-
-## $`r label_metric("rf_nmse", "latex")`$ and $`r label_metric("lm_nmse", "latex")`$: Using the positions of the cells within one trajectory to predict the cellular positions in the other trajectory
-
-An alternative approach to detect whether the positions of cells are similar between two trajectories, is to use the positions of one trajectory to predict the positions within the other trajectory. If the prediction error for a particular cell is low, the more similar its positions are between the two trajectories.
-
-Specifically, we implemented two metrics which predict the milestone percentages from the gold standards by using the predicted milestone percentages as features  (`r ref("fig", "metrics_prediction")`). We did this with two regression methods, linear regression ($\textit{lm}$, using the R `lm` function) and Random Forest ($\textit{rf}$, implemented in the *ranger* package [@wright_rangerfastimplementation_2017]). In both cases, the accuracy of the prediction was measured using the Mean Squared error ($\mathit{MSE}$), in the case of Random forest we used the out-of-bag mean-squared error. Next, we calculated $\mathit{MSE}_{worst}$ equal to the $\mathit{MSE}$ when predicting all milestone percentages as the average. We used this to calculate the normalised mean squared error as $\mathit{NMSE} = 1 - \frac{\mathit{MSE}}{\mathit{MSE}_{worst}}$. We created a regression model for every milestone in the gold standard, and averaged the $\mathit{NMSE}$ values to finally obtain the $`r label_metric("rf_nmse", "latex")`$ and $`r label_metric("lm_nmse", "latex")`$ scores.
-
-```{r, results = "asis"}
-add_fig(
-  result_file("metrics_prediction.svg", "manual_figures"),
-  "metrics_prediction",
-  glue::glue("The calculation of ${label_metric('lm_nmse', 'latex')}$ distances on a small example trajectory."),
-  ""
-)
-```
-
-## $`r label_metric("edge_flip", "latex")`$ and $`r label_metric("isomorphic", "latex")`$: Number of edge additions and removals to convert one topology to another
+## $`r label_metric("isomorphic", "latex")`$, $`r label_metric("edge_flip", "latex")`$ and $`r label_metric("him", "latex")`$: Edit distance between two trajectory topologies
 
 We used three different scores to assess the similarity in the topology between two trajectories, iregardless of where the cells were positioned.
 
@@ -138,13 +99,68 @@ To summarise, the different topology based scores are useful for different scena
 
 ## $`r label_metric("F1_branches", "latex")`$ and $`r label_metrics("F1_milestones", "latex")`$: Comparing how well the cells are clustered in the trajectory
 
+Perhaps one of the simplest ways to calculate the similarity between the cellular positions of two topologies is by mapping each cell to its closest milestone _or_ branch `r ref("fig", "clustering_scores_overview")`. These clusters of cells can then be compared using one of the many external cluster evaluation measures [@saelensComprehensiveEvaluationModule2018]. When selecting such a metric, we had two conditions:
 
+- Because we allow some methods to filter cells in the trajectory, the metric should be able to handle "non-exhaustive assignment", where some cells are not assigned to any cluster.
+- The metric should give each cluster equal weight, so that rare cell stages are equally important as large stages.
+
+Based on these requirements, and on the analysis in [@saelensComprehensiveEvaluationModule2018], we chose the $\textrm{F1}$ score between the $\textrm{Recovery}$ and $\textrm{Relevance}$. If 
+
+```{r, results = "asis"}
+add_fig(
+  result_file("plot_clustering_scores_overview.rds", experiment = "02-metric_characterisation/02-metric_examples"),
+  "clustering_scores_overview",
+  glue::glue("${label_metric('isomorphic', 'latex')}$, ${label_metric('edge_flip', 'latex')}$ and ${label_metric('him', 'latex')}$ .")
+)
+```
+
+
+## $`r label_metric("correlation", "latex")`$: Correlation between geodesic distances
+
+When the position of a cell is the same in both the gold standard and the prediction, its distances to all other cells in the trajectory should also be the same. This observation is the basis for the $`r label_metric("correlation", "latex")`$ metric.
+
+```{r, results = "asis"}
+add_fig(
+  result_file("metrics_geodesic.svg", "manual_figures"),
+  "metrics_geodesic",
+  "The calculation of geodesic distances on a small example trajectory.",
+  "a) A toy example containing four milestones (W to Z) and five cells (a to e). b) The corresponding milestone network, milestone percentages and regions of delayed commitment, when the toy trajectory is converted to the common trajectory model. c) The calculations made for calculating the pairwise geodesic distances. d) A heatmap representation of the pairwise geodesic distances."
+)
+```
+
+The geodesic distance is the distance a cell has to through the trajectory space to get from one position to another (`r ref("fig", "metrics_geodesic")`). The way this distance is calculated depends on how two cells are positioned:
+
+- **Both cells are on the same edge in the milestone network.** In this case, the distance is defined as the product of the difference in milestone percentages and the length of the transition they both reside on. The geodesic distance is defined as the product of the difference in milestone percentages and the length of their common edge. For cells $a$ and $b$ in the example, $d(a, b)$ is equal to $1 \times (0.9 - 0.2) = 0.7$.
+- **Cells reside on different edges in the milestone network.** First, the distance of the cell to all its nearby milestones is calculated, based on its percentage within the edge and the length of the edge. These distances in combination with the milestone network are used to calculate the shortest path distance between the two cells. For cells $a$ and $c$ in the example, $d(a, X) = 1 \times 0.9$ and $d(c, X) = 3 \times 0.2$, and therefore $d(a, c) = 1 \times 0.9 + 3 \times 0.2$. 
+
+The geodesic distance can be easily extended towards cells within regions of delayed commitment. When both cells are part of the same region of delayed commitment, the geodesic distance was defined as the manhattan distances between the milestone percentages weighted by the lengths from the milestone network. For cells $d$ and $e$ in the example, $d(d, e)$ is equal to $0 \times (0.3 - 0.2) + 2 \times (0.7 - 0.2) + 3 \times(0.4 - 0.1)$, which is equal to $1.9$. The distance between two cells where one is part of a region of delayed commitment is calculated similarly to the previous paragraph, by first calculating the distance between the cells and their neighbouring milestones first, then calculating the shortest path distances between the two.
+
+Calculating the pairwise distances between cells scales quadratically with the number of cells, and would therefore not be scaleable for large datasets. For this reason, a set of waypoint cells are defined *a priori*, and only the distances between the waypoint cells and all other cells is calculated, in order to calculate the correlation of geodesic distances of two trajectories. These cell waypoints are determined by viewing each milestone, edge between two milestones and region of delayed commitment as a collection of cells. We do stratified sampling from each collection of cells by weighing them by the total number of cells within that collection. For calculating the $`r label_metric("correlation", "latex")`$ between two trajectories, the distances between all cells and the union of both waypoint sets is computed.
+
+The number of cell waypoints has a trade-off between the accuracy versus the time to calculate $`r label_metric("correlation", "latex")`$. To select an optimal number of cell waypoints, we generated a large dataset with a complex topology, and plotted the accuracy versus the time to compute $`r label_metric("correlation", "latex")`$. TODO
+
+## $`r label_metric("rf_nmse", "latex")`$ and $`r label_metric("lm_nmse", "latex")`$: Using the positions of the cells within one trajectory to predict the cellular positions in the other trajectory
+
+An alternative approach to detect whether the positions of cells are similar between two trajectories, is to use the positions of one trajectory to predict the positions within the other trajectory. If the prediction error for a particular cell is low, the more similar its positions are between the two trajectories.
+
+Specifically, we implemented two metrics which predict the milestone percentages from the gold standards by using the predicted milestone percentages as features  (`r ref("fig", "metrics_prediction")`). We did this with two regression methods, linear regression ($\textit{lm}$, using the R `lm` function) and Random Forest ($\textit{rf}$, implemented in the *ranger* package [@wright_rangerfastimplementation_2017]). In both cases, the accuracy of the prediction was measured using the Mean Squared error ($\mathit{MSE}$), in the case of Random forest we used the out-of-bag mean-squared error. Next, we calculated $\mathit{MSE}_{worst}$ equal to the $\mathit{MSE}$ when predicting all milestone percentages as the average. We used this to calculate the normalised mean squared error as $\mathit{NMSE} = 1 - \frac{\mathit{MSE}}{\mathit{MSE}_{worst}}$. We created a regression model for every milestone in the gold standard, and averaged the $\mathit{NMSE}$ values to finally obtain the $`r label_metric("rf_nmse", "latex")`$ and $`r label_metric("lm_nmse", "latex")`$ scores.
+
+```{r, results = "asis"}
+add_fig(
+  result_file("metrics_prediction.svg", "manual_figures"),
+  "metrics_prediction",
+  glue::glue("The calculation of ${label_metric('lm_nmse', 'latex')}$ distances on a small example trajectory."),
+  ""
+)
+```
 
 # Application metrics
 
-Although most metrics described above already assess some aspects directly relevant to the user (eg. whether the method is good at finding the right topology), 
+Although most metrics described above already assess some aspects directly relevant to the user, such as whether the method is good at finding the right topology, these metrics do not assess the quality of downstream analyses and hypotheses which can be generated from these models. 
 
-## $`r label_metric("featureimp_cor", "latex")`$: The similarity between features differentially expressed along the trajectory
+## $`r label_metric("featureimp_cor", "latex")`$: The accuracy of differentially expressed features/genes along the trajectory
+
+One of the main advantages of studying cellular dynamic processes using single-cell -omics data is that the 
 
 # Metric conformity
 

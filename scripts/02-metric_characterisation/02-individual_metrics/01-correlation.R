@@ -91,6 +91,15 @@ load(derived_file("01-correlation.rda"))
 
 scores <- qsub::qsub_retrieve(handle) %>% bind_rows()
 
+save(
+  scores,
+  dataset,
+  dataset_design,
+  file = derived_file("01-correlation.rda")
+)
+
+load(derived_file("01-correlation.rda"))
+
 results <- bind_cols(
   bind_rows(scores),
   dataset_design
