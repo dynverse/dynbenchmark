@@ -163,3 +163,22 @@ label_time <- function(x) {
     TRUE ~ paste0(round(x/(60*60)), "h")
   )
 }
+
+
+
+
+
+#' tag the first plot of an assemble
+#'
+#' @param x A ggassemble
+#' @param tag The tag
+tag_first <- function(x, tag) {
+  y <- x$assemble$plots[[1]]
+
+  if ("ggassemble" %in% class(y)) {
+    x$assemble$plots[[1]] <- tag_first(x$assemble$plots[[1]], tag = tag)
+  } else {
+    x$assemble$plots[[1]] <- x$assemble$plots[[1]] + labs(tag = tag)
+  }
+  x
+}
