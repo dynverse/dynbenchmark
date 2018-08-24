@@ -139,3 +139,10 @@ theme_pub <- function(
       complete = TRUE
     )
 }
+
+
+#' Themes which make certain parts of the plot empty
+#'
+#' @export
+#' @rdname theme_empty
+theme_empty_x_axis <- ggplot2::theme(axis.line.x = ggplot2::element_blank(), axis.title.x = ggplot2::element_blank(), axis.text.x = ggplot2::element_blank(), axis.ticks.x = ggplot2::element_blank())
