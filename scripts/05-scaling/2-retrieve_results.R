@@ -16,7 +16,7 @@ benchmark_fetch_results(TRUE)
 execution_output <- benchmark_bind_results(load_models = TRUE)
 design <- read_rds(derived_file("design.rds"))
 methods_info <- design$methods
-datasets_info <- design$datasets
+datasets_info <- design$datasets %>% filter(id %in% execution_output$dataset_id)
 
 ##########################################################
 ###############         FIT MODELS         ###############
@@ -64,14 +64,15 @@ models <-
       mutate(
         lmem = log10(ifelse(error_status == "memory_limit", 32 * 1e9, max_mem))
       )
-    model_mem <- VGAM::vglm(lmem ~ lnrow + lncol, VGAM:::tobit(Upper = log10(32 * 1e9), Lower = 7), data = dat_mem)
+    model_mem <- VGAM::vglm(lmem ~ lnrow + lncol, VGAM:::tobit(Upper = log10(32 * 1e9), Lower = 8), data = dat_mem)
     coef_values_mem <- set_names(
       model_mem@coefficients[c("(Intercept):1", "lnrow", "lncol")],
       c("mem_intercept", "mem_lnrow", "mem_lncol")
     )
 
     # calculate preds
-    pred_ind <- datasets_info %>%
+    pred_ind <-
+      datasets_info %>%
       select(dataset_id = id, lnrow, lncol) %>%
       mutate(
         method_id = dat$method_id[[1]],
