@@ -45,12 +45,12 @@ plot_scores <- ggplot(results, aes(model_id, model_id1)) +
   geom_raster(aes(fill = score)) +
   geom_text(aes(label = round(score, 2), color = score < 0.2)) +
   facet_grid(~metric_id, labeller = label_facet(label_metrics, parse = TRUE)) +
-  viridis::scale_fill_viridis("Score", option="A", direction = 1, begin = 0.05) +
+  viridis::scale_fill_viridis("Score", option = "A", direction = 1, begin = 0.05) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   scale_color_manual(values = c(`TRUE` = "white", `FALSE` = "black"), guide = FALSE) +
-  scale_x_discrete("", labels=label_long, position="bottom", expand=c(0, 0)) +
-  scale_y_discrete("", labels=label_long, expand=c(0, 0), limits = rev(levels(results$model_id))) +
-  theme(axis.text.x.bottom = element_text(hjust=1, angle = 45)) +
+  scale_x_discrete("", labels = label_long, position = "bottom", expand = c(0, 0)) +
+  scale_y_discrete("", labels = label_long, expand = c(0, 0), limits = rev(levels(results$model_id))) +
+  theme(axis.text.x.bottom = element_text(hjust = 1, angle = 45)) +
   coord_equal()
 
 # compare HIM and edgeflip
@@ -63,7 +63,7 @@ plot_topology_difference <- results_spread %>%
   geom_point(aes()) +
   ggrepel::geom_text_repel(
     aes(label = paste0(model_id, " \U2b0c ", model_id1)),
-    data = results_spread %>% top_n(5, abs(lm(results_spread$edge_flip~results_spread$him)$residuals)),
+    data = results_spread %>% top_n(5, abs(lm(results_spread$edge_flip ~ results_spread$him)$residuals)),
     force = 10,
     min.segment.length = 0
   ) +
@@ -104,7 +104,7 @@ dataset_design$perturbation <- pmap(dataset_design, function(milestone_network, 
     mutate(percentage = ifelse(percentage > 0.5, 1, 0))
   dataset
 })
-dataset_design$dataset <- list(dataset_design$perturbation[[1]])#map(seq_len(nrow(dataset_design)), ~)
+dataset_design$dataset <- list(dataset_design$perturbation[[1]]) # map(seq_len(nrow(dataset_design)), ~)
 dataset_design$perturbation_id <- c("Reference", "Very short extra edges", "Short extra edges", "Long extra edges")
 
 # calculate the scores
@@ -113,7 +113,9 @@ scores <- scores %>% bind_rows()
 
 milestones <- tibble(milestone_id = dataset_design$perturbation %>% last() %>% .$milestone_ids) %>% dynplot:::add_milestone_coloring()
 plot_datasets <- dataset_design %>%
-  pmap(function(perturbation_id, perturbation, ...) {plot_dendro(perturbation, milestones = milestones, y_offset = 0) + ggtitle(perturbation_id)}) %>%
+  pmap(function(perturbation_id, perturbation, ...) {
+    plot_dendro(perturbation, milestones = milestones, y_offset = 0) + ggtitle(perturbation_id)
+  }) %>%
   patchwork::wrap_plots(nrow = 1)
 plot_scores <- scores %>%
   select(!!metric_ids) %>%
@@ -121,12 +123,15 @@ plot_scores <- scores %>%
     plot <- enframe(scores, "metric_id", "score") %>%
       mutate(score = unlist(score)) %>%
       ggplot(aes(1, metric_id)) +
-        geom_text(aes(label = round(score, 2))) +
-        theme_pub() +
-        scale_y_discrete("", labels = label_metrics) +
-        theme(axis.line = element_blank(), axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank())
+      geom_text(aes(label = round(score, 2))) +
+      theme_pub() +
+      scale_y_discrete("", labels = label_metrics) +
+      theme(axis.line = element_blank(), axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank())
   }) %>%
-  {.[[1]] <- .[[1]] + theme(axis.line.y = element_line(), axis.text.y = element_text());.} %>%
+  {
+    .[[1]] <- .[[1]] + theme(axis.line.y = element_line(), axis.text.y = element_text())
+    .
+  } %>%
   patchwork::wrap_plots(nrow = 1)
 plot_scores
 
@@ -139,22 +144,6 @@ plot_topology_lengths <- patchwork::wrap_plots(
 
 ##  ............................................................................
 ##  Combine plots                                                           ####
-
-
-# combine plots
-
-# tag the first plot of an assemble
-tag_first <- function(x, tag) {
-  y <- x$assemble$plots[[1]]
-
-  if ("ggassemble" %in% class(y)) {
-    x$assemble$plots[[1]] <- tag_first(x$assemble$plots[[1]], tag = tag)
-  } else {
-    x$assemble$plots[[1]] <- x$assemble$plots[[1]] + labs(tag = tag)
-  }
-  x
-}
-
 library(patchwork)
 plot_topology_scores_overview <- patchwork::wrap_plots(
   plot_datasets %>% tag_first("A"),

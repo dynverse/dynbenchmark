@@ -7,7 +7,8 @@ label_short <- function(x, width = 10) {
     left_join(dynbenchmark::labels, "id") %>%
     mutate(short = ifelse(is.na(short), label_capitalise(id), short)) %>%
     mutate(short = label_wrap(short, width = width)) %>%
-    pull(short)
+    pull(short) %>%
+    set_names(names(x))
 }
 
 #' Text wrapping
@@ -34,7 +35,8 @@ label_long <- function(x) {
         long
       )
     ) %>%
-    pull(long)
+    pull(long) %>%
+    set_names(names(x))
 }
 label_n <- function(x) {
   x %>% gsub("^n_", "# ", .)
@@ -160,4 +162,23 @@ label_time <- function(x) {
     x < 60*60 ~ paste0(round(x/60), "m"),
     TRUE ~ paste0(round(x/(60*60)), "h")
   )
+}
+
+
+
+
+
+#' tag the first plot of an assemble
+#'
+#' @param x A ggassemble
+#' @param tag The tag
+tag_first <- function(x, tag) {
+  y <- x$assemble$plots[[1]]
+
+  if ("ggassemble" %in% class(y)) {
+    x$assemble$plots[[1]] <- tag_first(x$assemble$plots[[1]], tag = tag)
+  } else {
+    x$assemble$plots[[1]] <- x$assemble$plots[[1]] + labs(tag = tag)
+  }
+  x
 }

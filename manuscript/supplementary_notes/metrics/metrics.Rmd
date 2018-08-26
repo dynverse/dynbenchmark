@@ -1,5 +1,5 @@
 ---
-title: "Supplementary Note 1: Evaluation metrics"
+title: "Supplementary Note 1: Metrics to compare two trajectories"
 output: 
   pdf_document:
     latex_engine: xelatex
@@ -38,7 +38,7 @@ add_fig(
 )
 ```
 
-Given the multilayered complexity of a trajectory model, it is not trivial to compare the similarity of two trajectory models. We therefore sought to use different comparison metrics, each serving a different purpose:
+Given the multilayered complexity of a trajectory model, it is not trivial to compare the similarity of two trajectory models using only one metric. We therefore sought to use different comparison metrics, each serving a different purpose:
 
 - **Specific metrics** investigate one particular aspect of the trajectory. This would allow us to find particular weak points for methods, e.g. that a method is very good at ordering but does not frequently find the correct topology. Moreover, this makes it possible to create personalised rankings of methods, for example for users which are primarily interested in using the method correct topology.
 - **Application metrics** focus on the quality of a downstream analysis using the trajectory. For example, it measures whether the trajectory can be used to find accurate differentially expressed genes.
@@ -46,9 +46,90 @@ Given the multilayered complexity of a trajectory model, it is not trivial to co
 
 Here, we first described and illustrate several specific, application and overall metrics which we defined. Next, we tested these metrics on several test cases, to make sure they were robustly identify different wrong trajectory predictions. Based on this robustness assessment, we chose 4 metrics for the final evaluation.
 
+All metrics described here were implemented within the dyneval R package ([https://github.com/dynverse/dyneval](https://github.com/dynverse/dyneval)).
+
 # Specific metrics
 
-All metrics described here were implemented within our dyneval R package ([https://github.com/dynverse/dyneval](https://github.com/dynverse/dyneval)).
+## $`r label_metric("isomorphic", "latex")`$, $`r label_metric("edge_flip", "latex")`$ and $`r label_metric("him", "latex")`$: Edit distance between two trajectory topologies
+
+We used three different scores to assess the similarity in the topology between two trajectories, iregardless of where the cells were positioned.
+
+For all three scores, we first simplified the topology of the trajectory to make both graph structures comparable:
+
+- As we are only interested in the main structure of the topology without start or end, the graph was made undirected.
+- All milestones with degree 2 were removed. For example in the topology A ⇨ B ⇨ C ⇨ D, C ⇨ D, the B milestone was removed
+- A linear topology was converted to A ⇨ B ⇨ C
+- A cyclical topology such as A ⇨ B ⇨ C ⇨ D or A ⇨ B ⇨ A were all simplified to A ⇨ B ⇨ C ⇨ A
+- Duplicated edges such as A ⇨ B, A ⇨ B were decoupled to A ⇨ B, A ⇨ C ⇨ B
+
+The $`r label_metric("isomorphic", "latex")`$ score returns 1 if two graphs are isomorphic, and 0 if they were not. For this, we used the used the BLISS algorithm [@junttila_engineeringefficientcanonical_2007], as implemented in the R *igraph* package.
+
+The $`r label_metric("edge_flip", "latex")`$ score was defined as the minimal number of edges which should be added or removed to convert one network into the other, divided by the total number of edges in both networks. This problem is equivalent to the maximum common edge subgraph problem, a known NP-hard problem without a scalable solution [@bahiense_maximumcommonedge_2012]. We implemented a branch and bound approach for this problem, using several heuristics to speed up the search:
+
+- First check all possible edge additions and removals corresponding to the number of different edges between the two graphs. If no solution is found, check all possible solutions with two extra edge additions/removals.
+- For each possible solution, first check whether:
+  - The maximal degree is the same
+  - The minimal degree is the same
+  - All degrees are the same after sorting
+- Only then check if the two graphs are isomorphic as described earlier.
+
+The $`r label_metric("him", "latex")`$ metric (Hamming-Ipsen-Mikhailov distance) [@jurmanHIMGlocalMetric2015] which was adopted from the R nettools package [https://github.com/filosi/nettools](https://github.com/filosi/nettools). It uses an adjacency matrix which was weighted according to the lengths of each edges within the milestone network. Conceptually, $`r label_metric("him", "latex")`$ is a linear combination of:
+
+- The normalised Hamming distance [@doughertyValidationGeneRegulatory2011], which calculates the distance between two graphs by matching individual edges in the adjacency matrix, but disregards overall structural similarity.
+- The normalised Ipsen-Mikhailov distance [@ipsenEvolutionaryReconstructionNetworks2002], which calculates the overall distance of two graphs based on matches between its degree and adjacency matrix, while disregarding local structural similarities. It requires a $\gamma$ parameter, which is usually estimated based on the number of nodes in the graph, but which we fixed at $0.1$ so as to make the score comparable across different graph sizes.
+
+We compared the three scores for several common topologies (`r ref("fig", "topology_scores_overview")`). While conceptually very different, the $`r label_metric("edge_flip", "latex")`$ and $`r label_metric("him", "latex")`$ still produce similar scores (`r ref("fig", "topology_scores_overview", "b")`). The $`r label_metric("him", "latex")`$ tends to punish the detection of cycles, while the $`r label_metric("edge_flip", "latex")`$ is more harsh for differences in the number of bifurcations (`r ref("fig", "topology_scores_overview", "c")`). The main difference however is that the $`r label_metric("him", "latex")`$ takes into account edge lengths when comparing two trajectories, as illustrated in (`r ref("fig", "topology_scores_overview", "d")`).
+
+```{r, results = "asis"}
+add_fig(
+  result_file("topology_scores_overview.rds", experiment = "02-metric_characterisation/02-metric_examples"),
+  "topology_scores_overview",
+  glue::glue("${label_metric('isomorphic', 'latex')}$, ${label_metric('edge_flip', 'latex')}$ and ${label_metric('him', 'latex')}$ ."),
+  "",
+  width = 12,
+  height = 12
+)
+```
+
+To summarise, the different topology based scores are useful for different scenarios:
+
+- If the two trajectories should only be compared when the topology is exactly the same, the $`r label_metric("isomorphic", "latex")`$ should be used.
+- If it is important that the topologies are similar (but possible exactly isomorphic), the $`r label_metric("edge_flip", "latex")`$ is most appropriate.
+- If the topologies should be similar, but shorter edges should not be punished as hard as longer edges, the $`r label_metric("HIM", "latex")`$ is most appropriate.
+
+## $`r label_metric("F1_branches", "latex")`$ and $`r label_metrics("F1_milestones", "latex")`$: Comparing how well the cells are clustered in the trajectory
+
+Perhaps one of the simplest ways to calculate the similarity between the cellular positions of two topologies is by mapping each cell to its closest milestone _or_ branch (`r ref("fig", "clustering_scores_overview")`). These clusters of cells can then be compared using one of the many external cluster evaluation measures [@saelensComprehensiveEvaluationModule2018]. When selecting such a metric, we had two conditions:
+
+- Because we allow some methods to filter cells in the trajectory, the metric should be able to handle "non-exhaustive assignment", where some cells are not assigned to any cluster.
+- The metric should give each cluster equal weight, so that rare cell stages are equally important as large stages.
+
+Based on these requirements, and on the analysis in [@saelensComprehensiveEvaluationModule2018], we chose the $\textrm{F1}$ score between the $\textrm{Recovery}$ and $\textrm{Relevance}$. If $C$ and $C'$ are two cell clusters:
+
+$$
+Jaccard(c, c') = \frac{|c \cap c'|}{|c \cup c'|}
+$$
+
+$$
+\textrm{Recovery} = \frac{1}{|C|} \sum_{c \in C}{\max_{c' \in C'}{\textrm{Jaccard(c, c')}}}
+$$
+$$
+\textrm{Relevance} = \frac{1}{|C'|} \sum_{c' \in C'}{\max_{c \in C}{\textrm{Jaccard(c, c')}}}
+$$
+$$
+\textrm{F1} = \frac{2}{\frac{1}{\textrm{Recovery}} + \frac{1}{\textrm{Relevance}}}
+$$
+
+```{r, results = "asis"}
+add_fig(
+  result_file("clustering_scores_overview.rds", experiment = "02-metric_characterisation/02-individual_metrics"),
+  "clustering_scores_overview",
+  glue::glue("Mapping cells to their closest milestone or branch for the calculation of the ${label_metric('F1_branches', 'latex')}$, ${label_metric('F1_edges', 'latex')}$ and ${label_metric('F1_branches', 'latex')}$ ."),
+  "",
+  width = 12,
+  height = 5
+)
+```
 
 ## $`r label_metric("correlation", "latex")`$: Correlation between geodesic distances
 
@@ -70,13 +151,23 @@ The geodesic distance is the distance a cell has to through the trajectory space
 
 The geodesic distance can be easily extended towards cells within regions of delayed commitment. When both cells are part of the same region of delayed commitment, the geodesic distance was defined as the manhattan distances between the milestone percentages weighted by the lengths from the milestone network. For cells $d$ and $e$ in the example, $d(d, e)$ is equal to $0 \times (0.3 - 0.2) + 2 \times (0.7 - 0.2) + 3 \times(0.4 - 0.1)$, which is equal to $1.9$. The distance between two cells where one is part of a region of delayed commitment is calculated similarly to the previous paragraph, by first calculating the distance between the cells and their neighbouring milestones first, then calculating the shortest path distances between the two.
 
-Calculating the pairwise distances between cells scales quadratically with the number of cells, and would therefore not be scaleable for large datasets. For this reason, a set of waypoint cells are defined *a priori*, and only the distances between the waypoint cells and all other cells is calculated, in order to calculate the correlation of geodesic distances of two trajectories. These cell waypoints are determined by viewing each milestone, edge between two milestones and region of delayed commitment as a collection of cells. We do stratified sampling from each collection of cells by weighing them by the total number of cells within that collection. For calculating the $`r label_metric("correlation", "latex")`$ between two trajectories, the distances between all cells and the union of both waypoint sets is computed.
+Calculating the pairwise distances between cells scales quadratically with the number of cells, and would therefore not be scaleable for large datasets. For this reason, a set of waypoint cells are defined *a priori*, and only the distances between the waypoint cells and all other cells is calculated, in order to calculate the correlation of geodesic distances of two trajectories (`r ref("fig", "waypoints_overview", "a")`). These cell waypoints are determined by viewing each milestone, edge between two milestones and region of delayed commitment as a collection of cells. We do stratified sampling from each collection of cells by weighing them by the total number of cells within that collection. For calculating the $`r label_metric("correlation", "latex")`$ between two trajectories, the distances between all cells and the union of both waypoint sets is computed.
 
-The number of cell waypoints has a trade-off between the accuracy versus the time to calculate $`r label_metric("correlation", "latex")`$. To select an optimal number of cell waypoints, we generated a large dataset with a complex topology, and plotted the accuracy versus the time to compute $`r label_metric("correlation", "latex")`$. 
+To select the number of cell waypoints, we need to find a trade-off between the accuracy versus the time to calculate $`r label_metric("correlation", "latex")`$. To select an optimal number of cell waypoints, we used the synthetic dataset with the most complex topology, and determined the $`r label_metric("correlation", "latex")`$ at different levels of both cell shuffling and number of cell waypoints (`r ref("fig", "waypoints_overview", "b")`). We found that using cell waypoints does not induce a systematic bias in the $`r label_metric("correlation", "latex")`$, and that its variability was relatively minimal when compared to the variability between different levels of cell shuffling when using 100 or more cell waypoints.
+
+```{r, results = "asis"}
+add_fig(
+  result_file("waypoints_overview.rds", experiment = "02-metric_characterisation/02-individual_metrics"),
+  "waypoints_overview",
+  glue::glue("Determination of cell waypoints"),
+  glue::glue("a) Illustration of the stratified cell sampling using an example dataset (top). Each milestone, edge between two milestones and region of delayed commitment is seen as a collection of cells (middle), and the number of waypoints (100 in this case) are divided over each of these collection of cells (bottom). b) Accuracy versus time to calculate ${label_metric('correlation', 'latex')}$"),
+  width = 12, height = 8
+)
+```
 
 ## $`r label_metric("rf_nmse", "latex")`$ and $`r label_metric("lm_nmse", "latex")`$: Using the positions of the cells within one trajectory to predict the cellular positions in the other trajectory
 
-An alternative approach to detect whether the positions of cells are similar between two trajectories, is to use the positions of one trajectory to predict the positions within the other trajectory. If the prediction error for a particular cell is low, the more similar its positions are between the two trajectories.
+An alternative approach to detect whether the positions of cells are similar between two trajectories, is to use the positions of one trajectory to predict the positions within the other trajectory. If the prediction error for a particular cell is low, the higher the similarity between the cellular positions.
 
 Specifically, we implemented two metrics which predict the milestone percentages from the gold standards by using the predicted milestone percentages as features  (`r ref("fig", "metrics_prediction")`). We did this with two regression methods, linear regression ($\textit{lm}$, using the R `lm` function) and Random Forest ($\textit{rf}$, implemented in the *ranger* package [@wright_rangerfastimplementation_2017]). In both cases, the accuracy of the prediction was measured using the Mean Squared error ($\mathit{MSE}$), in the case of Random forest we used the out-of-bag mean-squared error. Next, we calculated $\mathit{MSE}_{worst}$ equal to the $\mathit{MSE}$ when predicting all milestone percentages as the average. We used this to calculate the normalised mean squared error as $\mathit{NMSE} = 1 - \frac{\mathit{MSE}}{\mathit{MSE}_{worst}}$. We created a regression model for every milestone in the gold standard, and averaged the $\mathit{NMSE}$ values to finally obtain the $`r label_metric("rf_nmse", "latex")`$ and $`r label_metric("lm_nmse", "latex")`$ scores.
 
@@ -89,62 +180,27 @@ add_fig(
 )
 ```
 
-## $`r label_metric("edge_flip", "latex")`$ and $`r label_metric("isomorphic", "latex")`$: Number of edge additions and removals to convert one topology to another
+# Application metrics
 
-We used three different scores to assess the similarity in the topology between two trajectories, iregardless of where the cells were positioned.
+Although most metrics described above already assess some aspects directly relevant to the user, such as whether the method is good at finding the right topology, these metrics do not assess the quality of downstream analyses and hypotheses which can be generated from these models. 
 
-For all three scores, we first simplified the topology of the trajectory to make both graph structures comparable:
+## $`r label_metric("featureimp_cor", "latex")`$: The accuracy of dynamical differentially expressed features/genes.
 
-- As we are only interested in the main structure of the topology without start or end, the graph was made undirected.
-- All milestones with degree 2 were removed. For example in the topology A ⇨ B ⇨ C ⇨ D, C ⇨ D, the B milestone was removed
-- A linear topology was converted to A ⇨ B ⇨ C
-- A cyclical topology such as A ⇨ B ⇨ C ⇨ D or A ⇨ B ⇨ A were all simplified to A ⇨ B ⇨ C ⇨ A
-- Duplicated edges such as A ⇨ B, A ⇨ B were decoupled to A ⇨ B, A ⇨ C ⇨ B
+Perhaps the main advantages of studying cellular dynamic processes using single-cell -omics data is that the dynamics of gene expression can be studied for the whole transcriptome. This allows the study of dynamic regulatory networks and gene expression modules. Such analyses rely on a "good-enough" cellular ordering, so that the cellular ordering can be used to identify dynamical differentially expressed genes.
 
-The $`r label_metric("isomorphic", "latex")`$ score returns 1 if two graphs are isomorphic, and 0 if they were not. For this, we used the used the BLISS algorithm [@junttila_engineeringefficientcanonical_2007], as implemented in the R *igraph* package.
-
-The $`r label_metric("edge_flip", "latex")`$ score was defined as the minimal number of edges which should be added or removed to convert one network into the other, divided by the total number of edges in both networks. This problem is equivalent to the maximum common edge subgraph problem, a known NP-hard problem without a scalable solution [@bahiense_maximumcommonedge_2012]. We implemented a branch and bound approach for this problem, using several heuristics to make speed up the search:
-
-- First check all possible edge additions and removals corresponding to the number of different edges between the two graphs. If no solution is found, check all possible solutions with two extra edge additions/removals.
-- For each possible solution, first check whether:
-  - The maximal degree is the same
-  - The minimal degree is the same
-  - All degrees are the same after sorting
-- Only then check if the two graphs are isomorphic as described earlier.
-
-The $`r label_metric("him", "latex")`$ metric (Hamming-Ipsen-Mikhailov distance) [@jurmanHIMGlocalMetric2015] which was adopted from the R nettools package [https://github.com/filosi/nettools](https://github.com/filosi/nettools). It uses an adjacency matrix which was weighted according to the lengths of each edges within the milestone network. Conceptually, $`r label_metric("him", "latex")`$ is a linear combination of:
-
-- The normalised Hamming distance [@doughertyValidationGeneRegulatory2011], which calculates the distance between two graphs by matching individual edges in the adjacency matrix, but disregards overall structural similarity.
-- The normalised Ipsen-Mikhailov distance [@ipsenEvolutionaryReconstructionNetworks2002], which calculates the overall distance of two graphs based on matches between its degree and adjacency matrix, while disregarding local structural similarities. It requires a $\gamma$ parameter, which is usually estimated based on the number of nodes in the graph, but which we fixed at $0.1$ so as to make the score comparable across different graph sizes.
-
-We compared the three scores for several common topologies `r ref("fig", "topology_scores_overview")`. While conceptually very different, the $`r label_metric("edge_flip", "latex")`$ and $`r label_metric("him", "latex")`$ still produce similar scores `r ref("fig", "topology_scores_overview", "b")`, although the $`r label_metric("him", "latex")`$ tends to punish cycles more, while the $`r label_metric("edge_flip", "latex")`$ is more harsh for differences in the number of bifurcations `r ref("fig", "topology_scores_overview", "c")`. Their main difference is that the $`r label_metric("him", "latex")`$ takes into account edge lengths when comparing two trajectories, as illustrated in `r ref("fig", "topology_scores_overview", "d")`.
+To calculate the $`r label_metric("featureimp_cor", "latex")`$ we used Random forest regression to rank all the features according to their importance in predicting the positions of cells in the trajectory. Specifically, we calculated the geodesic distances for each cell to all milestones in the trajectory. We then trained a Random Forest regression model (implemented in the R _ranger_ package [@wright_rangerfastimplementation_2017], [https://github.com/imbs-hl/ranger](https://github.com/imbs-hl/ranger)) to predict these distances for each milestone, based on the expression of genes within each cell. We then extracted feature importances using the Mean Decrease in Impurity (`importance = 'impurity'` parameter of the `ranger` function), as illustrated in (`r ref("fig", "featureimp_overview.rds")`). The overall importance of a feature (gene) was then equal to the mean importance over all milestones.
 
 ```{r, results = "asis"}
 add_fig(
-  result_file("topology_scores_overview.rds", experiment = "02-metric_characterisation/02-metric_examples"),
-  "topology_scores_overview",
-  glue::glue("${label_metric('isomorphic', 'latex')}$, ${label_metric('edge_flip', 'latex')}$ and ${label_metric('him', 'latex')}$ ."),
-  "",
-  width = 12,
-  height = 12
+  result_file("featureimp_overview.rds", experiment = "02-metric_characterisation/02-individual_metrics"),
+  "featureimp_overview",
+  glue::glue(""),
+  glue::glue(""),
+  width = 12, height = 6
 )
 ```
 
-To summarise, the different topology based scores are useful for different scenarios:
-
-- If the two trajectories should only be compared when the topology is exactly the same, the $`r label_metric("isomorphic", "latex")`$ should be used.
-- If it is important that the topologies are similar (but possible exactly isomorphic), the $`r label_metric("edge_flip", "latex")`$ is most appropriate.
-- If the topologies should be similar, but shorter edges should not be punished as hard as longer edges, the $`r label_metric("HIM", "latex")`$ is most appropriate.
-
-## $`r label_metric("F1_branches", "latex")`$ and $`r label_metrics("F1_milestones", "latex")`$: Comparing how well the cells are clustered in the trajectory
-
-
-
-# Application metrics
-
-Although most metrics described above already assess some aspects directly relevant to the user (eg. whether the method is good at finding the right topology), 
-
-## $`r label_metric("featureimp_cor", "latex")`$: The similarity between features differentially expressed along the trajectory
+Random forest regression has two main hyperparameters. The number of trees to be fitted (`num_trees` parameter) was fixed to `10000` to provide accurate estimates of the feature importance. The number of features on which can be split (`mtry` parameter) was set to 1% of all available features (instead of the default square-root of the number of features), as to make sure that predictive but highly correlated feautres (omnipresent in transcriptomics data) can all get higher on the ranking.
 
 # Metric conformity
 
