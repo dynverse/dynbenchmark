@@ -97,16 +97,21 @@ plots <- map(method_ids, function(method_id) {
   data_method <- data %>% filter(method_id == !!method_id)
   model_method <- models %>% filter(method_id == !!method_id)
   data_noerror <- data_method %>% filter(error_status == "no_error")
+  data_error <- data_method %>% filter(error_status != "no_error")
   pred_method <- data_pred %>% filter(method_id == !!method_id)
 
   data_noerror <- bind_rows(
     data_noerror,
-    data_noerror %>% group_by(method_id, lnrow, lncol) %>% select_if(is.numeric) %>% summarise_if(is.numeric, mean) %>% mutate(orig_dataset_id = "mean") %>% ungroup()
+    data_noerror %>% group_by(method_id, lnrow, lncol) %>% select_if(is.numeric) %>% summarise_if(is.numeric, mean, na.rm = TRUE) %>% mutate(orig_dataset_id = "mean") %>% ungroup()
+  )
+  data_error <- bind_rows(
+    data_error,
+    data_error %>% group_by(method_id, lnrow, lncol) %>% select_if(is.numeric) %>% summarise_if(is.numeric, mean, na.rm = TRUE) %>% mutate(orig_dataset_id = "mean") %>% ungroup()
   )
 
   g1 <-
     ggplot(data_method) +
-    geom_tile(aes(lnrow, lncol, fill = error_status)) +
+    geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = error_status)) +
     scale_fill_manual(values = dynbenchmark::method_status_colours) +
     scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
     scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
@@ -120,8 +125,8 @@ plots <- map(method_ids, function(method_id) {
   if (nrow(data_noerror) > 0) {
     g2 <-
       ggplot(data_noerror) +
-      geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
-      geom_tile(aes(lnrow, lncol, fill = log10(time_method))) +
+      geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1), fill = "darkgray", data_error) +
+      geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = log10(time_method))) +
       scale_fill_distiller(palette = "RdYlBu") +
       scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
       scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
@@ -132,10 +137,11 @@ plots <- map(method_ids, function(method_id) {
       coord_equal()
     g2
 
+    tmp_error <- bind_rows(data_error, data_noerror %>% filter(log10(max_mem) < 8))
     g3 <-
-      ggplot(data_noerror) +
-      geom_tile(aes(lnrow, lncol), fill = "darkgray", data_method) +
-      geom_tile(aes(lnrow, lncol, fill = log10(max_mem))) +
+      ggplot(data_noerror %>% filter(log10(max_mem) >= 8)) +
+      geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1), fill = "darkgray", tmp_error) +
+      geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = log10(max_mem))) +
       scale_fill_distiller(palette = "RdYlBu") +
       scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
       scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
@@ -148,7 +154,7 @@ plots <- map(method_ids, function(method_id) {
 
     g4a <-
       ggplot(pred_method) +
-      geom_tile(aes(lnrow, lncol, fill = lpredtime)) +
+      geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = lpredtime)) +
       scale_fill_distiller(palette = "RdYlBu") +
       scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
       scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
@@ -158,7 +164,7 @@ plots <- map(method_ids, function(method_id) {
       coord_equal()
     g4b <-
       ggplot(pred_method) +
-      geom_tile(aes(lnrow, lncol, fill = lpredmem)) +
+      geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = lpredmem)) +
       scale_fill_distiller(palette = "RdYlBu") +
       scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
       scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
@@ -198,13 +204,16 @@ plots <- map(method_ids, function(method_id) {
 })
 
 dir.create(result_file("results"), showWarnings = FALSE)
+# pdf(result_file("results.pdf"), width = 16, height = 12)
+# walk(seq_along(method_ids), function(i) {
 pbapply::pblapply(seq_along(method_ids), cl = 8, function(i) {
   mid <- method_ids[[i]]
   pl <- plots[[i]]
   cat("Plotting ", mid, "\n", sep = "")
+  # print(pl)
   ggsave(result_file(c("results/", mid, ".svg")), pl, width = 16, height = 12)
 })
-
+# dev.off()
 
 
 
