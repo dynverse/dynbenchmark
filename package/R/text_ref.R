@@ -88,6 +88,7 @@ plot_fig <- function(ref_type, ref_id, fig_path, caption_main, caption_text, wid
   if (fs::path_ext(fig_path) == "rds") {
     fig_path_new <- fig_path
     fs::path_ext(fig_path_new) <- "pdf"
+
     ggsave(fig_path_new, read_rds(fig_path), width = width, height = height, device = grDevices::cairo_pdf)
     fig_path <- fig_path_new
   }
