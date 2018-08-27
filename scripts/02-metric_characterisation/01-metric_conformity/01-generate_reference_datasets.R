@@ -6,9 +6,10 @@ library(dyntoy)
 
 experiment("02-metric_characterisation/01-metric_conformity")
 
+# the topologies are defined here because they need to have the same number of edges for perturb_change_topology
 source(scripts_file("helper-topologies.R"))
 
-# the topologies are defined here because they need to have the same number of edges for perturb_change_topology
+# construct all different combinations of topologies, # cells, ...
 dataset_design <-
   crossing(
     bind_rows(
@@ -19,7 +20,7 @@ dataset_design <-
         "bifurcation_tented", dyntoy::model_bifurcating(max_degree = 1), TRUE
       )
     ),
-    num_cells = c(10, 50, 100, 200, 500),
+    num_cells = c(10, 20, 50, 100, 200, 500),
     repeat_ix = 1,
     cell_positioning = c("edges", "milestones")
   ) %>%
