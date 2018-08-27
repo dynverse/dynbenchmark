@@ -157,14 +157,15 @@ plot_fig <- function(
       "  <img src = \"{fig_path}\" />\n",
       "</p><p>\n",
       "  <strong>{fig_cap}: {caption_main}</strong> {caption_text}\n",
-      "</p>\n",
-      "\n\n"
+      "</p>\n"
     )
   } else {
     stop("Invalid format for figures")
   }
 
+  cat("\n\n")
   cat(subchunk)
+  cat("\n\n")
 }
 
 
