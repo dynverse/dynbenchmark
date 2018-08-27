@@ -159,4 +159,4 @@ plot_featureimp_cor_distributions <- results %>%
   theme_pub()
 plot_featureimp_cor_distributions
 
-write_rds(plot_featureimp_cor_distributions, result_file("feautreimp_cor_distributions.rds"))
+write_rds(plot_featureimp_cor_distributions, result_file("featureimp_cor_distributions.rds"))
