@@ -1,0 +1,3 @@
+[submodule "results"]
+	path = results
+	url = https://github.com/dynverse/dynbenchmark_results
