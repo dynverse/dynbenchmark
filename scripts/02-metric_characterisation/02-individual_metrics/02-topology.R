@@ -2,7 +2,7 @@ library(dynbenchmark)
 library(tidyverse)
 library(furrr)
 
-experiment("02-metric_characterisation/02-metric_examples")
+experiment("02-metric_characterisation/02-individual_metrics")
 
 # use all topology based metrics
 metric_ids <- dyneval::metrics %>% filter(category %in% "topology") %>% pull(metric_id)
