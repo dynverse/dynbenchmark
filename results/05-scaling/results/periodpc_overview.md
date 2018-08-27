@@ -1,4 +1,0 @@
-# periodpc
-![Overview](periodpc.svg)
-
-

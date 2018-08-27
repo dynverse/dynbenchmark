@@ -1,4 +1,0 @@
-# phenopath
-![Overview](phenopath.svg)
-
-
