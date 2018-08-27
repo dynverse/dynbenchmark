@@ -6,7 +6,9 @@ experiment("04-method_testing")
 ###################################################
 ###                   DESIGN                    ###
 ###################################################
-method_ids <- dynmethods::methods$id
+
+methods <- dynwrap::get_ti_methods(dynmethods::repo_digests) %>%
+  mutate(type = "fun")
 
 design <- benchmark_generate_design(
   datasets = list(
@@ -15,7 +17,7 @@ design <- benchmark_generate_design(
     "real/developing-dendritic-cells_schlitzer",
     "real/fibroblast-reprogramming_treutlein"
   ),
-  methods = method_ids,
+  methods = methods %>% select(id, type, fun, repo_digests),
   parameters = list(
     fateid = tibble(id = "default", force = TRUE),
     stemnet = tibble(id = "default", force = TRUE),
@@ -25,7 +27,7 @@ design <- benchmark_generate_design(
 
 # also include dynmethods container examples
 examples <- bind_rows(pbapply::pblapply(
-  method_ids,
+  methods$id,
   cl = 8,
   function(method_id) {
     file <- paste0("../dynmethods/containers/", method_id, "/example.R")
@@ -60,6 +62,8 @@ write_rds(design, derived_file("design.rds"), compress = "xz")
 ###                    SUBMIT                   ###
 ###################################################
 design <- read_rds(derived_file("design.rds"))
+
+# design$crossing <- design$crossing %>% filter(method_id == "angle")
 
 benchmark_submit(
   design = design,
