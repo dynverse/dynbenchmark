@@ -13,10 +13,10 @@ experiment("05-scaling")
 benchmark_fetch_results(TRUE)
 
 # bind results in one data frame (without models)
-execution_output <- benchmark_bind_results(load_models = TRUE)
+execution_output <- benchmark_bind_results(load_models = FALSE)
 design <- read_rds(derived_file("design.rds"))
 methods_info <- design$methods
-datasets_info <- design$datasets
+datasets_info <- design$datasets %>% filter(id %in% execution_output$dataset_id)
 
 ##########################################################
 ###############         FIT MODELS         ###############
@@ -53,6 +53,11 @@ models <-
         ltime = log10(ifelse(error_status == "time_limit", 3600, time_method))
       )
     model_time <- VGAM::vglm(ltime ~ lnrow + lncol, VGAM:::tobit(Upper = log10(3600), Lower = -5), data = dat_time)
+
+    # reducing object size
+    environment(model_time@terms$terms) <- NULL
+    environment(model_time@misc$formula) <- NULL
+
     coef_values_time <- set_names(
       model_time@coefficients[c("(Intercept):1", "lnrow", "lncol")],
       c("time_intercept", "time_lnrow", "time_lncol")
@@ -64,14 +69,20 @@ models <-
       mutate(
         lmem = log10(ifelse(error_status == "memory_limit", 32 * 1e9, max_mem))
       )
-    model_mem <- VGAM::vglm(lmem ~ lnrow + lncol, VGAM:::tobit(Upper = log10(32 * 1e9), Lower = 7), data = dat_mem)
+    model_mem <- VGAM::vglm(lmem ~ lnrow + lncol, VGAM:::tobit(Upper = log10(32 * 1e9), Lower = 8), data = dat_mem)
+
+    # reducing object size
+    environment(model_mem@terms$terms) <- NULL
+    environment(model_mem@misc$formula) <- NULL
+
     coef_values_mem <- set_names(
       model_mem@coefficients[c("(Intercept):1", "lnrow", "lncol")],
       c("mem_intercept", "mem_lnrow", "mem_lncol")
     )
 
     # calculate preds
-    pred_ind <- datasets_info %>%
+    pred_ind <-
+      datasets_info %>%
       select(dataset_id = id, lnrow, lncol) %>%
       mutate(
         method_id = dat$method_id[[1]],
@@ -104,5 +115,16 @@ models <- models %>% select(-pred_ind)
 ##########################################################
 ###############         SAVE DATA          ###############
 ##########################################################
+headtail <- function(X, num) {
+  pbapply::pbsapply(X, cl = 8, function(x) {
+    xs <- strsplit(x, split = "\n")[[1]]
+    if (length(xs) > 2 * num) {
+      xs <- c(head(xs, num), paste0("... ", length(xs) - 2 * num, " lines omitted ..."), tail(xs, num))
+    }
+    paste0(c(xs, ""), collapse = "\n")
+  })
+}
+data$stdout <- headtail(data$stdout, 50)
+
 write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "xz")
 
