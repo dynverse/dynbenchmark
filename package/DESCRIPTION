@@ -79,6 +79,7 @@ Collate:
     'load_dyneval_model.R'
     'metrics.R'
     'package.R'
+    'perturbations.R'
     'plotting_labels.R'
     'plotting_priors_mini.R'
     'plotting_svg_replacement.R'
