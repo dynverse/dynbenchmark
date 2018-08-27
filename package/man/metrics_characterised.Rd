@@ -4,7 +4,7 @@
 \name{metrics_characterised}
 \alias{metrics_characterised}
 \title{Metrics used in the characterisation}
-\format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 8 rows and 8 columns.}
+\format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 8 rows and 9 columns.}
 \usage{
 metrics_characterised
 }

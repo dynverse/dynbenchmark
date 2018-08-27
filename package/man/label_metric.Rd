@@ -5,15 +5,15 @@
 \alias{label_metrics}
 \title{Label the metrics}
 \usage{
-label_metric(metric_id, label_type = c("plotmath", "latex", "long_name",
-  "category"), parse = FALSE)
+label_metric(metric_id, format = get_default_metric_format(),
+  parse = FALSE)
 
 label_metrics(metric_ids, ...)
 }
 \arguments{
 \item{metric_id}{metric id}
 
-\item{label_type}{The type of label to return, can be plotmath, latex or long_name}
+\item{format}{The format of the label to return, can be plotmath, latex, long_name or metric_id}
 
 \item{parse}{Whether to parse the label into an expression}
 
