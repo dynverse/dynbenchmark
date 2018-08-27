@@ -1,4 +1,0 @@
-# elpigraph
-![Overview](elpigraph.svg)
-
-

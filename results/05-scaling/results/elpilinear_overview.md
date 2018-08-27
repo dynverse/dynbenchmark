@@ -1,4 +1,0 @@
-# elpilinear
-![Overview](elpilinear.svg)
-
-

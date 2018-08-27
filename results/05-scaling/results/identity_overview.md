@@ -1,4 +1,0 @@
-# identity
-![Overview](identity.svg)
-
-
