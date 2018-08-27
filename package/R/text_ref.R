@@ -157,7 +157,8 @@ plot_fig <- function(
       "  <img src = \"{fig_path}\" />\n",
       "</p><p>\n",
       "  <strong>{fig_cap}: {caption_main}</strong> {caption_text}\n",
-      "</p>\n"
+      "</p>\n",
+      "\n\n"
     )
   } else {
     stop("Invalid format for figures")
