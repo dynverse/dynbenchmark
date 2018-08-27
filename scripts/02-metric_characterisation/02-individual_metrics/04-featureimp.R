@@ -6,6 +6,9 @@ experiment("02-metric_characterisation/02-individual_metrics")
 
 dataset <- load_dataset("real/fibroblast-reprogramming_treutlein")
 
+##  ............................................................................
+##  Example                                                                 ####
+
 # calculate feature importances
 feature_importances <- dynfeature::calculate_milestone_feature_importance(dataset)
 feature_importances <- feature_importances %>% filter(milestone_id == "MEF")
@@ -60,3 +63,100 @@ plot_featureimp_overview <- wrap_plots(
 )
 
 write_rds(plot_featureimp_overview, result_file("featureimp_overview.rds"))
+
+
+##  ............................................................................
+##  Robustness to stochasticity                                             ####
+dataset_design <- crossing(
+  shuffle_perc = c(0, 0.2, 0.4, 0.6, 0.8, 1),
+  num_trees = c(10, 100, 1000, 10000),
+  repeat_ix = 1:100
+) %>%
+  mutate(seed = repeat_ix)
+
+perturb_shuffle_cells <- dynbenchmark:::perturb_shuffle_cells
+
+check_featureimp_cor <- function(dataset, shuffle_perc, num_trees, seed, ...) {
+  perturbed <- perturb_shuffle_cells(dataset, shuffle_perc)
+
+  start <- Sys.time()
+
+  set.seed(seed)
+
+  scores <- dyneval:::compute_featureimp(
+  # scores <- dyneval::calculate_featureimp_cor(
+    dataset = dataset,
+    prediction = perturbed,
+    num_trees = num_trees
+  )
+
+  as_tibble(scores) %>%
+    mutate(time_featureimp_cor = as.numeric( Sys.time() - start))
+}
+
+# run the experiment on qsub
+qsub_config <- qsub::override_qsub_config(
+  num_cores = 1,
+  memory = "4G",
+  batch_tasks = 25,
+  wait = FALSE,
+  max_wall_time = "03:00:00"
+)
+handle <- qsub_pmap(
+  dataset_design,
+  check_featureimp_cor,
+  dataset = dataset,
+  qsub_config = qsub_config,
+  qsub_packages = c("dynbenchmark", "tidyverse"),
+  qsub_environment = c("perturb_shuffle_cells")
+)
+
+save(
+  handle,
+  dataset,
+  dataset_design,
+  file = derived_file("04-featureimp.rda")
+)
+
+##
+load(derived_file("04-featureimp.rda"))
+
+scores <- qsub::qsub_retrieve(handle) %>% bind_rows()
+
+save(
+  scores,
+  dataset,
+  dataset_design,
+  file = derived_file("04-featureimp.rda")
+)
+##
+
+load(derived_file("04-featureimp.rda"))
+
+results <- bind_cols(
+  bind_rows(scores),
+  dataset_design
+) %>%
+  mutate_at(c("shuffle_perc", "num_trees"), factor)
+
+results$time <- results$time_featureimp_cor
+
+##  ............................................................................
+##  Plot featureimp correlation vs time                                     ####
+true_featureimp_cor <- results %>%
+  group_by(shuffle_perc) %>%
+  filter(num_trees == last(levels(num_trees))) %>%
+  summarise(true_featureimp_cor = mean(featureimp_cor))
+
+plot_featureimp_cor_distributions <- results %>%
+  ggplot(aes(shuffle_perc, featureimp_cor, color = shuffle_perc)) +
+  geom_hline(aes(yintercept = true_featureimp_cor, color = shuffle_perc), data = true_featureimp_cor, linetype = "dotted") +
+  geom_boxplot(aes(), outlier.shape = NA) +
+  scale_y_continuous(label_metric("featureimp_cor", parse = TRUE), limits = c(0, 1), breaks = round(true_featureimp_cor$true_featureimp_cor, 2)) +
+  scale_x_discrete(label_long("shuffle_perc"), labels = function(x) scales::percent(as.numeric(x))) +
+  scale_color_viridis_d(label_long("shuffle_perc"), labels = function(x) scales::percent(as.numeric(x))) +
+  facet_grid(.~num_trees, labeller = function(x) x %>% mutate_all(~paste0(., " trees"))) +
+  theme_pub()
+plot_featureimp_cor_distributions
+
+write_rds(plot_featureimp_cor_distributions, result_file("feautreimp_cor_distributions.rds"))
