@@ -28,7 +28,7 @@ assessment$conformity %>%
   select(metric_id, conforms) %>% 
   arrange(metric_id) %>% 
   mutate(
-    metric_id = label_metrics(metric_id, label_type = "latex") %>% paste0("$", ., "$") %>% forcats::fct_inorder(),
+    metric_id = label_metrics(metric_id, format = "latex") %>% as.character() %>% forcats::fct_inorder(),
     conforms = kableExtra::cell_spec(
       ifelse(conforms, "\U2714", "\U2716"), 
       background = ifelse(conforms, "#2ECC40", "#FF4136"),
