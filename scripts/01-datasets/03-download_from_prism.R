@@ -12,6 +12,7 @@ qsub::rsync_remote(
   compress = FALSE
 )
 
+# # Upload to prism
 # qsub::rsync_remote(
 #   remote_src = FALSE,
 #   path_src = derived_file(remote = FALSE),
