@@ -162,7 +162,7 @@ plot_fig <- function(
     subchunk <- glue::glue(
       "<p>\n",
       "  {fig_anch}\n",
-      "  <img src = \"{fig_path}\" />\n",
+      "  <img src = \"{fig_path}\" width = \"{width}\" height = \"{height}\" />\n",
       "</p><p>\n",
       "  <strong>{fig_cap}: {caption_main}</strong> {caption_text}\n",
       "</p>\n",
