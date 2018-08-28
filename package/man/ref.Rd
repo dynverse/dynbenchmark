@@ -18,6 +18,8 @@ ref(ref_type, ref_id, suffix = "", anchor = FALSE,
 \item{anchor}{Whether to anchor here}
 
 \item{pattern}{What to use as pattern}
+
+\item{format}{The output format (html, latex, markdown, ...)}
 }
 \description{
 Refer to a figure or table

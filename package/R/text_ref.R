@@ -11,6 +11,7 @@ setup_refs <- function() {
 #' @param suffix Adding something to the index
 #' @param anchor Whether to anchor here
 #' @param pattern What to use as pattern
+#' @param format The output format (html, latex, markdown, ...)
 #'
 #' @export
 ref <- function(ref_type, ref_id, suffix = "", anchor = FALSE, pattern = "[**{ref_full_name}**](#{ref_type}_{ref_id})", format = get_default_format()) {
@@ -110,6 +111,16 @@ plot_fig <- function(
   caption_main <- knitr::knit(text = caption_main, quiet = TRUE)
   caption_text <- knitr::knit(text = caption_text, quiet = TRUE)
 
+  # save fig_path is a ggplot
+  if (ggplot2::is.ggplot(fig_path)) {
+    ggplot2::ggsave(
+      paste0(knitr::opts_knit$get("fig.path") %||% ".", "/", ref_id, ".png"),
+      fig_path,
+      width = width,
+      height = height
+    )
+  }
+
   # plot figure if rds
   if (fs::path_ext(fig_path) == "rds") {
     fig_path_new <- fig_path
@@ -188,8 +199,6 @@ setup_tables <- function() {
 #' @inheritParams ref
 #' @inheritParams add_fig
 #' @param table Either a tibble, a path to a table or a named list with latex, html and markdown kables
-#' @param html The html table
-#' @param markdown The markdown table
 #' @param caption_main Caption title
 #' @param caption_text Caption text
 #' @param format The format, in html or latex
