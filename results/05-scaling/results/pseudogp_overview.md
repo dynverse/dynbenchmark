@@ -1,4 +1,0 @@
-# pseudogp
-![Overview](pseudogp.svg)
-
-
