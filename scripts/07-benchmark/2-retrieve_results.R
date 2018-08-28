@@ -26,18 +26,19 @@ datasets_info <- design$datasets %>% rename_all(function(x) paste0("dataset_", x
 trajtypes <-
   dynwrap::trajectory_types %>%
   filter(id %in% unique(datasets_info$dataset_trajectory_type)) %>%
-  add_row(id = "overall", simplified = "overall", directed = TRUE, directedness = "directed", colour = "#AAAAAA", background_colour = "E6A1A1", ancestors = list(character(0)))
+  add_row(id = "overall", simplified = "overall", directed = TRUE, directedness = "directed", colour = "#AAAAAA", background_colour = "E6A1A1", ancestors = list(character(0))) %>%
+  mutate(id_f = factor(id, levels = id), simplified_f = factor(simplified, levels = unique(simplified)))
 
 ###################################################
 ############### CREATE AGGREGATIONS ###############
 ###################################################
 
-scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = TRUE) {
+scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = FALSE) {
   x[x < 0] <- 0
   x[x > 1] <- 1
   xn <- x[!is.na(x)]
   x[is.na(x)] <- 0
-  if (all(x == 0)) return(x)
+  if (length(x) == 1 || all(x == 0)) return(x)
   if (max_scale) {
     y <- (x - mean(xn)) / max(abs(xn - mean(xn))) * 5
   } else {
@@ -50,7 +51,7 @@ checkrange_fun <- function(x) {
   ifelse(is.na(x), 0, x) %>% pmax(0) %>% pmin(1)
 }
 
-metrics <- c("correlation", "edge_flip", "featureimp_cor", "featureimp_wcor", "F1_branches", "him")
+metrics <- read_rds(result_file("metrics.rds"))
 
 calc_mean <- function(df) {
   df %>% mutate(
@@ -69,6 +70,7 @@ data <-
   left_join(datasets_info %>% select(dataset_id, dataset_trajectory_type, dataset_source), by = "dataset_id") %>%
   left_join(methods_info %>% select(method_id, method_name), by = "method_id") %>%
   left_join(design$crossing %>% select(dataset_id, method_id, prior_id, repeat_ix, param_id, lpredtime, lpredmem, predtime, predmem), by = c("dataset_id", "method_id", "prior_id", "repeat_ix", "param_id")) %>%
+  left_join(trajtypes %>% select(dataset_trajectory_type = id, dataset_trajectory_type_simplified = simplified, dataset_trajectory_type_f = id_f, dataset_trajectory_type_simplified_f = simplified_f), by = "dataset_trajectory_type") %>%
   mutate(
     time = ifelse(error_status != "no_error", 6 * 3600, time_method),
     mem = ifelse(error_status != "no_error", 32 * 10e9, max_mem),
@@ -78,8 +80,7 @@ data <-
     pct_time_limit = (error_status == "time_limit") + 0,
     pct_memory_limit = (error_status == "memory_limit") + 0,
     pct_execution_error = (error_status == "execution_error") + 0,
-    pct_method_error = (error_status == "method_error") + 0,
-    dataset_trajectory_type_f = factor(dataset_trajectory_type, levels = trajtypes$id)
+    pct_method_error = (error_status == "method_error") + 0
   ) %>%
   group_by(dataset_id) %>%
   mutate_at(metrics, checkrange_fun) %>%
@@ -89,7 +90,8 @@ data <-
     rank_mem = percent_rank(-lmem)
   ) %>%
   ungroup() %>%
-  select(-stdout, -stderr, -error_message)
+  select(-stdout, -stderr, -error_message) %>%
+  calc_mean()
 
 data %>% group_by(method_id, error_status) %>% summarise(n = n()) %>% as.data.frame()
 
@@ -158,3 +160,54 @@ data_trajtype_totalsx2 <- bind_rows(
 to_save <- environment() %>% as.list()
 to_save <- to_save[c(str_subset(names(to_save), "^data"), "trajtypes", "datasets_info", "methods_info")]
 write_rds(to_save, result_file("benchmark_results.rds"), compress = "xz")
+
+
+## CHECK VARIANCES PER DATASET AND METRIC
+stat_funs <- c("var", "mean")
+metricso <- c("overall", metrics)
+
+dat_df <-
+  data %>%
+  select(method_id, dataset_id, !!metricso) %>%
+  gather(metric, score, !!metricso) %>%
+  group_by(dataset_id, metric) %>%
+  filter(n() > 2) %>%
+  rename(unnorm = score) %>%
+  mutate(norm = scalesigmoid_trafo(unnorm)) %>%
+  gather(type, score, unnorm, norm) %>%
+  mutate(type = factor(type, levels = c("unnorm", "norm"))) %>%
+  ungroup()
+
+var_df <-
+  dat_df %>%
+  group_by(type, dataset_id, metric) %>%
+  summarise_at(vars(score), stat_funs) %>%
+  ungroup()
+
+g <- ggplot(var_df) +
+  geom_point(aes(mean, var, colour = metric)) +
+  facet_wrap(~type) +
+  scale_colour_brewer(palette = "Dark2") +
+  theme_bw()
+
+# g
+ggsave(result_file("normalisation_var_mean.pdf"), g, width = 10, height = 5)
+
+
+# dat_df %>%
+#   filter(type == "unnorm") %>%
+#   group_by(dataset_id, metric) %>%
+#   mutate(score = max(score, na.rm = TRUE)) %>%
+#   group_by(method_id, metric) %>%
+#   summarise(mean = mean(score)) %>%
+#   ungroup()
+#
+# dataset_difficulty <-
+#   dat_df %>%
+#   filter(type == "unnorm", metric == "overall") %>%
+#   group_by(dataset_id) %>%
+#   summarise(score = mean(score)) %>%
+#   arrange(desc(score)) %>%
+#   deframe()
+
+
