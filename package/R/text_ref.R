@@ -111,30 +111,27 @@ plot_fig <- function(
   caption_main <- knitr::knit(text = caption_main, quiet = TRUE)
   caption_text <- knitr::knit(text = caption_text, quiet = TRUE)
 
-  # save fig_path is a ggplot
+  # if fig path is an rds, or a ggplot object is given -> load into fig
   if (ggplot2::is.ggplot(fig_path)) {
-    ggplot2::ggsave(
-      paste0(knitr::opts_knit$get("fig.path") %||% ".", "/", ref_id, ".png"),
-      fig_path,
-      width = width,
-      height = height
-    )
+    fig <- fig_path
+    fig_path <- paste0(knitr::opts_knit$get("fig.path") %||% ".", "/", ref_id, ".rds")
+  } else if (fs::path_ext(fig_path) == "rds") {
+    fig <- read_rds(fig_path)
+  } else {
+    fig <- NULL
   }
 
+  # save the figure in the appropriate format
   # plot figure if rds
-  if (fs::path_ext(fig_path) == "rds") {
-    fig_path_new <- fig_path
-
+  if (!is.null(fig)) {
     if (format == "latex") {
-      fs::path_ext(fig_path_new) <- "pdf"
+      fig_path <- fs::path_ext_set(fig_path, "pdf")
 
-      ggsave(fig_path_new, read_rds(fig_path), width = width, height = height, device = grDevices::cairo_pdf)
-      fig_path <- fig_path_new
+      ggsave(fig_path, fig, width = width, height = height, device = grDevices::cairo_pdf)
     } else {
-      fs::path_ext(fig_path_new) <- "png"
+      fig_path <- fs::path_ext_set(fig_path, "png")
 
-      ggsave(fig_path_new, read_rds(fig_path), width = width, height = height)
-      fig_path <- fig_path_new
+      ggsave(fig_path, fig, width = width, height = height)
     }
   }
 
