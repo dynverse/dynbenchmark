@@ -111,9 +111,13 @@ design$crossing <- design$crossing %>%
 # save configuration
 write_rds(design, derived_file("design.rds"), compress = "xz")
 
+metrics <- c("correlation", "edge_flip", "featureimp_cor", "featureimp_wcor", "F1_branches", "him")
+write_rds(metrics, result_file("metrics.rds"), compress = "xz")
+
 ##########################################################
 ###############        SUBMIT JOB          ###############
 ##########################################################
+metrics <- read_rds(result_file("metrics.rds"))
 design_filt <- read_rds(derived_file("design.rds"))
 # design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("identity", "scorpius", "paga"))
 design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2", "Cat3"))
@@ -136,7 +140,7 @@ benchmark_submit(
   design = design_filt,
   qsub_grouping = "{method_id}/{param_id}/{category}",
   qsub_params = qsub_params,
-  metrics = c("correlation", "edge_flip", "featureimp_cor", "featureimp_wcor", "F1_branches", "him"),
+  metrics = metrics,
   verbose = TRUE,
   output_models = TRUE
 )
