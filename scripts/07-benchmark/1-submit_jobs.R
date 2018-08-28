@@ -58,17 +58,6 @@ datasets <-
   )
 
 
-##########################################################
-###############       CREATE DESIGN        ###############
-##########################################################
-design <-
-  benchmark_generate_design(
-    datasets = datasets,
-    methods = methods,
-    parameters = parameters,
-    num_repeats = 1
-  )
-
 # determine method execution order by predicting
 # the running times of each method
 predicted_times <-
@@ -81,6 +70,28 @@ predicted_times <-
   }) %>%
   mutate(predtime = 10^lpredtime, predmem = 10^lpredmem)
 
+preds_dataset <-
+  predicted_times %>%
+  group_by(dataset_id) %>%
+  summarise_at(c("lpredtime", "lpredmem", "predtime", "predmem"), sum) %>%
+  mutate(
+    category = paste0("Cat", cut(log10(predtime), breaks = 5, labels = FALSE))
+  )
+
+datasets <- datasets %>% left_join(preds_dataset %>% select(id = dataset_id, category), by = "id")
+
+
+##########################################################
+###############       CREATE DESIGN        ###############
+##########################################################
+design <-
+  benchmark_generate_design(
+    datasets = datasets,
+    methods = methods,
+    parameters = parameters,
+    num_repeats = 1
+  )
+
 method_ord <-
   predicted_times %>%
   group_by(method_id) %>%
@@ -89,9 +100,12 @@ method_ord <-
   pull(method_id)
 
 design$crossing <- design$crossing %>%
+  left_join(preds_dataset %>% select(dataset_id, category), by = "dataset_id") %>%
   left_join(predicted_times, by = c("method_id", "dataset_id")) %>%
-  mutate(method_order = match(method_id, method_ord)) %>%
-  arrange(method_order)
+  mutate(
+    method_order = match(method_id, method_ord)
+  ) %>%
+  arrange(category, method_order)
 
 # save configuration
 write_rds(design, derived_file("design.rds"), compress = "xz")
@@ -101,9 +115,10 @@ write_rds(design, derived_file("design.rds"), compress = "xz")
 ##########################################################
 design_filt <- read_rds(derived_file("design.rds"))
 # design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("identity", "scorpius", "paga"))
+design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2", "Cat3"))
 
 
-qsub_params <- function(method_id, param_id) {
+qsub_params <- function(method_id, param_id, category) {
   moremem <- c(
     "celltree_gibbs", "scimitar", "ouijaflow", "ouija", "pseudogp", "calista", "cellrouter",
     "grandprix", "ouijaflow", "paga", "projected_paga", "raceid_stemid"
@@ -118,9 +133,9 @@ qsub_params <- function(method_id, param_id) {
 # submit job
 benchmark_submit(
   design = design_filt,
-  qsub_grouping = "{method_id}/{param_id}",
+  qsub_grouping = "{method_id}/{param_id}/{category}",
   qsub_params = qsub_params,
-  metrics = metrics_evaluated$metric_id %>% setdiff("harm_mean"),
+  metrics = c("correlation", "edge_flip", "featureimp_cor", "featureimp_wcor", "F1_branches", "him"),
   verbose = TRUE,
   output_models = TRUE
 )
