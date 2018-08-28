@@ -32,20 +32,6 @@ trajtypes <-
 ############### CREATE AGGREGATIONS ###############
 ###################################################
 
-# join <- inner_join(
-#   design$crossing %>% select(-task_source, -settings, -model),
-#   data %>% select(dataset_id, method_id, prior_id, repeat_ix, param_id, error_status, time = time_method, mem = max_mem),
-#   by = c("dataset_id", "method_id", "prior_id", "repeat_ix", "param_id")
-# ) %>%
-#   filter(error_status %in% c("no_error", "time_limit", "memory_limit")) %>%
-#   mutate(
-#     time = ifelse(error_status == "memory_limit", NA, 10^time),
-#     mem = ifelse(error_status == "time_limit" | mem < -100, NA, 10^mem),
-#     ltime = log10(time),
-#     lmem = log10(mem)
-#   )
-
-
 # scaling disabled for now
 scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = TRUE) {
   x[x < 0] <- 0
@@ -63,10 +49,10 @@ scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = TRUE) {
 #
 # # previously:
 # # trafo_fun <- percent_rank
-# trafo_fun <- scalesigmoid_trafo
-trafo_fun <- function(x) {
-  ifelse(is.na(x), 0, x) %>% pmax(0) %>% pmin(1)
-}
+trafo_fun <- scalesigmoid_trafo
+# trafo_fun <- function(x) {
+#   ifelse(is.na(x), 0, x) %>% pmax(0) %>% pmin(1)
+# }
 
 data <-
   execution_output %>%
@@ -91,6 +77,8 @@ data <-
     norm_edge_flip = trafo_fun(edge_flip),
     norm_featureimp_cor = trafo_fun(featureimp_cor),
     norm_F1_branches = trafo_fun(F1_branches),
+    norm_him = trafo_fun(him),
+    norm_featureimp_ks = trafo_fun(featureimp_ks),
     rank_time = percent_rank(-ltime),
     rank_mem = percent_rank(-lmem)
   ) %>%
@@ -99,6 +87,15 @@ data <-
 
 data %>% group_by(method_id, error_status) %>% summarise(n = n()) %>% as.data.frame()
 
+data %>% group_by(method_id) %>% summarise(n = n()) %>% as.data.frame() %>% arrange(n)
+
+calc_mean <- function(df) {
+  df %>% mutate(
+    #overall = dyneval::calculate_harmonic_mean(norm_correlation, norm_edge_flip, norm_featureimp_cor, norm_F1_branches)
+    overall = dyneval::calculate_arithmetic_mean(norm_correlation, norm_edge_flip, norm_featureimp_cor, norm_F1_branches)
+  )
+}
+
 # aggregate over replicates
 data_repl <- data %>%
   group_by(method_id, method_name, dataset_id, param_id, dataset_trajectory_type, dataset_source, dataset_trajectory_type_f) %>%
@@ -106,9 +103,9 @@ data_repl <- data %>%
   ungroup() %>%
   mutate(
     pct_method_error_all = (pct_method_error == 1)+0,
-    pct_method_error_stoch = pct_method_error - pct_method_error_all,
-    harm_mean = dyneval::calculate_harmonic_mean(norm_correlation, norm_edge_flip, norm_featureimp_cor, norm_F1_branches)
-  )
+    pct_method_error_stoch = pct_method_error - pct_method_error_all
+  ) %>%
+  calc_mean()
 
 # process trajtype grouped evaluation
 data_trajtype <- data_repl %>%
@@ -116,9 +113,7 @@ data_trajtype <- data_repl %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
-  mutate(
-    harm_mean = dyneval::calculate_harmonic_mean(norm_correlation, norm_edge_flip, norm_featureimp_cor, norm_F1_branches)
-  )
+  calc_mean()
 
 # process overall evaluation
 data_method <- data_trajtype %>%
@@ -126,9 +121,7 @@ data_method <- data_trajtype %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
-  mutate(
-    harm_mean = dyneval::calculate_harmonic_mean(norm_correlation, norm_edge_flip, norm_featureimp_cor, norm_F1_branches)
-  )
+  calc_mean()
 
 # adding mean per trajtype
 data_trajtype_totals <- bind_rows(
@@ -139,9 +132,7 @@ data_trajtype_totals <- bind_rows(
     ungroup() %>%
     mutate(dataset_source = "mean")
 ) %>%
-  mutate(
-    harm_mean = dyneval::calculate_harmonic_mean(norm_correlation, norm_edge_flip, norm_featureimp_cor, norm_F1_branches)
-  )
+  calc_mean()
 
 # adding mean per method
 data_method_totals <-
@@ -153,9 +144,7 @@ data_method_totals <-
       ungroup() %>%
       mutate(dataset_source = "mean")
   ) %>%
-  mutate(
-    harm_mean = dyneval::calculate_harmonic_mean(norm_correlation, norm_edge_flip, norm_featureimp_cor, norm_F1_branches)
-  )
+  calc_mean()
 
 # combine all aggregated data frames
 data_trajtype_totalsx2 <- bind_rows(
@@ -163,9 +152,7 @@ data_trajtype_totalsx2 <- bind_rows(
   data_trajtype_totals
 ) %>%
   mutate(dataset_trajectory_type_f = factor(dataset_trajectory_type, levels = trajtypes$id)) %>%
-  mutate(
-    harm_mean = dyneval::calculate_harmonic_mean(norm_correlation, norm_edge_flip, norm_featureimp_cor, norm_F1_branches)
-  )
+  calc_mean()
 
 # save data structures
 to_save <- environment() %>% as.list()
