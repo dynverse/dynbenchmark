@@ -80,6 +80,7 @@ preds_dataset <-
 
 datasets <- datasets %>% left_join(preds_dataset %>% select(id = dataset_id, category), by = "id")
 
+preds_dataset %>% group_by(category) %>% summarise(predtime = sum(predtime)) %>% mutate(realtime = predtime / 3600 / 192)
 
 ##########################################################
 ###############       CREATE DESIGN        ###############
