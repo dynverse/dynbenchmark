@@ -76,7 +76,7 @@ add_fig <- function(
   fig_path,
   ref_id,
   caption_main,
-  caption_text,
+  caption_text = "",
   width = 5,
   height = 7,
   format = get_default_format()
