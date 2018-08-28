@@ -32,7 +32,6 @@ trajtypes <-
 ############### CREATE AGGREGATIONS ###############
 ###################################################
 
-# scaling disabled for now
 scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = TRUE) {
   x[x < 0] <- 0
   x[x > 1] <- 1
@@ -46,13 +45,24 @@ scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = TRUE) {
   }
   sigmoid::sigmoid(y)
 }
-#
-# # previously:
-# # trafo_fun <- percent_rank
-trafo_fun <- scalesigmoid_trafo
-# trafo_fun <- function(x) {
-#   ifelse(is.na(x), 0, x) %>% pmax(0) %>% pmin(1)
-# }
+
+checkrange_fun <- function(x) {
+  ifelse(is.na(x), 0, x) %>% pmax(0) %>% pmin(1)
+}
+
+metrics <- c("correlation", "edge_flip", "featureimp_cor", "featureimp_wcor", "F1_branches", "him")
+
+calc_mean <- function(df) {
+  df %>% mutate(
+    overall_harm_norm = dyneval::calculate_harmonic_mean(norm_correlation, norm_edge_flip, norm_featureimp_wcor, norm_F1_branches),
+    overall_arit_norm = dyneval::calculate_arithmetic_mean(norm_correlation, norm_edge_flip, norm_featureimp_wcor, norm_F1_branches),
+    overall_geom_norm = dyneval::calculate_geometric_mean(norm_correlation, norm_edge_flip, norm_featureimp_wcor, norm_F1_branches),
+    overall_harm_unno = dyneval::calculate_harmonic_mean(correlation, edge_flip, featureimp_wcor, F1_branches),
+    overall_arit_unno = dyneval::calculate_arithmetic_mean(correlation, edge_flip, featureimp_wcor, F1_branches),
+    overall_geom_unno = dyneval::calculate_geometric_mean(correlation, edge_flip, featureimp_wcor, F1_branches),
+    overall = overall_geom_norm
+  )
+}
 
 data <-
   execution_output %>%
@@ -72,13 +82,9 @@ data <-
     dataset_trajectory_type_f = factor(dataset_trajectory_type, levels = trajtypes$id)
   ) %>%
   group_by(dataset_id) %>%
+  mutate_at(metrics, checkrange_fun) %>%
+  mutate_at(set_names(metrics, paste0("norm_", metrics)), scalesigmoid_trafo) %>%
   mutate(
-    norm_correlation = trafo_fun(correlation),
-    norm_edge_flip = trafo_fun(edge_flip),
-    norm_featureimp_cor = trafo_fun(featureimp_cor),
-    norm_F1_branches = trafo_fun(F1_branches),
-    norm_him = trafo_fun(him),
-    norm_featureimp_ks = trafo_fun(featureimp_ks),
     rank_time = percent_rank(-ltime),
     rank_mem = percent_rank(-lmem)
   ) %>%
@@ -89,12 +95,6 @@ data %>% group_by(method_id, error_status) %>% summarise(n = n()) %>% as.data.fr
 
 data %>% group_by(method_id) %>% summarise(n = n()) %>% as.data.frame() %>% arrange(n)
 
-calc_mean <- function(df) {
-  df %>% mutate(
-    #overall = dyneval::calculate_harmonic_mean(norm_correlation, norm_edge_flip, norm_featureimp_cor, norm_F1_branches)
-    overall = dyneval::calculate_arithmetic_mean(norm_correlation, norm_edge_flip, norm_featureimp_cor, norm_F1_branches)
-  )
-}
 
 # aggregate over replicates
 data_repl <- data %>%

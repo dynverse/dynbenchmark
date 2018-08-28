@@ -32,7 +32,7 @@ rm(olist)
 ############### OVERALL COMPARISON ###############
 metr_lev <- c(
   "overall", "real", "synthetic/dyngen", "synthetic/dyntoy", "synthetic/prosstt", "synthetic/splatter",
-  "norm_correlation", "norm_edge_flip", "norm_him", "norm_F1_branches", "norm_featureimp_cor", "norm_featureimp_ks",
+  "correlation", "edge_flip", "him", "F1_branches", "featureimp_cor", "featureimp_ks",
    "rank_time", "rank_mem", "pct_errored", "predtime_cor", "predmem_cor",
   "pct_time_limit", "pct_memory_limit", "pct_execution_error"
 )
