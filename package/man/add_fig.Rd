@@ -4,7 +4,7 @@
 \alias{add_fig}
 \title{Add a figure}
 \usage{
-add_fig(fig_path, ref_id, caption_main, caption_text, width = 5,
+add_fig(fig_path, ref_id, caption_main, caption_text = "", width = 5,
   height = 7, format = get_default_format())
 }
 \arguments{

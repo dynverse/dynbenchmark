@@ -17,10 +17,6 @@ add_table(table, ref_id, caption_main, caption_text = "",
 \item{caption_text}{Caption text}
 
 \item{format}{The format, in html or latex}
-
-\item{html}{The html table}
-
-\item{markdown}{The markdown table}
 }
 \description{
 Add a table
