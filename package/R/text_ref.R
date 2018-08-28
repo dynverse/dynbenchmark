@@ -114,7 +114,8 @@ plot_fig <- function(
   # if fig path is an rds, or a ggplot object is given -> load into fig
   if (ggplot2::is.ggplot(fig_path)) {
     fig <- fig_path
-    fig_path <- paste0(knitr::opts_knit$get("fig.path") %||% ".", "/", ref_id, ".rds")
+    fig_path <- paste0(knitr::opts_chunk$get("fig.path") %||% ".", "/", ref_id, ".rds")
+    dir.create(fs::path_dir(fig_path), recursive = TRUE, showWarnings = FALSE)
   } else if (fs::path_ext(fig_path) == "rds") {
     fig <- read_rds(fig_path)
   } else {
@@ -152,12 +153,15 @@ plot_fig <- function(
       "\\begin{{myfigure}}{{{ifelse(ref_type == 'fig', '!htbp', 'H')}}}\n",
       "\\begin{{center}}\n",
       "{fig_anch}\n",
-      "\\includegraphics{{{fig_path}}}\n\n",
+      "\\includegraphics[height={height/2}in, width={width/2}in]{{{fig_path}}}\n\n",
       "\\end{{center}}\n",
       "\\textbf{{ {fig_name}: {caption_main}}} {caption_text}\n\n",
       "\\end{{myfigure}}\n"
     )
   } else if (format %in% c("html", "markdown")){
+    width <- width * 70
+    height = height * 70
+
     fig_cap <- ref(ref_type, ref_id, pattern = "{ref_full_name}")
     subchunk <- glue::glue(
       "<p>\n",

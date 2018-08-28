@@ -96,4 +96,5 @@ Collate:
     'suite_benchmark_generate_design.R'
     'suite_benchmark_submit.R'
     'suite_paramoptim.R'
+    'text_equations.R'
     'text_ref.R'
