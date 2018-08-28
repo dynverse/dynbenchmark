@@ -1,4 +1,0 @@
-# scuba
-![Overview](scuba.svg)
-
-

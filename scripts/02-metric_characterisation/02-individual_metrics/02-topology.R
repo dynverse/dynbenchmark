@@ -2,7 +2,7 @@ library(dynbenchmark)
 library(tidyverse)
 library(furrr)
 
-experiment("02-metric_characterisation/02-metric_examples")
+experiment("02-metric_characterisation/02-individual_metrics")
 
 # use all topology based metrics
 metric_ids <- dyneval::metrics %>% filter(category %in% "topology") %>% pull(metric_id)
@@ -44,7 +44,7 @@ plot_datasets <- map2(dataset_design$model_id, dataset_design$dataset, function(
 plot_scores <- ggplot(results, aes(model_id, model_id1)) +
   geom_raster(aes(fill = score)) +
   geom_text(aes(label = round(score, 2), color = score < 0.2)) +
-  facet_grid(~metric_id, labeller = label_facet(label_metrics, parse = TRUE)) +
+  facet_grid(~metric_id, labeller = label_facet(label_metrics, format = "plotmath", parse = TRUE)) +
   viridis::scale_fill_viridis("Score", option = "A", direction = 1, begin = 0.05) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   scale_color_manual(values = c(`TRUE` = "white", `FALSE` = "black"), guide = FALSE) +
@@ -112,12 +112,12 @@ scores <- future_map2(dataset_design$dataset, dataset_design$perturbation, calcu
 scores <- scores %>% bind_rows()
 
 milestones <- tibble(milestone_id = dataset_design$perturbation %>% last() %>% .$milestone_ids) %>% dynplot:::add_milestone_coloring()
-plot_datasets <- dataset_design %>%
+plot_length_datasets <- dataset_design %>%
   pmap(function(perturbation_id, perturbation, ...) {
     plot_dendro(perturbation, milestones = milestones, y_offset = 0) + ggtitle(perturbation_id)
   }) %>%
   patchwork::wrap_plots(nrow = 1)
-plot_scores <- scores %>%
+plot_length_scores <- scores %>%
   select(!!metric_ids) %>%
   mapdf(function(scores) {
     plot <- enframe(scores, "metric_id", "score") %>%
@@ -133,11 +133,11 @@ plot_scores <- scores %>%
     .
   } %>%
   patchwork::wrap_plots(nrow = 1)
-plot_scores
+plot_length_scores
 
 plot_topology_lengths <- patchwork::wrap_plots(
-  plot_datasets,
-  plot_scores,
+  plot_length_datasets,
+  plot_length_scores,
   ncol = 1
 )
 

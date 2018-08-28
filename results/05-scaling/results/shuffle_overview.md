@@ -1,4 +1,0 @@
-# shuffle
-![Overview](shuffle.svg)
-
-

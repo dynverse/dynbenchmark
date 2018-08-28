@@ -1,4 +1,0 @@
-# elpicycle
-![Overview](elpicycle.svg)
-
-

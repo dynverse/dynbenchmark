@@ -3,11 +3,14 @@
 \name{setup_refs}
 \alias{setup_refs}
 \alias{setup_figs}
+\alias{setup_tables}
 \title{Setup the text references}
 \usage{
 setup_refs()
 
 setup_figs()
+
+setup_tables()
 }
 \description{
 Setup the text references
