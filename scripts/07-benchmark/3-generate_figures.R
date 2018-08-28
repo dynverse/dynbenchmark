@@ -15,7 +15,7 @@ olist$datasets_info <- NULL
 # get ordering of methods
 method_ord <- olist$data_trajtype_totalsx2 %>%
   filter(dataset_source == "mean", dataset_trajectory_type == "overall") %>%
-  arrange(desc(harm_mean)) %>%
+  arrange(desc(overall)) %>%
   .$method_id
 
 # create method_id_f factor in all data structures
@@ -31,8 +31,8 @@ rm(olist)
 
 ############### OVERALL COMPARISON ###############
 metr_lev <- c(
-  "harm_mean", "norm_correlation", "norm_edge_flip", "norm_featureimp_cor", "norm_F1_branches",
-  "real", "synthetic/dyngen", "synthetic/dyntoy", "synthetic/prosstt", "synthetic/splatter",
+  "overall", "real", "synthetic/dyngen", "synthetic/dyntoy", "synthetic/prosstt", "synthetic/splatter",
+  "norm_correlation", "norm_edge_flip", "norm_him", "norm_F1_branches", "norm_featureimp_cor", "norm_featureimp_ks",
    "rank_time", "rank_mem", "pct_errored", "predtime_cor", "predmem_cor",
   "pct_time_limit", "pct_memory_limit", "pct_execution_error"
 )
@@ -46,7 +46,7 @@ oc1 <-
 oc2 <-
   data_trajtype_totalsx2 %>%
   filter(dataset_trajectory_type == "overall") %>%
-  select(method_id:param_id, method_id_f, metric = dataset_source, score = harm_mean)
+  select(method_id:param_id, method_id_f, metric = dataset_source, score = overall)
 
 nacor <- function(x, y) {
   is_na <- is.na(x) | is.na(y)
@@ -76,14 +76,14 @@ overall_comp <-
 g <-
   ggplot(overall_comp) +
   geom_bar(aes(method_id_f, score, fill = metric_f), stat = "identity") +
-  facet_wrap(~metric_f, scales = "free", ncol = 5, labeller = label_facet()) +
+  facet_wrap(~metric_f, scales = "free", ncol = 6, labeller = label_facet()) +
   coord_flip() +
   theme_bw() +
   labs(x = NULL, y = NULL, fill = "Metric") +
   theme(legend.position = "none")
 g
 
-ggsave(result_file("1_overall_comparison.pdf"), g, width = 20, height = 15)
+ggsave(result_file("1_overall_comparison.pdf"), g, width = 25, height = 15)
 
 rm(oc1, oc2, nacor, oc3, overall_comp)
 
@@ -97,7 +97,7 @@ method_cols <- rep(cols, ceiling(length(lvls) / length(cols)))[seq_along(lvls)]
 
 pdf(result_file("2_trajtype_comparison.pdf"), 20, 12)
 ggplot(data_trajtype_totalsx2) +
-  geom_point(aes(method_id_f, harm_mean, colour = method_id_f)) +
+  geom_point(aes(method_id_f, overall, colour = method_id_f)) +
   coord_flip() +
   theme_bw() +
   theme(legend.position = "none") +
@@ -105,7 +105,7 @@ ggplot(data_trajtype_totalsx2) +
   facet_grid(dataset_source~dataset_trajectory_type_f) +
   labs(
     x = NULL,
-    title = "Harmonic mean"
+    title = "Overall score"
   )
 
 ggplot(data_trajtype_totalsx2) +
