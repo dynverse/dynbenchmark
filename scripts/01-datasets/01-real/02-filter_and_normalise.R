@@ -1,3 +1,5 @@
+#' Filtering and normalising the real datasets using the `dynbenchmark::process_raw_dataset` function.
+
 library(dynbenchmark)
 library(tidyverse)
 library(qsub)

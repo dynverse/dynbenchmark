@@ -1,3 +1,5 @@
+#' [PROSSTT](https://github.com/soedinglab/prosstt), simulations of tree topologies using random walks
+
 library(tidyverse)
 library(dynbenchmark)
 library(qsub)
