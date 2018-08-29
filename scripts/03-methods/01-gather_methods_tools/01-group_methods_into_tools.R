@@ -6,7 +6,7 @@ library(tidyverse)
 library(googlesheets)
 library(dynbenchmark)
 
-experiment("03-method_characterisation")
+experiment("03-methods")
 
 # If it's your first time running this script, run this:
 # gs_auth()

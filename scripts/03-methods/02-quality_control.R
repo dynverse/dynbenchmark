@@ -2,7 +2,7 @@ library(dynbenchmark)
 library(tidyverse)
 library(patchwork)
 
-experiment("03-method_characterisation")
+experiment("03-methods")
 
 tool_qc <- read_rds(derived_file("tool_qc.rds"))
 tools_evaluated <- read_rds(derived_file("tools_evaluated.rds"))

@@ -3,7 +3,7 @@ library(dynwrap)
 library(dynbenchmark)
 library(tidyverse)
 
-experiment("03-method_characterisation/singularity_images")
+experiment("03-methods/singularity_images")
 
 
 # RUN THIS ON THE LOGIN NODE:
@@ -37,7 +37,7 @@ handle <- qsub::qsub_lapply(
   FUN = function(dig) {
     config <- dynwrap::container_singularity(
       prebuild = TRUE,
-      images_folder = derived_file("singularity_images/", experiment_id = "03-method_characterisation")
+      images_folder = derived_file("singularity_images/", experiment_id = "03-methods")
     )
     meth <- dynwrap:::.container_pull_image(dig, config = config)
   }

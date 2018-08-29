@@ -5,7 +5,7 @@ library(tidyverse)
 library(dynbenchmark)
 library(cowplot)
 
-experiment("03-method_characterisation")
+experiment("03-methods")
 
 tools_evaluated <- read_rds(derived_file("tools_evaluated.rds"))
 tools <- read_rds(derived_file("tools.rds"))

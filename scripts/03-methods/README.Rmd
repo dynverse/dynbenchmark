@@ -2,17 +2,22 @@
 output: github_document
 ---
 
-```{r echo = FALSE}
-knitr::opts_chunk$set(warning = FALSE, message = FALSE, error = FALSE, echo = FALSE)
-```
-
-```{r}
+```{r include = FALSE}
 library(tidyverse)
 library(dynbenchmark)
+
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Method characterisation
+# Method characterisation
+
+Here we
 
 - Compile all the information we have about TI methods
 - Group methods into sets of "tools"
 - Download and process the information from the QC spread sheet (https://docs.google.com/spreadsheets/d/1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE)
+- Interpret the method quality control
+
+```{r}
+dynbenchmark::render_scripts_documentation()
+```
