@@ -22,15 +22,20 @@ methods_info <- design$methods %>%
   select(-method_type) %>%
   left_join(dynmethods::methods %>% select(method_id = id, method_type = type), by = "method_id")
 datasets_info <- design$datasets %>% rename_all(function(x) paste0("dataset_", x))
+
 # collect relevant trajectory types
 trajtypes <-
   dynwrap::trajectory_types %>%
   filter(id %in% unique(datasets_info$dataset_trajectory_type)) %>%
   add_row(id = "overall", simplified = "overall", directed = TRUE, directedness = "directed", colour = "#AAAAAA", background_colour = "E6A1A1", ancestors = list(character(0))) %>%
-  mutate(id_f = factor(id, levels = id), simplified_f = factor(simplified, levels = unique(simplified)))
+  mutate(
+    id = factor(id, levels = id),
+    simplified = factor(simplified, levels = unique(simplified))
+  )
+
 
 ###################################################
-############### CREATE AGGREGATIONS ###############
+############### AGGREGATION SETTINGS ##############
 ###################################################
 
 scalesigmoid_trafo <- function (x, remove_errored = TRUE, max_scale = FALSE) {
@@ -65,12 +70,20 @@ calc_mean <- function(df) {
   )
 }
 
+dataset_source_weights <- c("real" = 1, "synthetic/dyngen" = 1, "synthetic/dyntoy" = 1/3, "synthetic/prosstt" = 1/3, "synthetic/splatter" = 1/3) %>% {. / sum(.)}
+
+
+###################################################
+############### CREATE AGGREGATIONS ###############
+###################################################
+
 data <-
   execution_output %>%
   left_join(datasets_info %>% select(dataset_id, dataset_trajectory_type, dataset_source), by = "dataset_id") %>%
   left_join(methods_info %>% select(method_id, method_name), by = "method_id") %>%
   left_join(design$crossing %>% select(dataset_id, method_id, prior_id, repeat_ix, param_id, lpredtime, lpredmem, predtime, predmem), by = c("dataset_id", "method_id", "prior_id", "repeat_ix", "param_id")) %>%
-  left_join(trajtypes %>% select(dataset_trajectory_type = id, dataset_trajectory_type_simplified = simplified, dataset_trajectory_type_f = id_f, dataset_trajectory_type_simplified_f = simplified_f), by = "dataset_trajectory_type") %>%
+  mutate(dataset_trajectory_type = factor(dataset_trajectory_type, levels = levels(trajtypes$id))) %>%
+  left_join(trajtypes %>% select(dataset_trajectory_type = id, dataset_trajectory_type_simplified = simplified), by = "dataset_trajectory_type") %>%
   mutate(
     time = ifelse(error_status != "no_error", 6 * 3600, time_method),
     mem = ifelse(error_status != "no_error", 32 * 10e9, max_mem),
@@ -100,7 +113,8 @@ data %>% group_by(method_id) %>% summarise(n = n()) %>% as.data.frame() %>% arra
 
 # aggregate over replicates
 data_repl <- data %>%
-  group_by(method_id, method_name, dataset_id, param_id, dataset_trajectory_type, dataset_source, dataset_trajectory_type_f) %>%
+  group_by(method_id, method_name, dataset_id, param_id, dataset_trajectory_type, dataset_trajectory_type_simplified, dataset_source) %>%
+  select(-repeat_ix) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
   mutate(
@@ -111,7 +125,7 @@ data_repl <- data %>%
 
 # process trajtype grouped evaluation
 data_trajtype <- data_repl %>%
-  group_by(method_id, method_name, param_id, dataset_trajectory_type, dataset_source, dataset_trajectory_type_f) %>%
+  group_by(method_id, method_name, param_id, dataset_trajectory_type, dataset_trajectory_type_simplified, dataset_source) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
@@ -123,44 +137,31 @@ data_method <- data_trajtype %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
-  calc_mean()
+  calc_mean() %>%
+  mutate(
+    dataset_trajectory_type = factor("overall", levels = levels(trajtypes$id)),
+    dataset_trajectory_type_simplified = factor("overall", levels = levels(trajtypes$simplified))
+  )
 
-# adding mean per trajtype
-data_trajtype_totals <- bind_rows(
-  data_trajtype,
-  data_trajtype %>%
-    group_by(method_id, method_name, param_id, dataset_trajectory_type, dataset_trajectory_type_f) %>%
-    summarise_if(is.numeric, mean) %>%
-    ungroup() %>%
-    mutate(dataset_source = "mean")
-) %>%
-  calc_mean()
-
-# adding mean per method
-data_method_totals <-
+data_aggregations <-
+  bind_rows(data_trajtype, data_method) %>% {
+  df <- .
   bind_rows(
-    data_method,
-    data_method %>%
-      group_by(method_id, method_name, param_id) %>%
-      summarise_if(is.numeric, mean) %>%
+    df,
+    df %>%
+      gather(metric, value, -method_id:-dataset_source) %>%
+      mutate(value = value * dataset_source_weights[dataset_source]) %>%
+      group_by(method_id, method_name, param_id, dataset_trajectory_type, dataset_trajectory_type_simplified, metric) %>%
+      summarise(value = sum(value)) %>%
       ungroup() %>%
+      spread(metric, value) %>%
       mutate(dataset_source = "mean")
-  ) %>%
-  calc_mean()
+  )
+}
 
-# combine all aggregated data frames
-data_trajtype_totalsx2 <- bind_rows(
-  data_method_totals %>% mutate(dataset_trajectory_type = "overall"),
-  data_trajtype_totals
-) %>%
-  mutate(dataset_trajectory_type_f = factor(dataset_trajectory_type, levels = trajtypes$id)) %>%
-  calc_mean()
 
 # save data structures
-to_save <- environment() %>% as.list()
-to_save <- to_save[c(str_subset(names(to_save), "^data"), "trajtypes", "datasets_info", "methods_info")]
-write_rds(to_save, result_file("benchmark_results.rds"), compress = "xz")
-
+write_rds(lst(data, data_aggregations, trajtypes, metrics, datasets_info, methods_info), result_file("benchmark_results.rds"), compress = "xz")
 
 ## CHECK VARIANCES PER DATASET AND METRIC
 stat_funs <- c("var", "mean")

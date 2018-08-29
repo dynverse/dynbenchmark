@@ -102,9 +102,9 @@ add_stable <- function(table, ref_id, caption) {
 }
 
 # load data
-methods <- read_rds(result_file("methods.rds", experiment_id = "03-method_characterisation"))
-methods_evaluated <- read_rds(result_file("methods_evaluated.rds", experiment_id = "03-method_characterisation"))
-tools <- read_rds(result_file("tools.rds", experiment_id = "03-method_characterisation"))
+methods <- read_rds(result_file("methods.rds", experiment_id = "03-methods"))
+methods_evaluated <- read_rds(result_file("methods_evaluated.rds", experiment_id = "03-methods"))
+tools <- read_rds(result_file("tools.rds", experiment_id = "03-methods"))
 datasets_info <- read_rds(result_file("datasets_info.rds", experiment_id = "06-optimise_parameters/3-evaluate_parameters"))
 
 # citate
