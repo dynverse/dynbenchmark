@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ```{r, results = "asis"}
-knit_child_readme("01-individual_metrics")
+knit_child_readme("01-metric_characterisation")
 ```
 
 ```{r, results = "asis"}

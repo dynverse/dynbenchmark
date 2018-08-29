@@ -3,19 +3,19 @@
 
 Good metrics are crucial for an unbiased and comprehensive benchmarking. Here we test several possible metrics for comparing two trajectories.
 
-## [Metric characterisation](01-individual_metrics)
+## [Metric characterisation](01-metric_characterisation)
 
 A first characterisation of the metrics. For each metric we:
 
 -   generate some examples to get some intuition on how the metric works
 -   test the robustness to a metric to stochasticity or parameters when appropriate
 
-|   \#| script                                                    | description                                                    |
-|----:|:----------------------------------------------------------|:---------------------------------------------------------------|
-|    1| [`correlation.R`](01-individual_metrics/01-correlation.R) | Testing the cor<sub>dist</sub>                                 |
-|    2| [`topology.R`](01-individual_metrics/02-topology.R)       | Testing the Isomorphic, edgeflip and HIM                       |
-|    3| [`clustering.R`](01-individual_metrics/03-clustering.R)   | Testing the F1<sub>branches</sub> and F1<sub>milestones</sub>  |
-|    4| [`featureimp.R`](01-individual_metrics/04-featureimp.R)   | Testing the cor<sub>features</sub> and wcor<sub>features</sub> |
+|   \#| script                                                         | description                                                                |
+|----:|:---------------------------------------------------------------|:---------------------------------------------------------------------------|
+|    1| [`correlation.R`](01-metric_characterisation/01-correlation.R) | Characterisation of the cor<sub>dist</sub>                                 |
+|    2| [`topology.R`](01-metric_characterisation/02-topology.R)       | Characterisation of the Isomorphic, edgeflip and HIM                       |
+|    3| [`clustering.R`](01-metric_characterisation/03-clustering.R)   | Characterisation of the F1<sub>branches</sub> and F1<sub>milestones</sub>  |
+|    4| [`featureimp.R`](01-metric_characterisation/04-featureimp.R)   | Characterisation of the cor<sub>features</sub> and wcor<sub>features</sub> |
 
 ## [Metric conformity](02-metric_conformity)
 
