@@ -1,9 +1,9 @@
-## Assess whether the metrics follow certain rules
+#' Using the scores on perturbed datasets, assess whether the metrics follow certain rules
 
 library(tidyverse)
 library(dynbenchmark)
 
-experiment("02-metric_characterisation/01-metric_conformity")
+experiment("02-metric_characterisation/02-metric_conformity")
 
 dataset_design <- read_rds(derived_file("dataset_design.rds"))
 

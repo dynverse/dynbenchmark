@@ -1,3 +1,5 @@
+#' Helper containing different topologies with the same number of milestones
+
 topologies <- list(
   linear = tibble(from=c("A", "B", "C", "D", "E"), to = c("B", "C", "D", "E", "F")),
   bifurcation = tibble(from = c("A", "B", "B", "C", "D"), to = c("B", "C", "D", "E", "F")),

@@ -1,3 +1,5 @@
+#' Helper functions containing the rules
+
 source(scripts_file("helper-topologies.R"))
 
 approx_unique <- function(x, tolerance = .Machine$double.eps ^ 0.5) {
@@ -770,7 +772,7 @@ change_topology <- lst(
       scale_fill_manual("Predicted topology", values = topology_colors) +
       facet_grid(from_topology ~ metric_id, switch = "y", labeller = function(tib) {
         if ("metric_id" %in% colnames(tib)) {
-          tib$metric_id <- map(tib$metric_id, label_metric, parse = TRUE)
+          tib$metric_id <- map(tib$metric_id, label_metric, parse = TRUE, format = "plotmath")
         }
         if (is.factor(tib[[1]])) tib[[1]] <- as.character(tib[[1]])
         tib

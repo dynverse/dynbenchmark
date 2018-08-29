@@ -1,10 +1,10 @@
-## Generation of toy datasets used as reference for perturbations
+#' Generation of toy datasets used as reference to assess metric conformity
 
 library(tidyverse)
 library(dynbenchmark)
 library(dyntoy)
 
-experiment("02-metric_characterisation/01-metric_conformity")
+experiment("02-metric_characterisation/02-metric_conformity")
 
 # the topologies are defined here because they need to have the same number of edges for perturb_change_topology
 source(scripts_file("helper-topologies.R"))

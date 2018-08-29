@@ -1,7 +1,9 @@
+#' Perturbing the reference datasets (for example shuffling the cells) to check the effect of this perturbation on a metric
+
 library(tidyverse)
 library(dynbenchmark)
 
-experiment("02-metric_characterisation/01-metric_conformity")
+experiment("02-metric_characterisation/02-metric_conformity")
 
 dataset_design <- read_rds(derived_file("dataset_design.rds"))
 

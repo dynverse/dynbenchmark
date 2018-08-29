@@ -1,9 +1,9 @@
-## Assess the similarity between metrics
+#' Assess the similarity between metrics
 
 library(tidyverse)
 library(dynbenchmark)
 
-experiment("02-metric_characterisation/01-metric_conformity")
+experiment("02-metric_characterisation/02-metric_conformity")
 
 # load scores
 scores <- read_rds(derived_file("scores.rds")) %>%
