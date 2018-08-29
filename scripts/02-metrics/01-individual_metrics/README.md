@@ -1,5 +1,10 @@
 
-# Individual metrics
+# Metric characterisation
+
+A first characterisation of the metrics. For each metric we:
+
+-   generate some examples to get some intuition on how the metric works
+-   test the robustness to a metric to stochasticity or parameters when appropriate
 
 |   \#| script                              | description                                                    |
 |----:|:------------------------------------|:---------------------------------------------------------------|

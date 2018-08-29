@@ -4,14 +4,14 @@ library(dynbenchmark)
 library(tidyverse)
 library(furrr)
 
-experiment("02-metric_characterisation/01-individual_metrics")
+experiment("02-metrics/01-individual_metrics")
 
 # use all topology based metrics
 metric_ids <- dyneval::metrics %>% filter(category %in% "topology") %>% pull(metric_id)
 
 ##  ............................................................................
 ##  Compare topologies                                                      ####
-source(scripts_file("helper-topologies.R", experiment = "02-metric_characterisation/02-metric_conformity"))
+source(scripts_file("helper-topologies.R", experiment = "02-metrics/02-metric_conformity"))
 
 plan(multiprocess)
 

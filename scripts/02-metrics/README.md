@@ -1,9 +1,14 @@
 
-# Metric characterisation and testing
+# Metrics for comparing two trajectories
 
 Good metrics are crucial for an unbiased and comprehensive benchmarking. Here we test several possible metrics for comparing two trajectories.
 
-## [Individual metrics](01-individual_metrics)
+## [Metric characterisation](01-individual_metrics)
+
+A first characterisation of the metrics. For each metric we:
+
+-   generate some examples to get some intuition on how the metric works
+-   test the robustness to a metric to stochasticity or parameters when appropriate
 
 |   \#| script                                                    | description                                                    |
 |----:|:----------------------------------------------------------|:---------------------------------------------------------------|

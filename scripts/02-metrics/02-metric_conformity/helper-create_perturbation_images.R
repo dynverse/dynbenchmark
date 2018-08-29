@@ -3,7 +3,7 @@
 library(dynbenchmark)
 library(esfiji)
 
-experiment("02-metric_characterisation/02-metric_conformity")
+experiment("02-metrics/02-metric_conformity")
 
 svg_location <- result_file("perturbations.svg", experiment_id = "manual_figures")
 

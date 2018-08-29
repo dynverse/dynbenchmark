@@ -29,7 +29,7 @@ perturb_shuffle_n_cells <- function(dataset, shuffle_n = Inf, seed = NULL) {
 }
 
 perturb_shuffle_cells <- function(dataset, shuffle_perc = 1, seed = NULL) {
-  source(scripts_file("helper-perturbations.R", experiment_id = "02-metric_characterisation/02-metric_conformity"))
+  source(scripts_file("helper-perturbations.R", experiment_id = "02-metrics/02-metric_conformity"))
 
   perturb_shuffle_n_cells(dataset, shuffle_n = length(dataset$cell_ids) * shuffle_perc, seed = seed)
 }
@@ -74,7 +74,7 @@ perturb_shuffle_n_edges <- function(dataset, shuffle_n = Inf) {
 }
 
 perturb_shuffle_edges <- function(dataset, shuffle_perc = 1) {
-  source(scripts_file("helper-perturbations.R", experiment_id = "02-metric_characterisation/02-metric_conformity"))
+  source(scripts_file("helper-perturbations.R", experiment_id = "02-metrics/02-metric_conformity"))
 
   perturb_shuffle_n_edges(dataset, shuffle_n = round(nrow(dataset$milestone_network) * shuffle_perc))
 }
@@ -463,7 +463,7 @@ perturb_shuffle_lengths <- function(dataset) {
 ##  ............................................................................
 ##  Direct topological changes                                              ####
 perturb_change_topology <- function(dataset, topology_id = "linear") {
-  source(scripts_file("helper-topologies.R", experiment_id = "02-metric_characterisation/02-metric_conformity"))
+  source(scripts_file("helper-topologies.R", experiment_id = "02-metrics/02-metric_conformity"))
 
   if (nrow(dataset$milestone_network) != 5) {stop("Can only change topology if there are 5 edges")}
   if (nrow(dataset$divergence_regions)) {stop("To change the topology, dataset cannot have divergence regions")}
@@ -499,7 +499,7 @@ perturb_change_topology <- function(dataset, topology_id = "linear") {
 ##  ............................................................................
 ##  Combined perturbations                                                  ####
 perturb_shuffle_cells_and_add_connecting_edges <- function(dataset, shuffle_perc = 0.2, n_edges = 1) {
-  source(scripts_file("helper-perturbations.R", experiment_id = "02-metric_characterisation/02-metric_conformity"))
+  source(scripts_file("helper-perturbations.R", experiment_id = "02-metrics/02-metric_conformity"))
 
   dataset <- perturb_add_connecting_edges(dataset, n_edges)
   dataset <- perturb_shuffle_cells(dataset, shuffle_perc)
@@ -508,7 +508,7 @@ perturb_shuffle_cells_and_add_connecting_edges <- function(dataset, shuffle_perc
 }
 
 perturb_shuffle_cells_and_merge_bifurcation <- function(dataset, shuffle_perc = 0.2) {
-  source(scripts_file("helper-perturbations.R", experiment_id = "02-metric_characterisation/02-metric_conformity"))
+  source(scripts_file("helper-perturbations.R", experiment_id = "02-metrics/02-metric_conformity"))
 
   dataset <- perturb_merge_bifurcation(dataset)
   dataset <- perturb_shuffle_cells(dataset, shuffle_perc)

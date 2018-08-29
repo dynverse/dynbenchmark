@@ -4,7 +4,7 @@ output:
     pandoc_args: --atx-headers
 ---
 
-# Metric characterisation and testing
+# Metrics for comparing two trajectories
 
 Good metrics are crucial for an unbiased and comprehensive benchmarking. Here we test several possible metrics for comparing two trajectories.
 
