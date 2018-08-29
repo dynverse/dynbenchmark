@@ -1,6 +1,5 @@
 
-Method characterisation
------------------------
+## Method characterisation
 
 -   Compile all the information we have about TI methods
 -   Group methods into sets of "tools"
