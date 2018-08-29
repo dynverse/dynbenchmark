@@ -1,18 +1,31 @@
 ---
-title: "Datasets"
 output: github_document
 ---
 
+# Dataset processing and characterisation
+
 ```{r include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(dynbenchmark)
+library(tidyverse)
+
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 The datasets are split in real datasets and synthetic datasets. The real datasets are downloaded and preprocessed first, and characteristics from these datasets (such as the number of cells and genes, library sizes, dropout probabilities, ...) are used to generate synthetic datasets. Finally, these dataset are uploaded to zenodo.
 
-All datasets can be downloaded from zenodo using the [00-download_from_zenodo.R](00-download_from_zenodo.R) script.
-
-```{r child='01-real/README.Rmd'}
+```{r}
+dynbenchmark::render_scripts_documentation()
 ```
 
-```{r child='02-synthetic/README.Rmd'}
+```{r results = 'asis'}
+knit_child_readme("01-real")
 ```
+
+```{r results = 'asis'}
+knit_child_readme("02-synthetic")
+```
+
+```{r results = 'asis'}
+knit_child_readme("05-dataset_characterisation")
+```
+

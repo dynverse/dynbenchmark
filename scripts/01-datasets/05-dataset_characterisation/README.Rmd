@@ -2,13 +2,11 @@
 output: github_document
 ---
 
-# Real datasets
+# Dataset characterisation
 
 ```{r, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
-
-The generation of the real datasets is divided in two parts:
 
 ```{r}
 dynbenchmark::render_scripts_documentation()
