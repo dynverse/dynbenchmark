@@ -2,7 +2,7 @@ library(dynbenchmark)
 library(tidyverse)
 library(patchwork)
 
-experiment("02-metric_characterisation/02-individual_metrics")
+experiment("02-metric_characterisation/01-individual_metrics")
 
 dataset <- load_dataset("real/fibroblast-reprogramming_treutlein")
 

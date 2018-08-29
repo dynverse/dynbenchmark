@@ -2,7 +2,7 @@ library(dynbenchmark)
 library(tidyverse)
 library(patchwork)
 
-experiment("02-metric_characterisation/02-individual_metrics")
+experiment("02-metric_characterisation/01-individual_metrics")
 
 # select the most complex dataset of all our datasets (excluding disconnected)
 dataset <- load_datasets(list_datasets() %>% filter(startsWith(source, "synthetic")) %>% pull(id)) %>%
