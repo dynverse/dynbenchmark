@@ -19,14 +19,14 @@ datasets <- map_df(
 )
 
 # read method meta info
-meta <- read_rds(derived_file("methods_evaluated.rds", "03-method_characterisation")) %>%
+meta <- read_rds(derived_file("methods_evaluated.rds", "03-methods")) %>%
   mutate(
     prior_mini_id = paste0("prior_mini_", group_indices(group_by_at(., vars(!!setdiff(priors$prior_id, "time")))))
   )
 
 # read qc scores
-qc_category_scores <- read_rds(derived_file("tool_qc_category_scores.rds", "03-method_characterisation"))
-qc_application_scores <- read_rds(derived_file("tool_qc_application_scores.rds", "03-method_characterisation"))
+qc_category_scores <- read_rds(derived_file("tool_qc_category_scores.rds", "03-methods"))
+qc_application_scores <- read_rds(derived_file("tool_qc_application_scores.rds", "03-methods"))
 
 
 ## START GATHERING COLUMNS

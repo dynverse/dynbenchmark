@@ -22,7 +22,7 @@ indrep_scores <- outputs_list$outputs_summrepl %>%
 ind_scores <- outputs_list$outputs_ind %>%
   inner_join(methods, "method_short_name")
 
-methods <- read_rds(derived_file("methods.rds", experiment_id = "03-method_characterisation")) %>%
+methods <- read_rds(derived_file("methods.rds", experiment_id = "03-methods")) %>%
   filter(type %in% c("algorithm", "control")) %>%
   filter(method_id %in% overall_scores$method_short_name)
 
