@@ -9,27 +9,23 @@ experiment("07-benchmark")
 ############### PART THREE: GENERATE FIGURES ###############
 ############################################################
 
-olist <- read_rds(result_file("benchmark_results.rds"))
-olist$datasets_info <- NULL
+list2env(read_rds(result_file("benchmark_results.rds")), environment())
 
-metrics_info <- dyneval::metrics %>% slice(match(read_rds(result_file("metrics.rds")), metric_id)) %>%
+metrics_info <- dyneval::metrics %>%
+  slice(match(read_rds(result_file("metrics.rds")), metric_id)) %>%
   add_row(metric_id = "overall", plotmath = "overall", latex = "\\textrm{overall}", html = "overall", long_name = "Overall score", category = "average", type = "overall", perfect = 1, worst = 0)
 
 # get ordering of methods
-method_ord <- olist$data_trajtype_totalsx2 %>%
-  filter(dataset_source == "mean", dataset_trajectory_type == "overall") %>%
+method_ord <-
+  data_aggregations %>%
+  filter(dataset_source == "mean", dataset_trajectory_type_simplified == "overall") %>%
   arrange(desc(overall)) %>%
-  .$method_id
+  select(method_id, method_name) %>%
+  mutate_all(factor)
 
 # create method_id_f factor in all data structures
-for (oname in str_subset(names(olist), "^data") %>% setdiff("datasets_info")) {
-  olist[[oname]] <- olist[[oname]] %>%
-    mutate(method_id_f = factor(method_id, levels = rev(method_ord)))
-}
-
-# load all outputs in environment and remove outputs_list
-list2env(olist, environment())
-rm(olist)
+data_aggregations <- data_aggregations %>% mutate(method_id = factor(method_id, levels = method_ord$method_id), method_name = factor(method_name, levels = method_ord$method_name))
+data <- data %>% mutate(method_id = factor(method_id, levels = method_ord$method_id), method_name = factor(method_name, levels = method_ord$method_name))
 
 ############### OVERALL COMPARISON ###############
 metr_lev <- c(
@@ -46,22 +42,22 @@ metr_lev <- c(
 
 # display barplots per metric
 oc1 <-
-  data_trajtype_totalsx2 %>%
-  filter(dataset_source == "mean", dataset_trajectory_type == "overall") %>%
-  select(method_id, method_name, method_id_f, param_id, one_of(intersect(colnames(data_trajtype_totalsx2), metr_lev))) %>%
-  gather(metric, score, -method_id:-param_id, -method_id_f)
+  data_aggregations %>%
+  filter(dataset_source == "mean", dataset_trajectory_type_simplified == "overall") %>%
+  select(method_id, method_name, param_id, one_of(intersect(colnames(data_aggregations), metr_lev))) %>%
+  gather(metric, score, -method_id:-param_id)
 
 # display barplots per dataset source
 oc2 <-
-  data_trajtype_totalsx2 %>%
-  filter(dataset_trajectory_type == "overall") %>%
-  select(method_id:param_id, method_id_f, metric = dataset_source, score = overall)
+  data_aggregations %>%
+  filter(dataset_trajectory_type_simplified == "overall") %>%
+  select(method_id:param_id, metric = dataset_source, score = overall)
 
 # create placeholder for dataset sources that havent run yet
 oc3 <-
-  data_trajtype_totalsx2 %>%
-  filter(dataset_source != "mean", dataset_trajectory_type == "overall") %>%
-  select(method_id:param_id, method_id_f) %>%
+  data_aggregations %>%
+  filter(dataset_source != "mean", dataset_trajectory_type_simplified == "overall") %>%
+  select(method_id:param_id) %>%
   crossing(metric = c("real", "synthetic/dyngen", "synthetic/dyntoy", "synthetic/prosstt", "synthetic/splatter")) %>%
   mutate(score = NA) %>%
   anti_join(oc2, by = colnames(oc2) %>% setdiff("score"))
@@ -80,7 +76,7 @@ oc4 <-
     ltime = log10(time),
     lmem = log10(mem)
   ) %>%
-  group_by(method_id, method_name, method_id_f, param_id) %>%
+  group_by(method_id, method_name, param_id) %>%
   summarise(
     predtime_cor = nacor(ltime, lpredtime),
     predmem_cor = nacor(lmem, lpredmem)
@@ -90,14 +86,14 @@ oc4 <-
 overall_comp <-
   bind_rows(oc1, oc2, oc3, oc4) %>%
   filter(metric %in% metr_lev) %>%
-  mutate(metric_f = factor(metric, levels = metr_lev))
+  mutate(metric = factor(metric, levels = metr_lev))
 
 g <-
-  ggplot(overall_comp) +
-  geom_bar(aes(method_id_f, score, fill = metric_f), stat = "identity") +
-  geom_text(aes(method_id_f, pmax(score, 0), label = method_id_f), overall_comp %>% filter(score < .2), nudge_y = .03, hjust = 0, colour = "#888888", size = 2.5) +
-  geom_text(aes(method_id_f, 0, label = method_id_f), overall_comp %>% filter(score >= .2), nudge_y = .03, hjust = 0, colour = "white", size = 2.5) +
-  facet_wrap(~metric_f, scales = "free_x", nrow = 3, labeller = label_facet(), dir = "v") +
+  ggplot(overall_comp %>% mutate(method_id = fct_rev(method_id))) +
+  geom_bar(aes(method_id, score, fill = metric), stat = "identity") +
+  geom_text(aes(method_id, pmax(score, 0), label = method_id), overall_comp %>% filter(score < .2), nudge_y = .03, hjust = 0, colour = "#888888", size = 2.5) +
+  geom_text(aes(method_id, 0, label = method_id), overall_comp %>% filter(score >= .2), nudge_y = .03, hjust = 0, colour = "white", size = 2.5) +
+  facet_wrap(~metric, scales = "free_x", nrow = 3, labeller = label_facet(), dir = "v") +
   coord_flip() +
   theme_bw() +
   labs(x = NULL, y = NULL, fill = "Metric") +
@@ -105,7 +101,7 @@ g <-
     legend.position = "none",
     panel.grid.major.y = element_blank()
   )
-# g
+g
 
 ggsave(result_file("1_overall_comparison.pdf"), g, width = 25, height = 15)
 
@@ -113,22 +109,22 @@ rm(oc1, oc2, nacor, oc3, overall_comp)
 
 
 ############### COMPARISON PER TRAJECTORY TYPE ###############
-lvls <- rev(levels(data_trajtype_totalsx2$method_id_f))
-cols <- RColorBrewer::brewer.pal(8, "Dark2")
-cols <- RColorBrewer::brewer.pal(4, "Blues")[2:4]
+lvls <- rev(levels(data_aggregations$method_id))
+# cols <- RColorBrewer::brewer.pal(8, "Dark2")
+# cols <- RColorBrewer::brewer.pal(4, "Blues")[2:4]
 cols <- viridis::viridis(8)[-1]
 method_cols <- rep(cols, ceiling(length(lvls) / length(cols)))[seq_along(lvls)]
 
 pdf(result_file("2_trajtype_comparison.pdf"), 20, 12)
 for (i in seq_len(nrow(metrics_info))) {
   g <-
-    ggplot(data_trajtype_totalsx2) +
-    geom_point(aes_string("method_id_f", metrics_info$metric_id[[i]], colour = "method_id_f")) +
+    ggplot(data_aggregations) +
+    geom_point(aes_string("fct_rev(method_id)", metrics_info$metric_id[[i]], colour = "method_id")) +
     coord_flip() +
     theme_bw() +
     theme(legend.position = "none") +
     scale_colour_manual(values = method_cols) +
-    facet_grid(dataset_source~dataset_trajectory_type_f) +
+    facet_grid(dataset_source ~ dataset_trajectory_type_simplified) +
     labs(
       x = NULL,
       title = paste0(metrics_info$metric_id[[i]], ": ", metrics_info$long_name[[i]])
