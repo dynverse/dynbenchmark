@@ -26,5 +26,7 @@ Here, we assess whether metrics conforms such rules empirically:
 render_scripts_documentation()
 ```
 
+The results of this experiment are available [here](`r link_to_results()`)
+
 
 

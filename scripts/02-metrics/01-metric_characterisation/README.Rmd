@@ -22,3 +22,4 @@ A first characterisation of the metrics. For each metric we:
 render_scripts_documentation()
 ```
 
+The results of this experiment are available [here](`r link_to_results()`)

@@ -17,6 +17,8 @@ A first characterisation of the metrics. For each metric we:
 | 3   | [📄`clustering.R`](01-metric_characterisation/03-clustering.R)   | Characterisation of the F1<sub>branches</sub> and F1<sub>milestones</sub>  |
 | 4   | [📄`featureimp.R`](01-metric_characterisation/04-featureimp.R)   | Characterisation of the cor<sub>features</sub> and wcor<sub>features</sub> |
 
+The results of this experiment are available [here](https://github.com/dynverse/dynbenchmark_results/tree/master/02-metrics/01-metric_characterisation)
+
 ## [Metric conformity](02-metric_conformity)
 
 Differences between two datasets should be reflected in certain changes in the metrics. This can be formalised in a set of rules, for example:
@@ -83,3 +85,5 @@ Here, we assess whether metrics conforms such rules empirically:
 </tr>
 </tbody>
 </table>
+
+The results of this experiment are available [here](https://github.com/dynverse/dynbenchmark_results/tree/master/02-metrics/02-metric_conformity)
