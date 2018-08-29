@@ -4,7 +4,7 @@ library(dynbenchmark)
 library(tidyverse)
 library(patchwork)
 
-experiment("02-metrics/01-individual_metrics")
+experiment("02-metrics/01-metric_characterisation")
 
 set.seed(9)
 dataset <- dyntoy::generate_dataset(model = dyntoy::model_binary_tree(num_branchpoints = 2)) %>% simplify_trajectory()
