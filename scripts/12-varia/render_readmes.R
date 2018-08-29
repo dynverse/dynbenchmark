@@ -4,8 +4,6 @@ library(dynbenchmark)
 library(fs)
 library(tidyverse)
 
-experiment("12-varia/01-documentation")
-
 readme_paths <- fs::dir_ls("scripts", regexp = "README\\.Rmd", recursive = TRUE) %>% c("./README.Rmd")
 
 options(knitr.duplicate.label = 'allow')
