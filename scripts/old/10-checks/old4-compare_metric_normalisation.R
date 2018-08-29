@@ -240,7 +240,7 @@ out_scalings <-
     lst(plot_out, stats)
   })
 
-pdf(figure_file("compare_scaling.pdf"), 30, 16)
+pdf(result_file("compare_scaling.pdf"), 30, 16)
 for (o in out_scalings) {
   print(o$plot_out)
 }
@@ -253,4 +253,4 @@ zz <- ggplot(stats, aes(mean_drift, cor)) +
   ggrepel::geom_text_repel(aes(label = score_name), nudge_y = .02) +
   facet_wrap(~metric, nrow = 1) +
   theme_bw()
-ggsave(figure_file("summ.pdf"), zz, width = 16, height = 6)
+ggsave(result_file("summ.pdf"), zz, width = 16, height = 6)

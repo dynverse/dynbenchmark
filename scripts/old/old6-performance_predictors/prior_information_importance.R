@@ -6,7 +6,7 @@ experiment("6-performance_predictors")
 
 read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
-methods <- read_rds(derived_file("methods.rds", experiment_id = "04-method_characterisation"))
+methods <- read_rds(derived_file("methods.rds", experiment_id = "03-method_characterisation"))
 
 method_priors <- methods %>%
   filter(method_short_name %in% overall_scores$method_short_name) %>%
@@ -54,7 +54,7 @@ required_priors_performance_comparison <- method_priors_scores %>%
     theme(panel.spacing = unit(0, "cm"), legend.position = "none")
 required_priors_performance_comparison
 
-write_rds(required_priors_performance_comparison, figure_file("required_priors_performance_comparison.rds"))
+write_rds(required_priors_performance_comparison, result_file("required_priors_performance_comparison.rds"))
 
 
 

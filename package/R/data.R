@@ -47,3 +47,8 @@
 #'
 #' @docType data
 "qc_categories"
+
+#' Metadata on method statuses
+#'
+#' @docType data
+"method_status_colours"

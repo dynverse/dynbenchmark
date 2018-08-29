@@ -276,7 +276,7 @@ predictions <- tibble(prediction = predictions_list, dataset_id = run$spaces$id)
 
 ### . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
 ### Check scores of controls                                                ####
-datasets <- read_rds(derived_file("datasets.rds", "02-dataset_characterisation"))
+datasets <- read_rds(derived_file("datasets.rds", "01-datasets/05-dataset_characterisation"))
 datasets <- datasets %>% slice(match(run$spaces$id, id))
 
 controls <- map(datasets %>% filter(dataset_group == "control" & id != "control_BA") %>% pull(id), function(dataset_id) {

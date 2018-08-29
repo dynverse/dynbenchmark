@@ -15,7 +15,7 @@ qsub_pmap <- function(.x, .f, ...) {
 
   .f2 <- function(.x, ...) {purrr::invoke(.x$.f, .x[names(.x) != ".f"], ...)}
 
-  qsub_lapply(
+  qsub::qsub_lapply(
     .x2,
     .f2,
     ...

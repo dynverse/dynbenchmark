@@ -16,7 +16,7 @@ read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-agg
 
 methods <- methods %>% filter(type == "algorithm")
 
-datasets <- read_rds(derived_file("datasets.rds", "02-dataset_characterisation"))
+datasets <- read_rds(derived_file("datasets.rds", "01-datasets/05-dataset_characterisation"))
 ti_methods <- dynwrap::get_ti_methods()
 
 top_methods <- methods %>% filter(bifurcation) %>% pull(method_short_name)
@@ -309,5 +309,5 @@ bifurcating_example <- cowplot::plot_grid(
 
 bifurcating_example
 
-cowplot::save_plot(figure_file("bifurcating_example.svg"), bifurcating_example, base_height = 10, base_width = 20)
+cowplot::save_plot(result_file("bifurcating_example.svg"), bifurcating_example, base_height = 10, base_width = 20)
 

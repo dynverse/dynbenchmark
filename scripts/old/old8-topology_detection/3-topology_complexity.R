@@ -50,7 +50,7 @@ read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-agg
 
 # load config and datasets
 config <- read_rds(derived_file("config.rds", "06-optimise_parameters/3-evaluate_parameters"))
-datasets <- read_rds(derived_file("datasets.rds", "02-dataset_characterisation")) %>% mutate(dataset_id = id)
+datasets <- read_rds(derived_file("datasets.rds", "01-datasets/05-dataset_characterisation")) %>% mutate(dataset_id = id)
 datasets$trajectory_type <- map(datasets$milestone_network, dynwrap::classify_milestone_network) %>% map_chr("network_type")
 datasets <- bind_cols(datasets, map_df(datasets$milestone_network, calculate_statistics))
 
@@ -176,5 +176,5 @@ topology_complexity_comparison <- plot_grid(
 )
 
 topology_complexity_comparison
-topology_complexity_comparison %>% ggsave(figure_file("topology_complexity_comparison.svg"), ., width = 12, height = 4)
+topology_complexity_comparison %>% ggsave(result_file("topology_complexity_comparison.svg"), ., width = 12, height = 4)
 

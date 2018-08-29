@@ -3,92 +3,73 @@ library(tidyverse)
 
 experiment("05-scaling")
 
-# define dataset function. two datasets with the same seed but different
-# dimensionalities should have the same values in overlapping columns and rows.
-generate_dataset <- function(lnrow, lncol, seed = 1) {
-  prev_seed <- .Random.seed[[1]]
-  nrow <- ceiling(10 ^ lnrow)
-  ncol <- ceiling(10 ^ lncol)
-  expression <- sapply(seq_len(ncol), function(i) {
-    set.seed(i * seed)
-    runif(nrow)
-  })
-  expression[expression <= .9] <- 0
-  counts <- round(2^expression) + 1
+##########################################################
+###############      DEFINE DATASETS       ###############
+##########################################################
+datasets <- readr::read_rds(derived_file("datasets.rds"))
 
-  cell_ids <- paste0("Cell", seq_len(nrow))
-  gene_ids <- paste0("Gene", seq_len(nrow))
-  dimnames(counts) <- dimnames(expression) <- list(cell_ids, gene_ids)
+##########################################################
+###############       DEFINE METHODS       ###############
+##########################################################
 
-  set.seed(seed)
-  dataset <-
-    dynwrap::wrap_data(
-      id = paste0("scaling_", lnrow, "_", lncol),
-      cell_ids = cell_ids
-    ) %>%
-    dynwrap::add_trajectory(
-      milestone_network = data_frame(from = "A", to = "B", length = 1, directed = FALSE),
-      progressions = data_frame(cell_id = cell_ids, from = "A", to = "B", percentage = runif(length(cell_ids)))
-    ) %>%
-    dynwrap::add_expression(
-      counts = counts,
-      expression = expression
-    ) %>%
-    dynwrap::add_prior_information() %>%
-    dynwrap::add_cell_waypoints() %>%
-    dynwrap::add_root("Cell1")
+# use method testing to define which methods will be run
+checks <- read_rds(result_file("checks.rds", experiment_id = "04-method_testing"))
+cat("NOT RUNNING: ", checks %>% filter(ran == 0) %>% pull(method_id) %>% paste(collapse = ", "), "\n", sep = "")
 
-  set.seed(prev_seed)
+# use methods that were able to at least run on 1 dataset, and arrange them according to execution time
+method_ids <- checks %>% filter(ran > 0) %>% arrange(time) %>% pull(method_id)
 
-  dataset
-}
+# construct methods tibble
+methods <-
+  dynwrap::get_ti_methods(method_ids, evaluate = FALSE) %>%
+  mapdf(function(m) {
+    l <- m$fun()
+    l$fun <- m$fun
+    l$type <- "function"
+    l
+  }) %>%
+  list_as_tibble() %>%
+  select(id, type, fun, everything())
 
-dim_test <- seq(log10(100), log10(100000), by = log10(10) / 4)
-dim_df <- crossing(
-  nrow = dim_test,
-  ncol = dim_test
-)
-dataset_funs <- lapply(seq_len(nrow(dim_df)), function(i) {
-  fun <- generate_dataset
-  formals(fun)$lnrow <- dim_df$nrow[[i]]
-  formals(fun)$lncol <- dim_df$ncol[[i]]
-  fun
-})
-
-
-# define methods
-method_ids <- dynmethods::methods$id
-
-# create design
-design <- generate_benchmark_design(
-  dataset_ids = dataset_ids,
-  method_ids = method_ids
+##########################################################
+###############       CREATE DESIGN        ###############
+##########################################################
+design <- benchmark_generate_design(
+  datasets = datasets,
+  methods = methods,
+  parameters = list(
+    fateid = tibble(id = "default", force = TRUE),
+    stemnet = tibble(id = "default", force = TRUE),
+    tscan = tibble(id = "default", modelNames = list(c("VVV", "EEE")))
+  )
 )
 
-# define other parameters
-metrics <- list( dummy = function(dataset, model) { 1 } )
-timeout_per_execution <- 60 * 60
-execute_before <- ""
-# execute_before <- "export DYNBENCHMARK_PATH=/group/irc/shared/dynbenchmark/; singularity exec -B /scratch:/scratch -B /group:/group /scratch/irc/shared/dynbenchmark.simg \\"
-verbose <- TRUE
-max_memory_per_execution <- "8G"
-local_output_folder <- derived_file("suite/")
-remote_output_folder <- derived_file("suite/", remote = TRUE)
+design$crossing <- design$crossing %>%
+  left_join(datasets %>% select(dataset_id = id, memory), by = "dataset_id") %>%
+  mutate(method_order = match(method_id, method_ids)) %>%
+  arrange(memory, method_order)
 
-# save configuration
-write_rds(lst(
-  design, metrics, timeout_per_execution,
-  max_memory_per_execution, execute_before, verbose,
-  local_output_folder, remote_output_folder
-), derived_file("config.rds"))
+write_rds(design, derived_file("design.rds"), compress = "xz")
+
+
+##########################################################
+###############        SUBMIT JOB          ###############
+##########################################################
+design_filt <- read_rds(derived_file("design.rds"))
+
+# only run the next stage when the first has finished
+# design_filt$crossing <- design_filt$crossing %>% filter(memory < 20, method_id %in% c("angle", "paga"))
+design_filt$crossing <- design_filt$crossing %>% filter(memory < 20)
+# design_filt$crossing <- design_filt$crossing %>% filter(memory < 50)
+# design_filt$crossing <- design_filt$crossing %>% filter(memory < 100)
+# design_filt$crossing <- design_filt$crossing
 
 benchmark_submit(
-  design = design,
-  timeout_per_execution = timeout_per_execution,
-  max_memory_per_execution = max_memory_per_execution,
-  metrics = metrics,
-  local_output_folder = local_output_folder,
-  remote_output_folder = remote_output_folder,
-  execute_before = execute_before,
-  verbose = verbose
+  design = design_filt,
+  qsub_grouping = "{method_id}/{memory}",
+  qsub_params = function(method_id, memory) list(timeout = 3600, memory = paste0(memory, "G")),
+  metrics = list(dummy = function(dataset, model) 1),
+  verbose = TRUE,
+  output_models = FALSE
 )
+

@@ -6,7 +6,7 @@ experiment("11-evaluation_robustness")
 
 read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
-datasets <- read_rds(derived_file("datasets.rds", "02-dataset_characterisation"))
+datasets <- read_rds(derived_file("datasets.rds", "01-datasets/05-dataset_characterisation"))
 
 source("analysis/analyses/11-evaluation_robustness/functions_rank_methods.R")
 method_scores <- rank_methods(ind_scores)
@@ -125,8 +125,8 @@ performance_dataset_variability_combined <- plot_grid(
   rel_heights = c(0.2, 0.8)
 )
 performance_dataset_variability_combined
-save_plot(figure_file("performance_dataset_variability_combined.svg"), performance_dataset_variability_combined, base_width = 20, base_height = 5)
-write_rds(performance_dataset_variability_combined, figure_file("performance_dataset_variability_combined.rds"))
+save_plot(result_file("performance_dataset_variability_combined.svg"), performance_dataset_variability_combined, base_width = 20, base_height = 5)
+write_rds(performance_dataset_variability_combined, result_file("performance_dataset_variability_combined.rds"))
 
 
 ##  ............................................................................
@@ -263,7 +263,7 @@ dataset_sample_max_datasets_overview <- dataset_sample_max_datasets_top %>%
     scale_x_discrete("", labels = method_names) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     scale_y_continuous(label_short("largest_subset_of_datasets_at_which_method_ranks_first", 30), limits = c(0, length(all_dataset_ids)+10), expand = c(0, 0))
-dataset_sample_max_datasets_overview %>% write_rds(figure_file("dataset_sample_max_datasets_overview.rds"))
+dataset_sample_max_datasets_overview %>% write_rds(result_file("dataset_sample_max_datasets_overview.rds"))
 
 
 dataset_sample_max_datasets_top_individual <- dataset_sample_max_datasets_top %>%

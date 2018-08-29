@@ -45,23 +45,24 @@ process_raw_dataset <- function(
   feature_info <- feature_info %>% slice(match(colnames(counts), feature_id))
 
   # wrap dataset
-  dataset <- dynwrap::wrap_data(
-    dataset_source = str_replace(id, "/.*", ""),
-    id = id,
-    cell_ids = cell_ids,
-    cell_info = cell_info,
-    normalisation_info = normalisation_info,
-    creation_date = Sys.time()
-  ) %>%
+  dataset <-
+    dynwrap::wrap_data(
+      source = str_replace(id, "/.*", ""),
+      id = id,
+      cell_ids = cell_ids,
+      cell_info = cell_info,
+      normalisation_info = normalisation_info,
+      creation_date = Sys.time()
+    ) %>%
     dynwrap::add_cluster_graph(
-    milestone_network = milestone_network,
-    grouping = grouping
-  ) %>%
+      milestone_network = milestone_network,
+      grouping = grouping
+    ) %>%
     dynwrap::add_expression(
-    counts = counts,
-    expression = expression,
-    feature_info = feature_info
-  ) %>%
+      counts = counts,
+      expression = expression,
+      feature_info = feature_info
+    ) %>%
     dynwrap::add_prior_information() %>%
     dynwrap::add_cell_waypoints()
 
@@ -72,10 +73,10 @@ process_raw_dataset <- function(
   dataset <- dynwrap::add_root(dataset, root_milestone_id = root_milestone_id)
 
   # save the dataset
-  save_dataset(dataset, dataset_id = id)
+  save_dataset(dataset, id = id)
 
   # save the normalisation plots
-  grDevices::pdf(dataset_file(dataset_id = id, "normalisation.pdf"))
+  grDevices::pdf(dataset_file(id = id, "normalisation.pdf"))
   walk(norm_out$normalisation_plots, print)
   grDevices::graphics.off()
 

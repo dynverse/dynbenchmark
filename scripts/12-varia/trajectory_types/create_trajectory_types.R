@@ -13,15 +13,15 @@ xml_find_multiple_ids <- function(xml, ids) {
   xml_find_all(xml, xpath)
 }
 
-xml <- read_xml(figure_file("trajectory_types.svg"))
+xml <- read_xml(result_file("trajectory_types.svg"))
 
 # Check traj types are in the xml
 trajtype_ids <- xml %>% xml_find_multiple_ids(trajectory_types$id) %>% xml_attr("id")
 
 walk(trajtype_ids, function(id) {
-  mini_name <- figure_file(glue::glue("mini/{id}.svg"))
+  mini_name <- result_file(glue::glue("mini/{id}.svg"))
 
-  xml_mini <- read_xml(figure_file("trajectory_types.svg"))
+  xml_mini <- read_xml(result_file("trajectory_types.svg"))
 
   remove_ids <- setdiff(trajtype_ids, id) %>% c("layer2", "layer3")
 

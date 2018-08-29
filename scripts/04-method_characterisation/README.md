@@ -1,1 +1,0 @@
-## Methods characterisation and testing

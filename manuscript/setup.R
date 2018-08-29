@@ -48,7 +48,7 @@ add_sfig <- function(fig_path, ref_id, caption_main, caption_text, width = 15, h
 }
 
 figs <- tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width = numeric(), height = numeric())
-add_fig <- function(fig_path, ref_id, caption_main, caption_text, width = 5, height = 7) {
+add_fig <- function(fig_path, ref_id, caption_main, caption_text = "", width = 5, height = 7) {
   # save it because why not
   figs <<- figs %>% add_row(
     ref_id = ref_id,
@@ -102,14 +102,14 @@ add_stable <- function(table, ref_id, caption) {
 }
 
 # load data
-methods <- read_rds(result_file("methods.rds", experiment_id = "04-method_characterisation"))
-methods_evaluated <- read_rds(result_file("methods_evaluated.rds", experiment_id = "04-method_characterisation"))
-implementations <- read_rds(result_file("implementations.rds", experiment_id = "04-method_characterisation"))
+methods <- read_rds(result_file("methods.rds", experiment_id = "03-method_characterisation"))
+methods_evaluated <- read_rds(result_file("methods_evaluated.rds", experiment_id = "03-method_characterisation"))
+tools <- read_rds(result_file("tools.rds", experiment_id = "03-method_characterisation"))
 datasets_info <- read_rds(result_file("datasets_info.rds", experiment_id = "06-optimise_parameters/3-evaluate_parameters"))
 
 # citate
 cite_methods <- function(method_ids) {
-  implementations %>% filter(implementation_id %in% !!method_ids) %>% pull(bibtex) %>% discard(is.na) %>% {glue::glue("@{.}")} %>% glue::collapse("; ") %>% glue::glue("[", ., "]")
+  tools %>% filter(tool_id %in% !!method_ids) %>% pull(bibtex) %>% discard(is.na) %>% {glue::glue("@{.}")} %>% glue::collapse("; ") %>% glue::glue("[", ., "]")
 }
 
 # add caption to table
@@ -124,7 +124,7 @@ add_table <- function(ref_id, table, caption) {
     table_output <- paste("", "", table[["latex"]] %>% add_caption_latex(caption_latex), "", "", sep = "\n")
   } else {
     table_output <- paste0(
-      paste0(ref("table", "implementations", anchor = TRUE), ": ", caption),
+      paste0(ref("table", "tools", anchor = TRUE), ": ", caption),
       table[["html"]],
       collapse = "\n"
     )

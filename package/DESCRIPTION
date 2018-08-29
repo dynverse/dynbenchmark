@@ -25,13 +25,15 @@ Imports:
   cluster,
   dplyr,
   emoa,
+  fs,
   ggraph,
   ggplot2,
   glue,
-  Hmisc,
   httr,
+  knitr,
   mlr,
   mlrMBO,
+  ParamHelpers (>= 1.11),
   parallelMap,
   purrr,
   readr,
@@ -44,16 +46,15 @@ Imports:
   tidyverse,
   tibble,
   testthat,
+  qsub,
   xml2
 Suggests:
   dyngen,
   dyntoy,
   dynnormaliser,
-  qsub,
   devtools,
   igraph,
   randomForest,
-  ParamHelpers (>= 1.11),
   reticulate,
   RColorBrewer,
   splatter,
@@ -68,10 +69,7 @@ Remotes:
   dynverse/dynutils,
   dynverse/dyntoy,
   dynverse/dynwrap,
-  mlr-org/mlr,
-  mlr-org/mlrMBO,
-  jakobbossek/smoof,
-  rcannood/qsub
+  rcannood/qsub@devel
 RoxygenNote: 6.1.0
 Roxygen: list(markdown = TRUE)
 Collate: 
@@ -79,10 +77,13 @@ Collate:
     'datasets_preprocessing.R'
     'google_scholar.R'
     'load_dyneval_model.R'
+    'metrics.R'
     'package.R'
+    'perturbations.R'
     'plotting_labels.R'
     'plotting_priors_mini.R'
     'plotting_svg_replacement.R'
+    'plotting_themes.R'
     'qsub.R'
     'setup_experiment.R'
     'setup_datasets.R'
@@ -91,5 +92,9 @@ Collate:
     'setup_pipeline.R'
     'setup_platforms.R'
     'simulators.R'
-    'suite_benchmark.R'
+    'suite_benchmark_fetch_results.R'
+    'suite_benchmark_generate_design.R'
+    'suite_benchmark_submit.R'
     'suite_paramoptim.R'
+    'text_equations.R'
+    'text_ref.R'

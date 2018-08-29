@@ -7,7 +7,7 @@ common_labels <- tribble(
   "ngenes", "Number of genes", "# genes",
   "ncells", "Number of cells", "# cells",
   "n_methods", "Number of methods", "# methods",
-  "n_implementations", "Number of methods", "# methods",
+  "n_tools", "Number of tools", "# tools",
   "silver", "Silver standard", "Silver",
   "gold", "Gold standard", "Gold",
   "gse", "Source(s)", "Source(s)",
@@ -23,7 +23,8 @@ common_labels <- tribble(
   "trajectory_type_gold", "Gold standard trajectory type", "Gold trajectory type",
   "trajectory_type_predicted", "Predicted trajectory type", "Predicted trajectory type",
   "harm_mean", "Harmonic mean", "Harmonic mean",
-  "dataset_source", "Dataset source", "Dataset source"
+  "dataset_source", "Dataset source", "Dataset source",
+  "source", "Dataset source", "Dataset source"
 )
 
 

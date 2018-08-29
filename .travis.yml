@@ -13,6 +13,8 @@ addons:
     - libssh-dev                          # ssh > qsub
 before_install:
  - cd package
+git:
+    submodules: false
 install:
 - if [ `git branch | grep '* master' | wc -l` == 0 ]; then sed -i 's#\(dynverse/[^, ]*\)#\1@devel#' DESCRIPTION; fi
 - R -e 'if ("devtools" %in% rownames(installed.packages())) update.packages(oldPkgs = "devtools", ask = FALSE) else install.packages("devtools")'

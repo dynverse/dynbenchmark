@@ -5,19 +5,17 @@ library(dynutils)
 
 drive <- drive_download(as_id("14ZzuesLq5u5l-Gp_r5tSkvwOpxxz9LuXS_HG6GAYfxw"), type="text/plain", overwrite=TRUE, path = tempfile())
 system(pritt("sed -i '1s/^.//' {drive$local_path}")) # remove first character, because this is some strange unicode character
-system(pritt("cat {drive$local_path} > analysis/paper/paper.Rmd"))
+system(pritt("cat {drive$local_path} > manuscript/paper.Rmd"))
 
-# add wip
-read_file("analysis/paper/paper.Rmd") %>%
-  str_replace_all("§(.*?)\n", "<p class='wip'>\\1</p>") %>%
+read_file("manuscript/paper.Rmd") %>%
   str_replace_all("\n\\[[a-z]{1,2}\\][^\n]*", "") %>%
   str_replace_all("\\[[a-z]{1,2}\\]", "") %>%
   str_replace_all("→", "-->") %>%
   str_replace_all("\n#", "\n\n#") %>% # add double new line before (sub)titles
-  write_file("analysis/paper/paper.Rmd")
+  write_file("manuscript/paper.Rmd")
 
 # process all svgs
-files <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg")
+files <- list.files("figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg")
 walk(files, function(file) {
   svg <- xml2::read_xml(file)
   if (is.null(xml2::xml_attr(svg, "width"))) {
@@ -48,7 +46,7 @@ browseURL("analysis/paper/paper.html")
 ##  PDF                                                                     ####
 
 # create pdfs and pngs for every svg, svg conversion is not really good in pandoc
-files <- list.files("analysis/figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg")
+files <- list.files("figures", recursive=TRUE, full.names=T) %>% keep(endsWith, ".svg")
 tofiles <- files %>% gsub("\\.svg", "\\.tmp\\.pdf", .)
 parallel::mclapply(purrr::transpose(list(files, tofiles)), function(.) system(glue::glue("inkscape {.[[1]]} --export-pdf={.[[2]]}")), mc.cores=8)
 

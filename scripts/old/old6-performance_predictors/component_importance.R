@@ -6,9 +6,9 @@ experiment("6-performance_predictors")
 
 read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
-method_components <- read_rds(derived_file("method_components.rds", experiment_id = "04-method_characterisation"))
-component_categories <- read_rds(derived_file("component_categories.rds", experiment_id = "04-method_characterisation"))
-component_category_colors <- read_rds(derived_file("component_category_colors.rds", experiment_id = "04-method_characterisation"))
+method_components <- read_rds(derived_file("method_components.rds", experiment_id = "03-method_characterisation"))
+component_categories <- read_rds(derived_file("component_categories.rds", experiment_id = "03-method_characterisation"))
+component_category_colors <- read_rds(derived_file("component_category_colors.rds", experiment_id = "03-method_characterisation"))
 
 #   ____________________________________________________________________________
 #   Component importance                                                    ####
@@ -142,7 +142,7 @@ table <- map(c("latex", "html"), function(format) {
 }) %>% set_names(c("latex", "html"))
 table
 
-table %>% write_rds(figure_file("component_importance.rds"))
+table %>% write_rds(result_file("component_importance.rds"))
 
 ##  ............................................................................
 ##  Plot                                                                    ####
@@ -208,4 +208,4 @@ method_components_scores_dots
 
 
 
-method_components_scores_dots %>% ggsave(figure_file("method_components_scores.svg"),., width = 12, height = 10)
+method_components_scores_dots %>% ggsave(result_file("method_components_scores.svg"),., width = 12, height = 10)
