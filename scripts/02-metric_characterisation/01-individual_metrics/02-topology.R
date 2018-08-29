@@ -1,3 +1,5 @@
+#' Testing the `r label_metric("isomorphic")`, `r label_metric("edge_flip")` and `r label_metric("him")`
+
 library(dynbenchmark)
 library(tidyverse)
 library(furrr)

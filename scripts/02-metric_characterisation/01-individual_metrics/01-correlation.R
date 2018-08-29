@@ -1,3 +1,5 @@
+#' Testing the `r label_metric("correlation")`
+
 library(dynbenchmark)
 library(tidyverse)
 library(patchwork)

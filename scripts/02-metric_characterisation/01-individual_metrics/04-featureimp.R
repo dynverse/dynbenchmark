@@ -1,3 +1,5 @@
+#' Testing the `r label_metric("featureimp_cor")` and `r label_metric("featureimp_wcor")`
+
 library(dynbenchmark)
 library(tidyverse)
 library(patchwork)

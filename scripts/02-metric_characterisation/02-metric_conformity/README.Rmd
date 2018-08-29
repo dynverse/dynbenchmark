@@ -1,5 +1,7 @@
 ---
-output: github_document
+output: 
+  github_document:
+    pandoc_args: --atx-headers
 ---
 
 # Metric conformity
@@ -19,14 +21,10 @@ Differences between two datasets should be reflected in certain changes in the m
 
 Here, we assess whether metrics conforms such rules empirically:
 
+
 ```{r, results = "asis"}
-extract_scripts_documentation(".", recursive = FALSE) %>% 
-  arrange(ix) %>% 
-    mutate(
-    script = glue::glue("[`{id}`]({file})"),
-    order = ifelse(is.na(ix), "", ix)
-  ) %>%
-  select(order, script, description = title) %>%
-  knitr::kable()
+render_scripts_documentation()
 ```
+
+
 
