@@ -1,3 +1,5 @@
+#' Retrieve the results from method testing
+
 library(dynbenchmark)
 library(tidyverse)
 
