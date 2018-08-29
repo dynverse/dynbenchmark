@@ -1,3 +1,5 @@
+#' Start the method testing on the cluster
+
 library(dynbenchmark)
 library(tidyverse)
 

@@ -1,3 +1,5 @@
+#' Create the website containing the method testing results for the world to see
+
 library(dynbenchmark)
 library(tidyverse)
 

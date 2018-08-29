@@ -1,4 +1,4 @@
-# This script preprocesses all datasets, will run on a computer cluster
+#' Downloading the real datasets from their sources (eg. GEO), and constructing the gold standard model, using the helpers in [helpers-download_from_sources](helpers-download_from_sources)
 
 library(tidyverse)
 library(dynbenchmark)

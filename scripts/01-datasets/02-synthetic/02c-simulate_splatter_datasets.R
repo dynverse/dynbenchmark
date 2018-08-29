@@ -1,3 +1,5 @@
+#' [Splatter](https://github.com/Oshlack/splatter), simulations of non-linear paths between different states
+
 library(tidyverse)
 library(dynbenchmark)
 library(qsub)

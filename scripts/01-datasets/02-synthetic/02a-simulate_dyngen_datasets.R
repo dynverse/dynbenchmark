@@ -1,3 +1,5 @@
+#' [dyngen](https://github.com/dynverse/dyngen), simulations of regulatory networks which will produce a particular trajectory
+
 library(qsub)
 library(dyngen)
 library(dynbenchmark)

@@ -6,7 +6,7 @@ experiment("6-performance_predictors")
 
 read_rds(derived_file("evaluation_algorithm.rds", "06-optimise_parameters/10-aggregations")) %>% list2env(.GlobalEnv)
 
-methods <- read_rds(derived_file("methods.rds", experiment_id = "03-method_characterisation"))
+methods <- read_rds(derived_file("methods.rds", experiment_id = "03-methods"))
 
 method_priors <- methods %>%
   filter(method_short_name %in% overall_scores$method_short_name) %>%

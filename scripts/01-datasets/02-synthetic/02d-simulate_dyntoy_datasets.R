@@ -1,3 +1,5 @@
+#' [dyntoy](https://github.com/dynverse/dyntoy), simulations of toy data using random expression gradients in a reduced space
+
 library(dynbenchmark)
 library(dyntoy)
 library(tidyverse)
