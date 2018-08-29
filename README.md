@@ -47,8 +47,7 @@ The scripts folder contains all the scripts necessary to fully reproduce the ben
 | 5   | [📁`scaling`](scripts/05-scaling)                         | Scalability of methods                  |
 | 6   | [📁`optimise_parameters`](scripts/06-optimise_parameters) |                                         |
 | 7   | [📁`benchmark`](scripts/07-benchmark)                     |                                         |
-| 12  | [📁`varia`](scripts/12-varia)                             |                                         |
-|     | [📁`old`](scripts/old)                                    |                                         |
+|     | [📁`varia`](scripts/varia)                                |                                         |
 
 ## Benchmarking your own method
 
