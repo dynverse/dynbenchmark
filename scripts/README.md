@@ -3,7 +3,7 @@
 
 The scripts folder contains all the scripts necessary to fully reproduce the benchmarking manuscript in chronologically ordered subfolders. Each subfolder contains a readme file with further explanations of the different scripts and what they do:
 
-| \#  | script                                           | description                             |
+| \#  | script/folder                                    | description                             |
 |:----|:-------------------------------------------------|:----------------------------------------|
 | 1   | [📁`datasets`](01-datasets)                       | Dataset processing and characterisation |
 | 2   | [📁`metrics`](02-metrics)                         | Metrics for comparing two trajectories  |

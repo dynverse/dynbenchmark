@@ -11,7 +11,7 @@ Here we estimate the parameters of these "platforms" and use them to simulate da
 
 The data is then simulated using wrappers around the simulators (see [/package/R/simulators.R](/package/R/simulators.R)), so that they all return datasets in a format consistent with dynwrap.
 
-| \#  | script                                                              | description                                                                                                                 |
+| \#  | script/folder                                                       | description                                                                                                                 |
 |:----|:--------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------|
 | 1   | [📄`estimate_platform.R`](01-estimate_platform.R)                    |                                                                                                                             |
 | 2a  | [📄`simulate_dyngen_datasets.R`](02a-simulate_dyngen_datasets.R)     | [dyngen](https://github.com/dynverse/dyngen), simulations of regulatory networks which will produce a particular trajectory |

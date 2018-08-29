@@ -68,11 +68,11 @@ render_scripts_documentation <- function(folder = ".", recursive = FALSE) {
     arrange(ix) %>%
     mutate(
       symbol = case_when(type == "directory" ~ "\U1F4C1", type == "script" ~ "\U1F4C4", TRUE ~ ""),
-      script = glue::glue("[{symbol}`{id}`]({file})"),
+      location = glue::glue("[{symbol}`{id}`]({file})"),
       order = paste0(ifelse(is.na(ix), "", ix), ifelse(is.na(subix), "", subix)),
       description = map_chr(title, ~knitr::knit_child(text = ., quiet = TRUE))
     ) %>%
-    select(`\\#` = order, script, description) %>%
+    select(`\\#` = order, `script/folder` = location, description) %>%
     knitr::kable()
 }
 

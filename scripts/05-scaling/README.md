@@ -5,7 +5,7 @@ Here we test how well a method scales with increasing number of features (genes)
 
 Each method is run on randomly generated data with increasing gene set and cell set sizes, and the execution times and memory usages are modelled using linear models.
 
-| \#  | script                                        | description |
+| \#  | script/folder                                 | description |
 |:----|:----------------------------------------------|:------------|
 | 0   | [📄`generate_data.R`](0-generate_data.R)       |             |
 | 1   | [📄`submit_jobs.R`](1-submit_jobs.R)           |             |

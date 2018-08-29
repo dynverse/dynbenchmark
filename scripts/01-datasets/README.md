@@ -3,7 +3,7 @@
 
 The datasets are split in real datasets and synthetic datasets. The real datasets are downloaded and preprocessed first, and characteristics from these datasets (such as the number of cells and genes, library sizes, dropout probabilities, ...) are used to generate synthetic datasets. The datasets are then characterised, after which they are uploaded to Zenodo.
 
-| \#  | script                                                     | description                                    |
+| \#  | script/folder                                              | description                                    |
 |:----|:-----------------------------------------------------------|:-----------------------------------------------|
 | 0   | [📄`download_from_zenodo.R`](00-download_from_zenodo.R)     | Downloading the processed datasets from zenodo |
 | 1   | [📁`real`](01-real)                                         | Real datasets                                  |
@@ -26,7 +26,7 @@ The generation of the real datasets is divided in two parts:
 <thead>
 <tr class="header">
 <th align="left">#</th>
-<th align="left">script</th>
+<th align="left">script/folder</th>
 <th align="left">description</th>
 </tr>
 </thead>
@@ -70,7 +70,7 @@ The data is then simulated using wrappers around the simulators (see [/package/R
 <thead>
 <tr class="header">
 <th align="left">#</th>
-<th align="left">script</th>
+<th align="left">script/folder</th>
 <th align="left">description</th>
 </tr>
 </thead>
@@ -105,7 +105,7 @@ The data is then simulated using wrappers around the simulators (see [/package/R
 
 ## [Dataset characterisation](04-dataset_characterisation)
 
-| \#  | script                                                                          | description |
+| \#  | script/folder                                                                   | description |
 |:----|:--------------------------------------------------------------------------------|:------------|
 | 1   | [📄`synthetic.R`](04-dataset_characterisation/1-synthetic.R)                     |             |
 | 2   | [📄`real.R`](04-dataset_characterisation/2-real.R)                               |             |

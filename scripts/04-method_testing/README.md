@@ -5,7 +5,7 @@ Here, we test the methods on some small real and toy datasets, to capture errors
 
 These testing results are in the end pushed to <https://dynverse.github.io/dynmethods_automated_testing/index.html>
 
-| \#  | script                                        | description                                                                   |
+| \#  | script/folder                                 | description                                                                   |
 |:----|:----------------------------------------------|:------------------------------------------------------------------------------|
 | 1   | [📄`submit_jobs.R`](1-submit_jobs.R)           | Start the method testing on the cluster                                       |
 | 2   | [📄`retrieve_results.R`](2-retrieve_results.R) | Retrieve the results from method testing                                      |
