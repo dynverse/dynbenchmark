@@ -38,16 +38,16 @@ The benchmarking pipeline generates (and uses) the following datasets:
 
 The scripts folder contains all the scripts necessary to fully reproduce the benchmarking manuscript in chronologically ordered subfolders. Each subfolder contains a readme file with further explanations of the different scripts and what they do:
 
-| \#  | script/folder                                            | description                             |
-|:----|:---------------------------------------------------------|:----------------------------------------|
-| 1   | [📁`datasets`](scripts/01-datasets)                       | Dataset processing and characterisation |
-| 2   | [📁`metrics`](scripts/02-metrics)                         | Metrics for comparing two trajectories  |
-| 3   | [📁`methods`](scripts/03-methods)                         | Trajectory inference methods            |
-| 4   | [📁`method_testing`](scripts/04-method_testing)           | Method testing                          |
-| 5   | [📁`scaling`](scripts/05-scaling)                         | Scalability of methods                  |
-| 6   | [📁`optimise_parameters`](scripts/06-optimise_parameters) |                                         |
-| 7   | [📁`benchmark`](scripts/07-benchmark)                     |                                         |
-|     | [📁`varia`](scripts/varia)                                |                                         |
+| \#  | script/folder                                            | description                                           |
+|:----|:---------------------------------------------------------|:------------------------------------------------------|
+| 1   | [📁`datasets`](scripts/01-datasets)                       | Dataset processing and characterisation               |
+| 2   | [📁`metrics`](scripts/02-metrics)                         | Metrics for comparing two trajectories                |
+| 3   | [📁`methods`](scripts/03-methods)                         | Trajectory inference methods                          |
+| 4   | [📁`method_testing`](scripts/04-method_testing)           | Method testing                                        |
+| 5   | [📁`scaling`](scripts/05-scaling)                         | Scalability of methods                                |
+| 6   | [📁`optimise_parameters`](scripts/06-optimise_parameters) | Optimisation of method parameters on synthetic data   |
+| 7   | [📁`benchmark`](scripts/07-benchmark)                     | Benchmarking of TI methods on real and synthetic data |
+|     | [📁`varia`](scripts/varia)                                |                                                       |
 
 ## Benchmarking your own method
 

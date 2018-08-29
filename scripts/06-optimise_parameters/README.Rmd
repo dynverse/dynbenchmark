@@ -1,0 +1,13 @@
+---
+output: github_document
+---
+
+# Optimisation of method parameters on synthetic data
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+dynbenchmark::render_scripts_documentation()
+```
