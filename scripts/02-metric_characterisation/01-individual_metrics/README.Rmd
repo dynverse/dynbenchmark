@@ -1,0 +1,24 @@
+---
+output: github_document
+---
+
+# Individual metrics
+
+```{r include=FALSE}
+library(dynbenchmark)
+library(tidyverse)
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r, results = "asis"}
+extract_scripts_documentation(".", recursive = FALSE) %>% 
+  arrange(ix) %>% 
+    mutate(
+    script = glue::glue("[`{id}`]({file})"),
+    order = ifelse(is.na(ix), "", ix)
+  ) %>%
+  select(`#` = order, script, description = title) %>%
+  knitr::kable()
+```
