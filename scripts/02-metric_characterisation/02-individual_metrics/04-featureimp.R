@@ -160,3 +160,50 @@ plot_featureimp_cor_distributions <- results %>%
 plot_featureimp_cor_distributions
 
 write_rds(plot_featureimp_cor_distributions, result_file("featureimp_cor_distributions.rds"))
+
+
+
+
+##  ............................................................................
+##  Weighted featureimp                                                     ####
+
+dataset_imp <- dynfeature::calculate_overall_feature_importance(dataset)
+
+shuffle_importances <- function(importances, shuffle_perc = 1, direction = "top", ...) {
+  direction <- ifelse(direction == "top", 1, -1)
+
+  n <- round(nrow(importances) * shuffle_perc)
+
+  chosen_ones <- importances %>% top_n(n, direction * importance) %>% pull(feature_id)
+
+  mapper <- set_names(importances$feature_id, importances$feature_id)
+  mapper[match(chosen_ones, mapper)] <- sample(chosen_ones)
+
+  importances$feature_id <- mapper[importances$feature_id]
+
+  importances
+}
+
+design <- crossing(
+  shuffle_perc = seq(0, 1, 0.1),
+  direction = "top",
+  repeat_ix = 1:50
+)
+
+design$pred_imp <- pmap(design, shuffle_importances, importances = dataset_imp)
+
+scores <- map_df(design$pred_imp, dyneval:::.calculate_featureimp_cor, dataset_imp = dataset_imp)
+
+results <- bind_cols(design, scores) %>%
+  mutate(shuffle_perc = factor(shuffle_perc))
+
+plot_featureimp_wcor_effect <- results %>%
+  gather("metric_id", "score", names(scores)) %>%
+  ggplot(aes(shuffle_perc, score, color = metric_id)) +
+  geom_boxplot() +
+  scale_x_discrete(label_long("shuffle_perc"), labels = function(x) {scales::percent(as.numeric(x))}) +
+  scale_color_discrete(label = label_metrics(names(scores), parse = TRUE)) +
+  # facet_grid(~metric_id, labeller = label_facet(label_metrics, parse = TRUE)) +
+  theme_pub()
+
+write_rds(plot_featureimp_wcor_effect, result_file("featureimp_wcor_effect.rds"))
