@@ -1,7 +1,7 @@
 
 # Dataset processing and characterisation
 
-The datasets are split in real datasets and synthetic datasets. The real datasets are downloaded and preprocessed first, and characteristics from these datasets (such as the number of cells and genes, library sizes, dropout probabilities, ...) are used to generate synthetic datasets. Finally, these dataset are uploaded to zenodo.
+The datasets are split in real datasets and synthetic datasets. The real datasets are downloaded and preprocessed first, and characteristics from these datasets (such as the number of cells and genes, library sizes, dropout probabilities, ...) are used to generate synthetic datasets. The datasets are then characterised, after which they are uploaded to Zenodo.
 
 | \#  | script                                                     | description                                    |
 |:----|:-----------------------------------------------------------|:-----------------------------------------------|
@@ -9,8 +9,8 @@ The datasets are split in real datasets and synthetic datasets. The real dataset
 | 1   | [📁`real`](01-real)                                         | Real datasets                                  |
 | 2   | [📁`synthetic`](02-synthetic)                               | Synthetic datasets                             |
 | 3   | [📄`download_from_prism.R`](03-download_from_prism.R)       | Download the datasets from the cluster         |
-| 4   | [📄`upload_to_zenodo.R`](04-upload_to_zenodo.R)             | Upload the datasets to Zenodo                  |
-| 5   | [📁`dataset_characterisation`](05-dataset_characterisation) | Dataset characterisation                       |
+| 4   | [📁`dataset_characterisation`](04-dataset_characterisation) | Dataset characterisation                       |
+| 5   | [📄`upload_to_zenodo.R`](05-upload_to_zenodo.R)             | Upload the datasets to Zenodo                  |
 |     | [📄`hotfix_datasets.R`](hotfix_datasets.R)                  |                                                |
 
 ## [Real datasets](01-real)
@@ -103,10 +103,10 @@ The data is then simulated using wrappers around the simulators (see [/package/R
 </tbody>
 </table>
 
-## [Dataset characterisation](05-dataset_characterisation)
+## [Dataset characterisation](04-dataset_characterisation)
 
 | \#  | script                                                                          | description |
 |:----|:--------------------------------------------------------------------------------|:------------|
-| 1   | [📄`synthetic.R`](05-dataset_characterisation/1-synthetic.R)                     |             |
-| 2   | [📄`real.R`](05-dataset_characterisation/2-real.R)                               |             |
-| 3   | [📄`trajectory_type_dag.R`](05-dataset_characterisation/3-trajectory_type_dag.R) |             |
+| 1   | [📄`synthetic.R`](04-dataset_characterisation/1-synthetic.R)                     |             |
+| 2   | [📄`real.R`](04-dataset_characterisation/2-real.R)                               |             |
+| 3   | [📄`trajectory_type_dag.R`](04-dataset_characterisation/3-trajectory_type_dag.R) |             |

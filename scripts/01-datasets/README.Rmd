@@ -11,7 +11,7 @@ library(tidyverse)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-The datasets are split in real datasets and synthetic datasets. The real datasets are downloaded and preprocessed first, and characteristics from these datasets (such as the number of cells and genes, library sizes, dropout probabilities, ...) are used to generate synthetic datasets. Finally, these dataset are uploaded to zenodo.
+The datasets are split in real datasets and synthetic datasets. The real datasets are downloaded and preprocessed first, and characteristics from these datasets (such as the number of cells and genes, library sizes, dropout probabilities, ...) are used to generate synthetic datasets. The datasets are then characterised, after which they are uploaded to Zenodo.
 
 ```{r}
 dynbenchmark::render_scripts_documentation()
@@ -26,6 +26,6 @@ knit_child_readme("02-synthetic")
 ```
 
 ```{r results = 'asis'}
-knit_child_readme("05-dataset_characterisation")
+knit_child_readme("04-dataset_characterisation")
 ```
 
