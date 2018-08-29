@@ -2,7 +2,7 @@
 output: github_document
 ---
 
-```{r echo = FALSE}
+```{r include = FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE, error = FALSE, echo = FALSE)
 ```
 
@@ -11,21 +11,10 @@ library(tidyverse)
 library(dynbenchmark)
 ```
 
-## Scripts
+# Scripts
 
 The scripts folder contains all the scripts necessary to fully reproduce the benchmarking manuscript in chronologically ordered subfolders. Each subfolder contains a readme file with further explanations of the different scripts and what they do:
 
 ```{r}
-scripts <- read_rds(derived_file("scripts.rds", experiment_id = "12-varia/01-documentation"))
-
-scripts %>% filter(
-  level == 1
-) %>%
-  arrange(ix) %>%
-  mutate(
-    name = str_glue("[{id}](https://github.com/dynverse/dynbenchmark/tree/master/{location})"),
-    order = ifelse(is.na(ix), "", ix)
-  ) %>%
-  select(order, subfolder = name, description = title) %>%
-  knitr::kable()
+dynbenchmark::render_scripts_documentation()
 ```

@@ -1,1 +1,1 @@
-## Benchmarking of methods on real and synthetic data
+# Benchmarking of methods on real and synthetic data
