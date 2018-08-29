@@ -78,7 +78,7 @@ The data is then simulated using wrappers around the simulators (see [/package/R
 <tr class="odd">
 <td align="left">1</td>
 <td align="left"><a href="02-synthetic/01-estimate_platform.R">📄<code>estimate_platform.R</code></a></td>
-<td align="left"></td>
+<td align="left">Estimation of the platforms from real data done by <code>dynbenchmark::estimate_platform</code></td>
 </tr>
 <tr class="even">
 <td align="left">2a</td>

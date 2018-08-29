@@ -13,7 +13,7 @@ The data is then simulated using wrappers around the simulators (see [/package/R
 
 | \#  | script/folder                                                       | description                                                                                                                 |
 |:----|:--------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------|
-| 1   | [📄`estimate_platform.R`](01-estimate_platform.R)                    |                                                                                                                             |
+| 1   | [📄`estimate_platform.R`](01-estimate_platform.R)                    | Estimation of the platforms from real data done by `dynbenchmark::estimate_platform`                                        |
 | 2a  | [📄`simulate_dyngen_datasets.R`](02a-simulate_dyngen_datasets.R)     | [dyngen](https://github.com/dynverse/dyngen), simulations of regulatory networks which will produce a particular trajectory |
 | 2b  | [📄`simulate_prosstt_datasets.R`](02b-simulate_prosstt_datasets.R)   | [PROSSTT](https://github.com/soedinglab/prosstt), simulations of tree topologies using random walks                         |
 | 2c  | [📄`simulate_splatter_datasets.R`](02c-simulate_splatter_datasets.R) | [Splatter](https://github.com/Oshlack/splatter), simulations of non-linear paths between different states                   |

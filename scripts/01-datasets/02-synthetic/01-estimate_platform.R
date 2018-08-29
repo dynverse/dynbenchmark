@@ -1,4 +1,4 @@
-## Estimation of the platforms from real data
+#' Estimation of the platforms from real data done by `dynbenchmark::estimate_platform`
 
 library(tidyverse)
 library(dynbenchmark)
