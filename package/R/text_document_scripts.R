@@ -15,10 +15,11 @@ extract_scripts_documentation <- function(folder = getwd(), recursive = TRUE) {
     mutate(
       file = fs::path_file(location),
       parent = fs::path_file(fs::path_dir(location)),
-      type = case_when(fs::is_dir(location) ~ "dir", TRUE ~ "script"),
-      ix = suppressWarnings(as.integer(gsub("([0-9]{2}).*", "\\1", file))),
-      level = str_count(location, "/"),
-      id = gsub("[0-9]{2}-(.*)", "\\1", file)
+      type = case_when(fs::is_dir(location) ~ "directory", TRUE ~ "script"),
+      ix = suppressWarnings(as.integer(gsub("([0-9]{1,2}).*", "\\1", file))),
+      subix = stringr::str_match(file, "[0-9]{1,2}([a-z]?).*")[, 2],
+      level = stringr::str_count(location, "/"),
+      id = gsub("[0-9]{1,2}[a-z]?-(.*)", "\\1", file)
     )
 
   extract_title <- function(location) {
@@ -26,12 +27,12 @@ extract_scripts_documentation <- function(folder = getwd(), recursive = TRUE) {
       # extract title: from README.Rmd
       readme_location <- fs::path(location, "README.Rmd")
       if (fs::file_exists(readme_location)) {
-        title_line <- read_lines(readme_location) %>%
+        title_line <- readr::read_lines(readme_location) %>%
           str_subset("^# .*") %>%
           first()
 
         if (length(title_line)) {
-          str_replace(title_line, "^# (.*)$", "\\1")
+          stringr::str_replace(title_line, "^# (.*)$", "\\1")
         } else {
           ""
         }
@@ -40,7 +41,7 @@ extract_scripts_documentation <- function(folder = getwd(), recursive = TRUE) {
       }
     } else {
       # extract title from scripts #'
-      first_line <- read_lines(location) %>% first()
+      first_line <- readr::read_lines(location) %>% first()
 
       if (str_detect(first_line, "#'.*")) {
         gsub("#' (.*)", "\\1", first_line)
@@ -65,8 +66,9 @@ render_scripts_documentation <- function(folder = ".", recursive = FALSE) {
   extract_scripts_documentation(folder, recursive = recursive) %>%
     arrange(ix) %>%
     mutate(
-      script = glue::glue("[`{id}`]({file})"),
-      order = ifelse(is.na(ix), "", ix),
+      symbol = case_when(type == "directory" ~ "\U1F4C1", type == "script" ~ "\U1F4C4", TRUE ~ ""),
+      script = glue::glue("[{symbol}`{id}`]({file})"),
+      order = paste0(ifelse(is.na(ix), "", ix), ifelse(is.na(subix), "", subix)),
       description = map_chr(title, ~knitr::knit_child(text = ., quiet = TRUE))
     ) %>%
     select(`\\#` = order, script, description) %>%
@@ -86,9 +88,11 @@ knit_child_readme <- function(folder) {
   }
   knit <- read_lines(file)
 
-  # process relative paths
+  # process relative paths to links
+  # match every link, except those which start with / (absolute link) or h (http)
+  # yeah, I know this is dirty but it works for now
   knit <- knit %>%
-    str_replace_all("(\\[[^\\]]*\\]\\()([^\\)]*\\))", paste0("\\1", folder, "/\\2"))
+    str_replace_all("(\\[[^\\]]*\\]\\()([^/h][^\\)]*\\))", paste0("\\1", folder, "/\\2"))
 
   # add extra header sublevels & add link
   knit <- knit %>%
