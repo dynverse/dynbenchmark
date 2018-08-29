@@ -12,4 +12,4 @@ The scripts folder contains all the scripts necessary to fully reproduce the ben
 | 5   | [📁`scaling`](05-scaling)                         | Scalability of methods                                |
 | 6   | [📁`optimise_parameters`](06-optimise_parameters) | Optimisation of method parameters on synthetic data   |
 | 7   | [📁`benchmark`](07-benchmark)                     | Benchmarking of TI methods on real and synthetic data |
-|     | [📁`varia`](varia)                                |                                                       |
+|     | [📁`varia`](varia)                                | Varia scripts                                         |

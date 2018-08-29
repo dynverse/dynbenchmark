@@ -1,0 +1,13 @@
+---
+output: github_document
+---
+
+# Varia scripts
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+dynbenchmark::render_scripts_documentation()
+```
