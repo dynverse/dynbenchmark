@@ -2,7 +2,8 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 [![Build Status](https://api.travis-ci.org/dynverse/dynbenchmark.svg)](https://travis-ci.org/dynverse/dynbenchmark) ![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg) <img src="package/man/figures/logo.png" align="right" />
 
-# Benchmarking trajectory inference methods
+Benchmarking trajectory inference methods
+=========================================
 
 This repo contains the scripts to reproduce the manuscript
 
@@ -10,7 +11,8 @@ A comparison of single-cell trajectory inference methods: towards more accurate 
 Wouter Saelens\*, Robrecht Cannoodt\*, Helena Todorov, Yvan Saeys
 bioRxiv 276907; doi: <https://doi.org/10.1101/276907>
 
-## Structure
+Structure
+---------
 
 This repository is structured as follows:
 
@@ -22,7 +24,8 @@ This repository is structured as follows:
 -   results: data objects outputted by the scripts
 -   scripts: code required to reproduce the analyses of the benchmark
 
-## Datasets
+Datasets
+--------
 
 The benchmarking pipeline generates (and uses) the following datasets:
 
@@ -34,22 +37,24 @@ The benchmarking pipeline generates (and uses) the following datasets:
 
 -   **General information about trajectory inference methods**, available as a data frame in `dynmethods::methods`
 
-# Scripts
+[Scripts](scripts)
+------------------
 
 The scripts folder contains all the scripts necessary to fully reproduce the benchmarking manuscript in chronologically ordered subfolders. Each subfolder contains a readme file with further explanations of the different scripts and what they do:
 
-| \#  | script                                           | description                             |
-|:----|:-------------------------------------------------|:----------------------------------------|
-| 1   | [📁`datasets`](01-datasets)                       | Dataset processing and characterisation |
-| 2   | [📁`metrics`](02-metrics)                         | Metrics for comparing two trajectories  |
-| 3   | [📁`methods`](03-methods)                         | Trajectory inference methods            |
-| 4   | [📁`method_testing`](04-method_testing)           | Method testing                          |
-| 5   | [📁`scaling`](05-scaling)                         | Scalability of methods                  |
-| 6   | [📁`optimise_parameters`](06-optimise_parameters) |                                         |
-| 7   | [📁`benchmark`](07-benchmark)                     |                                         |
-| 12  | [📁`varia`](12-varia)                             |                                         |
-|     | [📁`old`](old)                                    |                                         |
+| \#  | script                                                   | description                             |
+|:----|:---------------------------------------------------------|:----------------------------------------|
+| 1   | [📁`datasets`](scripts/01-datasets)                       | Dataset processing and characterisation |
+| 2   | [📁`metrics`](scripts/02-metrics)                         | Metrics for comparing two trajectories  |
+| 3   | [📁`methods`](scripts/03-methods)                         | Trajectory inference methods            |
+| 4   | [📁`method_testing`](scripts/04-method_testing)           | Method testing                          |
+| 5   | [📁`scaling`](scripts/05-scaling)                         | Scalability of methods                  |
+| 6   | [📁`optimise_parameters`](scripts/06-optimise_parameters) |                                         |
+| 7   | [📁`benchmark`](scripts/07-benchmark)                     |                                         |
+| 12  | [📁`varia`](scripts/12-varia)                             |                                         |
+|     | [📁`old`](scripts/old)                                    |                                         |
 
-## Benchmarking your own method
+Benchmarking your own method
+----------------------------
 
 Explanation coming soon. Feel free to make an issue or send us an e-mail if you want your method to be included.
