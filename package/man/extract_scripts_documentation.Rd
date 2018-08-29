@@ -11,6 +11,8 @@ render_scripts_documentation(folder = ".", recursive = FALSE)
 }
 \arguments{
 \item{folder}{The folder from which to start, defaults to current working directory}
+
+\item{recursive}{Whether to extract scripts recursively}
 }
 \description{
 Will recursively extract documentations from the scripts and folders within a given folder

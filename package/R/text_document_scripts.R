@@ -1,6 +1,7 @@
 #' Will recursively extract documentations from the scripts and folders within a given folder
 #'
 #' @param folder The folder from which to start, defaults to current working directory
+#' @param recursive Whether to extract scripts recursively
 #' @export
 extract_scripts_documentation <- function(folder = getwd(), recursive = TRUE) {
   script_locations <- fs::dir_ls(folder, recursive = recursive)
