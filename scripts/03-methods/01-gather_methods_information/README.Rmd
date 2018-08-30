@@ -1,0 +1,11 @@
+---
+output: dynbenchmark::github_markdown_nested
+---
+
+# Gathering all the information we have about the methods
+
+Most information of the methods are contained within their respective containers (see the [dynmethods](https://github.com/dynverse/dynmethods) repository, [https://github.com/dynverse/dynmethods](https://github.com/dynverse/dynmethods)). We gather additional information from our google sheets (https://docs.google.com/spreadsheets/d/1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE), which also contains the quality control for each methods.
+
+```{r}
+dynbenchmark::render_scripts_documentation()
+```
