@@ -65,22 +65,22 @@ Here, we assess whether metrics conforms such rules empirically:
 </tr>
 <tr class="odd">
 <td align="left"></td>
-<td align="left"><a href="helper-create_perturbation_images.R">📄<code>helper-create_perturbation_images.R</code></a></td>
+<td align="left"><a href="02-metric_conformity/helper-create_perturbation_images.R">📄<code>helper-create_perturbation_images.R</code></a></td>
 <td align="left">Helper for creating small images for each rule</td>
 </tr>
 <tr class="even">
 <td align="left"></td>
-<td align="left"><a href="helper-perturbations.R">📄<code>helper-perturbations.R</code></a></td>
+<td align="left"><a href="02-metric_conformity/helper-perturbations.R">📄<code>helper-perturbations.R</code></a></td>
 <td align="left">Helper functions for perturbations</td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
-<td align="left"><a href="helper-rules.R">📄<code>helper-rules.R</code></a></td>
+<td align="left"><a href="02-metric_conformity/helper-rules.R">📄<code>helper-rules.R</code></a></td>
 <td align="left">Helper functions containing the rules</td>
 </tr>
 <tr class="even">
 <td align="left"></td>
-<td align="left"><a href="helper-topologies.R">📄<code>helper-topologies.R</code></a></td>
+<td align="left"><a href="02-metric_conformity/helper-topologies.R">📄<code>helper-topologies.R</code></a></td>
 <td align="left">Helper containing different topologies with the same number of milestones</td>
 </tr>
 </tbody>

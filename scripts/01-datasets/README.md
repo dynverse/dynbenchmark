@@ -34,7 +34,7 @@ The generation of the real datasets is divided in two parts. We first download a
 <tr class="odd">
 <td align="left">1</td>
 <td align="left"><a href="01-real/01-download_from_sources.R">📄<code>download_from_sources.R</code></a></td>
-<td align="left">Downloading the real datasets from their sources (eg. GEO), and constructing the gold standard model, using the helpers in <a href="helpers-download_from_sources" class="uri">helpers-download_from_sources</a></td>
+<td align="left">Downloading the real datasets from their sources (eg. GEO), and constructing the gold standard model, using the helpers in <a href="01-real/helpers-download_from_sources">helpers-download_from_sources</a></td>
 </tr>
 <tr class="even">
 <td align="left">2</td>
@@ -43,7 +43,7 @@ The generation of the real datasets is divided in two parts. We first download a
 </tr>
 <tr class="odd">
 <td align="left"></td>
-<td align="left"><a href="helpers-download_from_sources">📁<code>helpers-download_from_sources</code></a></td>
+<td align="left"><a href="01-real/helpers-download_from_sources">📁<code>helpers-download_from_sources</code></a></td>
 <td align="left"></td>
 </tr>
 </tbody>
