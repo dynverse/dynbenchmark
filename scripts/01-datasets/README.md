@@ -15,7 +15,7 @@ The datasets are split in real datasets and synthetic datasets. The real dataset
 
 ## [Real datasets](01-real)
 
-The generation of the real datasets is divided in two parts:
+The generation of the real datasets is divided in two parts. We first download all the (annotated) expression files from sites such as GEO. Next, we filter and normalise all datasets, and wrap them into the common trajectory format of [dynwrap](https://www.github.com/dynverse/dynwrap).
 
 <table>
 <colgroup>
@@ -39,7 +39,7 @@ The generation of the real datasets is divided in two parts:
 <tr class="even">
 <td align="left">2</td>
 <td align="left"><a href="01-real/02-filter_and_normalise.R">📄<code>filter_and_normalise.R</code></a></td>
-<td align="left">Filtering and normalising the real datasets using the <code>dynbenchmark::process_raw_dataset</code> function.</td>
+<td align="left">Filtering and normalising the real datasets using <code>dynbenchmark::process_raw_dataset</code> All datasets are then saved into the dynwrap format.</td>
 </tr>
 <tr class="odd">
 <td align="left"></td>

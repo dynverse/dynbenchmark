@@ -13,12 +13,7 @@ walk(readme_paths, function(readme_path) {
   print(paste0("Processing ", readme_path))
   rmarkdown::render(
     readme_path,
-    output_format = rmarkdown::github_document(
-      html_preview = FALSE,
-      pandoc_args = c(
-        "--atx-headers" # atx headers are necessary so that it is easy to adapt the header level
-      )
-    ),
+    output_format = dynbenchmark::github_markdown_nested(html_preview = FALSE),
     quiet = TRUE
   )
 })

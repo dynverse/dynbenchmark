@@ -1,7 +1,5 @@
 ---
-output: 
-  github_document:
-    pandoc_args: --atx-headers
+output: dynbenchmark::github_markdown_nested
 ---
 
 # Metric characterisation

@@ -1,5 +1,5 @@
 ---
-output: github_document
+output: dynbenchmark::github_markdown_nested
 ---
 
 # Optimisation of method parameters on synthetic data

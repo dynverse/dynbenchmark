@@ -1,5 +1,5 @@
 ---
-output: github_document
+output: dynbenchmark::github_markdown_nested
 ---
 
 # Benchmarking of TI methods on real and synthetic data
