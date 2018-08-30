@@ -1,5 +1,5 @@
-## Downloading and processing the quality control worksheet
-## Downloads the quality control values from the google sheet and processes it into a tidy format
+#' Downloading and processing the quality control worksheet
+#' Downloads the quality control values from the google sheet and processes it into a tidy format
 
 library(tidyverse)
 library(googlesheets)

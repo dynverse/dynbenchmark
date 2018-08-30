@@ -1,4 +1,4 @@
-## Add QC scores to methods and tools tibble
+#' Add QC scores to methods and tools tibble
 
 library(tidyverse)
 library(dynbenchmark)

@@ -1,0 +1,11 @@
+---
+output: dynbenchmark::github_markdown_nested
+---
+
+# Tool quality control
+
+Here we compare the user and developer friendliness of the different trajectory inference tools
+
+```{r}
+dynbenchmark::render_scripts_documentation()
+```

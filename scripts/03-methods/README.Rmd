@@ -7,10 +7,13 @@ output: dynbenchmark::github_markdown_nested
 Here we
 
 - Compile all the information we have about TI methods
-- Group methods into sets of "tools"
-- Download and process the information from the QC spread sheet (https://docs.google.com/spreadsheets/d/1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE)
-- Create tables and figures to interpret the methods and quality control
+- Characterise the methods with regards to user and developer friendliness (method quality control)
+- Characterise the methods with regards to prior information, underlying algorithm, possible detectable trajectory types, ...
 
 ```{r}
 dynbenchmark::render_scripts_documentation()
+```
+
+```{r, results = "asis"}
+dynbenchmark::knit_nest("01-gather_methods_information")
 ```

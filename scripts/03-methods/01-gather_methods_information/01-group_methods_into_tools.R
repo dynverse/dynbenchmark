@@ -1,6 +1,6 @@
-## Grouping methods into tools
-## (1) Grouping of methods into "tools", based on the google spreadsheet
-## (2) Some postprocessing of the dynmethods::methods
+#' Grouping methods into tools
+#' (1) Grouping of methods into "tools", based on the google spreadsheet
+#' (2) Some postprocessing of the dynmethods::methods
 
 library(tidyverse)
 library(googlesheets)
