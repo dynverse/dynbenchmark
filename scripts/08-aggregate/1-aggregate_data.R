@@ -1,161 +1,180 @@
 library(dynbenchmark)
 library(tidyverse)
-library(dynplot)
 
 experiment("08-aggregate")
 
-############################################################
-############### PART THREE: GENERATE FIGURES ###############
-############################################################
+# read QC results
+method_tools <- read_rds(result_file("methods.rds", experiment_id = "03-methods")) %>% select(method_id = id, tool_id)
+tool_qc_scores <- read_rds(result_file("tool_qc_scores.rds", experiment_id = "03-methods"))
+tool_qc_category_scores <- read_rds(result_file("tool_qc_category_scores.rds", experiment_id = "03-methods"))
+tool_qc_application_scores <- read_rds(result_file("tool_qc_application_scores.rds", experiment_id = "03-methods"))
 
+method_qc_overall_scores <-
+  method_tools %>%
+  inner_join(tool_qc_scores, by = "tool_id") %>%
+  mutate(experiment = "qc", category = "overall", metric = "overall") %>%
+  select(method_id, experiment, category, metric, value = qc_score)
+
+method_qc_category_scores <-
+  method_tools %>%
+  inner_join(tool_qc_category_scores, by = "tool_id") %>%
+  rename(metric = category) %>%
+  mutate(experiment = "qc", category = "category") %>%
+  select(method_id, experiment, category, metric, value = qc_score)
+
+method_qc_application_scores <-
+  method_tools %>%
+  inner_join(tool_qc_application_scores, by = "tool_id") %>%
+  rename(metric = application) %>%
+  mutate(experiment = "qc", category = "application") %>%
+  select(method_id, experiment, category, metric, value = score)
+
+qc_results <-
+  bind_rows(
+    method_qc_overall_scores,
+    method_qc_category_scores,
+    method_qc_application_scores
+  )
+rm(method_tools, tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores, method_qc_overall_scores, method_qc_category_scores, method_qc_application_scores)
+
+# read scaling results
+scaling_results <- read_rds(result_file("scaling.rds", experiment_id = "05-scaling"))
+
+scaling_process <-
+  scaling_results$models %>%
+  select(-method_name, -model_time, -model_mem) %>%
+  gather(metric, value, -method_id) %>%
+  mutate(
+    experiment = "scaling",
+    category = case_when(metric == "pct_errored" ~ "errors", grepl("time", metric) ~ "time", grepl("mem", metric) ~ "memory")
+  ) %>%
+  group_by(category, metric) %>%
+  mutate(value = percent_rank(-value)) %>%
+  ungroup()
+
+scaling_results <- scaling_process %>% {
+  df <- .
+  bind_rows(
+    df,
+    df %>%
+      filter(metric %in% c("lpredtime", "lpredmem")) %>%
+      group_by(method_id, experiment) %>%
+      summarise(value = dyneval::calculate_geometric_mean(value)) %>%
+      ungroup() %>%
+      mutate(category = "overall", metric = "overall")
+  )
+}
+
+rm(scaling_process)
+
+
+# read benchmarking results
 benchmark_results <- read_rds(result_file("benchmark_results.rds", experiment_id = "07-benchmark"))
 
-# read datasets
-datasets <- map_df(
-  paste0(eval_param_config$local_datasets_folder, "/", eval_param_config$dataset_ids, ".rds"),
-  function(file_path) {
-    read_rds(file_path) %>% mutate(ncell = nrow(expression[[1]]), nfeat = ncol(expression[[1]]))
-  }
-)
+method_info <-
+  benchmark_results$methods_info %>%
+  select_if(is.atomic) %>%
+  select_if(function(x) !all(is.na(x)))
 
-# read method meta info
-meta <- read_rds(derived_file("methods_evaluated.rds", "03-methods")) %>%
-  mutate(
-    prior_mini_id = paste0("prior_mini_", group_indices(group_by_at(., vars(!!setdiff(priors$prior_id, "time")))))
+data_aggs <-
+  benchmark_results$data_aggregations %>%
+  select(-num_files_created, -n, -method_name) %>%
+  gather(metric, value, -method_id:-dataset_source) %>%
+  mutate(experiment = "benchmark")
+
+execution_metrics <- c("pct_errored", "pct_execution_error", "pct_memory_limit", "pct_method_error_all", "pct_method_error_stoch", "pct_time_limit")
+
+bench_overall <-
+  data_aggs %>%
+  filter(dataset_trajectory_type_simplified == "overall", dataset_source == "mean", metric %in% c(benchmark_results$metrics, "overall", execution_metrics)) %>%
+  select(method_id, metric, value, experiment) %>%
+  mutate(category = ifelse(metric %in% execution_metrics, "execution", "overall"))
+
+bench_trajtypes <-
+  data_aggs %>%
+  filter(dataset_trajectory_type_simplified != "overall", dataset_source == "mean", metric == "overall") %>%
+  select(method_id, metric = dataset_trajectory_type_simplified, value, experiment) %>%
+  mutate(category = "trajtypes")
+
+bench_sources <-
+  data_aggs %>%
+  filter(dataset_trajectory_type_simplified == "overall", dataset_source != "mean", metric == "overall") %>%
+  select(method_id, metric = dataset_source, value, experiment) %>%
+  mutate(category = "sources")
+
+benchmark_results <-
+  bind_rows(
+    bench_overall,
+    bench_trajtypes,
+    bench_sources
   )
 
-# read qc scores
-qc_category_scores <- read_rds(derived_file("tool_qc_category_scores.rds", "03-methods"))
-qc_application_scores <- read_rds(derived_file("tool_qc_application_scores.rds", "03-methods"))
+rm(data_aggs, bench_overall, bench_trajtypes, bench_sources)
 
+# combine different experiments
+results <-
+  bind_rows(qc_results, benchmark_results, scaling_results)
 
-## START GATHERING COLUMNS
-part_overall_mean <-
-  eval_param_outputs$outputs_summtrajtype_totalsx2 %>%
-  filter(trajectory_type == "overall", dataset_source == "mean") %>%
-  select(
-    method_short_name, harm_mean, norm_correlation, norm_edge_flip, norm_rf_mse, time_method, rank_time_method,
-    num_files_created, num_setseed_calls, pct_errored, pct_time_exceeded, pct_memory_exceeded, pct_allerrored, pct_stochastic
-  ) %>%
-  mutate(overall_metric = apply(.[,colnames(.)[grepl("^norm_", colnames(.))]], 1, mean))
+metric_info <- results %>%
+  group_by(experiment, category, metric) %>%
+  summarise(min = min(value), max = max(value)) %>%
+  ungroup() %>%
+  mutate_if(is.numeric, function(x) round(x, 2))
 
-part_sources <-
-  eval_param_outputs$outputs_summtrajtype_totalsx2 %>%
-  filter(trajectory_type == "overall", dataset_source != "mean") %>%
-  select(method_short_name, dataset_source, harm_mean) %>%
-  mutate(dataset_source = paste0("source_", dataset_source)) %>%
-  spread(dataset_source, harm_mean) %>%
-  mutate(overall_source = apply(.[,colnames(.)[grepl("^source_", colnames(.))]], 1, mean))
+metric_info %>% as.data.frame()
 
-part_trajtypes <-
-  eval_param_outputs$outputs_summtrajtype_totalsx2 %>%
-  filter(trajectory_type != "overall", dataset_source == "mean") %>%
-  select(method_short_name, trajectory_type, harm_mean) %>%
-  mutate(trajectory_type = paste0("trajtype_", trajectory_type)) %>%
-  spread(trajectory_type, harm_mean) %>%
-  mutate(overall_trajtype = apply(.[,colnames(.)[grepl("^trajtype_", colnames(.))]], 1, mean))
+# make sue each method has a value for each metric
+results <- full_join(
+  results,
+  crossing(method_info %>% select(method_id), metric_info %>% select(experiment, category, metric)),
+  by = c("method_id", "experiment", "category", "metric")
+) %>%
+  mutate(value = ifelse(is.na(value), 0, value))
 
-# part_complexities <-
-#   complexities$complexity %>%
-#   select(
-#     method_short_name, complexity_inferred = feature, complexity_inferred2 = feature2, complexity_sign = sign, complexity_rsq = rsq
-#   )
-#
-# part_variances <-
-#   variances$vardf %>%
-#   select(
-#     method_short_name, mean_var, var_norm_correlation, var_norm_edge_flip, var_norm_rf_mse, sets_seeds
-#   )
-
-part_priors <-
-  eval_param_outputs$outputs_ind %>%
-  select(method_short_name, prior_str) %>%
-  distinct()
-
-part_method_characterisation <-
-  meta %>%
-  select(
-    method_short_name = method_id,
-    method_name,
-    tool_id,
-    tool_name,
-    output_transformation,
-    topology_inference_type,
-    maximal_trajectory_types,
-    earliest_date = date,
-    publication_date,
-    preprint_date,
-    ncitations,
-    qc_score,
-    starts_with("prior_")
-  )
-
-part_qc_category <-
-  qc_category_scores %>%
-  mutate(category = paste0("qc_cat_", category)) %>%
-  spread(category, qc_score) %>%
-  right_join(meta %>% select(tool_id, method_id), by = "tool_id") %>%
-  select(method_short_name = method_id, everything()) %>%
-  select(-tool_id) %>%
-  mutate(overall_qccat = apply(.[,colnames(.)[grepl("^qc_cat_", colnames(.))]], 1, mean))
-
-part_qc_application <-
-  qc_application_scores %>%
-  mutate(application = paste0("qc_app_", application)) %>%
-  spread(application, score) %>%
-  right_join(meta %>% select(tool_id, method_id), by = "tool_id") %>%
-  select(method_short_name = method_id, everything()) %>%
-  select(-tool_id) %>%
-  mutate(overall_qcapp = apply(.[,colnames(.)[grepl("^qc_app_", colnames(.))]], 1, mean))
-
-## COMBINE_COLUMNS
-part_list <- lst(
-  part_overall_mean,
-  part_sources,
-  part_trajtypes,
-  # part_complexities,
-  # part_variances,
-  part_priors,
-  part_method_characterisation,
-  part_qc_category,
-  part_qc_application
-)
-reduce_fun <- function(a, b) inner_join(a, b, by = "method_short_name")
-method_tib <- Reduce("reduce_fun", part_list) %>%
-  mutate(
-    overall_benchmark = apply(cbind(overall_metric, overall_source, overall_trajtype), 1, psych::harmonic.mean),
-    is_na_qc = is.na(overall_qccat),
-    overall_qccat = ifelse(is_na_qc, mean(overall_qccat, na.rm = T), overall_qccat),
-    overall_qcapp = ifelse(is_na_qc, mean(overall_qcapp, na.rm = T), overall_qcapp),
-    overall_qc = apply(cbind(overall_qccat, overall_qcapp), 1, psych::harmonic.mean),
-    overall_qc = ifelse(is_na_qc, 0, overall_qc),
-    overall = apply(cbind(overall_metric, overall_source, overall_trajtype, overall_qccat, overall_qcapp), 1, psych::harmonic.mean)
-  ) %>%
-  filter(!method_short_name %in% c("gng", "periodpc"))
+rm(qc_results, benchmark_results, scaling_results)
 
 
 ## CALCULATE FINAL RANKING
-method_name_ord <- method_tib %>% arrange(desc(overall)) %>% pull(method_name)
-method_tib <- method_tib %>% mutate(method_name_f = factor(method_name, levels = method_name_ord))
 
-# method name check
-method_short_names <- part_list %>% map(~.$method_short_name) %>% Reduce("union", .)
-for (n in names(part_list)) {
-  dff <- setdiff(method_short_names, part_list[[n]]$method_short_name)
-  if (length(dff) > 0) {
-    cat(n, " missing methods: ", paste(dff, collapse = ", "), "\n", sep = "")
-  }
-}
+metric_weights <-
+  tribble(
+    ~experiment, ~category, ~metric, ~weight,
+    "benchmark", "overall", "overall", 1,
+    "qc", "overall", "overall", 1,
+    "scaling", "overall", "overall", 1
+  )
 
-# construct minis
-trajectory_types_mini <- tibble(
-  id = list.files(result_file("", "trajectory_types/mini")) %>% str_replace(".svg$", ""),
-  svg = id %>% map(~as.character(xml2::read_xml(result_file(paste0(., ".svg"), "trajectory_types/mini"))))
-)
+results_final <-
+  inner_join(
+    results,
+    metric_weights,
+    by = c("experiment", "category", "metric")
+  ) %>%
+  group_by(method_id) %>%
+  summarise(value = prod(value ^ weight) ^ (1 / sum(weight))) %>% #weighted geometric mean
+  mutate(experiment = "aggregate", metric = "overall", category = "overall") %>%
+  bind_rows(results)
 
-minis <- trajectory_types_mini %>% create_replacers()
+metric_info <- metric_info %>% add_row(experiment = "aggregate", metric = "overall", category = "overall")
+
+method_id_levels <-
+  results_final %>%
+  filter(experiment == "aggregate") %>%
+  arrange(desc(value)) %>%
+  pull(method_id)
+
+results <- results_final %>% mutate(method_id = factor(method_id, levels = method_id_levels))
+
+rm(method_id_levels, results_final)
+
+# # construct minis
+# trajectory_types_mini <- tibble(
+#   id = list.files(result_file("", "trajectory_types/mini")) %>% str_replace(".svg$", ""),
+#   svg = id %>% map(~as.character(xml2::read_xml(result_file(paste0(., ".svg"), "trajectory_types/mini"))))
+# )
+#
+# minis <- trajectory_types_mini %>% create_replacers()
 
 # write output
-write_rds(lst(method_tib, minis), result_file("aggregated_data.rds"))
+write_rds(lst(method_info, results, metric_info), result_file("results.rds"), compress = "xz")
 
-method_tib$method_short_name %>% sort
