@@ -70,7 +70,7 @@ render_scripts_documentation <- function(folder = ".", recursive = FALSE) {
       symbol = case_when(type == "directory" ~ "\U1F4C1", type == "script" ~ "\U1F4C4", TRUE ~ ""),
       location = glue::glue("[{symbol}`{id}`]({file})"),
       order = paste0(ifelse(is.na(ix), "", ix), ifelse(is.na(subix), "", subix)),
-      description = map_chr(title, ~knitr::knit_child(text = ., quiet = TRUE))
+      description = map_chr(title, ~if(. != ""){knitr::knit_child(text = ., quiet = TRUE)}else{""})
     ) %>%
     select(`\\#` = order, `script/folder` = location, description) %>%
     knitr::kable()
