@@ -98,4 +98,5 @@ Collate:
     'suite_paramoptim.R'
     'text_document_scripts.R'
     'text_equations.R'
+    'text_formats.R'
     'text_ref.R'
