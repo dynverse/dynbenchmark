@@ -60,8 +60,9 @@ pdf_supplementary_note <- function(
   format
 }
 
+#' Common dynbenchmark format
 #' @param format The format on which to apply common changes
-#' @param bibliograph Bibliography location
+#' @param bibliography Bibliography location
 #' @param csl Csl file location
 common_dynbenchmark_format <- function(
   format,

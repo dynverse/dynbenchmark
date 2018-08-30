@@ -11,6 +11,8 @@
   "manuscript/nature-biotechnology.csl"), ...)
 }
 \arguments{
+\item{bibliography}{Bibliography location}
+
 \item{csl}{Csl file location}
 
 \item{...}{Parameters for rmarkdown::pdf_document}
