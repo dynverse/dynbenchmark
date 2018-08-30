@@ -1,0 +1,9 @@
+---
+output: dynbenchmark::github_markdown_nested
+---
+
+# Rendering the READMEs, manuscript and supplementary notes
+
+```{r}
+dynbenchmark::render_scripts_documentation()
+```
