@@ -2,13 +2,19 @@
 % Please edit documentation in R/text_formats.R
 \name{pdf_supplementary_note}
 \alias{pdf_supplementary_note}
-\title{A supplementary note document}
+\title{A supplementary note pdf document}
 \usage{
-pdf_supplementary_note(...)
+
+  pdf_supplementary_note(bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(),
+  "manuscript/references.bib"),
+  csl = paste0(dynbenchmark::get_dynbenchmark_folder(),
+  "manuscript/nature-biotechnology.csl"), ...)
 }
 \arguments{
+\item{csl}{Csl file location}
+
 \item{...}{Parameters for rmarkdown::pdf_document}
 }
 \description{
-A supplementary note document
+A supplementary note pdf document
 }

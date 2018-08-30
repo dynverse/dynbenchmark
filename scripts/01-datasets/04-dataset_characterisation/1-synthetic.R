@@ -7,7 +7,6 @@ library(ggraph)
 experiment("01-datasets/05-dataset_characterisation/1-synthetic")
 datasets <- load_datasets()
 
-
 #   ____________________________________________________________________________
 #   Plotting the different models                                           ####
 

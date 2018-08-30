@@ -76,38 +76,6 @@ render_scripts_documentation <- function(folder = ".", recursive = FALSE) {
     knitr::kable()
 }
 
-#' Knit a child README, and add an extra level of headings + fix relative paths
-#'
-#' @param folder Subfolder where the README.Rmd is located
-#' @export
-knit_child_readme <- function(folder) {
-  if (is.null(knitr::opts_knit$get("output.dir"))) {knitr::opts_knit$set("output.dir" = ".")}
-
-  file <- file.path(folder, "README.md")
-  if (!file.exists(file)) {
-    stop(file, " does not exist!")
-  }
-  knit <- read_lines(file)
-
-  # process relative paths to links
-  # match every link, except those which start with / (absolute link) or h (http)
-  # yeah, I know this is dirty but it works for now
-  knit <- knit %>%
-    str_replace_all("(\\[[^\\]]*\\]\\()([^/h][^\\)]*\\))", paste0("\\1", folder, "/\\2"))
-
-  # add extra header sublevels & add link
-  knit <- knit %>%
-    str_replace_all("^(# )(.*)$", paste0("\\1[\\2](", folder, ")")) %>%
-    str_replace_all("^#", "##")
-
-  # cat output
-  cat(knit %>% glue::glue_collapse("\n"))
-
-  invisible()
-}
-
-
-
 
 #' Generates a link to the results
 #'

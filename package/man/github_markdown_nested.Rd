@@ -4,9 +4,15 @@
 \alias{github_markdown_nested}
 \title{A nested github markdown document}
 \usage{
-github_markdown_nested(...)
+
+  github_markdown_nested(bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(),
+  "manuscript/references.bib"),
+  csl = paste0(dynbenchmark::get_dynbenchmark_folder(),
+  "manuscript/nature-biotechnology.csl"), ...)
 }
 \arguments{
+\item{csl}{Csl file location}
+
 \item{...}{Parameters for rmarkdown::github_document}
 }
 \description{
