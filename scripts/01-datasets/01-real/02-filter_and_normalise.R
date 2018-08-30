@@ -1,4 +1,4 @@
-#' Filtering and normalising the real datasets using the `dynbenchmark::process_raw_dataset` function.
+#' Filtering and normalising the real datasets using `dynbenchmark::process_raw_dataset` All datasets are then saved into the dynwrap format.
 
 library(dynbenchmark)
 library(tidyverse)

@@ -6,7 +6,9 @@ library(patchwork)
 
 experiment("02-metrics/01-metric_characterisation")
 
-# select the most complex dataset of all our datasets (excluding disconnected)
+#   ____________________________________________________________________________
+#   The effect of the number of cell waypoints                              ####
+
 dataset <- load_datasets(list_datasets() %>% filter(startsWith(source, "synthetic")) %>% pull(id)) %>%
   filter(trajectory_type != "directed_disconnected_graph") %>%
   mutate(n_edges = map_int(milestone_network, nrow)) %>%
