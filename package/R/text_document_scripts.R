@@ -82,13 +82,14 @@ render_scripts_documentation <- function(folder = ".", recursive = FALSE) {
 #' @param scripts_folder Folder from which to calculate the experiment id
 #' @export
 link_to_results <- function(scripts_folder = getwd()) {
-  experiment_id <- scripts_folder %>% gsub(".*/scripts/(.*)", "\\1", .)
+  experiment_id <- scripts_folder %>% gsub(".*/?scripts/(.*)", "\\1", .)
   results_dir <- scripts_folder %>% gsub("scripts", "results", .)
   results_location <- paste0("https://github.com/dynverse/dynbenchmark_results/tree/master/", experiment_id)
 
   if (fs::is_absolute_path(experiment_id) || !dir.exists(results_dir)) {
-    stop(results_dir, " does not exist! Cannot link to results")
+    warning(results_dir, " does not exist! Cannot link to results")
+    NA
+  } else {
+    results_location
   }
-
-  results_location
 }

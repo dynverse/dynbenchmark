@@ -54,8 +54,8 @@ tool_qc_processed$answer <- ifelse(is.na(tool_qc_processed$answer), 0, tool_qc_p
 
 tool_qc <- tool_qc_processed
 
-write_rds(tool_qc_processed, derived_file("tool_qc.rds"))
-write_rds(checks, derived_file("qc_checks.rds"))
+write_rds(tool_qc_processed, result_file("tool_qc.rds"))
+write_rds(checks, result_file("qc_checks.rds"))
 
 ##  ............................................................................
 ##  Calculate final qc scores                                               ####
@@ -81,6 +81,6 @@ tool_qc_application_scores <- tool_qc %>%
   ungroup()
 
 
-write_rds(tool_qc_scores, derived_file("tool_qc_scores.rds"))
-write_rds(tool_qc_category_scores, derived_file("tool_qc_category_scores.rds"))
-write_rds(tool_qc_application_scores, derived_file("tool_qc_application_scores.rds"))
+write_rds(tool_qc_scores, result_file("tool_qc_scores.rds"))
+write_rds(tool_qc_category_scores, result_file("tool_qc_category_scores.rds"))
+write_rds(tool_qc_application_scores, result_file("tool_qc_application_scores.rds"))

@@ -61,7 +61,7 @@ trajectory_type_tree_changes <- cowplot::plot_grid(plotlist = c(list(less_comple
 
 trajectory_type_tree_changes
 
-trajectory_type_tree_changes %>% write_rds(result_file("trajectory_type_tree_changes.rds"))
+trajectory_type_tree_changes %>% write_rds(result_file("trajectory_type_tree_changes.rds"), compress = "xz")
 
 
 ##  ............................................................................
@@ -78,7 +78,7 @@ trajectory_type_tree_overall <- trajectory_type_tree_data %>%
   scale_edge_linetype_discrete("", labels = label_long)
 trajectory_type_tree_overall
 
-trajectory_type_tree_overall %>% write_rds(result_file("trajectory_type_tree_overall.rds"))
+trajectory_type_tree_overall %>% write_rds(result_file("trajectory_type_tree_overall.rds"), compress = "xz")
 
 ##  ............................................................................
 ##  Combined tree plot                                                      ####

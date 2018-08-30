@@ -54,7 +54,9 @@ design <- benchmark_generate_design(
 
 ##  ............................................................................
 ##  Run the crossing                                                        ####
-metric_ids <- metrics_characterised$metric_id
+metric_ids <- metrics_characterised %>%
+  filter(type != "overall") %>%
+  pull(metric_id)
 
 # run evaluation on cluster
 benchmark_submit(

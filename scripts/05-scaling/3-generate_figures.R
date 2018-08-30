@@ -212,7 +212,7 @@ pbapply::pblapply(seq_along(method_ids), cl = 8, function(i) {
   pl <- plots[[i]]
   cat("Plotting ", mid, "\n", sep = "")
   # print(pl)
-  ggsave(result_file(c("results/", mid, ".svg")), pl, width = 16, height = 12)
+  ggsave(result_file(c("results/", mid, ".png")), pl, width = 12, height = 14, dpi = 100)
 })
 # dev.off()
 
@@ -327,7 +327,7 @@ pbapply::pblapply(method_ids, cl = 8, function(mid) {
 
   lines <- paste0(c(
     "# ", mid, "\n",
-    "![Overview](", mid, ".svg)\n",
+    "![Overview](", mid, ".png)\n",
     "\n",
     unlist(sta_lines)
   ), collapse = "")
