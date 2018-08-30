@@ -17,14 +17,14 @@ source(scripts_file("helper-rules.R"))
 source(scripts_file("helper-perturbations.R"))
 
 # add harmonic mean
-metric_ids_harm_mean <- metrics_evaluated %>% filter(category != "average") %>% pull(metric_id)
+metric_ids_geom_mean <- metrics_evaluated %>% filter(category != "average") %>% pull(metric_id)
 scores <- scores %>% bind_rows(
   scores %>%
     filter(metric_id %in% metric_ids_harm_mean) %>%
     group_by(method_id, dataset_id, param_id) %>%
     summarise(
-      score = dyneval:::calculate_harmonic_mean(score),
-      metric_id = "harm_mean"
+      score = dyneval:::calculate_geometric_mean(score),
+      metric_id = "geom_mean"
     )
 )
 
@@ -80,9 +80,9 @@ assessment <- assess_conformity(rule, scores)
 assessment$plot_scores
 assessment$plot_datasets
 #
-# pdf("test.pdf", width=assessment$plot_scores$width, height = assessment$plot_scores$height)
-# assessment$plot_scores
-# dev.off()
+pdf("test.pdf", width=assessment$plot_scores$width, height = assessment$plot_scores$height)
+assessment$plot_scores
+dev.off()
 #
 # pdf("test.pdf", width=assessment$plot_datasets$width, height = assessment$plot_datasets$height)
 # assessment$plot_datasets
