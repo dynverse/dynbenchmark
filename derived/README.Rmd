@@ -1,10 +1,6 @@
 ---
-output: github_document
+output: dynbenchmark::github_markdown_nested
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 # Derived data
 

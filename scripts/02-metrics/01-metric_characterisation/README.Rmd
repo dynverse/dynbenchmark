@@ -4,13 +4,6 @@ output: dynbenchmark::github_markdown_nested
 
 # Metric characterisation
 
-```{r include=FALSE}
-library(dynbenchmark)
-library(tidyverse)
-
-knitr::opts_chunk$set(echo = FALSE)
-```
-
 A first characterisation of the metrics. For each metric we:
 
 - generate some examples to get some intuition on how the metric works

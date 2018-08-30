@@ -4,12 +4,10 @@ output: dynbenchmark::github_markdown_nested
 
 # Real datasets
 
-```{r, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
 
 The generation of the real datasets is divided in two parts. We first download all the (annotated) expression files from sites such as GEO. Next, we filter and normalise all datasets, and wrap them into the common trajectory format of [dynwrap](https://www.github.com/dynverse/dynwrap).
 
 ```{r}
 dynbenchmark::render_scripts_documentation()
 ```
+

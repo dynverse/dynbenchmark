@@ -2,13 +2,6 @@
 output: dynbenchmark::github_markdown_nested
 ---
 
-```{r include = FALSE}
-library(tidyverse)
-library(dynbenchmark)
-
-knitr::opts_chunk$set(echo = FALSE)
-```
-
 # Scalability of methods
 
 Here we test how well a method scales with increasing number of features (genes) and/or cells.

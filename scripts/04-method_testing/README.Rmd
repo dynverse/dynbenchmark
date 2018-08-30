@@ -2,10 +2,6 @@
 output: dynbenchmark::github_markdown_nested
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
-
 # Method testing
 
 Here, we test the methods on some small real and toy datasets, to capture errors early on and make sure all methods run fine on these "simple" datasets.

@@ -4,10 +4,6 @@ output: dynbenchmark::github_markdown_nested
 
 # Benchmarking of TI methods on real and synthetic data
 
-```{r include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
-
 ```{r}
 dynbenchmark::render_scripts_documentation()
 ```

@@ -2,13 +2,6 @@
 output: dynbenchmark::github_markdown_nested
 ---
 
-```{r include = FALSE}
-library(tidyverse)
-library(dynbenchmark)
-
-knitr::opts_chunk$set(echo = FALSE)
-```
-
 # Trajectory inference methods
 
 Here we
