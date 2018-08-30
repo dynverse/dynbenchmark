@@ -6,7 +6,7 @@ experiment("03-methods")
 
 tool_qc <- read_rds(derived_file("tool_qc.rds"))
 tools_evaluated <- read_rds(derived_file("tools_evaluated.rds"))
-qc_checks <- readRDS(derived_file("qc_checks.rds"))
+qc_checks <- read_rds(derived_file("qc_checks.rds"))
 
 # the order of the tools is determined based on overall qc score
 tool_order <- tools_evaluated %>%
@@ -32,7 +32,7 @@ plot_tool_ordering <- tools_evaluated %>%
   theme(legend.position="top")
 
 plot_tool_ordering
-plot_tool_ordering %>% write_rds(result_file("plot_tool_ordering.rds"))
+plot_tool_ordering %>% write_rds(result_file("plot_tool_ordering.rds"), compress = "xz")
 
 ##  ............................................................................
 ##  Heatmap of the individual aspects of each methods                       ####

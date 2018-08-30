@@ -10,7 +10,7 @@ tools <- read_rds(derived_file("tools.rds"))
 methods <- read_rds(derived_file("methods.rds"))
 
 # combine with qc scores
-tool_qc_scores <- readRDS(derived_file("tool_qc_scores.rds"))
+tool_qc_scores <- read_rds(derived_file("tool_qc_scores.rds"))
 
 # merge qc scores with tools tibble
 tools <- tools %>%
