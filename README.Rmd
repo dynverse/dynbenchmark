@@ -16,7 +16,7 @@ library(dynbenchmark)
 ```
 
 [![Build Status](https://api.travis-ci.org/dynverse/dynbenchmark.svg)](https://travis-ci.org/dynverse/dynbenchmark)
-![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg) <img src="package/man/figures/logo.png" align="right" />
+![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg) <a href = "package/man/figures/logo.svg"><img src="package/man/figures/logo.png" align="right" /></a>
 
 # Benchmarking trajectory inference methods
 
@@ -26,18 +26,32 @@ A comparison of single-cell trajectory inference methods: towards more accurate 
 Wouter Saelens\*, Robrecht Cannoodt\*, Helena Todorov, Yvan Saeys  
 bioRxiv 276907; doi: https://doi.org/10.1101/276907
 
+## Experiments
 
-## Structure
+From start to finish, the repository is divided into several experiments, each with their own scripts and results. The scripts and results are accompanied by documentation using github READMEs and can be easily explored by going to the appropriate folders:
 
-This repository is structured as follows:
+```{r results = 'asis'}
+extract_scripts_documentation("scripts", recursive = FALSE) %>% 
+  mutate(
+    scripts = location,
+    results = map_chr(scripts, dynbenchmark::link_to_results)
+  ) %>% 
+  mutate(
+    ix = case_when(is.na(ix) ~ "", TRUE ~ as.character(ix)),
+    id = label_long(id),
+    scripts = paste0("[", id, " scripts](", scripts, ")"),
+    results = case_when(is.na(results) ~ "", TRUE ~ paste0("[", id, " results](", results, ")"))
+  ) %>% 
+  select(`\\#` = ix, id, scripts, results) %>% 
+  knitr::kable()
+```
 
-* data: raw data files required by the scripts
-* derived: data files produced by the scripts
-* figures: figures created by the scrips
+We also have several additional subfolders:
+
 * manuscript: source files for producing the manuscript
-* package: an R package with helper functions
-* results: data objects outputted by the scripts
-* scripts: code required to reproduce the analyses of the benchmark
+* package: an R package with several helper functions
+* data: raw data files required by the scripts
+* derived: intermediate data files produced by the scripts
 
 ## Datasets
 
@@ -60,10 +74,6 @@ ggplot2::ggsave("package/man/figures/datasets.png", width = nrow(datasets)*3, he
 * **The performance of methods** used in [dynguidelines](https://www.github.com/dynverse/dynguidelines). _Not yet available_
 
 * **General information about trajectory inference methods**, available as a data frame in `dynmethods::methods`
-
-```{r results = 'asis'}
-knit_nest("scripts")
-```
 
 ## Benchmarking your own method
 
