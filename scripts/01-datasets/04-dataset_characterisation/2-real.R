@@ -287,7 +287,7 @@ table <- map(c("latex", "html"), function(format) {
 }) %>% set_names(c("latex", "html"))
 table
 
-write_rds(table, result_file("datasets.rds"))
+write_rds(table, result_file("datasets.rds"), compress = "xz")
 
 
 

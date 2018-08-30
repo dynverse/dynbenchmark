@@ -109,4 +109,4 @@ table <- map(c("latex", "html"), function(format) {
   table
 }) %>% set_names(c("latex", "html"))
 
-write_rds(table, result_file("samplers.rds"))
+write_rds(table, result_file("samplers.rds"), compress = "xz")
