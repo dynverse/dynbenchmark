@@ -2,13 +2,13 @@ library(dynbenchmark)
 library(tidyverse)
 library(dynplot)
 
-experiment("9-main_figure")
+experiment("08-aggregate")
 
-# read param eval config
-eval_param_config <- read_rds(derived_file("config.rds", "06-optimise_parameters/3-evaluate_parameters"))
+############################################################
+############### PART THREE: GENERATE FIGURES ###############
+############################################################
 
-# read param eval results
-eval_param_outputs <- read_rds(derived_file("outputs_postprocessed.rds", "06-optimise_parameters/3-evaluate_parameters"))
+benchmark_results <- read_rds(result_file("benchmark_results.rds", experiment_id = "07-benchmark"))
 
 # read datasets
 datasets <- map_df(

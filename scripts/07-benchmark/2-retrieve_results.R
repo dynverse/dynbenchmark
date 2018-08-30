@@ -70,7 +70,7 @@ calc_mean <- function(df) {
   )
 }
 
-dataset_source_weights <- c("real" = 1, "synthetic/dyngen" = 1, "synthetic/dyntoy" = 1/3, "synthetic/prosstt" = 1/3, "synthetic/splatter" = 1/3) %>% {. / sum(.)}
+dataset_source_weights <- c("real" = 1, "synthetic/dyngen" = 1, "synthetic/dyntoy" = 1/3, "synthetic/prosstt" = 1/3, "synthetic/splatter" = 1/3)
 
 
 ###################################################
@@ -113,7 +113,7 @@ data %>% group_by(method_id) %>% summarise(n = n()) %>% as.data.frame() %>% arra
 
 # aggregate over replicates
 data_repl <- data %>%
-  group_by(method_id, method_name, dataset_id, param_id, dataset_trajectory_type, dataset_trajectory_type_simplified, dataset_source) %>%
+  group_by(method_id, method_name, dataset_id, param_id, dataset_trajectory_type_simplified, dataset_source) %>%
   select(-repeat_ix) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
@@ -125,7 +125,7 @@ data_repl <- data %>%
 
 # process trajtype grouped evaluation
 data_trajtype <- data_repl %>%
-  group_by(method_id, method_name, param_id, dataset_trajectory_type, dataset_trajectory_type_simplified, dataset_source) %>%
+  group_by(method_id, method_name, param_id, dataset_trajectory_type_simplified, dataset_source) %>%
   mutate(n = n()) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
@@ -139,7 +139,6 @@ data_method <- data_trajtype %>%
   ungroup() %>%
   calc_mean() %>%
   mutate(
-    dataset_trajectory_type = factor("overall", levels = levels(trajtypes$id)),
     dataset_trajectory_type_simplified = factor("overall", levels = levels(trajtypes$simplified))
   )
 
@@ -150,9 +149,9 @@ data_aggregations <-
     df,
     df %>%
       gather(metric, value, -method_id:-dataset_source) %>%
-      mutate(value = value * dataset_source_weights[dataset_source]) %>%
-      group_by(method_id, method_name, param_id, dataset_trajectory_type, dataset_trajectory_type_simplified, metric) %>%
-      summarise(value = sum(value)) %>%
+      group_by(method_id, method_name, param_id, dataset_trajectory_type_simplified, metric) %>%
+      mutate(dataset_weight = dataset_source_weights[dataset_source]) %>%
+      summarise(value = sum(value * dataset_weight) / sum(dataset_weight)) %>%
       ungroup() %>%
       spread(metric, value) %>%
       mutate(dataset_source = "mean")
@@ -193,22 +192,4 @@ g <- ggplot(var_df) +
 
 # g
 ggsave(result_file("normalisation_var_mean.pdf"), g, width = 10, height = 5)
-
-
-# dat_df %>%
-#   filter(type == "unnorm") %>%
-#   group_by(dataset_id, metric) %>%
-#   mutate(score = max(score, na.rm = TRUE)) %>%
-#   group_by(method_id, metric) %>%
-#   summarise(mean = mean(score)) %>%
-#   ungroup()
-#
-# dataset_difficulty <-
-#   dat_df %>%
-#   filter(type == "unnorm", metric == "overall") %>%
-#   group_by(dataset_id) %>%
-#   summarise(score = mean(score)) %>%
-#   arrange(desc(score)) %>%
-#   deframe()
-
 
