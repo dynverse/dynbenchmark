@@ -10,12 +10,14 @@ A first characterisation of the metrics. For each metric we:
 -   generate some examples to get some intuition on how the metric works
 -   test the robustness to a metric to stochasticity or parameters when appropriate
 
-| \#  | script                                                          | description                                                                |
+| \#  | script/folder                                                   | description                                                                |
 |:----|:----------------------------------------------------------------|:---------------------------------------------------------------------------|
 | 1   | [📄`correlation.R`](01-metric_characterisation/01-correlation.R) | Characterisation of the cor<sub>dist</sub>                                 |
 | 2   | [📄`topology.R`](01-metric_characterisation/02-topology.R)       | Characterisation of the Isomorphic, edgeflip and HIM                       |
 | 3   | [📄`clustering.R`](01-metric_characterisation/03-clustering.R)   | Characterisation of the F1<sub>branches</sub> and F1<sub>milestones</sub>  |
 | 4   | [📄`featureimp.R`](01-metric_characterisation/04-featureimp.R)   | Characterisation of the cor<sub>features</sub> and wcor<sub>features</sub> |
+
+The results of this experiment are available [here](https://github.com/dynverse/dynbenchmark_results/tree/master/02-metrics/01-metric_characterisation)
 
 ## [Metric conformity](02-metric_conformity)
 
@@ -36,7 +38,7 @@ Here, we assess whether metrics conforms such rules empirically:
 <thead>
 <tr class="header">
 <th align="left">#</th>
-<th align="left">script</th>
+<th align="left">script/folder</th>
 <th align="left">description</th>
 </tr>
 </thead>
@@ -63,23 +65,25 @@ Here, we assess whether metrics conforms such rules empirically:
 </tr>
 <tr class="odd">
 <td align="left"></td>
-<td align="left"><a href="helper-create_perturbation_images.R">📄<code>helper-create_perturbation_images.R</code></a></td>
+<td align="left"><a href="02-metric_conformity/helper-create_perturbation_images.R">📄<code>helper-create_perturbation_images.R</code></a></td>
 <td align="left">Helper for creating small images for each rule</td>
 </tr>
 <tr class="even">
 <td align="left"></td>
-<td align="left"><a href="helper-perturbations.R">📄<code>helper-perturbations.R</code></a></td>
+<td align="left"><a href="02-metric_conformity/helper-perturbations.R">📄<code>helper-perturbations.R</code></a></td>
 <td align="left">Helper functions for perturbations</td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
-<td align="left"><a href="helper-rules.R">📄<code>helper-rules.R</code></a></td>
+<td align="left"><a href="02-metric_conformity/helper-rules.R">📄<code>helper-rules.R</code></a></td>
 <td align="left">Helper functions containing the rules</td>
 </tr>
 <tr class="even">
 <td align="left"></td>
-<td align="left"><a href="helper-topologies.R">📄<code>helper-topologies.R</code></a></td>
+<td align="left"><a href="02-metric_conformity/helper-topologies.R">📄<code>helper-topologies.R</code></a></td>
 <td align="left">Helper containing different topologies with the same number of milestones</td>
 </tr>
 </tbody>
 </table>
+
+The results of this experiment are available [here](https://github.com/dynverse/dynbenchmark_results/tree/master/02-metrics/02-metric_conformity)

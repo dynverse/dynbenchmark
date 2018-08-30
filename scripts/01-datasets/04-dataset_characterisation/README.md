@@ -1,7 +1,7 @@
 
 # Dataset characterisation
 
-| \#  | script                                              | description |
+| \#  | script/folder                                       | description |
 |:----|:----------------------------------------------------|:------------|
 | 1   | [📄`synthetic.R`](1-synthetic.R)                     |             |
 | 2   | [📄`real.R`](2-real.R)                               |             |

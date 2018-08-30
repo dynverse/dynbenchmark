@@ -2,7 +2,7 @@
 output: dynbenchmark::github_markdown_nested
 ---
 
-# Dataset characterisation
+# Varia scripts
 
 ```{r}
 dynbenchmark::render_scripts_documentation()

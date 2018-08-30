@@ -1,5 +1,5 @@
 ---
-output: github_document
+output: dynbenchmark::github_markdown_nested
 editor_options: 
   chunk_output_type: console
 ---
@@ -62,7 +62,7 @@ ggplot2::ggsave("package/man/figures/datasets.png", width = nrow(datasets)*3, he
 * **General information about trajectory inference methods**, available as a data frame in `dynmethods::methods`
 
 ```{r results = 'asis'}
-knit_child_readme("scripts")
+knit_nest("scripts")
 ```
 
 ## Benchmarking your own method

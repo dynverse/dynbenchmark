@@ -181,6 +181,8 @@ label_time <- function(x) {
 #'
 #' @param x A ggassemble
 #' @param tag The tag
+#'
+#' @export
 tag_first <- function(x, tag) {
   y <- x$assemble$plots[[1]]
 

@@ -1,0 +1,7 @@
+---
+output: dynbenchmark::github_markdown_nested
+---
+
+# Markdown tester
+
+$\textrm{Hi} = lolcat$

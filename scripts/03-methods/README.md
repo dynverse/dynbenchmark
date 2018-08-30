@@ -8,7 +8,7 @@ Here we
 -   Download and process the information from the QC spread sheet (<https://docs.google.com/spreadsheets/d/1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE>)
 -   Create tables and figures to interpret the methods and quality control
 
-| \#  | script                                                                       | description |
+| \#  | script/folder                                                                | description |
 |:----|:-----------------------------------------------------------------------------|:------------|
 | 1   | [📁`gather_methods_tools`](01-gather_methods_tools)                           |             |
 | 2   | [📄`quality_control.R`](02-quality_control.R)                                 |             |

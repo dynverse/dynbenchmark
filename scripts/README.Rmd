@@ -1,10 +1,6 @@
 ---
-output: github_document
+output: dynbenchmark::github_markdown_nested
 ---
-
-```{r include = FALSE}
-knitr::opts_chunk$set(warning = FALSE, message = FALSE, error = FALSE, echo = FALSE)
-```
 
 ```{r}
 library(tidyverse)

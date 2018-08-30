@@ -2,7 +2,7 @@
 output: dynbenchmark::github_markdown_nested
 ---
 
-# Dataset characterisation
+# Benchmarking of TI methods on real and synthetic data
 
 ```{r}
 dynbenchmark::render_scripts_documentation()

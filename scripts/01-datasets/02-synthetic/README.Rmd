@@ -1,12 +1,8 @@
 ---
-output: github_document
+output: dynbenchmark::github_markdown_nested
 ---
 
 # Synthetic datasets
-
-```{r, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
 
 Each synthetic dataset is based on some characteristics of some real datasets. These characteristics include:
 

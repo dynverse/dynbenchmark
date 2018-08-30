@@ -1,24 +1,15 @@
 ---
-output: 
-  github_document:
-    pandoc_args: --atx-headers
+output: dynbenchmark::github_markdown_nested
 ---
 
 # Metrics for comparing two trajectories
 
 Good metrics are crucial for an unbiased and comprehensive benchmarking. Here we test several possible metrics for comparing two trajectories.
 
-```{r include=FALSE}
-library(dynbenchmark)
-library(tidyverse)
-
-knitr::opts_chunk$set(echo = FALSE)
+```{r, results = "asis"}
+knit_nest("01-metric_characterisation")
 ```
 
 ```{r, results = "asis"}
-knit_child_readme("01-metric_characterisation")
-```
-
-```{r, results = "asis"}
-knit_child_readme("02-metric_conformity")
+knit_nest("02-metric_conformity")
 ```

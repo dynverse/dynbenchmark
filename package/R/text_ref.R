@@ -287,3 +287,19 @@ add_table <- function(
 
   cat(subchunk)
 }
+
+
+
+
+
+##  ............................................................................
+##  Global refs setup                                                       ####
+#' Setup the refs for a markdown document, globally!
+#'
+#' @export
+setup_refs_globally <- function()  {
+  refs <<- dynbenchmark::setup_refs()
+  figs <<- dynbenchmark::setup_figs()
+  tables <<- dynbenchmark::setup_tables()
+  invisible()
+}

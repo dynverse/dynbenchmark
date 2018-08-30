@@ -3,7 +3,7 @@
 
 The datasets are split in real datasets and synthetic datasets. The real datasets are downloaded and preprocessed first, and characteristics from these datasets (such as the number of cells and genes, library sizes, dropout probabilities, ...) are used to generate synthetic datasets. The datasets are then characterised, after which they are uploaded to Zenodo.
 
-| \#  | script                                                     | description                                    |
+| \#  | script/folder                                              | description                                    |
 |:----|:-----------------------------------------------------------|:-----------------------------------------------|
 | 0   | [📄`download_from_zenodo.R`](00-download_from_zenodo.R)     | Downloading the processed datasets from zenodo |
 | 1   | [📁`real`](01-real)                                         | Real datasets                                  |
@@ -15,7 +15,7 @@ The datasets are split in real datasets and synthetic datasets. The real dataset
 
 ## [Real datasets](01-real)
 
-The generation of the real datasets is divided in two parts:
+The generation of the real datasets is divided in two parts. We first download all the (annotated) expression files from sites such as GEO. Next, we filter and normalise all datasets, and wrap them into the common trajectory format of [dynwrap](https://www.github.com/dynverse/dynwrap).
 
 <table>
 <colgroup>
@@ -26,7 +26,7 @@ The generation of the real datasets is divided in two parts:
 <thead>
 <tr class="header">
 <th align="left">#</th>
-<th align="left">script</th>
+<th align="left">script/folder</th>
 <th align="left">description</th>
 </tr>
 </thead>
@@ -34,16 +34,16 @@ The generation of the real datasets is divided in two parts:
 <tr class="odd">
 <td align="left">1</td>
 <td align="left"><a href="01-real/01-download_from_sources.R">📄<code>download_from_sources.R</code></a></td>
-<td align="left">Downloading the real datasets from their sources (eg. GEO), and constructing the gold standard model, using the helpers in <a href="helpers-download_from_sources" class="uri">helpers-download_from_sources</a></td>
+<td align="left">Downloading the real datasets from their sources (eg. GEO), and constructing the gold standard model, using the helpers in <a href="01-real/helpers-download_from_sources">helpers-download_from_sources</a></td>
 </tr>
 <tr class="even">
 <td align="left">2</td>
 <td align="left"><a href="01-real/02-filter_and_normalise.R">📄<code>filter_and_normalise.R</code></a></td>
-<td align="left">Filtering and normalising the real datasets using the <code>dynbenchmark::process_raw_dataset</code> function.</td>
+<td align="left">Filtering and normalising the real datasets using <code>dynbenchmark::process_raw_dataset</code> All datasets are then saved into the dynwrap format.</td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
-<td align="left"><a href="helpers-download_from_sources">📁<code>helpers-download_from_sources</code></a></td>
+<td align="left"><a href="01-real/helpers-download_from_sources">📁<code>helpers-download_from_sources</code></a></td>
 <td align="left"></td>
 </tr>
 </tbody>
@@ -70,7 +70,7 @@ The data is then simulated using wrappers around the simulators (see [/package/R
 <thead>
 <tr class="header">
 <th align="left">#</th>
-<th align="left">script</th>
+<th align="left">script/folder</th>
 <th align="left">description</th>
 </tr>
 </thead>
@@ -78,7 +78,7 @@ The data is then simulated using wrappers around the simulators (see [/package/R
 <tr class="odd">
 <td align="left">1</td>
 <td align="left"><a href="02-synthetic/01-estimate_platform.R">📄<code>estimate_platform.R</code></a></td>
-<td align="left"></td>
+<td align="left">Estimation of the platforms from real data done by <code>dynbenchmark::estimate_platform</code></td>
 </tr>
 <tr class="even">
 <td align="left">2a</td>
@@ -105,7 +105,7 @@ The data is then simulated using wrappers around the simulators (see [/package/R
 
 ## [Dataset characterisation](04-dataset_characterisation)
 
-| \#  | script                                                                          | description |
+| \#  | script/folder                                                                   | description |
 |:----|:--------------------------------------------------------------------------------|:------------|
 | 1   | [📄`synthetic.R`](04-dataset_characterisation/1-synthetic.R)                     |             |
 | 2   | [📄`real.R`](04-dataset_characterisation/2-real.R)                               |             |

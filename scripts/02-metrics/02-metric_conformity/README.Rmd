@@ -1,17 +1,8 @@
 ---
-output: 
-  github_document:
-    pandoc_args: --atx-headers
+output: dynbenchmark::github_markdown_nested
 ---
 
 # Metric conformity
-
-```{r include=FALSE}
-library(dynbenchmark)
-library(tidyverse)
-
-knitr::opts_chunk$set(echo = FALSE)
-```
 
 Differences between two datasets should be reflected in certain changes in the metrics. This can be formalised in a set of rules, for example:
 
@@ -25,6 +16,8 @@ Here, we assess whether metrics conforms such rules empirically:
 ```{r, results = "asis"}
 render_scripts_documentation()
 ```
+
+The results of this experiment are available [here](`r link_to_results()`)
 
 
 

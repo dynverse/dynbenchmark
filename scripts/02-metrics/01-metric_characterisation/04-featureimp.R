@@ -24,14 +24,14 @@ feature_importances <- feature_importances %>%
 plot_feature_importances <- feature_importances %>%
   ggplot(aes(feature_id, importance)) +
   geom_point() +
-  geom_point(data = feature_importances %>% filter(highlighted), color = "red") +
-  scale_x_discrete("Genes", breaks = feature_importances %>% filter(highlighted) %>% pull(feature_id)) +
+  geom_point(data = feature_importances %>% filter(highlight), color = "red") +
+  scale_x_discrete("Genes", breaks = feature_importances %>% filter(highlight) %>% pull(feature_id)) +
   theme_pub()
 
 # plot the expression of highlighted features
 dimred <- dyndimred::dimred_landmark_mds(get_expression(dataset))
 plot_feature_expression <- feature_importances %>%
-  filter(highlighted) %>%
+  filter(highlight) %>%
   mutate(feature_id = as.character(feature_id)) %>%
   pmap(function(feature_id, ...) {
     plot_dimred(
@@ -85,8 +85,8 @@ check_featureimp_cor <- function(dataset, shuffle_perc, num_trees, seed, ...) {
 
   set.seed(seed)
 
-  scores <- dyneval:::compute_featureimp(
-  # scores <- dyneval::calculate_featureimp_cor(
+  # scores <- dyneval:::compute_featureimp(
+  scores <- dyneval::calculate_featureimp_cor(
     dataset = dataset,
     prediction = perturbed,
     num_trees = num_trees

@@ -2,7 +2,7 @@
 output: dynbenchmark::github_markdown_nested
 ---
 
-# Dataset characterisation
+# Optimisation of method parameters on synthetic data
 
 ```{r}
 dynbenchmark::render_scripts_documentation()

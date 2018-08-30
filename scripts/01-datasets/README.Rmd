@@ -1,5 +1,5 @@
 ---
-output: github_document
+output: dynbenchmark::github_markdown_nested
 ---
 
 # Dataset processing and characterisation
@@ -7,8 +7,6 @@ output: github_document
 ```{r include=FALSE}
 library(dynbenchmark)
 library(tidyverse)
-
-knitr::opts_chunk$set(echo = FALSE)
 ```
 
 The datasets are split in real datasets and synthetic datasets. The real datasets are downloaded and preprocessed first, and characteristics from these datasets (such as the number of cells and genes, library sizes, dropout probabilities, ...) are used to generate synthetic datasets. The datasets are then characterised, after which they are uploaded to Zenodo.
@@ -18,14 +16,14 @@ dynbenchmark::render_scripts_documentation()
 ```
 
 ```{r results = 'asis'}
-knit_child_readme("01-real")
+knit_nest("01-real")
 ```
 
 ```{r results = 'asis'}
-knit_child_readme("02-synthetic")
+knit_nest("02-synthetic")
 ```
 
 ```{r results = 'asis'}
-knit_child_readme("04-dataset_characterisation")
+knit_nest("04-dataset_characterisation")
 ```
 

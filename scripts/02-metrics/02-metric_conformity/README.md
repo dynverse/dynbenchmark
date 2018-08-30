@@ -9,7 +9,7 @@ Differences between two datasets should be reflected in certain changes in the m
 
 Here, we assess whether metrics conforms such rules empirically:
 
-| \#  | script                                                                        | description                                                                                                              |
+| \#  | script/folder                                                                 | description                                                                                                              |
 |:----|:------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------|
 | 1   | [📄`generate_reference_datasets.R`](01-generate_reference_datasets.R)          | Generation of toy datasets used as reference to assess metric conformity                                                 |
 | 2   | [📄`evaluate_perturbations.R`](02-evaluate_perturbations.R)                    | Perturbing the reference datasets (for example shuffling the cells) to check the effect of this perturbation on a metric |
@@ -19,3 +19,5 @@ Here, we assess whether metrics conforms such rules empirically:
 |     | [📄`helper-perturbations.R`](helper-perturbations.R)                           | Helper functions for perturbations                                                                                       |
 |     | [📄`helper-rules.R`](helper-rules.R)                                           | Helper functions containing the rules                                                                                    |
 |     | [📄`helper-topologies.R`](helper-topologies.R)                                 | Helper containing different topologies with the same number of milestones                                                |
+
+The results of this experiment are available [here](https://github.com/dynverse/dynbenchmark_results/tree/master/02-metrics/02-metric_conformity)

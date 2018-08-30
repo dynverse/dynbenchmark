@@ -68,40 +68,27 @@ render_scripts_documentation <- function(folder = ".", recursive = FALSE) {
     arrange(ix) %>%
     mutate(
       symbol = case_when(type == "directory" ~ "\U1F4C1", type == "script" ~ "\U1F4C4", TRUE ~ ""),
-      script = glue::glue("[{symbol}`{id}`]({file})"),
+      location = glue::glue("[{symbol}`{id}`]({file})"),
       order = paste0(ifelse(is.na(ix), "", ix), ifelse(is.na(subix), "", subix)),
       description = map_chr(title, ~knitr::knit_child(text = ., quiet = TRUE))
     ) %>%
-    select(`\\#` = order, script, description) %>%
+    select(`\\#` = order, `script/folder` = location, description) %>%
     knitr::kable()
 }
 
-#' Knit a child README, and add an extra level of headings + fix relative paths
+
+#' Generates a link to the results
 #'
-#' @param folder Subfolder where the README.Rmd is located
+#' @param scripts_folder Folder from which to calculate the experiment id
 #' @export
-knit_child_readme <- function(folder) {
-  if (is.null(knitr::opts_knit$get("output.dir"))) {knitr::opts_knit$set("output.dir" = ".")}
+link_to_results <- function(scripts_folder = getwd()) {
+  experiment_id <- scripts_folder %>% gsub(".*/scripts/(.*)", "\\1", .)
+  results_dir <- scripts_folder %>% gsub("scripts", "results", .)
+  results_location <- paste0("https://github.com/dynverse/dynbenchmark_results/tree/master/", experiment_id)
 
-  file <- file.path(folder, "README.md")
-  if (!file.exists(file)) {
-    stop(file, " does not exist!")
+  if (fs::is_absolute_path(experiment_id) || !dir.exists(results_dir)) {
+    stop(results_dir, " does not exist! Cannot link to results")
   }
-  knit <- read_lines(file)
 
-  # process relative paths to links
-  # match every link, except those which start with / (absolute link) or h (http)
-  # yeah, I know this is dirty but it works for now
-  knit <- knit %>%
-    str_replace_all("(\\[[^\\]]*\\]\\()([^/h][^\\)]*\\))", paste0("\\1", folder, "/\\2"))
-
-  # add extra header sublevels & add link
-  knit <- knit %>%
-    str_replace_all("^(# )(.*)$", paste0("\\1[\\2](", folder, ")")) %>%
-    str_replace_all("^#", "##")
-
-  # cat output
-  cat(knit %>% glue::glue_collapse("\n"))
-
-  invisible()
+  results_location
 }
