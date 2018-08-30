@@ -19,6 +19,7 @@ github_markdown_nested <- function(
   format$pre_processor <- function(metadata, input_file, runtime, knit_meta, files_dir, output_dir) {
     readr::read_lines(input_file) %>%
       render_equations(format = "markdown") %>%
+      fix_references_header() %>%
       readr::write_lines(input_file)
 
     invisible()
@@ -172,7 +173,8 @@ fix_relative_paths <- function(knit, folder) {
           file <- matches[3] # contains the file
           suffix <- matches[4]
 
-          if (fs::is_absolute_path(file) || startsWith(file, "http")) {
+          # do not fix absolute paths, urls or anchors
+          if (fs::is_absolute_path(file) || startsWith(file, "http") || startsWith(file, "#")) {
             link
           } else {
             glue::glue("{prefix}{folder}/{file}{suffix}")
@@ -182,4 +184,9 @@ fix_relative_paths <- function(knit, folder) {
   }
 
   knit
+}
+
+
+fix_references_header <- function(knit) {
+  knit %>% str_replace_all("^#*.*References.*", "#### References")
 }
