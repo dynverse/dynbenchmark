@@ -544,7 +544,7 @@ remove_divergence_regions <- rule_lower(
     num_cells >= 100
   ) %>% pull(dataset_id),
   method_id = "remove_divergence_regions",
-  observation = glue::glue("Both ${label_metric('F1_branches', 'latex')}$ and ${label_metric('edgeflip', 'latex')}$ fail here because neither the topology nor the branche assignment changes.")
+  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and {label_metric('edgeflip', 'latex')} fail here because neither the topology nor the branche assignment changes.")
 )
 
 time_warping_start <- rule_monotonic(
@@ -556,7 +556,7 @@ time_warping_start <- rule_monotonic(
   varied_parameter_id = "warp_magnitude",
   method_id = "time_warping_start",
   varied_parameter_name = "Warp magnitude",
-  observation = glue::glue("Both ${label_metric('F1_branches', 'latex')}$ and ${label_metric('edgeflip', 'latex')}$ fail here because neither the topology nor the branche assignment changes.")
+  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and {label_metric('edgeflip', 'latex')} fail here because neither the topology nor the branche assignment changes.")
 )
 
 time_warping_parabole <- rule_monotonic(
@@ -568,7 +568,7 @@ time_warping_parabole <- rule_monotonic(
   varied_parameter_id = "warp_magnitude",
   method_id = "time_warping_parabole",
   varied_parameter_name = "Warp magnitude",
-  observation = glue::glue("Both ${label_metric('F1_branches', 'latex')}$ and ${label_metric('edgeflip', 'latex')}$ fail here because neither the topology nor the branche assignment changes.")
+  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and {label_metric('edgeflip', 'latex')} fail here because neither the topology nor the branche assignment changes.")
 )
 
 shuffle_lengths <- rule_lower(
@@ -617,7 +617,7 @@ add_connecting_edges <- rule_monotonic(
   varied_parameter_id = "n_edges",
   method_id = "add_connecting_edges",
   varied_parameter_name = "Number of edges",
-  observation = glue::glue("Even though the positions of the cells change, the ${label_metric('correlation', 'latex')}$ still conforms to this rule because new edges can create shortcuts which will affect the geodesic distances between cells. Apart from this, metrics which investigate the clustering quality and topology also conform to this rule.")
+  observation = glue::glue("Even though the positions of the cells change, the {label_metric('correlation', 'latex')} still conforms to this rule because new edges can create shortcuts which will affect the geodesic distances between cells. Apart from this, metrics which investigate the clustering quality and topology also conform to this rule.")
 )
 
 combined_position_topology <- rule_combined(
@@ -632,7 +632,7 @@ combined_position_topology <- rule_combined(
   ),
   method_ids = c("shuffle_cells", "add_connecting_edges", "shuffle_cells_and_add_connecting_edges"),
   dataset_ids = dataset_design %>% filter(num_cells == 100) %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
-  observation = "Most metrics have problems with this rule as they focus on either the cellular positions or the topology individually. Only the ${label_metric('featureimp_cor', 'latex')}$ and the ${label_metric('harm_mean', 'latex')}$ conform to this rule."
+  observation = "Most metrics have problems with this rule as they focus on either the cellular positions or the topology individually. Only the {label_metric('featureimp_cor', 'latex')} and the {label_metric('harm_mean', 'latex')} conform to this rule."
 )
 
 merge_bifurcation <- rule_lower(
@@ -674,7 +674,7 @@ break_cycle <- rule_lower(
   description = "Breaking a cyclic trajectory should lower the score",
   dataset_ids = dataset_design %>% filter(topology_id == "cycle") %>% pull(dataset_id),
   method_id = "break_cycle",
-  observation = glue::glue("Because the actual positions of the cells nor the branch assignment change, both the MSE metrics and the ${label_metric('F1_branches', 'latex')}$ do not conform to this rule.")
+  observation = glue::glue("Because the actual positions of the cells nor the branch assignment change, both the MSE metrics and the {label_metric('F1_branches', 'latex')} do not conform to this rule.")
 )
 
 join_linear <- rule_lower(
@@ -683,7 +683,7 @@ join_linear <- rule_lower(
   description = "Joining the two ends of a linear trajectory should lower the score",
   dataset_ids = dataset_design %>% filter(topology_id == "linear") %>% pull(dataset_id),
   method_id = "join_linear",
-  observation = glue::glue("Because the positions of the cells can be perfectly predicted, the MSE metrics do not conform to this rule. Furthermore, because the branch assignment change stays the same, the ${label_metric('F1_branches', 'latex')}$ also does not conform to this rule.")
+  observation = glue::glue("Because the positions of the cells can be perfectly predicted, the MSE metrics do not conform to this rule. Furthermore, because the branch assignment change stays the same, the {label_metric('F1_branches', 'latex')} also does not conform to this rule.")
 )
 
 split_linear <- rule_lower(
@@ -814,7 +814,7 @@ change_topology <- lst(
 
     plot_datasets
   },
-  observation = glue::glue("Because the positions of the cells can be perfectly predicted, the MSE metrics do not conform to this rule. Furthermore, because the branch assignment change stays the same, the ${label_metric('F1_branches', 'latex')}$ also does not conform to this rule.")
+  observation = glue::glue("Because the positions of the cells can be perfectly predicted, the MSE metrics do not conform to this rule. Furthermore, because the branch assignment change stays the same, the {label_metric('F1_branches', 'latex')} also does not conform to this rule.")
 )
 
 
