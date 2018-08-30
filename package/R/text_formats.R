@@ -143,20 +143,19 @@ knit_nest <- function(file) {
 }
 
 
-#' process relative paths to links & figures
-#' match every link and check whether it is an absolute path (= starts with / or http) or not
-#' every relative path gets updated
+#' Process relative paths to links & figures
+#' First extract every link, determine whether it is a relative path and if yes, add folder to the front
 #'
 #' @param knit Character vector
 #' @param folder The relative folder
 #' @examples
 #' knit <- c(
-#' "hshlkjdsljkfdhg [xxxxx](/pompompom/dhkjhlkj/) kjfhlqkjsdhlkfjqsdf",
-#' "hshlkjdsljkfdhg [xxxxx](pompompom/dhkjhlkj/) kjfhlqkjsdhlkfjqsdf",
+#' "hshlkjdsljkfdhg [i am a absolute path](/pompompom/dhkjhlkj/) kjfhlqkjsdhlkfjqsdf",
+#' "hshlkjdsljkfdhg [i am a relative path](pompompom/dhkjhlkj/) kjfhlqkjsdhlkfjqsdf",
 #' "<img src = \"heyho/heyho\">",
 #' "<img src = \"/heyho/heyho\">"
 #' )
-#' fix_relative_links(knit, "IT WORKED :)")
+#' dynbenchmark:::fix_relative_paths(knit, "IT WORKED :)")
 fix_relative_paths <- function(knit, folder) {
   patterns <- c(
     "(\\[[^\\]]*\\]\\()([^\\)]*)(\\))",

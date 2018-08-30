@@ -20,10 +20,10 @@ every relative path gets updated
 }
 \examples{
 knit <- c(
-"hshlkjdsljkfdhg [xxxxx](/pompompom/dhkjhlkj/) kjfhlqkjsdhlkfjqsdf",
-"hshlkjdsljkfdhg [xxxxx](pompompom/dhkjhlkj/) kjfhlqkjsdhlkfjqsdf",
+"hshlkjdsljkfdhg [i am a absolute path](/pompompom/dhkjhlkj/) kjfhlqkjsdhlkfjqsdf",
+"hshlkjdsljkfdhg [i am a relative path](pompompom/dhkjhlkj/) kjfhlqkjsdhlkfjqsdf",
 "<img src = \\"heyho/heyho\\">",
 "<img src = \\"/heyho/heyho\\">"
 )
-fix_relative_links(knit, "IT WORKED :)")
+dynbenchmark:::fix_relative_paths(knit, "IT WORKED :)")
 }
