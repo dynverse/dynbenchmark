@@ -38,6 +38,7 @@ Imports:
   purrr,
   readr,
   reshape2,
+  rmarkdown,
   rvest,
   smoof,
   stats,

@@ -8,6 +8,11 @@ every relative path gets updated}
 \usage{
 fix_relative_paths(knit, folder)
 }
+\arguments{
+\item{knit}{Character vector}
+
+\item{folder}{The relative folder}
+}
 \description{
 process relative paths to links & figures
 match every link and check whether it is an absolute path (= starts with / or http) or not
