@@ -71,6 +71,6 @@ tools$non_inclusion_reasons_split <- tools$non_inclusion_reasons %>% str_split("
 
 #   ____________________________________________________________________________
 #   Save output                                                             ####
-write_rds(methods, derived_file("methods.rds"))
-write_rds(tools, derived_file("tools.rds"))
+write_rds(methods, result_file("methods.rds"), compress = "xz")
+write_rds(tools, result_file("tools.rds"), compress = "xz")
 

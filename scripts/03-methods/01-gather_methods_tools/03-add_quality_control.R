@@ -6,11 +6,11 @@ library(googlesheets)
 
 experiment("03-methods")
 
-tools <- read_rds(derived_file("tools.rds"))
-methods <- read_rds(derived_file("methods.rds"))
+tools <- read_rds(result_file("tools.rds"))
+methods <- read_rds(result_file("methods.rds"))
 
 # combine with qc scores
-tool_qc_scores <- readRDS(derived_file("tool_qc_scores.rds"))
+tool_qc_scores <- readRDS(result_file("tool_qc_scores.rds"))
 
 # merge qc scores with tools tibble
 tools <- tools %>%
@@ -35,7 +35,7 @@ if (nrow(methods_evaluated_nonqc) != 0) {
 }
 
 # save
-write_rds(tools, derived_file("tools.rds"))
-write_rds(tools_evaluated, derived_file("tools_evaluated.rds"))
-write_rds(methods, derived_file("methods.rds"))
-write_rds(methods_evaluated, derived_file("methods_evaluated.rds"))
+write_rds(tools, result_file("tools.rds"))
+write_rds(tools_evaluated, result_file("tools_evaluated.rds"))
+write_rds(methods, result_file("methods.rds"))
+write_rds(methods_evaluated, result_file("methods_evaluated.rds"))

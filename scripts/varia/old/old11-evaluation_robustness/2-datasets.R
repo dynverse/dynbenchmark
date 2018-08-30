@@ -263,7 +263,7 @@ dataset_sample_max_datasets_overview <- dataset_sample_max_datasets_top %>%
     scale_x_discrete("", labels = method_names) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     scale_y_continuous(label_short("largest_subset_of_datasets_at_which_method_ranks_first", 30), limits = c(0, length(all_dataset_ids)+10), expand = c(0, 0))
-dataset_sample_max_datasets_overview %>% write_rds(result_file("dataset_sample_max_datasets_overview.rds"))
+dataset_sample_max_datasets_overview %>% write_rds(result_file("dataset_sample_max_datasets_overview.rds"), compress = "xz")
 
 
 dataset_sample_max_datasets_top_individual <- dataset_sample_max_datasets_top %>%

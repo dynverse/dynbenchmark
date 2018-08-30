@@ -4,9 +4,9 @@ library(patchwork)
 
 experiment("03-methods")
 
-tool_qc <- read_rds(derived_file("tool_qc.rds"))
-tools_evaluated <- read_rds(derived_file("tools_evaluated.rds"))
-qc_checks <- readRDS(derived_file("qc_checks.rds"))
+tool_qc <- read_rds(result_file("tool_qc.rds"))
+tools_evaluated <- read_rds(result_file("tools_evaluated.rds"))
+qc_checks <- readRDS(result_file("qc_checks.rds"))
 
 # the order of the tools is determined based on overall qc score
 tool_order <- tools_evaluated %>%
@@ -32,7 +32,7 @@ plot_tool_ordering <- tools_evaluated %>%
   theme(legend.position="top")
 
 plot_tool_ordering
-plot_tool_ordering %>% write_rds(result_file("plot_tool_ordering.rds"))
+plot_tool_ordering %>% write_rds(result_file("plot_tool_ordering.rds"), compress = "xz")
 
 ##  ............................................................................
 ##  Heatmap of the individual aspects of each methods                       ####
@@ -84,7 +84,7 @@ plot_individual_checks <- tool_qc_checks %>%
   geom_rect(aes(ymax=check_start, ymin=check_end, xmin=as.integer(tool_id), xmax=as.integer(tool_id) + 1, alpha=answer), fill = "#444444") +
   hline_check + hline_aspect +
   geom_vline(aes(xintercept = as.integer(tool_id)), color="white", alpha=0.2) +
-  scale_y_reverse(NULL, breaks = aspect_position$aspect_mid, labels = aspect_position$name, expand = c(0, 0)) +
+  scale_y_reverse(NULL, breaks = aspect_positions$aspect_mid, labels = aspect_positions$name, expand = c(0, 0)) +
   # scale_x_continuous("", breaks = seq_along(levels(implementation_qc_checks$implementation_id))+0.5, labels = label_implementation(levels(implementation_qc_checks$implementation_id)), expand = c(0, 0), position="right") +
   scale_x_continuous("", breaks=NULL, expand = c(0, 0)) +
   scale_fill_brewer(palette = "Set1") +
