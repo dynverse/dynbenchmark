@@ -103,7 +103,8 @@ plot_individual_checks
 
 plot_category_labels <- category_positions %>%
   ggplot(aes(0, category_mid)) +
-  geom_rect(aes(xmin = -0.1, ymin = category_start, xmax = 0.1, ymax = category_end), fill = "black", alpha = 0.2) +
+  # geom_rect(aes(xmin = -0.1, ymin = category_start, xmax = 0.1, ymax = category_end), fill = "black", alpha = 0.2) +
+  geom_segment(aes(x = 0.05, y = category_start, xend = 0.05, yend = category_end), color = "black") +
   geom_text(aes(label = label_long(category)), angle = 90) +
   scale_x_continuous(limits = c(-0.1, 0.1), expand = c(0, 0)) +
   scale_y_reverse(expand = c(0, 0)) +
