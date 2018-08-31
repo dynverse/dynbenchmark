@@ -64,6 +64,8 @@ extract_scripts_documentation <- function(folder = getwd(), recursive = TRUE) {
 #' @rdname extract_scripts_documentation
 #' @export
 render_scripts_documentation <- function(folder = ".", recursive = FALSE) {
+  if(is.null(knitr::opts_knit$get("output.dir"))) {knitr::opts_knit$set("output.dir" = ".")} # fix for bizaroo knit_child error
+
   extract_scripts_documentation(folder, recursive = recursive) %>%
     arrange(ix) %>%
     mutate(
