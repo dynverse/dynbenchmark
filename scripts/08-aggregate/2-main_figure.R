@@ -145,7 +145,7 @@ axis <-
 
     "qcdf",    "Developer friendly",   hsp,   1,       T,           "circle",   F,               "qc_app_developer_friendly_sc_col",        "qc_app_developer_friendly_sc",
     "qcuf",    "User friendly",        ssp,   1,       T,           "circle",   F,               "qc_app_user_friendly_sc_col",             "qc_app_user_friendly_sc",
-    "qcgs",    "Future-proof",         ssp,   1,       T,           "circle",   F,               "qc_app_good_science_sc_col",              "qc_app_good_science_sc",
+    "qcgs",    "Future-proof",         ssp,   1,       T,           "circle",   F,               "qc_app_future_proof_sc_col",              "qc_app_future_proof_sc",
 
     "qcav",    "Availability",         lsp,   1,       T,           "circle",   F,               "qc_cat_availability_sc_col",              "qc_cat_availability_sc",
     "qcbe",    "Behaviour",            ssp,   1,       T,           "circle",   F,               "qc_cat_behaviour_sc_col",                 "qc_cat_behaviour_sc",

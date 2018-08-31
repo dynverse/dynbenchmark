@@ -1,5 +1,5 @@
 qc_applications <- tibble(
-  application = c("developer_friendly", "user_friendly", "good_science")
+  application = c("developer_friendly", "user_friendly", "future_proof")
 )
 
 qc_categories <- tibble(

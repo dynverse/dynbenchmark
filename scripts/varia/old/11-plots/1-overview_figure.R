@@ -90,7 +90,7 @@ method_tib <- method_tib %>%
     c(
       "overall_qc", "overall_qccat", "overall_qcapp",
       "qc_score", "qc_cat_availability", "qc_cat_behaviour", "qc_cat_code_assurance", "qc_cat_code_quality",
-      "qc_cat_documentation", "qc_cat_paper", "qc_app_developer_friendly", "qc_app_good_science", "qc_app_user_friendly"),
+      "qc_cat_documentation", "qc_cat_paper", "qc_app_developer_friendly", "qc_app_future_proof", "qc_app_user_friendly"),
     funs(sc = sc_fun, sc_col = colqc_fun)
   ) %>%
   mutate_at(
@@ -156,7 +156,7 @@ axis <-
 
     "qcdf",    "Developer friendly",   hsp,   1,       T,           "circle",   F,               "qc_app_developer_friendly_sc_col",        "qc_app_developer_friendly_sc",
     "qcuf",    "User friendly",        ssp,   1,       T,           "circle",   F,               "qc_app_user_friendly_sc_col",             "qc_app_user_friendly_sc",
-    "qcgs",    "Future-proof",         ssp,   1,       T,           "circle",   F,               "qc_app_good_science_sc_col",              "qc_app_good_science_sc",
+    "qcgs",    "Future-proof",         ssp,   1,       T,           "circle",   F,               "qc_app_future_proof_sc_col",              "qc_app_future_proof_sc",
 
     "qcav",    "Availability",         lsp,   1,       T,           "circle",   F,               "qc_cat_availability_sc_col",              "qc_cat_availability_sc",
     "qcbe",    "Behaviour",            ssp,   1,       T,           "circle",   F,               "qc_cat_behaviour_sc_col",                 "qc_cat_behaviour_sc",
