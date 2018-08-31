@@ -164,22 +164,20 @@ plot_fig <- function(
 
     fig_cap <- ref(ref_type, ref_id, pattern = "{ref_full_name}")
     subchunk <- glue::glue(
-      "<p>\n",
+      "\n\n\n<p>\n",
       "  {fig_anch}\n",
       "  <img src = \"{fig_path}\" width = \"{width}\" height = \"{height}\" />\n",
       "</p><p>\n",
       "  <strong>{fig_cap}: {caption_main}</strong> {caption_text}\n",
       "</p>\n",
       "___",
-      "\n"
+      "\n\n"
     )
   } else {
     stop("Invalid format for figures")
   }
 
-  cat("\n  \n  ")
-  cat(subchunk)
-  cat("\n  \n  ")
+  knitr::asis_output(subchunk)
 }
 
 
@@ -192,7 +190,7 @@ plot_fig <- function(
 #' @rdname setup_refs
 #' @export
 setup_tables <- function() {
-  tibble(ref_id = character(), latex = list(), html = list(), markdown = list(), caption_main = character(), caption_text = character())
+  tibble(ref_id = character(), table = list(), caption_main = character(), caption_text = character())
 }
 
 #' Add a table
@@ -232,14 +230,11 @@ add_table <- function(
   }
 
   # make sure all tables are given
-  testthat::expect_setequal(names(table), c("html", "latex", "markdown"))
-
+  testthat::expect_true(all(c("latex", "markdown") %in% names(table)))
 
   # save it because why not
   tables <<- tables %>% add_row(
-    latex = table$latex,
-    html = table$html,
-    markdown = table$markdown,
+    table = table,
     ref_id = ref_id,
     caption_main = caption_main,
     caption_text = caption_text
@@ -285,7 +280,7 @@ add_table <- function(
     )
   }
 
-  cat(subchunk)
+  knitr::asis_output(subchunk)
 }
 
 
