@@ -3,7 +3,7 @@ library(dynwrap)
 library(dynbenchmark)
 library(tidyverse)
 
-experiment("03-methods/singularity_images")
+experiment("singularity_images")
 
 
 # RUN THIS ON THE LOGIN NODE:
@@ -21,10 +21,11 @@ experiment("03-methods/singularity_images")
 # test with
 # Rscript -e 'dynbenchmark::setup_singularity_methods(); dynwrap::infer_trajectory(dyntoy::generate_dataset(), dynmethods::ti_angle())'
 
+versions <- dynmethods::method_versions
 
 handle <- qsub::qsub_lapply(
-  X = dynmethods::repo_digests,
-  qsub_environment = c(),
+  X = seq_along(versions),
+  qsub_environment = c("versions"),
   qsub_packages = c("tidyverse", "dynmethods", "dynbenchmark"),
   qsub_config = qsub::override_qsub_config(
     max_wall_time = "01:00:00",
@@ -34,11 +35,11 @@ handle <- qsub::qsub_lapply(
     wait = FALSE,
     stop_on_error = FALSE
   ),
-  FUN = function(dig) {
+  FUN = function(i) {
     config <- dynwrap::container_singularity(
       prebuild = TRUE,
-      images_folder = derived_file("singularity_images/", experiment_id = "03-methods")
+      images_folder = derived_file("", experiment_id = "singularity_images")
     )
-    meth <- dynwrap:::.container_pull_image(dig, config = config)
+    meth <- dynwrap:::.container_pull_image(names(versions)[[i]], config = config)
   }
 )
