@@ -1,4 +1,4 @@
-#' Characterisation of the `r label_metric("correlation")`
+#' Characterisation of the `r dynbenchmark::label_metric("correlation")`
 
 library(dynbenchmark)
 library(tidyverse)

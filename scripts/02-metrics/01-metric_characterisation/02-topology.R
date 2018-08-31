@@ -1,4 +1,4 @@
-#'  Characterisation of the `r label_metric("isomorphic")`, `r label_metric("edge_flip")` and `r label_metric("him")`
+#'  Characterisation of the `r dynbenchmark::label_metric("isomorphic")`, `r dynbenchmark::label_metric("edge_flip")` and `r dynbenchmark::label_metric("him")`
 
 library(dynbenchmark)
 library(tidyverse)

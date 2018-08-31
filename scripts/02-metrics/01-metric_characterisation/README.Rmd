@@ -9,8 +9,8 @@ A first characterisation of the metrics. For each metric we:
 - generate some examples to get some intuition on how the metric works
 - test the robustness to a metric to stochasticity or parameters when appropriate
 
-```{r, results = "asis"}
-render_scripts_documentation()
+```{r}
+dynbenchmark::render_scripts_documentation()
 ```
 
-The results of this experiment are available [here](`r link_to_results()`)
+The results of this experiment are available [here](`r dynbenchmark::link_to_results()`)
