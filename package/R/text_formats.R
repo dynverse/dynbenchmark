@@ -126,9 +126,7 @@ knit_nest <- function(file) {
       str_replace_all("^#", "##")
 
     # cat output
-    cat(knit %>% glue::glue_collapse("\n"))
-
-    invisible()
+    knit %>% glue::glue_collapse("\n") %>% knitr::asis_output()
   } else if (format == "latex") {
     # make sure duplicated labels are allowed
     options(knitr.duplicate.label = "allow")
@@ -137,9 +135,7 @@ knit_nest <- function(file) {
     knitr::knit_child(
       text = readr::read_lines(file) %>% stringr::str_replace_all("^#", "##"),
       quiet = TRUE
-    ) %>% cat()
-
-    invisible()
+    ) %>% knitr::asis_output()
   }
 }
 

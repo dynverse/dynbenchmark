@@ -14,7 +14,7 @@ tool_qc_sheet <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE") %>%
   gs_read(ws = "qc")
 
 categories <- unique(tool_qc_sheet$category) %>% discard(is.na)
-applications <- c("developer_friendly", "user_friendly", "good_science")
+applications <- c("developer_friendly", "user_friendly", "future_proof")
 
 tool_qc_converted <- tool_qc_sheet %>%
   filter(active) %>%

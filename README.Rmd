@@ -28,7 +28,7 @@ bioRxiv 276907; doi: https://doi.org/10.1101/276907
 
 ## Experiments
 
-From start to finish, the repository is divided into several experiments, each with their own scripts and results. The scripts and results are accompanied by documentation using github READMEs and can be easily explored by going to the appropriate folders:
+From start to finish, the repository is divided into several experiments, each with their own scripts and results. These are accompanied by documentation using github READMEs and can be easily explored by going to the appropriate folders:
 
 ```{r results = 'asis'}
 extract_scripts_documentation("scripts", recursive = FALSE) %>% 

@@ -2,109 +2,98 @@ library(dynbenchmark)
 library(tidyverse)
 library(dynplot)
 
-experiment("9-main_figure")
+experiment("08-aggregate")
 
-list2env(read_rds(result_file("aggregated_data.rds", "9-main_figure")), environment())
+list2env(read_rds(result_file("results.rds")), environment())
 
 # determine palettes
-sc_fun <- scale_minmax
-sc_fun <- function(x) x / max(x, na.rm = TRUE)
 sc_col_fun <- function(palette) {
   function(x) {
-    sc <- sc_fun(x)
-    ifelse(is.na(sc), "#444444", palette[cut(sc, length(palette))])
+    ifelse(is.na(x), "#444444", palette[cut(x, length(palette))])
   }
 }
-brewer_names <- RColorBrewer::brewer.pal.info %>% rownames()
-scale_brewer_funs <- map(setNames(brewer_names, brewer_names), ~ sc_col_fun(colorRampPalette(RColorBrewer::brewer.pal(9, .))(101)))
 viridis_names <- c("viridis", "magma", "plasma", "inferno", "cividis")
 scale_viridis_funs <- map(setNames(viridis_names, viridis_names), ~ sc_col_fun(viridisLite::viridis(101, option = .)))
 
-topinf_colours <- setNames(topinf_types$colour, topinf_types$name)
-error_colours <- setNames(error_reasons$colour, error_reasons$name)
-maxtraj_colours <- setNames(trajectory_types$colour, trajectory_types$id)
+topinf_colours <- topinf_types %>% select(name, colour) %>% deframe()
+error_colours <- error_reasons %>% select(name, colour) %>% deframe()
+maxtraj_colours <- trajectory_types %>% select(simplified, colour) %>% deframe()
 
 coloverall <- "inferno"
 colbench <- "magma"
 colqc <- "viridis"
-coltime <-  "cividis"
+colscaling <-  "cividis"
 coloverall_fun <- scale_viridis_funs[[coloverall]]
 colbench_fun <- scale_viridis_funs[[colbench]]
 colqc_fun <- scale_viridis_funs[[colqc]]
-coltime_fun <- scale_viridis_funs[[coltime]]
+colscaling_fun <- scale_viridis_funs[[colscaling]]
 
-prior_type1cols <- c("required_" = "#cc2400", "optional_" = "#00aaed", "_" = "#00ab1b")
-prior_type1_fun <- function(x) ifelse(is.na(x), "", gsub("_.*", "", x))
-prior_type1col_fun <- function(x) prior_type1cols[paste0(prior_type1_fun(x), "_")]
-prior_type2_fun <- function(x) ifelse(is.na(x), "", gsub(".*_", "", x))
+metric_info <-
+  metric_info %>% # should just save it in agg
+  as.data.frame() %>%
+  mutate(name = paste0(experiment, "_", category, "_", metric))
+bench_vars <- metric_info %>% filter(experiment == "benchmark", name != "benchmark_execution_pct_method_error_stoch") %>% pull(name)
+overall_vars <- metric_info %>% filter(experiment == "aggregate") %>% pull(name)
+qc_vars <- metric_info %>% filter(experiment == "qc") %>% pull(name)
+scaling_vars <- metric_info %>% filter(experiment == "scaling") %>% pull(name)
+
+# prior_type1cols <- c("required_" = "#cc2400", "optional_" = "#00aaed", "_" = "#00ab1b")
+# prior_type1_fun <- function(x) ifelse(is.na(x), "", gsub("_.*", "", x))
+# prior_type1col_fun <- function(x) prior_type1cols[paste0(prior_type1_fun(x), "_")]
+# prior_type2_fun <- function(x) ifelse(is.na(x), "", gsub(".*_", "", x))
 
 # PROCESS COORDINATES AND COLOURS
 row_height <- 1
 row_spacing <- .1
 
-control_methods <- c("periodpc", "angle", "comp1", "random", "gng")
+control_methods <- method_info %>% filter(method_type != "algorithm") %>% pull(method_id)
 
-method_tib <- method_tib %>%
-  left_join(minis %>% select(maximal_trajectory_types = id, maxtraj_replace_id = replace_id), by = "maximal_trajectory_types") %>%
-  arrange(method_name_f) %>%
+
+# method_topology_inference, method_wrapper_type,
+big_tib <-
+  left_join(
+    method_info %>%
+      mutate(method_id = factor(method_id, levels = levels(results$method_id))),
+    results %>%
+      mutate(name = paste0(experiment, "_", category, "_", metric)) %>%
+      select(-experiment, -category, -metric) %>%
+      spread(name, value),
+    by = "method_id"
+  ) %>%
+  # left_join(minis %>% select(maximal_trajectory_types = id, maxtraj_replace_id = replace_id), by = "maximal_trajectory_types") %>%
+  arrange(method_id) %>%
   mutate(
-    method_i = seq_len(n()),
+    method_i = row_number(),
     do_spacing = method_i != 1 & method_i %% 5 == 1,
     spacing = row_spacing,
     method_y = - (method_i * row_height + cumsum(spacing)),
     method_ymin = method_y - row_height / 2,
     method_ymax = method_y + row_height / 2,
-    rank_time_method = percent_rank(-time_method),
-    trafo = str_replace(output_transformation, ":.*", ""),
-    topinf_lab = setNames(topinf_types$name, topinf_types$short_name)[topology_inference_type],
-    avg_time_lab = ifelse(time_method < 60, paste0(round(time_method), "s"), ifelse(time_method < 3600, paste0(round(time_method / 60), "m"), paste0(round(time_method / 3600), "h"))),
-    remove_results = pct_errored > .49,
-    pct_succeeded = 1 - pct_errored,
-    pct_errored_lab = case_when(pct_errored >= .01 ~ paste0(ceiling(pct_errored * 100), "%"), pct_errored > 0 ~ "<1%", TRUE ~ "0%"),
-    missing_qc_reason = ifelse(!is_na_qc, "", ifelse(method_short_name %in% control_methods, "Control", "Missing")),
-    black = "black"
+    benchmark_execution_pct_succeeded = 1 - benchmark_execution_pct_errored,
+    benchmark_execution_pct_errored_lab = case_when(benchmark_execution_pct_errored >= .01 ~ paste0(ceiling(benchmark_execution_pct_errored * 100), "%"), benchmark_execution_pct_errored > 0 ~ "<1%", TRUE ~ "0%")
   ) %>%
-  mutate_at(
-    c(
-      "overall_metric", "overall_source", "overall_trajtype", "overall_benchmark",
-      "harm_mean", "norm_correlation", "norm_edge_flip", "norm_rf_mse",
-      "source_real", "source_synthetic",
-      "trajtype_bifurcation", "trajtype_convergence", "trajtype_directed_acyclic_graph", "trajtype_directed_cycle",
-      "trajtype_directed_graph", "trajtype_directed_linear", "trajtype_multifurcation",
-      # "trajtype_disconnected_directed_graph",
-      "trajtype_rooted_tree"
-    ),
-    funs(sc = sc_fun, sc_col = colbench_fun)
-  ) %>%
-  mutate_at(
-    c(
-      "overall", "overall"
-    ),
-    funs(sc = sc_fun, sc_col = coloverall_fun)
-  ) %>%
-  mutate_at(
-    c("prior_start", "prior_end", "prior_states", "prior_genes"),
-    funs(type1 = prior_type1_fun, type2 = prior_type2_fun, type1col = prior_type1col_fun)
-  ) %>%
-  mutate_at(
-    c(
-      "overall_qc", "overall_qccat", "overall_qcapp",
-      "qc_score", "qc_cat_availability", "qc_cat_behaviour", "qc_cat_code_assurance", "qc_cat_code_quality",
-      "qc_cat_documentation", "qc_cat_paper", "qc_app_developer_friendly", "qc_app_future_proof", "qc_app_user_friendly"),
-    funs(sc = sc_fun, sc_col = colqc_fun)
-  ) %>%
-  mutate_at(
-    c("rank_time_method", "pct_succeeded", "pct_errored"),
-    funs(sc = sc_fun, sc_col = coltime_fun)
-  ) %>%
+  mutate_at(bench_vars, funs(col = colbench_fun)) %>%
+  mutate_at(qc_vars, funs(col = colqc_fun)) %>%
+  mutate_at(scaling_vars, funs(col = colscaling_fun)) %>%
+  mutate_at(overall_vars, funs(col = coloverall_fun)) %>%
   mutate(
-    topinf_colour = topinf_colours[topology_inference_type],
-    maxtraj_colour = maxtraj_colours[maximal_trajectory_types],
-    # avg_time_lab_colour = ifelse(rank_time_method_sc < .5, "white", "black"),
-    # pct_errored_lab_colour = ifelse(pct_errored_sc > .5, "white", "black")
-    avg_time_lab_colour = "black",
-    pct_errored_lab_colour = "black"
+    topinf_colour = topinf_colours[method_topology_inference]
+    # wraptyp_colour = wraptyp_colours[method_wrapper_type],
+    # maxtraj_colour = maxtraj_colours[maximal_trajectory_types],
   )
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 hsp <- .5
 lsp <- .5
@@ -318,20 +307,6 @@ leg_circles <- data_frame(
   colbench = colbench_fun(r*2),
   colqc = colqc_fun(r*2)
 )
-
-make_scale_legend <- function(scale, range_labels) {
-  g <-
-    ggplot() +
-    geom_point(aes(x, y, col = z), data_frame(x = c(0, 1, runif(1000)), y = c(0, 1, runif(1000)), z = (x + y) / 2)) +
-    scale_colour_gradientn(colours = scale, breaks = c(0, 1), labels = range_labels) +
-    labs(colour = NULL) +
-    theme(legend.position = "bottom")
-  cowplot::get_legend(g)
-}
-
-bench_leg <- make_scale_legend(viridisLite::viridis(101, option = colbench), range_labels = c("low", "high"))
-time_leg <- make_scale_legend(viridisLite::viridis(101, option = coltime), range_labels = c("long", "short"))
-qc_leg <- make_scale_legend(viridisLite::viridis(101, option = colqc), range_labels = c("low", "high"))
 
 error_leg_df <- error_reasons %>%
   rename(fill = colour) %>%

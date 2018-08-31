@@ -1,4 +1,4 @@
-#'  Characterisation of the `r label_metric("F1_branches")` and `r label_metric("F1_milestones")`
+#'  Characterisation of the `r dynbenchmark::label_metric("F1_branches")` and `r dynbenchmark::label_metric("F1_milestones")`
 
 library(dynbenchmark)
 library(tidyverse)
