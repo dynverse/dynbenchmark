@@ -10,7 +10,7 @@ process_raw_dataset(id, counts, milestone_network, grouping,
   colnames(counts)))
 }
 \arguments{
-\item{id}{A unique identifier for the data}
+\item{id}{A unique identifier for the data. If \code{NULL}, a random string will be generated.}
 
 \item{counts}{The counts with genes in columns and cells in rows}
 
