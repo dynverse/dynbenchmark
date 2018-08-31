@@ -146,7 +146,7 @@ rm(qc_results, benchmark_results, scaling_results)
 metric_weights <-
   tribble(
     ~experiment, ~category, ~metric, ~weight,
-    "benchmark", "overall", "overall", 1,
+    "benchmark", "overall", "overall", 2,
     "qc", "overall", "overall", 1,
     "scaling", "overall", "overall", 1
   )
