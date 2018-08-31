@@ -1,7 +1,7 @@
 library(dynbenchmark)
 library(tidyverse)
 
-experiment("08-aggregate")
+experiment("08-summary")
 
 # read QC results
 method_tools <- read_rds(result_file("methods.rds", experiment_id = "03-methods")) %>% select(method_id = id, tool_id)
@@ -88,7 +88,7 @@ bench_overall <-
   data_aggs %>%
   filter(dataset_trajectory_type_simplified == "overall", dataset_source == "mean", metric %in% c(benchmark_results$metrics, "overall", execution_metrics)) %>%
   select(method_id, metric, value, experiment) %>%
-  mutate(category = ifelse(metric %in% execution_metrics, "execution", "overall"))
+  mutate(category = case_when(metric %in% execution_metrics ~ "execution", metric %in% benchmark_results$metrics ~ "metric", metric == "overall" ~ "overall"))
 
 bench_trajtypes <-
   data_aggs %>%
@@ -115,6 +115,11 @@ rm(data_aggs, bench_overall, bench_trajtypes, bench_sources)
 results <-
   bind_rows(qc_results, benchmark_results, scaling_results)
 
+not_available_methods <- setdiff(unique(results$method_id), method_info$method_id)
+warning("THESE METHODS DO NOT HAVE BENCHMARKING RESULTS: ", paste0(not_available_methods, collapse = ", "))
+
+results <- results %>% filter(method_id %in% method_info$method_id)
+
 metric_info <- results %>%
   group_by(experiment, category, metric) %>%
   summarise(min = min(value), max = max(value)) %>%
@@ -123,13 +128,15 @@ metric_info <- results %>%
 
 metric_info %>% as.data.frame()
 
-# make sue each method has a value for each metric
+# make sure each method has a value for each metric
 results <- full_join(
   results,
   crossing(method_info %>% select(method_id), metric_info %>% select(experiment, category, metric)),
   by = c("method_id", "experiment", "category", "metric")
 ) %>%
-  mutate(value = ifelse(is.na(value), 0, value))
+  group_by(experiment, metric, category) %>%
+  mutate(placeholder = is.na(value), value = ifelse(placeholder, mean(value, na.rm = TRUE), value)) %>%
+  ungroup()
 
 rm(qc_results, benchmark_results, scaling_results)
 
@@ -151,15 +158,15 @@ results_final <-
     by = c("experiment", "category", "metric")
   ) %>%
   group_by(method_id) %>%
-  summarise(value = prod(value ^ weight) ^ (1 / sum(weight))) %>% #weighted geometric mean
-  mutate(experiment = "aggregate", metric = "overall", category = "overall") %>%
+  summarise(placeholder = FALSE, value = prod(value ^ weight) ^ (1 / sum(weight))) %>% #weighted geometric mean
+  mutate(experiment = "summary", metric = "overall", category = "overall") %>%
   bind_rows(results)
 
-metric_info <- metric_info %>% add_row(experiment = "aggregate", metric = "overall", category = "overall")
+metric_info <- metric_info %>% add_row(experiment = "summary", metric = "overall", category = "overall")
 
 method_id_levels <-
   results_final %>%
-  filter(experiment == "aggregate") %>%
+  filter(experiment == "summary") %>%
   arrange(desc(value)) %>%
   pull(method_id)
 
