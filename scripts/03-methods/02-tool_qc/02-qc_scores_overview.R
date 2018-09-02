@@ -93,7 +93,11 @@ plot_individual_checks <- tool_qc_checks %>%
   # scale_fill_manual("Category", values=set_names(qc_categories$color, qc_categories$category), labels=set_names(qc_categories$label, qc_categories$category), guide=guide_legend(ncol=2)) +
   scale_alpha_continuous("Score", guide=guide_legend(ncol=5, label.position = "bottom")) +
   theme_pub() +
-  theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust=1), axis.text.y = element_text(size=8), legend.position="bottom")
+  theme(
+    axis.text.x = element_text(angle = 60, vjust = 1, hjust=1),
+    axis.text.y = element_text(size=8), legend.position="bottom",
+    axis.line.y = element_blank()
+  )
 
 plot_individual_checks
 
@@ -128,7 +132,6 @@ check_difficulty_data <- qc_checks %>%
 # construct the heatmap and highlights
 plot_check_difficulty <- check_difficulty_data %>%
   ggplot() +
-  geom_rect(aes(ymin=check_start, ymax=check_end, xmin=0, xmax=1), fill="#DDDDDD") +
   geom_rect(aes(ymin=check_start, ymax=check_end, xmin=0, xmax=1, fill=score)) +
   ggrepel::geom_label_repel(
     aes(
@@ -150,12 +153,11 @@ plot_check_difficulty <- check_difficulty_data %>%
   # hline_check + hline_aspect +
   # scale_fill_manual(values=set_names(qc_categories$color, qc_categories$category)) +
   # scale_fill_distiller("QC\ndifficulty", palette="Spectral", limits=c(0,1), breaks=c(0,0.5, 1), direction=1) +
-  scale_fill_gradientn("Average QC score across methods", colors = c("#9e0142", "#d53e4f", "#f46d43", "#fee08b", "#abdda4", "#1a9850"), limits=c(0,1), breaks=c(0,0.5, 1), guide=guide_colorbar(title.position = "bottom", title.hjust=0.5, barwidth = unit(2, "inches"))) +
+  scale_fill_gradientn("Average QC score", colors = c("#9e0142", "#d53e4f", "#f46d43", "#fee08b", "#abdda4", "#1a9850"), limits=c(0,1), breaks=c(0,0.5, 1), guide=guide_colorbar(title.position = "bottom", title.hjust=0.5, barwidth = unit(2, "inches"))) +
   scale_x_continuous(NULL, breaks=NULL, limits=c(0, 12), expand=c(0,0)) +
   scale_y_reverse(NULL, breaks=NULL, expand=c(0,0)) +
-  annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf)+
   theme_pub() +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom", axis.line.y = element_blank())
 
 plot_check_difficulty
 

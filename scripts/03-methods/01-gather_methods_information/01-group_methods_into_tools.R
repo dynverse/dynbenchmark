@@ -21,7 +21,7 @@ methods$tool_id <- ifelse(is.na(methods$implementation_id), methods$id, methods$
 
 # join with google sheet
 methods_google <- sheet %>%
-  gs_read(ws = "methods", skip = 1)
+  gs_read(ws = "methods")
 
 if (length(setdiff(methods$id, methods_google$id))) {
   stop(setdiff(methods$id, methods_google$id))
@@ -37,9 +37,9 @@ methods$publication_date <- as.Date(methods$publication_date)
 methods$preprint_date <- as.Date(methods$preprint_date)
 
 #   ____________________________________________________________________________
-#   Implementations                                                         ####
+#   Tools                                                                   ####
 tools_google <- sheet %>%
-  gs_read(ws = "tools", skip = 1) %>%
+  gs_read(ws = "tools") %>%
   filter(contains_ti)
 
 tools <- methods %>%
@@ -50,6 +50,13 @@ tools <- methods %>%
 
 tools <- tools %>%
   full_join(tools_google, "tool_id")
+
+tools_excluded <- sheet %>%
+  gs_read(ws = "tools_excluded") %>%
+  filter(!tool_id %in% tools$tool_id) %>%
+  mutate(trajectory_types = map(trajectory_types, str_split, ", ", simplify = FALSE))
+
+tools <- bind_rows(tools, tools_excluded)
 
 # Dates ------------------------------
 tools$date <- tools$preprint_date

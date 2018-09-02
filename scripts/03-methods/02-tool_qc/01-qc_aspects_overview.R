@@ -26,8 +26,6 @@ citation_format <- c(
   markdown = function(references) {if(is.na(references)) {""} else {references}}
 )
 
-
-
 qc_aspects <- qc_checks %>%
   group_by(!!!rlang::syms(colnames(qc_checks)[1:which(colnames(qc_checks) == "references")])) %>%
   summarise() %>%
