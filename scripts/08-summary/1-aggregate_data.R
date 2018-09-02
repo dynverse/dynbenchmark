@@ -4,26 +4,26 @@ library(tidyverse)
 experiment("08-summary")
 
 # read QC results
-method_tools <- read_rds(result_file("methods.rds", experiment_id = "03-methods")) %>% select(method_id = id, tool_id)
+methods <- read_rds(result_file("methods.rds", experiment_id = "03-methods")) %>% select(method_id = id, tool_id)
 tool_qc_scores <- read_rds(result_file("tool_qc_scores.rds", experiment_id = "03-methods"))
 tool_qc_category_scores <- read_rds(result_file("tool_qc_category_scores.rds", experiment_id = "03-methods"))
 tool_qc_application_scores <- read_rds(result_file("tool_qc_application_scores.rds", experiment_id = "03-methods"))
 
 method_qc_overall_scores <-
-  method_tools %>%
+  methods %>%
   inner_join(tool_qc_scores, by = "tool_id") %>%
   mutate(experiment = "qc", category = "overall", metric = "overall") %>%
   select(method_id, experiment, category, metric, value = qc_score)
 
 method_qc_category_scores <-
-  method_tools %>%
+  methods %>%
   inner_join(tool_qc_category_scores, by = "tool_id") %>%
   rename(metric = category) %>%
   mutate(experiment = "qc", category = "category") %>%
   select(method_id, experiment, category, metric, value = qc_score)
 
 method_qc_application_scores <-
-  method_tools %>%
+  methods %>%
   inner_join(tool_qc_application_scores, by = "tool_id") %>%
   rename(metric = application) %>%
   mutate(experiment = "qc", category = "application") %>%
@@ -35,7 +35,7 @@ qc_results <-
     method_qc_category_scores,
     method_qc_application_scores
   )
-rm(method_tools, tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores, method_qc_overall_scores, method_qc_category_scores, method_qc_application_scores)
+rm(methods, tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores, method_qc_overall_scores, method_qc_category_scores, method_qc_application_scores)
 
 # read scaling results
 scaling_results <- read_rds(result_file("scaling.rds", experiment_id = "05-scaling"))
