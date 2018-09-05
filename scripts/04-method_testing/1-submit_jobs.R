@@ -9,7 +9,9 @@ experiment("04-method_testing")
 ###                   DESIGN                    ###
 ###################################################
 
-methods <- dynwrap::get_ti_methods(dynmethods::repo_digests) %>%
+container_set_default_config(container_create_docker_config(), permanent = FALSE)
+
+methods <- dynwrap::get_ti_methods(evaluate = TRUE) %>%
   mutate(type = "fun")
 
 design <- benchmark_generate_design(
@@ -29,16 +31,18 @@ design <- benchmark_generate_design(
 
 # also include dynmethods container examples
 examples <- bind_rows(pbapply::pblapply(
-  methods$id,
+  seq_len(nrow(methods)),
   cl = 8,
-  function(method_id) {
-    file <- paste0("../dynmethods/containers/", method_id, "/example.R")
-    source(file)
+  function(i) {
+    method_id <- methods$id[[i]]
+    image <- methods$docker_repository[[i]]
+
+    ex <- dynwrap:::.container_get_example(image)
     tibble(
       method_id = method_id,
-      dataset = list(data),
+      dataset = list(ex$data),
       dataset_id = data$id,
-      params = list(params),
+      params = list(ex$params),
       param_id = "example"
     )
   }
