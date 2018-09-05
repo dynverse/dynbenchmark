@@ -85,6 +85,7 @@ Collate:
     'plotting_priors_mini.R'
     'plotting_svg_replacement.R'
     'plotting_themes.R'
+    'plotting_trajectory_types.R'
     'qsub.R'
     'setup_experiment.R'
     'setup_datasets.R'

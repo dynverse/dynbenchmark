@@ -84,7 +84,7 @@ imp_table <- map(c("latex", "html"), function(format) {
       date = strftime(date, "%d/%m/%Y"),
       maximal_trajectory_type =
         kableExtra::cell_spec(
-          label_simple_trajectory_types(maximal_trajectory_type),
+          label_long(maximal_trajectory_type),
           format,
           background =
             toupper(set_names(trajectory_types$colour, trajectory_types$id)[maximal_trajectory_type]) %>%
@@ -153,7 +153,7 @@ date <- function(x) x
 columns <- tribble(
   ~sheet_id, ~local_id, ~processor,
   "Name", "tool_name", direct,
-  "Most complex trajectory type", "maximal_trajectory_type", label_simple_trajectory_types,
+  "Most complex trajectory type", "maximal_trajectory_type", label_long,
   "Earliest publishing date", "date", date,
   "Fixes topology", "topology_inference_type", label_tbd,
   "Priors required", "prior_required", label_tbd,

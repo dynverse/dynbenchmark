@@ -55,7 +55,7 @@ trajtype_handle_comparison <- method_trajtypes_scores %>%
     direction = "y",
     min.segment.length = 0
   ) +
-  facet_grid(score_id~trajectory_type, labeller = label_facet(label_simple_trajectory_types))+
+  facet_grid(score_id~trajectory_type, labeller = label_facet(label_long))+
   scale_fill_identity() +
   scale_color_identity() +
   scale_y_continuous(label_long("score_on_datasets_with_trajectory_type"), limits = c(0, 1.2), breaks = c(0, 0.25, 0.5, 0.75, 1)) +
@@ -132,7 +132,7 @@ edge_flip_distributions <- ind_scores %>%
     to = 1
   ) +
   scale_fill_manual(values = set_names(trajectory_types$colour, trajectory_types$id)) +
-  facet_grid(.~trajectory_type, labeller = label_facet(label_simple_trajectory_types)) +
+  facet_grid(.~trajectory_type, labeller = label_facet(label_long)) +
   scale_y_discrete(label_long("method_short_name"), expand = c(0, 0), labels = set_names(methods$method_name, methods$method_short_name)) +
   scale_x_continuous(label_long("edge_flip"), expand = c(0, 0), breaks = c(0, 0.5, 1), label = round) +
   theme(legend.position = "none", axis.text.y = element_text(vjust = 0))

@@ -16,8 +16,15 @@ sheet <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE")
 ##  Methods                                                                 ####
 methods <- dynmethods::methods
 
-# tool_id is default id
+# tool_id is default the method_id
 methods$tool_id <- ifelse(is.na(methods$implementation_id), methods$id, methods$implementation_id)
+
+# add detects_... columns for trajectory types
+trajectory_type_ids <- trajectory_types$id
+methods$trajectory_types %>%
+  map(~trajectory_type_ids %in% .) %>%
+  bind_rows()
+
 
 # join with google sheet
 methods_google <- sheet %>%
