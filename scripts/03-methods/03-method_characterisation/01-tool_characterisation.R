@@ -7,14 +7,14 @@ library(cowplot)
 
 experiment("03-methods/03-method_characterisation")
 
-tools_evaluated <- read_rds(result_file("tools_evaluated.rds"))
-tools <- read_rds(result_file("tools.rds"))
-tool_qc <- read_rds(result_file("tool_qc.rds"))
+tools_evaluated <- read_rds(result_file("tools_evaluated.rds", experiment_id = "03-methods"))
+tools <- read_rds(result_file("tools.rds", experiment_id = "03-methods"))
+tool_qc <- read_rds(result_file("tool_qc.rds", experiment_id = "03-methods"))
 
 tool_id_to_name <- setNames(tools$tool_name, tools$tool_id)
 
 start_date <- as.Date("2014-01-01")
-end_date <- as.Date("2018-09-01")
+end_date <- as.Date("2018-11-01")
 
 
 tools$publication_date <- tools$publication_date
@@ -187,15 +187,14 @@ write_rds(platforms, result_file("platforms.rds"))
 
 ##  ............................................................................
 ##  Trajectory types over time                                              ####
-trajectory_types <- dynwrap::trajectory_types %>% pull(id)
-simplified_trajectory_types <- trajectory_types_simplified$simplified %>% keep(~.!="unknown")
+trajectory_type_ids <- dynwrap::trajectory_types %>% filter(id != "convergence") %>% pull(id)
 
 tool_trajectory_types <- tools %>%
   filter(!is.na(date)) %>%
   filter(!is.na(trajectory_types)) %>%
   mutate(
     trajectory_types =
-      map(trajectory_types, ~as.tibble(set_names(as.list(simplified_trajectory_types %in% simplify_trajectory_type(.)), simplified_trajectory_types)))
+      map(trajectory_types, ~as.tibble(set_names(as.list(trajectory_type_ids %in% .), trajectory_type_ids)))
   ) %>%
   unnest(trajectory_types)
 
@@ -216,7 +215,7 @@ add_step <- function(df) {
 tool_trajectory_types_step <- add_step(arrange(tool_trajectory_types, date))
 
 tool_trajectory_types_gathered <- tool_trajectory_types_step %>%
-  gather(trajectory_type, can_trajectory_type, !!simplified_trajectory_types) %>%
+  gather(trajectory_type, can_trajectory_type, !!trajectory_type_ids) %>%
   mutate(trajectory_type = factor(trajectory_type, levels = simplified_trajectory_types)) %>%
   group_by(trajectory_type) %>%
   arrange(date) %>%
