@@ -128,7 +128,7 @@ qsub_params <- function(method_id, param_id, category) {
     "celltree_gibbs", "scimitar", "ouijaflow", "ouija", "pseudogp", "calista", "cellrouter",
     "grandprix", "ouijaflow", "paga", "projected_paga", "raceid_stemid"
   )
-  prm <- lst(timeout = 6 * 60 * 60, memory = "10G")
+  prm <- lst(timeout = 60 * 60, memory = "10G")
   if (method_id %in% moremem) {
     prm$memory <- "32G"
   }
