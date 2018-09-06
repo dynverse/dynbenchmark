@@ -47,8 +47,6 @@ strip_vglm = function(model) {
   environment(model@family@infos) <- new.env(parent = emptyenv())
   model@family@loglikelihood <- function() {}
   environment(model@family@loglikelihood) <- new.env(parent = emptyenv())
-  print(model@family@loglikelihood %>% pryr::object_size())
-
 
   model
 }
