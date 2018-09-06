@@ -29,7 +29,7 @@ plot_trajectory_types <- function(plot = ggplot() + theme_void(), trajectory_typ
     ymin <- ymins[i]
     ymax <- ymaxs[i]
 
-    network <-  trajectory_type_info$example_network
+    network <- trajectory_type_info$example_network
     nodes <- trajectory_type_info$example_nodes %>% mutate(id = row_number())
 
     # change positions of nodes based on bounds

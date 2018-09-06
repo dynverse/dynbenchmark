@@ -21,10 +21,11 @@ methods$tool_id <- ifelse(is.na(methods$implementation_id), methods$id, methods$
 
 # add detects_... columns for trajectory types
 trajectory_type_ids <- trajectory_types$id
-methods$trajectory_types %>%
-  map(~trajectory_type_ids %in% .) %>%
-  bind_rows()
-
+methods_detects <- methods$trajectory_types %>%
+  map(~as.list(set_names(trajectory_type_ids %in% ., trajectory_type_ids))) %>%
+  bind_rows() %>%
+  rename_all(~paste0("detects_", .))
+methods <- methods %>% bind_cols(methods_detects)
 
 # join with google sheet
 methods_google <- sheet %>%
