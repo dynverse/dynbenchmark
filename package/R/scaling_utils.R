@@ -16,9 +16,9 @@
 #'
 #' @export
 strip_vglm = function(model) {
-  f <- list()
-  class(f)<- "vglmff"
-  model@family <- f
+  # f <- list()
+  # class(f)<- "vglmff"
+  # model@family <- f
   model@qr <- list()
   model@x <- matrix()
   model@extra <- list()
@@ -34,5 +34,27 @@ strip_vglm = function(model) {
   model@misc$earg <- NULL
   model@misc$formula <- NULL
   model@misc$orig.assign <- NULL
+
+  model@family@weight  <- expression()
+  model@family@initialize <- expression()
+  model@family@deriv <- expression()
+  model@family@last <- expression()
+  model@family@linkinv <- function() {}
+  environment(model@family@linkinv) <- new.env(parent = emptyenv())
+  model@family@validparams <- function() {}
+  environment(model@family@validparams)  <- new.env(parent = emptyenv())
+  model@family@infos <- function() {}
+  environment(model@family@infos) <- new.env(parent = emptyenv())
+  model@family@loglikelihood <- function() {}
+  environment(model@family@loglikelihood) <- new.env(parent = emptyenv())
+  print(model@family@loglikelihood %>% pryr::object_size())
+
+
   model
 }
+
+#' @examples
+#' model <- scaling_results$models$model_time[[1]]
+#' model2 <- strip_vglm(model)
+#' model2@family %>% maps4(pryr::object_size) %>% unlist() %>% sort()
+#' model2@family@linkinv %>% pryr::object_size()
