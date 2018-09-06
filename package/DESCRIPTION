@@ -87,6 +87,7 @@ Collate:
     'plotting_themes.R'
     'plotting_trajectory_types.R'
     'qsub.R'
+    'scaling_utils.R'
     'setup_experiment.R'
     'setup_datasets.R'
     'setup_get_dynbenchmark_folder.R'
