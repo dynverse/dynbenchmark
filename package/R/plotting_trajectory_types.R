@@ -22,7 +22,7 @@ plot_trajectory_types <- function(plot = ggplot() + theme_void(), trajectory_typ
   for (i in seq_along(trajectory_types)) {
     trajectory_type <- trajectory_types[i]
 
-    trajectory_type_info <- dynwrap::trajectory_types %>% extract_row_to_list(which(id == trajectory_type))
+    trajectory_type_info <- dynutils::extract_row_to_list(dynwrap::trajectory_types, which(dynwrap::trajectory_types$id == trajectory_type))
 
     xmin <- xmins[i]
     xmax <- xmaxs[i]
