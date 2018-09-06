@@ -17,9 +17,9 @@ Strip a vglm model, removing components which are not necessary for predictions
 d.AD <- data.frame(treatment = gl(3, 3),outcome = gl(3, 1, 9),counts = c(18,17,15,20,10,20,25,13,12))
 model <- VGAM::vglm(counts ~ outcome + treatment, family = VGAM::poissonff, data = d.AD, trace = TRUE)
 
-pryr::object_size(model)
-pryr::object_size(strip_vglm(model))
-1/as.numeric(pryr::object_size(strip_vglm(model))/pryr::object_size(model))
+object.size(model)
+object.size(strip_vglm(model))
+1/as.numeric(object.size(strip_vglm(model))/object.size(model))
 predict(model, d.AD)
 predict(strip_vglm(model), d.AD)
 }
