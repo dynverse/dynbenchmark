@@ -2,6 +2,7 @@
 
 export(add_fig)
 export(add_table)
+export(benchmark_aggregate)
 export(benchmark_bind_results)
 export(benchmark_fetch_results)
 export(benchmark_generate_design)

@@ -9,7 +9,8 @@ experiment("07-benchmark")
 ############### PART THREE: GENERATE FIGURES ###############
 ############################################################
 
-list2env(read_rds(result_file("benchmark_results.rds")), environment())
+list2env(read_rds(result_file("benchmark_results_input.rds")), environment())
+list2env(read_rds(result_file("benchmark_results_normalised.rds")), environment())
 
 metrics_info <- dyneval::metrics %>%
   slice(match(read_rds(result_file("metrics.rds")), metric_id)) %>%
@@ -18,7 +19,7 @@ metrics_info <- dyneval::metrics %>%
 # get ordering of methods
 method_ord <-
   data_aggregations %>%
-  filter(dataset_source == "mean", dataset_trajectory_type_simplified == "overall") %>%
+  filter(dataset_source == "mean", dataset_trajectory_type == "overall") %>%
   arrange(desc(overall)) %>%
   select(method_id, method_name) %>%
   mutate_all(factor)
@@ -34,7 +35,6 @@ metr_lev <- c(
   "norm_correlation", "norm_edge_flip", "norm_him",
   "F1_branches", "featureimp_cor", "featureimp_wcor",
   "norm_F1_branches", "norm_featureimp_cor", "norm_featureimp_wcor",
-  "overall_harm_norm", "overall_geom_norm", "overall_arit_norm", "overall_harm_unno", "overall_geom_unno", "overall_arit_unno",
   "rank_time",  "pct_errored", "pct_execution_error",
   "rank_mem",  "pct_time_limit", "pct_memory_limit",
   "predmem_cor", "predtime_cor"
@@ -43,20 +43,20 @@ metr_lev <- c(
 # display barplots per metric
 oc1 <-
   data_aggregations %>%
-  filter(dataset_source == "mean", dataset_trajectory_type_simplified == "overall") %>%
+  filter(dataset_source == "mean", dataset_trajectory_type == "overall") %>%
   select(method_id, method_name, param_id, one_of(intersect(colnames(data_aggregations), metr_lev))) %>%
   gather(metric, score, -method_id:-param_id)
 
 # display barplots per dataset source
 oc2 <-
   data_aggregations %>%
-  filter(dataset_trajectory_type_simplified == "overall") %>%
+  filter(dataset_trajectory_type == "overall") %>%
   select(method_id:param_id, metric = dataset_source, score = overall)
 
 # create placeholder for dataset sources that havent run yet
 oc3 <-
   data_aggregations %>%
-  filter(dataset_source != "mean", dataset_trajectory_type_simplified == "overall") %>%
+  filter(dataset_source != "mean", dataset_trajectory_type == "overall") %>%
   select(method_id:param_id) %>%
   crossing(metric = c("real", "synthetic/dyngen", "synthetic/dyntoy", "synthetic/prosstt", "synthetic/splatter")) %>%
   mutate(score = NA) %>%
@@ -124,7 +124,7 @@ for (i in seq_len(nrow(metrics_info))) {
     theme_bw() +
     theme(legend.position = "none") +
     scale_colour_manual(values = method_cols) +
-    facet_grid(dataset_source ~ dataset_trajectory_type_simplified) +
+    facet_grid(dataset_source ~ dataset_trajectory_type) +
     labs(
       x = NULL,
       title = paste0(metrics_info$metric_id[[i]], ": ", metrics_info$long_name[[i]])
@@ -181,3 +181,39 @@ g2 <- ggplot(join %>% filter(lmem > 8)) +
 ggsave(result_file("compare_pred_all.pdf"), patchwork::wrap_plots(g1, g2, nrow = 1), width = 16, height = 8)
 
 rm(join, g1, g2)
+
+
+
+## CHECK VARIANCES PER DATASET AND METRIC
+stat_funs <- c("var", "mean")
+metricso <- c("overall", metrics)
+
+dat_df <-
+  data %>%
+  select(method_id, dataset_id, !!metricso) %>%
+  gather(metric, score, !!metricso) %>%
+  group_by(dataset_id, metric) %>%
+  filter(n() > 2) %>%
+  rename(unnorm = score) %>%
+  mutate(norm = .benchmark_aggregate_normalisation$scalesigmoid(unnorm)) %>%
+  gather(type, score, unnorm, norm) %>%
+  mutate(type = factor(type, levels = c("unnorm", "norm"))) %>%
+  ungroup()
+
+var_df <-
+  dat_df %>%
+  group_by(type, dataset_id, metric) %>%
+  summarise_at(vars(score), stat_funs) %>%
+  ungroup()
+
+g <- ggplot(var_df) +
+  geom_point(aes(mean, var, colour = metric)) +
+  facet_wrap(~type) +
+  scale_colour_brewer(palette = "Dark2") +
+  theme_bw()
+
+# g
+ggsave(result_file("normalisation_var_mean.pdf"), g, width = 10, height = 5)
+
+rm(stat_funs, metricso, dat_df, var_df, g)
+
