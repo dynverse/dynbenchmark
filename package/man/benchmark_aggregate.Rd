@@ -22,7 +22,7 @@ benchmark_aggregate(data, metrics, norm_fun = c("scalesigmoid", "none"),
 
 \item{mean_weights}{Which metrics to use for the calculation of the mean, and which weights}
 
-\item{dataset_source_weight}{The weights of the dataset sources}
+\item{dataset_source_weights}{The weights of the dataset sources}
 }
 \description{
 Normalisation and aggregation function

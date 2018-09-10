@@ -92,6 +92,8 @@ write_rds(lst(raw_data, metrics), result_file("benchmark_results_unnormalised.rd
 ###################################################
 ############### CREATE AGGREGATIONS ###############
 ###################################################
+list2env(read_rds(result_file("benchmark_results_unnormalised.rds", "07-benchmark")), environment())
+
 out <- benchmark_aggregate(
   data = raw_data,
   metrics = metrics,
@@ -101,8 +103,6 @@ out <- benchmark_aggregate(
   dataset_source_weights = c("real" = 5, "synthetic/dyngen" = 5, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
 )
 
-
-# save data
 write_rds(out, result_file("benchmark_results_normalised.rds"), compress = "xz")
 
 

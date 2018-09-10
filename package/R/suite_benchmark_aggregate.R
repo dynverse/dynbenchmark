@@ -26,7 +26,7 @@
 #' @param norm_fun Which normalisation to use
 #' @param mean_fun Which mean function to use
 #' @param mean_weights Which metrics to use for the calculation of the mean, and which weights
-#' @param dataset_source_weight The weights of the dataset sources
+#' @param dataset_source_weights The weights of the dataset sources
 #'
 #' @export
 benchmark_aggregate <- function(
