@@ -86,7 +86,7 @@ raw_data <-
 
 # save data
 write_rds(lst(trajtypes, metrics, datasets_info, methods_info), result_file("benchmark_results_input.rds"), compress = "xz")
-write_rds(lst(raw_data), result_file("benchmark_results_unnormalised.rds"), compress = "xz")
+write_rds(lst(raw_data, metrics), result_file("benchmark_results_unnormalised.rds"), compress = "xz")
 
 
 ###################################################
