@@ -97,7 +97,7 @@ out <- benchmark_aggregate(
   metrics = metrics,
   norm_fun = "scalesigmoid",
   mean_fun = "geometric",
-  mean_weights = c("correlation" = 1, "edge_flip" = 1, "featureimp_wcor" = 1, "F1_branches" = 1),
+  mean_weights = c("correlation" = 1, "him" = 1, "featureimp_wcor" = 1, "F1_branches" = 1),
   dataset_source_weights = c("real" = 5, "synthetic/dyngen" = 5, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
 )
 
