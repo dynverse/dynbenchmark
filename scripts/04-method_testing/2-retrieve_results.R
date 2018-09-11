@@ -36,7 +36,7 @@ g
 ggsave(result_file("method_status.svg"), g, width = 16, height = 16)
 
 #' @examples
-#' output %>% filter(method_id == "cellrouter") %>% pull(stderr) %>% first() %>% cat
+#' output %>% filter(method_id == "topslam") %>% pull(stdout) %>% first() %>% cat
 #' output %>% filter(method_id == "stemnet") %>% pull(stdout) %>% first() %>% cat
 #'
 #' output %>% filter(method_id == "pcreode", grepl("fibro", dataset_id)) %>% pull(stdout) %>% first() %>% cat

@@ -1,3 +1,5 @@
+#' Download singularity images if TI methods on the cluster
+
 library(dynmethods)
 library(dynwrap)
 library(dynbenchmark)
@@ -11,12 +13,12 @@ experiment("singularity_images")
 # for i in $(seq 1 8); do ssh prismcls0$i 'rm -rf /tmp/* /data/*'; done
 # for i in $(seq 1 8); do ssh prismcls0$i 'mkdir /data/tmp'; done
 
-method_ids <- dynmethods::methods$docker_repository
+methods <- dynmethods::methods
 
 handle <- qsub::qsub_lapply(
-  X = method_ids,
-  qsub_environment = c(),
-  qsub_packages = c("tidyverse", "dynmethods", "dynbenchmark"),
+  X = seq_len(nrow(methods)),
+  qsub_environment = c("methods"),
+  qsub_packages = c("babelwhale"),
   qsub_config = qsub::override_qsub_config(
     max_wall_time = "01:00:00",
     name = "singbuild",
@@ -25,11 +27,7 @@ handle <- qsub::qsub_lapply(
     wait = FALSE,
     stop_on_error = FALSE
   ),
-  FUN = function(method_id) {
-    config <- dynwrap::container_singularity(
-      prebuild = TRUE,
-      images_folder = derived_file("", experiment_id = "singularity_images")
-    )
-    meth <- dynwrap:::.container_pull_image(method_id, config = config)
+  FUN = function(i) {
+    meth <- babelwhale::pull_container(methods$docker_repository[[i]])
   }
 )
