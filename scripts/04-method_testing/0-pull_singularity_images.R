@@ -13,10 +13,9 @@ experiment("singularity_images")
 # for i in $(seq 1 8); do ssh prismcls0$i 'rm -rf /tmp/* /data/*'; done
 # for i in $(seq 1 8); do ssh prismcls0$i 'mkdir /data/tmp'; done
 
-methods <- dynmethods::methods
-
 handle <- qsub::qsub_lapply(
-  X = seq_len(nrow(methods)),
+  X = dynmethods::methods$docker_repository,
+  # X = "dynverse/specific_method",
   qsub_environment = c("methods"),
   qsub_packages = c("babelwhale"),
   qsub_config = qsub::override_qsub_config(
@@ -27,7 +26,5 @@ handle <- qsub::qsub_lapply(
     wait = FALSE,
     stop_on_error = FALSE
   ),
-  FUN = function(i) {
-    meth <- babelwhale::pull_container(methods$docker_repository[[i]])
-  }
+  FUN = babelwhale::pull_container
 )
