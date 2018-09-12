@@ -67,9 +67,9 @@ models <-
     dat_mem <- dat %>%
       filter(error_status %in% c("no_error", "memory_limit")) %>%
       mutate(
-        lmem = log10(ifelse(error_status == "memory_limit", 32 * 1e9, max_mem))
+        lmem = log10(ifelse(error_status == "memory_limit", 10 * 1e9, max_mem))
       )
-    model_mem <- VGAM::vglm(lmem ~ lnrow + lncol, VGAM:::tobit(Upper = log10(32 * 1e9), Lower = 8), data = dat_mem)
+    model_mem <- VGAM::vglm(lmem ~ lnrow + lncol, VGAM:::tobit(Upper = log10(10 * 1e9), Lower = 8), data = dat_mem)
 
     # reducing object size
     environment(model_mem@terms$terms) <- NULL
