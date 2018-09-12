@@ -64,23 +64,23 @@ predicted_times <-
   pmap_df(scaling$models, function(method_id, model_time, model_mem, ...) {
     datasets2 <- datasets %>% rename(dataset_id = id)
     datasets2$method_id <- method_id
-    datasets2$lpredtime = predict(model_time, datasets2)[,1]
-    datasets2$lpredmem = predict(model_mem, datasets2)[,1]
+    datasets2$time_lpred = predict(model_time, datasets2)[,1]
+    datasets2$mem_lpred = predict(model_mem, datasets2)[,1]
     datasets2
   }) %>%
-  mutate(predtime = 10^lpredtime, predmem = 10^lpredmem)
+  mutate(time_pred = 10^pred_ltime, mem_pred = 10^mem_lpred)
 
 preds_dataset <-
   predicted_times %>%
   group_by(dataset_id) %>%
-  summarise_at(c("lpredtime", "lpredmem", "predtime", "predmem"), sum) %>%
+  summarise_at(c("time_lpred", "mem_lpred", "time_pred", "mem_pred"), sum) %>%
   mutate(
-    category = paste0("Cat", cut(log10(predtime), breaks = 5, labels = FALSE))
+    category = paste0("Cat", cut(log10(time_pred), breaks = 5, labels = FALSE))
   )
 
 datasets <- datasets %>% left_join(preds_dataset %>% select(id = dataset_id, category), by = "id")
 
-preds_dataset %>% group_by(category) %>% summarise(predtime = sum(predtime)) %>% mutate(realtime = predtime / 3600 / 192)
+preds_dataset %>% group_by(category) %>% summarise(time_pred = sum(time_pred)) %>% mutate(realtime = time_pred / 3600 / 192)
 
 ##########################################################
 ###############       CREATE DESIGN        ###############
@@ -96,8 +96,8 @@ design <-
 method_ord <-
   predicted_times %>%
   group_by(method_id) %>%
-  summarise(lpredtime = mean(lpredtime), lpredmem = mean(lpredmem)) %>%
-  arrange(lpredtime) %>%
+  summarise(time_lpred = mean(time_lpred), mem_lpred = mean(mem_lpred)) %>%
+  arrange(time_lpred) %>%
   pull(method_id)
 
 design$crossing <- design$crossing %>%
@@ -119,8 +119,15 @@ write_rds(metrics, result_file("metrics.rds"), compress = "xz")
 ##########################################################
 metrics <- read_rds(result_file("metrics.rds"))
 design_filt <- read_rds(derived_file("design.rds"))
-# design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("identity", "scorpius", "paga"))
-design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2", "Cat3"))
+
+# step 1:
+# design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("identity", "scorpius", "paga"), category == "Cat1")
+
+# step 2:
+design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2"))
+
+# step 3:
+# design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2", "Cat3"))
 
 
 qsub_params <- function(method_id, param_id, category) {

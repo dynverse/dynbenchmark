@@ -13,30 +13,6 @@ benchmark_fetch_results(TRUE)
 # bind results in one data frame (without models)
 execution_output <- benchmark_bind_results(load_models = FALSE)
 
-# # hotfix for trajectory types
-# fix_trajectory_types <- function(trajectory_types) {
-#   unname(c(
-#     "directed_linear" = "linear",
-#     "directed_cycle" = "cycle",
-#     "undirected_linear" = "linear",
-#     "undirected_cycle" = "cycle",
-#     "simple_fork" = "bifurcation",
-#     "bifurcation" = "bifurcation",
-#     "convergence" = "convergence",
-#     "complex_fork" = "multifurcation",
-#     "multifurcation" = "multifurcation",
-#     "rooted_tree" = "tree",
-#     "unrooted_tree" = "tree",
-#     "directed_acyclic_graph" = "acyclic_graph",
-#     "rooted_binary_tree" = "tree",
-#     "unrooted_binary_tree" = "tree",
-#     "directed_graph" = "graph",
-#     "undirected_graph" = "graph",
-#     "disconnected_directed_graph" = "disconnected_graph",
-#     "disconnected_undirected_graph" = "disconnected_graph"
-#   )[trajectory_types])
-# }
-
 # df <- execution_output %>% filter(edge_flip < 0) %>% select(method_id, dataset_id, param_id, prior_id, repeat_ix)
 # model <- load_dyneval_model(method_id = "celltrails/default", df = df, experiment_id = "07-benchmark")
 
@@ -47,7 +23,6 @@ methods_info <- design$methods %>%
   select(-method_type) %>%
   left_join(dynmethods::methods %>% select(method_id = id, method_type = type), by = "method_id")
 datasets_info <- design$datasets %>%
-  # mutate(trajectory_type = fix_trajectory_types(trajectory_type)) %>%
   rename_all(function(x) paste0("dataset_", x))
 
 crossing <- design$crossing
@@ -74,7 +49,7 @@ raw_data <-
   select(-stdout, -stderr, -error_message) %>%
   left_join(methods_info %>% select(method_id, method_name), by = "method_id") %>%
   left_join(datasets_info %>% select(dataset_id, dataset_trajectory_type, dataset_source), by = "dataset_id") %>%
-  left_join(crossing %>% select(dataset_id, method_id, prior_id, repeat_ix, param_id, lpredtime, lpredmem, predtime, predmem), by = c("dataset_id", "method_id", "prior_id", "repeat_ix", "param_id")) %>%
+  left_join(crossing %>% select(dataset_id, method_id, prior_id, repeat_ix, param_id, time_lpred, mem_lpred, time_pred, mem_pred), by = c("dataset_id", "method_id", "prior_id", "repeat_ix", "param_id")) %>%
   mutate(dataset_trajectory_type = factor(dataset_trajectory_type, levels = levels(trajtypes$id))) %>%
   left_join(trajtypes %>% select(dataset_trajectory_type = id), by = "dataset_trajectory_type") %>%
   mutate(

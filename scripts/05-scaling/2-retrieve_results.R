@@ -87,8 +87,8 @@ models <-
       mutate(
         method_id = dat$method_id[[1]],
         method_name = dat$method_name[[1]],
-        lpredtime = predict(model_time, datasets_info)[,1],
-        lpredmem = predict(model_mem, datasets_info)[,1]
+        time_lpred = predict(model_time, datasets_info)[,1],
+        mem_lpred = predict(model_mem, datasets_info)[,1]
       )
 
     # format output
@@ -103,8 +103,8 @@ models <-
       ) %>%
       bind_cols(as.data.frame(t(c(coef_values_time, coef_values_mem)))) %>%
       mutate(
-        lpredtime = mean(pred_ind[[1]]$lpredtime),
-        lpredmem = mean(pred_ind[[1]]$lpredmem)
+        time_lpred = mean(pred_ind[[1]]$time_lpred),
+        mem_lpred = mean(pred_ind[[1]]$mem_lpred)
       )
   }) %>%
   ungroup()
