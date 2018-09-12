@@ -37,11 +37,19 @@ models <-
     y = -as.integer(method_id_f)
   )
 
-columns <-
-  data_frame(
-    id = c("score", "lpredtime", "time_lnrow", "time_lncol", "time_intercept", "lpredmem", "mem_lnrow", "mem_lncol", "mem_intercept", "pct_errored"),
-    name = c("Score", "Predicted\nlog time", "Time coeff.\nintercept", "Time coeff.\n# cells", "Time coeff.\n# features", "Predicted\nlog memory", "Mem coeff.\nintercept", "Mem coeff.\n# cells", "Mem coeff.\n# features", "% errored"),
-    fill = c("overall", "time", "time", "time", "time", "memory", "memory", "memory", "memory", "errors"),
+columns <- tribble(
+  ~id, ~name, ~fill,
+  "score", "Score", "overall",
+  "lpredtime", "Prediced\nlog time", "time",
+  "time_intercept", "Time coeff.\nintercept", "time",
+  "time_lnrow", "Time coeff.\n# cells", "time",
+  "time_lncol", "Time coeff.\n# features", "time",
+  "lpredmem", "Predicted\nlog memory", "memory",
+  "mem_intercept", "Mem coeff.\nintercept", "memory",
+  "mem_lnrow", "Mem coeff.\n# cells", "memory",
+  "mem_lncol", "Mem coeff.\n# features", "memory",
+  "pct_errored", "& errored", "errors"
+) %>% mutate(
     x = 1.1 * seq_along(id),
     min = map_dbl(id, ~ min(models[[.]], na.rm = TRUE)),
     max = map_dbl(id, ~ max(models[[.]], na.rm = TRUE))
