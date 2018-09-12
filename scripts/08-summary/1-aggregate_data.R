@@ -57,7 +57,7 @@ scaling_results <- scaling_process %>% {
   bind_rows(
     df,
     df %>%
-      filter(metric %in% c("lpredtime", "lpredmem")) %>%
+      filter(metric %in% c("time_lpred", "mem_lpred")) %>%
       group_by(method_id, experiment) %>%
       summarise(value = dyneval::calculate_geometric_mean(value)) %>%
       ungroup() %>%

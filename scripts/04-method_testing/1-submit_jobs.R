@@ -9,10 +9,8 @@ experiment("04-method_testing")
 ###                   DESIGN                    ###
 ###################################################
 
-container_set_default_config(container_create_docker_config(), permanent = FALSE)
-
 methods <- dynwrap::get_ti_methods(evaluate = TRUE) %>%
-  mutate(type = "fun")
+  mutate(method_type = type, type = "fun")
 
 design <- benchmark_generate_design(
   datasets = list(
@@ -21,7 +19,7 @@ design <- benchmark_generate_design(
     "real/developing-dendritic-cells_schlitzer",
     "real/fibroblast-reprogramming_treutlein"
   ),
-  methods = methods %>% select(id, type, fun, repo_digests),
+  methods = methods %>% select(id, type, fun, version),
   parameters = list(
     fateid = tibble(id = "default", force = TRUE),
     stemnet = tibble(id = "default", force = TRUE),
@@ -41,7 +39,7 @@ examples <- bind_rows(pbapply::pblapply(
     tibble(
       method_id = method_id,
       dataset = list(ex$data),
-      dataset_id = data$id,
+      dataset_id = ex$data$id,
       params = list(ex$params),
       param_id = "example"
     )

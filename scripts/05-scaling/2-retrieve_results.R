@@ -67,9 +67,9 @@ models <-
     dat_mem <- dat %>%
       filter(error_status %in% c("no_error", "memory_limit")) %>%
       mutate(
-        lmem = log10(ifelse(error_status == "memory_limit", 32 * 1e9, max_mem))
+        lmem = log10(ifelse(error_status == "memory_limit", 10 * 1e9, max_mem))
       )
-    model_mem <- VGAM::vglm(lmem ~ lnrow + lncol, VGAM:::tobit(Upper = log10(32 * 1e9), Lower = 8), data = dat_mem)
+    model_mem <- VGAM::vglm(lmem ~ lnrow + lncol, VGAM:::tobit(Upper = log10(10 * 1e9), Lower = 8), data = dat_mem)
 
     # reducing object size
     environment(model_mem@terms$terms) <- NULL
@@ -87,8 +87,8 @@ models <-
       mutate(
         method_id = dat$method_id[[1]],
         method_name = dat$method_name[[1]],
-        lpredtime = predict(model_time, datasets_info)[,1],
-        lpredmem = predict(model_mem, datasets_info)[,1]
+        time_lpred = predict(model_time, datasets_info)[,1],
+        mem_lpred = predict(model_mem, datasets_info)[,1]
       )
 
     # format output
@@ -103,8 +103,8 @@ models <-
       ) %>%
       bind_cols(as.data.frame(t(c(coef_values_time, coef_values_mem)))) %>%
       mutate(
-        lpredtime = mean(pred_ind[[1]]$lpredtime),
-        lpredmem = mean(pred_ind[[1]]$lpredmem)
+        time_lpred = mean(pred_ind[[1]]$time_lpred),
+        mem_lpred = mean(pred_ind[[1]]$mem_lpred)
       )
   }) %>%
   ungroup()

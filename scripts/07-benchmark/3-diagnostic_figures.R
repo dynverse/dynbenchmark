@@ -37,7 +37,7 @@ metr_lev <- c(
   "norm_F1_branches", "norm_featureimp_cor", "norm_featureimp_wcor",
   "rank_time",  "pct_errored", "pct_execution_error",
   "rank_mem",  "pct_time_limit", "pct_memory_limit",
-  "predmem_cor", "predtime_cor"
+  "mem_pred_cor", "time_pred_cor"
 )
 
 # display barplots per metric
@@ -67,7 +67,7 @@ nacor <- function(x, y) {
   cor(x[!is_na], y[!is_na])
 }
 
-# display barplots for predtime and predmem correlation
+# display barplots for time_pred and mem_pred correlation
 oc4 <-
   data %>%
   mutate(
@@ -78,10 +78,10 @@ oc4 <-
   ) %>%
   group_by(method_id, method_name, param_id) %>%
   summarise(
-    predtime_cor = nacor(ltime, lpredtime),
-    predmem_cor = nacor(lmem, lpredmem)
+    time_pred_cor = nacor(ltime, time_lpred),
+    mem_pred_cor = nacor(lmem, mem_lpred)
   ) %>%
-  gather(metric, score, predtime_cor, predmem_cor)
+  gather(metric, score, time_pred_cor, mem_pred_cor)
 
 overall_comp <-
   bind_rows(oc1, oc2, oc3, oc4) %>%
@@ -145,19 +145,19 @@ join <-
     lmem = log10(mem)
   )
 
-range_time <- quantile(abs(join$ltime - join$lpredtime), .9, na.rm = TRUE) %>% {2 * c(-., .)}
-range_mem <- quantile(abs(join$lmem - join$lpredmem), .9, na.rm = TRUE) %>% {2 * c(-., .)}
+range_time <- quantile(abs(join$ltime - join$time_lpred), .9, na.rm = TRUE) %>% {2 * c(-., .)}
+range_mem <- quantile(abs(join$lmem - join$mem_lpred), .9, na.rm = TRUE) %>% {2 * c(-., .)}
 
 g1 <-
   ggplot(join) +
-  geom_point(aes(lpredtime, ltime, colour = ltime - lpredtime)) +
+  geom_point(aes(time_lpred, ltime, colour = ltime - time_lpred)) +
   theme_bw() +
   facet_wrap(~method_id, scales = "free") +
   scale_color_distiller(palette = "RdYlBu", limits = range_time)
 
 g2 <-
   ggplot(join) +
-  geom_point(aes(lpredmem, lmem, colour = lmem - lpredmem)) +
+  geom_point(aes(mem_lpred, lmem, colour = lmem - mem_lpred)) +
   theme_bw() +
   facet_wrap(~method_id, scales = "free") +
   scale_color_distiller(palette = "RdYlBu", limits = range_mem)
@@ -169,12 +169,12 @@ dev.off()
 
 
 g1 <- ggplot(join) +
-  geom_point(aes(lpredtime, ltime, colour = ltime - lpredtime)) +
+  geom_point(aes(time_lpred, ltime, colour = ltime - time_lpred)) +
   theme_bw() +
   scale_color_distiller(palette = "RdYlBu", limits = range_time) +
   theme(legend.position = "bottom")
 g2 <- ggplot(join %>% filter(lmem > 8)) +
-  geom_point(aes(lpredmem, lmem, colour = lmem - lpredmem)) +
+  geom_point(aes(mem_lpred, lmem, colour = lmem - mem_lpred)) +
   theme_bw() +
   scale_color_distiller(palette = "RdYlBu", limits = range_mem) +
   theme(legend.position = "bottom")
@@ -195,7 +195,7 @@ dat_df <-
   group_by(dataset_id, metric) %>%
   filter(n() > 2) %>%
   rename(unnorm = score) %>%
-  mutate(norm = .benchmark_aggregate_normalisation$scalesigmoid(unnorm)) %>%
+  mutate(norm = dynbenchmark:::.benchmark_aggregate_normalisation$scalesigmoid(unnorm)) %>%
   gather(type, score, unnorm, norm) %>%
   mutate(type = factor(type, levels = c("unnorm", "norm"))) %>%
   ungroup()
