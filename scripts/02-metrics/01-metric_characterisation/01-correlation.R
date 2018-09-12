@@ -86,6 +86,7 @@ save(
   file = derived_file("01-correlation.rda")
 )
 
+##
 load(derived_file("01-correlation.rda"))
 
 results <- bind_cols(
@@ -173,3 +174,27 @@ plot_waypoints_overview <- wrap_plots(
 )
 
 write_rds(plot_waypoints_overview, result_file("waypoints_overview.rds"))
+
+
+
+
+#   ____________________________________________________________________________
+#   Reconstructing the trajectory from the geodesic distances?              ####
+
+datasets <- dyntoy::generate_datasets(allow_tented_progressions = FALSE, num_features = 2, num_cells = 500, add_prior_information = FALSE, num_replicates = 1)
+
+plots_geodesic_distance_dimreds <- mapdf(datasets, function(dataset) {
+  distances <- dynwrap::compute_tented_geodesic_distances(dataset) %>% t()
+  distances[is.infinite(distances)] <- max(distances[!is.infinite(distances)])
+
+  dimred <- dyndimred::dimred_mds(distances)
+  dimred %>% as.data.frame() %>%  ggplot(aes(comp_1, comp_2)) +
+    geom_point() +
+    theme_graph() +
+    ggtitle(label_long(dataset$model)) +
+    theme(panel.border = element_rect(colour = "black", fill = NA, size = 1))
+})
+
+plot_geodesic_distance_dimreds <- wrap_plots(plots_geodesic_distance_dimreds)
+
+write_rds(plot_geodesic_distance_dimreds, result_file("geodesic_distances_dimreds.rds"))
