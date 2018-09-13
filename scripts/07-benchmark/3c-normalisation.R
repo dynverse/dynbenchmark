@@ -30,3 +30,36 @@ g <- ggplot(var_df) +
 ggsave(result_file("normalisation_var_mean.pdf"), g, width = 10, height = 5)
 
 rm(stat_funs, metricso, dat_df, var_df, g)
+
+# direct compare normalised vs non-normalised
+dircom <-
+  data_aggregations %>%
+  select(method_id:dataset_source, !!c(metrics, paste0("norm_", metrics))) %>%
+  gather(metric, value, !!c(metrics, paste0("norm_", metrics))) %>%
+  mutate(
+    met = gsub("norm_", "", metric),
+    ric = ifelse(grepl("norm_", metric), "norm", "unnorm")
+  )
+directcomp <-
+  dircom %>%
+  select(-metric) %>%
+  spread(ric, value)
+
+g1 <- ggplot(directcomp %>% filter(dataset_source == "mean")) +
+  geom_abline(intercept = 0, slope = 1) +
+  geom_point(aes(unnorm, norm, colour = dataset_trajectory_type)) +
+  theme_bw() +
+  facet_grid(met~dataset_trajectory_type) +
+  scale_colour_manual(values = trajtypes %>% select(id, colour) %>% deframe()) +
+  labs(title = paste0("Unnormalised versus normalised, for dataset_source == 'mean'"))
+ggsave(result_file("normalisation_unnorm-v-norm_trajtypes.pdf"), g1, width = 15, height = 8)
+
+g2 <- ggplot(directcomp %>% filter(dataset_trajectory_type == "overall")) +
+  geom_abline(intercept = 0, slope = 1) +
+  geom_point(aes(unnorm, norm, colour = dataset_source)) +
+  theme_bw() +
+  facet_grid(met~dataset_source) +
+  labs(title = paste0("Unnormalised versus normalised, for dataset_source == 'mean'"))
+ggsave(result_file("normalisation_unnorm-v-norm_sources.pdf"), g2, width = 11, height = 8)
+
+rm(directcomp, dircom, g1, g2)
