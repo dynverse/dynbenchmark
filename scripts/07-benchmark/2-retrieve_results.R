@@ -11,7 +11,8 @@ experiment("07-benchmark")
 benchmark_fetch_results(TRUE)
 
 # bind results in one data frame (without models)
-execution_output <- benchmark_bind_results(load_models = FALSE)
+execution_output <- benchmark_bind_results(load_models = FALSE) %>%
+  filter(!method_id %in% c("identity", "random", "shuffle", "error"))
 
 # df <- execution_output %>% filter(edge_flip < 0) %>% select(method_id, dataset_id, param_id, prior_id, repeat_ix)
 # model <- load_dyneval_model(method_id = "celltrails/default", df = df, experiment_id = "07-benchmark")
@@ -59,8 +60,47 @@ raw_data <-
     lmem = log10(mem)
   )
 
-# save data
-write_rds(lst(trajtypes, metrics, datasets_info, methods_info), result_file("benchmark_results_input.rds"), compress = "xz")
+
+###########################################
+############### NORM PARAMS ###############
+###########################################
+
+
+norm_fun <- "scalesigmoid"
+mean_fun <- "geometric"
+mean_weights <- c("correlation" = 1, "him" = 1, "featureimp_wcor" = 1, "F1_branches" = 1)
+dataset_source_weights <- c(
+  real = 5,
+  `synthetic/dyngen` = 3,
+  `synthetic/dyntoy` = 1,
+  `synthetic/prosstt` = 1,
+  `synthetic/splatter` = 1
+)
+# tmp <- benchmark_aggregate(
+#   data = raw_data,
+#   metrics = metrics,
+#   norm_fun = "scalesigmoid",
+#   mean_fun = "geometric",
+#   mean_weights = c("correlation" = 1, "him" = 1, "featureimp_wcor" = 1, "F1_branches" = 1),
+#   dataset_source_weights = c("real" = 1, "synthetic/dyngen" = 1, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
+# )
+#
+# dataset_source_weights <-
+#   tmp$data_aggregations %>%
+#   filter(dataset_trajectory_type == "overall") %>%
+#   select(method_id:dataset_source, overall) %>%
+#   spread(dataset_source, overall) %>%
+#   select(-mean) %>%
+#   mutate(compare = real) %>%
+#   gather(synth, value, -method_id:-dataset_trajectory_type, -compare) %>%
+#   group_by(synth) %>%
+#   summarise(cor = nacor(compare, value)) %>%
+#   deframe()
+
+#########################################
+############### SAVE DATA ###############
+#########################################
+write_rds(lst(trajtypes, metrics, datasets_info, methods_info, norm_fun, mean_fun, mean_weights, dataset_source_weights), result_file("benchmark_results_input.rds"), compress = "xz")
 write_rds(lst(raw_data, metrics), result_file("benchmark_results_unnormalised.rds"), compress = "xz")
 
 
@@ -72,10 +112,10 @@ list2env(read_rds(result_file("benchmark_results_unnormalised.rds", "07-benchmar
 out <- benchmark_aggregate(
   data = raw_data,
   metrics = metrics,
-  norm_fun = "scalesigmoid",
-  mean_fun = "geometric",
-  mean_weights = c("correlation" = 1, "him" = 1, "featureimp_wcor" = 1, "F1_branches" = 1),
-  dataset_source_weights = c("real" = 5, "synthetic/dyngen" = 5, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
+  norm_fun = norm_fun,
+  mean_fun = mean_fun,
+  mean_weights = mean_weights,
+  dataset_source_weights = dataset_source_weights
 )
 
 write_rds(out, result_file("benchmark_results_normalised.rds"), compress = "xz")
