@@ -68,7 +68,7 @@ predicted_times <-
     datasets2$mem_lpred = predict(model_mem, datasets2)[,1]
     datasets2
   }) %>%
-  mutate(time_pred = 10^pred_ltime, mem_pred = 10^mem_lpred)
+  mutate(time_pred = 10^time_lpred, mem_pred = 10^mem_lpred)
 
 preds_dataset <-
   predicted_times %>%
@@ -124,10 +124,10 @@ design_filt <- read_rds(derived_file("design.rds"))
 # design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("identity", "scorpius", "paga"), category == "Cat1")
 
 # step 2:
-design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2"))
+# design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2"))
 
 # step 3:
-# design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2", "Cat3"))
+design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2", "Cat3"))
 
 
 qsub_params <- function(method_id, param_id, category) {
