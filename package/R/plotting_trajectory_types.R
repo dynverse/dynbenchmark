@@ -20,21 +20,20 @@ plot_trajectory_types <- function(plot = ggplot() + theme_void(), trajectory_typ
 
   # loop over every trajectory type and plot
   for (i in seq_along(trajectory_types)) {
-    trajectory_type <- trajectory_types[i]
+    trajectory_type <- trajectory_types[[i]]
+    xmin <- xmins[[i]]
+    xmax <- xmaxs[[i]]
+    ymin <- ymins[[i]]
+    ymax <- ymaxs[[i]]
 
     trajectory_type_info <- dynutils::extract_row_to_list(dynwrap::trajectory_types, which(dynwrap::trajectory_types$id == trajectory_type))
-
-    xmin <- xmins[i]
-    xmax <- xmaxs[i]
-    ymin <- ymins[i]
-    ymax <- ymaxs[i]
 
     network <- trajectory_type_info$example_network
     nodes <- trajectory_type_info$example_nodes %>% mutate(id = row_number())
 
     # change positions of nodes based on bounds
-    nodes$x <- nodes$x * (xmax - xmin) / 5 + xmin
-    nodes$y <- nodes$y * (ymax - ymin) / 6 + ymin
+    nodes$x <- nodes$x * (xmax - xmin) / 6 + xmin
+    nodes$y <- nodes$y * (ymax - ymin) / 5 + ymin
 
     network_positions <- network %>%
       left_join(nodes, c("from"="id")) %>%
