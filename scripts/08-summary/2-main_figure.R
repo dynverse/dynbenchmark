@@ -38,7 +38,7 @@ data <-
       transmute(
         method_id,
         name = method_name,
-        topology_inference = method_topology_inference,
+        topology_inference = ifelse(method_topology_inference == "parameter", "param", method_topology_inference),
         wrapper_type = wrapper_type_map[method_wrapper_type],
         most_complex = method_most_complex_trajectory_type
       ) %>%
