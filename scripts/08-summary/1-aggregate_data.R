@@ -3,27 +3,39 @@ library(tidyverse)
 
 experiment("08-summary")
 
+# read methods info
+method_info <-
+  read_rds(result_file("methods.rds", experiment_id = "03-methods")) %>%
+  rename_all(function(x) paste0("method_", x)) %>%
+  rename(tool_id = method_tool_id) %>%
+  select_if(is.atomic) %>%
+  select_if(function(x) !all(is.na(x))) %>%
+  filter(!method_id %in% c("error", "identity", "random", "shuffle"))
+
 # read QC results
-methods <- read_rds(result_file("methods.rds", experiment_id = "03-methods")) %>% select(method_id = id, tool_id)
+tool_qc_scores <- read_rds(result_file("tool_qc_scores.rds", experiment_id = "03-methods"))
 tool_qc_scores <- read_rds(result_file("tool_qc_scores.rds", experiment_id = "03-methods"))
 tool_qc_category_scores <- read_rds(result_file("tool_qc_category_scores.rds", experiment_id = "03-methods"))
 tool_qc_application_scores <- read_rds(result_file("tool_qc_application_scores.rds", experiment_id = "03-methods"))
 
 method_qc_overall_scores <-
-  methods %>%
+  method_info %>%
+  select(method_id, tool_id) %>%
   inner_join(tool_qc_scores, by = "tool_id") %>%
   mutate(experiment = "qc", category = "overall", metric = "overall") %>%
   select(method_id, experiment, category, metric, value = qc_score)
 
 method_qc_category_scores <-
-  methods %>%
+  method_info %>%
+  select(method_id, tool_id) %>%
   inner_join(tool_qc_category_scores, by = "tool_id") %>%
   rename(metric = category) %>%
   mutate(experiment = "qc", category = "category") %>%
   select(method_id, experiment, category, metric, value = qc_score)
 
 method_qc_application_scores <-
-  methods %>%
+  method_info %>%
+  select(method_id, tool_id) %>%
   inner_join(tool_qc_application_scores, by = "tool_id") %>%
   rename(metric = application) %>%
   mutate(experiment = "qc", category = "application") %>%
@@ -35,7 +47,7 @@ qc_results <-
     method_qc_category_scores,
     method_qc_application_scores
   )
-rm(methods, tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores, method_qc_overall_scores, method_qc_category_scores, method_qc_application_scores)
+rm(tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores, method_qc_overall_scores, method_qc_category_scores, method_qc_application_scores)
 
 # read scaling results
 scaling_results <- read_rds(result_file("scaling.rds", experiment_id = "05-scaling"))
@@ -69,36 +81,33 @@ rm(scaling_process)
 
 
 # read benchmarking results
-benchmark_results <- read_rds(result_file("benchmark_results.rds", experiment_id = "07-benchmark"))
-
-method_info <-
-  benchmark_results$methods_info %>%
-  select_if(is.atomic) %>%
-  select_if(function(x) !all(is.na(x)))
+benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", experiment_id = "07-benchmark"))
+benchmark_results_normalised <- read_rds(result_file("benchmark_results_normalised.rds", experiment_id = "07-benchmark"))
 
 data_aggs <-
-  benchmark_results$data_aggregations %>%
-  select(-num_files_created, -n, -method_name) %>%
+  benchmark_results_normalised$data_aggregations %>%
+  select(-n, -method_name) %>%
   gather(metric, value, -method_id:-dataset_source) %>%
   mutate(experiment = "benchmark")
 
 execution_metrics <- c("pct_errored", "pct_execution_error", "pct_memory_limit", "pct_method_error_all", "pct_method_error_stoch", "pct_time_limit")
+bench_metrics <- paste0("norm_", benchmark_results_input$metrics)
 
 bench_overall <-
   data_aggs %>%
-  filter(dataset_trajectory_type_simplified == "overall", dataset_source == "mean", metric %in% c(benchmark_results$metrics, "overall", execution_metrics)) %>%
+  filter(dataset_trajectory_type == "overall", dataset_source == "mean", metric %in% c(bench_metrics, "overall", execution_metrics)) %>%
   select(method_id, metric, value, experiment) %>%
-  mutate(category = case_when(metric %in% execution_metrics ~ "execution", metric %in% benchmark_results$metrics ~ "metric", metric == "overall" ~ "overall"))
+  mutate(category = case_when(metric %in% execution_metrics ~ "execution", metric %in% bench_metrics ~ "metric", metric == "overall" ~ "overall"))
 
 bench_trajtypes <-
   data_aggs %>%
-  filter(dataset_trajectory_type_simplified != "overall", dataset_source == "mean", metric == "overall") %>%
-  select(method_id, metric = dataset_trajectory_type_simplified, value, experiment) %>%
+  filter(dataset_trajectory_type != "overall", dataset_source == "mean", metric == "overall") %>%
+  select(method_id, metric = dataset_trajectory_type, value, experiment) %>%
   mutate(category = "trajtypes")
 
 bench_sources <-
   data_aggs %>%
-  filter(dataset_trajectory_type_simplified == "overall", dataset_source != "mean", metric == "overall") %>%
+  filter(dataset_trajectory_type == "overall", dataset_source != "mean", metric == "overall") %>%
   select(method_id, metric = dataset_source, value, experiment) %>%
   mutate(category = "sources")
 
@@ -166,7 +175,8 @@ metric_info <- metric_info %>% add_row(experiment = "summary", metric = "overall
 
 method_id_levels <-
   results_final %>%
-  filter(experiment == "summary") %>%
+  # filter(experiment == "summary") %>%
+  filter(experiment == "benchmark", category == "overall") %>%
   arrange(desc(value)) %>%
   pull(method_id)
 

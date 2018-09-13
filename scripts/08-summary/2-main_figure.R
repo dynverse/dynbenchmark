@@ -6,10 +6,6 @@ experiment("08-summary")
 
 list2env(read_rds(result_file("results.rds")), environment())
 
-method_rem <- c("identity", "shuffle", "random")
-method_info <- method_info %>% filter(!method_id %in% method_rem)
-results <- results %>% filter(!method_id %in% method_rem)
-
 # determine palettes
 sc_col_fun <- function(palette) {
   function(x) {
@@ -21,13 +17,13 @@ scale_viridis_funs <- map(setNames(viridis_names, viridis_names), ~ sc_col_fun(v
 
 topinf_colours <- topinf_types %>% select(name, colour) %>% deframe()
 error_colours <- error_reasons %>% select(name, colour) %>% deframe()
-maxtraj_colours <- trajectory_types %>% select(simplified, colour) %>% deframe()
+maxtraj_colours <- trajectory_types %>% select(id, colour) %>% deframe()
 
 exp_palettes <- c(summary = "inferno", qc = "viridis", benchmark = "magma", scaling = "cividis")
 
 # COMBINE PLOT DATA INTO ONE TABLE
 
-wrapper_type_map <- c(linear_trajectory = "linear", cyclic_trajectory = "cyclic", trajectory = "milest gr", cell_graph = "cell gr", cluster_graph = "clus gr", control = "control", dimred_projection = "dimred", end_state_probabilities = "prob")
+wrapper_type_map <- c(branch_trajectory = "traj", linear_trajectory = "linear", cyclic_trajectory = "cyclic", trajectory = "traj", cell_graph = "cell gr", cluster_graph = "clus gr", control = "control", dimred_projection = "dimred", end_state_probabilities = "prob")
 data <-
   bind_rows(
     results %>%
@@ -39,7 +35,13 @@ data <-
         experiment = ifelse(category == "overall" & experiment != "summary", "summary", experiment)
       ),
     method_info %>%
-      transmute(method_id, name = method_name, topology_inference = method_topology_inference, wrapper_type = wrapper_type_map[method_wrapper_type]) %>% # max_trajectory = method_maximal_trajectory_thing
+      transmute(
+        method_id,
+        name = method_name,
+        topology_inference = method_topology_inference,
+        wrapper_type = wrapper_type_map[method_wrapper_type],
+        most_complex = method_most_complex_trajectory_type
+      ) %>%
       gather(metric, label, -method_id) %>%
       mutate(experiment = "method", category = "overall", colour = "black", placeholder = FALSE) # need to set colours
   )
@@ -74,9 +76,8 @@ metric_pos <-
   mutate(
     xsep = c(0, ifelse(experiment[-1] != experiment[-n()] | category[-1] != category[-n()], .5, .1)),
     xwidth = case_when(
-      name == "Name" ~ 6,
-      name == "Wrapper type" ~ 2,
-      name == "Topology inference" ~ 2,
+      id == "name" ~ 6,
+      id %in% c("wrty", "mcpx", "topi") ~ 2,
       geom == "bar" ~ 4,
       TRUE ~ 1
     ),
@@ -105,7 +106,7 @@ header_pos <-
 
 # PROCESS CIRCLES DATA
 #' @examples
-#' geom_types <- "pie"
+#' geom_types <- "trajtype"
 #' met_row <- metric_pos %>% filter(geom == geom_types) %>% slice(1)
 geom_data_processor <- function(geom_types, fun) {
   map_df(seq_len(nrow(metric_pos)), function(i) {
@@ -161,7 +162,9 @@ barguides_data <- geom_data_processor(c("bar", "invbar"), function(dat) {
     yend = max(dat$ymax)
   )
 })
-
+trajtype_data <- geom_data_processor("trajtype", function(dat) {
+  dat %>% transmute(xmin, xmax, ymin, ymax, topinf = label)
+})
 
 # CREATE LEGENDS
 legy_start <- min(method_pos$ymin)
@@ -227,7 +230,8 @@ g1 <- ggplot() +
   # BARS
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour), bind_rows(bar_data, invbar_data), colour = "black", size = .25) +
   # RECTANGLES
-  # geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = col), rect_data, colour = "black", size = .25) +
+  # geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour), rect_data, colour = "black", size = .25) +
+  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), trajtype_data, colour = "black", size = .25) +
   # CIRCLES
   ggforce::geom_circle(aes(x0 = x0, y0 = y0, fill = colour, r = size), circle_data, size = .25) +
   # STARS
@@ -235,9 +239,6 @@ g1 <- ggplot() +
   ggforce::geom_circle(aes(x0 = x0, y0 = y0, r = r, fill = colour), data = pie_data %>% filter(pct > (1-1e-10)), size = .25) +
   # TEXT
   geom_text(aes(x = x, y = y, label = label, colour = colour), data = text_data, vjust = .5, hjust = 0) +
-
-  # # TRAJ TYPE MINIS
-  # geom_rect(aes(xmin = axtr$maxt$xmin, xmax = axtr$maxt$xmax, ymin = method_ymin, ymax = method_ymax, alpha = maxtraj_replace_id, fill = "#ABCDEF"), colour = "black", size = .25) +
 
   # RESERVE SPACE
   expand_limits(x = c(max(metric_pos$xmax)+2), y = legy_start - 4.1) +
@@ -273,10 +274,11 @@ g1 <- ggplot() +
   geom_text(aes(1, legy_start - 4, label = stamp), colour = "#cccccc", hjust = 0, vjust = 0) +
   expand_limits(y = legy_start - 4.3)
 
+g1 <-
+  plot_trajectory_types(plot = g1, trajectory_types = trajtype_data$topinf, xmins = trajtype_data$xmin, xmaxs = trajtype_data$xmax, ymins = trajtype_data$ymin, ymaxs = trajtype_data$ymax, size = 1)
 
 # WRITE FILES
 overview_fig_file <- result_file("overview.svg")
 ggsave(overview_fig_file, g1, width = 20, height = 16)
-# xml2::read_xml(overview_fig_file) %>% replace_svg(minis) %>% xml2::write_xml(overview_fig_file)
 
 
