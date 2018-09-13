@@ -69,33 +69,27 @@ raw_data <-
 norm_fun <- "scalesigmoid"
 mean_fun <- "geometric"
 mean_weights <- c("correlation" = 1, "him" = 1, "featureimp_wcor" = 1, "F1_branches" = 1)
-dataset_source_weights <- c(
-  real = 5,
-  `synthetic/dyngen` = 3,
-  `synthetic/dyntoy` = 1,
-  `synthetic/prosstt` = 1,
-  `synthetic/splatter` = 1
+
+tmp <- benchmark_aggregate(
+  data = raw_data %>% filter(error_status == "no_error"),
+  metrics = metrics,
+  norm_fun = norm_fun,
+  mean_fun = mean_fun,
+  mean_weights = mean_weights,
+  dataset_source_weights = c("real" = 1, "synthetic/dyngen" = 1, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
 )
-# tmp <- benchmark_aggregate(
-#   data = raw_data,
-#   metrics = metrics,
-#   norm_fun = "scalesigmoid",
-#   mean_fun = "geometric",
-#   mean_weights = c("correlation" = 1, "him" = 1, "featureimp_wcor" = 1, "F1_branches" = 1),
-#   dataset_source_weights = c("real" = 1, "synthetic/dyngen" = 1, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
-# )
-#
-# dataset_source_weights <-
-#   tmp$data_aggregations %>%
-#   filter(dataset_trajectory_type == "overall") %>%
-#   select(method_id:dataset_source, overall) %>%
-#   spread(dataset_source, overall) %>%
-#   select(-mean) %>%
-#   mutate(compare = real) %>%
-#   gather(synth, value, -method_id:-dataset_trajectory_type, -compare) %>%
-#   group_by(synth) %>%
-#   summarise(cor = nacor(compare, value)) %>%
-#   deframe()
+
+dataset_source_weights <-
+  tmp$data_aggregations %>%
+  filter(dataset_trajectory_type == "overall") %>%
+  select(method_id:dataset_source, overall) %>%
+  spread(dataset_source, overall) %>%
+  select(-mean) %>%
+  mutate(compare = real) %>%
+  gather(synth, value, -method_id:-dataset_trajectory_type, -compare) %>%
+  group_by(synth) %>%
+  summarise(cor = nacor(compare, value)) %>%
+  deframe()
 
 #########################################
 ############### SAVE DATA ###############

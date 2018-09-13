@@ -71,7 +71,7 @@ g
 
 ggsave(result_file("1_overall_comparison.pdf"), g, width = 25, height = 15)
 
-rm(oc1, oc2, nacor, oc3, overall_comp)
+rm(oc1, oc2, oc3, overall_comp)
 
 ############### COMPARISON PER TRAJECTORY TYPE ###############
 lvls <- rev(levels(data_aggregations$method_id))
