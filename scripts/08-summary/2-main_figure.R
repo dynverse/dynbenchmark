@@ -162,7 +162,7 @@ barguides_data <- geom_data_processor(c("bar", "invbar"), function(dat) {
     yend = max(dat$ymax)
   )
 })
-trajtype_data <- geom_data_processor("trajtype", function(dat) {
+trajd <- geom_data_processor("trajtype", function(dat) {
   dat %>% transmute(xmin, xmax, ymin, ymax, topinf = label)
 })
 
@@ -231,7 +231,7 @@ g1 <- ggplot() +
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour), bind_rows(bar_data, invbar_data), colour = "black", size = .25) +
   # RECTANGLES
   # geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour), rect_data, colour = "black", size = .25) +
-  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), trajtype_data, colour = "black", size = .25) +
+  # geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), trajd, colour = "black", size = .25) +
   # CIRCLES
   ggforce::geom_circle(aes(x0 = x0, y0 = y0, fill = colour, r = size), circle_data, size = .25) +
   # STARS
@@ -275,7 +275,7 @@ g1 <- ggplot() +
   expand_limits(y = legy_start - 4.3)
 
 g1 <-
-  plot_trajectory_types(plot = g1, trajectory_types = trajtype_data$topinf, xmins = trajtype_data$xmin, xmaxs = trajtype_data$xmax, ymins = trajtype_data$ymin, ymaxs = trajtype_data$ymax, size = 1)
+  plot_trajectory_types(plot = g1, trajectory_types = trajd$topinf, xmins = trajd$xmin, xmaxs = trajd$xmax, ymins = trajd$ymin, ymaxs = trajd$ymax, size = 1, geom = "circle", circ_size = .1)
 
 # WRITE FILES
 overview_fig_file <- result_file("overview.svg")
