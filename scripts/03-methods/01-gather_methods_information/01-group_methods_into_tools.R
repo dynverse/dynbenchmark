@@ -27,6 +27,9 @@ methods_detects <- methods$trajectory_types %>%
   rename_all(~paste0("detects_", .))
 methods <- methods %>% bind_cols(methods_detects)
 
+# add most complex trajectory type (the latest in dynwrap::trajectory_types)
+methods$most_complex_trajectory_type <- methods$trajectory_types %>% map_chr(~ last(trajectory_type_ids[trajectory_type_ids %in% .]))
+
 # join with google sheet
 methods_google <- sheet %>%
   gs_read(ws = "methods")
