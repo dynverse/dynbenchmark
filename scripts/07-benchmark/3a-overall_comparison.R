@@ -7,7 +7,7 @@ metr_lev <- c(
   "norm_F1_branches", "norm_featureimp_cor", "norm_featureimp_wcor",
   "rank_time",  "pct_errored", "pct_execution_error",
   "rank_mem",  "pct_time_limit", "pct_memory_limit",
-  "mem_pred_cor", "time_pred_cor"
+  "progress", "mem_pred_cor", "time_pred_cor"
 )
 
 # display barplots per metric
@@ -32,11 +32,6 @@ oc3 <-
   mutate(score = NA) %>%
   anti_join(oc2, by = colnames(oc2) %>% setdiff("score"))
 
-nacor <- function(x, y) {
-  is_na <- is.na(x) | is.na(y)
-  cor(x[!is_na], y[!is_na])
-}
-
 # display barplots for time_pred and mem_pred correlation
 oc4 <-
   data %>%
@@ -49,9 +44,10 @@ oc4 <-
   group_by(method_id, method_name, param_id) %>%
   summarise(
     time_pred_cor = nacor(ltime, time_lpred),
-    mem_pred_cor = nacor(lmem, mem_lpred)
+    mem_pred_cor = nacor(lmem, mem_lpred),
+    progress = n() / nrow(datasets_info)
   ) %>%
-  gather(metric, score, time_pred_cor, mem_pred_cor)
+  gather(metric, score, time_pred_cor, mem_pred_cor, progress)
 
 overall_comp <-
   bind_rows(oc1, oc2, oc3, oc4) %>%
@@ -84,7 +80,7 @@ lvls <- rev(levels(data_aggregations$method_id))
 cols <- viridis::viridis(8)[-1]
 method_cols <- rep(cols, ceiling(length(lvls) / length(cols)))[seq_along(lvls)]
 
-pdf(result_file("2_trajtype_comparison.pdf"), 20, 12)
+pdf(result_file("2_trajtype_comparison.pdf"), 20, 25)
 for (i in seq_len(nrow(metrics_info))) {
   g <-
     ggplot(data_aggregations) +
