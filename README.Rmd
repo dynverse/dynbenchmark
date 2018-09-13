@@ -10,7 +10,7 @@ editor_options:
 knitr::opts_chunk$set(warning = FALSE, message = FALSE, error = FALSE, echo = FALSE)
 ```
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(dynbenchmark)
 ```
