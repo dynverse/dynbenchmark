@@ -1,3 +1,4 @@
+#' @importFrom sigmoid sigmoid
 .benchmark_aggregate_normalisation <- list(
   scalesigmoid = function (x, remove_errored = TRUE, multiplier = 5) {
     x[x < 0] <- 0
@@ -11,6 +12,19 @@
     y <- (xnazero - mean(xnona)) / var(xnona) * multiplier
 
     sigmoid::sigmoid(y)
+  },
+  scaletanh = function (x, remove_errored = TRUE, multiplier = 3) {
+    x[x < 0] <- 0
+    x[x > 1] <- 1
+
+    xnona <- x[!is.na(x)]
+    xnazero <- ifelse(is.na(x), 0, x)
+
+    if (length(xnazero) == 1 || all(xnazero == 0)) return(x)
+
+    y <- (xnazero - mean(xnona)) / var(xnona) * multiplier
+
+    tanh(y)
   },
   none = "none"
 )
