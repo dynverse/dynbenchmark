@@ -14,10 +14,10 @@ Here, we assess whether metrics conforms such rules empirically:
 
 
 ```{r, results = "asis"}
-render_scripts_documentation()
+dynbenchmark::render_scripts_documentation()
 ```
 
-The results of this experiment are available [here](`r link_to_results()`).
+The results of this experiment are available [here](`r dynbenchmark::link_to_results()`).
 
 
 
