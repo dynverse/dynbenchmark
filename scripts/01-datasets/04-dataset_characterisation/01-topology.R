@@ -89,7 +89,10 @@ plots_topology_clusters <- topology_clusters %>%
       )
     }
   )) %>%
-  mutate(n = map(topology_clusters, ~sum(.$n)))
+  mutate(
+    n = map_int(topology_clusters, nrow),
+    n_datasets = map_int(topology_clusters, ~sum(.$n))
+  )
 
 plots_topology_clusters %>%
   write_rds(result_file("topology_clusters.rds"))
