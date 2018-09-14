@@ -50,8 +50,7 @@ methods$preprint_date <- as.Date(methods$preprint_date)
 #   ____________________________________________________________________________
 #   Tools                                                                   ####
 tools_google <- sheet %>%
-  gs_read(ws = "tools") %>%
-  filter(contains_ti)
+  gs_read(ws = "tools")
 
 tools <- methods %>%
   filter(type == "algorithm") %>%
@@ -83,9 +82,6 @@ tools_altmetrics <- map(tools$doi, function(doi) {
 }) %>% bind_rows()
 tools_altmetrics[is.na(tools_altmetrics)] <- 0
 tools <- bind_cols(tools, tools_altmetrics)
-
-## Non inclusion reasons ------------------------
-tools$non_inclusion_reasons_split <- tools$non_inclusion_reasons %>% str_split("[ ]?,[ ]?")
 
 #   ____________________________________________________________________________
 #   Save output                                                             ####
