@@ -26,7 +26,7 @@
 
     tanh(y)
   },
-  minmax = function (x, remove_errored = TRUE, multiplier = 1) {
+  minmax = function (x, remove_errored = TRUE) {
     x[x < 0] <- 0
     x[x > 1] <- 1
 
