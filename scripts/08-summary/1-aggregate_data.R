@@ -6,6 +6,12 @@ experiment("08-summary")
 # read methods info
 method_info <-
   read_rds(result_file("methods.rds", experiment_id = "03-methods")) %>%
+  mutate(
+    priors_required = map_chr(input, ~ .$required %>% setdiff(c("expression", "counts")) %>% paste0(collapse = ",")),
+    priors_optional = map_chr(input, ~ .$optional %>% paste0(collapse = ",")),
+    any_priors_required = priors_required != "",
+    any_priors_optional = priors_optional != ""
+  ) %>%
   rename_all(function(x) paste0("method_", x)) %>%
   rename(tool_id = method_tool_id) %>%
   select_if(is.atomic) %>%
@@ -145,6 +151,7 @@ results <- full_join(
 ) %>%
   group_by(experiment, metric, category) %>%
   mutate(placeholder = is.na(value), value = ifelse(placeholder, mean(value, na.rm = TRUE), value)) %>%
+  # mutate(placeholder = is.na(value), value = ifelse(placeholder, .5, value)) %>%
   ungroup()
 
 rm(qc_results, benchmark_results, scaling_results)
@@ -155,9 +162,9 @@ rm(qc_results, benchmark_results, scaling_results)
 metric_weights <-
   tribble(
     ~experiment, ~category, ~metric, ~weight,
-    "benchmark", "overall", "overall", 4,
+    "benchmark", "overall", "overall", 1,
     "qc", "overall", "overall", 1,
-    "scaling", "overall", "overall", 2
+    "scaling", "overall", "overall", 1
   )
 
 results_final <-
@@ -173,12 +180,17 @@ results_final <-
 
 metric_info <- metric_info %>% add_row(experiment = "summary", metric = "overall", category = "overall")
 
+# method_grouping_variables <- c("method_type", "method_any_priors_required")
+
+method_grouping_variables <- c("method_most_complex_trajectory_type")
 method_id_levels <-
   results_final %>%
   filter(experiment == "summary") %>%
   left_join(method_info, by = "method_id") %>%
+  mutate(method_most_complex_trajectory_type = factor(method_most_complex_trajectory_type, levels = rev(trajectory_types$id))) %>%
   # filter(experiment == "benchmark", category == "overall") %>%
-  arrange(method_type, desc(value)) %>%
+  # arrange(method_type, method_any_priors_required, desc(value)) %>%
+  arrange(method_most_complex_trajectory_type, desc(value)) %>%
   pull(method_id)
 
 results <- results_final %>% mutate(method_id = factor(method_id, levels = method_id_levels))
@@ -186,5 +198,5 @@ results <- results_final %>% mutate(method_id = factor(method_id, levels = metho
 rm(method_id_levels, results_final)
 
 # write output
-write_rds(lst(method_info, results, metric_info), result_file("results.rds"), compress = "xz")
+write_rds(lst(method_info, results, metric_info, method_grouping_variables), result_file("results.rds"), compress = "xz")
 

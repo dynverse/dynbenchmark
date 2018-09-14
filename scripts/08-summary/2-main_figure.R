@@ -23,7 +23,8 @@ exp_palettes <- c(summary = "inferno", qc = "viridis", benchmark = "magma", scal
 
 # COMBINE PLOT DATA INTO ONE TABLE
 
-wrapper_type_map <- c(branch_trajectory = "traj", linear_trajectory = "linear", cyclic_trajectory = "cyclic", trajectory = "traj", cell_graph = "cell gr", cluster_graph = "clus gr", control = "control", dimred_projection = "dimred", end_state_probabilities = "prob")
+#wrapper_type_map <- c(branch_trajectory = "traj", linear_trajectory = "linear", cyclic_trajectory = "cyclic", trajectory = "traj", cell_graph = "cell gr", cluster_graph = "clus gr", control = "control", dimred_projection = "dimred", end_state_probabilities = "prob")
+wrapper_type_map <- c(branch_trajectory = "Traj", linear_trajectory = "Line", cyclic_trajectory = "Cycl", trajectory = "Traj", cell_graph = "Cell", cluster_graph = "Clus", control = "", dimred_projection = "Proj", end_state_probabilities = "Prob")
 data <-
   bind_rows(
     results %>%
@@ -41,6 +42,8 @@ data <-
       transmute(
         method_id,
         name = method_name,
+        control_label = ifelse(method_type == "algorithm", "", "Control"),
+        priors = method_info$method_priors_required %>% str_replace_all("[^,]+", "*") %>% str_replace_all(",", ""),
         topology_inference = ifelse(method_topology_inference == "parameter", "param", method_topology_inference),
         wrapper_type = wrapper_type_map[method_wrapper_type],
         most_complex = method_most_complex_trajectory_type
@@ -54,17 +57,22 @@ data <-
 # GENERATE METHOD POSITIONS
 row_height <- 1
 row_spacing <- .1
+group_spacing <- 1
 
 method_pos <-
-  data_frame(
-    method_id = factor(unique(results$method_id), levels = levels(results$method_id))
-  ) %>%
+  method_info %>%
+  select(method_id, !!method_grouping_variables) %>%
+  gather(col, val, !!method_grouping_variables) %>%
+  group_by(method_id) %>%
+  summarise(group = paste0(col, "=", val, collapse = ",")) %>%
+  mutate(method_id = factor(method_id, levels = levels(results$method_id))) %>%
   arrange(method_id) %>%
   mutate(
     method_i = row_number(),
     method_id = as.character(method_id),
-    do_spacing = method_i != 1 & method_i %% 5 == 1,
-    spacing = row_spacing,
+    colour_background = method_i %% 2 == 1,
+    do_spacing = c(FALSE, diff(as.integer(factor(group))) != 0),
+    spacing = ifelse(do_spacing, group_spacing, row_spacing),
     y = - (method_i * row_height + cumsum(spacing)),
     ymin = y - row_height / 2,
     ymax = y + row_height / 2
@@ -81,6 +89,7 @@ metric_pos <-
     xwidth = case_when(
       id == "name" ~ 6,
       id %in% c("wrty", "mcpx", "topi") ~ 2,
+      # id %in% c("mcpx", "topi") ~ 2,
       geom == "bar" ~ 4,
       TRUE ~ 1
     ),
@@ -139,6 +148,9 @@ invbar_data <- geom_data_processor("invbar", function(dat) {
   dat %>% transmute(xmin = xmax - value * xwidth, xmax, ymin, ymax, colour)
 })
 text_data <- geom_data_processor("text", function(dat) {
+  dat %>% mutate(x = x, y, colour, label = ifelse(is.na(label), sprintf("%0.2f", value), label))
+})
+textl_data <- geom_data_processor("textl", function(dat) {
   dat %>% mutate(x = xmin, y, colour, label = ifelse(is.na(label), sprintf("%0.2f", value), label))
 })
 pie_data <- geom_data_processor("pie", function(dat) {
@@ -217,7 +229,7 @@ g1 <- ggplot() +
   cowplot::theme_nothing() +
 
   # SEPARATOR LINES
-  geom_rect(aes(xmin = min(metric_pos$xmin), xmax = max(metric_pos$xmax), ymin = ymin - (spacing / 2), ymax = ymax + (spacing / 2)), method_pos %>% filter(method_i %% 2 == 1), fill = "#EEEEEE") +
+  geom_rect(aes(xmin = min(metric_pos$xmin), xmax = max(metric_pos$xmax), ymin = ymin - (row_spacing / 2), ymax = ymax + (row_spacing / 2)), method_pos %>% filter(colour_background), fill = "#EEEEEE") +
 
   # METRIC AXIS
   geom_segment(aes(x = x, xend = x, y = -.3, yend = -.1), metric_pos %>% filter(show_label), size = .5) +
@@ -241,7 +253,8 @@ g1 <- ggplot() +
   ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = colour), data = pie_data %>% filter(pct <= (1-1e-10)), size = .25) +
   ggforce::geom_circle(aes(x0 = x0, y0 = y0, r = r, fill = colour), data = pie_data %>% filter(pct > (1-1e-10)), size = .25) +
   # TEXT
-  geom_text(aes(x = x, y = y, label = label, colour = colour), data = text_data, vjust = .5, hjust = 0) +
+  geom_text(aes(x = x, y = y, label = label, colour = colour), data = textl_data, vjust = .5, hjust = 0) +
+  geom_text(aes(x = x, y = y, label = label, colour = colour), data = text_data, vjust = .5, hjust = 0.5) +
 
   # RESERVE SPACE
   expand_limits(x = c(max(metric_pos$xmax)+2), y = legy_start - 4.1) +
@@ -281,7 +294,8 @@ g1 <-
   plot_trajectory_types(plot = g1, trajectory_types = trajd$topinf, xmins = trajd$xmin, xmaxs = trajd$xmax, ymins = trajd$ymin, ymaxs = trajd$ymax, size = 1, geom = "circle", circ_size = .1)
 
 # WRITE FILES
-overview_fig_file <- result_file("overview.svg")
-ggsave(overview_fig_file, g1, width = 20, height = 16)
+ggsave(result_file("overview.pdf"), g1, width = 20, height = 16)
+ggsave(result_file("overview.svg"), g1, width = 20, height = 16)
+ggsave(result_file("overview.png"), g1, width = 20, height = 16)
 
 
