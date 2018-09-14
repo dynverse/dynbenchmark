@@ -55,6 +55,9 @@ data <-
       )
   )
 
+pie_colours <-
+  error_reasons %>% select(metric = name, colour)
+
 
 
 # GENERATE METHOD POSITIONS
@@ -123,7 +126,7 @@ header_xvals <- header_pos %>% transmute(nam = paste0(level, "_", id), xmin) %>%
 
 # PROCESS CIRCLES DATA
 #' @examples
-#' geom_types <- "trajtype"
+#' geom_types <- "pie"
 #' met_row <- metric_pos %>% filter(geom == geom_types) %>% slice(1)
 geom_data_processor <- function(geom_types, fun) {
   map_df(seq_len(nrow(metric_pos)), function(i) {
@@ -153,17 +156,26 @@ invbar_data <- geom_data_processor("invbar", function(dat) {
   dat %>% transmute(xmin = xmax - value * xwidth, xmax, ymin, ymax, colour)
 })
 text_data <- geom_data_processor("text", function(dat) {
-  dat %>% mutate(x = x, y, colour, label = ifelse(is.na(label), sprintf("%0.2f", value), label))
+  dat %>% mutate(x = x, y, colour = "black", label)
 })
 textl_data <- geom_data_processor("textl", function(dat) {
-  dat %>% mutate(x = xmin, y, colour, label = ifelse(is.na(label), sprintf("%0.2f", value), label))
+  dat %>% mutate(x = xmin, y, colour = "black", label)
+})
+pct_data <- geom_data_processor("pct", function(dat) {
+  dat %>% mutate(x = xmax, y, colour = "black", label = ifelse(0 < value & value < .01, "<1%", paste0(ceiling(100 * value), "%")))
 })
 pie_data <- geom_data_processor("pie", function(dat) {
   dat %>%
+    select(-colour) %>%
+    left_join(
+      pie_colours,
+      by = "metric"
+    ) %>%
     group_by(method_id) %>%
     transmute(
       y0 = y,
       x0 = x,
+      value = ifelse(is.finite(value), value, 0),
       pct = value / sum(value),
       rad = pct * 2 * pi,
       rad_end = cumsum(rad),
@@ -202,14 +214,16 @@ leg_circles <- map_df(names(exp_palettes), function(experiment) {
 error_leg_df <- error_reasons %>%
   rename(fill = colour) %>%
   mutate(
-    rad_start = seq(0, pi, length.out = 5)[-5],
-    rad_end = seq(0, pi, length.out = 5)[-1],
+    rad_start = seq(0, pi, length.out = 6) %>% head(-1),
+    rad_end = seq(0, pi, length.out = 6) %>% tail(-1),
     rad = (rad_start + rad_end) / 2,
     colour = rep("black", length(rad)),
     lab_x = row_height * sin(rad),
-    lab_y = row_height * cos(rad),
+    # lab_y = row_height * cos(rad),
+    lab_y = seq(row_height * (cos(first(rad)) + .2), row_height * (cos(last(rad)) - .2), length.out = 5),
     hjust = rep(0, length(rad)),
-    vjust = seq(0, 1, length.out = length(rad)+2)[c(-1,-(length(rad)+2))]
+    #vjust = seq(0, 1, length.out = length(rad)+2)[c(-1,-(length(rad)+2))]
+    vjust = .5
   )
 
 # Stamp
@@ -251,6 +265,7 @@ g1 <- ggplot() +
   # TEXT
   geom_text(aes(x = x, y = y, label = label, colour = colour), data = textl_data, vjust = .5, hjust = 0) +
   geom_text(aes(x = x, y = y, label = label, colour = colour), data = text_data, vjust = .5, hjust = 0.5) +
+  geom_text(aes(x = x, y = y, label = label, colour = colour), data = pct_data, vjust = .5, hjust = 1) +
 
   # RESERVE SPACE
   expand_limits(x = c(max(metric_pos$xmax)+3), y = legy_start - 4.1) +
@@ -285,8 +300,8 @@ g1 <-
   plot_trajectory_types(plot = g1, trajectory_types = trajd$topinf, xmins = trajd$xmin, xmaxs = trajd$xmax, ymins = trajd$ymin, ymaxs = trajd$ymax, size = 1, geom = "circle", circ_size = .1)
 
 # WRITE FILES
-ggsave(result_file("overview.pdf"), g1, width = 20, height = 16)
-ggsave(result_file("overview.svg"), g1, width = 20, height = 16)
-ggsave(result_file("overview.png"), g1, width = 20, height = 16)
+ggsave(result_file("overview.pdf"), g1, width = 20, height = 18)
+# ggsave(result_file("overview.svg"), g1, width = 20, height = 16)
+# ggsave(result_file("overview.png"), g1, width = 20, height = 16)
 
 

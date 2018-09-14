@@ -1,4 +1,4 @@
-execution_error_metrics <- list("pct_time_limit", "pct_memory_limit", "pct_method_error_stoch", "pct_method_error_all")
+execution_error_metrics <- as.list(error_reasons$name)
 
 metric_pos <- tribble(
    ~experiment,     ~category,                  ~metric,    ~id,                    ~name,     ~geom,
@@ -30,7 +30,7 @@ metric_pos <- tribble(
    "benchmark",   "trajtypes",          "acyclic_graph", "acyc",          "Acyclic graph",  "circle",
    "benchmark",   "trajtypes",                  "graph", "conn",        "Connected graph",  "circle",
    "benchmark",   "trajtypes",     "disconnected_graph", "disc",     "Disconnected graph",  "circle",
-   "benchmark",   "execution",            "pct_errored", "errp",              "% Errored",    "text",
+   "benchmark",   "execution",            "pct_errored", "errp",              "% Errored",     "pct",
    "benchmark",   "execution",  execution_error_metrics, "errr",           "Error reason",     "pie",
      "scaling",        "time",             "time_lpred", "tipr",        "Time prediction",  "circle",
      "scaling",        "time",         "time_intercept", "tiin",         "Time intercept",  "circle",
