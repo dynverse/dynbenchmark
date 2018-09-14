@@ -175,22 +175,15 @@ metric_info <- metric_info %>% add_row(experiment = "summary", metric = "overall
 
 method_id_levels <-
   results_final %>%
-  # filter(experiment == "summary") %>%
-  filter(experiment == "benchmark", category == "overall") %>%
-  arrange(desc(value)) %>%
+  filter(experiment == "summary") %>%
+  left_join(method_info, by = "method_id") %>%
+  # filter(experiment == "benchmark", category == "overall") %>%
+  arrange(method_type, desc(value)) %>%
   pull(method_id)
 
 results <- results_final %>% mutate(method_id = factor(method_id, levels = method_id_levels))
 
 rm(method_id_levels, results_final)
-
-# # construct minis
-# trajectory_types_mini <- tibble(
-#   id = list.files(result_file("", "trajectory_types/mini")) %>% str_replace(".svg$", ""),
-#   svg = id %>% map(~as.character(xml2::read_xml(result_file(paste0(., ".svg"), "trajectory_types/mini"))))
-# )
-#
-# minis <- trajectory_types_mini %>% create_replacers()
 
 # write output
 write_rds(lst(method_info, results, metric_info), result_file("results.rds"), compress = "xz")
