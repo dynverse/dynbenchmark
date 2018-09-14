@@ -63,3 +63,34 @@ g2 <- ggplot(directcomp %>% filter(dataset_trajectory_type == "overall")) +
 ggsave(result_file("normalisation_unnorm-v-norm_sources.pdf"), g2, width = 11, height = 8)
 
 rm(directcomp, dircom, g1, g2)
+
+ # compare per dataset
+dircom <- data %>%
+  select(method_id, dataset_id, param_id, prior_id, repeat_ix, dataset_source, !!c(metrics, paste0("norm_", metrics))) %>%
+  gather(metric, value, !!c(metrics, paste0("norm_", metrics))) %>%
+  mutate(
+    met = gsub("norm_", "", metric),
+    ric = ifelse(grepl("norm_", metric), "norm", "unnorm")
+  )
+dircom_spr <-
+  dircom %>%
+  select(-metric) %>%
+  spread(ric, value)
+
+dids <- unique(dircom_spr$dataset_id)
+# ix <- sample.int(length(dids), 20) %>% sort()
+# dids <- dids[ix]
+
+pdf(result_file("normalisation_unnorm-v-norm_dataset.pdf"), width = 15, height = 3)
+for (did in dids) {
+  g <- ggplot(dircom_spr %>% filter(dataset_id == did)) +
+    geom_point(aes(unnorm, norm, colour = met)) +
+    facet_grid(dataset_id ~ met) +
+    theme_bw() +
+    scale_colour_brewer(palette = "Dark2") +
+    labs(title = did)
+  print(g)
+}
+dev.off()
+
+rm(dircom, dircom_spr, dids, g)
