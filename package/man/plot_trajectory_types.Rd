@@ -5,7 +5,9 @@
 \title{Plot a trajectory type}
 \usage{
 plot_trajectory_types(plot = ggplot() + theme_void(), trajectory_types,
-  xmins = 0, xmaxs = 1, ymins = 0, ymaxs = 1, size = 4)
+  xmins = 0, xmaxs = 1, ymins = 0, ymaxs = 1, size = 4,
+  geom = c("point", "circle"), circ_size = ifelse(geom == "circle",
+  0.05, 0))
 }
 \arguments{
 \item{plot}{Existing plot}
@@ -20,7 +22,14 @@ plot_trajectory_types(plot = ggplot() + theme_void(), trajectory_types,
 
 \item{ymaxs}{Maximal y bound}
 
-\item{size}{Size of the arrows and dots}
+\item{size}{Size of the arrows and nodes}
+
+\item{geom}{Which underlying geom to use. When using \code{"point"}, it is expected to also be
+using \code{scale_colour_identity()} with your plot. The nodes will go slightly outside the (x, y) boundaries,
+because the size of the points depend on the plot size. When using \code{"circle"}, it is expected to be using
+\code{scale_fill_identity()} and \code{coord_equal()}, otherwise the nodes might be elliptical.`}
+
+\item{circ_size}{Size of nodes, only used when \code{geom == "circle"}.}
 }
 \description{
 Plot a trajectory type
