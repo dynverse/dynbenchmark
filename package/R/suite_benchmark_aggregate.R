@@ -65,7 +65,7 @@
 benchmark_aggregate <- function(
   data,
   metrics,
-  norm_fun = c("scalesigmoid", "none"),
+  norm_fun = names(.benchmark_aggregate_normalisation),
   mean_fun = c("geometric", "harmonic", "arithmetic"),
   mean_weights = set_names(rep(1, length(metrics)), metrics),
   dataset_source_weights = c("real" = 5, "synthetic/dyngen" = 5, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
@@ -179,3 +179,4 @@ benchmark_aggregate <- function(
     data_aggregations
   )
 }
+formals(benchmark_aggregate)$norm_fun <- names(.benchmark_aggregate_normalisation)
