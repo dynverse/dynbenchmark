@@ -1,13 +1,18 @@
 ############### OVERALL COMPARISON ###############
+# metr_lev <- c(
+#   "overall", "real", "synthetic/dyngen", "synthetic/dyntoy", "synthetic/prosstt", "synthetic/splatter",
+#   "correlation", "edge_flip", "him",
+#   "norm_correlation", "norm_edge_flip", "norm_him",
+#   "F1_branches", "featureimp_cor", "featureimp_wcor",
+#   "norm_F1_branches", "norm_featureimp_cor", "norm_featureimp_wcor",
+#   "rank_time",  "pct_errored", "pct_execution_error",
+#   "rank_mem",  "pct_time_limit", "pct_memory_limit",
+#   "progress", "mem_pred_cor", "time_pred_cor"
+# )
 metr_lev <- c(
-  "overall", "real", "synthetic/dyngen", "synthetic/dyntoy", "synthetic/prosstt", "synthetic/splatter",
-  "correlation", "edge_flip", "him",
-  "norm_correlation", "norm_edge_flip", "norm_him",
-  "F1_branches", "featureimp_cor", "featureimp_wcor",
-  "norm_F1_branches", "norm_featureimp_cor", "norm_featureimp_wcor",
-  "rank_time",  "pct_errored", "pct_execution_error",
-  "rank_mem",  "pct_time_limit", "pct_memory_limit",
-  "progress", "mem_pred_cor", "time_pred_cor"
+  "overall", "real", "synthetic/dyngen", "synthetic/dyntoy", "synthetic/prosstt", "synthetic/splatter", "rank_time",
+  "norm_correlation", "norm_edge_flip", "norm_him", "norm_F1_branches", "norm_featureimp_cor", "norm_featureimp_wcor", "rank_mem",
+  "pct_errored", "pct_execution_error", "pct_time_limit", "pct_memory_limit", "mem_pred_cor", "time_pred_cor", "progress"
 )
 
 # display barplots per metric
@@ -59,7 +64,8 @@ g <-
   geom_bar(aes(method_id, score, fill = metric), stat = "identity") +
   geom_text(aes(method_id, pmax(score, 0), label = method_id), overall_comp %>% filter(score < .2), nudge_y = .03, hjust = 0, colour = "#888888", size = 2.5) +
   geom_text(aes(method_id, 0, label = method_id), overall_comp %>% filter(score >= .2), nudge_y = .03, hjust = 0, colour = "white", size = 2.5) +
-  facet_wrap(~metric, scales = "free_x", nrow = 3, labeller = label_facet(), dir = "v") +
+  # facet_wrap(~metric, scales = "free_x", nrow = 3, labeller = label_facet(), dir = "v") +
+  facet_wrap(~metric, scales = "free_x", ncol = 7, labeller = label_facet()) +
   coord_flip() +
   theme_bw() +
   labs(x = NULL, y = NULL, fill = "Metric") +

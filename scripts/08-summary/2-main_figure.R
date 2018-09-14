@@ -6,6 +6,7 @@ experiment("08-summary")
 
 list2env(read_rds(result_file("results.rds")), environment())
 
+
 # determine palettes
 sc_col_fun <- function(palette) {
   function(x) {
@@ -66,17 +67,17 @@ row_spacing <- .1
 group_spacing <- 1
 
 method_pos <-
-  method_info %>%
-  select(method_id, !!method_grouping_variables) %>%
-  gather(col, val, !!method_grouping_variables) %>%
-  group_by(method_id) %>%
-  summarise(group = paste0(col, "=", val, collapse = ",")) %>%
-  mutate(method_id = factor(method_id, levels = levels(results$method_id))) %>%
-  arrange(method_id) %>%
+  results %>%
+  filter(experiment == "summary", metric == "overall") %>%
+  left_join(method_info, by = "method_id")  %>%
+  transmute(method_id, group = factor(method_most_complex_trajectory_type, levels = rev(trajectory_types$id)), ranking_score = value) %>%
+  arrange(group, desc(ranking_score)) %>%
+  group_by(group) %>%
+  mutate(group_i = row_number()) %>%
+  ungroup() %>%
   mutate(
     method_i = row_number(),
-    method_id = as.character(method_id),
-    colour_background = method_i %% 2 == 1,
+    colour_background = group_i %% 2 == 1,
     do_spacing = c(FALSE, diff(as.integer(factor(group))) != 0),
     spacing = ifelse(do_spacing, group_spacing, row_spacing),
     y = - (method_i * row_height + cumsum(spacing)),
@@ -84,6 +85,16 @@ method_pos <-
     ymax = y + row_height / 2
   )
 
+# GENERATE GROUPING POSITIONS
+grouping_pos <-
+  method_pos %>%
+  group_by(group) %>%
+  summarise(
+    ymin = min(ymin),
+    ymax = max(ymax),
+    y = (ymin + ymax) / 2,
+    x = -1
+  )
 
 # GENERATE METRIC POSITIONS
 source(scripts_file("2a-metric_tbl.txt"))
@@ -126,7 +137,7 @@ header_xvals <- header_pos %>% transmute(nam = paste0(level, "_", id), xmin) %>%
 
 # PROCESS CIRCLES DATA
 #' @examples
-#' geom_types <- "pie"
+#' geom_types <- "circle"
 #' met_row <- metric_pos %>% filter(geom == geom_types) %>% slice(1)
 geom_data_processor <- function(geom_types, fun) {
   map_df(seq_len(nrow(metric_pos)), function(i) {
@@ -188,10 +199,9 @@ pie_data <- geom_data_processor("pie", function(dat) {
     ungroup()
 })
 barguides_data <- geom_data_processor(c("bar", "invbar"), function(dat) {
-  data_frame(
-    x = c(dat$xmin[[1]], dat$xmax[[1]]),
-    y = min(dat$ymin),
-    yend = max(dat$ymax)
+  crossing(
+    data_frame(x = c(dat$xmin[[1]], dat$xmax[[1]])),
+    grouping_pos %>% select(y = ymin, yend = ymax)
   )
 })
 trajd <- geom_data_processor("trajtype", function(dat) {
@@ -240,16 +250,20 @@ g1 <- ggplot() +
   cowplot::theme_nothing() +
 
   # SEPARATOR LINES
-  geom_rect(aes(xmin = min(metric_pos$xmin), xmax = max(metric_pos$xmax), ymin = ymin - (row_spacing / 2), ymax = ymax + (row_spacing / 2)), method_pos %>% filter(colour_background), fill = "#EEEEEE") +
+  geom_rect(aes(xmin = min(metric_pos$xmin)-.25, xmax = max(metric_pos$xmax)+.25, ymin = ymin - (row_spacing / 2), ymax = ymax + (row_spacing / 2)), method_pos %>% filter(colour_background), fill = "#EEEEEE") +
 
   # METRIC AXIS
   geom_segment(aes(x = x, xend = x, y = -.3, yend = -.1), metric_pos %>% filter(show_label), size = .5) +
-  geom_text(aes(x = x, y = 0, label = name), metric_pos %>% filter(show_label), angle = 30, vjust = 0, hjust = 0) +
+  geom_text(aes(x = x, y = 0, label = label_long(name)), metric_pos %>% filter(show_label), angle = 30, vjust = 0, hjust = 0) +
+
+  # HEADER AXIS
+  geom_segment(aes(x = xmin, xend = xmax, y = y, yend = y), header_pos, size = 1) +
+  geom_text(aes(x = x, y = y+.25, label = label_short(id)), header_pos, vjust = 0, hjust = 0.5, fontface = "bold") +
+  geom_text(aes(x = xmin, y = y+.5, label = key), header_pos %>% filter(key != ""), vjust = 0, hjust = 0, fontface = "bold", size = 5) +
 
   # GROUPING AXIS
-  geom_segment(aes(x = xmin, xend = xmax, y = y, yend = y), header_pos, size = 1) +
-  geom_text(aes(x = x, y = y+.5, label = id), header_pos, vjust = 1, hjust = 0.5, fontface = "bold") +
-  geom_text(aes(x = xmin, y = y+.7, label = key), header_pos %>% filter(key != ""), vjust = 1, hjust = 0, fontface = "bold", size = 5) +
+  geom_segment(aes(x = x, xend = x, y = ymin, yend = ymax), grouping_pos, size = 1) +
+  geom_text(aes(x = x-.5, y = y, label = label_short(group)), grouping_pos, vjust = 0, hjust = .5, fontface = "bold", angle = 90) +
 
   # BAR GUIDES
   geom_segment(aes(x = x, xend = x, y = y, yend = yend), barguides_data, colour = "black", size = .5, linetype = "dashed") +
@@ -268,7 +282,7 @@ g1 <- ggplot() +
   geom_text(aes(x = x, y = y, label = label, colour = colour), data = pct_data, vjust = .5, hjust = 1) +
 
   # RESERVE SPACE
-  expand_limits(x = c(max(metric_pos$xmax)+3), y = legy_start - 4.1) +
+  expand_limits(x = c(-3, max(metric_pos$xmax)+3), y = c(legy_start - 4.3, 6.5)) +
 
   # LEGEND: BENCHMARK
   geom_text(aes(header_xvals[["experiment_benchmark"]], legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
@@ -293,8 +307,7 @@ g1 <- ggplot() +
   geom_segment(aes(x = header_xvals[["category_trajtypes"]] + .5, xend = header_xvals[["category_trajtypes"]] + .5, y = legy_start - 2.5, yend = legy_start - 2.5 + row_height*.75), data = data_frame(z = 1), size = .25) +
 
   # GENERATION SENTENCE
-  geom_text(aes(1, legy_start - 4, label = stamp), colour = "#cccccc", hjust = 0, vjust = 0) +
-  expand_limits(y = legy_start - 4.3)
+  geom_text(aes(1, legy_start - 4, label = stamp), colour = "#cccccc", hjust = 0, vjust = 0)
 
 g1 <-
   plot_trajectory_types(plot = g1, trajectory_types = trajd$topinf, xmins = trajd$xmin, xmaxs = trajd$xmax, ymins = trajd$ymin, ymaxs = trajd$ymax, size = 1, geom = "circle", circ_size = .1)

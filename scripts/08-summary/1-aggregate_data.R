@@ -158,7 +158,6 @@ rm(qc_results, benchmark_results, scaling_results)
 
 
 ## CALCULATE FINAL RANKING
-
 metric_weights <-
   tribble(
     ~experiment, ~category, ~metric, ~weight,
@@ -167,7 +166,7 @@ metric_weights <-
     "scaling", "overall", "overall", 1
   )
 
-results_final <-
+results <-
   inner_join(
     results,
     metric_weights,
@@ -180,23 +179,6 @@ results_final <-
 
 metric_info <- metric_info %>% add_row(experiment = "summary", metric = "overall", category = "overall")
 
-# method_grouping_variables <- c("method_type", "method_any_priors_required")
-
-method_grouping_variables <- c("method_most_complex_trajectory_type")
-method_id_levels <-
-  results_final %>%
-  filter(experiment == "summary") %>%
-  left_join(method_info, by = "method_id") %>%
-  mutate(method_most_complex_trajectory_type = factor(method_most_complex_trajectory_type, levels = rev(trajectory_types$id))) %>%
-  # filter(experiment == "benchmark", category == "overall") %>%
-  # arrange(method_type, method_any_priors_required, desc(value)) %>%
-  arrange(method_most_complex_trajectory_type, desc(value)) %>%
-  pull(method_id)
-
-results <- results_final %>% mutate(method_id = factor(method_id, levels = method_id_levels))
-
-rm(method_id_levels, results_final)
-
 # write output
-write_rds(lst(method_info, results, metric_info, method_grouping_variables), result_file("results.rds"), compress = "xz")
+write_rds(lst(method_info, results, metric_info), result_file("results.rds"), compress = "xz")
 
