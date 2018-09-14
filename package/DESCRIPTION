@@ -58,6 +58,7 @@ Suggests:
   randomForest,
   reticulate,
   RColorBrewer,
+  sigmoid,
   splatter,
   SingleCellExperiment,
   tidygraph
