@@ -27,6 +27,9 @@ wrapper_type_map <- c(branch_trajectory = "traj", linear_trajectory = "linear", 
 data <-
   bind_rows(
     results %>%
+      group_by(experiment, metric, category) %>%
+      mutate(value = value / max(value)) %>%
+      ungroup() %>%
       group_by(experiment) %>%
       mutate(colour = scale_viridis_funs[[exp_palettes[[experiment[[1]]]]]](value)) %>% # need to determine error reason colours
       ungroup() %>%
