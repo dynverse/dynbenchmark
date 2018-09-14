@@ -1,6 +1,6 @@
 #' @importFrom sigmoid sigmoid
 .benchmark_aggregate_normalisation <- list(
-  scalesigmoid = function (x, remove_errored = TRUE, multiplier = 5) {
+  scalesigmoid = function (x, remove_errored = TRUE, multiplier = 1) {
     x[x < 0] <- 0
     x[x > 1] <- 1
 
@@ -13,7 +13,7 @@
 
     sigmoid::sigmoid(y)
   },
-  scaletanh = function (x, remove_errored = TRUE, multiplier = 3) {
+  scaletanh = function (x, remove_errored = TRUE, multiplier = 1) {
     x[x < 0] <- 0
     x[x > 1] <- 1
 
@@ -26,6 +26,17 @@
 
     tanh(y)
   },
+  minmax = function (x, remove_errored = TRUE, multiplier = 1) {
+    x[x < 0] <- 0
+    x[x > 1] <- 1
+
+    xnona <- x[!is.na(x)]
+    xnazero <- ifelse(is.na(x), 0, x)
+
+    if (length(xnazero) == 1 || all(xnazero == 0)) return(x)
+
+    (xnazero - min(xnona)) / (max(xnona) - min(xnona))
+  }
   none = "none"
 )
 
