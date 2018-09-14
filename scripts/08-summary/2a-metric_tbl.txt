@@ -11,7 +11,7 @@ metric_pos <- tribble(
      "summary",     "overall",              "benchmark", "oveb",              "Benchmark",     "bar",
      "summary",     "overall",                "scaling", "oves",                "Scaling",     "bar",
      "summary",     "overall",                     "qc", "oveq",                     "QC",     "bar",
-     "summary",     "overall",          "control_label", "conl",                       "Control_label",    "text",
+     "summary",     "overall",          "control_label", "conl",                       "",    "text",
    "benchmark",      "metric",       "norm_correlation", "gcor",           "Geodesic cor",  "circle",
    "benchmark",      "metric",               "norm_him", "him_",                    "HIM",  "circle",
    "benchmark",      "metric",       "norm_F1_branches", "f1br",            "F1-branches",  "circle",
