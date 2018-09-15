@@ -1,6 +1,6 @@
 #' @importFrom sigmoid sigmoid
 .benchmark_aggregate_normalisation <- list(
-  scalesigmoid = function (x, remove_errored = TRUE, multiplier = 5) {
+  scalesigmoid = function (x, multiplier = 1) {
     x[x < 0] <- 0
     x[x > 1] <- 1
 
@@ -13,7 +13,7 @@
 
     sigmoid::sigmoid(y)
   },
-  scaletanh = function (x, remove_errored = TRUE, multiplier = 3) {
+  scaletanh = function (x, multiplier = 1) {
     x[x < 0] <- 0
     x[x > 1] <- 1
 
@@ -25,6 +25,25 @@
     y <- (xnazero - mean(xnona)) / var(xnona) * multiplier
 
     tanh(y)
+  },
+  minmax = function (x) {
+    x[x < 0] <- 0
+    x[x > 1] <- 1
+
+    xnona <- x[!is.na(x)]
+    xnazero <- ifelse(is.na(x), 0, x)
+
+    if (length(xnazero) == 1 || all(xnazero == 0)) return(x)
+
+    (xnazero - min(xnona)) / (max(xnona) - min(xnona))
+  },
+  percentrank = function(x) {
+    x[x < 0] <- 0
+    x[x > 1] <- 1
+
+    if (length(x) == 1 || all(is.na(x) | x == 0)) return(x)
+
+    ifelse(is.na(x), 0, percent_rank(x))
   },
   none = "none"
 )
@@ -46,7 +65,7 @@
 benchmark_aggregate <- function(
   data,
   metrics,
-  norm_fun = c("scalesigmoid", "none"),
+  norm_fun = names(.benchmark_aggregate_normalisation),
   mean_fun = c("geometric", "harmonic", "arithmetic"),
   mean_weights = set_names(rep(1, length(metrics)), metrics),
   dataset_source_weights = c("real" = 5, "synthetic/dyngen" = 5, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
@@ -160,3 +179,4 @@ benchmark_aggregate <- function(
     data_aggregations
   )
 }
+formals(benchmark_aggregate)$norm_fun <- names(.benchmark_aggregate_normalisation)

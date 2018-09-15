@@ -12,7 +12,7 @@ benchmark_fetch_results(TRUE)
 
 # bind results in one data frame (without models)
 execution_output <- benchmark_bind_results(load_models = FALSE) %>%
-  filter(!method_id %in% c("identity", "random", "shuffle", "error"))
+  filter(!method_id %in% c("identity", "shuffle", "error"))
 
 # df <- execution_output %>% filter(edge_flip < 0) %>% select(method_id, dataset_id, param_id, prior_id, repeat_ix)
 # model <- load_dyneval_model(method_id = "celltrails/default", df = df, experiment_id = "07-benchmark")
@@ -24,7 +24,11 @@ methods_info <- design$methods %>%
   select(-method_type) %>%
   left_join(dynmethods::methods %>% select(method_id = id, method_type = type), by = "method_id")
 datasets_info <- design$datasets %>%
+  filter(category %in% c("Cat1", "Cat2")) %>%
   rename_all(function(x) paste0("dataset_", x))
+
+# temporarily filter cat3 datasets
+execution_output <- execution_output %>% filter(dataset_id %in% datasets_info$dataset_id)
 
 crossing <- design$crossing
 

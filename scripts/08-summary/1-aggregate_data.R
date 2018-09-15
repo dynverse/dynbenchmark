@@ -6,6 +6,12 @@ experiment("08-summary")
 # read methods info
 method_info <-
   read_rds(result_file("methods.rds", experiment_id = "03-methods")) %>%
+  mutate(
+    priors_required = map_chr(input, ~ .$required %>% setdiff(c("expression", "counts")) %>% paste0(collapse = ",")),
+    priors_optional = map_chr(input, ~ .$optional %>% paste0(collapse = ",")),
+    any_priors_required = priors_required != "",
+    any_priors_optional = priors_optional != ""
+  ) %>%
   rename_all(function(x) paste0("method_", x)) %>%
   rename(tool_id = method_tool_id) %>%
   select_if(is.atomic) %>%
@@ -145,22 +151,22 @@ results <- full_join(
 ) %>%
   group_by(experiment, metric, category) %>%
   mutate(placeholder = is.na(value), value = ifelse(placeholder, mean(value, na.rm = TRUE), value)) %>%
+  # mutate(placeholder = is.na(value), value = ifelse(placeholder, .5, value)) %>%
   ungroup()
 
 rm(qc_results, benchmark_results, scaling_results)
 
 
 ## CALCULATE FINAL RANKING
-
 metric_weights <-
   tribble(
     ~experiment, ~category, ~metric, ~weight,
-    "benchmark", "overall", "overall", 2,
+    "benchmark", "overall", "overall", 1,
     "qc", "overall", "overall", 1,
     "scaling", "overall", "overall", 1
   )
 
-results_final <-
+results <-
   inner_join(
     results,
     metric_weights,
@@ -172,25 +178,6 @@ results_final <-
   bind_rows(results)
 
 metric_info <- metric_info %>% add_row(experiment = "summary", metric = "overall", category = "overall")
-
-method_id_levels <-
-  results_final %>%
-  # filter(experiment == "summary") %>%
-  filter(experiment == "benchmark", category == "overall") %>%
-  arrange(desc(value)) %>%
-  pull(method_id)
-
-results <- results_final %>% mutate(method_id = factor(method_id, levels = method_id_levels))
-
-rm(method_id_levels, results_final)
-
-# # construct minis
-# trajectory_types_mini <- tibble(
-#   id = list.files(result_file("", "trajectory_types/mini")) %>% str_replace(".svg$", ""),
-#   svg = id %>% map(~as.character(xml2::read_xml(result_file(paste0(., ".svg"), "trajectory_types/mini"))))
-# )
-#
-# minis <- trajectory_types_mini %>% create_replacers()
 
 # write output
 write_rds(lst(method_info, results, metric_info), result_file("results.rds"), compress = "xz")

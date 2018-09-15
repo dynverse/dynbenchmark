@@ -24,7 +24,8 @@ common_labels <- tribble(
   "trajectory_type_predicted", "Predicted trajectory type", "Predicted trajectory type",
   "harm_mean", "Harmonic mean", "Harmonic mean",
   "dataset_source", "Dataset source", "Dataset source",
-  "source", "Dataset source", "Dataset source"
+  "source", "Dataset source", "Dataset source",
+  "qc", "Quality Control", "QC"
 )
 
 
@@ -33,4 +34,4 @@ labels <- bind_rows(
   prior_types %>% select(id = prior_id, long = prior_name, short = prior_name)
 )
 
-devtools::use_data(labels, overwrite = TRUE)
+devtools::use_data(labels, overwrite = TRUE, pkg = "package")
