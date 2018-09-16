@@ -2,9 +2,13 @@
 % Please edit documentation in R/text_ref.R
 \name{add_fig}
 \alias{add_fig}
+\alias{add_sfig}
 \title{Add a figure}
 \usage{
 add_fig(fig_path, ref_id, caption_main, caption_text = "", width = 5,
+  height = 7, format = get_default_format())
+
+add_sfig(fig_path, ref_id, caption_main, caption_text = "", width = 5,
   height = 7, format = get_default_format())
 }
 \arguments{

@@ -62,6 +62,12 @@ setup_figs <- function() {
   tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width = numeric(), height = numeric())
 }
 
+#' @rdname setup_refs
+#' @export
+setup_sfigs <- function() {
+  tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width = numeric(), height = numeric())
+}
+
 #' Add a figure
 #'
 #' @inheritParams ref
@@ -93,6 +99,28 @@ add_fig <- function(
   )
 
   plot_fig("fig", ref_id, fig_path, caption_main, caption_text, width, height, format)
+}
+
+#' @rdname add_fig
+#' @export
+add_sfig <- function(
+  fig_path,
+  ref_id,
+  caption_main,
+  caption_text = "",
+  width = 5,
+  height = 7,
+  format = get_default_format()
+) {
+  # save it because why not
+  figs <<- sfigs %>% add_row(
+    ref_id = ref_id,
+    fig_path = fig_path,
+    caption_main = caption_main,
+    caption_text = caption_text,
+    width = width,
+    height = height
+  )
 }
 
 
@@ -336,6 +364,7 @@ show_table <- function(ref_id) {
 setup_refs_globally <- function()  {
   refs <<- dynbenchmark::setup_refs()
   figs <<- dynbenchmark::setup_figs()
+  sfigs <<- dynbenchmark::setup_sfigs()
   tables <<- dynbenchmark::setup_tables()
   stables <<- dynbenchmark::setup_stables()
   invisible()
