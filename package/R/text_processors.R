@@ -17,38 +17,15 @@ apply_pre_processor <- function(func) {
 }
 
 
-
-
 process_changes <- function(x, format = get_default_format()) {
   if (format == "latex") {
     x %>%
-      stringr::str_replace_all("\U2192[ ]*", "\\\\textbf{") %>%
+      stringr::str_replace_all("\U2192[ ]*", "\\\\textcolor{changes}{") %>%
       stringr::str_replace_all("\U2190", "}")
   } else {
     x
   }
 }
-
-#' Show a url
-#'
-#' @param url The url
-#' @param text The text
-#' @param format The format
-url <- function(url, text = url, format = get_default_format()) {
-  if(format == "latex") {
-    pritt("\\\\href{{{url}}}{{{text}}}")
-  } else {
-    pritt("[{text}]({url})")
-  }
-}
-
-
-
-
-
-
-
-
 
 #' Process relative paths to links & figures
 #' First extract every link, determine whether it is a relative path and if yes, add folder to the front
