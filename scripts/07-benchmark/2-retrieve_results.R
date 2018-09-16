@@ -24,11 +24,11 @@ methods_info <- design$methods %>%
   select(-method_type) %>%
   left_join(dynmethods::methods %>% select(method_id = id, method_type = type), by = "method_id")
 datasets_info <- design$datasets %>%
-  filter(category %in% c("Cat1", "Cat2")) %>%
+  # filter(category %in% c("Cat1", "Cat2")) %>%
   rename_all(function(x) paste0("dataset_", x))
 
 # temporarily filter cat3 datasets
-execution_output <- execution_output %>% filter(dataset_id %in% datasets_info$dataset_id)
+# execution_output <- execution_output %>% filter(dataset_id %in% datasets_info$dataset_id)
 
 crossing <- design$crossing
 

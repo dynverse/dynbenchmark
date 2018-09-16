@@ -57,6 +57,8 @@ datasets <-
     fun = map(id, ~ function() load_dataset(., as_tibble = FALSE))
   )
 
+timeout_sec <- 60 * 60
+memory_gb <- 16
 
 # determine method execution order by predicting
 # the running times of each method
@@ -64,8 +66,8 @@ predicted_times <-
   pmap_df(scaling$models, function(method_id, model_time, model_mem, ...) {
     datasets2 <- datasets %>% rename(dataset_id = id)
     datasets2$method_id <- method_id
-    datasets2$time_lpred = predict(model_time, datasets2)[,1]
-    datasets2$mem_lpred = predict(model_mem, datasets2)[,1]
+    datasets2$time_lpred = pmin(predict(model_time, datasets2)[,1], tlog10(imeout_sec))
+    datasets2$mem_lpred = pmin(predict(model_mem, datasets2)[,1], log10(memory_gb * 1e9))
     datasets2
   }) %>%
   mutate(time_pred = 10^time_lpred, mem_pred = 10^mem_lpred)
@@ -114,11 +116,13 @@ write_rds(design, derived_file("design.rds"), compress = "xz")
 metrics <- c("correlation", "edge_flip", "featureimp_cor", "featureimp_wcor", "F1_branches", "him")
 write_rds(metrics, result_file("metrics.rds"), compress = "xz")
 
+write_rds(lst(timeout_sec, memory_gb, metrics), result_file("params.rds"), compress = "xz")
+
 ##########################################################
 ###############        SUBMIT JOB          ###############
 ##########################################################
-metrics <- read_rds(result_file("metrics.rds"))
 design_filt <- read_rds(derived_file("design.rds"))
+list2env(read_rds(result_file("params.rds")), environment())
 
 # step 1:
 # design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("identity", "scorpius", "paga"), category == "Cat1")
@@ -127,14 +131,17 @@ design_filt <- read_rds(derived_file("design.rds"))
 # design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2"))
 
 # step 3:
-design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2", "Cat3"))
+# design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2", "Cat3"))
 
+# TODO: rerun cat 1 - 3
+
+# step 4:
 
 # submit job
 benchmark_submit(
   design = design_filt,
   qsub_grouping = "{method_id}/{param_id}/{category}",
-  qsub_params = lst(timeout = 60 * 60, memory = "16G"),
+  qsub_params = lst(timeout = timeout_sec, memory = paste0(memory_gb, "G")),
   metrics = metrics,
   verbose = TRUE,
   output_models = TRUE

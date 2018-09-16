@@ -20,7 +20,7 @@ topinf_colours <- topinf_types %>% select(name, colour) %>% deframe()
 error_colours <- error_reasons %>% select(name, colour) %>% deframe()
 maxtraj_colours <- trajectory_types %>% select(id, colour) %>% deframe()
 
-exp_palettes <- c(summary = "inferno", qc = "viridis", benchmark = "magma", scaling = "cividis")
+exp_palettes <- c(summary = "inferno", qc = "viridis", benchmark = "magma", scalability = "cividis")
 
 # COMBINE PLOT DATA INTO ONE TABLE
 
@@ -29,16 +29,20 @@ wrapper_type_map <- c(branch_trajectory = "Traj", linear_trajectory = "Line", cy
 data <-
   bind_rows(
     results %>%
+      filter(experiment != "scalability" | category == "overall") %>%
       group_by(experiment, metric, category) %>%
       mutate(value = value / max(value)) %>%
       ungroup() %>%
       group_by(experiment) %>%
-      mutate(colour = scale_viridis_funs[[exp_palettes[[experiment[[1]]]]]](value)) %>% # need to determine error reason colours
+      mutate(colour = scale_viridis_funs[[exp_palettes[[experiment[[1]]]]]](value)) %>%
       ungroup() %>%
       mutate(
         metric = ifelse(category == "overall" & experiment != "summary", experiment, metric),
         experiment = ifelse(category == "overall" & experiment != "summary", "summary", experiment)
       ),
+    results %>% # process scaling results separately
+      filter(experiment == "scalability" & category != "overall") %>%
+      mutate(colour = scale_viridis_funs[[exp_palettes[["scalability"]]]](value)),
     method_info %>%
       transmute(
         method_id,
@@ -64,7 +68,7 @@ pie_colours <-
 # GENERATE METHOD POSITIONS
 row_height <- 1
 row_spacing <- .1
-group_spacing <- 1
+group_spacing <- .5
 
 method_pos <-
   results %>%
@@ -159,6 +163,9 @@ circle_data <- geom_data_processor("circle", function(dat) {
 })
 rect_data <- geom_data_processor("rect", function(dat) {
   dat %>% transmute(xmin, xmax, ymin, ymax, colour)
+})
+textbox_data <- geom_data_processor("textbox", function(dat) {
+  dat %>% transmute(xmin, xmax, ymin, ymax, x, y, colour, label, colour_label = ifelse(value < .6, "white", "black"))
 })
 bar_data <- geom_data_processor("bar", function(dat) {
   dat %>% transmute(xmin = xmin, xmax = xmin + value * xwidth, ymin, ymax, colour)
@@ -258,7 +265,7 @@ g1 <- ggplot() +
 
   # HEADER AXIS
   geom_segment(aes(x = xmin, xend = xmax, y = y, yend = y), header_pos, size = 1) +
-  geom_text(aes(x = x, y = y+.25, label = label_short(id)), header_pos, vjust = 0, hjust = 0.5, fontface = "bold") +
+  geom_text(aes(x = x, y = y+.25, label = label_long(id)), header_pos, vjust = 0, hjust = 0.5, fontface = "bold") +
   geom_text(aes(x = xmin, y = y+.5, label = key), header_pos %>% filter(key != ""), vjust = 0, hjust = 0, fontface = "bold", size = 5) +
 
   # GROUPING AXIS
@@ -271,6 +278,9 @@ g1 <- ggplot() +
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour), bind_rows(bar_data, invbar_data), colour = "black", size = .25) +
   # RECTANGLES
   # geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour), rect_data, colour = "black", size = .25) +
+  # TEXTBOXES
+  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour), textbox_data, colour = "black", size = .25) +
+  geom_text(aes(x = x, y = y, label = label, colour = colour_label), textbox_data, hjust = .5, vjust = .5, size = 3) +
   # CIRCLES
   ggforce::geom_circle(aes(x0 = x0, y0 = y0, fill = colour, r = size), circle_data, size = .25) +
   # STARS
@@ -290,9 +300,9 @@ g1 <- ggplot() +
   geom_text(aes(x = header_xvals[["experiment_benchmark"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "benchmark") %>% slice(c(1, n()))) +
 
   # LEGEND: SCALING
-  geom_text(aes(header_xvals[["experiment_scaling"]], legy_start - 1, label = "Scaling score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggforce::geom_circle(aes(x0 = header_xvals[["experiment_scaling"]] + .8 + x, y0 = legy_start - 2.3 + r, r = r, fill = col), size = .25, leg_circles %>% filter(exp == "scaling")) +
-  geom_text(aes(x = header_xvals[["experiment_scaling"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "scaling") %>% slice(c(1, n()))) +
+  geom_text(aes(header_xvals[["experiment_scalability"]], legy_start - 1, label = "Estimated time"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  ggforce::geom_circle(aes(x0 = header_xvals[["experiment_scalability"]] + .8 + x, y0 = legy_start - 2.3 + r, r = r, fill = col), size = .25, leg_circles %>% filter(exp == "scalability")) +
+  geom_text(aes(x = header_xvals[["experiment_scalability"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "scalability") %>% slice(c(1, n()))) +
 
   # LEGEND: QC
   geom_text(aes(header_xvals[["experiment_qc"]], legy_start - 1, label = "QC score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
