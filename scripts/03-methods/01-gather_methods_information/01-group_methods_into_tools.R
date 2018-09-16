@@ -64,7 +64,13 @@ tools <- tools %>%
 tools_excluded <- sheet %>%
   gs_read(ws = "tools_excluded") %>%
   filter(!tool_id %in% tools$tool_id) %>%
-  mutate(trajectory_types = map(trajectory_types, str_split, ", ", simplify = FALSE))
+  mutate(trajectory_types = map(trajectory_types, str_split, ", ", simplify = TRUE)) %>%
+  mutate(most_complex_trajectory_type = map_chr(trajectory_types, ~ last(trajectory_type_ids[trajectory_type_ids %in% .]))) %>%
+  mutate(
+    publication_date = as.Date(publication_date),
+    preprint_date = as.Date(preprint_date),
+    date = ifelse(is.na(publication_date), preprint_date, publication_date)
+  )
 
 tools <- bind_rows(tools, tools_excluded)
 
