@@ -4,6 +4,7 @@
 \alias{setup_refs}
 \alias{setup_figs}
 \alias{setup_tables}
+\alias{setup_stables}
 \title{Setup the text references}
 \usage{
 setup_refs()
@@ -11,6 +12,8 @@ setup_refs()
 setup_figs()
 
 setup_tables()
+
+setup_stables()
 }
 \description{
 Setup the text references
