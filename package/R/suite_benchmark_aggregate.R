@@ -1,56 +1,23 @@
 #' @importFrom sigmoid sigmoid
 .benchmark_aggregate_normalisation <- list(
-  scalesigmoid = function (x, multiplier = 1) {
-    x[x < 0] <- 0
-    x[x > 1] <- 1
-
-    xnona <- x[!is.na(x)]
-    xnazero <- ifelse(is.na(x), 0, x)
-
-    if (length(xnazero) == 1 || all(xnazero == 0)) return(x)
-
+  scalesigmoid = function (xnona, xnazero, multiplier = 1) {
     y <- (xnazero - mean(xnona)) / var(xnona) * multiplier
 
     sigmoid::sigmoid(y)
   },
-  scaletanh = function (x, multiplier = 1) {
-    x[x < 0] <- 0
-    x[x > 1] <- 1
-
-    xnona <- x[!is.na(x)]
-    xnazero <- ifelse(is.na(x), 0, x)
-
-    if (length(xnazero) == 1 || all(xnazero == 0)) return(x)
-
+  scaletanh = function (xnona, xnazero, multiplier = 1) {
     y <- (xnazero - mean(xnona)) / var(xnona) * multiplier
 
     tanh(y)
   },
-  minmax = function (x) {
-    x[x < 0] <- 0
-    x[x > 1] <- 1
-
-    xnona <- x[!is.na(x)]
-    xnazero <- ifelse(is.na(x), 0, x)
-
-    if (length(xnazero) == 1 || all(xnazero == 0)) return(x)
-
+  minmax = function (xnona, xnazero) {
     (xnazero - min(xnona)) / (max(xnona) - min(xnona))
   },
-  percentrank = function(x) {
-    x[x < 0] <- 0
-    x[x > 1] <- 1
-
-    if (length(x) == 1 || all(is.na(x) | x == 0)) return(x)
-
-    ifelse(is.na(x), 0, percent_rank(x))
+  percentrank = function(xnona, xnazero) {
+    percent_rank(xnazero)
   },
   none = "none"
 )
-
-.benchmark_aggregate_minmaxrange <- function(x) {
-  ifelse(is.na(x), 0, x) %>% pmax(0) %>% pmin(1)
-}
 
 #' Normalisation and aggregation function
 #'
@@ -83,7 +50,7 @@ benchmark_aggregate <- function(
     pct_execution_error = (error_status == "execution_error") + 0,
     pct_method_error = (error_status == "method_error") + 0
   ) %>%
-    mutate_at(metrics, .benchmark_aggregate_minmaxrange) %>%
+    mutate_at(metrics, function(x) ifelse(is.na(x), 0, x) %>% pmax(0) %>% pmin(1)) %>%
     group_by(dataset_id) %>%
     mutate(
       rank_time = percent_rank(-ltime),
@@ -98,10 +65,24 @@ benchmark_aggregate <- function(
   }
 
   if (!identical(norm_fun, "none")) {
+    preproc_fun <- function(x) {
+      x[x < 0] <- 0
+      x[x > 1] <- 1
+
+      xnona <- x[!is.na(x)]
+      xnazero <- ifelse(is.na(x), 0, x)
+
+      if (length(xnazero) == 1 || all(xnazero == 0)) {
+        lst(ret = x)
+      } else {
+        norm_fun(xnona, xnazero)
+      }
+    }
+
     data <-
       data %>%
       group_by(dataset_id) %>%
-      mutate_at(set_names(metrics, paste0("norm_", metrics)), norm_fun) %>%
+      mutate_at(set_names(metrics, paste0("norm_", metrics)), preproc_fun) %>%
       ungroup()
     names(mean_weights) <- paste0("norm_", names(mean_weights))
   }
