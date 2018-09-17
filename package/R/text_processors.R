@@ -28,7 +28,7 @@ process_changes <- function(x, format = get_default_format()) {
     #   stringr::str_replace_all("\U2190", "}")
 
     x %>%
-      stringr::str_replace_all("\U2192", "\\\\textcolor{changes}{") %>%
+      stringr::str_replace_all("\U2192", "\\\\changes{") %>%
       stringr::str_replace_all("\U2190", "}")
   } else {
     x
