@@ -4,7 +4,7 @@
 \name{method_statuses}
 \alias{method_statuses}
 \title{Metadata on method statuses}
-\format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 7 rows and 3 columns.}
+\format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 7 rows and 4 columns.}
 \usage{
 method_statuses
 }

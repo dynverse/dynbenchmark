@@ -1,5 +1,5 @@
 #' @importFrom extrafont fonts font_import
-#' @importFrom utils download.file untip
+#' @importFrom utils download.file unzip
 install_fontawesome <- function() {
   if (!"Font Awesome 5 Free" %in% extrafont::fonts()) {
     # install fontawesome
