@@ -9,6 +9,8 @@ experiment("07-benchmark")
 ############### PART THREE: GENERATE FIGURES ###############
 ############################################################
 
+num_replicates <- 5
+
 list2env(read_rds(result_file("benchmark_results_input.rds")), environment())
 list2env(read_rds(result_file("benchmark_results_normalised.rds")), environment())
 
@@ -31,6 +33,6 @@ data <- data %>% mutate(method_id = factor(method_id, levels = method_ord$method
 # execute plotting scripts
 source(scripts_file("3a-overall_comparison.R"))
 source(scripts_file("3b-time_mem_predictions.R"))
-source(scripts_file("3c-normalisation.R"))
-
+# source(scripts_file("3c-normalisation.R"))
+source(scripts_file("3d-compare_sources.R"))
 

@@ -50,7 +50,7 @@ oc4 <-
   summarise(
     time_pred_cor = nacor(ltime, time_lpred),
     mem_pred_cor = nacor(lmem, mem_lpred),
-    progress = n() / nrow(datasets_info)
+    progress = n() / nrow(datasets_info) / num_replicates
   ) %>%
   gather(metric, score, time_pred_cor, mem_pred_cor, progress)
 
