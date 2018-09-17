@@ -47,11 +47,12 @@ data <-
       transmute(
         method_id,
         name = method_name,
-        control_label = ifelse(method_type == "algorithm", "", "Control"),
+        control_label = ifelse(method_type != "control", "", "Control"),
         priors = method_info$method_priors_required %>% str_replace_all("[^,]+", "*") %>% str_replace_all(",", ""),
         topology_inference = ifelse(method_topology_inference == "parameter", "param", method_topology_inference),
         wrapper_type = wrapper_type_map[method_wrapper_type],
-        most_complex = method_most_complex_trajectory_type
+        most_complex = method_most_complex_trajectory_type,
+        method_grouping
       ) %>%
       gather(metric, label, -method_id) %>%
       mutate(
@@ -74,7 +75,7 @@ method_pos <-
   results %>%
   filter(experiment == "summary", metric == "overall") %>%
   left_join(method_info, by = "method_id")  %>%
-  transmute(method_id, group = factor(method_most_complex_trajectory_type, levels = rev(trajectory_types$id)), ranking_score = value) %>%
+  transmute(method_id, group = factor(method_grouping, levels = c(rev(trajectory_types$id), "control")), ranking_score = value) %>%
   arrange(group, desc(ranking_score)) %>%
   group_by(group) %>%
   mutate(group_i = row_number()) %>%

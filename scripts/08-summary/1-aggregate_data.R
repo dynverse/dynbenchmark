@@ -3,7 +3,9 @@ library(tidyverse)
 
 experiment("08-summary")
 
-# read methods info
+#####################################################
+#                  GET METHODS INFO                  #
+#####################################################
 method_info <-
   read_rds(result_file("methods.rds", experiment_id = "03-methods")) %>%
   mutate(
