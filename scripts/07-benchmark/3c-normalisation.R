@@ -2,6 +2,20 @@
 stat_funs <- c("var", "mean")
 metricso <- c("overall", metrics)
 
+preproc_fun <- function(x) {
+  x[x < 0] <- 0
+  x[x > 1] <- 1
+
+  xnona <- x[!is.na(x)]
+  xnazero <- ifelse(is.na(x), 0, x)
+
+  if (length(xnazero) == 1 || all(xnazero == 0)) {
+    x
+  } else {
+    dynbenchmark:::.benchmark_aggregate_normalisation$scalesigmoid(xnona, xnazero)
+  }
+}
+
 dat_df <-
   data %>%
   select(method_id, dataset_id, !!metricso) %>%
@@ -9,7 +23,7 @@ dat_df <-
   group_by(dataset_id, metric) %>%
   filter(n() > 2) %>%
   rename(unnorm = score) %>%
-  mutate(norm = dynbenchmark:::.benchmark_aggregate_normalisation$scalesigmoid(unnorm)) %>%
+  mutate(norm = preproc_fun(unnorm)) %>%
   gather(type, score, unnorm, norm) %>%
   mutate(type = factor(type, levels = c("unnorm", "norm"))) %>%
   ungroup()
