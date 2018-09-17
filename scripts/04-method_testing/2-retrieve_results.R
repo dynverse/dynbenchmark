@@ -1,4 +1,4 @@
-#' Retrieve and process the results
+#' Retrieve the results
 
 library(dynbenchmark)
 library(tidyverse)
@@ -22,18 +22,6 @@ extract_method_status <- function(error_status, correlation, ...) {
   )
 }
 output$method_status <- pmap_chr(output, extract_method_status)
-
-g <- output %>%
-  mutate(dataset_id = gsub("specific_example/.*", "specific_example", dataset_id)) %>%
-  ggplot(aes(correlation, fct_rev(method_id))) +
-  geom_label(aes(label = method_status, fill = method_status)) +
-  scale_fill_manual(values = dynbenchmark::method_status_colours) +
-  scale_x_continuous(expand = c(0.5, 0)) +
-  facet_wrap(~dataset_id, nrow = 1) +
-  theme_bw()
-g
-
-ggsave(result_file("method_status.svg"), g, width = 16, height = 16)
 
 write_rds(output, result_file("output.rds"), compress = "xz")
 
