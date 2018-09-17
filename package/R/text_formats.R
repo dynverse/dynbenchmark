@@ -103,7 +103,7 @@ pdf_manuscript <- function(
 
     system(glue::glue("xelatex -interaction=nonstopmode {output_file}"))
 
-    output_file
+    fs::path_ext_set(output_file, "pdf")
   }
 
   format
