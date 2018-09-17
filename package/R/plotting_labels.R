@@ -191,5 +191,11 @@ tag_first <- function(x, tag) {
 #' @param x A vector
 #' @export
 label_vector <- function(x) {
-  glue::glue_collapse(x, sep = ", ", last = " and ")
+  if (length(x) == 0) {
+    ""
+  } else if (length(x) == 1) {
+    x
+  } else {
+    glue::glue_collapse(x, sep = ", ", last = " and ")
+  }
 }

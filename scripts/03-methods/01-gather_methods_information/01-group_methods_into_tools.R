@@ -17,7 +17,10 @@ sheet <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE")
 methods <- dynmethods::methods
 
 # tool_id is default the method_id
-methods$tool_id <- ifelse(is.na(methods$implementation_id), methods$id, methods$implementation_id)
+methods$tool_id <- case_when(
+  is.na(methods$implementation_id) ~ gsub("projected_", "", methods$id),
+  TRUE ~ methods$implementation_id
+)
 
 # add detects_... columns for trajectory types
 trajectory_type_ids <- trajectory_types$id
@@ -64,7 +67,13 @@ tools <- tools %>%
 tools_excluded <- sheet %>%
   gs_read(ws = "tools_excluded") %>%
   filter(!tool_id %in% tools$tool_id) %>%
-  mutate(trajectory_types = map(trajectory_types, str_split, ", ", simplify = FALSE))
+  mutate(trajectory_types = map(trajectory_types, str_split, ", ", simplify = TRUE)) %>%
+  mutate(most_complex_trajectory_type = map_chr(trajectory_types, ~ last(trajectory_type_ids[trajectory_type_ids %in% .]))) %>%
+  mutate(
+    publication_date = as.Date(publication_date),
+    preprint_date = as.Date(preprint_date),
+    date = ifelse(is.na(publication_date), preprint_date, publication_date)
+  )
 
 tools <- bind_rows(tools, tools_excluded)
 
