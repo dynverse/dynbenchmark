@@ -4,10 +4,10 @@ output: dynbenchmark::github_markdown_nested
 
 # Method testing
 
-Here, we test the methods on some small real and toy datasets, to capture errors early on and make sure all methods run fine on these "simple" datasets.
+Each method is tested on a few small real and toy datasets. Ideally, each method should be able to execute successfully on each of these datasets.
+If a method is not able to infer a trajectory on any of the datasets, it will not be included in any of the next experiments.
 
-These testing results are in the end pushed to [https://dynverse.github.io/dynmethods_automated_testing/index.html](https://dynverse.github.io/dynmethods_automated_testing/index.html)
-
+Overview experiment:
 ```{r}
 dynbenchmark::render_scripts_documentation()
 ```

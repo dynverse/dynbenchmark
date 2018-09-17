@@ -1,4 +1,4 @@
-#' Download singularity images if TI methods on the cluster
+#' Update singularity images on the cluster
 
 library(dynmethods)
 library(dynwrap)
@@ -6,7 +6,6 @@ library(dynbenchmark)
 library(tidyverse)
 
 experiment("singularity_images")
-
 
 # If nothing is running on the cluster, run this on the login node to clear temporary folders:
 # rm -rf /tmp/* /data/*
