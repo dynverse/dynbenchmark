@@ -25,6 +25,7 @@ Imports:
   cluster,
   dplyr,
   emoa,
+  extrafont,
   fs,
   ggraph,
   ggplot2,
@@ -48,6 +49,7 @@ Imports:
   tidyverse,
   tibble,
   testthat,
+  utils,
   qsub,
   xml2
 Suggests:
@@ -80,6 +82,7 @@ Collate:
     'datasets_preprocessing.R'
     'google_scholar.R'
     'headtail.R'
+    'install_fontawesome.R'
     'load_dyneval_model.R'
     'metrics.R'
     'nacor.R'
