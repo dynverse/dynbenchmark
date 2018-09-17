@@ -249,13 +249,13 @@ add_table <- function(
 
   # save it because why not
   tables <<- tables %>% add_row(
-    table = table,
+    table = list(table),
     ref_id = ref_id,
     caption_main = caption_main,
     caption_text = caption_text
   )
 
-  show_table(ref_id)
+  show_table(ref_id, format = format)
 }
 
 #' @rdname add_table
@@ -271,7 +271,7 @@ add_stable <- function(
 
   # save it because why not
   stables <<- stables %>% add_row(
-    table = table,
+    table = list(table),
     ref_id = ref_id,
     caption_main = caption_main,
     caption_text = caption_text,
@@ -305,7 +305,7 @@ process_table <- function(table) {
   table
 }
 
-show_table <- function(ref_id) {
+show_table <- function(ref_id, format = get_default_format()) {
   table_row <- tables %>% extract_row_to_list(ref_id == !!ref_id)
 
   table <- table_row$table
