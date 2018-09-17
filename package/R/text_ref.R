@@ -62,6 +62,12 @@ setup_figs <- function() {
   tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width = numeric(), height = numeric())
 }
 
+#' @rdname setup_refs
+#' @export
+setup_sfigs <- function() {
+  tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width = numeric(), height = numeric())
+}
+
 #' Add a figure
 #'
 #' @inheritParams ref
@@ -93,6 +99,28 @@ add_fig <- function(
   )
 
   plot_fig("fig", ref_id, fig_path, caption_main, caption_text, width, height, format)
+}
+
+#' @rdname add_fig
+#' @export
+add_sfig <- function(
+  fig_path,
+  ref_id,
+  caption_main,
+  caption_text = "",
+  width = 5,
+  height = 7,
+  format = get_default_format()
+) {
+  # save it because why not
+  figs <<- sfigs %>% add_row(
+    ref_id = ref_id,
+    fig_path = fig_path,
+    caption_main = caption_main,
+    caption_text = caption_text,
+    width = width,
+    height = height
+  )
 }
 
 
@@ -193,14 +221,20 @@ setup_tables <- function() {
   tibble(ref_id = character(), table = list(), caption_main = character(), caption_text = character())
 }
 
+#' @rdname setup_refs
+#' @export
+setup_stables <- function() {
+  tibble(ref_id = character(), table = list(), caption_main = character(), caption_text = character())
+}
+
 #' Add a table
 #'
-#' @inheritParams ref
-#' @inheritParams add_fig
 #' @param table Either a tibble, a path to a table or a named list with latex, html and markdown kables
 #' @param caption_main Caption title
 #' @param caption_text Caption text
 #' @param format The format, in html or latex
+#' @inheritParams ref
+#' @inheritParams add_fig
 #'
 #' @export
 add_table <- function(
@@ -208,8 +242,44 @@ add_table <- function(
   ref_id,
   caption_main,
   caption_text = "",
+  format = get_default_format(),
+  supplementary = FALSE
+) {
+  table <- process_table(table)
+
+  # save it because why not
+  tables <<- tables %>% add_row(
+    table = table,
+    ref_id = ref_id,
+    caption_main = caption_main,
+    caption_text = caption_text
+  )
+
+  show_table(ref_id)
+}
+
+#' @rdname add_table
+#' @export
+add_stable <- function(
+  table,
+  ref_id,
+  caption_main,
+  caption_text = "",
   format = get_default_format()
 ) {
+  table <- process_table(table)
+
+  # save it because why not
+  stables <<- stables %>% add_row(
+    table = table,
+    ref_id = ref_id,
+    caption_main = caption_main,
+    caption_text = caption_text,
+    supplementary = supplementary
+  )
+}
+
+process_table <- function(table) {
   # load in the table if character
   if (is.character(table) && fs::path_ext(table) == "rds") {
     table <- read_rds(table)
@@ -232,20 +302,20 @@ add_table <- function(
   # make sure all tables are given
   testthat::expect_true(all(c("latex", "markdown") %in% names(table)))
 
-  # save it because why not
-  tables <<- tables %>% add_row(
-    table = table,
-    ref_id = ref_id,
-    caption_main = caption_main,
-    caption_text = caption_text
-  )
+  table
+}
+
+show_table <- function(ref_id) {
+  table_row <- tables %>% extract_row_to_list(ref_id == ref_id)
+
+  table <- table_row$table
 
   # anchor
   table_anch <- anchor("table", ref_id)
 
   # caption
-  caption_main <- knitr::knit(text = caption_main, quiet = TRUE)
-  caption_text <- knitr::knit(text = caption_text, quiet = TRUE)
+  caption_main <- knitr::knit(text = table_row$caption_main, quiet = TRUE)
+  caption_text <- knitr::knit(text = table_row$caption_text, quiet = TRUE)
   table_name <- ref("table", ref_id, pattern = "{ref_full_name}")
 
   # render the table
@@ -286,7 +356,6 @@ add_table <- function(
 
 
 
-
 ##  ............................................................................
 ##  Global refs setup                                                       ####
 #' Setup the refs for a markdown document, globally!
@@ -295,6 +364,9 @@ add_table <- function(
 setup_refs_globally <- function()  {
   refs <<- dynbenchmark::setup_refs()
   figs <<- dynbenchmark::setup_figs()
+  sfigs <<- dynbenchmark::setup_sfigs()
   tables <<- dynbenchmark::setup_tables()
+  stables <<- dynbenchmark::setup_stables()
   invisible()
 }
+
