@@ -306,7 +306,7 @@ process_table <- function(table) {
 }
 
 show_table <- function(ref_id) {
-  table_row <- tables %>% extract_row_to_list(ref_id == ref_id)
+  table_row <- tables %>% extract_row_to_list(ref_id == !!ref_id)
 
   table <- table_row$table
 
