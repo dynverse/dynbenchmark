@@ -75,7 +75,7 @@ pdf_manuscript <- function(
   ...
 ) {
   # setup the pdf format
-  format <- rmarkdown::pdf_document(
+  format <- rmarkdown::latex_document(
     ...,
     toc = FALSE,
     includes = rmarkdown::includes(
@@ -95,8 +95,16 @@ pdf_manuscript <- function(
   )
 
   # add changes formatter
-  format$pre_processor <- append_pre_processor(format, apply_pre_processor(process_changes))
+  # format$pre_processor <- append_pre_processor(format, apply_pre_processor(process_changes))
   format$pre_processor <- append_pre_processor(format, apply_pre_processor(process_header_newline))
+
+  format$post_processor <- function(metadata, input_file, output_file, clean, verbose) {
+    read_lines(output_file) %>% process_changes() %>% write_lines(output_file)
+
+    system(glue::glue("xelatex -interaction=nonstopmode {output_file}"))
+
+    output_file
+  }
 
   format
 }
