@@ -6,7 +6,7 @@
 \title{Add a table}
 \usage{
 add_table(table, ref_id, caption_main, caption_text = "",
-  format = get_default_format(), supplementary = FALSE)
+  format = get_default_format())
 
 add_stable(table, ref_id, caption_main, caption_text = "",
   format = get_default_format())

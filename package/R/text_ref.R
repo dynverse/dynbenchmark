@@ -242,8 +242,7 @@ add_table <- function(
   ref_id,
   caption_main,
   caption_text = "",
-  format = get_default_format(),
-  supplementary = FALSE
+  format = get_default_format()
 ) {
   table <- process_table(table)
 
