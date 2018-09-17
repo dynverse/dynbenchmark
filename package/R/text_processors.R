@@ -11,7 +11,7 @@ append_pre_processor <- function(format, func) {
 # read the file, apply the pre knit, and save the file
 apply_pre_processor <- function(func) {
   function(metadata, input_file, runtime, knit_meta, files_dir, output_dir) {
-    readr::read_file(file.path(output_dir, input_file)) %>% func() %>% readr::write_file(file.path(output_dir, input_file))
+    readr::read_lines(file.path(output_dir, input_file)) %>% func() %>% readr::write_lines(file.path(output_dir, input_file))
     invisible()
   }
 }
@@ -25,6 +25,11 @@ process_changes <- function(x, format = get_default_format()) {
   } else {
     x
   }
+}
+
+process_header_newline <- function(x) {
+  x %>%
+    stringr::str_replace_all("^#", "\n#")
 }
 
 #' Process relative paths to links & figures
