@@ -62,69 +62,7 @@ rm(tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores, method_q
 #####################################################
 #                READ SCALING RESULTS               #
 #####################################################
-scaling_results <- read_rds(result_file("scaling.rds", experiment_id = "05-scaling"))
-
-# scaling_exp <- tribble(
-#   ~ experiment, ~ category, ~ metric, ~ lnrow, ~ lncol,
-#   "scalability", "10k features", "100 cells", 2, 4,
-#   "scalability", "10k features", "10k cells", 4, 4,
-#   "scalability", "10k features", "1m cells", 6, 4,
-#   "scalability", "10k cells", "100 features", 4, 2,
-#   "scalability", "10k cells", "10k features", 4, 4,
-#   "scalability", "10k cells", "1m features", 4, 6
-# )
-
-scaling_exp <- tribble(
-  ~ experiment, ~ category, ~ metric, ~ lnrow, ~ lncol,
-  "scalability", "1k features", "1k cells", 3, 3,
-  "scalability", "1k features", "10k cells", 4, 3,
-  "scalability", "1k features", "100k cells", 5, 3,
-  "scalability", "1k cells", "1k features", 3, 3,
-  "scalability", "1k cells", "10k features", 3, 4,
-  "scalability", "1k cells", "100k features", 3, 5
-)
-
-scaling_process <-
-  scaling_results$models %>%
-  select(method_id, model_time) %>%
-  rowwise() %>%
-  do({
-    df <- .
-    exp <- scaling_exp
-    exp$method_id <- df$method_id
-    exp$logtime <- predict(df$model_time, exp)[,1]
-    exp
-  }) %>%
-  ungroup() %>%
-  mutate(
-    scaletime = (logtime - log10(10)) / (log10(3600 * 24 * 7) - log10(10)),
-    score = 1 - ifelse(scaletime > 1, 1, ifelse(scaletime < 0, 0, scaletime)),
-    time = 10^logtime,
-    timestr = case_when(
-      time < 1 ~ "<1s",
-      time < 60 ~ paste0(floor(time), "s"),
-      time < 3600 ~ paste0(floor(time / 60), "m"),
-      time < 3600 * 24 ~ paste0(floor(time / 3600), "h"),
-      time < 3600 * 24 * 7 ~ paste0(floor(time / 3600 / 24), "d"),
-      TRUE ~ ">7d"
-    )
-  )
-
-scaling_agg <- scaling_process %>%
-  group_by(method_id) %>%
-  summarise(
-    score = mean(score)
-  )
-
-scaling_results <- bind_rows(
-  scaling_process %>% transmute(method_id, experiment, category, metric, value = score, label = timestr),
-  scaling_agg %>% transmute(method_id, experiment = "scalability", category = "overall", metric = "overall", value = score)
-)
-
-
-
-rm(scaling_process, scaling_agg)
-
+scaling_results <- read_rds(result_file("scaling_results.rds", experiment_id = "05-scaling"))
 
 #####################################################
 #             READ BENCHMARKING RESULTS             #
