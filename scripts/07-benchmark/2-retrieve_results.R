@@ -48,10 +48,10 @@ write_rds(lst(trajtypes, metrics, datasets_info, methods_info), result_file("ben
 #########################################
 ############### JOIN DATA ###############
 #########################################
+execution_output$stdout <- headtail(execution_output$stdout, 50)
 
 raw_data <-
   execution_output %>%
-  select(-stdout, -stderr, -error_message) %>%
   left_join(methods_info %>% select(method_id, method_name), by = "method_id") %>%
   left_join(datasets_info %>% select(dataset_id, dataset_trajectory_type, dataset_source), by = "dataset_id") %>%
   left_join(crossing %>% select(dataset_id, method_id, prior_id, repeat_ix, param_id, time_lpred, mem_lpred, time_pred, mem_pred), by = c("dataset_id", "method_id", "prior_id", "repeat_ix", "param_id")) %>%
