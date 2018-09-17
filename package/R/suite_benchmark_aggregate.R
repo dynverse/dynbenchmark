@@ -61,7 +61,7 @@ benchmark_aggregate <- function(
 
   # check normalise parameter
   if (is.character(norm_fun)) {
-    norm_fun <- .benchmark_aggregate_normalisation[[match.arg(norm_fun)]]
+    norm_fun <- .benchmark_aggregate_normalisation[[match.arg(norm_fun, choices = names(.benchmark_aggregate_normalisation))]]
   }
 
   if (!identical(norm_fun, "none")) {
@@ -73,7 +73,7 @@ benchmark_aggregate <- function(
       xnazero <- ifelse(is.na(x), 0, x)
 
       if (length(xnazero) == 1 || all(xnazero == 0)) {
-        lst(ret = x)
+        x
       } else {
         norm_fun(xnona, xnazero)
       }
