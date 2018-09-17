@@ -1,4 +1,4 @@
-#' Retrieve the results from method testing
+#' Retrieve and process the results
 
 library(dynbenchmark)
 library(tidyverse)
@@ -34,21 +34,6 @@ g <- output %>%
 g
 
 ggsave(result_file("method_status.svg"), g, width = 16, height = 16)
-
-#' @examples
-#' output %>% filter(method_id == "topslam") %>% pull(stdout) %>% first() %>% cat
-#' output %>% filter(method_id == "stemnet") %>% pull(stdout) %>% first() %>% cat
-#'
-#' output %>% filter(method_id == "pcreode", grepl("fibro", dataset_id)) %>% pull(stdout) %>% first() %>% cat
-#'
-#' output %>% filter(method_id == "projected_dpt", grepl("schl", dataset_id)) %>% pull(stderr) %>% first() %>% cat
-#'
-#' output %>% filter(method_id == "scuba", method_status == "method_error") %>% pull(stdout) %>% cat
-#'
-#' output %>% filter(str_detect(error_message, "no item called .*")) %>% pull(method_id) %>% unique()
-#'
-#' output %>% filter(method_id == "urd", method_status == "method_error") %>% select(method_id, dataset_id, stdout, stderr, error_message) %>% pull(stdout)
-
 
 write_rds(output, result_file("output.rds"), compress = "xz")
 

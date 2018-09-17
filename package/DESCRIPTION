@@ -35,6 +35,7 @@ Imports:
   mlrMBO,
   ParamHelpers (>= 1.11),
   parallelMap,
+  pbapply,
   purrr,
   readr,
   reshape2,
@@ -78,6 +79,7 @@ Collate:
     'data.R'
     'datasets_preprocessing.R'
     'google_scholar.R'
+    'headtail.R'
     'load_dyneval_model.R'
     'metrics.R'
     'nacor.R'

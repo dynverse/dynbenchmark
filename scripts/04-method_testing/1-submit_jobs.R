@@ -1,4 +1,4 @@
-#' Start the method testing on the cluster
+#' Submit jobs for method testing
 
 library(dynbenchmark)
 library(tidyverse)
@@ -69,6 +69,7 @@ if (!file.exists(derived_file("design.rds"))) {
 ###################################################
 design <- read_rds(derived_file("design.rds"))
 
+# # try first with one method:
 # design$crossing <- design$crossing %>% filter(method_id == "angle")
 
 benchmark_submit(
