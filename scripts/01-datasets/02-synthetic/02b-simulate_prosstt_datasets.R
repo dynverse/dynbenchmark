@@ -1,4 +1,4 @@
-#' [PROSSTT](https://github.com/soedinglab/prosstt), simulations of tree topologies using random walks
+#' [PROSSTT](https://github.com/soedinglab/prosstt), expression is sampled from a linear model which depends on pseudotime
 
 library(tidyverse)
 library(dynbenchmark)
