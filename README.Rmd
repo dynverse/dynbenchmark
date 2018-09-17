@@ -81,4 +81,4 @@ Explanation coming soon. Feel free to make an issue or send us an e-mail if you 
 
 ## Guidelines
 
-Based on the results of the benchmark, we provide context-dependent user guidelines. If you want to run methods based on these guidelines, see the [dynorepository](https://github.com/dynverse/dyno). For the guidelines itself, see the [dynguidelines ](https://github.com/dynverse/dynguidelines).
+Based on the results of the benchmark, we provide context-dependent user guidelines, [available as a shiny app]https://github.com/dynverse/dynguidelines). This app is integrated within the a whole pipeline [dyno repository](https://github.com/dynverse/dyno), which also includes the wrappers used in the benchmarking and other packages for visualising and interpreting the results.
