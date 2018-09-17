@@ -4,4 +4,14 @@ output: dynbenchmark::github_markdown_nested
 
 # Markdown tester
 
-$\textrm{Hi} = lolcat$
+$\textrm{One} = Two$
+
+```{r}
+dynbenchmark::add_table(
+  tibble::tibble(Three = "Four"),
+  "table",
+  "Five"
+)
+```
+
+See `r dynbenchmark::ref("table", "table")` for Six
