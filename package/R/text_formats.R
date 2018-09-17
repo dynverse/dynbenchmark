@@ -96,6 +96,7 @@ pdf_manuscript <- function(
 
   # add changes formatter
   format$pre_processor <- append_pre_processor(format, apply_pre_processor(process_changes))
+  format$pre_processor <- append_pre_processor(format, apply_pre_processor(process_header_newline))
 
   format
 }
