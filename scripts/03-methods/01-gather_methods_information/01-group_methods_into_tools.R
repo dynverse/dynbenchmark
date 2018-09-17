@@ -17,7 +17,10 @@ sheet <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE")
 methods <- dynmethods::methods
 
 # tool_id is default the method_id
-methods$tool_id <- ifelse(is.na(methods$implementation_id), methods$id, methods$implementation_id)
+methods$tool_id <- case_when(
+  is.na(methods$implementation_id) ~ gsub("projected_", "", methods$id),
+  TRUE ~ methods$implementation_id
+)
 
 # add detects_... columns for trajectory types
 trajectory_type_ids <- trajectory_types$id
