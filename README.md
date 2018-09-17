@@ -13,10 +13,10 @@ This repo contains the scripts to reproduce the manuscript
 > A comparison of single-cell trajectory inference methods: towards more
 > accurate and robust tools  
 > <strong> Wouter Saelens\* </strong>
-> <a href='https://orcid.org/0000-0002-7114-6248'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/orcid_logo.svg' height='16'></a>
+> <a href='https://orcid.org/0000-0002-7114-6248'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/orcid_logo.svg?sanitize=true' height='16'></a>
 > <a href='https://github.com/zouter'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>,
 > <strong> Robrecht Cannoodt\* </strong>
-> <a href='https://orcid.org/0000-0003-3641-729X'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/orcid_logo.svg' height='16'></a>
+> <a href='https://orcid.org/0000-0003-3641-729X'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/orcid_logo.svg?sanitize=true' height='16'></a>
 > <a href='https://github.com/rcannood'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>,
 > Helena Todorov
 > <a href='https://github.com/Helena-todd'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>,
@@ -85,4 +85,4 @@ includes the wrappers used in the benchmarking and other packages for
 visualising and interpreting the
 results.
 
-![dynguidelines](https://github.com/dynverse/dynguidelines/raw/master/man/figures/demo.gif)
+[![dynguidelines](https://github.com/dynverse/dynguidelines/raw/master/man/figures/demo.gif)](https://github.com/dynverse/dynguidelines)
