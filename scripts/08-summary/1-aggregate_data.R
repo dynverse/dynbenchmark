@@ -19,9 +19,9 @@ method_info <-
   filter(!method_id %in% c("error", "identity", "random", "shuffle"))
 
 
-
-
-# read QC results
+#####################################################
+#                  READ QC RESULTS                  #
+#####################################################
 tool_qc_scores <- read_rds(result_file("tool_qc_scores.rds", experiment_id = "03-methods"))
 tool_qc_scores <- read_rds(result_file("tool_qc_scores.rds", experiment_id = "03-methods"))
 tool_qc_category_scores <- read_rds(result_file("tool_qc_category_scores.rds", experiment_id = "03-methods"))
@@ -59,9 +59,9 @@ qc_results <-
 rm(tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores, method_qc_overall_scores, method_qc_category_scores, method_qc_application_scores)
 
 
-
-
-# read scaling results
+#####################################################
+#                READ SCALING RESULTS               #
+#####################################################
 scaling_results <- read_rds(result_file("scaling.rds", experiment_id = "05-scaling"))
 
 # scaling_exp <- tribble(
@@ -122,35 +122,13 @@ scaling_results <- bind_rows(
 )
 
 
-# scaling_process <-
-#   scaling_results$models %>%
-#   select(-method_name, -model_time, -model_mem) %>%
-#   gather(metric, value, -method_id) %>%
-#   mutate(
-#     experiment = "scalability",
-#     category = case_when(metric == "pct_errored" ~ "errors", grepl("time", metric) ~ "time", grepl("mem", metric) ~ "memory")
-#   ) %>%
-#   group_by(category, metric) %>%
-#   mutate(value = percent_rank(-value)) %>%
-#   ungroup()
-#
-# scaling_results <- scaling_process %>% {
-#   df <- .
-#   bind_rows(
-#     df,
-#     df %>%
-#       filter(metric %in% c("time_lpred", "mem_lpred")) %>%
-#       group_by(method_id, experiment) %>%
-#       summarise(value = dyneval::calculate_geometric_mean(value)) %>%
-#       ungroup() %>%
-#       mutate(category = "overall", metric = "overall")
-#   )
-# }
 
 rm(scaling_process, scaling_agg)
 
 
-# read benchmarking results
+#####################################################
+#             READ BENCHMARKING RESULTS             #
+#####################################################
 benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", experiment_id = "07-benchmark"))
 benchmark_results_normalised <- read_rds(result_file("benchmark_results_normalised.rds", experiment_id = "07-benchmark"))
 
@@ -192,8 +170,9 @@ rm(data_aggs, bench_overall, bench_trajtypes, bench_sources)
 
 
 
-
-# combine different experiments
+#####################################################
+#                  COMBINE RESULTS                  #
+#####################################################
 results <-
   bind_rows(qc_results, benchmark_results, scaling_results)
 
@@ -230,8 +209,9 @@ rm(qc_results, benchmark_results, scaling_results)
 
 
 
-
-## CALCULATE FINAL RANKING
+#####################################################
+#              DETERMINE FINAL RANKING              #
+#####################################################
 metric_weights <-
   tribble(
     ~experiment, ~category, ~metric, ~weight,
@@ -256,6 +236,8 @@ metric_info <- metric_info %>% add_row(experiment = "summary", metric = "overall
 
 
 
-# write output
+#####################################################
+#                    WRITE OUTPUT                   #
+#####################################################
 write_rds(lst(method_info, results, metric_info), result_file("results.rds"), compress = "xz")
 
