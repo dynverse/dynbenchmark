@@ -44,7 +44,7 @@ equal_identity <- lst(
   name = "Same score on identity",
   description = "The score should be approximately the same when comparing the trajectory to itself",
   observation = "Metrics which contain some stochasticity (random forest based metrics in particular), usually do not conform to this rule, even though their scores are still consistently high.",
-  conforms_if = "1 \\leqslant \\mathit{score} \\leqslant 0.99",
+  conforms_if = "0.99 \\leqslant \\mathit{score} \\leqslant 1",
   crossing = crossing(
     dataset_id = dataset_design %>% filter(topology_id %in% names(topologies), num_cells > 50) %>% pull(dataset_id),
     method_id = "identity"
