@@ -6,6 +6,11 @@ experiment("08-summary")
 
 list2env(read_rds(result_file("results.rds")), environment())
 
+# define method groups
+method_info <- method_info %>%
+  mutate(method_grouping = ifelse(method_source == "tool", method_most_complex_trajectory_type, method_source))
+
+method_groups <- c(dynwrap::trajectory_types$id, c("adaptation", "offtheshelf", "control"))
 
 # determine palettes
 sc_col_fun <- function(palette) {
@@ -31,7 +36,8 @@ data <-
     results %>%
       filter(experiment != "scalability" | category == "overall") %>%
       group_by(experiment, metric, category) %>%
-      mutate(value = value / max(value)) %>%
+      # mutate(value = value / max(value)) %>%
+      mutate(value = dynutils::scale_minmax(value)) %>%
       ungroup() %>%
       group_by(experiment) %>%
       mutate(colour = scale_viridis_funs[[exp_palettes[[experiment[[1]]]]]](value)) %>%
@@ -47,12 +53,11 @@ data <-
       transmute(
         method_id,
         name = method_name,
-        control_label = ifelse(method_type != "control", "", "Control"),
+        control_label = ifelse(method_source == "tool", "", method_source),
         priors = method_info$method_priors_required %>% str_replace_all("[^,]+", "*") %>% str_replace_all(",", ""),
         topology_inference = ifelse(method_topology_inference == "parameter", "param", method_topology_inference),
         wrapper_type = wrapper_type_map[method_wrapper_type],
-        most_complex = method_most_complex_trajectory_type,
-        method_grouping
+        most_complex = method_most_complex_trajectory_type
       ) %>%
       gather(metric, label, -method_id) %>%
       mutate(
@@ -65,17 +70,16 @@ pie_colours <-
   error_reasons %>% select(metric = name, colour)
 
 
-
 # GENERATE METHOD POSITIONS
 row_height <- 1
 row_spacing <- .1
 group_spacing <- .5
 
 method_pos <-
-  results %>%
+  data %>%
   filter(experiment == "summary", metric == "overall") %>%
   left_join(method_info, by = "method_id")  %>%
-  transmute(method_id, group = factor(method_grouping, levels = c(rev(trajectory_types$id), "control")), ranking_score = value) %>%
+  transmute(method_id, group = factor(method_grouping, levels = method_groups), ranking_score = value) %>%
   arrange(group, desc(ranking_score)) %>%
   group_by(group) %>%
   mutate(group_i = row_number()) %>%
