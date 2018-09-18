@@ -6,9 +6,9 @@
 \usage{
 
   pdf_manuscript(bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/references.bib"),
+  "manuscript/assets/references.bib"),
   csl = paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/nature-biotechnology.csl"), ...)
+  "manuscript/assets/nature-biotechnology.csl"), ...)
 }
 \arguments{
 \item{bibliography}{Bibliography location}
