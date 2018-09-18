@@ -12,7 +12,8 @@ benchmark_fetch_results(TRUE)
 
 # bind results in one data frame (without models)
 execution_output <- benchmark_bind_results(load_models = FALSE) %>%
-  filter(!method_id %in% c("identity", "shuffle", "error", "projected_gng"))
+  filter(!method_id %in% c("identity", "shuffle", "error")) %>%
+  mutate(method_id = ifelse(method_id == "projected_gng", "gng", method_id))
 
 # df <- execution_output %>% filter(edge_flip < 0) %>% select(method_id, dataset_id, param_id, prior_id, repeat_ix)
 # model <- load_dyneval_model(method_id = "celltrails/default", df = df, experiment_id = "07-benchmark")
@@ -36,7 +37,7 @@ trajtypes <-
   mutate(id = factor(id, levels = id))
 
 
-metrics <- read_rds(result_file("metrics.rds"))
+list2env(read_rds(result_file("params.rds")), environment())
 
 # save data
 write_rds(lst(trajtypes, metrics, datasets_info, methods_info), result_file("benchmark_results_input.rds"), compress = "xz")
@@ -113,6 +114,40 @@ out <- benchmark_aggregate(
   dataset_source_weights = dataset_source_weights
 )
 
-write_rds(out, result_file("benchmark_results_normalised.rds"), compress = "xz")
 
+#####################################################
+############### CALCULATE VARIABILITY ###############
+#####################################################
+
+worst_var <- var(c(rep(0, floor(num_repeats / 2)), rep(1, ceiling(num_repeats / 2))))
+
+norm_var <- function(x) {
+  maxx <- max(x)
+
+  if (maxx == 0) return(1)
+
+  worst_var_this <- worst_var * maxx ^ 2
+
+  (worst_var_this - var(x) ) / worst_var_this
+}
+
+met2 <- c(metrics, "overall")
+
+out$data_var <-
+  out$data %>%
+  select(method_id, method_name, dataset_id, param_id, !!met2) %>%
+  group_by(method_id, method_name, dataset_id, param_id) %>%
+  summarise_if(is.numeric, norm_var) %>%
+  ungroup() %>%
+  group_by(method_id, method_name, param_id) %>%
+  summarise_if(is.numeric, mean) %>%
+  ungroup() %>%
+  gather(metric, value, !!met2) %>%
+  mutate(metric = paste0("var_", metric))
+
+#####################################################
+############### SAVE DATA ###############
+#####################################################
+
+write_rds(out, result_file("benchmark_results_normalised.rds"), compress = "xz")
 
