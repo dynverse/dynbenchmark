@@ -4,6 +4,8 @@ library(tidyverse)
 library(dynbenchmark)
 library(qsub)
 
+experiment("01-datasets/02-synthetic")
+
 # generate design of models, platforms and (randomised) splatter parameters
 design <- crossing(
   topology_model = c("linear", "bifurcating", "multifurcating", "binary_tree", "tree"),
@@ -21,6 +23,7 @@ design <- crossing(
     seed = sample(1:100000, n())
   ) %>%
   select(-platform_ix)
+write_rds(design, result_file("design_prosstt.rds"))
 
 # simulate datasets
 qsub_config <- override_qsub_config(memory = "10G", max_wall_time = "24:00:00", num_cores = 1, name = "prosstt", wait = F, execute_before = "module load python/x86_64/3.6.5", stop_on_error = FALSE)

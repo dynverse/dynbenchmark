@@ -107,13 +107,16 @@ save_dataset <- function(dataset, id = NULL, lazy_load = TRUE) {
 }
 
 #' @rdname load_dataset
+#' @param prefix The prefix, eg. real or synthetic
 #' @export
-list_datasets <- function() {
+list_datasets <- function(prefix = "") {
   ids <- list.files(
     derived_file("", experiment_id = "01-datasets"),
     "dataset\\.rds",
     recursive = TRUE
-  ) %>% dirname()
+  ) %>%
+    dirname() %>%
+    str_subset(paste0("^", prefix))
 
   tibble(
     id = ids,

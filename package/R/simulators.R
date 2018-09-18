@@ -32,6 +32,8 @@ simulate_splatter <- function(
   seed = NULL,
   use_cache = TRUE
 ) {
+  simulation_design <- as.list(environment())
+
   requireNamespace("splatter")
 
   if (missing(dataset_id)) stop("dataset_id is required")
@@ -70,7 +72,7 @@ simulate_splatter <- function(
         group.prob = milestone_network$length/sum(milestone_network$length),
         path.from = path.from,
         path.length = ceiling(milestone_network$length*n_steps_per_length),
-        path.nonlinearProb = path.nonlinearProb,
+        path.nonlinsimulation_designearProb = path.nonlinearProb,
         path.sigmaFac = path.sigmaFac,
         path.skew = path.skew
       )
@@ -120,7 +122,7 @@ simulate_splatter <- function(
     list(
       simulator = "splatter",
       simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "splatter", "dynnormaliser", "dynbenchmark"))
-    )
+    ) %>% c(simulation_design)
 
   # save dataset
   save_dataset(dataset, dataset_id)
@@ -147,6 +149,8 @@ simulate_prosstt <- function(
   beta = exp(rnorm(1, log(1), log(1.5))) + 1,
   seed = NULL
 ) {
+  simulation_design <- as.list(environment())
+
   if (missing(dataset_id)) stop("dataset_id is required")
 
   # pip3 install git+https://github.com/soedinglab/prosstt
@@ -278,7 +282,7 @@ simulate_prosstt <- function(
     list(
       simulator = "prosstt",
       simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "prosstt", "splatter", "dynbenchmark", "dynnormaliser"))
-    )
+    ) %>% c(simulation_design)
 
   # save dataset
   save_dataset(dataset, dataset_id)
@@ -303,6 +307,8 @@ simulate_dyntoy <- function(
   dropout_probability_factor = runif(1, 10, 200),
   seed = NULL
 ) {
+  simulation_design <- as.list(environment())
+
   if (missing(dataset_id)) stop("dataset_id is required")
 
   if (!is.null(seed)) set.seed(seed)
@@ -332,7 +338,7 @@ simulate_dyntoy <- function(
   dataset$simulation_design <- list(
     simulator = "dyntoy",
     simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyntoy", "splatter", "dynbenchmark", "dynnormaliser"))
-  )
+  ) %>% c(simulation_design)
 
   # add cell waypoints
   dataset <- dataset %>% dynwrap::add_cell_waypoints()
@@ -356,6 +362,8 @@ simulate_dyngen <- function(
   use_cache = TRUE,
   seed = NULL
 ) {
+  simulation_design <- as.list(environment())
+
   if (missing(dataset_id)) stop("dataset_id is required")
   dataset_preprocessing(dataset_id)
 
@@ -411,7 +419,7 @@ simulate_dyngen <- function(
   dataset$simulation_design <- list(
     simulator = "dyngen",
     simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyngen","splatter", "dynbenchmark"))
-  )
+  ) %>% c(simulation_design)
 
   # add cell waypoints
   dataset <- dataset %>% dynwrap::add_cell_waypoints()
