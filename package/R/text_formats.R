@@ -5,8 +5,8 @@
 #'
 #' @export
 github_markdown_nested <- function(
-  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/nature-biotechnology.csl"),
+  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
+  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
   ...
 ) {
   format <- rmarkdown::github_document(...)
@@ -39,8 +39,8 @@ github_markdown_nested <- function(
 #'
 #' @export
 pdf_supplementary_note <- function(
-  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/nature-biotechnology.csl"),
+  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
+  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
   ...
 ) {
   # setup the pdf format
@@ -70,8 +70,8 @@ pdf_supplementary_note <- function(
 #'
 #' @export
 pdf_manuscript <- function(
-  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/nature-biotechnology.csl"),
+  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
+  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
   ...
 ) {
   # setup the pdf format
