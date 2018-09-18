@@ -6,14 +6,17 @@
 \usage{
 
   pdf_manuscript(bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/references.bib"),
+  "manuscript/assets/references.bib"),
   csl = paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/nature-biotechnology.csl"), ...)
+  "manuscript/assets/nature-biotechnology.csl"), render_changes = TRUE,
+  ...)
 }
 \arguments{
 \item{bibliography}{Bibliography location}
 
 \item{csl}{Csl file location}
+
+\item{render_changes}{Whether to export a *_changes.pdf as well}
 
 \item{...}{Parameters for rmarkdown::pdf_document}
 }

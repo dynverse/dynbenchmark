@@ -112,7 +112,7 @@ pies <- cowplot::plot_grid(
   plotlist = map(
     c("technology", "trajectory_type"),
     function(what) {
-      datasets <- datasets_real
+      datasets <- datasets_real_metadata
       datasets$variable_of_interest <- datasets[[what]]
 
       # first extract the variable

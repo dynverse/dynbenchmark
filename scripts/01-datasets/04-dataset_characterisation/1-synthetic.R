@@ -95,7 +95,7 @@ ggsave(result_file("modulenets.svg"), ggrid, width = 12, height = 35)
 
 #   ____________________________________________________________________________
 #   Samplers table                                                          ####
-samplers <- read_tsv(data_file("samplers"))
+samplers <- read_tsv(raw_file("samplers"))
 notes <- c("$y_{max} = r/d * p/q$")
 
 table <- map(c("latex", "html"), function(format) {

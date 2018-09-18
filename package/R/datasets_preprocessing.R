@@ -70,7 +70,7 @@ process_raw_dataset <- function(
   if (is.null(root_milestone_id)) {
     root_milestone_id <- milestone_network$from[[1]]
   }
-  dataset <- dynwrap::add_root(dataset, root_milestone_id = root_milestone_id)
+  dataset <- dynwrap::add_root(dataset, root_milestone_id = root_milestone_id, flip_edges = FALSE)
 
   # save the dataset
   save_dataset(dataset, id = id)

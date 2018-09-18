@@ -6,13 +6,15 @@
 \alias{load_datasets}
 \title{Load datasets}
 \usage{
-list_datasets()
+list_datasets(prefix = "")
 
 load_dataset(id, as_tibble = FALSE)
 
 load_datasets(ids = list_datasets()$id, as_tibble = TRUE)
 }
 \arguments{
+\item{prefix}{The prefix, eg. real or synthetic}
+
 \item{id}{The ID of the dataset to be used}
 
 \item{as_tibble}{Return the datasets as a tibble or as a list of datasets?}

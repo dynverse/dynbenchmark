@@ -3,8 +3,8 @@
 from=$1
 to=$2
 
-if [ -d data/$from ]; then 
-	mv data/$from data/$to
+if [ -d raw/$from ]; then
+	mv raw/$from raw/$to
 fi
 
 if [ -d figures/$from ]; then

@@ -99,14 +99,19 @@ bench_sources <-
   select(method_id, metric = dataset_source, value, experiment) %>%
   mutate(category = "sources")
 
+bench_vars <-
+  benchmark_results_normalised$data_var %>%
+  transmute(method_id, metric, value, experiment = "benchmark", category = "stability")
+
 benchmark_results <-
   bind_rows(
     bench_overall,
     bench_trajtypes,
-    bench_sources
+    bench_sources,
+    bench_vars
   )
 
-rm(data_aggs, bench_overall, bench_trajtypes, bench_sources)
+rm(data_aggs, bench_overall, bench_trajtypes, bench_sources, bench_vars)
 
 
 
@@ -114,7 +119,8 @@ rm(data_aggs, bench_overall, bench_trajtypes, bench_sources)
 #                  COMBINE RESULTS                  #
 #####################################################
 results <-
-  bind_rows(qc_results, benchmark_results, scaling_results)
+  bind_rows(qc_results, benchmark_results, scaling_results) %>%
+  mutate(method_id = ifelse(method_id == "projected_gng", "gng", method_id))
 
 not_available_methods <- setdiff(unique(results$method_id), method_info$method_id)
 warning("THESE METHODS DO NOT HAVE BENCHMARKING RESULTS: ", paste0(not_available_methods, collapse = ", "))

@@ -6,8 +6,17 @@
 #'
 #' @export
 print_url <- function(url, text = url, format = get_default_format()) {
+  # cut off www and http
+  if (text == url) {
+    text <- text %>%
+      gsub("https:\\/\\/", "", .) %>%
+      gsub("http:\\/\\/", "", .) %>%
+      gsub("www\\.", "", .) %>%
+      gsub("\\/$", "", .)
+  }
+
   if(format == "latex") {
-    paste0("\\href{", url, "}{\\textcolor{cyan}{", text, "}}")
+    paste0("\\textcolor{cyan}{\\href{", url, "}{", text, "}}")
   } else {
     pritt("[{text}]({url})")
   }

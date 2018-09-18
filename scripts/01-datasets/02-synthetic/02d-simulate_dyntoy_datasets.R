@@ -5,8 +5,10 @@ library(dyntoy)
 library(tidyverse)
 library(qsub)
 
+experiment("01-datasets/02-synthetic")
+
 # remove all datasets
-rm_remote(dataset_file(id = "synthetic/dyntoy", remote = TRUE), remote = TRUE, recursive = TRUE)
+# rm_remote(dataset_file(id = "synthetic/dyntoy", remote = TRUE), remote = TRUE, recursive = TRUE)
 
 # generate design
 set.seed(1)
@@ -19,6 +21,7 @@ design <- crossing(
     seed = sample(1:100000, n())
   ) %>%
   select(-platform_ix)
+write_rds(design, result_file("design_dyntoy.rds"))
 
 # simulate datasets
 qsub_config <- override_qsub_config(memory = "10G", max_wall_time = "24:00:00", num_cores = 1, name = "dyntoy", wait = F, stop_on_error = FALSE)

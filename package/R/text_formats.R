@@ -5,8 +5,8 @@
 #'
 #' @export
 github_markdown_nested <- function(
-  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/nature-biotechnology.csl"),
+  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
+  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
   ...
 ) {
   format <- rmarkdown::github_document(...)
@@ -39,8 +39,8 @@ github_markdown_nested <- function(
 #'
 #' @export
 pdf_supplementary_note <- function(
-  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/nature-biotechnology.csl"),
+  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
+  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
   ...
 ) {
   # setup the pdf format
@@ -66,12 +66,14 @@ pdf_supplementary_note <- function(
 #' The manuscript pdf document
 #'
 #' @inheritParams common_dynbenchmark_format
+#' @param render_changes Whether to export a *_changes.pdf as well
 #' @param ... Parameters for rmarkdown::pdf_document
 #'
 #' @export
 pdf_manuscript <- function(
-  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/nature-biotechnology.csl"),
+  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
+  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
+  render_changes = TRUE,
   ...
 ) {
   # setup the pdf format
@@ -99,8 +101,15 @@ pdf_manuscript <- function(
   format$pre_processor <- append_pre_processor(format, apply_pre_processor(process_header_newline))
 
   format$post_processor <- function(metadata, input_file, output_file, clean, verbose) {
-    read_lines(output_file) %>% process_changes() %>% write_lines(output_file)
+    # render with changes
+    if (render_changes) {
+      output_file_changes <- paste0(fs::path_ext_remove(output_file), "_changes.tex")
+      read_lines(output_file) %>% process_changes(render_changes = TRUE) %>% write_lines(output_file_changes)
+      system(glue::glue("xelatex -interaction=nonstopmode {output_file_changes}"))
+    }
 
+    # render without changes
+    read_lines(output_file) %>% process_changes(render_changes = FALSE) %>% write_lines(output_file)
     system(glue::glue("xelatex -interaction=nonstopmode {output_file}"))
 
     fs::path_ext_set(output_file, "pdf")
@@ -115,8 +124,8 @@ pdf_manuscript <- function(
 #' @param csl Csl file location
 common_dynbenchmark_format <- function(
   format,
-  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/nature-biotechnology.csl")
+  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
+  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl")
 ) {
   # allow duplicate labels, needed for nested documents to work
   options(knitr.duplicate.label = 'allow')
