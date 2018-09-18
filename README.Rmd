@@ -22,12 +22,23 @@ library(dynbenchmark)
 
 This repo contains the scripts to reproduce the manuscript
 
+```{r}
+get_altmetric_badge <- function() {
+  curl::curl_fetch_memory("https://api.altmetric.com/v1/doi/10.1101/276907")$content %>%
+    rawToChar() %>% 
+    jsonlite::fromJSON() %>% 
+    purrr::pluck("images") %>%
+    purrr::pluck("medium") %>% 
+    paste0("&style=bar")
+}
+```
+
 > A comparison of single-cell trajectory inference methods: towards more accurate and robust tools  
 <strong> Wouter Saelens\* </strong> <a href='https://orcid.org/0000-0002-7114-6248'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/orcid_logo.svg?sanitize=true' height='16'></a> <a href='https://github.com/zouter'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>,
 <strong> Robrecht Cannoodt\* </strong> <a href='https://orcid.org/0000-0003-3641-729X'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/orcid_logo.svg?sanitize=true' height='16'></a> <a href='https://github.com/rcannood'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>,
 Helena Todorov <a href='https://github.com/Helena-todd'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>,
 <em> Yvan Saeys </em> <a href='https://github.com/saeyslab'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>  
-[bioRxiv:276907](https://www.biorxiv.org/content/early/2018/03/05/276907) [doi:10.1101/276907](https://doi.org/10.1101/276907)
+[bioRxiv:276907](https://www.biorxiv.org/content/early/2018/03/05/276907) [doi:10.1101/276907](https://doi.org/10.1101/276907) [![altmetric](`r get_altmetric_badge()`)](https://altmetric.com/details/33972849)
 
 ## Experiments
 
