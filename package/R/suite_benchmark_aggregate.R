@@ -40,23 +40,13 @@ benchmark_aggregate <- function(
 
   # add a few columns
   data <- data %>% mutate(
-    time = ifelse(error_status != "no_error", 6 * 3600, time_method),
-    mem = ifelse(error_status != "no_error", 32 * 10e9, max_mem),
-    ltime = log10(time),
-    lmem = log10(mem),
     pct_errored = (error_status != "no_error") + 0,
     pct_time_limit = (error_status == "time_limit") + 0,
     pct_memory_limit = (error_status == "memory_limit") + 0,
     pct_execution_error = (error_status == "execution_error") + 0,
     pct_method_error = (error_status == "method_error") + 0
   ) %>%
-    mutate_at(metrics, function(x) ifelse(is.na(x), 0, x) %>% pmax(0) %>% pmin(1)) %>%
-    group_by(dataset_id) %>%
-    mutate(
-      rank_time = percent_rank(-ltime),
-      rank_mem = percent_rank(-lmem)
-    ) %>%
-    ungroup()
+    mutate_at(metrics, function(x) ifelse(is.na(x), 0, x) %>% pmax(0) %>% pmin(1))
 
 
   # check normalise parameter
