@@ -1,6 +1,7 @@
 #' Renders the manuscript
 
 # download from google docs
+httr::set_config(httr::config(http_version = 0)) # avoid http2 framing layer bug
 drive <- googledrive::drive_download(googledrive::as_id("1je6AaelApu2xcSNbYlvcuTzUeUJBOpTUPHz0L9Houfw"), type="text/plain", overwrite=TRUE, path = tempfile())
 system(pritt("sed -i '1s/^.//' {drive$local_path}")) # remove first character, because this is some strange unicode character
 system(pritt("cat {drive$local_path} > manuscript/paper.Rmd"))
@@ -12,7 +13,8 @@ rmarkdown::render("manuscript/paper.Rmd", output_format = pdf_manuscript())
 system("/usr/bin/xdg-open manuscript/paper.pdf")
 
 # upload to google drive
-drive_update("dynverse/paper.pdf", "manuscript/paper.pdf")
+googledrive::drive_update("dynverse/paper.pdf", "manuscript/paper.pdf")
+googledrive::drive_update("dynverse/paper_changes.pdf", "manuscript/paper_changes.pdf")
 drive_update("dynverse/supplementary.pdf", "manuscript/supplementary.pdf")
 
 # prepare for submission
