@@ -13,4 +13,4 @@ experiment:
 | :- | :---------------------------------------------------------- | :--------------------------------------- |
 | 0  | [📄`pull_singularity_images.R`](0-pull_singularity_images.R) | Update singularity images on the cluster |
 | 1  | [📄`submit_jobs.R`](1-submit_jobs.R)                         | Submit jobs for method testing           |
-| 2  | [📄`retrieve_results.R`](2-retrieve_results.R)               | Retrieve and process the results         |
+| 2  | [📄`retrieve_results.R`](2-retrieve_results.R)               | Retrieve the results                     |

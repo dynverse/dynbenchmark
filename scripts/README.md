@@ -17,4 +17,5 @@ do:
 | 6  | [📁`optimise_parameters`](06-optimise_parameters) | Optimisation of method parameters on synthetic data   |
 | 7  | [📁`benchmark`](07-benchmark)                     | Benchmarking of TI methods on real and synthetic data |
 | 8  | [📁`summary`](08-summary)                         |                                                       |
+| 9  | [📁`guidelines`](09-guidelines)                   |                                                       |
 |    | [📁`varia`](varia)                                | Varia scripts                                         |
