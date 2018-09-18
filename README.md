@@ -5,6 +5,7 @@
 Status](https://api.travis-ci.org/dynverse/dynbenchmark.svg)](https://travis-ci.org/dynverse/dynbenchmark)
 ![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
 <a href = "package/man/figures/logo.svg"><img src="package/man/figures/logo.png" align="right" /></a>
+[![doi](https://zenodo.org/badge/doi/10.1101/276907.svg)](https://doi.org/10.1101/276907)
 
 # Benchmarking trajectory inference methods
 
