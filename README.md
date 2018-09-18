@@ -30,7 +30,7 @@ This repo contains the scripts to reproduce the manuscript
 
 From start to finish, the repository is divided into several
 experiments, each with their own scripts and results. These are
-accompanied by documentation using github READMEs and can be easily
+accompanied by documentation using github readmes and can thus be easily
 explored by going to the appropriate
 folders:
 
@@ -45,36 +45,16 @@ folders:
 | 7  | Benchmark           | [Benchmark scripts](scripts/07-benchmark)                     | [Benchmark results](https://github.com/dynverse/dynbenchmark_results/tree/master/07-benchmark)           |
 | 8  | Summary             | [Summary scripts](scripts/08-summary)                         | [Summary results](https://github.com/dynverse/dynbenchmark_results/tree/master/08-summary)               |
 | 9  | Guidelines          | [Guidelines scripts](scripts/09-guidelines)                   |                                                                                                          |
+| 10 | Topologies          | [Topologies scripts](scripts/10-topologies)                   |                                                                                                          |
 |    | Varia               | [Varia scripts](scripts/varia)                                |                                                                                                          |
 
 We also have several additional subfolders:
 
-  - manuscript: source files for producing the manuscript
-  - package: an R package with several helper functions
-  - data: raw data files required by the scripts
-  - derived: intermediate data files produced by the scripts
-
-## Datasets
-
-The benchmarking pipeline generates (and uses) the following datasets:
-
-  - **Gold standard single-cell datasets**, both real and synthetic,
-    used to evaluated the trajectory inference methods
-    [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1211533.svg)](https://doi.org/10.5281/zenodo.1211533)
-
-![datasets](package/man/figures/datasets.png)
-
-  - **The performance of methods** used in
-    [dynguidelines](https://www.github.com/dynverse/dynguidelines). *Not
-    yet available*
-
-  - **General information about trajectory inference methods**,
-    available as a data frame in `dynmethods::methods`
-
-## Benchmarking your own method
-
-Explanation coming soon. Feel free to make an issue or send us an e-mail
-if you want your method to be included.
+  - [Manuscript](manuscript): Source files for producing the manuscript.
+  - [Package](package): An R package with several helper functions.
+  - [Data](data): Raw data files required by the scripts.
+  - [Derived](derived): Intermediate data files produced by the scripts.
+    These files or not git committed.
 
 ## Guidelines
 
@@ -87,3 +67,27 @@ visualising and interpreting the
 results.
 
 [![dynguidelines](https://github.com/dynverse/dynguidelines/raw/master/man/figures/demo.gif)](https://github.com/dynverse/dynguidelines)
+
+## Datasets
+
+The benchmarking pipeline generates (and uses) the following datasets:
+
+  - **Gold standard single-cell datasets**, both real and synthetic,
+    used to evaluated the trajectory inference methods
+    [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1211533.svg)](https://doi.org/10.5281/zenodo.1211533)
+
+![datasets](package/man/figures/datasets.png)
+
+  - **The performance of methods** used for the [results overview
+    figure](https://github.com/dynverse/dynbenchmark_results/tree/master/08-summary/overview.pdf)
+    and the
+    [dynguidelines](https://www.github.com/dynverse/dynguidelines) app.
+    *Not yet available*, but can be accessed in the results folder.
+
+  - **General information about trajectory inference methods**,
+    available as a data frame in `dynmethods::methods`
+
+## Benchmarking your own method
+
+Explanation coming soon. Feel free to make an issue or send us an e-mail
+if you want your method to be included.
