@@ -3,12 +3,12 @@
 \docType{data}
 \name{method_status_colours}
 \alias{method_status_colours}
-\title{Metadata on method statuses}
+\title{Colours of method statuses}
 \format{An object of class \code{character} of length 7.}
 \usage{
 method_status_colours
 }
 \description{
-Metadata on method statuses
+Colours of method statuses
 }
 \keyword{datasets}

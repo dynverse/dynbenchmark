@@ -25,9 +25,11 @@ Imports:
   cluster,
   dplyr,
   emoa,
+  extrafont,
   fs,
   ggraph,
   ggplot2,
+  ggforce,
   glue,
   httr,
   knitr,
@@ -35,11 +37,13 @@ Imports:
   mlrMBO,
   ParamHelpers (>= 1.11),
   parallelMap,
+  pbapply,
   purrr,
   readr,
   reshape2,
   rmarkdown,
   rvest,
+  sigmoid,
   smoof,
   stats,
   stringr,
@@ -47,6 +51,7 @@ Imports:
   tidyverse,
   tibble,
   testthat,
+  utils,
   qsub,
   xml2
 Suggests:
@@ -77,15 +82,20 @@ Collate:
     'data.R'
     'datasets_preprocessing.R'
     'google_scholar.R'
+    'headtail.R'
+    'install_fontawesome.R'
     'load_dyneval_model.R'
     'metrics.R'
+    'nacor.R'
     'package.R'
     'perturbations.R'
     'plotting_labels.R'
     'plotting_priors_mini.R'
     'plotting_svg_replacement.R'
     'plotting_themes.R'
+    'plotting_trajectory_types.R'
     'qsub.R'
+    'scaling_utils.R'
     'setup_experiment.R'
     'setup_datasets.R'
     'setup_get_dynbenchmark_folder.R'
@@ -93,6 +103,7 @@ Collate:
     'setup_pipeline.R'
     'setup_platforms.R'
     'simulators.R'
+    'suite_benchmark_aggregate.R'
     'suite_benchmark_fetch_results.R'
     'suite_benchmark_generate_design.R'
     'suite_benchmark_submit.R'
@@ -100,4 +111,6 @@ Collate:
     'text_document_scripts.R'
     'text_equations.R'
     'text_formats.R'
+    'text_helpers.R'
+    'text_processors.R'
     'text_ref.R'

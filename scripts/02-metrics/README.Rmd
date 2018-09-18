@@ -7,9 +7,9 @@ output: dynbenchmark::github_markdown_nested
 Good metrics are crucial for an unbiased and comprehensive benchmarking. Here we test several possible metrics for comparing two trajectories.
 
 ```{r, results = "asis"}
-knit_nest("01-metric_characterisation")
+dynbenchmark::knit_nest("01-metric_characterisation")
 ```
 
 ```{r, results = "asis"}
-knit_nest("02-metric_conformity")
+dynbenchmark::knit_nest("02-metric_conformity")
 ```

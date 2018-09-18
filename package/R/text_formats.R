@@ -47,7 +47,7 @@ pdf_supplementary_note <- function(
   format <- rmarkdown::pdf_document(
     ...,
     toc = TRUE,
-    includes = rmarkdown::includes(system.file("supplementary_note.sty", package = "dynbenchmark")),
+    includes = rmarkdown::includes(system.file("common.sty", package = "dynbenchmark")),
     latex_engine = "xelatex",
     number_sections = FALSE
   )
@@ -57,6 +57,54 @@ pdf_supplementary_note <- function(
     bibliography = bibliography,
     csl = csl
   )
+
+  format
+}
+
+
+
+#' The manuscript pdf document
+#'
+#' @inheritParams common_dynbenchmark_format
+#' @param ... Parameters for rmarkdown::pdf_document
+#'
+#' @export
+pdf_manuscript <- function(
+  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/references.bib"),
+  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/nature-biotechnology.csl"),
+  ...
+) {
+  # setup the pdf format
+  format <- rmarkdown::latex_document(
+    ...,
+    toc = FALSE,
+    includes = rmarkdown::includes(
+      in_header = c(
+        system.file("common.sty", package = "dynbenchmark"),
+        system.file("manuscript.sty", package = "dynbenchmark")
+      )
+    ),
+    latex_engine = "xelatex",
+    number_sections = FALSE
+  )
+
+  format <- common_dynbenchmark_format(
+    format,
+    bibliography = bibliography,
+    csl = csl
+  )
+
+  # add changes formatter
+  # format$pre_processor <- append_pre_processor(format, apply_pre_processor(process_changes))
+  format$pre_processor <- append_pre_processor(format, apply_pre_processor(process_header_newline))
+
+  format$post_processor <- function(metadata, input_file, output_file, clean, verbose) {
+    read_lines(output_file) %>% process_changes() %>% write_lines(output_file)
+
+    system(glue::glue("xelatex -interaction=nonstopmode {output_file}"))
+
+    fs::path_ext_set(output_file, "pdf")
+  }
 
   format
 }
@@ -126,9 +174,7 @@ knit_nest <- function(file) {
       str_replace_all("^#", "##")
 
     # cat output
-    cat(knit %>% glue::glue_collapse("\n"))
-
-    invisible()
+    knit %>% glue::glue_collapse("\n") %>% knitr::asis_output()
   } else if (format == "latex") {
     # make sure duplicated labels are allowed
     options(knitr.duplicate.label = "allow")
@@ -137,56 +183,6 @@ knit_nest <- function(file) {
     knitr::knit_child(
       text = readr::read_lines(file) %>% stringr::str_replace_all("^#", "##"),
       quiet = TRUE
-    ) %>% cat()
-
-    invisible()
+    ) %>% knitr::asis_output()
   }
-}
-
-
-#' Process relative paths to links & figures
-#' First extract every link, determine whether it is a relative path and if yes, add folder to the front
-#'
-#' @param knit Character vector
-#' @param folder The relative folder
-#' @examples
-#' knit <- c(
-#' "hshlkjdsljkfdhg [i am a absolute path](/pompompom/dhkjhlkj/) kjfhlqkjsdhlkfjqsdf",
-#' "hshlkjdsljkfdhg [i am a relative path](pompompom/dhkjhlkj/) kjfhlqkjsdhlkfjqsdf",
-#' "<img src = \"heyho/heyho\">",
-#' "<img src = \"/heyho/heyho\">"
-#' )
-#' dynbenchmark:::fix_relative_paths(knit, "IT WORKED :)")
-fix_relative_paths <- function(knit, folder) {
-  patterns <- c(
-    "(\\[[^\\]]*\\]\\()([^\\)]*)(\\))",
-    "(src[ ]?=[ ]?[\"\'])([^\"\']*)([\"\'])"
-  )
-
-  for (pattern in patterns) {
-    knit <- knit %>%
-      str_replace_all(
-        pattern,
-        function(link) {
-          matches <- stringr::str_match(link, pattern)
-          prefix <- matches[2]
-          file <- matches[3] # contains the file
-          suffix <- matches[4]
-
-          # do not fix absolute paths, urls or anchors
-          if (fs::is_absolute_path(file) || startsWith(file, "http") || startsWith(file, "#")) {
-            link
-          } else {
-            glue::glue("{prefix}{folder}/{file}{suffix}")
-          }
-        }
-      )
-  }
-
-  knit
-}
-
-
-fix_references_header <- function(knit) {
-  knit %>% str_replace_all("^#*.*References.*", "#### References")
 }

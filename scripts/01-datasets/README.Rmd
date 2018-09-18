@@ -16,14 +16,14 @@ dynbenchmark::render_scripts_documentation()
 ```
 
 ```{r results = 'asis'}
-knit_nest("01-real")
+dynbenchmark::knit_nest("01-real")
 ```
 
 ```{r results = 'asis'}
-knit_nest("02-synthetic")
+dynbenchmark::knit_nest("02-synthetic")
 ```
 
 ```{r results = 'asis'}
-knit_nest("04-dataset_characterisation")
+dynbenchmark::knit_nest("04-dataset_characterisation")
 ```
 

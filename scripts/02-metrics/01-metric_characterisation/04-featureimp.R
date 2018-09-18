@@ -1,4 +1,4 @@
-#'  Characterisation of the `r label_metric("featureimp_cor")` and `r label_metric("featureimp_wcor")`
+#'  Characterisation of the `r dynbenchmark::label_metric("featureimp_cor")` and `r dynbenchmark::label_metric("featureimp_wcor")`
 
 library(dynbenchmark)
 library(tidyverse)

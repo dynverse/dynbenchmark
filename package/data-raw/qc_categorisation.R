@@ -1,5 +1,5 @@
 qc_applications <- tibble(
-  application = c("developer_friendly", "user_friendly", "good_science")
+  application = c("developer_friendly", "user_friendly", "future_proof")
 )
 
 qc_categories <- tibble(
@@ -8,4 +8,4 @@ qc_categories <- tibble(
   label = c("Availability", "Code quality", "Code assurance", "Documentation", "Behaviour", "Study design")
 )
 
-devtools::use_data(qc_applications, qc_categories, overwrite = TRUE)
+devtools::use_data(qc_applications, qc_categories, overwrite = TRUE, pkg = "package")

@@ -67,9 +67,9 @@ models <-
     dat_mem <- dat %>%
       filter(error_status %in% c("no_error", "memory_limit")) %>%
       mutate(
-        lmem = log10(ifelse(error_status == "memory_limit", 32 * 1e9, max_mem))
+        lmem = log10(ifelse(error_status == "memory_limit", 10 * 1e9, max_mem))
       )
-    model_mem <- VGAM::vglm(lmem ~ lnrow + lncol, VGAM:::tobit(Upper = log10(32 * 1e9), Lower = 8), data = dat_mem)
+    model_mem <- VGAM::vglm(lmem ~ lnrow + lncol, VGAM:::tobit(Upper = log10(10 * 1e9), Lower = 8), data = dat_mem)
 
     # reducing object size
     environment(model_mem@terms$terms) <- NULL
@@ -87,8 +87,8 @@ models <-
       mutate(
         method_id = dat$method_id[[1]],
         method_name = dat$method_name[[1]],
-        lpredtime = predict(model_time, datasets_info)[,1],
-        lpredmem = predict(model_mem, datasets_info)[,1]
+        time_lpred = predict(model_time, datasets_info)[,1],
+        mem_lpred = predict(model_mem, datasets_info)[,1]
       )
 
     # format output
@@ -103,8 +103,8 @@ models <-
       ) %>%
       bind_cols(as.data.frame(t(c(coef_values_time, coef_values_mem)))) %>%
       mutate(
-        lpredtime = mean(pred_ind[[1]]$lpredtime),
-        lpredmem = mean(pred_ind[[1]]$lpredmem)
+        time_lpred = mean(pred_ind[[1]]$time_lpred),
+        mem_lpred = mean(pred_ind[[1]]$mem_lpred)
       )
   }) %>%
   ungroup()
@@ -115,16 +115,59 @@ models <- models %>% select(-pred_ind)
 ##########################################################
 ###############         SAVE DATA          ###############
 ##########################################################
-headtail <- function(X, num) {
-  pbapply::pbsapply(X, cl = 8, function(x) {
-    xs <- strsplit(x, split = "\n")[[1]]
-    if (length(xs) > 2 * num) {
-      xs <- c(head(xs, num), paste0("... ", length(xs) - 2 * num, " lines omitted ..."), tail(xs, num))
-    }
-    paste0(c(xs, ""), collapse = "\n")
-  })
-}
 data$stdout <- headtail(data$stdout, 50)
 
 write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "xz")
 
+##########################################################
+###############   MAKE A FEW PREDICTIONS   ###############
+##########################################################
+
+scaling_exp <- tribble(
+  ~ experiment, ~ category, ~ metric, ~ lnrow, ~ lncol,
+  "scalability", "1k features", "1k cells", 3, 3,
+  "scalability", "1k features", "10k cells", 4, 3,
+  "scalability", "1k features", "100k cells", 5, 3,
+  "scalability", "1k cells", "1k features", 3, 3,
+  "scalability", "1k cells", "10k features", 3, 4,
+  "scalability", "1k cells", "100k features", 3, 5
+)
+
+scaling_process <-
+  models %>%
+  select(method_id, model_time) %>%
+  rowwise() %>%
+  do({
+    df <- .
+    exp <- scaling_exp
+    exp$method_id <- df$method_id
+    exp$logtime <- predict(df$model_time, exp)[,1]
+    exp
+  }) %>%
+  ungroup() %>%
+  mutate(
+    scaletime = (logtime - log10(10)) / (log10(3600 * 24 * 7) - log10(10)),
+    score = 1 - ifelse(scaletime > 1, 1, ifelse(scaletime < 0, 0, scaletime)),
+    time = 10^logtime,
+    timestr = case_when(
+      time < 1 ~ "<1s",
+      time < 60 ~ paste0(floor(time), "s"),
+      time < 3600 ~ paste0(floor(time / 60), "m"),
+      time < 3600 * 24 ~ paste0(floor(time / 3600), "h"),
+      time < 3600 * 24 * 7 ~ paste0(floor(time / 3600 / 24), "d"),
+      TRUE ~ ">7d"
+    )
+  )
+
+scaling_agg <- scaling_process %>%
+  group_by(method_id) %>%
+  summarise(
+    score = mean(score)
+  )
+
+scaling_results <- bind_rows(
+  scaling_process %>% transmute(method_id, experiment, category, metric, value = score, label = timestr),
+  scaling_agg %>% transmute(method_id, experiment = "scalability", category = "overall", metric = "overall", value = score)
+)
+
+write_rds(scaling_results, result_file("scaling_results.rds"), compress = "xz")

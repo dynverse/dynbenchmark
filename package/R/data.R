@@ -51,4 +51,9 @@
 #' Metadata on method statuses
 #'
 #' @docType data
+"method_statuses"
+
+#' Colours of method statuses
+#'
+#' @docType data
 "method_status_colours"

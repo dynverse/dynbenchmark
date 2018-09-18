@@ -2,9 +2,13 @@
 % Please edit documentation in R/text_ref.R
 \name{add_table}
 \alias{add_table}
+\alias{add_stable}
 \title{Add a table}
 \usage{
 add_table(table, ref_id, caption_main, caption_text = "",
+  format = get_default_format())
+
+add_stable(table, ref_id, caption_main, caption_text = "",
   format = get_default_format())
 }
 \arguments{

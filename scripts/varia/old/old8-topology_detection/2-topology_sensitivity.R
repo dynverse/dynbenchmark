@@ -39,7 +39,7 @@ topology_sensitivity_plot <- topology_sensitivity %>%
   geom_rect(aes(fill = color, xmin = 0)) +
   geom_rect(aes(xmax = 1, xmin = 0, color = ifelse(can_handle_trajectory_type, "black", "white")), fill = NA) +
   geom_vline(aes(xintercept = 0.5), linetype = "dashed", color = "white") +
-  facet_grid(.~trajectory_type, labeller = label_facet(label_simple_trajectory_types)) +
+  facet_grid(.~trajectory_type, labeller = label_facet(label_long)) +
   scale_fill_identity() +
   scale_color_identity() +
   theme_bw() +

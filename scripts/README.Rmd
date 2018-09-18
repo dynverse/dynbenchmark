@@ -2,7 +2,7 @@
 output: dynbenchmark::github_markdown_nested
 ---
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(dynbenchmark)
 ```

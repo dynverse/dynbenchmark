@@ -26,7 +26,7 @@ method_ids <- unique(data$method_id) %>% setdiff("error")
 models <-
   models %>%
   mutate(
-    score = 1 - dyneval:::calculate_arithmetic_mean(dynutils::scale_minmax(lpredtime), dynutils::scale_minmax(lpredmem), dynutils::scale_minmax(pct_errored))
+    score = 1 - dyneval:::calculate_arithmetic_mean(dynutils::scale_minmax(time_lpred), dynutils::scale_minmax(mem_lpred), dynutils::scale_minmax(pct_errored))
   ) %>%
   bind_rows(data %>% select(method_id, method_name) %>% distinct() %>% filter(!method_id %in% models$method_id) %>% mutate(score = 0, pct_errored = 1)) %>%
   arrange(desc(score)) %>%
@@ -37,11 +37,19 @@ models <-
     y = -as.integer(method_id_f)
   )
 
-columns <-
-  data_frame(
-    id = c("score", "lpredtime", "time_lnrow", "time_lncol", "time_intercept", "lpredmem", "mem_lnrow", "mem_lncol", "mem_intercept", "pct_errored"),
-    name = c("Score", "Predicted\nlog time", "Time coeff.\nintercept", "Time coeff.\n# cells", "Time coeff.\n# features", "Predicted\nlog memory", "Mem coeff.\nintercept", "Mem coeff.\n# cells", "Mem coeff.\n# features", "% errored"),
-    fill = c("overall", "time", "time", "time", "time", "memory", "memory", "memory", "memory", "errors"),
+columns <- tribble(
+  ~id, ~name, ~fill,
+  "score", "Score", "overall",
+  "time_lpred", "Prediced\nlog time", "time",
+  "time_intercept", "Time coeff.\nintercept", "time",
+  "time_lnrow", "Time coeff.\n# cells", "time",
+  "time_lncol", "Time coeff.\n# features", "time",
+  "mem_lpred", "Predicted\nlog memory", "memory",
+  "mem_intercept", "Mem coeff.\nintercept", "memory",
+  "mem_lnrow", "Mem coeff.\n# cells", "memory",
+  "mem_lncol", "Mem coeff.\n# features", "memory",
+  "pct_errored", "& errored", "errors"
+) %>% mutate(
     x = 1.1 * seq_along(id),
     min = map_dbl(id, ~ min(models[[.]], na.rm = TRUE)),
     max = map_dbl(id, ~ max(models[[.]], na.rm = TRUE))
@@ -154,7 +162,7 @@ plots <- map(method_ids, function(method_id) {
 
     g4a <-
       ggplot(pred_method) +
-      geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = lpredtime)) +
+      geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = time_lpred)) +
       scale_fill_distiller(palette = "RdYlBu") +
       scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
       scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
@@ -164,7 +172,7 @@ plots <- map(method_ids, function(method_id) {
       coord_equal()
     g4b <-
       ggplot(pred_method) +
-      geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = lpredmem)) +
+      geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = mem_lpred)) +
       scale_fill_distiller(palette = "RdYlBu") +
       scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
       scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +

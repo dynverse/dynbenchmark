@@ -6,7 +6,7 @@ library(tidyverse)
 
 readme_paths <- c(
   # fs::dir_ls("results", regexp = "README\\.Rmd", recursive = TRUE)
-  fs::dir_ls(result_file("", experiment = "02-metrics"), regexp = "README\\.Rmd", recursive = TRUE)
+  fs::dir_ls(result_file("", experiment = "03-methods"), regexp = "README\\.Rmd", recursive = TRUE)
 )
 
 walk(readme_paths, function(readme_path) {

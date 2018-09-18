@@ -69,17 +69,6 @@ label_facet <- function(label_func = label_long, ...) {
   }
 }
 
-#' Label trajectory types simplified
-#' @param x Trajectory types
-#' @export
-label_simple_trajectory_types <- function(x) {
-  tibble(id = as.character(x)) %>%
-    left_join(dynwrap::trajectory_types, by = "id") %>%
-    mutate(label = label_long(ifelse(!is.na(simplified), simplified, x))) %>%
-    .$label
-}
-
-
 #' Labels only the extrema (and zero)
 #' @param x The values
 #' @export
@@ -202,5 +191,11 @@ tag_first <- function(x, tag) {
 #' @param x A vector
 #' @export
 label_vector <- function(x) {
-  glue::glue_collapse(x, sep = ", ", last = " and ")
+  if (length(x) == 0) {
+    ""
+  } else if (length(x) == 1) {
+    x
+  } else {
+    glue::glue_collapse(x, sep = ", ", last = " and ")
+  }
 }

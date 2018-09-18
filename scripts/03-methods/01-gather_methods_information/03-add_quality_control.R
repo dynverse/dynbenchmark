@@ -1,4 +1,4 @@
-## Add QC scores to methods and tools tibble
+#' Add QC scores to methods and tools tibble
 
 library(tidyverse)
 library(dynbenchmark)
@@ -14,11 +14,11 @@ tool_qc_scores <- readRDS(result_file("tool_qc_scores.rds"))
 
 # merge qc scores with tools tibble
 tools <- tools %>%
-  select(-matches("qc_score")) %>%
+  select(-tidyselect::matches("qc_score")) %>%
   left_join(tool_qc_scores, "tool_id")
 
 methods <- methods %>%
-  select(-matches("qc_score")) %>%
+  select(-tidyselect::matches("qc_score")) %>%
   left_join(tool_qc_scores, "tool_id")
 
 # filter evaluated
