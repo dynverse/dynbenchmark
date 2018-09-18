@@ -115,8 +115,8 @@ pdf_manuscript <- function(
 #' @param csl Csl file location
 common_dynbenchmark_format <- function(
   format,
-  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/nature-biotechnology.csl")
+  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
+  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl")
 ) {
   # allow duplicate labels, needed for nested documents to work
   options(knitr.duplicate.label = 'allow')
