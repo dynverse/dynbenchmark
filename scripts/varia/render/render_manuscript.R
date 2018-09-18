@@ -1,5 +1,8 @@
 #' Renders the manuscript
 
+library(dynbenchmark)
+library(tidyverse)
+
 # download from google docs
 httr::set_config(httr::config(http_version = 0)) # avoid http2 framing layer bug
 drive <- googledrive::drive_download(googledrive::as_id("1je6AaelApu2xcSNbYlvcuTzUeUJBOpTUPHz0L9Houfw"), type="text/plain", overwrite=TRUE, path = tempfile())
