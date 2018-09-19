@@ -219,7 +219,7 @@ Methods were excluded from the evaluation based on several criteria: `r glue::gl
 The selected methods were dissected into a set of algorithmic components. Each component can have a significant impact on the performance, scalability, and output. Across all methods, these components can be broadly grouped into two stages; (i) conversion to a simplified representation using dimensionality reduction, clustering or graph building and (ii) ordering the cells along the simplified representation [@cannoodt_computational_2016]. Components are frequently shared between different algorithms. For example, minimal spanning trees (MST), used in the first single-cell RNA-seq trajectory inference methods [@trapnell_dynamics_2014], is shared by almost half of the methods we evaluated.
 →
 ### Method wrappers
-Each method was wrapped within a docker and singularity container (available at `r print_url("https://github.com/dynverse/dynverse/tree/master/methods")`). These containers are automatically built on both Singularity Hub (`r print_url("https://singularity-hub.org/")`) and Docker Hub (`r print_url("https://hub.docker.com/u/dynverse")`).
+Each method was wrapped within a docker and singularity container (available at `r print_url("https://github.com/dynverse/dynmethods")`). These containers are automatically built on both Singularity Hub (`r print_url("https://singularity-hub.org/")`) and Docker Hub (`r print_url("https://hub.docker.com/u/dynverse")`).
 For each method, we wrote a wrapper script based on example scripts or tutorials provided by the authors (as mentioned in the respective wrapper scripts). This script reads in the input data (as described below), runs the method, and outputs the files required to construct a trajectory (as described below). We also created a script to generate an example dataset, which is used to automatically test every method using travis continuous integration (`r print_url("https://travis-ci.org/dynverse")`).
 
 
@@ -300,7 +300,7 @@ Special conversions were necessary for certain methods:
 * **URD:** We extracted the pseudotime of a cell within each branch using the y positions in the tree layout. This was then further processed as a type 1, direct, method.
 
 
-More information on how each method was wrapped can be found within the comments of each wrapper script, available at `r print_url("https://github.com/dynverse/dynverse/tree/master/methods")`.←
+More information on how each method was wrapped can be found within the comments of each wrapper script, available at `r print_url("https://github.com/dynverse/dynmethods")`.←
 
 
 →
@@ -476,7 +476,7 @@ design_dyntoy <- read_rds(result_file("design_dyntoy.rds", "01-datasets/02-synth
 ```
 
 
-For more simplistic data generation ("toy" datasets), we created the dyntoy workflow (`r print_url("https://github.com/dynverse/dyntoy")`) . We created `r length(unique(design_dyntoy$topology_model))` topology generators (described below), and with   `r nrow(design_dyntoy)/length(unique(design_dyntoy$topology_model))` datasets per generator, we created `r nrow(design_dyntoy)` datasets.
+For more simplistic data generation ("toy" datasets), we created the dyntoy workflow (`r print_url("https://github.com/dynverse/dyntoy")`) . We created `r length(unique(design_dyntoy$topology_model))` topology generators (described below), and with   `r nrow(design_dyntoy)/length(unique(design_dyntoy$topology_model))` datasets per generator, this lead to a total of `r nrow(design_dyntoy)` datasets.
 
 
 We created a set of topology generators:
@@ -491,6 +491,7 @@ We created a set of topology generators:
 For more complex topologies we first calculated a random number of "modifications" $\sim U(3, 6)$ and a $\textit{deg}_{\textit{max}} \sim B(10, 0.25) + 1$. For each type of topology, we defined what kind of modifications are possible: divergences, loops, convergences and divergence-convergence. We then iteratively constructed the topology by uniformly sampling from the set of possible modifications, and adding this modification to the existing topology. For a divergence, we connected an existing milestone to a number of a new milestones. Conversely, for a convergence we connected a number of new nodes to an existing node. For a loop, we connected two existing milestones with a number of milestones in between. Finally for a divergence-convergence we connected an existing milestone to several new milestones which again converged on a new milestone. The number of nodes was sampled from $\sim B(\textit{deg}_{\textit{max}} - 3, 0.25) + 2$
 
 
+* Looping, allowed loop modifications
 * Diverging-converging, allowed divergence and converging modifications
 * Diverging with loops, allowed divergence and loop modifications
 * Multiple looping, allowed looping modifications
@@ -535,54 +536,25 @@ We used a standard single-cell RNA-seq preprocessing pipeline which applies part
 The importance of using multiple metrics to compare complex models has been stated repeatedly [@norel_selfassessmenttrap_2011]. →Furthermore, a trajectory is a model with multiple layers of complexity, which calls for several metrics each assessing a different layer. We therefore defined several possible metrics for comparing trajectories, each investigating different layers. These are all discussed in `r ref("snote", "metrics")` along with examples and robustness analyses when appropriate.
 
 
-Next, we created a set of rules to which we think a good trajectory metric should conform, and tested this empirically for each metric by comparing scores before and after perturbing a dataset (`r ref("snote", "metrics")`). Based on this analysis, we chose 4 metrics for the evaluation, each assessing a different aspect of the trajectory: (i) the `r label_metric("him")` measures the topological similarity, (ii) the  `r label_metric("F1_branches")` compares the branch assignment, (iii) the  `r label_metric("correlation")` assesses the similarity in pairwise cell-cell distances and thus the cellular positions, and (iv) the  `r label_metric("featureimp_cor")` looks at whether similar important features (genes) are found in both the reference dataset and the prediction. ←
+Next, we created a set of rules to which we think a good trajectory metric should conform, and tested this empirically for each metric by comparing scores before and after perturbing a dataset (`r ref("snote", "metrics")`). Based on this analysis, we chose 4 metrics for the evaluation, each assessing a different aspect of the trajectory: (i) the `r label_metric("him")` measures the topological similarity, (ii) the   `r label_metric("F1_branches")`compares the branch assignment, (iii) the  `r label_metric("correlation")` assesses the similarity in pairwise cell-cell distances and thus the cellular positions, and (iv) the  `r label_metric("featureimp_wcor")` looks at whether similar important features (genes) are found in both the reference dataset and the prediction. 
+
+
+### The Hamming-Ipsen-Mikhailov metric
+The Hamming-Ipsen-Mikhailov (HIM) [@jurman_HIM_Glocal_Metric_2015] uses the two weighted adjacency matrices of the milestone networks as input (weighted by edge length). It is a linear combination of the normalised Hamming distance, which gives an indication of the differences in edge lengths, and the normalised Ipsen-Mikhailov distance, which assesses the similarity in degree distributions. The latter has a parameter $\gamma$, which was fixed at 0.1 as to make the scores comparable between datasets. We illustrate the metric and discuss alternatives in `r ref("snote", "metrics")`.
+
+
+### The F1 between branch assignments
+To compare branch assignment, we borrowed the $F_1$ metric from the field of expression biclustering [@saelens_comprehensiveevaluationmodule_2018]. To calculate this metric, we first calculated the similarity of all pairs of branches between the two trajectories using the Jaccard similarity. Next, we define the $\textit{Recovery}$ (respectively $\textit{Relevance}$) as the average maximal similarity of all branches in the reference dataset (respectively $\textit{prediction}$). The `r label_metric("F1_branches")` was then defined as the harmonic mean between $\textit{Recovery}$ and $\textit{Relevance}$. We illustrate this metric further in  `r ref("snote", "metrics")`.
+←
 ### Correlation between geodesic distances
-The similarity in cell ordering between two trajectories is assessed by calculating the geodesic distances between each pair of cells for both trajectories. The definition of a geodesic distance between two cells part of the common trajectory model will be demonstrated using a toy example (`r ref("sfig", "metric_geodesic")`). 
+→When the position of a cell is the same in both the gold standard and the prediction, its relative distances to all other cells in the trajectory should also be the same. This observation is the basis for the `r label_metric("correlation")` metric. 
+To calculate the `r label_metric("correlation")`, we first sampled 100 waypoint cells in both the prediction and the reference dataset, using stratified sampling between the different milestones, edges and regions of delayed commitment, weighted by the number of cells in each collection. We then calculated the geodesic distances between the union of waypoint cells from both datasets and all other cells. The calculation of the geodesic distance depended on the location of the two cells within the trajectory, further discussed in `r ref("snote", "metrics")` and was weighted by the length of the edge in the milestone network. Finally, the `r label_metric("correlation")` was defined as the Spearman rank correlation between the distances of both datasets. We illustrate the metric and assess the effect of the number of waypoint cells in `r ref("snote", "metrics")`.
+### The correlation between important features
+The `r label_metric("featureimp_wcor")` assesses whether similar dynamically differentially expressed features are found between the prediction and model. To calculate this metric, we used Random Forest regression (implemented in the R ranger package), to predict expression values of each gene, based on the geodesic distances of a cell to each milestone. We then extract feature importance values for each feature, and calculated the similarity of the feature importances using a weighted Pearson correlation, weighted by the feature importance in the reference dataset as to give more weight to differentially expressed features then non-differentially expressed features. As hyperparameters we set the number of trees to 10000, and the number of features on which can be split to 1% of all available features. We illustrate this metric and assess the effect of its hyperparameters in `r ref("snote", "metrics")`.
 
 
-```{r}
-add_sfig(
-  ggplot(),#figure_file("geodesic.svg", experiment_id="manual_figures/metrics"), 
-  "metric_geodesic", 
-  "The modified geodesic distances demonstrated on a toy example.", 
-  "a) A toy example containing four milestones (W to Z) and five cells (a to e). b) The corresponding milestone network, milestone percentages and regions of delayed commitment, when the toy trajectory is converted to the common trajectory model. c) The calculations made for calculating the pairwise geodesic distances. d) A heatmap representation of the pairwise geodesic distances."
-)
-```
-
-
-The geodesic distance between two cells depends on whether they are (i) on the same transition, or (ii) in different transitions. In the first case, the distance is defined as the product of the difference in milestone percentages and the length of the transition they both reside on. For cells $a$ and $b$ in the example, $d(a, b)$ is equal to $1 \times (0.9 - 0.2) = 0.7$. In the latter case, the distances between the cells and all of their neighbouring milestones will be calculated. These distances in combination with the milestone network are used to calculate the shortest path distance between the two cells. For cells $a$ and $c$ in the example, $d(a, X) = 1 \times 0.9$ and $d(c, X) = 3 \times 0.2$, and therefore $d(a, c) = 1 \times 0.9 + 3 \times 0.2$. 
-
-
-According to the defined common trajectory model (`r ref("fig", "ti_evaluation_overview", "b")`), cells are also allowed to have a delayed commitment. In a region of delayed commitment, one milestone will be connected to all other milestones as per the milestone network. In this case, the distance between two cells both inside a region of delayed commitment is calculated as the manhattan distances between the milestone percentages weighted by the transition weights from the milestone network. For cells $d$ and $e$ in the example, $d(d, e)$ is equal to $0 \times (0.3 - 0.2) + 2 \times (0.7 - 0.2) + 3 \times(0.4 - 0.1)$, which is equal to $1.9$. The distance between two cells where one is part of a region of delayed commitment is calculated similarly to the previous paragraph, by first calculating the distance between the cells and their neighbouring milestones first, then calculating the shortest path distances between the two.
-
-
-Finally, calculating all pairwise distances between cells would scale poorly for trajectories with large numbers of cells. For this reason, a set of waypoint cells are defined *a priori*, and only the distances between the waypoint cells and all other cells is calculated, in order to calculate the correlation of geodesic distances of two trajectories. The waypoints are determined by viewing each milestone, transition and region of delayed commitment as a collection of cells, and sampling cells from the different collections weighted by the total number of cells within that collection. For calculating the correlation of geodesic distances between two trajectories, the distances between all cells and the union of both waypoint sets is computed. For the benchmark evaluation, the total number of waypoints sampled from a trajectory was one hundred.
-
-
-### Random forest prediction error
-
-
-Although the correlation between geodesic distances directly assesses the position of the cells in the trajectory, a bad correlation does not directly imply that similar cells were not grouped together by the method, as illustrated in `r ref("sfig", "score_aspects", c("b", "c"))`. For example, certain methods will inevitably reach an incorrect ordering because they cannot handle the correct trajectory type, but these methods could still correctly place similar cells next to each other. We therefore also included a metric which looks at the local neighbourhood of each cell, and assesses whether this neighbourhood can accurately predict the position of this cell in the gold standard. We used a Random Forest regression, implemented in the *ranger* package [@wright_rangerfastimplementation_2017] to separately predict milestone percentages of each cell in the gold standard, using the milestone percentages of this cells in the prediction as features. We then used the out-of-bag mean-squared error on these percentages to score each method's capability of predicting the correct neighbourhood of each cell.
-
-
-### Edge flip score
-
-
-As a third independent score, we assessed the similarity between the milestone network topologies. We first simplified each network, by merging consecutive linear edges into one edge, and adding new milestones within self loops such that $A \rightarrow A$ would be converted $A \rightarrow B \rightarrow C \rightarrow D$, by adding an intermediate node to linear networks. Because we are interested in the overall similarity between two topologies irrespective of the direction of the edges, the network was made undirected. Next, we define the edge flip score as the minimal number of edges which should be added or removed to convert one network into the other, divided by the total number of edges in both networks. This problem is equivalent to the maximum common edge subgraph problem, a known NP-hard problem without a scalable solution [@bahiense_maximumcommonedge_2012]. We implemented a branch and bound approach for this problem, by first enumerating all possible edge additions and removals with the minimal number of edges (the edge difference between the two networks) and if none of the new networks was isomorphic, we tried out all solutions with additional two edge changes. To further limit the search space, we made sure the degree distributions between the two networks were  similar, before assessing whether the two networks were isomorphic using the BLISS algorithm [@junttila_engineeringefficientcanonical_2007], as implemented in the R *igraph* package.
-
-
-A comparison of edge flip scores between common trajectory topologies is illustrated in `r ref("sfig", "edge_flip_comparison")`.
-
-
-```{r}
-add_sfig(
-  ggplot(),#figure_file("edge_flip_comparison.svg", experiment_id="3-metric_characterisation/4-edge_flip"), 
-  "edge_flip_comparison", 
- "Edge flip score values for common trajectory topologies",
-  ""
-)
-```
-### Aggregation of scores
+←
+### Aggregation of scores[c]
 `r ref("sfig", "aggregation_of_results")` illustrates the full set of aggregations performed on the raw scores in order to arrive at the final ranking of methods. 
 
 
@@ -645,7 +617,7 @@ To assess the effect of algorithm components on the performance of a method, we 
 ## Method quality control
 
 
-We created a transparent scoring scheme to check the quality of each method based on several existing tool quality and programming guidelines in literature and online (`r ref("stable", "qc_checks")`). The goal of this quality control in the first place is to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of dataset in which the usefulness of the method was shown, and the scope of method evaluation in the paper.
+We created a transparent scoring scheme to check the quality of each method based on several existing tool quality and programming guidelines in literature and online (`r ref("stable", "qc_checks")`). The goal of this quality control is in the first place is to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of dataset in which the usefulness of the method was shown, and the scope of method evaluation in the paper.
 
 
 ```{r}
@@ -660,12 +632,13 @@ We created a transparent scoring scheme to check the quality of each method base
 ```
 
 
-Each aspect was further assigned to one or more applications, based on whether it influenced the user friendliness of the tool (such as code availability, good documentation or contains plotting functions), the developer friendliness of the tool (such as unit testing, inline documentation and a clear licensing), or indications that the tool will be broadly applicable on new datasets (such as being open-source, containing a good tutorial and support system, and being thoroughly evaluated in the study where it was published).
+Each aspect was further assigned to one or more applications, based on whether it influenced the user friendliness of the tool (such as code availability, good documentation or contains plotting functions) or the developer friendliness of the tool (such as unit testing, inline documentation and a clear licensing).
 
 
 Each quality aspect received a weight depending on how frequently it was found in several papers and online sources which discuss tool quality (`r ref("stable", "qc_checks")`). This was to make sure that more important aspects, such as the open source availability of the method, outweighed other aspects, such as the availability of a graphical user interface. Within each aspect, we also assigned a weight to the individual questions being investigated (`r ref("stable", "qc_checks")`). For calculating the final score, we weighed each of the six categories equally.
 →
-## Scalability
+## Scalability[d]
+## [e]Stability
 ←
 ## Trajectory types
 We classified all possible trajectory topologies into distinct trajectory types, based on topological criteria (`r ref("fig", "ti_evaluation_overview", "c")`). These trajectory types start from the most general trajectory type, a disconnected directed graph, and move down (within a directed acyclic graph structure), progressively becoming more simple until the two basic types: linear and cyclical. A disconnected directed graph is a graph in which only one edge can exist between two nodes. A directed graph is a disconnected graph in which all nodes are (indirectly) connected. A directed acyclic graph is a graph containing no cycles. A rooted tree is a directed acyclic graph containing no convergences (no nodes with in-degree higher than 1). A rooted binary tree is a rooted tree with every node having maximally two outgoing edges. A convergence is a directed acyclic graph in which only one node has a degree larger than one and this same node has an indegree of one. A multifurcation is a rooted tree in which only one node has a degree larger than one. A bifurcation is a multifurcation in which only one node has a degree equal to 3. A directed linear graph is a graph in which no node has a degree larger than 3. Finally, a directed cycle is a directed graph in which no node has a degree larger than 3 but contains one cycle. For every directed trajectory type, a corresponding undirected trajectory type can also be defined, with directed acyclic graphs and directed graphs merging to undirected graph, and convergence and bifurcation merging to a simple fork. In most cases, a method which was able to detect a complex trajectory type, was also able to detect less complex trajectory types, with →the exceptions being being DPT (limited to bifurcating trajectories), and STEMNET and FateID (unable to return linear trajectories).←
@@ -701,3 +674,6 @@ Make sure to pin the zotero bibtex references after first using them!
 
 [a]Don't put this in the paper
 [b]Factually incorrect but ¯\_(ツ)_/¯
+[c]Robrecht, you know what to do ;)
+[d]I will try to do my best in adding this if you don't do it first Robrecht
+[e]I will try to do my best in adding this if you don't do it first Robrecht
