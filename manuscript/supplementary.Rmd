@@ -1,0 +1,48 @@
+---
+title: "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
+output: 
+  dynbenchmark::pdf_manuscript:
+      render_change: FALSE
+---
+
+# Supplementary material
+
+```{r setup, include=FALSE}
+library(dynbenchmark)
+library(tidyverse)
+```
+
+```{r}
+supplementary <- read_rds("supplementary.rds")
+sfigs <- supplementary$sfigs
+```
+
+# Supplementary figures
+```{r, results="asis"}
+sfigs %>% pmap(dynbenchmark:::plot_fig, ref_type = "sfig") %>% walk(cat)
+```
+
+# Supplementary tables
+
+
+
+```{r setup, include=FALSE}
+# source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/analysis/paper/setup.R"))
+# 
+# # knitr options
+# knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+# knitr::opts_chunk$set(
+#   collapse = TRUE,
+#   warning = FALSE,
+#   message = FALSE,
+#   echo = FALSE,
+#   comment = "#>",
+#   fig.path = paste0(rprojroot::find_rstudio_root_file(), "/analysis/paper/.scratch/")
+# )
+# 
+# list2env(read_rds(derived_file("sfigs_stables.rds", "paper")), environment())
+```
+
+```{r "supplementary", echo=FALSE, results='asis'}
+# source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/analysis/paper/sfigs_stables.R"))
+```

@@ -91,7 +91,7 @@ add_fig <- function(
   # save it because why not
   figs <<- figs %>% add_row(
     ref_id = ref_id,
-    fig_path = fig_path,
+    fig_path = if(is.character(fig_path)) {fig_path} else {list(fig_path)},
     caption_main = caption_main,
     caption_text = caption_text,
     width = width,
@@ -112,10 +112,10 @@ add_sfig <- function(
   height = 7,
   format = get_default_format()
 ) {
-  # save it because why not
-  figs <<- sfigs %>% add_row(
+  # save it because it's necessary
+  sfigs <<- sfigs %>% add_row(
     ref_id = ref_id,
-    fig_path = fig_path,
+    fig_path = if(is.character(fig_path)) {fig_path} else {list(fig_path)},
     caption_main = caption_main,
     caption_text = caption_text,
     width = width,
