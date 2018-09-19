@@ -17,6 +17,7 @@ if (!file.exists(derived_file("design.rds"))) {
 
   # need to look into scaling results of these methods first
   method_ids <- scaling$models$method_id
+  method_ids[method_ids == "projected_gng"] <- "gng"
 
   methods <-
     dynwrap::get_ti_methods(method_ids, evaluate = FALSE) %>%
