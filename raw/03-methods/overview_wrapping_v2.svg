@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.98994949"
-     inkscape:cx="372.90003"
-     inkscape:cy="129.56438"
+     inkscape:zoom="3.959798"
+     inkscape:cx="440.36669"
+     inkscape:cy="54.621849"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -5697,7 +5697,7 @@
            transform="translate(19.012248,8.9853017)">
           <path
              sodipodi:nodetypes="ccc"
-             style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.13385832;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+             style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.75590551;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
              d="m 447.64813,261.74889 v 30.50372 h 119.198"
              id="path2686"
              inkscape:connector-curvature="0" />
@@ -5897,12 +5897,6 @@
                cy="286.74646"
                r="1.8940361" />
           </g>
-          <path
-             inkscape:connector-curvature="0"
-             id="path3021"
-             d="m 447.64813,261.74889 v 30.50372 h 119.198"
-             style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.13385832;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
-             sodipodi:nodetypes="ccc" />
           <g
              transform="translate(0,-31.607144)"
              id="g3077">
@@ -6090,7 +6084,7 @@
           </g>
           <path
              sodipodi:nodetypes="ccc"
-             style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.13385832;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+             style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.75590551;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
              d="m 447.64813,228.08818 v 30.50372 h 119.198"
              id="path3079"
              inkscape:connector-curvature="0" />
