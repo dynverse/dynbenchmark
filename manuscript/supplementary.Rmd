@@ -15,6 +15,8 @@ library(tidyverse)
 ```{r}
 supplementary <- read_rds("supplementary.rds")
 sfigs <- supplementary$sfigs
+stables <- supplementary$stables
+refs <- supplementary$refs
 ```
 
 # Supplementary figures
@@ -24,6 +26,9 @@ sfigs %>% pmap(dynbenchmark:::plot_fig, ref_type = "sfig") %>% walk(cat)
 
 # Supplementary tables
 
+```{r, results="asis"}
+stables %>% pmap(dynbenchmark:::show_table, ref_type = "stable") %>% walk(cat)
+```
 
 
 ```{r setup, include=FALSE}

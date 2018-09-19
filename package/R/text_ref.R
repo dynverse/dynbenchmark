@@ -254,7 +254,7 @@ add_table <- function(
     caption_text = caption_text
   )
 
-  show_table(ref_id, format = format)
+  show_table(table, ref_id, caption_main, caption_text, ref_type = "table")
 }
 
 #' @rdname add_table
@@ -273,8 +273,7 @@ add_stable <- function(
     table = list(table),
     ref_id = ref_id,
     caption_main = caption_main,
-    caption_text = caption_text,
-    supplementary = supplementary
+    caption_text = caption_text
   )
 }
 
@@ -282,6 +281,15 @@ process_table <- function(table) {
   # load in the table if character
   if (is.character(table) && fs::path_ext(table) == "rds") {
     table <- read_rds(table)
+  }
+
+  # if an excel, add a note that this table was submitted separately
+  if (is.character(table) & fs::path_ext(table) == "xlsx") {
+    table <- list(
+      html = "This table was provided as a separate excel file",
+      latex = "This table was provided as a separate excel file",
+      markdown = "This table was provided as a separate excel file"
+    )
   }
 
   # convert tibble to kables
@@ -304,18 +312,14 @@ process_table <- function(table) {
   table
 }
 
-show_table <- function(ref_id, format = get_default_format()) {
-  table_row <- tables %>% extract_row_to_list(ref_id == !!ref_id)
-
-  table <- table_row$table
-
+show_table <- function(table, ref_id, caption_main, caption_text, format = get_default_format(), ref_type = "table") {
   # anchor
-  table_anch <- anchor("table", ref_id)
+  table_anch <- anchor(ref_type, ref_id)
 
   # caption
-  caption_main <- knitr::knit(text = table_row$caption_main, quiet = TRUE)
-  caption_text <- knitr::knit(text = table_row$caption_text, quiet = TRUE)
-  table_name <- ref("table", ref_id, pattern = "{ref_full_name}")
+  caption_main <- knitr::knit(text = caption_main, quiet = TRUE)
+  caption_text <- knitr::knit(text = caption_text, quiet = TRUE)
+  table_name <- ref(ref_type, ref_id, pattern = "{ref_full_name}")
 
   # render the table
   if (format == "latex") {
