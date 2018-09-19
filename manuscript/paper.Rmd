@@ -14,9 +14,6 @@ methods <- read_rds(result_file("methods.rds", "03-methods"))
 ```
 
 
-*`r format(Sys.time(), '%d %B, %Y')`*
-
-
 Wouter Saelens* ¹ ², Robrecht Cannoodt* ¹ ² ³, Helena Todorov¹ ² ⁴, Yvan Saeys¹ ²
 
 
@@ -25,12 +22,18 @@ Wouter Saelens* ¹ ², Robrecht Cannoodt* ¹ ² ³, Helena Todorov¹ ² ⁴, Yva
 ² Department of Applied Mathematics, Computer Science and Statistics, Ghent University, Ghent, Belgium.  
 ³ Center for Medical Genetics, Ghent University Hospital, Ghent, Belgium.  
 ⁴ Centre International de Recherche en Infectiologie, Inserm, U1111, Université Claude Bernard Lyon 1, CNRS, UMR5308, École Normale Supérieure de Lyon, Univ Lyon, F-69007, Lyon, France
+
+
+*`r format(Sys.time(), '%d %B, %Y')`*
+
+
+`dynverse/dynbenchmark/commit/`r git2r::revparse_single(".","HEAD")$sha``
 ```{r}
-n_tools <- tools %>% filter(type == "algorithm") %>% nrow()
-n_methods_evaluated <- nrow(filter(methods, evaluated, type %in% c("algorithm", "algorithm_test")))
-n_control_methods_evaluated <- nrow(filter(methods, evaluated, type %in% c("control", "control_test")))
-n_datasets_real <- 10
-n_datasets_synthetic <- 20
+n_tools <- nrow(tools)
+n_methods_evaluated <- nrow(filter(methods, evaluated, source %in% c("tool", "adaptation", "offtheshelf")))
+n_control_methods_evaluated <- nrow(filter(methods, evaluated, source %in% c("control")))
+n_datasets_real <- nrow(list_datasets("real"))
+n_datasets_synthetic <- nrow(list_datasets("synthetic"))
 ```
 # Abstract
 
@@ -49,7 +52,7 @@ Current applications of TI focus on specific subsets of cells, but ongoing effor
 
 
 <!-- §2: Plethora of new TI methods -->
-A plethora of TI methods has been developed over the last years, and even more are being created every month (`r ref("stable", "tools")`). →In several repositories listing single-cell tools,  `r print_url("www.omictools.org")` [@henry_omictoolsinformativedirectory_2014], the "awesome-single-cell" list (`r print_url("https://github.com/seandavi/awesome-single-cell")`) [@davis_awesomesinglecelllistsoftware_2018] and `r print_url("www.scRNA-tools.org")` [@zappia_exploringsinglecellrnaseq_2017], TI methods are one the largest categories.← All methods have their own unique set of characteristics in terms of underlying algorithm, the prior information they require and the outputs they produce. Two of the most distinctive differences between TI methods are whether they fix the topology of the trajectory or not, and what type(s) of graph topologies they can detect. Early TI methods typically fixed the topology algorithmically (e.g. linear [@bendall_singlecelltrajectorydetection_2014; @schlitzer_identificationcdc1cdc2committed_2015; @shin_singlecellrnaseqwaterfall_2015; @campbell_bayesiangaussianprocess_2015] or bifurcating [@haghverdi_diffusionpseudotimerobustly_2016; @setty_wishboneidentifiesbifurcating_2016]), or through parameters provided by the user [@trapnell_dynamics_2014; @matsumoto_scoupprobabilisticmodel_2016]. These methods therefore mainly focused on correctly ordering the cells along the fixed topology. →Most recent methods also infer the topology computationally, which increases the difficulty of the problem at hand, but allows an unbiased identification of both the ordering inside a branch and the topology connecting these branches.←
+A plethora of TI methods has been developed over the last years, and even more are being created every month (`r ref("stable", "tools")`). →Indeed, in several repositories listing single-cell tools,  `r print_url("www.omictools.org")` [@henry_omictoolsinformativedirectory_2014], the "awesome-single-cell" list (`r print_url("https://github.com/seandavi/awesome-single-cell")`) [@davis_awesomesinglecelllistsoftware_2018] and `r print_url("www.scRNA-tools.org")` [@zappia_exploringsinglecellrnaseq_2017], TI methods are one the largest categories.← All methods have their own unique set of characteristics in terms of underlying algorithm, the prior information they require and the outputs they produce. Two of the most distinctive differences between TI methods are whether they fix the topology of the trajectory or not, and what type(s) of graph topologies they can detect. Early TI methods typically fixed the topology algorithmically (e.g. linear [@bendall_singlecelltrajectorydetection_2014; @schlitzer_identificationcdc1cdc2committed_2015; @shin_singlecellrnaseqwaterfall_2015; @campbell_bayesiangaussianprocess_2015] or bifurcating [@haghverdi_diffusionpseudotimerobustly_2016; @setty_wishboneidentifiesbifurcating_2016]), or through parameters provided by the user [@trapnell_dynamics_2014; @matsumoto_scoupprobabilisticmodel_2016]. These methods therefore mainly focused on correctly ordering the cells along the fixed topology. →Most recent methods also infer the topology computationally, which increases the difficulty of the problem at hand, but allows an unbiased identification of both the ordering inside a branch and the topology connecting these branches.←
 
 
 
@@ -70,16 +73,16 @@ Given the diversity in TI methods, an important issue to address is a quantitati
 
 
 <!-- §4: Our study -->
-In this study, we performed a comprehensive evaluation of  →`r n_methods_evaluated`← TI methods (`r ref("fig", "ti_evaluation_overview", "a")`, `r ref("sfig", "overview_evaluation_expanded")`). The inclusion criterion for TI methods was primarily based on their free availability and presence of a programming interface (`r ref("stable", "tools")`). →The evaluated each methods on four core aspects: (i) their accuracy given a gold or silver standard on `r n_datasets_real` real and `r n_datasets_synthetic` synthetic datasets, (ii) the user friendliness of the provided software and documentation, (iii) their scalability with both the number of cells and features, and (iv) their stability across reruns stability. Finally, we combined these metrics to provide a set of practical guidelines for users. ←
+In this study, we performed a comprehensive evaluation of  →`r n_methods_evaluated`← TI methods (`r ref("fig", "ti_evaluation_overview", "a")`, `r ref("sfig", "overview_evaluation_expanded")`). The inclusion criterion for TI methods was primarily based on their free availability and presence of a programming interface (`r ref("stable", "tools")`). →We evaluated each methods on four core aspects: (i) their accuracy given a gold or silver standard on `r n_datasets_real` real and `r n_datasets_synthetic` synthetic datasets, (ii) the user friendliness of the provided software and documentation, (iii) their scalability with both the number of cells and features, and (iv) the stability of the predictions on the same dataset. Finally, we combined these metrics to provide a set of practical guidelines for users. ←
 
 
 ```{r}
 add_fig(
-  fig_path = "figures/overview_evaluation_v4.svg",
+  fig_path = raw_file("overview_evaluation_v6.svg", ""),
   ref_id = "ti_evaluation_overview", 
   caption_main = "Overview of several key aspects of the evaluation.", 
-  caption_text = "a) A schematic overview of our evaluation pipeline. b) In order to make the trajectories comparable to each other, a common trajectory model was used to represent gold standard trajectories from the real and synthetic datasets, as well as any predicted trajectories from TI methods. c) Trajectories are automatically classified into one of nine trajectory types, with increasing complexity. d) Three metrics were defined in order to assess the similarity in cell ordering, cell neighbourhood, and topology, for any two trajectories.",
-   width = 12,
+  caption_text = "a) A schematic overview of our evaluation pipeline. b) In order to make the trajectories comparable to each other, a common trajectory model was used to represent gold standard trajectories from the real and synthetic datasets, as well as any predicted trajectories from TI methods. c) Trajectories are automatically classified into one of nine trajectory types, with increasing complexity. d) →We defined four metrics each assessing the similarity of a different aspect of the trajectory: the topology, the branch assignment, the cell positions and the important features.←",
+   width = 13,
   height = 8, 
 )
 ```
@@ -87,7 +90,7 @@ add_fig(
 
 ```{r}
 add_sfig(
-  fig_path = "figures/overview_evaluation_expanded_v1.svg",
+  fig_path = raw_file("overview_evaluation_expanded_v1.svg", ""),
   ref_id = "overview_evaluation_expanded",
   caption_main = "Extended overview of our evaluation pipeline.", 
   caption_text = "From literature we extracted a quality control checklist, a list of trajectory inference methods, a set of real datasets containing a trajectory and real regulatory networks used to generate the synthetic data. We created a wrapper of each method, so that its output was transformed into a common probabilistic trajectory model, and used these to infer trajectories on all real and synthetic datasets using their default parameters. Using several similarity metrics, we compared the gold standard of the real and synthetic datasets with the inferred trajectories. We also evaluated the quality of each method using the quality control checklist, and used both the benchmark results and quality control results to produce a final set of guidelines for method's users.", 
@@ -148,7 +151,7 @@ add_fig(
 
 
 <!-- The context -->
-In this study, we presented a large scale evaluation of the performance and code of  `r nrow(filter(methods, evaluated, type == "algorithm"))`  TI methods. By using a common structure and three metrics to compare the methods’ outputs, we were able to assess the performance of the methods on more than a hundred datasets, which allowed us to highlight the strengths and weaknesses of each method on different trajectory types. We also assessed the code quality of these methods, to provide information on important scientific and software development practices for these methods.
+In this study, we presented a large scale evaluation of the performance and code of  `r n_methods_evaluated`  TI methods. By using a common structure and three metrics to compare the methods’ outputs, we were able to assess the performance of the methods on more than a hundred datasets, which allowed us to highlight the strengths and weaknesses of each method on different trajectory types. We also assessed the code quality of these methods, to provide information on important scientific and software development practices for these methods.
 
 
 <!-- FOR METHOD USERS -->
@@ -265,7 +268,7 @@ special_methods <- c("mfa", "dpt", "slice", "sincell", "calista", "urd")
 # create functions to list the methods within a particular conversion category
 conversion <- function(conversion_oi) {
   methods_evaluated %>% 
-    filter(type %in% c("algorithm", "algorithm_test")) %>%
+    filter(source %in% c("tool", "offtheshelf", "adaptation")) %>%
     filter(map_lgl(output, ~conversion_oi %in% .$outputs)) %>% 
     mutate(name = paste0(name, ifelse(id %in% special_methods, "\\*", ""))) %>% 
     pull(name) %>% 
@@ -279,7 +282,7 @@ conversion <- function(conversion_oi) {
 * **Type 2, linear pseudotime:** `r conversion("linear_trajectory")`. The method returned a pseudotime, which is translated into a linear trajectory where the milestone network contains two milestones and cells are positioned between these two milestones.
 * **Type 3, cyclical pseudotime:** `r conversion("cyclic_trajectory")`. The method returned a pseudotime, which is translated into a cyclical trajectory where the milestone network contains three milestones and cells are positioned between these three milestones. →These milestones were positioned at pseudotime 0, ⅓ and ⅔ .←
 * **Type 4, end state probability:** `r conversion("end_state_probabilities")`. The method returned a pseudotime and for each cell and end state a probability for how likely a cell will end up in a certain end state. →This was translated into a star-shaped milestone network, with one starting milestone ($M_0$) and several outer milestones ($M_i$) with regions of delayed commitment between all milestones. The milestone percentage of a cell to one of the outer milestones was equal to $\textrm{pseudotime} \times \textrm{Pr}_{M_i}$ , the milestone percentage to the starting milestone was equal to $1-\textrm{pseudotime}$ .←
-* **Type 5, cluster assignment:** `r conversion("cluster_graph")`. The method returned a milestone network, and an assignment of each cell to a specific milestone. Cells were positioned onto the milestones they are assigned to.
+* **Type 5, cluster assignment:** `r conversion("cluster_graph")`. The method returned a milestone network, and an assignment of each cell to a specific milestone. Cells were positioned onto the milestones they are assigned to→, with milestone percentage equal to 1.←
 * **Type 6, project onto nearest branch:** `r conversion("dimred_projection")`. The method returned a milestone network, and a dimensionality reduction of the cells and milestones. The cells were projected onto the closest nearest segment, thus determining the cells position along the milestone network. →If a method also returned a cluster assignment (type 5), we limited the projection of each cell to the closest edge connecting to the milestone of a cell. For these methods, we usually wrote two wrappers, one which included the projection, and one without.←
 * →**Type 7, branch trajectory[a]:** `r conversion("branch_trajectory")`. The method returned an assignment of cells to a particular branch, a pseudotime for each cell within the branch, and a network connecting these different branch. We converted this branch network to a milestone network by calculating the line graph of the network. The cells were then placed between each two milestones using the provided pseudotime. ←
 * **Type 8, cell graph:** `r conversion("cell_graph")`. The method returned a network of cells, 
@@ -347,7 +350,12 @@ For every simulator, we took great care with trying to make the datasets look li
 ### dyngen
 
 
-The workflow to generate synthetic data is based on the well established workflow used in the evaluation of network inference methods [@schaffter_genenetweaversilicobenchmark_2011; @marbach_wisdom_2012] and consists of four main steps: network generation, simulation, gold standard extraction and simulation of the scRNA-seq experiment. At every step, we tried to mirror real regulatory networks, while keeping the model simple and easily extendable. →We simulated a total of ←
+```{r}
+design_dyngen <- read_rds(result_file("design_dyngen.rds", "01-datasets/02-synthetic"))
+```
+
+
+The workflow to generate synthetic data is based on the well established workflow used in the evaluation of network inference methods [@schaffter_genenetweaversilicobenchmark_2011; @marbach_wisdom_2012] and consists of four main steps: network generation, simulation, gold standard extraction and simulation of the scRNA-seq experiment. At every step, we tried to mirror real regulatory networks, while keeping the model simple and easily extendable. →We simulated a total of `r nrow(design_dyngen)`, with `r length(unique(design_dyngen$modulenet_name))` different topologies.←
 #### Network generation
 
 
@@ -449,7 +457,7 @@ We converted each ODE to an SDE by adding a chemical Langevin equation, as descr
 #### Simulation of the single-cell RNA-seq experiment
 
 
-For each dataset we sampled the same number of cells as were present in the reference real dataset, limited to the simulation steps after burn-in. Next, we used the Splatter package [@zappia_splattersimulationsinglecell_2017] to estimate the different characteristics of a real dataset, such as the distributions of average gene expression, library sizes and dropout probabilities. We used Splatter to simulate the expression levels $\lambda_{i,j}$ of housekeeping genes $i$ (to match the number of genes in the reference dataset) in every cell $j$. These were combined with the expression levels of the genes simulated within a trajectory. Next, true counts were simulated using $Y'_{i,j} \sim \text{Poisson}(\lambda_{i,j})$. Finally, we simulated dropouts by setting true counts to zero by sampling from a Bernoulli distribution using a dropout probability $\pi^D_{i,j} =\frac{1}{1+e^{-k(\text{ln}(\lambda_{i,j})-x_0)}}$. →Both $x_0$ (the midpoint for the dropout logistic function) and $k$ (the shape of the dropout logistic function) were estimated by Splatter.←
+For each dataset we sampled the same number of cells as were present in the reference real dataset, limited to the simulation steps after burn-in. →These cells were sampled uniformly across the different steps of the 32 simulations. ← Next, we used the Splatter package [@zappia_splattersimulationsinglecell_2017] to estimate the different characteristics of a real dataset, such as the distributions of average gene expression, library sizes and dropout probabilities. We used Splatter to simulate the expression levels $\lambda_{i,j}$ of housekeeping genes $i$ (to match the number of genes in the reference dataset) in every cell $j$. These were combined with the expression levels of the genes simulated within a trajectory. Next, true counts were simulated using $Y'_{i,j} \sim \text{Poisson}(\lambda_{i,j})$. Finally, we simulated dropouts by setting true counts to zero by sampling from a Bernoulli distribution using a dropout probability $\pi^D_{i,j} =\frac{1}{1+e^{-k(\text{ln}(\lambda_{i,j})-x_0)}}$. →Both $x_0$ (the midpoint for the dropout logistic function) and $k$ (the shape of the dropout logistic function) were estimated by Splatter.←
 
 
 #### Gold standard extraction
@@ -580,7 +588,7 @@ Here, the mean is subtracted from the raw score in order to center the distribut
 
 ```{r}
 add_sfig(
-  ggplot(),#figure_file("overview_aggregation_v1.svg", experiment_id="manual_figures/metrics"), 
+  raw_file("overview_aggregation_v1.svg", "08-summary"), 
   "aggregation_of_results", 
   "Aggregation methodology of metric scores.",
   "",
