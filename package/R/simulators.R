@@ -249,7 +249,6 @@ simulate_prosstt <- function(
 
   # normalise & filter
   counts[counts < 0] <- 0 # in some cases, prosstt produces verry low numbers (eg. -8e54)
-  # counts[counts > 1e30] <- 1e30
 
   counts <- counts[apply(counts, 1, max) > 0, ]
   if (nrow(counts) == 0) {stop("PROSSTT generated out-of-bound counts")}
