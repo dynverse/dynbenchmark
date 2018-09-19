@@ -52,16 +52,17 @@ Current applications of TI focus on specific subsets of cells, but ongoing effor
 
 
 <!-- §2: Plethora of new TI methods -->
-A plethora of TI methods has been developed over the last years, and even more are being created every month (`r ref("stable", "tools")`). →Indeed, in several repositories listing single-cell tools,  `r print_url("www.omictools.org")` [@henry_omictoolsinformativedirectory_2014], the "awesome-single-cell" list (`r print_url("https://github.com/seandavi/awesome-single-cell")`) [@davis_awesomesinglecelllistsoftware_2018] and `r print_url("www.scRNA-tools.org")` [@zappia_exploringsinglecellrnaseq_2017], TI methods are one the largest categories.← All methods have their own unique set of characteristics in terms of underlying algorithm, the prior information they require and the outputs they produce. Two of the most distinctive differences between TI methods are whether they fix the topology of the trajectory or not, and what type(s) of graph topologies they can detect. Early TI methods typically fixed the topology algorithmically (e.g. linear [@bendall_singlecelltrajectorydetection_2014; @schlitzer_identificationcdc1cdc2committed_2015; @shin_singlecellrnaseqwaterfall_2015; @campbell_bayesiangaussianprocess_2015] or bifurcating [@haghverdi_diffusionpseudotimerobustly_2016; @setty_wishboneidentifiesbifurcating_2016]), or through parameters provided by the user [@trapnell_dynamics_2014; @matsumoto_scoupprobabilisticmodel_2016]. These methods therefore mainly focused on correctly ordering the cells along the fixed topology. →Most recent methods also infer the topology computationally, which increases the difficulty of the problem at hand, but allows an unbiased identification of both the ordering inside a branch and the topology connecting these branches.←
+A plethora of TI methods has been developed over the last years, and even more are being created every month (`r ref("stable", "tools")`). →Indeed, in several repositories listing single-cell tools,  `r print_url("www.omictools.org")` [@henry_omictoolsinformativedirectory_2014], the "awesome-single-cell" list (`r print_url("https://github.com/seandavi/awesome-single-cell")`) [@davis_awesomesinglecelllistsoftware_2018] and `r print_url("www.scRNA-tools.org")` [@zappia_exploringsinglecellrnaseq_2017], TI methods are one the largest categories.← All methods have their own unique set of characteristics in terms of underlying algorithm, the prior information they require and the outputs they produce. Two of the most distinctive differences between TI methods are whether they fix the topology of the trajectory or not, and what type(s) of graph topologies they can detect. Early TI methods typically fixed the topology algorithmically (e.g. linear [@bendall_singlecelltrajectorydetection_2014; @schlitzer_identificationcdc1cdc2committed_2015; @shin_singlecellrnaseqwaterfall_2015; @campbell_bayesiangaussianprocess_2015] or bifurcating [@haghverdi_diffusionpseudotimerobustly_2016; @setty_wishboneidentifiesbifurcating_2016]), or through parameters provided by the user [@trapnell_dynamics_2014; @matsumoto_scoupprobabilisticmodel_2016]. These methods therefore mainly focused on correctly ordering the cells along the fixed topology. →Most recent methods also infer the topology [@street_slingshotcelllineage_2017; @wolf_graphabstractionreconciles_2017], which increases the difficulty of the problem at hand, but allows an unbiased identification of both the ordering inside a branch and the topology connecting these branches.←
 
 
 
 
-```{r, eval = FALSE}
+```{r}
 add_stable(
-  read_rds(result_file("tools_table.rds", "03-methods"))[[params$table_format]],
-"tools",
-paste0("Overview of the trajectory inference methods included in this study. ", glue::glue_data(non_inclusion_reasons, "{footnote}: {long}") %>% glue::glue_collapse("; "))
+ result_file("tools.xlsx", "03-methods"),
+  "tools",
+paste0("→Overview of available trajectory inference tools, and whether they were included in this study.←"),
+  ""
 )
 ```
 
@@ -200,15 +201,15 @@ ________________
 # Online Methods
 ## Data and code availability
 → 
-The real and synthetic datasets used in this study are deposited on Zenodo ([doi.org/10.5281/zenodo.1211533](https://doi.org/10.5281/zenodo.1211533)) [@cannoodt_goldstandardsinglecell_]. 
+The real and synthetic datasets used in this study are deposited on Zenodo ([doi.org/10.5281/zenodo.1211533](https://doi.org/10.5281/zenodo.1211533[a])) [@cannoodt_goldstandardsinglecell_]. 
 
 
-The code to fully reproduce the results from this study has been split into several R packages and is available on github at `r print_url("github.com/dynverse/dynverse")`. These include packages for wrapping trajectories (`r print_url("github.com/dynverse/dynwrap")`), all trajectory inference methods (`r print_url("github.com/dynverse/dynverse")`), the evaluation metrics (`r print_url("github.com/dynverse/dyneval")`) and the guidelines app packages (`r print_url("github.com/dynverse/dynguidelines")`). The main analysis repository is available at `r print_url("github.com/dynverse/dynbenchmark")` and is divided into several experiments. In this repository, we provide READMEs for both the scripts and the results, which can be easily browsed and explored on the github website. 
+The code to fully reproduce the results from this study has been split into several R packages and is available on github at `r print_url("https://www.github.com/dynverse/dynverse")`. These include packages for wrapping trajectories (`r print_url("https://www.github.com/dynverse/dynwrap")`), all trajectory inference methods (`r print_url("https://www.github.com/dynverse/dynverse")`), the evaluation metrics (`r print_url("https://www.github.com/dynverse/dyneval")`) and the guidelines app packages (`r print_url("https://www.github.com/dynverse/dynguidelines")`). The main analysis repository is available at `r print_url("https://www.github.com/dynverse/dynbenchmark")` and is divided into several experiments. In this repository, we provide readmes for both the scripts and the results, which can be easily browsed and explored on the github website.
 ←
 ## Trajectory inference methods
 <!-- Overview -->
-We gathered a list of `r n_tools` trajectory inference tools (`r ref("stable", "tools")`), by searching the literature for "trajectory inference" and "pseudotemporal ordering", and based on two existing lists found online [@davis_awesomesinglecelllistsoftware_2018; @gitter_singlecellpseudotimeoverviewalgorithms_2018].
-We welcome any contributions by creating an issue at →`r print_url("github.com/dynverse/dynmethods/issues")`←.
+We gathered a list of `r n_tools` trajectory inference tools (`r ref("stable", "tools")`), by searching the literature for "trajectory inference" and "pseudotemporal ordering", and based on two existing lists found online: `r print_url("https://github.com/seandavi/awesome-single-cell")`  [@davis_awesomesinglecelllistsoftware_2018] and  `r print_url("https://github.com/agitter/single-cell-pseudotime")` [@gitter_singlecellpseudotimeoverviewalgorithms_2018].
+We welcome any contributions by creating an issue at →`r print_url("https://www.github.com/dynverse/dynmethods/issues")`←.
 
 
 <!-- Inclusion criterion -->
@@ -326,13 +327,11 @@ We gathered `r sum(list_datasets()$source == "real")` real datasets by searching
 
 
 ```{r}
-#add_stable(
-#  read_rds(
-#     figure_file("datasets.rds","2-dataset_characterisation/2-real")
-#  )[[params$table_format]], 
-#  "datasets", 
-#  "Real datasets used in this study."
-#)
+add_stable(
+  result_file("metadata.xlsx","01-datasets/01-real"), 
+  "datasets", 
+  "Real datasets used in this study."
+)
 ```
 ## Synthetic datasets
 →
@@ -499,7 +498,7 @@ For more complex topologies we first calculated a random number of "modification
 * Disconnected, number of components sampled from $\sim B(5, 0.25) + 2$, for each component we randomly chose a topology from the ones listed above
 
 
-After generating the topology, we sampled the length of each edge $\sim U(0.5, 1)$. We added regions of delayed commitment to a divergence by virtually flipping a coin. [a]We then placed the number of cells (same number as from the reference real dataset), on this topology uniformly, depending on the length of the edges in the milestone network.[b]
+After generating the topology, we sampled the length of each edge $\sim U(0.5, 1)$. We added regions of delayed commitment to a divergence by virtually flipping a coin. [b]We then placed the number of cells (same number as from the reference real dataset), on this topology uniformly, depending on the length of the edges in the milestone network.[c]
 
 
 For each gene (same number as from the reference real dataset), we calculated the Kamada-Kawai layout in 2 dimensions, with edge weight equal to the length of the edge. For this gene, we then extracted for each cell a density value using a bivariate normal distribution with $\mu \sim U(x_{\textit{min}}, x_{\textit{min}})$ and $\sigma \sim U(x_{\textit{min}}/10, x_{\textit{min}}/8)$. We used this density as input for a zero-inflated negative binomial distribution with $\mu ~ U(100, 1000) \times \textit{density}$, $k ~ U(\mu / 10, \mu / 4)$ and $pi$ from the parameters of the reference real dataset, to get the final count values.
@@ -554,7 +553,7 @@ The `r label_metric("featureimp_wcor")` assesses whether similar dynamically dif
 
 
 ←
-### Aggregation of scores[c]
+### Aggregation of scores[d]
 `r ref("sfig", "aggregation_of_results")` illustrates the full set of aggregations performed on the raw scores in order to arrive at the final ranking of methods. 
 
 
@@ -637,8 +636,8 @@ Each aspect was further assigned to one or more applications, based on whether i
 
 Each quality aspect received a weight depending on how frequently it was found in several papers and online sources which discuss tool quality (`r ref("stable", "qc_checks")`). This was to make sure that more important aspects, such as the open source availability of the method, outweighed other aspects, such as the availability of a graphical user interface. Within each aspect, we also assigned a weight to the individual questions being investigated (`r ref("stable", "qc_checks")`). For calculating the final score, we weighed each of the six categories equally.
 →
-## Scalability[d]
-## [e]Stability
+## Scalability[e]
+## [f]Stability
 ←
 ## Trajectory types
 We classified all possible trajectory topologies into distinct trajectory types, based on topological criteria (`r ref("fig", "ti_evaluation_overview", "c")`). These trajectory types start from the most general trajectory type, a disconnected directed graph, and move down (within a directed acyclic graph structure), progressively becoming more simple until the two basic types: linear and cyclical. A disconnected directed graph is a graph in which only one edge can exist between two nodes. A directed graph is a disconnected graph in which all nodes are (indirectly) connected. A directed acyclic graph is a graph containing no cycles. A rooted tree is a directed acyclic graph containing no convergences (no nodes with in-degree higher than 1). A rooted binary tree is a rooted tree with every node having maximally two outgoing edges. A convergence is a directed acyclic graph in which only one node has a degree larger than one and this same node has an indegree of one. A multifurcation is a rooted tree in which only one node has a degree larger than one. A bifurcation is a multifurcation in which only one node has a degree equal to 3. A directed linear graph is a graph in which no node has a degree larger than 3. Finally, a directed cycle is a directed graph in which no node has a degree larger than 3 but contains one cycle. For every directed trajectory type, a corresponding undirected trajectory type can also be defined, with directed acyclic graphs and directed graphs merging to undirected graph, and convergence and bifurcation merging to a simple fork. In most cases, a method which was able to detect a complex trajectory type, was also able to detect less complex trajectory types, with →the exceptions being being DPT (limited to bifurcating trajectories), and STEMNET and FateID (unable to return linear trajectories).←
@@ -672,8 +671,9 @@ Make sure to pin the zotero bibtex references after first using them!
 -->
 
 
-[a]Don't put this in the paper
-[b]Factually incorrect but ¯\_(ツ)_/¯
-[c]Robrecht, you know what to do ;)
-[d]I will try to do my best in adding this if you don't do it first Robrecht
+[a]Update the doi when reuploaded
+[b]Don't put this in the paper
+[c]Factually incorrect but ¯\_(ツ)_/¯
+[d]Robrecht, you know what to do ;)
 [e]I will try to do my best in adding this if you don't do it first Robrecht
+[f]I will try to do my best in adding this if you don't do it first Robrecht
