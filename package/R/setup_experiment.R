@@ -63,7 +63,7 @@ derived_file <- experiment_subfolder("derived")
 
 #' @rdname experiment
 #' @export
-data_file <- experiment_subfolder("data")
+raw_file <- experiment_subfolder("raw")
 
 #' @rdname experiment
 #' @export

@@ -7,7 +7,7 @@ experiment("gource")
 files <- c(
   list.files(derived_file("git_output"), "*.txt", full.names = TRUE),
   derived_file("google_drive.txt"),
-  list.files(data_file("deprecated_repositories"), "*.txt", full.names = TRUE)
+  list.files(raw_file("deprecated_repositories"), "*.txt", full.names = TRUE)
 )
 
 user_map <- c(Zouter = "Wouter Saelens", zouter = "Wouter Saelens")
@@ -24,7 +24,7 @@ changes <- files %>%
 write_delim(changes, derived_file("combined_out.txt"), delim = "|", col_names = FALSE)
 
 system(pritt(
-  "gource -1920x1080 -s 3 {derived_file('combined_out.txt')} --user-image-dir {data_file('avatar/')} -o - | ",
+  "gource -1920x1080 -s 3 {derived_file('combined_out.txt')} --user-image-dir {raw_file('avatar/')} -o - | ",
   "ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -vcodec libx264 -preset ultrafast -pix_fmt yuv420p ",
   "-crf 1 -threads 0 -bf 0 {derived_file('gource.mp4')}"
 ))

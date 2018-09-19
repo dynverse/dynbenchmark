@@ -5,18 +5,17 @@ experiment("01-datasets/04-dataset_characterisation")
 
 datasets <- load_datasets()
 
-
 ##  ............................................................................
 ##  Clustering the topologies                                               ####
 # - first simplifying the graph
 # - then applying hierarchical clustering with distance cutoff 0
 cluster_topologies <- function(milestone_networks) {
-  # group datasets by degree distribution (after simplification)
+  # group datasets by in and out degree distribution (after simplification)
   graph_simplified <- map(
-    datasets$milestone_network,
+    milestone_networks,
     function(milestone_network) {
       milestone_network %>%
-        igraph::graph_from_data_frame() %>%
+        igraph::graph_from_data_frame(directed = any(milestone_network$directed)) %>%
         dynwrap::simplify_igraph_network(allow_duplicated_edges = FALSE, allow_self_loops = FALSE)
     }
   )
@@ -25,11 +24,19 @@ cluster_topologies <- function(milestone_networks) {
   dataset_degree_distributions <- map(
     graph_simplified,
     function(graph) {
-      degree_distribution <- igraph::degree.distribution(graph)
-      if (length(degree_distribution) < max_degree + 1) {
-        degree_distribution <- c(rep(0, max_degree - length(degree_distribution) + 1), degree_distribution)
+      degree_distribution_in <- igraph::degree.distribution(graph, mode = "in")
+      if (length(degree_distribution_in) < max_degree + 1) {
+        degree_distribution_in <- c(rep(0, max_degree - length(degree_distribution_in) + 1), degree_distribution_in)
       }
-      degree_distribution
+
+      degree_distribution_out <- igraph::degree.distribution(graph, mode = "out")
+      if (length(degree_distribution_out) < max_degree + 1) {
+        degree_distribution_out <- c(rep(0, max_degree - length(degree_distribution_out) + 1), degree_distribution_out)
+      }
+      c(
+        degree_distribution_in,
+        degree_distribution_out
+      )
     }
   ) %>% do.call(rbind, .)
 
@@ -40,9 +47,7 @@ cluster_topologies <- function(milestone_networks) {
   )
 }
 
-
 datasets_clustered <- bind_cols(datasets, cluster_topologies(datasets$milestone_network))
-
 
 topology_clusters <- datasets_clustered %>%
   group_by(topology_cluster) %>%
@@ -71,9 +76,15 @@ plots_topology_clusters <- topology_clusters %>%
       individual_plots <- pmap(
         topology_clusters,
         function(graph_simplified, n, ...) {
+          if (igraph::is_directed(graph_simplified)) {
+            arrow <- arrow(type = "closed", length = unit(0.1, "inches"))
+          } else {
+            arrow = NULL
+          }
+
           ggraph::ggraph(graph_simplified) +
             ggraph::geom_node_point() +
-            ggraph::geom_edge_link(arrow = arrow(type = "closed", length = unit(0.1, "inches"))) +
+            ggraph::geom_edge_link(arrow = arrow) +
             ggtitle(n) +
             theme_graph() +
             theme(plot.title = element_text(hjust = 0.5))
