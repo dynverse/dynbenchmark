@@ -23,20 +23,6 @@
    inkscape:export-ydpi="100">
   <defs
      id="defs16903">
-    <marker
-       inkscape:stockid="Arrow1Lend"
-       orient="auto"
-       refY="0.0"
-       refX="0.0"
-       id="Arrow1Lend"
-       style="overflow:visible;"
-       inkscape:isstock="true">
-      <path
-         id="path7006"
-         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
-         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
-         transform="scale(0.8) rotate(180) translate(12.5,0)" />
-    </marker>
     <linearGradient
        id="linearGradient2489"
        inkscape:collect="always">
@@ -80,34 +66,6 @@
          style="stop-color:#bebada;stop-opacity:1;"
          offset="0"
          id="stop1791" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient3646">
-      <stop
-         style="stop-color:#ffa500;stop-opacity:1;"
-         offset="0"
-         id="stop3644" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient3640">
-      <stop
-         style="stop-color:#dc00ff;stop-opacity:1;"
-         offset="0"
-         id="stop3638" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient3634">
-      <stop
-         style="stop-color:#ffe100;stop-opacity:1;"
-         offset="0"
-         id="stop3632" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient3628">
-      <stop
-         style="stop-color:#fc0303;stop-opacity:1;"
-         offset="0"
-         id="stop3626" />
     </linearGradient>
     <linearGradient
        id="linearGradient3620"
@@ -423,72 +381,6 @@
       stroke-miterlimit: 10.00;
     }
   ]]></style>
-    <linearGradient
-       id="linearGradient29433">
-      <stop
-         style="stop-color:#fd0f00;stop-opacity:1;"
-         offset="0"
-         id="stop29431" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient29451">
-      <stop
-         style="stop-color:#58b629;stop-opacity:1;"
-         offset="0"
-         id="stop29449" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient29654">
-      <stop
-         style="stop-color:#006fd0;stop-opacity:1;"
-         offset="0"
-         id="stop29652" />
-    </linearGradient>
-    <marker
-       inkscape:stockid="Arrow1Lstart"
-       orient="auto"
-       refY="0"
-       refX="0"
-       id="Arrow1Lstart-0"
-       style="overflow:visible"
-       inkscape:isstock="true">
-      <path
-         id="path16632-1"
-         d="M 0,0 5,-5 -12.5,0 5,5 Z"
-         style="fill:#161100;fill-opacity:1;fill-rule:evenodd;stroke:#161100;stroke-width:1.00000003pt;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-opacity:1"
-         transform="matrix(0.8,0,0,0.8,10,0)"
-         inkscape:connector-curvature="0" />
-    </marker>
-    <marker
-       inkscape:isstock="true"
-       style="overflow:visible"
-       id="marker25853-7-4-7"
-       refX="0"
-       refY="0"
-       orient="auto"
-       inkscape:stockid="Arrow1Lend">
-      <path
-         transform="matrix(-0.8,0,0,-0.8,-10,0)"
-         style="fill:#161100;fill-opacity:1;fill-rule:evenodd;stroke:#161100;stroke-width:1.00000003pt;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-opacity:1"
-         d="M 0,0 5,-5 -12.5,0 5,5 Z"
-         id="path25851-4-3-8"
-         inkscape:connector-curvature="0" />
-    </marker>
-    <marker
-       inkscape:stockid="Arrow1Lstart"
-       orient="auto"
-       refY="0"
-       refX="0"
-       id="Arrow1Lstart-8"
-       style="overflow:visible"
-       inkscape:isstock="true">
-      <path
-         inkscape:connector-curvature="0"
-         id="path16632-0"
-         d="M 0,0 5,-5 -12.5,0 5,5 Z"
-         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-opacity:1"
-         transform="matrix(0.8,0,0,0.8,10,0)" />
-    </marker>
     <style
        id="style83897"
        type="text/css"><![CDATA[
@@ -776,112 +668,6 @@
       stroke-miterlimit: 10.00;
     }
   ]]></style>
-    <linearGradient
-       id="linearGradient1362"
-       gradientTransform="scale(1.4012789,0.71363381)"
-       x1="-115.34911"
-       y1="124.18454"
-       x2="-99.958405"
-       y2="124.18454"
-       gradientUnits="userSpaceOnUse">
-      <stop
-         style="stop-color:#b7b7b7;stop-opacity:1;"
-         offset="0"
-         id="stop1360" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient1350"
-       gradientTransform="matrix(0.00490061,0,0,0.00490061,-856.05935,223.08323)">
-      <stop
-         style="stop-color:#020a0f;stop-opacity:1;"
-         offset="0"
-         id="stop1348" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient1314"
-       gradientTransform="matrix(0.07000434,0,0,0.07000434,-484.2463,106.83661)">
-      <stop
-         style="stop-color:#ff7f00;stop-opacity:1;"
-         offset="0"
-         id="stop1312" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient1326"
-       gradientTransform="matrix(0.00129662,0,0,0.00129662,-1064.6776,278.86905)">
-      <stop
-         style="stop-color:#6a3d9a;stop-opacity:1;"
-         offset="0"
-         id="stop1324" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient1290"
-       gradientTransform="matrix(0.00490061,0,0,0.00490061,-856.05935,223.10268)">
-      <stop
-         style="stop-color:#33a02c;stop-opacity:1;"
-         offset="0"
-         id="stop1288" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient1302"
-       gradientTransform="matrix(0.07000434,0,0,0.07000434,-484.2463,106.92922)">
-      <stop
-         style="stop-color:#e31a1c;stop-opacity:1;"
-         offset="0"
-         id="stop1300" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient1278"
-       gradientTransform="matrix(0.07000434,0,0,0.07000434,-484.2463,106.92922)">
-      <stop
-         style="stop-color:#1f78b4;stop-opacity:1;"
-         offset="0"
-         id="stop1276" />
-    </linearGradient>
-    <marker
-       inkscape:isstock="true"
-       style="overflow:visible"
-       id="marker90181-2"
-       refX="0"
-       refY="0"
-       orient="auto"
-       inkscape:stockid="Arrow2Mend">
-      <path
-         inkscape:connector-curvature="0"
-         transform="scale(-0.6)"
-         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
-         style="fill:#33a02c;fill-opacity:1;fill-rule:evenodd;stroke:#33a02c;stroke-width:0.625;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-opacity:1"
-         id="path90179-9" />
-    </marker>
-    <marker
-       inkscape:stockid="Arrow2Mend"
-       orient="auto"
-       refY="0"
-       refX="0"
-       id="marker85977-1"
-       style="overflow:visible"
-       inkscape:isstock="true">
-      <path
-         id="path85975-2"
-         style="fill:#e31a1c;fill-opacity:1;fill-rule:evenodd;stroke:#e31a1c;stroke-width:0.625;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-opacity:1"
-         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
-         transform="scale(-0.6)"
-         inkscape:connector-curvature="0" />
-    </marker>
-    <marker
-       inkscape:stockid="Arrow2Mend"
-       orient="auto"
-       refY="0"
-       refX="0"
-       id="marker78535-6"
-       style="overflow:visible"
-       inkscape:isstock="true">
-      <path
-         id="path78533-2"
-         style="fill:#6a3d9a;fill-opacity:1;fill-rule:evenodd;stroke:#6a3d9a;stroke-width:0.625;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-opacity:1"
-         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
-         transform="scale(-0.6)"
-         inkscape:connector-curvature="0" />
-    </marker>
     <marker
        inkscape:stockid="TriangleOutS"
        orient="auto"
@@ -2309,16 +2095,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="4"
-     inkscape:cx="715.81566"
-     inkscape:cy="249.36044"
+     inkscape:zoom="1"
+     inkscape:cx="517.60383"
+     inkscape:cy="324.37377"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1920"
-     inkscape:window-height="983"
-     inkscape:window-x="1920"
-     inkscape:window-y="27"
+     inkscape:window-height="1163"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      fit-margin-top="0"
      fit-margin-left="0"
