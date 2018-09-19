@@ -72,7 +72,7 @@ simulate_splatter <- function(
         group.prob = milestone_network$length/sum(milestone_network$length),
         path.from = path.from,
         path.length = ceiling(milestone_network$length*n_steps_per_length),
-        path.nonlinsimulation_designearProb = path.nonlinearProb,
+        path.nonlinearProb = path.nonlinearProb,
         path.sigmaFac = path.sigmaFac,
         path.skew = path.skew
       )
