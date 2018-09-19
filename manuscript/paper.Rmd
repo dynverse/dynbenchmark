@@ -41,7 +41,7 @@ n_datasets_synthetic <- nrow(list_datasets("synthetic"))
 Recent technological advances allow unbiased investigation of cellular dynamic processes, by generating -omics profiles of thousands of single cells and computationally ordering these cells along a trajectory. Since 2014, at least →`r n_tools`← tools for trajectory inference have been developed, but due to high variability in their inputs and outputs, these methods are difficult to compare. As a result, a comprehensive assessment of the performance of trajectory inference methods is still lacking, and more importantly also guidelines for new users to the field. 
 
 
-In this study, we evaluated a total of →`r n_methods_evaluated`← methods in terms of cellular →ordering, topology, scalability, and user friendliness←. Our results indicate that existing methods are typically better at ordering the cells rather than inferring the correct trajectory topology, and that there is no "one-fits-all" method. Instead, the choice of method →mostly← depends on the trajectory topology present in the data. →To aid users with selecting the most appropriate method, we therefore developed a set of guidelines, available as an interactive app at `r print_url("http://35.239.15.98")`.← While the field certainly has matured significantly since its inception, further progress is still necessary in order to cope with increasingly complex and novel use cases. We hope to spearhead such developments and the field as a whole, by making our evaluation pipeline easily extensible and freely available at `r print_url("https://www.github.com/dynverse/dynverse")`.
+In this study, we evaluated a total of →`r n_methods_evaluated`← methods in terms of cellular →ordering, topology, scalability, and user friendliness←. Our results indicate that existing methods are typically better at ordering the cells rather than inferring the correct trajectory topology, and that there is no "one-fits-all" method. Instead, the choice of method →mostly← depends on the trajectory topology present in the data. →To aid users with selecting the most appropriate method, we therefore developed a set of guidelines, available as an interactive app at `r print_url("http://dynverse.duckdns.org")`.← While the field certainly has matured significantly since its inception, further progress is still necessary in order to cope with increasingly complex and novel use cases. We hope to spearhead such developments and the field as a whole, by making our evaluation pipeline easily extensible and freely available at `r print_url("https://www.github.com/dynverse/dynverse")`.
 
 
 # Introduction
@@ -278,14 +278,13 @@ conversion <- function(conversion_oi) {
 ```
 
 
-* **Type 1, direct:** `r conversion("trajectory")`. The wrapped method directly returned a network of milestones, the regions of delayed commitment, and for each cell is given to what extent it belongs to a milestone. →In some cases, this← indicates that additional transformations were required for the method not covered by any of the following output formats.
+* **Type 1, direct:** `r conversion("trajectory")`. The wrapped method directly returned a network of milestones, the regions of delayed commitment, and for each cell is given to what extent it belongs to a milestone. →In some cases, this← indicates that additional transformations were required for the method not covered by any of the following output formats. →Some methods (`r conversion("branch_trajectory")`) returned a branch network instead of a milestone network, and this conversion was done by calculating the line graph of the branch network.←
 * **Type 2, linear pseudotime:** `r conversion("linear_trajectory")`. The method returned a pseudotime, which is translated into a linear trajectory where the milestone network contains two milestones and cells are positioned between these two milestones.
 * **Type 3, cyclical pseudotime:** `r conversion("cyclic_trajectory")`. The method returned a pseudotime, which is translated into a cyclical trajectory where the milestone network contains three milestones and cells are positioned between these three milestones. →These milestones were positioned at pseudotime 0, ⅓ and ⅔ .←
-* **Type 4, end state probability:** `r conversion("end_state_probabilities")`. The method returned a pseudotime and for each cell and end state a probability for how likely a cell will end up in a certain end state. →This was translated into a star-shaped milestone network, with one starting milestone ($M_0$) and several outer milestones ($M_i$) with regions of delayed commitment between all milestones. The milestone percentage of a cell to one of the outer milestones was equal to $\textrm{pseudotime} \times \textrm{Pr}_{M_i}$ , the milestone percentage to the starting milestone was equal to $1-\textrm{pseudotime}$ .←
+* **Type 4, end state probability:** `r conversion("end_state_probabilities")`. The method returned a pseudotime and for each cell and end state a probability for how likely a cell will end up in a certain end state. →This was translated into a star-shaped milestone network, with one starting milestone ($M_0$) and several outer milestones ($M_i$), with regions of delayed commitment between all milestones. The milestone percentage of a cell to one of the outer milestones was equal to $\textrm{pseudotime} \times \textrm{Pr}_{M_i}$ , the milestone percentage to the starting milestone was equal to $1-\textrm{pseudotime}$ .←
 * **Type 5, cluster assignment:** `r conversion("cluster_graph")`. The method returned a milestone network, and an assignment of each cell to a specific milestone. Cells were positioned onto the milestones they are assigned to→, with milestone percentage equal to 1.←
 * **Type 6, project onto nearest branch:** `r conversion("dimred_projection")`. The method returned a milestone network, and a dimensionality reduction of the cells and milestones. The cells were projected onto the closest nearest segment, thus determining the cells position along the milestone network. →If a method also returned a cluster assignment (type 5), we limited the projection of each cell to the closest edge connecting to the milestone of a cell. For these methods, we usually wrote two wrappers, one which included the projection, and one without.←
-* →**Type 7, branch trajectory[a]:** `r conversion("branch_trajectory")`. The method returned an assignment of cells to a particular branch, a pseudotime for each cell within the branch, and a network connecting these different branch. We converted this branch network to a milestone network by calculating the line graph of the network. The cells were then placed between each two milestones using the provided pseudotime. ←
-* **Type 8, cell graph:** `r conversion("cell_graph")`. The method returned a network of cells, 
+* **Type 7, cell graph:** `r conversion("cell_graph")`. The method returned a network of cells, 
 and which cell-cell transitions are part of the 'backbone' structure. Backbone cells with degree $\neq$ 2 were regarded as milestones, and all other cells were placed on transitions between the milestones. →If methods did not return a distance between pairs of cells, the cells were uniformly positioned between the two milestones. Otherwise, we first calculated the distance between two milestones as the sum of the distances between the cells, and then divided the distance of each pair of cells with the total distance to get the milestone percentages.←
 
 
@@ -293,7 +292,7 @@ Special conversions were necessary for certain methods:
 
 
 * **DPT:** We projected the cells onto the cluster network, consisting of a central milestone (this cluster contains the cells which were assigned to the "unknown" branch) and three terminal milestones, each corresponding to a tip point. →This was then processed as a type 1, direct,  method.←
-* **Sincell:** To constrain the number of milestones this method creates, we merged two cell clusters iteratively until the percentage of leaf nodes was below a certain cutoff, default at 25%.  →This was then processed as a type 8, cell graph, method.←
+* **Sincell:** To constrain the number of milestones this method creates, we merged two cell clusters iteratively until the percentage of leaf nodes was below a certain cutoff, default at 25%.  →This was then processed as a type 7, cell graph, method.←
 * **SLICE:** As discussed in the vignette of SLICE, we ran principal curves one by one for every edge detected by SLICE. →This was then processed as a type 1, direct, method.←
 * **mfa:** We used the branch assignment as state probabilities, which together with the global pseudotime were processed →as a type 4, end state probabilities, method.←
 →
@@ -301,8 +300,9 @@ Special conversions were necessary for certain methods:
 * **URD:** We extracted the pseudotime of a cell within each branch using the y positions in the tree layout. This was then further processed as a type 1, direct, method.
 
 
-More information on how each method was wrapped can be found within the comments of each wrapper script.
-←
+More information on how each method was wrapped can be found within the comments of each wrapper script, available at `r print_url("https://github.com/dynverse/dynverse/tree/master/methods")`.←
+
+
 →
 ### Control methods
 We added several control positive and negative control methods: **random**, which generates a random network with 50 milestones according to a Barabási–Albert model, **identity**, which returns the gold standard, and **shuffle**, which will place the cells randomly on the gold standard milestone network.
@@ -345,7 +345,7 @@ To generate synthetic datasets, we used four different synthetic data simulators
 * **Splatter:** Simulations of non-linear paths between different expression states [@zappia_splattersimulationsinglecell_2017]
 
 
-For every simulator, we took great care with trying to make the datasets look like real data as  best as possible. To do this, we extracted several parameters from all real datasets. We calculated the number of differentially expressed features within a trajectory using a wilcoxon test between every pair of cell groups. We also calculated several other parameters, such as drop-out rates and library sizes using the Splatter package [@zappia_splattersimulationsinglecell_2017]. These parameters were then given to the simulators when applicable, as described below.
+For every simulator, we took great care with trying to make the datasets look like real data as  best as possible. To do this, we extracted several parameters from all real datasets. We calculated the number of differentially expressed features within a trajectory using a wilcoxon test between every pair of cell groups. We also calculated several other parameters, such as drop-out rates and library sizes using the Splatter package [@zappia_splattersimulationsinglecell_2017]. These parameters were then given to the simulators when applicable, as described below. To select a diverse set of $k$ reference real datasets, we clustered all the parameters of each real dataset, and used the $k$ cluster centers from a pam clustering (implemented in the R cluster package);
 ←
 ### dyngen
 
@@ -355,7 +355,7 @@ design_dyngen <- read_rds(result_file("design_dyngen.rds", "01-datasets/02-synth
 ```
 
 
-The workflow to generate synthetic data is based on the well established workflow used in the evaluation of network inference methods [@schaffter_genenetweaversilicobenchmark_2011; @marbach_wisdom_2012] and consists of four main steps: network generation, simulation, gold standard extraction and simulation of the scRNA-seq experiment. At every step, we tried to mirror real regulatory networks, while keeping the model simple and easily extendable. →We simulated a total of `r nrow(design_dyngen)`, with `r length(unique(design_dyngen$modulenet_name))` different topologies.←
+The dyngen ( `r print_url("https://github.com/dynverse/dyngen")`) workflow to generate synthetic data is based on the well established workflow used in the evaluation of network inference methods [@schaffter_genenetweaversilicobenchmark_2011; @marbach_wisdom_2012] and consists of four main steps: network generation, simulation, gold standard extraction and simulation of the scRNA-seq experiment. At every step, we tried to mirror real regulatory networks, while keeping the model simple and easily extendable. →We simulated a total of `r nrow(design_dyngen)` datasets, with `r length(unique(design_dyngen$modulenet_name))` different topologies.←
 #### Network generation
 
 
@@ -460,6 +460,9 @@ We converted each ODE to an SDE by adding a chemical Langevin equation, as descr
 For each dataset we sampled the same number of cells as were present in the reference real dataset, limited to the simulation steps after burn-in. →These cells were sampled uniformly across the different steps of the 32 simulations. ← Next, we used the Splatter package [@zappia_splattersimulationsinglecell_2017] to estimate the different characteristics of a real dataset, such as the distributions of average gene expression, library sizes and dropout probabilities. We used Splatter to simulate the expression levels $\lambda_{i,j}$ of housekeeping genes $i$ (to match the number of genes in the reference dataset) in every cell $j$. These were combined with the expression levels of the genes simulated within a trajectory. Next, true counts were simulated using $Y'_{i,j} \sim \text{Poisson}(\lambda_{i,j})$. Finally, we simulated dropouts by setting true counts to zero by sampling from a Bernoulli distribution using a dropout probability $\pi^D_{i,j} =\frac{1}{1+e^{-k(\text{ln}(\lambda_{i,j})-x_0)}}$. →Both $x_0$ (the midpoint for the dropout logistic function) and $k$ (the shape of the dropout logistic function) were estimated by Splatter.←
 
 
+This count matrix was then filtered and normalised using the pipeline described below.
+
+
 #### Gold standard extraction
 
 
@@ -468,35 +471,71 @@ Because each cellular simulation follows the trajectory at its own speed, knowin
 
 →
 ### dyntoy
+```{r}
+design_dyntoy <- read_rds(result_file("design_dyntoy.rds", "01-datasets/02-synthetic"))
+```
 
 
+For more simplistic data generation ("toy" datasets), we created the dyntoy workflow (`r print_url("https://github.com/dynverse/dyntoy")`) . We created `r length(unique(design_dyntoy$topology_model))` topology generators (described below), and with   `r nrow(design_dyntoy)/length(unique(design_dyntoy$topology_model))` datasets per generator, we created `r nrow(design_dyntoy)` datasets.
+
+
+We created a set of topology generators:
+
+
+* Linear and cyclic, with number of milestones $\sim B(10, 0.25)$
+* Bifurcating and converging, with four milestones
+* Binary tree, with number of branching points $\sim U(3, 6)$
+* Tree, with number of branching points $\sim U(3, 6)$ and maximal degree $\sim U(3, 6)$
+
+
+For more complex topologies we first calculated a random number of "modifications" $\sim U(3, 6)$ and a $\textit{deg}_{\textit{max}} \sim B(10, 0.25) + 1$. For each type of topology, we defined what kind of modifications are possible: divergences, loops, convergences and divergence-convergence. We then iteratively constructed the topology by uniformly sampling from the set of possible modifications, and adding this modification to the existing topology. For a divergence, we connected an existing milestone to a number of a new milestones. Conversely, for a convergence we connected a number of new nodes to an existing node. For a loop, we connected two existing milestones with a number of milestones in between. Finally for a divergence-convergence we connected an existing milestone to several new milestones which again converged on a new milestone. The number of nodes was sampled from $\sim B(\textit{deg}_{\textit{max}} - 3, 0.25) + 2$
+
+
+* Diverging-converging, allowed divergence and converging modifications
+* Diverging with loops, allowed divergence and loop modifications
+* Multiple looping, allowed looping modifications
+* Connected, allowed looping, divergence and convergence modifications
+* Disconnected, number of components sampled from $\sim B(5, 0.25) + 2$, for each component we randomly chose a topology from the ones listed above
+
+
+After generating the topology, we sampled the length of each edge $\sim U(0.5, 1)$. We added regions of delayed commitment to a divergence by virtually flipping a coin. [a]We then placed the number of cells (same number as from the reference real dataset), on this topology uniformly, depending on the length of the edges in the milestone network.[b]
+
+
+For each gene (same number as from the reference real dataset), we calculated the Kamada-Kawai layout in 2 dimensions, with edge weight equal to the length of the edge. For this gene, we then extracted for each cell a density value using a bivariate normal distribution with $\mu \sim U(x_{\textit{min}}, x_{\textit{min}})$ and $\sigma \sim U(x_{\textit{min}}/10, x_{\textit{min}}/8)$. We used this density as input for a zero-inflated negative binomial distribution with $\mu ~ U(100, 1000) \times \textit{density}$, $k ~ U(\mu / 10, \mu / 4)$ and $pi$ from the parameters of the reference real dataset, to get the final count values.
+
+
+This count matrix was then filtered and normalised using the pipeline described below.
 ### PROSSTT
+```{r}
+design_prosstt <- read_rds(result_file("design_dyntoy.rds", "01-datasets/02-synthetic"))
+```
 
 
+PROSSTT is a recent data simulator [@papadopoulosPROSSTTProbabilisticSimulation2018], which simulates expression using linear mixtures of expression programs and random walks through the trajectory. We used 5 topology generators from dyntoy (linear, bifurcating, multifurcating, binary tree and tree), and simulated for each topology generator 10 datasets using different reference real datasets, leading to a total of 50 datasets.
+
+
+Using the `simulate_lineage` function, we simulated the lineage expression, with parameters $\a \sim U(0.01, 0.1)$, $\textit{branch-tol}_{\textit{intra}} \sim U(0, 0.9)$ and $\textit{branch-tol}_{\textit{inter}} \sim U(0, 0.9)$. These parameter distributions were chosen very broad so as to make sure both easy and difficult datasets are simulated. After simulating base gene expression with `simulate_base_gene_exp`, we used the `sample_density` function to finally simulate expression values of a number of cells (the same as from the reference real dataset), with $\alpha \sim \textit{Lognormal}$ ($\mu = 0.3$ and $\sigma = 1.5$) and $\beta \sim \textit{Lognormal}$ ($\mu = 2$ and $\sigma = 1.5$). Each of these parameters were centered around the default values of PROSSTT, but with enough variability to ensure a varied set of datasets.
+
+
+This count matrix was then filtered and normalised using the pipeline described below.
 ### Splatter
+Splatter [@zappia_splattersimulationsinglecell_2017] simulates expression values by constructing non-linear paths between different states, each having a distinct expression profile. We used 5 topology generators from dyntoy (linear, bifurcating, multifurcating, binary tree and tree), and simulated for each topology generator 10 datasets using different reference real datasets, leading to a total of 50 datasets.
+
+
+We used the `splatSimulatePaths` function from Splatter to simulate datasets, with number of cells and genes equal to those in the reference real dataset, and with parameters  $\textit{nonlinearProb}$, $\textit{sigmaFac}$ and $\textit{skew}$ all sampled from $U(0, 1)$. 
+
+
+This count matrix was then filtered and normalised using the pipeline described below.
+
+
 ←
 ## Dataset filtering and normalisation
-We used a standard single-cell RNA-seq preprocessing pipeline which applies parts of the scran and scater Bioconductor packages [@lun_stepbystepworkflowlowlevel_2016]. The advantages of this pipeline is that it works both with and without spike-ins, and includes a harsh cell filtering which looks at abnormalities in library sizes, mitochondrial gene expression, and number of genes expressed using median absolute deviations (set to 3). We required that a gene was expressed in at least 5% of the cells, and that it should have an average expression higher than 0.05. Furthermore, we used the pipeline to select the most highly variable genes, using a false discovery rate of 5% and a biological component higher than 0.5. As a final filter, we removed both zero genes and cells until convergence.
+We used a standard single-cell RNA-seq preprocessing pipeline which applies parts of the scran and scater Bioconductor packages [@lun_stepbystepworkflowlowlevel_2016]. The advantages of this pipeline is that it works both with and without spike-ins, and includes a harsh cell filtering which looks at abnormalities in library sizes, mitochondrial gene expression, and number of genes expressed using median absolute deviations (→which we set to 3←). We required that a gene was expressed in at least 5% of the cells, and that it should have an average expression higher than 0.02. Furthermore, we used the pipeline to select the most highly variable genes, using a false discovery rate of 5% and a biological component higher than 0.5. As a final filter, we removed both all-zero genes and cells until convergence.
 ## Evaluation metrics
 The importance of using multiple metrics to compare complex models has been stated repeatedly [@norel_selfassessmenttrap_2011]. →Furthermore, a trajectory is a model with multiple layers of complexity, which calls for several metrics each assessing a different layer. We therefore defined several possible metrics for comparing trajectories, each investigating different layers. These are all discussed in `r ref("snote", "metrics")` along with examples and robustness analyses when appropriate.
 
 
-Next, we created a set of rules to which we think a good trajectory metric should conform, and tested this empirically for each metric by comparing scores before and after perturbing a dataset (`r ref("snote", "metrics")`). Based on this analysis, we chose 4 metrics for ←
-
-
-  We defined three metrics for comparing the similarity of predicted trajectories to a gold standard (`r ref("fig", "ti_evaluation_overview", "c")`). Each metric assesses the performance of a different aspect of the trajectory (`r ref("sfig", "score_aspects")`); (i) the correlation metric measures the similarity in pairwise cell-cell distances; (ii) the RF MSE metric assesses whether cell neighbourhoods are similar in both trajectories; and (iii) the edge flip scores assesses similarity in trajectory topologies. 
-
-
-```{r}
-add_sfig(
-  ggplot(),#figure_file("aspects_v2.svg", experiment_id="manual_figures/metrics"), 
-  "score_aspects", 
-  "Different scores assess different aspects of the correspondence between a prediction and gold standard trajectory.", 
-  "",
-  15, 
-  8
-)
-```
+Next, we created a set of rules to which we think a good trajectory metric should conform, and tested this empirically for each metric by comparing scores before and after perturbing a dataset (`r ref("snote", "metrics")`). Based on this analysis, we chose 4 metrics for the evaluation, each assessing a different aspect of the trajectory: (i) the `r label_metric("him")` measures the topological similarity, (ii) the  `r label_metric("F1_branches")` compares the branch assignment, (iii) the  `r label_metric("correlation")` assesses the similarity in pairwise cell-cell distances and thus the cellular positions, and (iv) the  `r label_metric("featureimp_cor")` looks at whether similar important features (genes) are found in both the reference dataset and the prediction. ←
 ### Correlation between geodesic distances
 The similarity in cell ordering between two trajectories is assessed by calculating the geodesic distances between each pair of cells for both trajectories. The definition of a geodesic distance between two cells part of the common trajectory model will be demonstrated using a toy example (`r ref("sfig", "metric_geodesic")`). 
 
@@ -660,4 +699,5 @@ Make sure to pin the zotero bibtex references after first using them!
 -->
 
 
-[a]Gotta update the figure to reflect this
+[a]Don't put this in the paper
+[b]Factually incorrect but ¯\_(ツ)_/¯
