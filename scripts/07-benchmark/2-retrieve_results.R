@@ -21,9 +21,7 @@ execution_output <- benchmark_bind_results(load_models = FALSE) %>%
 design <- read_rds(derived_file("design.rds"))
 
 methods_info <- design$methods %>%
-  rename_all(function(x) paste0("method_", x)) %>%
-  select(-method_type) %>%
-  left_join(dynmethods::methods %>% select(method_id = id, method_type = type), by = "method_id")
+  rename_all(function(x) paste0("method_", x))
 datasets_info <- design$datasets %>%
   rename_all(function(x) paste0("dataset_", x))
 

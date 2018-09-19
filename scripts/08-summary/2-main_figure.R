@@ -10,7 +10,7 @@ list2env(read_rds(result_file("results.rds")), environment())
 method_info <- method_info %>%
   mutate(method_grouping = ifelse(method_source == "tool", method_most_complex_trajectory_type, method_source))
 
-method_groups <- c(dynwrap::trajectory_types$id, c("adaptation", "offtheshelf", "control"))
+method_groups <- c(rev(dynwrap::trajectory_types$id), c("adaptation", "offtheshelf", "control"))
 
 # determine palettes
 sc_col_fun <- function(palette) {
