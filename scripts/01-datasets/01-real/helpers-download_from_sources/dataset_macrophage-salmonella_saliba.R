@@ -1,7 +1,7 @@
 library(tidyverse)
 library(dynbenchmark)
 
-dataset_preprocessing("real/macrophage-salmonella_saliba")
+dataset_preprocessing("real/gold/macrophage-salmonella_saliba")
 
 txt_location <- download_dataset_source_file(
   "GSE79363_first_dataset_read_count.txt.gz",

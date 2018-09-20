@@ -3,7 +3,7 @@ library(dynbenchmark)
 library(GEOquery)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real/developing-dendritic-cells_schlitzer")
+dataset_preprocessing("real/gold/developing-dendritic-cells_schlitzer")
 
 # download and untar files
 file <- download_dataset_source_file("GSE60781_RAW.tar", "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE60781&format=file")

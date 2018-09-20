@@ -3,7 +3,7 @@ library(dynbenchmark)
 library(GEOquery)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real/hematopoiesis_olsson")
+dataset_preprocessing("real/goldsilver/hematopoiesis_olsson")
 
 files_df <- tribble(
   ~location, ~url,
@@ -48,7 +48,7 @@ allcell_info <- tibble(
 
 settings <- list(
   list(
-    id = "real/hematopoiesis-clusters_olsson",
+    id = "real/silver/hematopoiesis-clusters_olsson",
     milestone_source = "cluster",
     milestone_network = tribble(
       ~from, ~to,
@@ -63,7 +63,7 @@ settings <- list(
     ) %>% mutate(length = 1, directed = TRUE)
   ),
   list(
-    id = "real/hematopoiesis-gates_olsson",
+    id = "real/gold/hematopoiesis-gates_olsson",
     milestone_source = "gate",
     milestone_network = tribble(
       ~from, ~to,

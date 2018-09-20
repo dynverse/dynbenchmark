@@ -3,7 +3,7 @@
 library(tidyverse)
 library(dynbenchmark)
 
-dataset_preprocessing("real/mouse-cell-atlas_guo")
+dataset_preprocessing("real/gold/mouse-cell-atlas_guo")
 
 # get settings
 source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/scripts/01-datasets/01-real/helpers-download_from_sources/helper_mouse-cell-atlas_settings.R"))

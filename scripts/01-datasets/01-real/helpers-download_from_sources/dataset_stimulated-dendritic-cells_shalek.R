@@ -1,7 +1,7 @@
 library(tidyverse)
 library(dynbenchmark)
 
-dataset_preprocessing("real/stimulated-dendritic-cells_shalek")
+dataset_preprocessing("real/gold/stimulated-dendritic-cells_shalek")
 
 file <- download_dataset_source_file(
   "GSM1406531_GSM1407094.txt.gz",

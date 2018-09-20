@@ -1,7 +1,7 @@
 library(dynbenchmark)
 library(tidyverse)
 
-dataset_preprocessing("real/kidney-collecting-duct_park")
+dataset_preprocessing("real/silver/kidney-collecting-duct_park")
 
 txt_location <- download_dataset_source_file(
   "GSE107585_Mouse_kidney_single_cell_datamatrix.txt.gz",
@@ -74,7 +74,7 @@ all_cell_info$subcluster_id[match(sub_cell_info$cell_id, all_cell_info$cell_id)]
 ## Extract datasets
 settings <- list(
   list(
-    id = "real/kidney-collecting-duct-clusters_park",
+    id = "real/silver/kidney-collecting-duct-clusters_park",
     group_id = "cluster_id",
     milestone_network = tribble(
       ~from, ~to,
@@ -83,7 +83,7 @@ settings <- list(
     ) %>% mutate(length = 1, directed = FALSE)
   ),
   list(
-    id = "real/kidney-collecting-duct-subclusters_park",
+    id = "real/silver/kidney-collecting-duct-subclusters_park",
     group_id = "subcluster_id",
     milestone_network = tribble(
       ~from, ~to,
