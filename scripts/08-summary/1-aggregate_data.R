@@ -4,8 +4,19 @@ library(tidyverse)
 experiment("08-summary")
 
 #####################################################
-#                  GET METHODS INFO                  #
+#                  GET METHODS INFO                 #
 #####################################################
+
+spread_trajtypes <- function(method_info) {
+  trajtypes <-
+    map_df(dynwrap::trajectory_types$id, function(trajtyp) {
+      data_frame(id = method_info$id, trajectory_type = paste0("trajtyp_", trajtyp), value = map_lgl(method_info$trajectory_types, ~ trajtyp %in% .))
+    }) %>%
+    spread(trajectory_type, value)
+
+  left_join(method_info, trajtypes, by = "id")
+}
+
 method_info <-
   read_rds(result_file("methods.rds", experiment_id = "03-methods")) %>%
   mutate(
@@ -14,6 +25,7 @@ method_info <-
     any_priors_required = priors_required != "",
     any_priors_optional = priors_optional != ""
   ) %>%
+  spread_trajtypes() %>%
   rename_all(function(x) paste0("method_", x)) %>%
   rename(tool_id = method_tool_id) %>%
   select_if(is.atomic) %>%
@@ -85,7 +97,13 @@ bench_overall <-
   data_aggs %>%
   filter(dataset_trajectory_type == "overall", dataset_source == "mean", metric %in% c(bench_metrics, "overall", execution_metrics)) %>%
   select(method_id, metric, value, experiment) %>%
-  mutate(category = case_when(metric %in% execution_metrics ~ "execution", metric %in% bench_metrics ~ "metric", metric == "overall" ~ "overall"))
+  mutate(
+    category = case_when(
+      metric %in% execution_metrics ~ "execution",
+      metric %in% bench_metrics ~ "metric",
+      metric == "overall" ~ "overall"
+    )
+  )
 
 bench_trajtypes <-
   data_aggs %>%
@@ -103,15 +121,22 @@ bench_vars <-
   benchmark_results_normalised$data_var %>%
   transmute(method_id, metric, value, experiment = "benchmark", category = "stability")
 
+bench_vars2 <-
+  benchmark_results_normalised$data_var %>%
+  group_by(method_id) %>%
+  summarise(value = mean(value)) %>%
+  transmute(method_id, metric = "stability", value, experiment = "summary", category = "overall")
+
 benchmark_results <-
   bind_rows(
     bench_overall,
     bench_trajtypes,
     bench_sources,
-    bench_vars
+    bench_vars,
+    bench_vars2
   )
 
-rm(data_aggs, bench_overall, bench_trajtypes, bench_sources, bench_vars)
+rm(data_aggs, bench_overall, bench_trajtypes, bench_sources, bench_vars, bench_vars2)
 
 
 
