@@ -5,7 +5,8 @@
 \title{Plot a trajectory type}
 \usage{
 plot_trajectory_types(plot = ggplot() + theme_void(), trajectory_types,
-  xmins = 0, xmaxs = 1, ymins = 0, ymaxs = 1, size = 4,
+  xmins = 0, xmaxs = 1, ymins = 0, ymaxs = 1,
+  node_colours = NULL, edge_colours = NULL, size = 4,
   geom = c("point", "circle"), circ_size = ifelse(geom == "circle",
   0.05, 0))
 }
@@ -14,13 +15,21 @@ plot_trajectory_types(plot = ggplot() + theme_void(), trajectory_types,
 
 \item{trajectory_types}{One or more trajectory types}
 
-\item{xmins}{Minimal x bound}
+\item{xmins}{Minimal x bound (length 1 or length of \code{trajectory_types})}
 
-\item{xmaxs}{Maximal y bound}
+\item{xmaxs}{Maximal y bound (likewise)}
 
-\item{ymins}{Minimal y bound}
+\item{ymins}{Minimal y bound (likewise)}
 
-\item{ymaxs}{Maximal y bound}
+\item{ymaxs}{Maximal y bound (likewise)}
+
+\item{node_colours}{The colours of the nodes.
+If \code{NULL}, the colours provided by \code{dynwrap::trajectory_types} will be used (recommended).
+Otherwise, \code{node_colours} is expected to be of length 1 or length of \code{trajectory_types}.}
+
+\item{edge_colours}{The colours of the edges.
+If \code{NULL}, the edges will be coloured black.
+Otherwise, \code{edge_colours} is expected to be of length 1 or length of \code{trajectory_types}.}
 
 \item{size}{Size of the arrows and nodes}
 
