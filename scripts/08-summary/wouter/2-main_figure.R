@@ -8,10 +8,9 @@ list2env(read_rds(result_file("results.rds", experiment_id = "08-summary")), env
 
 # define method groups
 method_info <- method_info %>%
-  mutate(method_grouping = method_most_complex_trajectory_type)
+  mutate(method_grouping = ifelse(method_source %in% c("tool", "adaptation"), method_most_complex_trajectory_type, method_source))
 
-#method_groups <- c(rev(dynwrap::trajectory_types$id), c("adaptation", "offtheshelf", "control"))
-method_groups <- rev(dynwrap::trajectory_types$id)
+method_groups <- c(rev(dynwrap::trajectory_types$id), c("adaptation", "offtheshelf", "control"))
 
 # determine palettes
 sc_col_fun <- function(palette) {
@@ -333,7 +332,7 @@ g1 <- ggplot() +
   # LEGEND: BENCHMARK
   geom_text(aes(header_xvals[["metric_prio"]], legy_start - 1, label = "Priors required"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
   geom_text(aes(x = header_xvals[["metric_prio"]] + .8, y = legy_start - 2.3 + c(.8, 0, -.8), label = c("", "\u2715", "\u2716")), hjust = .5) +
-  geom_text(aes(x = header_xvals[["metric_prio"]] + 2, y = legy_start - 2.3 + c(.8, 0, -.8), label = c("None", "Some", "A lot")), hjust = 0) +
+  geom_text(aes(x = header_xvals[["metric_prio"]] + 2, y = legy_start - 2.3 + c(.8, 0, -.8), label = c("None", "Soft", "Hard")), hjust = 0) +
 
   # LEGEND: BENCHMARK
   geom_text(aes(header_xvals[["experiment_benchmark"]], legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
@@ -376,7 +375,7 @@ g1 <-
   )
 
 # WRITE FILES
-ggsave(result_file("overview.pdf"), g1, device = cairo_pdf, width = 26, height = 18)
+ggsave(result_file("overview_wouter.pdf"), g1, device = cairo_pdf, width = 26, height = 18)
 # ggsave(result_file("overview.svg"), g1, width = 20, height = 16)
 # ggsave(result_file("overview.png"), g1, width = 20, height = 16)
 
