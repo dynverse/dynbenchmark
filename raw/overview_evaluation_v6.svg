@@ -2095,9 +2095,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4142136"
-     inkscape:cx="578.39814"
-     inkscape:cy="599.75831"
+     inkscape:zoom="0.50000001"
+     inkscape:cx="445.00319"
+     inkscape:cy="321.37465"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -3467,7 +3467,7 @@
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20.57535172px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:center;text-anchor:middle;stroke-width:1.54315138"
            y="780.7442"
            x="180.49049"
-           sodipodi:role="line">Trajectory types:</tspan></text>
+           sodipodi:role="line">Trajectory types</tspan></text>
       <g
          transform="matrix(5.0862926,0,0,5.0862925,-150.54675,773.55441)"
          style="display:inline;stroke:url(#linearGradient1675);stroke-width:0.40000001;stroke-miterlimit:4;stroke-dasharray:none"
