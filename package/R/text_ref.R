@@ -284,7 +284,7 @@ process_table <- function(table) {
   }
 
   # if an excel, add a note that this table was submitted separately
-  if (is.character(table) & fs::path_ext(table) == "xlsx") {
+  if (is.character(table) && fs::path_ext(table) == "xlsx") {
     table <- list(
       html = "This table was provided as a separate excel file",
       latex = "This table was provided as a separate excel file",
