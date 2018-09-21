@@ -142,6 +142,7 @@ benchmark_aggregate <- function(
           ungroup() %>%
           spread(metric, value) %>%
           mutate(dataset_source = "mean")
+          calc_mean() %>%
       )
     }
 
