@@ -76,7 +76,7 @@ tmp <- benchmark_aggregate(
   norm_fun = norm_fun,
   mean_fun = mean_fun,
   mean_weights = mean_weights,
-  dataset_source_weights = c("real" = 1, "synthetic/dyngen" = 1, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
+  dataset_source_weights = c("real/gold" = 1, "real/silver" = 1, "synthetic/dyngen" = 1, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
 )
 
 dataset_source_weights <-
@@ -85,7 +85,7 @@ dataset_source_weights <-
   select(method_id:dataset_source, overall) %>%
   spread(dataset_source, overall) %>%
   select(-mean) %>%
-  mutate(compare = real) %>%
+  mutate(compare = `real/gold`) %>%
   gather(synth, value, -method_id:-dataset_trajectory_type, -compare) %>%
   group_by(synth) %>%
   summarise(cor = nacor(compare, value)) %>%
