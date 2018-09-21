@@ -55,9 +55,19 @@ data <-
         name = method_name,
         control_label = ifelse(method_source == "tool", "", method_source),
         priors = method_info$method_priors_required %>% str_replace_all("[^,]+", "*") %>% str_replace_all(",", ""),
-        topology_inference = ifelse(method_topology_inference == "parameter", "param", method_topology_inference),
+        topology_inference = label_short(ifelse(method_topology_inference == "parameter", "param", method_topology_inference)),
         wrapper_type = wrapper_type_map[method_wrapper_type],
-        most_complex = method_most_complex_trajectory_type
+        most_complex = method_most_complex_trajectory_type,
+        platform = c("R" = "R", "Python" = "Py")[method_platform],
+        tt_cycle = ifelse(method_trajtyp_cycle, "cycle", "gray_cycle"),
+        tt_linear = ifelse(method_trajtyp_linear, "linear", "gray_linear"),
+        tt_convergence = ifelse(method_trajtyp_convergence, "convergence", "gray_convergence"),
+        tt_bifurcation = ifelse(method_trajtyp_bifurcation, "bifurcation", "gray_bifurcation"),
+        tt_multifurcation = ifelse(method_trajtyp_multifurcation, "multifurcation", "gray_multifurcation"),
+        tt_tree = ifelse(method_trajtyp_tree, "tree", "gray_tree"),
+        tt_acyclic_graph = ifelse(method_trajtyp_acyclic_graph, "acyclic_graph", "gray_acyclic_graph"),
+        tt_graph = ifelse(method_trajtyp_graph, "graph", "gray_graph"),
+        tt_disconnected_graph = ifelse(method_trajtyp_disconnected_graph, "disconnected_graph", "gray_disconnected_graph")
       ) %>%
       gather(metric, label, -method_id) %>%
       mutate(
@@ -68,7 +78,6 @@ data <-
 
 pie_colours <-
   error_reasons %>% select(metric = name, colour)
-
 
 # GENERATE METHOD POSITIONS
 row_height <- 1
@@ -116,6 +125,7 @@ metric_pos <-
     xwidth = case_when(
       id == "name" ~ 6,
       id %in% c("wrty", "mcpx", "topi") ~ 2,
+      grepl("^tt", id) ~ 2,
       geom == "bar" | id == "conl" ~ 4,
       TRUE ~ 1
     ),
@@ -139,7 +149,8 @@ header_pos <-
     y = ifelse(level == "experiment", 4.5, 3.5),
     key = ifelse(level == "experiment", letters[row_number()], ""),
     x = (xmin + xmax) / 2
-  )
+  ) %>%
+  filter(!(level == "category" & id == "overall"))
 
 header_xvals <- header_pos %>% transmute(nam = paste0(level, "_", id), xmin) %>% deframe()
 
@@ -218,7 +229,7 @@ barguides_data <- geom_data_processor(c("bar", "invbar"), function(dat) {
 })
 trajd <- geom_data_processor("trajtype", function(dat) {
   dat %>% transmute(xmin, xmax, ymin, ymax, topinf = label)
-})
+}) %>% filter(!grepl("gray_", topinf))
 
 # CREATE LEGENDS
 legy_start <- min(method_pos$ymin)
@@ -328,7 +339,7 @@ g1 <-
   plot_trajectory_types(plot = g1, trajectory_types = trajd$topinf, xmins = trajd$xmin, xmaxs = trajd$xmax, ymins = trajd$ymin, ymaxs = trajd$ymax, size = 1, geom = "circle", circ_size = .1)
 
 # WRITE FILES
-ggsave(result_file("overview.pdf"), g1, width = 20, height = 18)
+ggsave(result_file("overview.pdf"), g1, width = 24, height = 18)
 # ggsave(result_file("overview.svg"), g1, width = 20, height = 16)
 # ggsave(result_file("overview.png"), g1, width = 20, height = 16)
 

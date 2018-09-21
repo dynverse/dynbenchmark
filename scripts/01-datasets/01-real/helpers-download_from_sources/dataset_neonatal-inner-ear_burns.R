@@ -1,7 +1,7 @@
 library(tidyverse)
 library(dynbenchmark)
 
-dataset_preprocessing("real/neonatal-inner-ear_burns")
+dataset_preprocessing("real/silver/neonatal-inner-ear_burns")
 
 count_location <- download_dataset_source_file(
   "GSE71982_RSEM_Counts_Matrix.txt.gz",

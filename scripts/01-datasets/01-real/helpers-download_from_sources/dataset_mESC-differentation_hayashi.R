@@ -4,7 +4,7 @@ library(GEOquery)
 library(Biobase)
 options('download.file.method.GEOquery'='curl')
 
-id <- "real/mESC-differentiation_hayashi"
+id <- "real/gold/mESC-differentiation_hayashi"
 dataset_preprocessing(id)
 
 counts_location <- download_dataset_source_file(

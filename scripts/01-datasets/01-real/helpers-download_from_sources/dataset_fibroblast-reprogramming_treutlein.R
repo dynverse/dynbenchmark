@@ -1,7 +1,7 @@
 library(tidyverse)
 library(dynbenchmark)
 
-dataset_preprocessing("real/fibroblast-reprogramming_treutlein")
+dataset_preprocessing("real/silver/fibroblast-reprogramming_treutlein")
 
 txt_location <- download_dataset_source_file(
   "GSE67310_iN_data_log2FPKM_annotated.txt.gz",

@@ -1,7 +1,7 @@
 library(tidyverse)
 library(dynbenchmark)
 
-dataset_preprocessing("real/pancreatic-cell-maturation_zhang")
+dataset_preprocessing("real/gold/pancreatic-cell-maturation_zhang")
 
 txt_location <- download_dataset_source_file(
   "GSE99951_all_data_htseq_out.csv",
@@ -39,11 +39,11 @@ counts_all <- read.table(txt_location, TRUE, " ", stringsAsFactors = FALSE) %>% 
 
 settings <- list(
   list(
-    id = "real/psc-astrocyte-maturation-neuron_sloan",
+    id = "real/gold/psc-astrocyte-maturation-neuron_sloan",
     group_id = "cell type: neuron"
   ),
   list(
-    id = "real/psc-astrocyte-maturation-glia_sloan",
+    id = "real/gold/psc-astrocyte-maturation-glia_sloan",
     group_id = "cell type: glia"
   )
 )

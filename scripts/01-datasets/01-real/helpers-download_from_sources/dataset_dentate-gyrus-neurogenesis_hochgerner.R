@@ -4,7 +4,7 @@ library(GEOquery)
 library(Biobase)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real/dentate-gyrus-neurogenesis_hochgerner")
+dataset_preprocessing("real/silver/dentate-gyrus-neurogenesis_hochgerner")
 
 
 # get cell info
