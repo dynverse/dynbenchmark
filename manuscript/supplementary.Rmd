@@ -1,11 +1,9 @@
 ---
-title: "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
+title: "Supplementary material for: \nA comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
 output: 
   dynbenchmark::pdf_manuscript:
       render_change: FALSE
 ---
-
-# Supplementary material
 
 ```{r setup, include=FALSE}
 library(dynbenchmark)
