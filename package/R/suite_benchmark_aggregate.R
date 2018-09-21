@@ -110,39 +110,37 @@ benchmark_aggregate <- function(
     ) %>%
     calc_mean()
 
-  # process trajtype grouped evaluation
-  data_trajtype <- data_repl %>%
+  # process source grouped evaluation
+  data_source <- data_repl %>%
     group_by(method_id, method_name, param_id, dataset_trajectory_type, dataset_source) %>%
-    mutate(n = n()) %>%
     summarise_if(is.numeric, mean) %>%
     ungroup() %>%
     calc_mean()
 
   # process overall evaluation
-  data_method <- data_trajtype %>%
-    group_by(method_id, method_name, param_id, dataset_source) %>%
-    mutate(n = n()) %>%
-    summarise_if(is.numeric, mean) %>%
+  data_method <- data_source %>%
+    gather(metric, value, -method_id:-dataset_source) %>%
+    group_by(method_id, method_name, param_id, dataset_trajectory_type, metric) %>%
+    mutate(dataset_weight = dataset_source_weights[dataset_source]) %>%
+    summarise(value = sum(value * dataset_weight) / sum(dataset_weight)) %>%
+    spread(metric, value) %>%
     ungroup() %>%
     calc_mean() %>%
     mutate(
-      dataset_trajectory_type = factor("overall", levels = levels(data$dataset_trajectory_type))
+      dataset_source = "mean"
     )
 
   data_aggregations <-
-    bind_rows(data_trajtype, data_method) %>% {
+    bind_rows(data_source, data_method) %>% {
       df <- .
       bind_rows(
         df,
         df %>%
-          gather(metric, value, -method_id:-dataset_source) %>%
-          group_by(method_id, method_name, param_id, dataset_trajectory_type, metric) %>%
-          mutate(dataset_weight = dataset_source_weights[dataset_source]) %>%
-          summarise(value = sum(value * dataset_weight) / sum(dataset_weight)) %>%
+          group_by(method_id, method_name, param_id, dataset_source) %>%
+          summarise_if(is.numeric, mean) %>%
           ungroup() %>%
-          spread(metric, value) %>%
-          mutate(dataset_source = "mean")
           calc_mean() %>%
+          mutate(dataset_trajectory_type = factor("overall", levels = levels(data$dataset_trajectory_type)))
       )
     }
 
