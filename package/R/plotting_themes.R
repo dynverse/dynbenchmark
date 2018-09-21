@@ -146,3 +146,21 @@ theme_pub <- function(
 #' @export
 #' @rdname theme_empty
 theme_empty_x_axis <- ggplot2::theme(axis.line.x = ggplot2::element_blank(), axis.title.x = ggplot2::element_blank(), axis.text.x = ggplot2::element_blank(), axis.ticks.x = ggplot2::element_blank())
+
+
+
+#' Only retain the legend in the middle plot
+#'
+#' @param plots A list of plots
+#' @param at Integers at which a legend will be added
+#' @param theme_legend The theme to apply to the plot with a legend
+#'
+#' @export
+legend_at <- function(plots, at = floor(length(plots)/2), theme_legend = theme()) {
+  plots_with_legend <- at
+  plots_without_legend <- seq_len(length(plots))[-plots_with_legend]
+  plots %>%
+    modify_at(plots_without_legend, ~ . + theme(legend.position = "none")) %>%
+    modify_at(plots_with_legend, ~. + theme_legend)
+
+}
