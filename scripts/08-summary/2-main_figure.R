@@ -4,7 +4,7 @@ library(dynplot)
 
 experiment("08-summary")
 
-list2env(read_rds(result_file("results.rds")), environment())
+list2env(read_rds(result_file("results.rds", experiment_id = "08-summary")), environment())
 
 # define method groups
 method_info <- method_info %>%
