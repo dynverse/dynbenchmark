@@ -86,6 +86,7 @@ benchmark_submit <- function(
     # check whether results already exist
     dirname <- with(grouping_values, glue::glue(qsub_grouping))
     suite_method_folder <- file.path(local_output_folder, dirname)
+    suite_method_folder_rem <- file.path(remote_tmp_path, dirname)
     output_file <- file.path(suite_method_folder, "output.rds")
     qsub_handle_file <- file.path(suite_method_folder, "qsubhandle.rds")
 
@@ -108,7 +109,8 @@ benchmark_submit <- function(
         name = gsub("[\\/]", "_", dirname),
         memory = qsub_params$memory,
         max_wall_time = qsub_params$timeout,
-        local_tmp_path = paste0(suite_method_folder, "/r2gridengine")
+        local_tmp_path = paste0(suite_method_folder, "/r2gridengine"),
+        remote_tmp_path = paste0(suite_method_folder_rem, "/r2gridengine")
       )
 
     # which packages to load on the cluster
