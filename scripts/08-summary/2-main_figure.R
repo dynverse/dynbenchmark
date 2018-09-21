@@ -166,7 +166,11 @@ header_pos <-
   ) %>%
   filter(!(level == "category" & id == "overall"))
 
-header_xvals <- header_pos %>% transmute(nam = paste0(level, "_", id), xmin) %>% deframe()
+header_xvals <-
+  bind_rows(
+    header_pos %>% transmute(nm = paste0(level, "_", id), xmin),
+    metric_pos %>% transmute(nm = paste0("metric_", id), xmin)
+  ) %>% deframe()
 
 
 # PROCESS CIRCLES DATA
@@ -326,9 +330,9 @@ g1 <- ggplot() +
   expand_limits(x = c(-3, max(metric_pos$xmax)+3), y = c(legy_start - 4.3, 6.5)) +
 
   # LEGEND: BENCHMARK
-  geom_text(aes(header_xvals[["experiment_method"]], legy_start - 1, label = "Priors required"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  geom_text(aes(x = header_xvals[["experiment_method"]] + .8, y = legy_start - 2.3 + c(.8, 0, -.8), label = c("", "\u2715", "\u2716")), hjust = .5) +
-  geom_text(aes(x = header_xvals[["experiment_method"]] + 2, y = legy_start - 2.3 + c(.8, 0, -.8), label = c("None", "Some", "A lot")), hjust = 0) +
+  geom_text(aes(header_xvals[["metric_prio"]], legy_start - 1, label = "Priors required"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  geom_text(aes(x = header_xvals[["metric_prio"]] + .8, y = legy_start - 2.3 + c(.8, 0, -.8), label = c("", "\u2715", "\u2716")), hjust = .5) +
+  geom_text(aes(x = header_xvals[["metric_prio"]] + 2, y = legy_start - 2.3 + c(.8, 0, -.8), label = c("None", "Some", "A lot")), hjust = 0) +
 
   # LEGEND: BENCHMARK
   geom_text(aes(header_xvals[["experiment_benchmark"]], legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
@@ -346,14 +350,14 @@ g1 <- ggplot() +
   geom_text(aes(x = header_xvals[["experiment_qc"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "qc") %>% slice(c(1, n()))) +
 
   # LEGEND: PCT ERRORED
-  geom_text(aes(header_xvals[["category_trajtypes"]], legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggforce::geom_arc_bar(aes(x0 = header_xvals[["category_trajtypes"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = fill), size = .25, error_leg_df) +
-  ggforce::geom_arc_bar(aes(x0 = header_xvals[["category_trajtypes"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = NA), size = .25, error_leg_df) +
-  geom_text(aes(x = header_xvals[["category_trajtypes"]] + .5 + lab_x + .5, y = legy_start - 2.5 + lab_y, label = label, vjust = vjust, hjust = hjust), error_leg_df) +
-  geom_segment(aes(x = header_xvals[["category_trajtypes"]] + .5, xend = header_xvals[["category_trajtypes"]] + .5, y = legy_start - 2.5, yend = legy_start - 2.5 + row_height*.75), data = data_frame(z = 1), size = .25) +
+  geom_text(aes(header_xvals[["metric_errr"]], legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  ggforce::geom_arc_bar(aes(x0 = header_xvals[["metric_errr"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = fill), size = .25, error_leg_df) +
+  ggforce::geom_arc_bar(aes(x0 = header_xvals[["metric_errr"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = NA), size = .25, error_leg_df) +
+  geom_text(aes(x = header_xvals[["metric_errr"]] + .5 + lab_x + .5, y = legy_start - 2.5 + lab_y, label = label, vjust = vjust, hjust = hjust), error_leg_df) +
+  geom_segment(aes(x = header_xvals[["metric_errr"]] + .5, xend = header_xvals[["metric_errr"]] + .5, y = legy_start - 2.5, yend = legy_start - 2.5 + row_height*.75), data = data_frame(z = 1), size = .25) +
 
   # GENERATION SENTENCE
-  geom_text(aes(1, legy_start - 4, label = stamp), colour = "#cccccc", hjust = 0, vjust = 0)
+  geom_text(aes(1, legy_start - 5, label = stamp), colour = "#cccccc", hjust = 0, vjust = 0)
 
 g1 <-
   plot_trajectory_types(
@@ -371,7 +375,7 @@ g1 <-
   )
 
 # WRITE FILES
-ggsave(result_file("overview.pdf"), g1, device = cairo_pdf, width = 24, height = 18)
+ggsave(result_file("overview.pdf"), g1, device = cairo_pdf, width = 26, height = 18)
 # ggsave(result_file("overview.svg"), g1, width = 20, height = 16)
 # ggsave(result_file("overview.png"), g1, width = 20, height = 16)
 
