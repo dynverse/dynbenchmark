@@ -10,7 +10,6 @@ setup_refs <- function() {
 #' @param ref_id The identifier
 #' @param suffix Adding something to the index
 #' @param anchor Whether to anchor here
-#' @param pattern What to use as pattern
 #' @param format The output format (html, latex, markdown, ...)
 #'
 #' @export
