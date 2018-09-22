@@ -10,13 +10,14 @@ experiment("01-platforms")
 rm_remote(derived_file("", remote = TRUE), remote = TRUE, recursive = TRUE)
 
 # use all real dataset for platform estimation
-dataset_ids <- list_datasets() %>% filter(source == "real") %>% pull(id)
+dataset_ids <- list_datasets("real") %>% pull(id)
 
 # run on cluster
 qsub_config <- override_qsub_config(
   name = "platform_estim",
   memory = "10G",
-  wait = FALSE
+  wait = FALSE,
+  remove_tmp_folder = FALSE
 )
 
 handle <- qsub_lapply(
