@@ -14,7 +14,7 @@ setup_refs <- function() {
 #' @param format The output format (html, latex, markdown, ...)
 #'
 #' @export
-ref <- function(ref_type, ref_id, suffix = "", anchor = FALSE, pattern = "[**{ref_full_name}**](#{ref_type}_{ref_id})", format = get_default_format()) {
+ref <- function(ref_type, ref_id, suffix = "", anchor = FALSE, format = get_default_format()) {
   if(nrow(refs %>% filter(ref_id == !!ref_id)) == 0) {
     refs <<- refs %>% bind_rows(tibble(
       name = create_names[[ref_type]](sum(refs$ref_type == ref_type) + 1),
@@ -24,8 +24,17 @@ ref <- function(ref_type, ref_id, suffix = "", anchor = FALSE, pattern = "[**{re
   }
   ref_name <- refs %>% filter(ref_id == !!ref_id) %>%
     pull(name)
-  ref_full_name <- paste0(ref_name, glue::glue_collapse(suffix, ','))
+  ref_full_name <- paste0(ref_name, label_vector(suffix))
+
+  # print text of ref
+  if (format != "latex") {
+    pattern <- "[**{ref_full_name}**](#{ref_type}_{ref_id})"
+  } else {
+    pattern <- "\\protect\\hyperlink{{{ref_type}_{ref_id}}}{{\\textbf{{{ref_full_name}}}}"
+  }
   ref <- pritt(pattern)
+
+  # add anchor is requested
   if (anchor)  ref <- pritt("{ref}{anchor(ref_type, ref_id, format = format)}")
   ref
 }
@@ -176,21 +185,21 @@ plot_fig <- function(
       fig_path <- new_fig_path
     }
 
-    fig_name <- ref(ref_type, ref_id, pattern = "{ref_full_name}")
+    fig_name <- ref(ref_type, ref_id)
     subchunk <- glue::glue(
       "\\begin{{myfigure}}{{{ifelse(ref_type == 'fig', '!htbp', 'H')}}}\n",
       "\\begin{{center}}\n",
       "{fig_anch}\n",
       "\\includegraphics[height={height/2}in, width={width/2}in]{{{fig_path}}}\n\n",
       "\\end{{center}}\n",
-      "\\textbf{{ {fig_name}: {caption_main}}} {caption_text}\n\n",
+      "\\textbf{{{fig_name}: {caption_main}}} {caption_text}\n\n",
       "\\end{{myfigure}}\n"
     )
   } else if (format %in% c("html", "markdown")){
     width <- width * 70
     height = height * 70
 
-    fig_cap <- ref(ref_type, ref_id, pattern = "{ref_full_name}")
+    fig_cap <- ref(ref_type, ref_id)
     subchunk <- glue::glue(
       "\n\n\n<p>\n",
       "  {fig_anch}\n",
@@ -319,7 +328,7 @@ show_table <- function(table, ref_id, caption_main, caption_text, format = get_d
   # caption
   caption_main <- knitr::knit(text = caption_main, quiet = TRUE)
   caption_text <- knitr::knit(text = caption_text, quiet = TRUE)
-  table_name <- ref(ref_type, ref_id, pattern = "{ref_full_name}")
+  table_name <- ref(ref_type, ref_id)
 
   # render the table
   if (format == "latex") {
@@ -329,7 +338,7 @@ show_table <- function(table, ref_id, caption_main, caption_text, format = get_d
       "{table_anch}\n",
       "{table$latex %>% glue::glue_collapse('\n')}\n\n",
       "\\end{{center}}\n",
-      "\\textbf{{ {table_name}: {caption_main}}} {caption_text}\n\n",
+      "\\textbf{{{table_name}: {caption_main}}} {caption_text}\n\n",
       "\\end{{table}}\n"
     )
   } else if (format == "html") {
