@@ -10,6 +10,24 @@ experiment("04-method_testing")
 ###################################################
 benchmark_fetch_results()
 
+# Upload to prism
+# qsub::rsync_remote(
+#   remote_src = FALSE,
+#   path_src = derived_file(remote = FALSE, experiment = "04-method_testing"),
+#   remote_dest = TRUE,
+#   path_dest = derived_file(remote = TRUE, experiment = "04-method_testing"),
+#   verbose = TRUE
+# )
+
+# Download from prism
+# qsub::rsync_remote(
+#   remote_src = FALSE,
+#   path_src = derived_file(remote = TRUE, experiment = "04-method_testing"),
+#   remote_dest = TRUE,
+#   path_dest = derived_file(remote = FALSE, experiment = "04-method_testing"),
+#   verbose = TRUE
+# )
+
 output <- benchmark_bind_results(load_models = TRUE)
 
 design <- read_rds(derived_file("design.rds"))
@@ -22,6 +40,19 @@ extract_method_status <- function(error_status, correlation, ...) {
   )
 }
 output$method_status <- pmap_chr(output, extract_method_status)
+
+
+g <- output %>%
+  mutate(dataset_id = gsub("specific_example/.*", "specific_example", dataset_id)) %>%
+  ggplot(aes(correlation, fct_rev(method_id))) +
+  geom_label(aes(label = method_status, fill = method_status)) +
+  scale_fill_manual(values = dynbenchmark::method_status_colours) +
+  scale_x_continuous(expand = c(0.5, 0)) +
+  facet_wrap(~dataset_id, nrow = 1) +
+  theme_bw()
+g
+
+
 
 write_rds(output, result_file("output.rds"), compress = "xz")
 

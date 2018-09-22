@@ -17,8 +17,8 @@ if (!file.exists(derived_file("design.rds"))) {
     datasets = list(
       dyntoy::generate_dataset(id = "toy/linear", model = "linear", num_cells = 99, num_features = 101),
       dyntoy::generate_dataset(id = "toy/bifurcating", model = "bifurcating", num_cells = 99, num_features = 101),
-      "real/developing-dendritic-cells_schlitzer",
-      "real/fibroblast-reprogramming_treutlein"
+      "real/gold/developing-dendritic-cells_schlitzer",
+      "real/silver/fibroblast-reprogramming_treutlein"
     ),
     methods = methods %>% select(id, type, fun, version),
     parameters = list(
