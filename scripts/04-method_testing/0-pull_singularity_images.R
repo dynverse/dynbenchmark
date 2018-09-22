@@ -15,7 +15,7 @@ experiment("singularity_images")
 handle <- qsub::qsub_lapply(
   X = dynmethods::methods$docker_repository,
   # X = "dynverse/specific_method",
-  qsub_environment = c("methods"),
+  qsub_environment = c(),
   qsub_packages = c("babelwhale"),
   qsub_config = qsub::override_qsub_config(
     max_wall_time = "01:00:00",

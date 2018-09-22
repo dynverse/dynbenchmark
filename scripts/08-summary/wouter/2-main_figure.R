@@ -2,13 +2,13 @@ library(dynbenchmark)
 library(tidyverse)
 library(dynplot)
 
-experiment("08-summary")
+experiment("08-summary/wouter")
 
 list2env(read_rds(result_file("results.rds", experiment_id = "08-summary")), environment())
 
 # define method groups
 method_info <- method_info %>%
-  mutate(method_grouping = ifelse(method_source == "tool", method_most_complex_trajectory_type, method_source))
+  mutate(method_grouping = ifelse(method_source %in% c("tool", "adaptation"), method_most_complex_trajectory_type, method_source))
 
 method_groups <- c(rev(dynwrap::trajectory_types$id), c("adaptation", "offtheshelf", "control"))
 
@@ -319,12 +319,12 @@ g1 <- ggplot() +
   # CIRCLES
   ggforce::geom_circle(aes(x0 = x0, y0 = y0, fill = colour, r = size), circle_data, size = .25) +
   # STARS
-  ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = colour), data = pie_data %>% filter(pct <= (1-1e-10)), size = .25) +
-  ggforce::geom_circle(aes(x0 = x0, y0 = y0, r = r, fill = colour), data = pie_data %>% filter(pct > (1-1e-10)), size = .25) +
+  # ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = colour), data = pie_data %>% filter(pct <= (1-1e-10)), size = .25) +
+  # ggforce::geom_circle(aes(x0 = x0, y0 = y0, r = r, fill = colour), data = pie_data %>% filter(pct > (1-1e-10)), size = .25) +
   # TEXT
   geom_text(aes(x = x, y = y, label = label, colour = colour), data = textl_data, vjust = .5, hjust = 0) +
   geom_text(aes(x = x, y = y, label = label, colour = colour), data = text_data, vjust = .5, hjust = 0.5) +
-  geom_text(aes(x = x, y = y, label = label, colour = colour), data = pct_data, vjust = .5, hjust = 1) +
+  # geom_text(aes(x = x, y = y, label = label, colour = colour), data = pct_data, vjust = .5, hjust = 1) +
 
   # RESERVE SPACE
   expand_limits(x = c(-3, max(metric_pos$xmax)+3), y = c(legy_start - 4.3, 6.5)) +
@@ -350,11 +350,11 @@ g1 <- ggplot() +
   geom_text(aes(x = header_xvals[["experiment_qc"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "qc") %>% slice(c(1, n()))) +
 
   # LEGEND: PCT ERRORED
-  geom_text(aes(header_xvals[["metric_errr"]], legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggforce::geom_arc_bar(aes(x0 = header_xvals[["metric_errr"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = fill), size = .25, error_leg_df) +
-  ggforce::geom_arc_bar(aes(x0 = header_xvals[["metric_errr"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = NA), size = .25, error_leg_df) +
-  geom_text(aes(x = header_xvals[["metric_errr"]] + .5 + lab_x + .5, y = legy_start - 2.5 + lab_y, label = label, vjust = vjust, hjust = hjust), error_leg_df) +
-  geom_segment(aes(x = header_xvals[["metric_errr"]] + .5, xend = header_xvals[["metric_errr"]] + .5, y = legy_start - 2.5, yend = legy_start - 2.5 + row_height*.75), data = data_frame(z = 1), size = .25) +
+  # geom_text(aes(header_xvals[["metric_errr"]], legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  # ggforce::geom_arc_bar(aes(x0 = header_xvals[["metric_errr"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = fill), size = .25, error_leg_df) +
+  # ggforce::geom_arc_bar(aes(x0 = header_xvals[["metric_errr"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = NA), size = .25, error_leg_df) +
+  # geom_text(aes(x = header_xvals[["metric_errr"]] + .5 + lab_x + .5, y = legy_start - 2.5 + lab_y, label = label, vjust = vjust, hjust = hjust), error_leg_df) +
+  # geom_segment(aes(x = header_xvals[["metric_errr"]] + .5, xend = header_xvals[["metric_errr"]] + .5, y = legy_start - 2.5, yend = legy_start - 2.5 + row_height*.75), data = data_frame(z = 1), size = .25) +
 
   # GENERATION SENTENCE
   geom_text(aes(1, legy_start - 5, label = stamp), colour = "#cccccc", hjust = 0, vjust = 0)
@@ -375,7 +375,7 @@ g1 <-
   )
 
 # WRITE FILES
-ggsave(result_file("overview.pdf"), g1, device = cairo_pdf, width = 26, height = 18)
+ggsave(result_file("overview_wouter.pdf"), g1, device = cairo_pdf, width = 26, height = 18)
 # ggsave(result_file("overview.svg"), g1, width = 20, height = 16)
 # ggsave(result_file("overview.png"), g1, width = 20, height = 16)
 
