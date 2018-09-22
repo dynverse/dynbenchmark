@@ -6,7 +6,7 @@ experiment("07-benchmark")
 if (!file.exists(derived_file("design.rds"))) {
   timeout_sec <- 60 * 60
   memory_gb <- 16
-  num_repeats <- 5
+  num_repeats <- 1
   metrics <- c("correlation", "edge_flip", "featureimp_cor", "featureimp_wcor", "F1_branches", "him")
 
   ##########################################################
@@ -127,13 +127,13 @@ design_filt <- read_rds(derived_file("design.rds"))
 list2env(read_rds(result_file("params.rds")), environment())
 
 # step 1:
-# design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("identity", "scorpius", "paga"), category == "Cat1")
+design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("identity", "scorpius", "paga"), category == "Cat1")
 
 # step 2:
 # design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2"))
 
 # step 3:
-design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2", "Cat3"))
+# design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2", "Cat3"))
 
 # step 4:
 
