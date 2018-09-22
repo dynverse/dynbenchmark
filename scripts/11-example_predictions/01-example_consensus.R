@@ -45,7 +45,7 @@ design <- designs[[2]]
 
 plot_dimred_overviews <- list()
 
-for (design in designs[-2]) {
+for (design in designs[2]) {
   dataset <- load_dataset(design$dataset_id)
 
   dataset <- dataset %>% add_dimred(dyndimred::dimred_landmark_mds)
@@ -62,7 +62,7 @@ for (design in designs[-2]) {
     milestones=milestones,
     trajectory_size = 1
   ) +
-    labs(title = "Dataset", subtitle = "(with reference trajectory)") +
+    labs(title = "Reference") +
     theme(plot.subtitle = element_text(hjust = 0.5), legend.position = "none")
   plot_dimred_reference
 
@@ -149,7 +149,7 @@ for (design in designs[-2]) {
     }) %>%
     map2(ordered_models$method_name, ~ . + ggtitle(.y)) %>%
     legend_at(theme_legend = guides(color = guide_legend(nrow = 1, ncol = length(unique(get_grouping(dataset))), title.theme = element_blank()))) %>%
-    modify_at(1, ~ . + annotate("rect", xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, fill = NA, color = "black") + labs(subtitle="(consensus prediction)") + theme(plot.subtitle = element_text(hjust = 0.5)))
+    modify_at(1, ~ . + annotate("rect", xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, fill = NA, color = "black") + labs(subtitle="(consensus)") + theme(plot.subtitle = element_text(hjust = 0.5)))
 
   plot_dimred_overview <- plot_dimreds %>%
     c(list(plot_dimred_reference), .) %>%
@@ -161,7 +161,7 @@ for (design in designs[-2]) {
 }
 
 
-plot_dimred_overviews <- plot_dimred_overviews %>% map(wrap_elements)
+plot_dimred_overviews <- plot_dimred_overviews %>% map(patchwork::wrap_elements)
 
 plot_example_predictions <- patchwork::wrap_plots(
   plot_dimred_overviews$linear + labs(tag = "a"),
@@ -170,7 +170,7 @@ plot_example_predictions <- patchwork::wrap_plots(
     plot_dimred_overviews$disconnected + labs(tag = "c"),
     plot_dimred_overviews$cyclic + labs(tag = "d"),
     ncol = 2
-  ) %>% wrap_elements(),
+  ) %>% patchwork::wrap_elements(),
   nrow = 3
 )
 
