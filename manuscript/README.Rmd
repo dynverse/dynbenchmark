@@ -1,0 +1,12 @@
+---
+output: dynbenchmark::github_markdown_nested
+---
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(dynbenchmark)
+```
+
+# Manuscript
+
+The files to generate the manuscript: the main paper and the supplementary material.
