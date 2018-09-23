@@ -175,6 +175,12 @@ plot_fig <- function(
   # convert to relative path (for github markdown)
   fig_path <- fs::path_rel(fig_path)
 
+
+  # check if path exists
+  if (!file.exists(fig_path)) {
+    stop(fig_path, " does not exist!")
+  }
+
   if (format == "latex") {
     # convert svg to pdf
     if (fs::path_ext(fig_path) == "svg") {
