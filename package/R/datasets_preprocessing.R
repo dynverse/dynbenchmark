@@ -44,6 +44,9 @@ process_raw_dataset <- function(
   grouping <- grouping[cell_ids]
   feature_info <- feature_info %>% slice(match(colnames(counts), feature_id))
 
+  # make sure all is directed if any directed
+  milestone_network$directed <- any(milestone_network$directed)
+
   # wrap dataset
   dataset <-
     dynwrap::wrap_data(
