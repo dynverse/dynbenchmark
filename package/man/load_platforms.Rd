@@ -4,6 +4,7 @@
 \alias{load_platforms}
 \alias{load_platform}
 \alias{load_simple_platform}
+\alias{get_platform_features}
 \alias{select_platforms}
 \title{List and load the platforms}
 \usage{
@@ -13,10 +14,14 @@ load_platform(platform_id)
 
 load_simple_platform()
 
+get_platform_features(platforms)
+
 select_platforms(n_platforms)
 }
 \arguments{
 \item{platform_id}{Platform identifier}
+
+\item{platforms}{The platforms, loaded by load_platforms}
 
 \item{n_platforms}{Number of platforms to select}
 }
