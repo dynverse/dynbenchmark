@@ -10,14 +10,6 @@ experiment("04-method_testing")
 ###################################################
 benchmark_fetch_results()
 
-# Upload to prism
-# qsub::rsync_remote(
-#   remote_src = FALSE,
-#   path_src = derived_file(remote = FALSE, experiment = "04-method_testing"),
-#   remote_dest = TRUE,
-#   path_dest = derived_file(remote = TRUE, experiment = "04-method_testing"),
-#   verbose = TRUE
-# )
 
 # Download from prism
 # qsub::rsync_remote(
@@ -67,3 +59,13 @@ checks <-
   arrange(ran < 0, time)
 
 write_rds(checks, result_file("checks.rds"), compress = "xz")
+
+
+# # Upload to prism
+# qsub::rsync_remote(
+#   remote_src = FALSE,
+#   path_src = derived_file(remote = FALSE, experiment = "04-method_testing"),
+#   remote_dest = TRUE,
+#   path_dest = derived_file(remote = TRUE, experiment = "04-method_testing"),
+#   verbose = TRUE
+# )
