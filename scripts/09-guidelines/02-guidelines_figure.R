@@ -147,7 +147,7 @@ metrics <- tribble(
   "benchmark", "Benchmark\nscore", split_renderer(c(0.6, 0.95), quintuple_checks, palette_names["benchmark"]), "benchmark",1,
   "qc", "User\nFriendliness", split_renderer(c(0.6, 0.9), quintuple_checks, palette_names["qc"]), "qc",1,
   "1k cells", " \n1k cells", split_renderer(c(0.5, 0.8), quintuple_checks, palette_names["scalability"]),  "scalability",1,
-  "10k cells", "Estimated running time\n10k cells", split_renderer(c(0.5, 0.8), quintuple_checks, palette_names["scalability"]), "scalability",1,
+  "10k cells", "Est. running time @ 10k features\n10k cells", split_renderer(c(0.5, 0.8), quintuple_checks, palette_names["scalability"]), "scalability",1,
   "100k cells", "\n100k cells", split_renderer(c(0.5, 0.8), quintuple_checks, palette_names["scalability"]), "scalability",1,
   "priors", "\nRequired priors", prior_renderer, "priors", 2
 ) %>%
@@ -199,11 +199,11 @@ results_boxes %>%
 
 
 # write the methods as svg and add to existing svg
-ggsave(result_file("guidelines_methods.svg"), width = 8, height = 10)
+ggsave(result_file("guidelines_methods.png"), width = 8, height = 10)
 
 # the "tree.svg" file has a link to "guidelines_methods.svg", so make sure both are in the same directory
 file.copy(raw_file("tree.svg"), result_file("guidelines.svg"), overwrite = TRUE)
 
 # embed the methods svg (not supported, we have to choose between saving guidelines_methods as png and embedding, or as svg and linking)
-# system(glue::glue("inkscape {result_file('guidelines.svg')}  --verb=org.ekips.filter.embedimage.noprefs --verb=FileSave --verb=FileClose --verb=FileQuit"))
+system(glue::glue("inkscape {result_file('guidelines.svg')}  --verb=org.ekips.filter.embedimage.noprefs --verb=FileSave --verb=FileClose --verb=FileQuit"))
 
