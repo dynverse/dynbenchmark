@@ -93,7 +93,7 @@ estimate_platform <- function(dataset_id, subsample = 500, override_fun = FALSE)
     on.exit(assignInNamespace("splatEstDropout", old_fun, asNamespace("splatter")))
   }
 
-  platform_location <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "01-platforms_yada")
+  platform_location <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "01-platforms")
   if (!file.exists(dirname(platform_location))) dir.create(dirname(platform_location), recursive = TRUE)
 
   platform <- load_or_generate(
@@ -102,6 +102,11 @@ estimate_platform <- function(dataset_id, subsample = 500, override_fun = FALSE)
       dataset_raw <- read_rds(dataset_raw_file(dataset_id))
 
       counts <- dataset_raw$counts
+
+      # number of cells which should have this gene expressed (from findMarkers function)
+      # this is also used for splatter, because otherwise it errors on more than half of the datasets
+      min.pct <- 0.05
+      counts <- dataset_raw$counts[, apply(dataset_raw$counts, 2, function(x) mean(x>0) > min.pct)]
 
       # estimate splatter params
       if (!is.null(subsample)) {
@@ -114,10 +119,6 @@ estimate_platform <- function(dataset_id, subsample = 500, override_fun = FALSE)
 
       # determine how many features change between trajectory stages
       group_ids <- unique(dataset_raw$grouping)
-
-      # number of cells which should have this gene expressed (from findMarkers function)
-      min.pct <- 0.05
-      counts <- dataset_raw$counts[, apply(dataset_raw$counts, 2, function(x) mean(x>0) > min.pct)]
 
       # differential expression using wilcox test
       diffexp <- map_df(group_ids, function(group_id) {
