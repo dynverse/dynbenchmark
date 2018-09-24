@@ -19,13 +19,13 @@ refs <- supplementary$refs
 
 # Supplementary figures
 ```{r, results="asis"}
-sfigs %>% pmap(dynbenchmark:::plot_fig, ref_type = "sfig") %>% walk(cat)
+sfigs %>% pmap(dynbenchmark:::plot_fig, ref_type = "sfig") %>% modify(paste0, "\n\n") %>% walk(cat)
 ```
 
 # Supplementary tables
 
 ```{r, results="asis"}
-stables %>% pmap(dynbenchmark:::show_table, ref_type = "stable") %>% walk(cat)
+stables %>% pmap(dynbenchmark:::show_table, ref_type = "stable") %>% modify(paste0, "\n\n") %>% walk(cat)
 ```
 
 

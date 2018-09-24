@@ -10,17 +10,27 @@ methods <- read_rds(result_file("methods.rds", "03-methods"))
 
 
 extract_top_methods <- function(trajectory_types, top_n = 4) {
+  # filter on non-hard priors
+  method_ids_soft_prior <- methods %>%
+    filter(
+      !map_lgl(
+        required_priors,
+        ~ any(. %in% (dynwrap::priors %>% filter(type == "hard") %>% pull(prior_id)))
+      )
+    ) %>%
+    pull(id)
+
   # filter on detectable
   detects_filter <- glue::glue_collapse(paste0("detects_", trajectory_types), " & ")
   method_ids_detectable <- methods %>%
-    # filter(!requires_prior) %>%  # remove methods which require a prior
     filter(!!rlang::parse_expr(detects_filter)) %>%
     pull(id)
 
   # get benchmark scores (average)
   benchmark <- results %>%
     filter(
-      method_id %in% (method_ids_detectable),
+      method_id %in% method_ids_detectable,
+      method_id %in% method_ids_soft_prior,
       experiment == "benchmark",
       metric %in% trajectory_types
     ) %>%
@@ -31,7 +41,7 @@ extract_top_methods <- function(trajectory_types, top_n = 4) {
 
   # get qc scores
   qc <- results %>%
-    filter(experiment == "qc", metric %in% c("overall")) %>%
+    filter(experiment == "qc", metric %in% c("user_friendly")) %>%
     mutate(metric = "qc") %>%
     select(experiment, method_id, metric, label, value)
 
@@ -49,7 +59,9 @@ extract_top_methods <- function(trajectory_types, top_n = 4) {
       value = as.numeric(requires_prior),
       experiment = "priors",
       metric = "priors",
-      label = map_chr(required_priors, paste0, collapse =  ", ")
+      label = map_chr(required_priors, function(required_priors) {
+        dynwrap::priors$name[match(required_priors, dynwrap::priors$prior_id)] %>% paste0(collapse =  ", ")
+      })
     ) %>%
     select(experiment, metric, method_id = id, value, label)
 
@@ -90,15 +102,15 @@ palettes <-
     map(c("RdYlGn", "RdYlBu"), RColorBrewer::brewer.pal, n = 8) %>% set_names(c("RdYlGn", "RdYlBu")),
     list(
       wouter = c("#d73027", "#fdae61", "#ffd217", "#4575b4", "#313695"),
-      wouter2 = c("#b02821", "#db4740", "#ffd524", "#a6d96a", "#1a9850")
+      wouter2 = c("#d73027", "#fee08b","#9bcde1")
     )
   )
 
 # palette_names <- c(qc = "viridis", benchmark = "magma", scalability = "cividis")
-palette_names <- c(qc = "RdYlGn", benchmark = "RdYlGn", scalability = "RdYlGn")
+# palette_names <- c(qc = "RdYlGn", benchmark = "RdYlGn", scalability = "RdYlGn")
 # palette_names <- c(qc = "RdYlBu", benchmark = "RdYlBu", scalability = "RdYlBu")
 # palette_names <- c(qc = "wouter", benchmark = "wouter", scalability = "wouter")
-# palette_names <- c(qc = "wouter2", benchmark = "wouter2", scalability = "wouter2")
+palette_names <- c(qc = "wouter2", benchmark = "wouter2", scalability = "wouter2")
 
 split_renderer <- function(breaks, labels, palette_name) {
   breaks <- c(-Inf, breaks)
@@ -126,19 +138,18 @@ prior_renderer <- function(x, label) {
   )
 }
 
-quintuple_checks <- c("--", "-", "\U00B1", "+", "++")
+quintuple_checks <- c("-", "\U00B1", "+")
 # quintuple_checks <- c("\U2716", "\U2715", "\U2713", "\U2713\U2713", "\U2713\U2713\U2713")
 
-category_x_padding <- 0.25
-
+category_x_padding <- 0.1
 metrics <- tribble(
   ~id, ~name, ~renderer, ~category, ~width,
-  "benchmark", "Benchmark\nscore", split_renderer(c(0.25, 0.5, 0.8, 0.95), quintuple_checks, palette_names["benchmark"]), "benchmark",1,
-  "qc", "User\nFriendliness", split_renderer(c(0.6, 0.7, 0.8, 0.9), quintuple_checks, palette_names["qc"]), "qc",1,
-  "1k cells", " \n1k cells", split_renderer(c(0.5, 0.6, 0.7, 0.8), quintuple_checks, palette_names["scalability"]),  "scalability",1,
-  "10k cells", "Estimated running time\n10k cells", split_renderer(c(0.5, 0.6, 0.7, 0.8), quintuple_checks, palette_names["scalability"]), "scalability",1,
-  "100k cells", "\n100k cells", split_renderer(c(0.5, 0.6, 0.7, 0.8), quintuple_checks, palette_names["scalability"]), "scalability",1,
-  "priors", "Required\npriors", prior_renderer, "priors", 2
+  "benchmark", "Benchmark\nscore", split_renderer(c(0.6, 0.95), quintuple_checks, palette_names["benchmark"]), "benchmark",1,
+  "qc", "User\nFriendliness", split_renderer(c(0.6, 0.9), quintuple_checks, palette_names["qc"]), "qc",1,
+  "1k cells", " \n1k cells", split_renderer(c(0.5, 0.8), quintuple_checks, palette_names["scalability"]),  "scalability",1,
+  "10k cells", "Estimated running time\n10k cells", split_renderer(c(0.5, 0.8), quintuple_checks, palette_names["scalability"]), "scalability",1,
+  "100k cells", "\n100k cells", split_renderer(c(0.5, 0.8), quintuple_checks, palette_names["scalability"]), "scalability",1,
+  "priors", "\nRequired priors", prior_renderer, "priors", 2
 ) %>%
   mutate(
     xmin = lag(cumsum(width), default = 0) + c(0, cumsum(tail(category, -1) != head(category, -1))) * category_x_padding,
@@ -184,13 +195,15 @@ results_boxes %>%
   scale_x_continuous(breaks = metrics$xmid, labels = metrics$name, position = "top", expand = c(0, 0), limits = c(-2.5, max(metrics$xmax))) +
   scale_y_reverse(expand = c(0, 0)) +
   theme_void() +
-  theme(axis.text.x = element_text(vjust = 1))
+  theme(axis.text.x = element_text(vjust = 1, lineheight = 1))
 
 
-ggsave("~/test.png", width = 8, height = 10)
+# write the methods as svg and add to existing svg
+ggsave(result_file("guidelines_methods.svg"), width = 8, height = 10)
 
+# the "tree.svg" file has a link to "guidelines_methods.svg", so make sure both are in the same directory
+file.copy(raw_file("tree.svg"), result_file("guidelines.svg"), overwrite = TRUE)
 
-file.copy(raw_file("tree.svg"), result_file("tree.svg"), overwrite = TRUE)
-
-system(glue::glue("inkscape {result_file('tree.svg')}  --verb=org.ekips.filter.embedimage.noprefs --verb=FileSave --verb=FileClose --verb=FileQuit"))
+# embed the methods svg (not supported, we have to choose between saving guidelines_methods as png and embedding, or as svg and linking)
+# system(glue::glue("inkscape {result_file('guidelines.svg')}  --verb=org.ekips.filter.embedimage.noprefs --verb=FileSave --verb=FileClose --verb=FileQuit"))
 
