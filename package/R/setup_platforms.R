@@ -81,8 +81,9 @@ splatEstDropout <- function(norm.counts, params) {
 
 #' Estimate a platform
 #' @param dataset_id The dataset_id from which the platform will be estimated, using the files in datasets_preproc/raw
+#' @param subsample The number of cells to subsample
 #' @export
-estimate_platform <- function(dataset_id) {
+estimate_platform <- function(dataset_id, subsample = NULL) {
   requireNamespace("splatter")
   assignInNamespace("splatEstDropout", dynbenchmark:::splatEstDropout, asNamespace("splatter"))
 
@@ -130,7 +131,12 @@ estimate_platform <- function(dataset_id) {
       trajectory_dependent_features <- length(diffexp_features) / ncol(dataset_raw$counts)
 
       # estimate splatter params
-      estimate <- splatter::splatEstimate(t(counts[sample(nrow(counts), min(nrow(counts), 500)), ]))
+      if (!is.null(subsample)) {
+        ix <- sample(nrow(counts), min(nrow(counts), subsample))
+      } else {
+        ix <- seq_len(nrow(counts))
+      }
+      estimate <- splatter::splatEstimate(t(counts[ix, , drop = FALSE]))
       class(estimate) <- "TheMuscularDogBlinkedQuietly." # change the class, so scater won't get magically loaded when the platform is loaded
 
       # create platform object
