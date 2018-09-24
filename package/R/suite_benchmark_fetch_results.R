@@ -234,7 +234,7 @@ extract_error_status <- function(stdout, stderr, error_message, job_exit_status,
 #' @importFrom readr read_rds
 #' @export
 benchmark_bind_results <- function(load_models = FALSE, experiment_id = NULL) {
-  local_output_folder <- derived_file("suite", experiment_id = NULL)
+  local_output_folder <- derived_file("suite", experiment_id = experiment_id)
 
   # find all 2nd level folders with individual tasks
   files <- list.files(local_output_folder, pattern = "output_metrics.rds", recursive = TRUE, full.names = TRUE)
