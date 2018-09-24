@@ -1,7 +1,7 @@
 library(tidyverse)
 library(dynbenchmark)
 
-dataset_preprocessing("real/gold/pancreatic-cell-maturation_zhang")
+dataset_preprocessing("real/gold/psc-astrocyte-maturation")
 
 txt_location <- download_dataset_source_file(
   "GSE99951_all_data_htseq_out.csv",
