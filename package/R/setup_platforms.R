@@ -132,7 +132,7 @@ estimate_platform <- function(dataset_id, subsample = NULL) {
 
       # estimate splatter params
       if (!is.null(subsample)) {
-        ix <- sample(nrow(counts), min(nrow(counts), subsample))
+        ix <- sample.int(nrow(counts), min(nrow(counts), subsample))
       } else {
         ix <- seq_len(nrow(counts))
       }
