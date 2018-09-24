@@ -85,7 +85,9 @@ splatEstDropout <- function(norm.counts, params) {
 #' @export
 estimate_platform <- function(dataset_id, subsample = NULL) {
   requireNamespace("splatter")
+  old_fun <- splatter:::splatEstDropout
   assignInNamespace("splatEstDropout", dynbenchmark:::splatEstDropout, asNamespace("splatter"))
+  on.exit(assignInNamespace("splatEstDropout", old_fun, asNamespace("splatter")))
 
   platform_location <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "01-platforms")
   if (!file.exists(dirname(platform_location))) dir.create(dirname(platform_location), recursive = TRUE)
