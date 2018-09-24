@@ -25,7 +25,7 @@ handle <- qsub_lapply(
   dataset_ids,
   qsub_config = qsub_config,
   estimate_platform,
-  override_fun = T
+  override_fun = TRUE
 )
 
 write_rds(handle, derived_file("handle.rds"))

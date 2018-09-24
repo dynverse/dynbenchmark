@@ -2,7 +2,14 @@
 
 # define dataset function. two datasets with the same seed but different
 # dimensionalities should have the same values in overlapping columns and rows.
-generate_dataset <- function(orig_dataset_id, lnrow, lncol, seed = 1, cores = 1, verbose = TRUE) {
+generate_dataset <- function(
+  orig_dataset_id,
+  lnrow,
+  lncol,
+  seed = 1,
+  cores = 1,
+  verbose = TRUE
+) {
   prev_seed <- .Random.seed[[1]]
 
   set.seed(seed)
