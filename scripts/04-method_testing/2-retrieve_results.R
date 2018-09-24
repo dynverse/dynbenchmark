@@ -11,7 +11,13 @@ experiment("04-method_testing")
 
 # If you are the one who submitted the jobs, run:
 # benchmark_fetch_results()
-
+# qsub::rsync_remote(
+#   remote_src = FALSE,
+#   path_src = derived_file(remote = FALSE, experiment = "04-method_testing"),
+#   remote_dest = TRUE,
+#   path_dest = derived_file(remote = TRUE, experiment = "04-method_testing"),
+#   verbose = TRUE
+# )
 
 # If you want to download the output from prism
 qsub::rsync_remote(
@@ -64,11 +70,4 @@ checks <-
 write_rds(checks, result_file("checks.rds"), compress = "xz")
 
 
-# # Upload to prism
-# qsub::rsync_remote(
-#   remote_src = FALSE,
-#   path_src = derived_file(remote = FALSE, experiment = "04-method_testing"),
-#   remote_dest = TRUE,
-#   path_dest = derived_file(remote = TRUE, experiment = "04-method_testing"),
-#   verbose = TRUE
-# )
+
