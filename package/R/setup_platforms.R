@@ -27,6 +27,22 @@ load_simple_platform <- function() {
 }
 
 #' @rdname load_platforms
+#' @param platforms The platforms, loaded by load_platforms
+#' @export
+get_platform_features <- function(platforms) {
+  features <- map(platforms, function(platform) {
+    c(
+      platform[c("trajectory_dependent_features", "n_cells", "n_features")],
+      platform$estimate %>% attributes() %>% keep(is.numeric)
+    )
+  }) %>% bind_rows() %>% as.matrix() %>% scale
+  rownames(features) <- map(platforms, "platform_id")
+  features <- features[, apply(features, 2, function(x) !any(is.na(x)))]
+
+  features
+}
+
+#' @rdname load_platforms
 #' @param n_platforms Number of platforms to select
 #' @export
 select_platforms <- function(n_platforms) {
@@ -39,14 +55,7 @@ select_platforms <- function(n_platforms) {
   }
 
   # select features
-  features <- map(platforms, function(platform) {
-    c(
-      platform[c("trajectory_dependent_features", "n_cells", "n_features")],
-      platform$estimate %>% attributes() %>% keep(is.numeric)
-    )
-  }) %>% bind_rows() %>% as.matrix() %>% scale
-  rownames(features) <- map(platforms, "platform_id")
-  features <- features[, apply(features, 2, function(x) !any(is.na(x)))]
+  features <- get_platform_features(platforms)
 
   # cluster the platforms according to these features
   corm <- cor(t(features))
@@ -82,7 +91,7 @@ splatEstDropout <- function(norm.counts, params) {
 #' Estimate a platform
 #' @param dataset_id The dataset_id from which the platform will be estimated, using the files in datasets_preproc/raw
 #' @param subsample The number of cells to subsample
-#' @param override_fun Whether or not to override several splatEstDropout params
+#' @param override_fun Whether or not to override one splatEstDropout params
 #' @export
 estimate_platform <- function(dataset_id, subsample = 500, override_fun = FALSE) {
   requireNamespace("splatter")
@@ -114,6 +123,7 @@ estimate_platform <- function(dataset_id, subsample = 500, override_fun = FALSE)
       } else {
         ix <- seq_len(nrow(counts))
       }
+
       estimate <- splatter::splatEstimate(t(counts[ix, , drop = FALSE]))
       class(estimate) <- "TheMuscularDogBlinkedQuietly." # change the class, so scater won't get magically loaded when the platform is loaded
 
