@@ -229,11 +229,12 @@ extract_error_status <- function(stdout, stderr, error_message, job_exit_status,
 #' Gather and bind the results of the benchmark jobs
 #'
 #' @param load_models Whether or not to load the models as well.
+#' @param experiment_id The experiment_id, defaults to the current one
 #'
 #' @importFrom readr read_rds
 #' @export
-benchmark_bind_results <- function(load_models = FALSE) {
-  local_output_folder <- derived_file("suite")
+benchmark_bind_results <- function(load_models = FALSE, experiment_id = NULL) {
+  local_output_folder <- derived_file("suite", experiment_id = NULL)
 
   # find all 2nd level folders with individual tasks
   files <- list.files(local_output_folder, pattern = "output_metrics.rds", recursive = TRUE, full.names = TRUE)
