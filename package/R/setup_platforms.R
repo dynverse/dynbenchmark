@@ -82,12 +82,16 @@ splatEstDropout <- function(norm.counts, params) {
 #' Estimate a platform
 #' @param dataset_id The dataset_id from which the platform will be estimated, using the files in datasets_preproc/raw
 #' @param subsample The number of cells to subsample
+#' @param override_fun Whether or not to override several splatEstDropout params
 #' @export
-estimate_platform <- function(dataset_id, subsample = NULL) {
+estimate_platform <- function(dataset_id, subsample = NULL, override_fun = FALSE) {
   requireNamespace("splatter")
-  old_fun <- splatter:::splatEstDropout
-  assignInNamespace("splatEstDropout", dynbenchmark:::splatEstDropout, asNamespace("splatter"))
-  on.exit(assignInNamespace("splatEstDropout", old_fun, asNamespace("splatter")))
+
+  if (override_fun) {
+    old_fun <- splatter:::splatEstDropout
+    assignInNamespace("splatEstDropout", dynbenchmark:::splatEstDropout, asNamespace("splatter"))
+    on.exit(assignInNamespace("splatEstDropout", old_fun, asNamespace("splatter")))
+  }
 
   platform_location <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "01-platforms")
   if (!file.exists(dirname(platform_location))) dir.create(dirname(platform_location), recursive = TRUE)
