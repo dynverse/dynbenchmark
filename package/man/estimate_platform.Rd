@@ -4,10 +4,12 @@
 \alias{estimate_platform}
 \title{Estimate a platform}
 \usage{
-estimate_platform(dataset_id)
+estimate_platform(dataset_id, subsample = NULL)
 }
 \arguments{
 \item{dataset_id}{The dataset_id from which the platform will be estimated, using the files in datasets_preproc/raw}
+
+\item{subsample}{The number of cells to subsample}
 }
 \description{
 Estimate a platform
