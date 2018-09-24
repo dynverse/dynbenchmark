@@ -84,7 +84,7 @@ splatEstDropout <- function(norm.counts, params) {
 #' @param subsample The number of cells to subsample
 #' @param override_fun Whether or not to override several splatEstDropout params
 #' @export
-estimate_platform <- function(dataset_id, subsample = NULL, override_fun = FALSE) {
+estimate_platform <- function(dataset_id, subsample = 500, override_fun = FALSE) {
   requireNamespace("splatter")
 
   if (override_fun) {
@@ -116,7 +116,7 @@ estimate_platform <- function(dataset_id, subsample = NULL, override_fun = FALSE
       group_ids <- unique(dataset_raw$grouping)
 
       # number of cells which should have this gene expressed (from findMarkers function)
-      min.pct <- 0.4
+      min.pct <- 0.05
       counts <- dataset_raw$counts[, apply(dataset_raw$counts, 2, function(x) mean(x>0) > min.pct)]
 
       # differential expression using wilcox test
