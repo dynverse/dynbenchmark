@@ -24,7 +24,8 @@ qsub_config <- override_qsub_config(
 handle <- qsub_lapply(
   dataset_ids,
   qsub_config = qsub_config,
-  estimate_platform
+  estimate_platform,
+  override_fun = T
 )
 
 write_rds(handle, derived_file("handle.rds"))
@@ -40,6 +41,24 @@ qsub::rsync_remote(
   path_dest = derived_file(remote = FALSE),
   verbose = TRUE
 )
+
+# correlations between platforms
+platforms <- load_platforms()
+metadata <- read_rds(result_file("metadata.rds", "01-datasets/01-real"))
+
+features <- get_platform_features(platforms)
+
+features_dimred <- dyndimred::dimred_mds(features) %>%
+  as.data.frame() %>%
+  rownames_to_column("platform_id") %>%
+
+
+
+
+
+
+ggplot(features_dimred) + geom_point(aes(comp_1, comp_2))
+
 
 
 # # debug
