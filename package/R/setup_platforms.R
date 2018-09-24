@@ -98,8 +98,12 @@ estimate_platform <- function(dataset_id) {
 
       # determine how many features change between trajectory stages
       group_ids <- unique(dataset_raw$grouping)
+
+      # number of cells which should have this gene expressed (from findMarkers function)
       min.pct <- 0.4
       counts <- dataset_raw$counts[, apply(dataset_raw$counts, 2, function(x) mean(x>0) > min.pct)]
+
+      # differential expression using wilcox test
       diffexp <- map_df(group_ids, function(group_id) {
         inside <- dataset_raw$grouping == group_id
         outside <- dataset_raw$grouping != group_id
@@ -118,11 +122,14 @@ estimate_platform <- function(dataset_id) {
             group_id = group_id
           )
         })
-      })
+      }) %>%
+        mutate(qvalue = p.adjust(pvalue, "fdr"))
 
+      qvalue_cutoff <- 0.05
+      log2fc_cutoff <- 1
       diffexp_features <- diffexp %>% filter(
-        pvalue < 0.05,
-        abs(log2fc) > 1
+        qvalue < qvalue_cutoff,
+        abs(log2fc) > log2fc_cutoff
       ) %>%
         pull(feature_id) %>%
         unique()
@@ -130,7 +137,7 @@ estimate_platform <- function(dataset_id) {
       trajectory_dependent_features <- length(diffexp_features) / ncol(dataset_raw$counts)
 
       # estimate splatter params
-      estimate <- splatter::splatEstimate(t(counts[sample(nrow(counts), min(nrow(counts), 500)), ]))
+      estimate <- splatter::splatEstimate(t(counts))
       class(estimate) <- "TheMuscularDogBlinkedQuietly." # change the class, so scater won't get magically loaded when the platform is loaded
 
       # create platform object
