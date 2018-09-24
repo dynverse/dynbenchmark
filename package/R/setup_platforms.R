@@ -103,6 +103,15 @@ estimate_platform <- function(dataset_id, subsample = NULL, override_fun = FALSE
 
       counts <- dataset_raw$counts
 
+      # estimate splatter params
+      if (!is.null(subsample)) {
+        ix <- sample.int(nrow(counts), min(nrow(counts), subsample))
+      } else {
+        ix <- seq_len(nrow(counts))
+      }
+      estimate <- splatter::splatEstimate(t(counts[ix, , drop = FALSE]))
+      class(estimate) <- "TheMuscularDogBlinkedQuietly." # change the class, so scater won't get magically loaded when the platform is loaded
+
       # determine how many features change between trajectory stages
       group_ids <- unique(dataset_raw$grouping)
 
@@ -142,15 +151,6 @@ estimate_platform <- function(dataset_id, subsample = NULL, override_fun = FALSE
         unique()
 
       trajectory_dependent_features <- length(diffexp_features) / ncol(dataset_raw$counts)
-
-      # estimate splatter params
-      if (!is.null(subsample)) {
-        ix <- sample.int(nrow(counts), min(nrow(counts), subsample))
-      } else {
-        ix <- seq_len(nrow(counts))
-      }
-      estimate <- splatter::splatEstimate(t(counts[ix, , drop = FALSE]))
-      class(estimate) <- "TheMuscularDogBlinkedQuietly." # change the class, so scater won't get magically loaded when the platform is loaded
 
       # create platform object
       platform <- lst(
