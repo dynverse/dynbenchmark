@@ -91,9 +91,9 @@ estimate_platform <- function(dataset_id, subsample = 500, override_fun = FALSE)
     old_fun <- splatter:::splatEstDropout
     assignInNamespace("splatEstDropout", dynbenchmark:::splatEstDropout, asNamespace("splatter"))
     on.exit(assignInNamespace("splatEstDropout", old_fun, asNamespace("splatter")))
-  }
+  } %>%
 
-  platform_location <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "01-platforms")
+  platform_location <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "01-platforms_yada")
   if (!file.exists(dirname(platform_location))) dir.create(dirname(platform_location), recursive = TRUE)
 
   platform <- load_or_generate(
