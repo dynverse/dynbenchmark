@@ -42,7 +42,7 @@ metric_ord <- tribble(
   "benchmark",    "trajtypes",    "acyclic_graph",          "acyc", "Acyclic",                "circle",
   "benchmark",    "trajtypes",    "graph",                  "conn", "Connected",              "circle",
   "benchmark",    "trajtypes",    "disconnected_graph",     "disc", "Disconnected",           "circle",
-  "benchmark",    "execution",    "pct_errored",            "errp", "% Errored",              "text(format = 'percentage')",
+  "benchmark",    "execution",    "pct_errored",            "errp", "% Errored",              "text(hjust = 1, format = 'percentage')",
   "benchmark",    "execution",    execution_error_metrics,  "errr", "Reason",                 "pie",
   "benchmark",    "stability",    "var_overall",            "vove", "Overall",                "circle",
   "benchmark",    "stability",    "var_correlation",        "vcor", "Ordering",               "circle",
