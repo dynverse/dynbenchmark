@@ -1,12 +1,12 @@
 #' @importFrom sigmoid sigmoid
 .benchmark_aggregate_normalisation <- list(
   scalesigmoid = function (xnona, xnazero, multiplier = 1) {
-    y <- (xnazero - mean(xnona)) / var(xnona) * multiplier
+    y <- (xnazero - mean(xnona)) / sd(xnona) * multiplier
 
     sigmoid::sigmoid(y)
   },
   scaletanh = function (xnona, xnazero, multiplier = 1) {
-    y <- (xnazero - mean(xnona)) / var(xnona) * multiplier
+    y <- (xnazero - mean(xnona)) / sd(xnona) * multiplier
 
     tanh(y)
   },
