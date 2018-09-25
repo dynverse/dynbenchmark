@@ -81,6 +81,7 @@ Roxygen: list(markdown = TRUE)
 Collate: 
     'data.R'
     'datasets_preprocessing.R'
+    'funky_heatmap.R'
     'google_scholar.R'
     'headtail.R'
     'install_fontawesome.R'
