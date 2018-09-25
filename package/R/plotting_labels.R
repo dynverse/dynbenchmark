@@ -199,3 +199,14 @@ label_vector <- function(x) {
     glue::glue_collapse(x, sep = ", ", last = " and ")
   }
 }
+
+
+
+#' Label a method
+#'
+#' @param method_ids Vector of method ids
+#' @export
+label_method <- function(method_ids) {
+  methods <- load_methods()
+  methods$name[match(method_ids, methods$id)]
+}
