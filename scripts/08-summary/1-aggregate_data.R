@@ -86,7 +86,7 @@ benchmark_results_normalised <- read_rds(result_file("benchmark_results_normalis
 
 data_aggs <-
   benchmark_results_normalised$data_aggregations %>%
-  select(-n, -method_name) %>%
+  select(-method_name) %>%
   gather(metric, value, -method_id:-dataset_source) %>%
   mutate(experiment = "benchmark")
 
@@ -117,23 +117,23 @@ bench_sources <-
   select(method_id, metric = dataset_source, value, experiment) %>%
   mutate(category = "sources")
 
-bench_vars <-
-  benchmark_results_normalised$data_var %>%
-  transmute(method_id, metric, value, experiment = "benchmark", category = "stability")
-
-bench_vars2 <-
-  benchmark_results_normalised$data_var %>%
-  group_by(method_id) %>%
-  summarise(value = mean(value)) %>%
-  transmute(method_id, metric = "stability", value, experiment = "summary", category = "overall")
+# bench_vars <-
+#   benchmark_results_normalised$data_var %>%
+#   transmute(method_id, metric, value, experiment = "benchmark", category = "stability")
+#
+# bench_vars2 <-
+#   benchmark_results_normalised$data_var %>%
+#   group_by(method_id) %>%
+#   summarise(value = mean(value)) %>%
+#   transmute(method_id, metric = "stability", value, experiment = "summary", category = "overall")
 
 benchmark_results <-
   bind_rows(
     bench_overall,
     bench_trajtypes,
-    bench_sources,
-    bench_vars,
-    bench_vars2
+    bench_sources#,
+    # bench_vars,
+    # bench_vars2
   )
 
 rm(data_aggs, bench_overall, bench_trajtypes, bench_sources, bench_vars, bench_vars2)

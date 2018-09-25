@@ -19,7 +19,7 @@ metric_ord <- tribble(
   "method",       "ttinfer",      "tt_disconnected_graph",  "ttdi", "Disconnected",           "traj",
   "summary",      "overall",      "overall",                "over", "Overall",                "bar",
   "summary",      "overall",      "benchmark",              "oveb", "Benchmark",              "bar",
-  "summary",      "overall",      "stability",              "ovet", "Stability",              "bar",
+  #"summary",      "overall",      "stability",              "ovet", "Stability",              "bar",
   "summary",      "overall",      "scalability",            "oves", "Scalability",            "bar",
   "summary",      "overall",      "qc",                     "oveq", "QC",                     "bar",
   "summary",      "overall",      "control_label",          "conl", "",                       "text(overlay = TRUE)",

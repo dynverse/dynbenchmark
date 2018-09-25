@@ -116,7 +116,7 @@ metric_annot_names <- tribble(
   "category", "sources", "Sources",
   "category", "trajtypes", "Trajectory types",
   "category", "execution", "Execution",
-  "category", "stability", "Stability",
+  # "category", "stability", "Stability",
   "category", "10k features", "10k features",
   "category", "10k cells", "10k cells",
   "category", "application", "Application",
