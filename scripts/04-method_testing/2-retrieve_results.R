@@ -10,7 +10,7 @@ experiment("04-method_testing")
 ###################################################
 
 # If you are the one who submitted the jobs, run:
-# benchmark_fetch_results()
+# benchmark_fetch_results(TRUE)
 # qsub::rsync_remote(
 #   remote_src = FALSE,
 #   path_src = derived_file(remote = FALSE, experiment = "04-method_testing"),
