@@ -22,19 +22,14 @@ output$milestone_network <- output$model %>%
 
 # calculate milestone network statistics
 calculate_milestone_network_statistics <- function(milestone_network) {
+  classification <- dynwrap::classify_milestone_network(milestone_network)
+
   lst(
       n_nodes = length(unique(c(milestone_network$from, milestone_network$to))),
       n_edges = nrow(milestone_network),
-      complexity = n_nodes + n_edges
+      complexity = n_nodes + n_edges,
+      trajectory_type = classification$network_type
   )
-
-  # classification <- dynwrap::classify_milestone_network(milestone_network)
-  #
-  # lst(
-  #   trajectory_type = classification$network_type,
-  #   n_nodes = length(unique(c(milestone_network$from, milestone_network$to))),
-  #   n_edges = nrow(milestone_network)
-  # ) %>% c(classification$properties)
 }
 
 prediction_statistics <- bind_cols(
@@ -78,7 +73,6 @@ statistics <- statistics %>%
   )
 
 
-
 ##  ............................................................................
 ##  Overall ordering in complexity                                          ####
 
@@ -95,9 +89,51 @@ plot_overall_complexity_difference <- statistics %>%
   ggplot(aes(complexity_difference, method_id, fill = topology_inference)) +
   # geom_point() +
   ggridges::geom_density_ridges2() +
-  geom_vline(xintercept = 0)
+  geom_vline(xintercept = 0) +
+  theme_pub() +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_discrete(labels = label_method)
+
+plot_overall_complexity_difference
 
 write_rds(plot_overall_complexity_difference, result_file("overall_complexity_difference.rds"))
 
 ##  ............................................................................
 ##  Trajectory type specific complexity                                     ####
+
+method_ids <- c("slingshot", "paga", "monocle_ddrtree", "grandprix", "scorpius", "gng")
+
+statistics_complexity <- bind_rows(
+  statistics,
+  statistics %>% mutate(trajectory_type_dataset = "all_trajectory_types")
+)
+
+bw <- 1.5
+arrow_y <- 5
+trajectory_type_colors <- c(set_names(trajectory_types$colour, trajectory_types$id), "all_trajectory_types" = "#333333")
+complexity_difference_limits <- statistics_complexity %>% filter(method_id %in% method_ids) %>% pull(complexity_difference) %>% range()
+arrow_annot_data <- tibble(
+  method_id = factor(method_ids[[1]], method_ids),
+  x = diff(complexity_difference_limits)/10 * c(-1, 1),
+  text = c("Prediction too\nsimple", "Prediction too\ncomplex"),
+  hjust = c(1, 0)
+)
+
+bind_rows(
+  statistics,
+  statistics %>% mutate(trajectory_type_dataset = "all_trajectory_types")
+) %>%
+  mutate(trajectory_type_dataset = factor(trajectory_type_dataset, names(trajectory_type_colors))) %>%
+  filter(method_id %in% method_ids) %>%
+  mutate(method_id = factor(method_id, method_ids)) %>%
+  ggplot(aes(complexity_difference, trajectory_type_dataset)) +
+  ggridges::geom_density_ridges(aes(fill = trajectory_type_dataset)) +
+  geom_point() +
+  geom_vline(xintercept = 0) +
+  geom_text(aes(x = x, y = arrow_y, hjust = hjust, label = text), colour = "#333333", vjust = 1, lineheight = 0.8, size = 3.2, data = arrow_annot_data) +
+  facet_grid(.~method_id, labeller = label_facet(label_method)) +
+  scale_fill_manual(values = trajectory_type_colors, labels = label_long, guide = "none") +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_discrete(labels = label_long, expand = c(0, 0)) +
+  theme_pub()
+
