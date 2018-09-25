@@ -134,7 +134,7 @@ get_default_metric_format <- function() {
   case_when(
     identical(knitr::opts_knit$get("rmarkdown.pandoc.to"), "latex")  ~ "latex",
     identical(knitr::opts_knit$get("rmarkdown.pandoc.to"), "html")  ~ "html",
-    startsWith(knitr::opts_knit$get("rmarkdown.pandoc.to") %||% "", "markdown") ~ "html",
+    identical(knitr::opts_knit$get("out.format"), "markdown") ~ "html",
     TRUE ~ "plotmath"
   )
 }
@@ -198,4 +198,15 @@ label_vector <- function(x) {
   } else {
     glue::glue_collapse(x, sep = ", ", last = " and ")
   }
+}
+
+
+
+#' Label a method
+#'
+#' @param method_ids Vector of method ids
+#' @export
+label_method <- function(method_ids) {
+  methods <- load_methods()
+  methods$name[match(method_ids, methods$id)]
 }

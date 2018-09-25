@@ -45,7 +45,7 @@ design <- designs[[2]]
 
 plot_dimred_overviews <- list()
 
-for (design in designs[2]) {
+for (design in designs[-2]) {
   dataset <- load_dataset(design$dataset_id)
 
   dataset <- dataset %>% add_dimred(dyndimred::dimred_landmark_mds)
@@ -131,7 +131,6 @@ for (design in designs[2]) {
 
   # plot models
   plot_dimreds <- map(ordered_models$model, function(model) {
-    print(1)
     plot_dimred(
       model,
       color_cells,
@@ -140,7 +139,7 @@ for (design in designs[2]) {
       milestones = milestones,
       dimred = get_dimred(dataset),
       plot_milestone_network = FALSE,
-      cells_alpha = 0.5
+      alpha_cells = 0.5
     )
     # plot_dimred(model, dimred = get_dimred(dataset), plot_milestone_network = TRUE)
     # plot_dimred(model, "pseudotime", pseudotime = calculate_pseudotime(model %>% add_root(dataset$prior_information$start_id)), dimred = get_dimred(dataset), plot_milestone_network = TRUE)

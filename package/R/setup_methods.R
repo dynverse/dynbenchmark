@@ -7,3 +7,11 @@ setup_singularity_methods <- function() {
     dynwrap_run_environment = "singularity"
   )
 }
+
+
+#' Load the information on the methods
+#'
+#' @export
+load_methods <- function() {
+  read_rds(result_file("methods.rds", "03-methods"))
+}
