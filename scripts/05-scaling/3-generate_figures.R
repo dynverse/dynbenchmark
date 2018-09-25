@@ -6,6 +6,9 @@ experiment("05-scaling")
 
 list2env(read_rds(result_file("scaling.rds")), .GlobalEnv)
 
+# check which datasets are available on the remote (some may not have executed entirely)
+scaling_avail <- qsub::ls_remote(derived_file("", experiment = "05-scaling/dataset", remote = TRUE), remote = TRUE) %>% gsub("\\.rds$", "", .)
+
 #' @examples
 #' # examine some errors
 #' data %>% filter(method_id == "calista", error_status == "method_error", nrow > 100, ncol > 100) %>% select(dataset_id, stdout) %>% pull(stdout)%>% head(5)
@@ -128,7 +131,7 @@ plots <- map(method_ids, function(method_id) {
     labs(x = "# cells", y = "# features", fill = "Status") +
     facet_wrap(~ orig_dataset_id, ncol = 1) +
     coord_equal()
-  g1
+  # g1
 
   if (nrow(data_noerror) > 0) {
     g2 <-
@@ -143,7 +146,7 @@ plots <- map(method_ids, function(method_id) {
       labs(x = "# cells", y = "# features", fill = "Log10(Time)") +
       facet_wrap(~ orig_dataset_id, ncol = 1) +
       coord_equal()
-    g2
+    # g2
 
     tmp_error <- bind_rows(data_error, data_noerror %>% filter(log10(max_mem) < 8))
     g3 <-
@@ -158,7 +161,7 @@ plots <- map(method_ids, function(method_id) {
       labs(x = "# cells", y = "# features", fill = "Log10(Max mem)") +
       facet_wrap(~ orig_dataset_id, ncol = 1) +
       coord_equal()
-    g3
+    # g3
 
     g4a <-
       ggplot(pred_method) +
@@ -257,8 +260,6 @@ cluster <- function(s, num_diffs) {
 error_statuses <- unique(data$error_status)
 
 datasets_info <- data %>% select(dataset_id, orig_dataset_id, lnrow, lncol)
-
-scaling_avail <- list.files(derived_file("", experiment = "05-scaling/dataset")) %>% gsub("\\.rds$", "", .)
 
 pbapply::pblapply(method_ids, cl = 8, function(mid) {
   selection <-
