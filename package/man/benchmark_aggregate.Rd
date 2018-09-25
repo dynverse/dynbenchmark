@@ -5,7 +5,7 @@
 \title{Normalisation and aggregation function}
 \usage{
 benchmark_aggregate(data, metrics, norm_fun = c("scalesigmoid",
-  "scaletanh", "minmax", "percentrank", "none"),
+  "scaletanh", "minmax", "percentrank", "normal", "none"),
   mean_fun = c("geometric", "harmonic", "arithmetic"),
   mean_weights = set_names(rep(1, length(metrics)), metrics),
   dataset_source_weights = c(real = 5, `synthetic/dyngen` = 5,
