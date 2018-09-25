@@ -101,39 +101,51 @@ write_rds(plot_overall_complexity_difference, result_file("overall_complexity_di
 ##  ............................................................................
 ##  Trajectory type specific complexity                                     ####
 
-method_ids <- c("slingshot", "paga", "monocle_ddrtree", "grandprix", "scorpius", "gng")
+method_ids <- c("slingshot", "paga", "monocle_ddrtree", "grandprix", "scorpius", "mst")
 
+# add a row "all trajectory types"
 statistics_complexity <- bind_rows(
   statistics,
   statistics %>% mutate(trajectory_type_dataset = "all_trajectory_types")
 )
 
+# some parameters of the plot
 bw <- 1.5
 arrow_y <- 5
+alpha <- 0.8
 trajectory_type_colors <- c(set_names(trajectory_types$colour, trajectory_types$id), "all_trajectory_types" = "#333333")
-complexity_difference_limits <- statistics_complexity %>% filter(method_id %in% method_ids) %>% pull(complexity_difference) %>% range()
+complexity_difference_limits <- statistics_complexity %>%
+  filter(method_id %in% method_ids) %>%
+  pull(complexity_difference) %>%
+  range() %>%
+  {. + c(-bw, +bw)}
+
+
 arrow_annot_data <- tibble(
   method_id = factor(method_ids[[1]], method_ids),
-  x = diff(complexity_difference_limits)/10 * c(-1, 1),
+  x = complexity_difference_limits,
   text = c("Prediction too\nsimple", "Prediction too\ncomplex"),
-  hjust = c(1, 0)
+  hjust = c(0, 1)
 )
 
-bind_rows(
-  statistics,
-  statistics %>% mutate(trajectory_type_dataset = "all_trajectory_types")
-) %>%
+statistics_complexity %>%
   mutate(trajectory_type_dataset = factor(trajectory_type_dataset, names(trajectory_type_colors))) %>%
   filter(method_id %in% method_ids) %>%
   mutate(method_id = factor(method_id, method_ids)) %>%
   ggplot(aes(complexity_difference, trajectory_type_dataset)) +
-  ggridges::geom_density_ridges(aes(fill = trajectory_type_dataset)) +
+  ggridges::geom_density_ridges2(
+    aes(fill = trajectory_type_dataset),
+    bandwidth = bw,
+    alpha = alpha,
+    from = complexity_difference_limits[[1]],
+    to = complexity_difference_limits[[2]]
+  ) +
   geom_point() +
-  geom_vline(xintercept = 0) +
+  geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
   geom_text(aes(x = x, y = arrow_y, hjust = hjust, label = text), colour = "#333333", vjust = 1, lineheight = 0.8, size = 3.2, data = arrow_annot_data) +
   facet_grid(.~method_id, labeller = label_facet(label_method)) +
   scale_fill_manual(values = trajectory_type_colors, labels = label_long, guide = "none") +
-  scale_x_continuous(expand = c(0, 0)) +
-  scale_y_discrete(labels = label_long, expand = c(0, 0)) +
+  scale_y_discrete(label_long("Gold standard trajectory type"), expand = c(0,0), labels = label_long) +
+  scale_x_continuous(label_long("Difference in topology size (= # nodes + # edges)\nbetween prediction and gold standard"), expand = c(0, 0), limits = complexity_difference_limits) +
   theme_pub()
 
