@@ -16,6 +16,10 @@
   percentrank = function(xnona, xnazero) {
     percent_rank(xnazero)
   },
+  normal = function(xnona, xnazero) {
+    y <- (xnazero - mean(xnona)) / sd(xnona)
+    pnorm(y)
+  },
   none = "none"
 )
 
