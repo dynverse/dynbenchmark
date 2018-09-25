@@ -10,7 +10,7 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   sodipodi:docname="tree3.svg"
+   sodipodi:docname="tree.svg"
    inkscape:version="0.92.3 (d244b95, 2018-08-02)"
    id="svg8"
    version="1.1"
@@ -735,15 +735,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.6748202"
-     inkscape:cx="769.03823"
-     inkscape:cy="87.242315"
+     inkscape:cx="850.56966"
+     inkscape:cy="403.77348"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
      showguides="true"
      inkscape:window-width="1920"
      inkscape:window-height="983"
-     inkscape:window-x="1920"
+     inkscape:window-x="0"
      inkscape:window-y="27"
      inkscape:window-maximized="1"
      fit-margin-top="0"
@@ -796,14 +796,14 @@
     <svg:image
        sodipodi:absref="/home/wouters/thesis/projects/dynverse/dynbenchmark/raw/09-guidelines/../../results/09-guidelines/guidelines_methods.png"
        xlink:href="../../results/09-guidelines/guidelines_methods.png"
-       inkscape:label="methods"
-       style="display:inline;stroke-width:1.69773591"
-       width="452.36719"
-       height="565.45905"
-       preserveAspectRatio="none"
-       id="methods"
+       y="18.109434"
        x="743.8855"
-       y="18.109434" />
+       id="methods"
+       preserveAspectRatio="none"
+       height="565.45905"
+       width="452.36719"
+       style="display:inline;stroke-width:1.69773591"
+       inkscape:label="methods" />
     <svg:a
        id="a1179"
        xlink:href="http://www.dynverse.org"
@@ -1805,8 +1805,8 @@
        style="display:inline;stroke-width:6.51041603" />
     <svg:image
        sodipodi:absref="/home/wouters/thesis/projects/dynverse/dynguidelines/inst/img/trajectory_types/graph.png"
-       y="144.65453"
-       x="615"
+       y="145.70457"
+       x="616.16107"
        id="image1549-2"
        xlink:href="file:///home/wouters/thesis/projects/dynverse/dynguidelines/inst/img/trajectory_types/graph.png"
        preserveAspectRatio="none"
@@ -2033,33 +2033,33 @@
     <svg:text
        xml:space="preserve"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15.83477688px;line-height:125%;font-family:'Open Sans';-inkscape-font-specification:'Open Sans Bold';font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:justify;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#060305;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.88976395;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:3.4000001;stroke-dasharray:3.77952773, 3.77952773;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-       x="292.90164"
+       x="276.90164"
        y="308.30151"
        id="text1827-8"><svg:tspan
          sodipodi:role="line"
          id="tspan1825-7"
-         x="292.90164"
+         x="276.90164"
          y="308.30151"
          style="stroke-width:1.88976395">Free topology</svg:tspan></svg:text>
     <svg:path
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#060305;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.88976395;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:3.4000001;stroke-dasharray:3.77952773, 3.77952773;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-       d="m 273.54996,309.52093 14.71256,0.13257 -7.29001,-14.97764 z"
+       d="m 257.54996,309.52093 14.71256,0.13257 -7.29001,-14.97764 z"
        id="path1823-2"
        inkscape:connector-curvature="0" />
     <svg:text
        xml:space="preserve"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15.83477688px;line-height:125%;font-family:'Open Sans';-inkscape-font-specification:'Open Sans Bold';font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:justify;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#060305;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.88976395;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:3.4000001;stroke-dasharray:3.77952773, 3.77952773;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-       x="292.90164"
+       x="276.90164"
        y="338.23318"
        id="text1827-8-8"><svg:tspan
          sodipodi:role="line"
          id="tspan1825-7-2"
-         x="292.90164"
+         x="276.90164"
          y="338.23318"
          style="stroke-width:1.88976395">Fixed topology</svg:tspan></svg:text>
     <svg:path
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#060305;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.88976395;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:3.4000001;stroke-dasharray:3.77952773, 3.77952773;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-       d="m 288.26252,324.74009 -14.71256,-0.13257 7.29001,14.97764 z"
+       d="m 272.26252,324.74009 -14.71256,-0.13257 7.29001,14.97764 z"
        id="path1823-2-9"
        inkscape:connector-curvature="0" />
     <svg:path
