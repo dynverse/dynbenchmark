@@ -3,7 +3,7 @@ library(tidyverse)
 library(GEOquery)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real/cortical-interneuron-differentiation_frazer")
+dataset_preprocessing("real/silver/cortical-interneuron-differentiation_frazer")
 
 txt_location <- download_dataset_source_file(
   "GSE90860_SupplementaryData1_revised_julien.tsv.gz",

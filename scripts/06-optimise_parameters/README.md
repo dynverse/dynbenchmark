@@ -1,5 +1,8 @@
 
-# Optimisation of method parameters on synthetic data
+# Optimisation of method’s parameters on synthetic data
+
+We plan to add this experiment later 🚧.👷 These scripts are currently not
+up-to-date.
 
 | \# | script/folder                                 | description |
 | :- | :-------------------------------------------- | :---------- |

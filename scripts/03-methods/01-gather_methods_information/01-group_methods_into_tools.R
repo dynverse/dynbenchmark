@@ -30,8 +30,15 @@ methods_detects <- methods$trajectory_types %>%
   rename_all(~paste0("detects_", .))
 methods <- methods %>% bind_cols(methods_detects)
 
+# TEMP FIX
+methods$topology_inference <- ifelse(methods$topology_inference == "param", "parameter", methods$topology_inference)
+
 # add most complex trajectory type (the latest in dynwrap::trajectory_types)
 methods$most_complex_trajectory_type <- methods$trajectory_types %>% map_chr(~ last(trajectory_type_ids[trajectory_type_ids %in% .]))
+
+# add requires_priors column
+methods$requires_prior <- map_lgl(methods$input, ~any(dynwrap::priors$prior_id %in% .$required))
+methods$required_priors <- map(methods$input, ~intersect(dynwrap::priors$prior_id, .$required))
 
 # join with google sheet
 methods_google <- sheet %>%

@@ -57,7 +57,7 @@ settings_individual <- list(
 )
 
 settings_individual <- map(settings_individual, function(setting) {
-  setting$id <- paste0("real/planaria-", setting$subid, "_plass")
+  setting$id <- paste0("real/silver/planaria-", setting$subid, "_plass")
   setting
 })
 
@@ -73,7 +73,7 @@ settings_combinations <-
   map2(seq_along(combinations), combinations, function(combination_ix, combination) {
     setting <- list(
       milestone_network = bind_rows(map(settings_individual[combination], "milestone_network")),
-      id = paste0("real/planaria-combination-", combination_ix, "_plass"),
+      id = paste0("real/silver/planaria-combination-", combination_ix, "_plass"),
       progenitors = map_chr(settings_individual[combination], ~.$milestone_network$from[[1]])
     )
   })
@@ -88,7 +88,7 @@ settings_pairs <-
       .
     )
 
-    setting$id <- paste0("real/planaria-pair-", combination_ix, "_plass")
+    setting$id <- paste0("real/silver/planaria-pair-", combination_ix, "_plass")
 
     setting
   })
@@ -96,7 +96,7 @@ settings_pairs <-
 # full planaria
 additional_endstates <- c("otf+ cells 1", "otf+ cells 2", "secretory 2", "secretory 1", "secretory 3", "secretory 4", "goblet cells", "protonephridia")
 setting_full <- list(
-  id = "real/planaria-full_plass",
+  id = "real/silver/planaria-full_plass",
   milestone_network = map_dfr(settings_individual, function(setting) {
     milestone_network <- setting$milestone_network %>% bind_rows(
       tibble(from = "neoblast 1", to = setting$milestone_network$from[[1]]),

@@ -91,7 +91,7 @@ tools$xs <- map(tools$xs, function(xs) {
 
 # choose tools
 tool_ids <- tools %>% filter(tool_name %in% issues$title) %>% pull(tool_id)
-tool_id <- "scorpius"
+tool_ids <- "scorpius"
 
 for (tool_id in tool_ids) {
   print(tool_id)
@@ -108,14 +108,14 @@ for (tool_id in tool_ids) {
     } else {
       author$given
     }
-  }) %>% glue::collapse(", ", last = " and ")
+  }) %>% glue::glue_collapse(", ", last = " and ")
 
   code_text <- if(nrow(methods_oi) == 1) {
     glue::glue("[a docker container]({methods_oi$container_url})")
   } else {
     paste0(
       "docker containers",
-      glue::collapse(
+      glue::glue_collapse(
         glue::glue("[[{seq_len(nrow(methods_oi))}]]({methods_oi$container_url})")
       )
     )

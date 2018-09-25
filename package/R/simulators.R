@@ -72,7 +72,7 @@ simulate_splatter <- function(
         group.prob = milestone_network$length/sum(milestone_network$length),
         path.from = path.from,
         path.length = ceiling(milestone_network$length*n_steps_per_length),
-        path.nonlinsimulation_designearProb = path.nonlinearProb,
+        path.nonlinearProb = path.nonlinearProb,
         path.sigmaFac = path.sigmaFac,
         path.skew = path.skew
       )
@@ -249,7 +249,6 @@ simulate_prosstt <- function(
 
   # normalise & filter
   counts[counts < 0] <- 0 # in some cases, prosstt produces verry low numbers (eg. -8e54)
-  # counts[counts > 1e30] <- 1e30
 
   counts <- counts[apply(counts, 1, max) > 0, ]
   if (nrow(counts) == 0) {stop("PROSSTT generated out-of-bound counts")}

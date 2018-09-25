@@ -1,7 +1,7 @@
 library(tidyverse)
 library(dynbenchmark)
 
-dataset_preprocessing("real/germline-human_li")
+dataset_preprocessing("real/goldsilver/germline-human_li")
 
 tar_location <- download_dataset_source_file(
   "GSE86146_RAW.tar",
@@ -41,7 +41,7 @@ milestone_order_to_network <- function(order) {
 
 settings <- list(
   list(
-    id = "real/germline-human-male_li",
+    id = "real/silver/germline-human-male_li",
     milestone_network = tribble(
       ~from, ~to,
       "Male_FGC#1", "Male_FGC#2",
@@ -50,7 +50,7 @@ settings <- list(
     milestone_source = "cluster"
   ),
   list(
-    id = "real/germline-human-female_li",
+    id = "real/silver/germline-human-female_li",
     milestone_network = tribble(
       ~from, ~to,
       "Female_FGC#1", "Female_FGC#2",
@@ -59,7 +59,7 @@ settings <- list(
     milestone_source = "cluster"
   ),
   list(
-    id = "real/germline-human-male-weeks_li",
+    id = "real/gold/germline-human-male-weeks_li",
     milestone_network = tribble(
       ~from, ~to,
       "M#4#FGC", "M#9#FGC",
@@ -72,7 +72,7 @@ settings <- list(
     milestone_source = "weekgendertype"
   ),
   list(
-    id = "real/germline-human-female-weeks_li",
+    id = "real/gold/germline-human-female-weeks_li",
     milestone_network = tribble(
       ~from, ~to,
       "F#5#FGC", "F#7#FGC",

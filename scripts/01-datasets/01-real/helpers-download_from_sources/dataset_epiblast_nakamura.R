@@ -1,7 +1,7 @@
 library(tidyverse)
 library(dynbenchmark)
 
-dataset_preprocessing("real/epiblast_nakamura")
+dataset_preprocessing("real/silver/epiblast_nakamura")
 
 rpm_ms_location <- download_dataset_source_file(
   "GSE74767_SC3seq_Ms_ProcessedData.txt.gz",
@@ -36,7 +36,7 @@ allcell_info <- readxl::read_excel(celldata_location, "SC3-seq_SampleTable", ski
 
 settings <- list(
   list(
-    id = "real/epiblast-monkey_nakamura",
+    id = "real/silver/epiblast-monkey_nakamura",
     milestone_network = tribble(
       ~from, ~to,
       "ICM", "Pre-EPI",
@@ -51,7 +51,7 @@ settings <- list(
     rpm = rpm_cy
   ),
   list(
-    id = "real/trophectoderm-monkey_nakamura",
+    id = "real/silver/trophectoderm-monkey_nakamura",
     milestone_network = tribble(
       ~from, ~to,
       "PreE-TE", "PreL-TE",
@@ -61,7 +61,7 @@ settings <- list(
     rpm = rpm_cy
   ),
   list(
-    id = "real/ICM-monkey_nakamura",
+    id = "real/silver/ICM-monkey_nakamura",
     milestone_network = tribble(
       ~from, ~to,
       "ICM", "Hypoblast",
@@ -79,7 +79,7 @@ settings <- list(
     rpm = rpm_cy
   ),
   list(
-    id = "real/blastocyst-monkey_nakamura",
+    id = "real/silver/blastocyst-monkey_nakamura",
     milestone_network = tribble(
       ~from, ~to,
       "ICM", "Hypoblast",

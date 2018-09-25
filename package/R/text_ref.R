@@ -10,11 +10,10 @@ setup_refs <- function() {
 #' @param ref_id The identifier
 #' @param suffix Adding something to the index
 #' @param anchor Whether to anchor here
-#' @param pattern What to use as pattern
 #' @param format The output format (html, latex, markdown, ...)
 #'
 #' @export
-ref <- function(ref_type, ref_id, suffix = "", anchor = FALSE, pattern = "[**{ref_full_name}**](#{ref_type}_{ref_id})", format = get_default_format()) {
+ref <- function(ref_type, ref_id, suffix = "", anchor = FALSE, format = get_default_format()) {
   if(nrow(refs %>% filter(ref_id == !!ref_id)) == 0) {
     refs <<- refs %>% bind_rows(tibble(
       name = create_names[[ref_type]](sum(refs$ref_type == ref_type) + 1),
@@ -24,8 +23,17 @@ ref <- function(ref_type, ref_id, suffix = "", anchor = FALSE, pattern = "[**{re
   }
   ref_name <- refs %>% filter(ref_id == !!ref_id) %>%
     pull(name)
-  ref_full_name <- paste0(ref_name, glue::glue_collapse(suffix, ','))
+  ref_full_name <- paste0(ref_name, label_vector(suffix))
+
+  # print text of ref
+  if (format != "latex") {
+    pattern <- "[**{ref_full_name}**](#{ref_type}_{ref_id})"
+  } else {
+    pattern <- "\\protect\\hyperlink{{{ref_type}_{ref_id}}}{{\\textbf{{{ref_full_name}}}}"
+  }
   ref <- pritt(pattern)
+
+  # add anchor is requested
   if (anchor)  ref <- pritt("{ref}{anchor(ref_type, ref_id, format = format)}")
   ref
 }
@@ -91,7 +99,7 @@ add_fig <- function(
   # save it because why not
   figs <<- figs %>% add_row(
     ref_id = ref_id,
-    fig_path = fig_path,
+    fig_path = if(is.character(fig_path)) {fig_path} else {list(fig_path)},
     caption_main = caption_main,
     caption_text = caption_text,
     width = width,
@@ -112,10 +120,10 @@ add_sfig <- function(
   height = 7,
   format = get_default_format()
 ) {
-  # save it because why not
-  figs <<- sfigs %>% add_row(
+  # save it because it's necessary
+  sfigs <<- sfigs %>% add_row(
     ref_id = ref_id,
-    fig_path = fig_path,
+    fig_path = if(is.character(fig_path)) {fig_path} else {list(fig_path)},
     caption_main = caption_main,
     caption_text = caption_text,
     width = width,
@@ -167,6 +175,12 @@ plot_fig <- function(
   # convert to relative path (for github markdown)
   fig_path <- fs::path_rel(fig_path)
 
+
+  # check if path exists
+  if (!file.exists(fig_path)) {
+    stop(fig_path, " does not exist!")
+  }
+
   if (format == "latex") {
     # convert svg to pdf
     if (fs::path_ext(fig_path) == "svg") {
@@ -176,21 +190,21 @@ plot_fig <- function(
       fig_path <- new_fig_path
     }
 
-    fig_name <- ref(ref_type, ref_id, pattern = "{ref_full_name}")
+    fig_name <- ref(ref_type, ref_id)
     subchunk <- glue::glue(
       "\\begin{{myfigure}}{{{ifelse(ref_type == 'fig', '!htbp', 'H')}}}\n",
       "\\begin{{center}}\n",
       "{fig_anch}\n",
       "\\includegraphics[height={height/2}in, width={width/2}in]{{{fig_path}}}\n\n",
       "\\end{{center}}\n",
-      "\\textbf{{ {fig_name}: {caption_main}}} {caption_text}\n\n",
+      "\\textbf{{{fig_name}: {caption_main}}} {caption_text}\n\n",
       "\\end{{myfigure}}\n"
     )
   } else if (format %in% c("html", "markdown")){
     width <- width * 70
     height = height * 70
 
-    fig_cap <- ref(ref_type, ref_id, pattern = "{ref_full_name}")
+    fig_cap <- ref(ref_type, ref_id)
     subchunk <- glue::glue(
       "\n\n\n<p>\n",
       "  {fig_anch}\n",
@@ -254,7 +268,7 @@ add_table <- function(
     caption_text = caption_text
   )
 
-  show_table(ref_id, format = format)
+  show_table(table, ref_id, caption_main, caption_text, ref_type = "table")
 }
 
 #' @rdname add_table
@@ -273,8 +287,7 @@ add_stable <- function(
     table = list(table),
     ref_id = ref_id,
     caption_main = caption_main,
-    caption_text = caption_text,
-    supplementary = supplementary
+    caption_text = caption_text
   )
 }
 
@@ -282,6 +295,15 @@ process_table <- function(table) {
   # load in the table if character
   if (is.character(table) && fs::path_ext(table) == "rds") {
     table <- read_rds(table)
+  }
+
+  # if an excel, add a note that this table was submitted separately
+  if (is.character(table) && fs::path_ext(table) == "xlsx") {
+    table <- list(
+      html = "This table was provided as a separate excel file",
+      latex = "This table was provided as a separate excel file",
+      markdown = "This table was provided as a separate excel file"
+    )
   }
 
   # convert tibble to kables
@@ -304,18 +326,14 @@ process_table <- function(table) {
   table
 }
 
-show_table <- function(ref_id, format = get_default_format()) {
-  table_row <- tables %>% extract_row_to_list(ref_id == !!ref_id)
-
-  table <- table_row$table
-
+show_table <- function(table, ref_id, caption_main, caption_text, format = get_default_format(), ref_type = "table") {
   # anchor
-  table_anch <- anchor("table", ref_id)
+  table_anch <- anchor(ref_type, ref_id)
 
   # caption
-  caption_main <- knitr::knit(text = table_row$caption_main, quiet = TRUE)
-  caption_text <- knitr::knit(text = table_row$caption_text, quiet = TRUE)
-  table_name <- ref("table", ref_id, pattern = "{ref_full_name}")
+  caption_main <- knitr::knit(text = caption_main, quiet = TRUE)
+  caption_text <- knitr::knit(text = caption_text, quiet = TRUE)
+  table_name <- ref(ref_type, ref_id)
 
   # render the table
   if (format == "latex") {
@@ -325,7 +343,7 @@ show_table <- function(ref_id, format = get_default_format()) {
       "{table_anch}\n",
       "{table$latex %>% glue::glue_collapse('\n')}\n\n",
       "\\end{{center}}\n",
-      "\\textbf{{ {table_name}: {caption_main}}} {caption_text}\n\n",
+      "\\textbf{{{table_name}: {caption_main}}} {caption_text}\n\n",
       "\\end{{table}}\n"
     )
   } else if (format == "html") {

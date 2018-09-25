@@ -5,12 +5,29 @@ library(survival)
 
 experiment("05-scaling")
 
-##########################################################
-###############      RETRIEVE RESULTS      ###############
-##########################################################
+###################################################
+###                    FETCH                    ###
+###################################################
 
-# fetch results from cluster
-benchmark_fetch_results(TRUE)
+# If you are the one who submitted the jobs, run:
+# benchmark_fetch_results()
+# qsub::rsync_remote(
+#   remote_src = FALSE,
+#   path_src = derived_file(remote = FALSE, experiment = "05-scaling"),
+#   remote_dest = TRUE,
+#   path_dest = derived_file(remote = TRUE, experiment = "05-scaling"),
+#   verbose = TRUE
+# )
+
+# If you want to download the output from prism
+qsub::rsync_remote(
+  remote_src = TRUE,
+  path_src = derived_file(remote = TRUE, experiment = "05-scaling"),
+  remote_dest = FALSE,
+  path_dest = derived_file(remote = FALSE, experiment = "05-scaling"),
+  verbose = TRUE,
+  exclude = "*/r2gridengine/*"
+)
 
 # bind results in one data frame (without models)
 execution_output <- benchmark_bind_results(load_models = FALSE)
@@ -125,12 +142,12 @@ write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "
 
 scaling_exp <- tribble(
   ~ experiment, ~ category, ~ metric, ~ lnrow, ~ lncol,
-  "scalability", "1k features", "1k cells", 3, 3,
-  "scalability", "1k features", "10k cells", 4, 3,
-  "scalability", "1k features", "100k cells", 5, 3,
-  "scalability", "1k cells", "1k features", 3, 3,
-  "scalability", "1k cells", "10k features", 3, 4,
-  "scalability", "1k cells", "100k features", 3, 5
+  "scalability", "10k features", "1k cells", 3, 3,
+  "scalability", "10k features", "10k cells", 4, 3,
+  "scalability", "10k features", "100k cells", 5, 3,
+  "scalability", "10k cells", "1k features", 3, 3,
+  "scalability", "10k cells", "10k features", 3, 4,
+  "scalability", "10k cells", "100k features", 3, 5
 )
 
 scaling_process <-

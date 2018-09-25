@@ -1,7 +1,7 @@
 library(dynbenchmark)
 library(tidyverse)
 
-dataset_preprocessing("real/whole-schmidtea-mediterranea_plass")
+dataset_preprocessing("real/silver/whole-schmidtea-mediterranea_plass")
 
 # get settings
 source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/scripts/01-datasets/01-real/helpers-download_from_sources/helper_planaria-plass.R"))

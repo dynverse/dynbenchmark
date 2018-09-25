@@ -21,9 +21,7 @@ execution_output <- benchmark_bind_results(load_models = FALSE) %>%
 design <- read_rds(derived_file("design.rds"))
 
 methods_info <- design$methods %>%
-  rename_all(function(x) paste0("method_", x)) %>%
-  select(-method_type) %>%
-  left_join(dynmethods::methods %>% select(method_id = id, method_type = type), by = "method_id")
+  rename_all(function(x) paste0("method_", x))
 datasets_info <- design$datasets %>%
   rename_all(function(x) paste0("dataset_", x))
 
@@ -78,7 +76,7 @@ tmp <- benchmark_aggregate(
   norm_fun = norm_fun,
   mean_fun = mean_fun,
   mean_weights = mean_weights,
-  dataset_source_weights = c("real" = 1, "synthetic/dyngen" = 1, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
+  dataset_source_weights = c("real/gold" = 1, "real/silver" = 1, "synthetic/dyngen" = 1, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
 )
 
 dataset_source_weights <-
@@ -87,7 +85,7 @@ dataset_source_weights <-
   select(method_id:dataset_source, overall) %>%
   spread(dataset_source, overall) %>%
   select(-mean) %>%
-  mutate(compare = real) %>%
+  mutate(compare = `real/gold`) %>%
   gather(synth, value, -method_id:-dataset_trajectory_type, -compare) %>%
   group_by(synth) %>%
   summarise(cor = nacor(compare, value)) %>%

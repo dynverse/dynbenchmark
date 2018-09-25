@@ -1,7 +1,7 @@
 library(dynbenchmark)
 library(tidyverse)
 
-dataset_preprocessing("real/distal-lung-epithelium_treutlein")
+dataset_preprocessing("real/silver/distal-lung-epithelium_treutlein")
 
 txt_location <- download_dataset_source_file(
   "nature13173-s4.txt",

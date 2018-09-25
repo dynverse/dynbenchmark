@@ -17,10 +17,10 @@ datasets_real_metadata <- gs_key("1SALZ2jt7TZJQJMEvvOwSR2r5yIl50qcGAZ-K5AC4DJo")
   tidyr::separate_rows(id, sep = ",\n")
 
 # link the dataset ids to the metadata
-dataset_ids_real <- list_datasets() %>% filter(source == "real") %>% pull(id)
+dataset_ids_real <- list_datasets("real") %>% pull(id)
 
 datasets_real_metadata <- datasets_real_metadata %>%
-  mutate(id = map(paste0("real/", datasets_real_metadata$id), str_match, string = dataset_ids_real) %>% map(~.[!is.na(.)])) %>%
+  mutate(id = map(paste0("real/(gold|silver)/", datasets_real_metadata$id), str_match, string = dataset_ids_real) %>% map(~.[!is.na(.)])) %>%
   unnest(id)
 
 if (any(!dataset_ids_real %in% datasets_real_metadata$id)) {

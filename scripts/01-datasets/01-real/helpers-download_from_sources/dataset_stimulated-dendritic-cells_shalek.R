@@ -1,7 +1,7 @@
 library(tidyverse)
 library(dynbenchmark)
 
-dataset_preprocessing("real/stimulated-dendritic-cells_shalek")
+dataset_preprocessing("real/gold/stimulated-dendritic-cells_shalek")
 
 file <- download_dataset_source_file(
   "GSM1406531_GSM1407094.txt.gz",
@@ -21,7 +21,7 @@ allcell_info <- data_frame(
 
 settings <- lapply(c("LPS", "PAM", "PIC"), function(stim) {
   list(
-    id = pritt("real/stimulated-dendritic-cells-{stim}_shalek"),
+    id = pritt("real/gold/stimulated-dendritic-cells-{stim}_shalek"),
     milestone_network = tribble(
       ~from, ~to, ~length,
       "Unstimulated#0h", pritt("{stim}#1h"), 1,

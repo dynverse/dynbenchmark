@@ -5,7 +5,6 @@
 \title{Refer to a figure or table}
 \usage{
 ref(ref_type, ref_id, suffix = "", anchor = FALSE,
-  pattern = "[**{ref_full_name}**](#{ref_type}_{ref_id})",
   format = get_default_format())
 }
 \arguments{
@@ -16,8 +15,6 @@ ref(ref_type, ref_id, suffix = "", anchor = FALSE,
 \item{suffix}{Adding something to the index}
 
 \item{anchor}{Whether to anchor here}
-
-\item{pattern}{What to use as pattern}
 
 \item{format}{The output format (html, latex, markdown, ...)}
 }

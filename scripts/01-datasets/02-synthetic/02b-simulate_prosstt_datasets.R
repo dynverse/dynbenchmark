@@ -15,8 +15,8 @@ design <- crossing(
     a = runif(n(), 0.01, 0.1),
     intra_branch_tol = runif(n(), 0, 0.9),
     inter_branch_tol = runif(n(), 0, 0.9),
-    alpha = exp(rnorm(n(), log(0.2), log(1.5))),
-    beta = exp(rnorm(n(), log(1), log(1.5))) + 1
+    alpha = exp(rnorm(n(), log(0.3), log(1.5))),
+    beta = exp(rnorm(n(), log(2), log(1.5))) + 1
   ) %>%
   mutate(
     dataset_id = paste0("synthetic/prosstt/", topology_model, "_", platform_ix),

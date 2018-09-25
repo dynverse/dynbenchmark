@@ -2,7 +2,7 @@ library(tidyverse)
 library(dynbenchmark)
 library(GEOquery)
 
-dataset_preprocessing("real/hepatoblast-differentiation_yang")
+dataset_preprocessing("real/silver/hepatoblast-differentiation_yang")
 
 txt_location <- download_dataset_source_file(
   "GSE90047_Single-cell_RNA-seq_TPM.txt.gz",

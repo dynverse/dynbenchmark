@@ -1,7 +1,7 @@
 library(tidyverse)
 library(dynbenchmark)
 
-dataset_preprocessing("real/neonatal-inner-ear_burns")
+dataset_preprocessing("real/silver/neonatal-inner-ear_burns")
 
 count_location <- download_dataset_source_file(
   "GSE71982_RSEM_Counts_Matrix.txt.gz",
@@ -28,7 +28,7 @@ settings <- list(
       "TEC", "HC (i)",
       "HC (i)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/neonatal-inner-ear-all_burns"
+    id = "real/silver/neonatal-inner-ear-all_burns"
   ),
   list(
     milestone_network = tribble(
@@ -37,7 +37,7 @@ settings <- list(
       "SC (ii)", "HC (ii)",
       "HC (ii)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/neonatal-inner-ear-SC-HC_burns"
+    id = "real/silver/neonatal-inner-ear-SC-HC_burns"
   ),
   list(
     milestone_network = tribble(
@@ -45,7 +45,7 @@ settings <- list(
       "TEC", "SC (i)",
       "SC (i)", "SC (ii)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/neonatal-inner-ear-TEC-SC_burns"
+    id = "real/silver/neonatal-inner-ear-TEC-SC_burns"
   ),
   list(
     milestone_network = tribble(
@@ -53,7 +53,7 @@ settings <- list(
       "TEC", "HC (i)",
       "HC (i)", "HC (iii-iv)"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/neonatal-inner-ear-TEC-HSC_burns"
+    id = "real/silver/neonatal-inner-ear-TEC-HSC_burns"
   )
 )
 

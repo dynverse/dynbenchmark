@@ -2,7 +2,7 @@ library(tidyverse)
 library(dynbenchmark)
 options('download.file.method.GEOquery'='curl')
 
-dataset_preprocessing("real/epidermis-hair_joost")
+dataset_preprocessing("real/silver/epidermis-hair_joost")
 
 txt_location <- download_dataset_source_file(
   "GSE67602_Joost_et_al_expression.txt.gz",
@@ -35,7 +35,7 @@ settings <- list(
       "IB", "uHF-I",
       "uHF-I", "IFE-B"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/epidermis-hair-spatial_joost"
+    id = "real/silver/epidermis-hair-spatial_joost"
   ),
   list(
     milestone_network = tribble(
@@ -45,7 +45,7 @@ settings <- list(
       "IFE-DII", "IFE-KI",
       "IFE-KI", "IFE-KII"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/epidermis-hair-IFE_joost"
+    id = "real/silver/epidermis-hair-IFE_joost"
   ),
   list(
     milestone_network = tribble(
@@ -53,7 +53,7 @@ settings <- list(
       "uHF-I", "uHF-II",
       "uHF-II", "uHF-III"
     ) %>% mutate(length = 1, directed = TRUE),
-    id = "real/epidermis-hair-uHF_joost"
+    id = "real/silver/epidermis-hair-uHF_joost"
   )
 )
 

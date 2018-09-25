@@ -112,6 +112,10 @@ pdf_manuscript <- function(
     read_lines(output_file) %>% process_changes(render_changes = FALSE) %>% write_lines(output_file)
     system(glue::glue("xelatex -interaction=nonstopmode {output_file}"))
 
+    # save the supplementary figures and tables
+    write_rds(lst(sfigs = get("sfigs", envir = .GlobalEnv), stables, refs), "supplementary.rds")
+
+    # return the new output file
     fs::path_ext_set(output_file, "pdf")
   }
 

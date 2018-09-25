@@ -2,7 +2,7 @@ library(tidyverse)
 library(dynbenchmark)
 library(GEOquery)
 
-dataset_preprocessing("real/pancreatic-cell-maturation_zhang")
+dataset_preprocessing("real/gold/pancreatic-cell-maturation_zhang")
 
 txt_location <- download_dataset_source_file(
   "GSE87375_Single_Cell_RNA-seq_Gene_Read_Count.txt.gz",
@@ -50,7 +50,7 @@ allcell_info <- dynutils::list_as_tibble(geo@gsms %>% map(~.@header)) %>%
 
 settings <- list(
   list(
-    id = "real/pancreatic-alpha-cell-maturation_zhang",
+    id = "real/gold/pancreatic-alpha-cell-maturation_zhang",
     milestone_network = tribble(
       ~from, ~to, ~length,
       "α-cell E17.5", "α-cell P0", 2.5,
@@ -61,7 +61,7 @@ settings <- list(
     ) %>% mutate(directed = TRUE)
   ),
   list(
-    id = "real/pancreatic-beta-cell-maturation_zhang",
+    id = "real/gold/pancreatic-beta-cell-maturation_zhang",
     milestone_network = tribble(
       ~from, ~to, ~length,
       "β-cell E17.5", "β-cell P0", 2.5,

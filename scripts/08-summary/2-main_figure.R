@@ -4,13 +4,13 @@ library(dynplot)
 
 experiment("08-summary")
 
-list2env(read_rds(result_file("results.rds")), environment())
+list2env(read_rds(result_file("results.rds", experiment_id = "08-summary")), environment())
 
 # define method groups
 method_info <- method_info %>%
   mutate(method_grouping = ifelse(method_source == "tool", method_most_complex_trajectory_type, method_source))
 
-method_groups <- c(dynwrap::trajectory_types$id, c("adaptation", "offtheshelf", "control"))
+method_groups <- c(rev(dynwrap::trajectory_types$id), c("adaptation", "offtheshelf", "control"))
 
 # determine palettes
 sc_col_fun <- function(palette) {
@@ -54,21 +54,44 @@ data <-
         method_id,
         name = method_name,
         control_label = ifelse(method_source == "tool", "", method_source),
-        priors = method_info$method_priors_required %>% str_replace_all("[^,]+", "*") %>% str_replace_all(",", ""),
-        topology_inference = ifelse(method_topology_inference == "parameter", "param", method_topology_inference),
+        # priors = method_priors_required %>% str_replace_all("[^,]+", "*") %>% str_replace_all(",", ""),
+        priors = case_when(
+          grepl("dataset", method_priors_required) ~ "All",
+          grepl("(groups_id|features_id|timecourse_continuous|timecourse_discrete|groups_network)", method_priors_required) ~ "\u2716",
+          grepl("(start_id|end_id|end_n|start_n|groups_n)", method_priors_required) ~ "\u2715",
+          TRUE ~ ""
+        ),
+        topology_inference = label_short(ifelse(method_topology_inference == "parameter", "param", method_topology_inference)),
         wrapper_type = wrapper_type_map[method_wrapper_type],
-        most_complex = method_most_complex_trajectory_type
+        most_complex = method_most_complex_trajectory_type,
+        platform = c("R" = "R", "Python" = "Py")[method_platform],
+        tt_cycle = ifelse(method_trajtyp_cycle, "cycle", "gray_cycle"),
+        tt_linear = ifelse(method_trajtyp_linear, "linear", "gray_linear"),
+        tt_convergence = ifelse(method_trajtyp_convergence, "convergence", "gray_convergence"),
+        tt_bifurcation = ifelse(method_trajtyp_bifurcation, "bifurcation", "gray_bifurcation"),
+        tt_multifurcation = ifelse(method_trajtyp_multifurcation, "multifurcation", "gray_multifurcation"),
+        tt_tree = ifelse(method_trajtyp_tree, "tree", "gray_tree"),
+        tt_acyclic_graph = ifelse(method_trajtyp_acyclic_graph, "acyclic_graph", "gray_acyclic_graph"),
+        tt_graph = ifelse(method_trajtyp_graph, "graph", "gray_graph"),
+        tt_disconnected_graph = ifelse(method_trajtyp_disconnected_graph, "disconnected_graph", "gray_disconnected_graph")
       ) %>%
       gather(metric, label, -method_id) %>%
       mutate(
-        experiment = ifelse(metric == "control_label", "summary", "method"), # control_label is an exception
-        category = "overall", colour = "black", placeholder = FALSE
+        experiment = case_when(
+          metric == "control_label" ~ "summary",
+          TRUE ~ "method"
+        ),
+        category = case_when(
+          grepl("^tt_", metric) ~ "inferrable trajectory types",
+          TRUE ~ "overall"
+        ),
+        colour = "black",
+        placeholder = FALSE
       )
   )
 
 pie_colours <-
   error_reasons %>% select(metric = name, colour)
-
 
 # GENERATE METHOD POSITIONS
 row_height <- 1
@@ -116,6 +139,7 @@ metric_pos <-
     xwidth = case_when(
       id == "name" ~ 6,
       id %in% c("wrty", "mcpx", "topi") ~ 2,
+      grepl("^tt", id) ~ 2,
       geom == "bar" | id == "conl" ~ 4,
       TRUE ~ 1
     ),
@@ -139,9 +163,14 @@ header_pos <-
     y = ifelse(level == "experiment", 4.5, 3.5),
     key = ifelse(level == "experiment", letters[row_number()], ""),
     x = (xmin + xmax) / 2
-  )
+  ) %>%
+  filter(!(level == "category" & id == "overall"))
 
-header_xvals <- header_pos %>% transmute(nam = paste0(level, "_", id), xmin) %>% deframe()
+header_xvals <-
+  bind_rows(
+    header_pos %>% transmute(nm = paste0(level, "_", id), xmin),
+    metric_pos %>% transmute(nm = paste0("metric_", id), xmin)
+  ) %>% deframe()
 
 
 # PROCESS CIRCLES DATA
@@ -217,7 +246,8 @@ barguides_data <- geom_data_processor(c("bar", "invbar"), function(dat) {
   )
 })
 trajd <- geom_data_processor("trajtype", function(dat) {
-  dat %>% transmute(xmin, xmax, ymin, ymax, topinf = label)
+  dat %>%
+    transmute(xmin, xmax, ymin, ymax, topinf = gsub("^gray_", "", label), colour = ifelse(grepl("^gray_", label), "lightgray", NA))
 })
 
 # CREATE LEGENDS
@@ -300,14 +330,19 @@ g1 <- ggplot() +
   expand_limits(x = c(-3, max(metric_pos$xmax)+3), y = c(legy_start - 4.3, 6.5)) +
 
   # LEGEND: BENCHMARK
+  geom_text(aes(header_xvals[["metric_prio"]], legy_start - 1, label = "Priors required"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  geom_text(aes(x = header_xvals[["metric_prio"]] + .8, y = legy_start - 2.3 + c(.8, 0, -.8), label = c("", "\u2715", "\u2716")), hjust = .5) +
+  geom_text(aes(x = header_xvals[["metric_prio"]] + 2, y = legy_start - 2.3 + c(.8, 0, -.8), label = c("None", "Soft", "Hard")), hjust = 0) +
+
+  # LEGEND: BENCHMARK
   geom_text(aes(header_xvals[["experiment_benchmark"]], legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
   ggforce::geom_circle(aes(x0 = header_xvals[["experiment_benchmark"]] + .8 + x, y0 = legy_start - 2.3 + r, r = r, fill = col), size = .25, leg_circles %>% filter(exp == "benchmark")) +
   geom_text(aes(x = header_xvals[["experiment_benchmark"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "benchmark") %>% slice(c(1, n()))) +
 
-  # LEGEND: SCALING
-  geom_text(aes(header_xvals[["experiment_scalability"]], legy_start - 1, label = "Estimated time"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggforce::geom_circle(aes(x0 = header_xvals[["experiment_scalability"]] + .8 + x, y0 = legy_start - 2.3 + r, r = r, fill = col), size = .25, leg_circles %>% filter(exp == "scalability")) +
-  geom_text(aes(x = header_xvals[["experiment_scalability"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "scalability") %>% slice(c(1, n()))) +
+  # # LEGEND: SCALING
+  # geom_text(aes(header_xvals[["experiment_scalability"]], legy_start - 1, label = "Estimated time"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  # ggforce::geom_circle(aes(x0 = header_xvals[["experiment_scalability"]] + .8 + x, y0 = legy_start - 2.3 + r, r = r, fill = col), size = .25, leg_circles %>% filter(exp == "scalability")) +
+  # geom_text(aes(x = header_xvals[["experiment_scalability"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "scalability") %>% slice(c(1, n()))) +
 
   # LEGEND: QC
   geom_text(aes(header_xvals[["experiment_qc"]], legy_start - 1, label = "QC score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
@@ -315,20 +350,32 @@ g1 <- ggplot() +
   geom_text(aes(x = header_xvals[["experiment_qc"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "qc") %>% slice(c(1, n()))) +
 
   # LEGEND: PCT ERRORED
-  geom_text(aes(header_xvals[["category_trajtypes"]], legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-  ggforce::geom_arc_bar(aes(x0 = header_xvals[["category_trajtypes"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = fill), size = .25, error_leg_df) +
-  ggforce::geom_arc_bar(aes(x0 = header_xvals[["category_trajtypes"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = NA), size = .25, error_leg_df) +
-  geom_text(aes(x = header_xvals[["category_trajtypes"]] + .5 + lab_x + .5, y = legy_start - 2.5 + lab_y, label = label, vjust = vjust, hjust = hjust), error_leg_df) +
-  geom_segment(aes(x = header_xvals[["category_trajtypes"]] + .5, xend = header_xvals[["category_trajtypes"]] + .5, y = legy_start - 2.5, yend = legy_start - 2.5 + row_height*.75), data = data_frame(z = 1), size = .25) +
+  geom_text(aes(header_xvals[["metric_errr"]], legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  ggforce::geom_arc_bar(aes(x0 = header_xvals[["metric_errr"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = fill), size = .25, error_leg_df) +
+  ggforce::geom_arc_bar(aes(x0 = header_xvals[["metric_errr"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = NA), size = .25, error_leg_df) +
+  geom_text(aes(x = header_xvals[["metric_errr"]] + .5 + lab_x + .5, y = legy_start - 2.5 + lab_y, label = label, vjust = vjust, hjust = hjust), error_leg_df) +
+  geom_segment(aes(x = header_xvals[["metric_errr"]] + .5, xend = header_xvals[["metric_errr"]] + .5, y = legy_start - 2.5, yend = legy_start - 2.5 + row_height*.75), data = data_frame(z = 1), size = .25) +
 
   # GENERATION SENTENCE
-  geom_text(aes(1, legy_start - 4, label = stamp), colour = "#cccccc", hjust = 0, vjust = 0)
+  geom_text(aes(1, legy_start - 5, label = stamp), colour = "#cccccc", hjust = 0, vjust = 0)
 
 g1 <-
-  plot_trajectory_types(plot = g1, trajectory_types = trajd$topinf, xmins = trajd$xmin, xmaxs = trajd$xmax, ymins = trajd$ymin, ymaxs = trajd$ymax, size = 1, geom = "circle", circ_size = .1)
+  plot_trajectory_types(
+    plot = g1,
+    trajectory_types = trajd$topinf,
+    xmins = trajd$xmin,
+    xmaxs = trajd$xmax,
+    ymins = trajd$ymin,
+    ymaxs = trajd$ymax,
+    node_colours = trajd$colour,
+    edge_colours = trajd$colour,
+    size = 1,
+    geom = "circle",
+    circ_size = .1
+  )
 
 # WRITE FILES
-ggsave(result_file("overview.pdf"), g1, width = 20, height = 18)
+ggsave(result_file("overview.pdf"), g1, device = cairo_pdf, width = 26, height = 18)
 # ggsave(result_file("overview.svg"), g1, width = 20, height = 16)
 # ggsave(result_file("overview.png"), g1, width = 20, height = 16)
 

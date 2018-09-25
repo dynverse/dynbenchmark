@@ -1,7 +1,7 @@
 library(dynbenchmark)
 library(tidyverse)
 
-dataset_preprocessing("real/olfactory-projection-neurons_horns")
+dataset_preprocessing("real/goldsilver/olfactory-projection-neurons_horns")
 
 txts <- tibble(remote_location=c(
   "https://raw.githubusercontent.com/felixhorns/FlyPN/master/data/names_DA1_24hAPF.txt",
@@ -39,7 +39,7 @@ allcounts <- allcounts[, !(str_detect(colnames(allcounts), "^ERCC-.*"))]
 
 settings <- list(
   list(
-    id = "real/olfactory-projection-neurons-DA1_horns",
+    id = "real/silver/olfactory-projection-neurons-DA1_horns",
     milestone_source = "group_id",
     milestone_network = tribble(
       ~from, ~to,
@@ -50,7 +50,7 @@ settings <- list(
     ) %>% mutate(length = 1, directed = TRUE)
   ),
   list(
-    id = "real/olfactory-projection-neurons-DC3_VA1d_horns",
+    id = "real/silver/olfactory-projection-neurons-DC3_VA1d_horns",
     milestone_source = "group_id",
     milestone_network = tribble(
       ~from, ~to,
@@ -65,7 +65,7 @@ settings <- list(
     ) %>% mutate(length = 1, directed = TRUE)
   ),
   list(
-    id = "real/olfactory-projection-neurons_horns",
+    id = "real/silver/olfactory-projection-neurons_horns",
     milestone_source = "group_id",
     milestone_network = tribble(
       ~from, ~to,

@@ -1,5 +1,8 @@
 #' Renders the manuscript
 
+library(dynbenchmark)
+library(tidyverse)
+
 # download from google docs
 httr::set_config(httr::config(http_version = 0)) # avoid http2 framing layer bug
 drive <- googledrive::drive_download(googledrive::as_id("1je6AaelApu2xcSNbYlvcuTzUeUJBOpTUPHz0L9Houfw"), type="text/plain", overwrite=TRUE, path = tempfile())
@@ -8,14 +11,16 @@ system(pritt("cat {drive$local_path} > manuscript/paper.Rmd"))
 
 # render
 rmarkdown::render("manuscript/paper.Rmd", output_format = pdf_manuscript())
+rmarkdown::render("manuscript/supplementary.Rmd", output_format = pdf_manuscript(render_changes = FALSE))
 
 # browse
 system("/usr/bin/xdg-open manuscript/paper.pdf")
+system("/usr/bin/xdg-open manuscript/supplementary.pdf")
 
 # upload to google drive
 googledrive::drive_update("dynverse/paper.pdf", "manuscript/paper.pdf")
 googledrive::drive_update("dynverse/paper_changes.pdf", "manuscript/paper_changes.pdf")
-drive_update("dynverse/supplementary.pdf", "manuscript/supplementary.pdf")
+googledrive::drive_update("dynverse/supplementary.pdf", "manuscript/supplementary.pdf")
 
 # prepare for submission
 # paper_folder <- "../../dyndocs/20180401_submission_nat_biotech/"

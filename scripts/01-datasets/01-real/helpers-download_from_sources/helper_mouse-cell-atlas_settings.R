@@ -167,7 +167,7 @@ settings <- list(
 
 # create ids
 settings <- map(settings, function(setting) {
-  setting$id <- paste0("real/", setting$tissue, "-", setting$subid, "_", "mca")
+  setting$id <- paste0("real/silver/", setting$tissue, "-", setting$subid, "_", "mca")
   setting
 })
 
@@ -180,7 +180,7 @@ settings <- c(
     setting <- list(
       milestone_network = bind_rows(map(settings[combination], "milestone_network")),
       dynamic_process = "mix",
-      id = paste0("real/mouse-cell-atlas-combination-", combination_ix)
+      id = paste0("real/silver/mouse-cell-atlas-combination-", combination_ix)
     )
   })
 )

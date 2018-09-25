@@ -1,7 +1,7 @@
 #' List and load the platforms
 #' @export
 load_platforms <- function() {
-  folder <- derived_file("", experiment_id = "01-platforms/")
+  folder <- result_file("", experiment_id = "01-datasets/02-synthetic/platforms")
   list.files(folder, recursive = TRUE, full.names = TRUE) %>% gsub("(.*)\\.tsv", "\\1", .) %>% map(read_rds)
 }
 
@@ -10,7 +10,7 @@ load_platforms <- function() {
 #' @param platform_id Platform identifier
 #' @export
 load_platform <- function(platform_id) {
-  folder <- derived_file("", experiment_id = "01-platforms/")
+  folder <- result_file("", experiment_id = "01-datasets/02-synthetic/platforms")
   read_rds(paste0(folder, "/", platform_id, ".rds"))
 }
 
@@ -27,6 +27,22 @@ load_simple_platform <- function() {
 }
 
 #' @rdname load_platforms
+#' @param platforms The platforms, loaded by load_platforms
+#' @export
+get_platform_features <- function(platforms) {
+  features <- map(platforms, function(platform) {
+    c(
+      platform[c("trajectory_dependent_features", "n_cells", "n_features")],
+      platform$estimate %>% attributes() %>% keep(is.numeric)
+    )
+  }) %>% bind_rows() %>% as.matrix() %>% scale
+  rownames(features) <- map(platforms, "platform_id")
+  features <- features[, apply(features, 2, function(x) !any(is.na(x)))]
+
+  features
+}
+
+#' @rdname load_platforms
 #' @param n_platforms Number of platforms to select
 #' @export
 select_platforms <- function(n_platforms) {
@@ -39,14 +55,7 @@ select_platforms <- function(n_platforms) {
   }
 
   # select features
-  features <- map(platforms, function(platform) {
-    c(
-      platform[c("trajectory_dependent_features", "n_cells", "n_features")],
-      platform$estimate %>% attributes() %>% keep(is.numeric)
-    )
-  }) %>% bind_rows() %>% as.matrix() %>% scale
-  rownames(features) <- map(platforms, "platform_id")
-  features <- features[, apply(features, 2, function(x) !any(is.na(x)))]
+  features <- get_platform_features(platforms)
 
   # cluster the platforms according to these features
   corm <- cor(t(features))
@@ -81,12 +90,21 @@ splatEstDropout <- function(norm.counts, params) {
 
 #' Estimate a platform
 #' @param dataset_id The dataset_id from which the platform will be estimated, using the files in datasets_preproc/raw
+#' @param subsample The number of cells to subsample
+#' @param override_fun Whether or not to override one splatEstDropout params
 #' @export
-estimate_platform <- function(dataset_id) {
+estimate_platform <- function(dataset_id, subsample = 500, override_fun = FALSE) {
   requireNamespace("splatter")
-  assignInNamespace("splatEstDropout", dynbenchmark:::splatEstDropout, asNamespace("splatter"))
+
+  if (override_fun) {
+    old_fun <- splatter:::splatEstDropout
+    assignInNamespace("splatEstDropout", dynbenchmark:::splatEstDropout, asNamespace("splatter"))
+    on.exit(assignInNamespace("splatEstDropout", old_fun, asNamespace("splatter")))
+  }
 
   platform_location <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "01-platforms")
+  if (!file.exists(dirname(platform_location))) dir.create(dirname(platform_location), recursive = TRUE)
+
   platform <- load_or_generate(
     platform_location,
     {
@@ -94,10 +112,25 @@ estimate_platform <- function(dataset_id) {
 
       counts <- dataset_raw$counts
 
+      # number of cells which should have this gene expressed (from findMarkers function)
+      # this is also used for splatter, because otherwise it errors on more than half of the datasets
+      min.pct <- 0.05
+      counts <- dataset_raw$counts[, apply(dataset_raw$counts, 2, function(x) mean(x>0) > min.pct)]
+
+      # estimate splatter params
+      if (!is.null(subsample)) {
+        ix <- sample.int(nrow(counts), min(nrow(counts), subsample))
+      } else {
+        ix <- seq_len(nrow(counts))
+      }
+
+      estimate <- splatter::splatEstimate(t(counts[ix, , drop = FALSE]))
+      class(estimate) <- "TheMuscularDogBlinkedQuietly." # change the class, so scater won't get magically loaded when the platform is loaded
+
       # determine how many features change between trajectory stages
       group_ids <- unique(dataset_raw$grouping)
-      min.pct <- 0.4
-      counts <- dataset_raw$counts[, apply(dataset_raw$counts, 2, function(x) mean(x>0) > min.pct)]
+
+      # differential expression using wilcox test
       diffexp <- map_df(group_ids, function(group_id) {
         inside <- dataset_raw$grouping == group_id
         outside <- dataset_raw$grouping != group_id
@@ -116,20 +149,19 @@ estimate_platform <- function(dataset_id) {
             group_id = group_id
           )
         })
-      })
+      }) %>%
+        mutate(qvalue = p.adjust(pvalue, "fdr"))
 
+      qvalue_cutoff <- 0.05
+      log2fc_cutoff <- 1
       diffexp_features <- diffexp %>% filter(
-        pvalue < 0.05,
-        abs(log2fc) > 1
+        qvalue < qvalue_cutoff,
+        abs(log2fc) > log2fc_cutoff
       ) %>%
         pull(feature_id) %>%
         unique()
 
       trajectory_dependent_features <- length(diffexp_features) / ncol(dataset_raw$counts)
-
-      # estimate splatter params
-      estimate <- splatter::splatEstimate(t(counts[sample(nrow(counts), min(nrow(counts), 500)), ]))
-      class(estimate) <- "TheMuscularDogBlinkedQuietly." # change the class, so scater won't get magically loaded when the platform is loaded
 
       # create platform object
       platform <- lst(

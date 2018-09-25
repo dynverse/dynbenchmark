@@ -4,19 +4,34 @@ library(dynbenchmark)
 library(tidyverse)
 library(qsub)
 
+run_remote("find . -maxdepth 2 -type d -ls", args = c("-2", derived_file(experiment_id = '01-datasets_preproc/raw/real', remote = T)), remote = T)$stdout
+
 # determine datasets to normalise & filter
 list_raw_datasets_remote <- function() {
-  derived_file(experiment_id = "01-datasets_preproc/raw/real", remote = T) %>%
-    ls_remote(remote = T) %>%
-    paste0("real/", .) %>%
-    gsub("(.*)\\.rds", "\\1", .)
+  run_remote(
+    "find",
+    args = c(
+      derived_file(experiment_id = '01-datasets_preproc/raw/real', remote = T),
+      "-maxdepth", "2",
+      "-type", "f"
+    ),
+    remote = T
+  )$stdout %>%
+    gsub(".*(real/.*)\\.rds", "\\1", .)
 }
 
 list_datasets_remote <- function() {
-  derived_file(experiment_id = "01-datasets/real", remote = T) %>%
-    ls_remote(remote = T) %>%
-    paste0("real/", .) %>%
-    gsub("(.*)\\.rds", "\\1", .)
+  run_remote(
+    "find",
+    args = c(
+      derived_file(experiment_id = '01-datasets/real', remote = T),
+      "-maxdepth", "3",
+      "-type", "f",
+      "-regex", "'.*dataset\\.rds'"
+    ),
+    remote = T
+  )$stdout %>%
+    gsub(".*(real/.*)/dataset\\.rds", "\\1", .)
 }
 
 dataset_ids_to_process <- setdiff(list_raw_datasets_remote(), list_datasets_remote())
