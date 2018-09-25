@@ -60,21 +60,21 @@ table_original <- read_csv(raw_file("example.csv"))
 
 jump_on_change <- function(x) seq_along(x) + cumsum(lag(x, default = 0) != x)
 
-normalise <- function(x) round(scale_minmax(x), 2)
+normalise <- dynbenchmark:::.benchmark_aggregate_normalisation$normal
 average <- function(x) round(mean(x), 2)
 
 tables <- lst(
   split_datasets = table_original %>%
     mutate(row_ix = jump_on_change(dataset_id)),
 
-  normalise = split_datasets %>%
+  normalised = split_datasets %>%
     group_by(dataset_id) %>%
     mutate_at(c("metric_x", "metric_y"), funs(norm = normalise)) %>%
     select(-metric_x, -metric_y) %>%
     ungroup() %>%
     mutate(row_ix = jump_on_change(dataset_id)),
 
-  split_trajectory_type_and_dataset_source = normalise %>%
+  split_trajectory_type_and_dataset_source = normalised %>%
     mutate(row_ix = jump_on_change(paste0(trajectory_type, dataset_source))) %>%
     group_by(trajectory_type, dataset_source, method_id),
 
@@ -106,7 +106,7 @@ tables <- lst(
 )
 
 
-table <- tables$original
+table <- tables$split_datasets
 
 plot_table <- function(table) {
   table <- table %>%
@@ -140,7 +140,7 @@ plot_table <- function(table) {
     scale_fill_identity() +
     scale_color_manual(values = c(`TRUE` = "black", `FALSE` = "white"), guide = "none") +
     scale_y_reverse("", breaks = NULL, expand = c(0, 0)) +
-    scale_x_discrete("", position = "top", labels = label_long, expand = c(0, 0)) +
+    scale_x_discrete("", position = "top", labels = function(x) label_short(x, width = 5), expand = c(0, 0)) +
     theme_pub()
 }
 
@@ -149,9 +149,59 @@ plot_tables <- map2(tables, names(tables), function(table, table_id) {
   plot_table(table) + ggtitle(label_long(table_id))
 })
 
-pdf("test.pdf")
-plot_tables
-dev.off()
+
+
+plot_arrow <- function(label = "") {
+  ggplot() +
+    geom_segment(aes(x = 0, y = 0, xend = 1, yend = 0), color = "black", arrow = arrow(type = "closed")) +
+    geom_text(aes(x = 0.5, y = 0), label = label, vjust = -1) +
+    theme_void()
+}
+
+
+
+
+# normalisation
+
+patchwork::wrap_plots(
+  patchwork::wrap_plots(
+    plot_tables$split_datasets,
+    plot_arrow("Normalise"),
+    plot_tables$normalise,
+    widths = c(1, 0.25, 1)
+  ),
+  patchwork::wrap_plots(
+    plot_tables$split_trajectory_type_and_dataset_source,
+    plot_arrow("Average scores"),
+    plot_tables$aggregate_datasets,
+    widths = c(1, 0.25, 1)
+  ),
+  patchwork::wrap_plots(
+    plot_tables$split_trajectory_type,
+    plot_arrow("Average scores"),
+    plot_tables$aggregate_dataset_source,
+    widths = c(1, 0.25, 1)
+  ),
+  patchwork::wrap_plots(
+    plot_tables$aggregate_trajectory_types,
+    plot_arrow("Geometric mean"),
+    plot_tables$average_metrics,
+    widths = c(1, 0.25, 1)
+  ),
+
+  ncol = 1
+) %>% write_rds(derived_file("aggregation_example.rds"))
+
+
+
+
+
+#
+#
+#
+# pdf("test.pdf")
+# plot_tables
+# dev.off()
 
 # patchwork::wrap_plots(plot_tables, ncol = 2, byrow = TRUE)
 
