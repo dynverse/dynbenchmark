@@ -134,7 +134,7 @@ get_default_metric_format <- function() {
   case_when(
     identical(knitr::opts_knit$get("rmarkdown.pandoc.to"), "latex")  ~ "latex",
     identical(knitr::opts_knit$get("rmarkdown.pandoc.to"), "html")  ~ "html",
-    startsWith(knitr::opts_knit$get("rmarkdown.pandoc.to") %||% "", "markdown") ~ "html",
+    identical(knitr::opts_knit$get("out.format"), "markdown") ~ "html",
     TRUE ~ "plotmath"
   )
 }
