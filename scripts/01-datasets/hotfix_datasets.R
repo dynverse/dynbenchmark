@@ -2,7 +2,7 @@ library(dynbenchmark)
 library(tidyverse)
 library(dynplot)
 
-dataset_ids <- list_datasets() %>% filter(source %in% c("real/gold", "real/silver")) %>% pull(id)
+dataset_ids <- list_datasets("synthetic/prosstt") %>% pull(id)
 
 for (i in seq_along(dataset_ids)) {
   id <- dataset_ids[[i]]
