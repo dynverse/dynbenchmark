@@ -1,5 +1,5 @@
 ## CHECK VARIANCES PER DATASET AND METRIC
-stat_funs <- c("var", "mean")
+stat_funs <- c("sd", "mean")
 metricso <- c("overall", metrics)
 
 preproc_fun <- function(x) {
@@ -35,7 +35,7 @@ var_df <-
   ungroup()
 
 g <- ggplot(var_df) +
-  geom_point(aes(mean, var, colour = metric)) +
+  geom_point(aes(mean, sd, colour = metric)) +
   facet_wrap(~type) +
   scale_colour_brewer(palette = "Dark2") +
   theme_bw()
