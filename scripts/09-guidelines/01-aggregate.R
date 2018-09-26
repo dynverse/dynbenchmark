@@ -79,4 +79,5 @@ methods_aggr <- methods_aggr %>%
 methods_aggr %>% select(-benchmark, -parameters, -authors, -qc_category_scores)
 methods_aggr %>% pryr::object_size()
 
-save(methods_aggr, benchmark_datasets_info, file = "../dynguidelines/R/sysdata.rda", compress = "xz")
+devtools::use_data(methods_aggr, benchmark_datasets_info, internal = TRUE, pkg = "../dynguidelines")
+# save(methods_aggr, benchmark_datasets_info, file = "../dynguidelines/R/sysdata.rda", compress = "xz")
