@@ -55,6 +55,7 @@ Imports:
   qsub,
   xml2
 Suggests:
+  cowplot,
   dyngen,
   dyntoy,
   dynnormaliser,

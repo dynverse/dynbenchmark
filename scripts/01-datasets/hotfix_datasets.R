@@ -2,26 +2,28 @@ library(dynbenchmark)
 library(tidyverse)
 library(dynplot)
 
-dataset_ids <- list_datasets() %>% pull(id)
+dataset_ids <- list_datasets("synthetic/prosstt") %>% pull(id)
 
 for (i in seq_along(dataset_ids)) {
   id <- dataset_ids[[i]]
   cat(i, "/", length(dataset_ids), ": ", id, "\n", sep = "")
   dataset <- load_dataset(id)
 
-  dataset$dataset_source <- NULL
-  dataset$source <- gsub("/[^/]*$", "", dataset$id)
+  dataset <- dataset %>% add_cell_waypoints()
+
+  # dataset$dataset_source <- NULL
+  # dataset$source <- gsub("/[^/]*$", "", dataset$id)
 
   # # fix count and expression functions
-  # for (col in c("expression", "counts")) {
-  #   env <- new.env(baseenv())
-  #   assign("id", id, env)
-  #   assign("col", col, env)
-  #   dataset[[col]] <- function() {
-  #     readr::read_rds(dynbenchmark::dataset_file(paste0(col, ".rds"), id = id))
-  #   }
-  #   environment(dataset[[col]]) <- env
-  # }
+  for (col in c("expression", "counts")) {
+    env <- new.env(baseenv())
+    assign("id", id, env)
+    assign("col", col, env)
+    dataset[[col]] <- function() {
+      readr::read_rds(dynbenchmark::dataset_file(paste0(col, ".rds"), id = id))
+    }
+    environment(dataset[[col]]) <- env
+  }
 
   # dataset <- dataset %>% dynwrap::add_prior_information()
 
