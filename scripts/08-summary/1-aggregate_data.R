@@ -136,7 +136,7 @@ benchmark_results <-
     # bench_vars2
   )
 
-rm(data_aggs, bench_overall, bench_trajtypes, bench_sources, bench_vars, bench_vars2)
+rm(data_aggs, bench_overall, bench_trajtypes, bench_sources)#, bench_vars, bench_vars2)
 
 
 
