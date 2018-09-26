@@ -1,5 +1,7 @@
 library(dynbenchmark)
 library(tidyverse)
+library(furrr)
+plan(multiprocess)
 
 experiment("10-topologies")
 
@@ -17,7 +19,7 @@ simplify_milestone_network <- function(milestone_network) {
 
 output$milestone_network <- output$model %>%
   map("milestone_network") %>%
-  map(simplify_milestone_network)
+  future_map(simplify_milestone_network)
 
 
 # calculate milestone network statistics
@@ -34,7 +36,7 @@ calculate_milestone_network_statistics <- function(milestone_network) {
 
 prediction_statistics <- bind_cols(
   output %>% select(-milestone_network, -model),
-  map_df(output$milestone_network, calculate_milestone_network_statistics)
+  future_map_dfr(output$milestone_network, calculate_milestone_network_statistics)
 )
 
 
@@ -47,11 +49,11 @@ datasets <- design$datasets %>%
 
 datasets$milestone_network <- datasets$dataset %>%
   map("milestone_network") %>%
-  map(simplify_milestone_network)
+  future_map(simplify_milestone_network)
 
 dataset_statistics <- bind_cols(
   datasets %>% select(-milestone_network, -dataset),
-  map_df(datasets$milestone_network, calculate_milestone_network_statistics)
+  future_map_dfr(datasets$milestone_network, calculate_milestone_network_statistics)
 )
 
 # now combine and compare
@@ -128,7 +130,7 @@ arrow_annot_data <- tibble(
   hjust = c(0, 1)
 )
 
-statistics_complexity %>%
+plot_topology_complexity <- statistics_complexity %>%
   mutate(trajectory_type_dataset = factor(trajectory_type_dataset, names(trajectory_type_colors))) %>%
   filter(method_id %in% method_ids) %>%
   mutate(method_id = factor(method_id, method_ids)) %>%
@@ -146,6 +148,9 @@ statistics_complexity %>%
   facet_grid(.~method_id, labeller = label_facet(label_method)) +
   scale_fill_manual(values = trajectory_type_colors, labels = label_long, guide = "none") +
   scale_y_discrete(label_long("Gold standard trajectory type"), expand = c(0,0), labels = label_long) +
-  scale_x_continuous(label_long("Difference in topology size (= # nodes + # edges)\nbetween prediction and gold standard"), expand = c(0, 0), limits = complexity_difference_limits) +
+  scale_x_continuous(label_long("Difference in topology size (= # nodes + # edges)\nbetween prediction and reference"), expand = c(0, 0), limits = complexity_difference_limits) +
   theme_pub()
 
+plot_topology_complexity
+
+plot_topology_complexity %>% write_rds(result_file("topology_complexity.rds"))
