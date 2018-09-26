@@ -68,6 +68,12 @@ scaling_results <-
   mutate(metric = paste0("scaling_preds_", metric)) %>%
   spread(metric, score)
 
+scaling_models <-
+  read_rds(result_file("scaling.rds", experiment_id = "05-scaling"))$models %>%
+  select(-method_name) %>%
+  rename_at(., setdiff(colnames(.), "method_id"), function(x) paste0("scaling_models_", x))
+
+
 #####################################################
 #             READ BENCHMARKING RESULTS             #
 #####################################################
@@ -99,29 +105,19 @@ bench_sources <-
   transmute(method_id, metric = paste0("benchmark_source_", gsub("/", "_", dataset_source)), score = overall) %>%
   spread(metric, score)
 
-benchmark_results <-
-  left_join(
-    bench_overall,
-    bench_trajtypes,
-    by = "method_id"
-  ) %>%
-  left_join(
-    bench_sources,
-    by = "method_id"
-  )
 
-rm(execution_metrics, bench_metrics, all_metrics, data_aggs, bench_overall, bench_trajtypes, bench_sources, benchmark_results_input, benchmark_results_normalised) # more than this haiku
+rm(execution_metrics, bench_metrics, all_metrics, data_aggs, benchmark_results_input, benchmark_results_normalised) # more than this haiku
 
 #####################################################
 #                  COMBINE RESULTS                  #
 #####################################################
-results <-
-  method_info %>%
-  left_join(qc_results, by = "method_id") %>%
-  left_join(benchmark_results, by = "method_id") %>%
-  left_join(scaling_results, by = "method_id")
 
-rm(qc_results, benchmark_results, scaling_results)
+results <- Reduce(
+  function(a, b) left_join(a, b, by = "method_id"),
+  list(method_info, qc_results, scaling_results, scaling_models, bench_overall, bench_trajtypes, bench_sources)
+)
+
+rm(list = setdiff(ls(), "results"))
 
 #####################################################
 #              DETERMINE FINAL RANKING              #
