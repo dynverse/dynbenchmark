@@ -5,9 +5,14 @@ plan(multiprocess)
 
 experiment("10-topologies")
 
-output <- benchmark_bind_results(load_models = TRUE, experiment_id = "04-method_testing") %>%
+# load in output models
+output <- benchmark_bind_results(load_models = TRUE, experiment_id = "07-benchmark") %>%
   filter(!map_lgl(model, is.null)) %>%
-  select(method_id, dataset_id, model)
+  select(method_id, dataset_id, model, him)
+
+# only take into account methods with free topology and tree detection
+relevant_methods <- load_methods() %>% filter(source != "control", topology_inference == "free", detects_tree) %>% pull(id)
+output <- output %>% filter(method_id %in% relevant_methods)
 
 # simplify all milestone networks
 simplify_milestone_network <- function(milestone_network) {
@@ -41,20 +46,14 @@ prediction_statistics <- bind_cols(
 
 
 # do the same for the datasets
-design <- read_rds(derived_file("design.rds", "04-method_testing"))
-datasets <- design$datasets %>%
-  mutate(dataset = invoke_map(fun)) %>%
-  select(dataset_id = id, dataset)
-# datasets <- load_datasets(ids = unique(predictions$dataset_id))
+datasets <- load_datasets(ids = unique(output$dataset_id))
+datasets <- datasets
 
-datasets$milestone_network <- datasets$dataset %>%
-  map("milestone_network") %>%
+datasets$milestone_network <- datasets$milestone_network %>%
   future_map(simplify_milestone_network)
 
-dataset_statistics <- bind_cols(
-  datasets %>% select(-milestone_network, -dataset),
-  future_map_dfr(datasets$milestone_network, calculate_milestone_network_statistics)
-)
+dataset_statistics <- future_map_dfr(datasets$milestone_network, calculate_milestone_network_statistics) %>%
+  mutate(dataset_id = datasets$id)
 
 # now combine and compare
 statistics <- left_join(
@@ -68,37 +67,59 @@ statistics <- left_join(
 statistics <- statistics %>%
   mutate(
     complexity_difference = complexity_prediction - complexity_dataset
-  ) %>%
-  left_join(
-    load_methods() %>% select(method_id = id, topology_inference),
-    "method_id"
   )
 
+# add him
+statistics$him <- output$him
+
+# add means
+
+statistics <- statistics %>%
+  group_by(method_id) %>%
+  mutate_if(is.numeric, funs(mean = mean)) %>%
+  ungroup()
 
 ##  ............................................................................
 ##  Overall ordering in complexity                                          ####
 
 # determine order based on average
-method_complexity_order <- statistics %>%
-  group_by(method_id) %>%
-  summarise(complexity_difference = mean(complexity_difference)) %>%
-  ungroup() %>%
-  arrange(complexity_difference) %>%
-  pull(method_id)
+method_order <- statistics %>% arrange(complexity_difference_mean) %>% pull(method_id) %>% unique()
+
+max_complexity_difference <- 10
+bandwidth <- 1
 
 plot_overall_complexity_difference <- statistics %>%
-  mutate(method_id = factor(method_id, method_complexity_order)) %>%
-  ggplot(aes(complexity_difference, method_id, fill = topology_inference)) +
-  # geom_point() +
-  ggridges::geom_density_ridges2() +
-  geom_vline(xintercept = 0) +
+  mutate(method_id = factor(method_id, method_order)) %>%
+  mutate(complexity_difference = ifelse(complexity_difference > max_complexity_difference, max_complexity_difference, complexity_difference)) %>%
+  ggplot(aes(complexity_difference, method_id)) +
+  ggridges::geom_density_ridges2(aes(fill = complexity_difference_mean), bandwidth = bandwidth) +
+  geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
   theme_pub() +
   scale_x_continuous(expand = c(0, 0)) +
-  scale_y_discrete(labels = label_method)
+  scale_y_discrete(labels = label_method) +
+  scale_fill_distiller(palette = "BrBG", limits = c(-10, 10), oob = scales::squish)
 
 plot_overall_complexity_difference
 
 write_rds(plot_overall_complexity_difference, result_file("overall_complexity_difference.rds"))
+
+##  ............................................................................
+##  Overall ordering in him                                                 ####
+method_order <- statistics %>% arrange(him_mean) %>% pull(method_id) %>% unique()
+
+plot_overall_him <- statistics %>%
+  mutate(method_id = factor(method_id, method_order)) %>%
+  ggplot(aes(him, method_id)) +
+  ggridges::geom_density_ridges2(aes(fill = him_mean)) +
+  geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
+  theme_pub() +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_discrete(labels = label_method) +
+  scale_fill_distiller(palette = "BrBG", limits = c(0, 1), oob = scales::squish)
+
+plot_overall_him
+
+write_rds(plot_overall_complexity_difference, result_file("overall_him.rds"))
 
 ##  ............................................................................
 ##  Trajectory type specific complexity                                     ####
@@ -142,12 +163,12 @@ plot_topology_complexity <- statistics_complexity %>%
     from = complexity_difference_limits[[1]],
     to = complexity_difference_limits[[2]]
   ) +
-  geom_point() +
+  # geom_point() +
   geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
   geom_text(aes(x = x, y = arrow_y, hjust = hjust, label = text), colour = "#333333", vjust = 1, lineheight = 0.8, size = 3.2, data = arrow_annot_data) +
   facet_grid(.~method_id, labeller = label_facet(label_method)) +
   scale_fill_manual(values = trajectory_type_colors, labels = label_long, guide = "none") +
-  scale_y_discrete(label_long("Gold standard trajectory type"), expand = c(0,0), labels = label_long) +
+  scale_y_discrete(label_long("Reference trajectory type"), expand = c(0,0), labels = label_long) +
   scale_x_continuous(label_long("Difference in topology size (= # nodes + # edges)\nbetween prediction and reference"), expand = c(0, 0), limits = complexity_difference_limits) +
   theme_pub()
 
