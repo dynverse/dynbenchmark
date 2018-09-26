@@ -7,15 +7,32 @@ experiment("07-benchmark")
 ############### PART TWO: RETRIEVE RESULTS ###############
 ##########################################################
 
-# fetch results from cluster
+# If you are the one who submitted the jobs, run:
 benchmark_fetch_results(TRUE)
+# qsub::rsync_remote(
+#   remote_src = FALSE,
+#   path_src = derived_file(remote = FALSE, experiment = "07-benchmark"),
+#   remote_dest = TRUE,
+#   path_dest = derived_file(remote = TRUE, experiment = "07-benchmark"),
+#   verbose = TRUE,
+#   exclude = "*/r2gridengine/*"
+# )
+
+# If you want to download the output from prism
+# qsub::rsync_remote(
+#   remote_src = TRUE,
+#   path_src = derived_file(remote = TRUE, experiment = "07-benchmark"),
+#   remote_dest = FALSE,
+#   path_dest = derived_file(remote = FALSE, experiment = "07-benchmark"),
+#   verbose = TRUE,
+#   exclude = "*/r2gridengine/*"
+# )
 
 # bind results in one data frame (without models)
 execution_output <- benchmark_bind_results(load_models = FALSE) %>%
   filter(!method_id %in% c("identity", "shuffle", "error"))
 
-# df <- execution_output %>% filter(edge_flip < 0) %>% select(method_id, dataset_id, param_id, prior_id, repeat_ix)
-# model <- load_dyneval_model(method_id = "celltrails/default", df = df, experiment_id = "07-benchmark")
+execution_output %>% filter(error_status == "execution_error") %>% pull(error_message) %>% first() %>% cat
 
 design <- read_rds(derived_file("design.rds"))
 
@@ -32,7 +49,6 @@ trajtypes <-
   filter(id %in% unique(datasets_info$dataset_trajectory_type)) %>%
   add_row(id = "overall", colour = "#AAAAAA", background_colour = "E6A1A1", ancestors = list(character(0))) %>%
   mutate(id = factor(id, levels = id))
-
 
 list2env(read_rds(result_file("params.rds")), environment())
 
@@ -59,13 +75,13 @@ raw_data <-
     lmem = log10(mem)
   )
 
-
+table(raw_data$dataset_source, raw_data$error_status)
 ###########################################
 ############### NORM PARAMS ###############
 ###########################################
 
 
-norm_fun <- "scalesigmoid"
+norm_fun <- "normal"
 mean_fun <- "geometric"
 mean_weights <- c("correlation" = 1, "him" = 1, "featureimp_wcor" = 1, "F1_branches" = 1)
 
@@ -112,35 +128,35 @@ out <- benchmark_aggregate(
 )
 
 
-#####################################################
-############### CALCULATE VARIABILITY ###############
-#####################################################
-
-worst_var <- var(c(rep(0, floor(num_repeats / 2)), rep(1, ceiling(num_repeats / 2))))
-
-norm_var <- function(x) {
-  maxx <- max(x)
-
-  if (maxx == 0) return(1)
-
-  worst_var_this <- worst_var * maxx ^ 2
-
-  (worst_var_this - var(x) ) / worst_var_this
-}
-
-met2 <- c(metrics, "overall")
-
-out$data_var <-
-  out$data %>%
-  select(method_id, method_name, dataset_id, param_id, !!met2) %>%
-  group_by(method_id, method_name, dataset_id, param_id) %>%
-  summarise_if(is.numeric, norm_var) %>%
-  ungroup() %>%
-  group_by(method_id, method_name, param_id) %>%
-  summarise_if(is.numeric, mean) %>%
-  ungroup() %>%
-  gather(metric, value, !!met2) %>%
-  mutate(metric = paste0("var_", metric))
+# #####################################################
+# ############### CALCULATE VARIABILITY ###############
+# #####################################################
+#
+# worst_var <- var(c(rep(0, floor(num_repeats / 2)), rep(1, ceiling(num_repeats / 2))))
+#
+# norm_var <- function(x) {
+#   maxx <- max(x)
+#
+#   if (maxx == 0) return(1)
+#
+#   worst_var_this <- worst_var * maxx ^ 2
+#
+#   (worst_var_this - var(x) ) / worst_var_this
+# }
+#
+# met2 <- c(metrics, "overall")
+#
+# out$data_var <-
+#   out$data %>%
+#   select(method_id, method_name, dataset_id, param_id, !!met2) %>%
+#   group_by(method_id, method_name, dataset_id, param_id) %>%
+#   summarise_if(is.numeric, norm_var) %>%
+#   ungroup() %>%
+#   group_by(method_id, method_name, param_id) %>%
+#   summarise_if(is.numeric, mean) %>%
+#   ungroup() %>%
+#   gather(metric, value, !!met2) %>%
+#   mutate(metric = paste0("var_", metric))
 
 #####################################################
 ############### SAVE DATA ###############
