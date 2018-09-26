@@ -47,7 +47,7 @@ crossing <- design$crossing
 trajtypes <-
   dynwrap::trajectory_types %>%
   filter(id %in% unique(datasets_info$dataset_trajectory_type)) %>%
-  add_row(id = "overall", colour = "#AAAAAA", background_colour = "E6A1A1", ancestors = list(character(0))) %>%
+  add_row(id = "overall", colour = "#AAAAAA", background_colour = "#E6A1A1", ancestors = list(character(0))) %>%
   mutate(id = factor(id, levels = id))
 
 list2env(read_rds(result_file("params.rds")), environment())
