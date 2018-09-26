@@ -9,7 +9,12 @@ for (i in seq_along(dataset_ids)) {
   cat(i, "/", length(dataset_ids), ": ", id, "\n", sep = "")
   dataset <- load_dataset(id)
 
-  # fix count and expression functions
+  dataset <- dataset %>% add_cell_waypoints()
+
+  # dataset$dataset_source <- NULL
+  # dataset$source <- gsub("/[^/]*$", "", dataset$id)
+
+  # # fix count and expression functions
   for (col in c("expression", "counts")) {
     env <- new.env(baseenv())
     assign("id", id, env)

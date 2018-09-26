@@ -16,18 +16,19 @@ experiment("05-scaling")
 #   path_src = derived_file(remote = FALSE, experiment = "05-scaling"),
 #   remote_dest = TRUE,
 #   path_dest = derived_file(remote = TRUE, experiment = "05-scaling"),
-#   verbose = TRUE
+#   verbose = TRUE,
+#   exclude = "*/r2gridengine/*"
 # )
 
 # If you want to download the output from prism
-qsub::rsync_remote(
-  remote_src = TRUE,
-  path_src = derived_file(remote = TRUE, experiment = "05-scaling"),
-  remote_dest = FALSE,
-  path_dest = derived_file(remote = FALSE, experiment = "05-scaling"),
-  verbose = TRUE,
-  exclude = "*/r2gridengine/*"
-)
+# qsub::rsync_remote(
+#   remote_src = TRUE,
+#   path_src = derived_file(remote = TRUE, experiment = "05-scaling"),
+#   remote_dest = FALSE,
+#   path_dest = derived_file(remote = FALSE, experiment = "05-scaling"),
+#   verbose = TRUE,
+#   exclude = "*/r2gridengine/*"
+# )
 
 # bind results in one data frame (without models)
 execution_output <- benchmark_bind_results(load_models = FALSE)

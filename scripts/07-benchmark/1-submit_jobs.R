@@ -17,7 +17,6 @@ if (!file.exists(derived_file("design.rds"))) {
 
   # need to look into scaling results of these methods first
   method_ids <- scaling$models$method_id
-  method_ids[method_ids == "projected_gng"] <- "gng"
 
   methods <-
     dynwrap::get_ti_methods(method_ids, evaluate = FALSE) %>%
@@ -127,7 +126,7 @@ design_filt <- read_rds(derived_file("design.rds"))
 list2env(read_rds(result_file("params.rds")), environment())
 
 # step 1:
-design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("identity", "scorpius", "paga"), category == "Cat1")
+# design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("identity", "scorpius", "paga", "mst"), category == "Cat1")
 
 # step 2:
 # design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2"))

@@ -12,8 +12,7 @@ benchmark_fetch_results(TRUE)
 
 # bind results in one data frame (without models)
 execution_output <- benchmark_bind_results(load_models = FALSE) %>%
-  filter(!method_id %in% c("identity", "shuffle", "error")) %>%
-  mutate(method_id = ifelse(method_id == "projected_gng", "gng", method_id))
+  filter(!method_id %in% c("identity", "shuffle", "error"))
 
 # df <- execution_output %>% filter(edge_flip < 0) %>% select(method_id, dataset_id, param_id, prior_id, repeat_ix)
 # model <- load_dyneval_model(method_id = "celltrails/default", df = df, experiment_id = "07-benchmark")
@@ -43,8 +42,8 @@ write_rds(lst(trajtypes, metrics, datasets_info, methods_info), result_file("ben
 #########################################
 ############### JOIN DATA ###############
 #########################################
-execution_output$stdout <- headtail(execution_output$stdout, 50)
-# execution_output <- execution_output %>% select(-stdout)
+# execution_output$stdout <- headtail(execution_output$stdout, 50)
+execution_output <- execution_output %>% select(-stdout)
 
 raw_data <-
   execution_output %>%
