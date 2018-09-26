@@ -1,4 +1,4 @@
-dataset_id,trajectory_type,dataset_source,method_id,metric_x,metric_y
+dataset_id,trajectory_type,dataset_source,method_id,metric_X,metric_Y
 A,linear,real/gold,a,0.15,0.1
 A,linear,real/gold,b,0.3,0.05
 A,linear,real/gold,c,0.4,0.2
