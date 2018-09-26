@@ -63,7 +63,7 @@ plot_topology_difference <- results_spread %>%
   ggplot(aes(edge_flip, him)) +
   geom_smooth(method = "lm", se = FALSE, color = "grey") +
   geom_point(aes()) +
-  ggrepel::geom_text_repel(
+  ggrepel::geom_label_repel(
     aes(label = paste0(model_id, " \U2b0c ", model_id1)),
     data = results_spread %>% top_n(5, abs(lm(results_spread$edge_flip ~ results_spread$him)$residuals)),
     force = 10,
@@ -157,7 +157,9 @@ plot_topology_scores_overview <- patchwork::wrap_plots(
   ),
   plot_topology_lengths %>% tag_first("D"),
   ncol = 1,
-  heights = c(1, 2, 2)
+  heights = c(1, 2.5, 2)
 )
+
+plot_topology_scores_overview
 
 write_rds(plot_topology_scores_overview, result_file("topology_scores_overview.rds"))

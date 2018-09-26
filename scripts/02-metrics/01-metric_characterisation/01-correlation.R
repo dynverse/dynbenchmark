@@ -143,7 +143,7 @@ plot_correlation_distributions_overview <- wrap_plots(
 set.seed(9)
 dataset <- dyntoy::generate_dataset(model = dyntoy::model_binary_tree(num_branchpoints = 2)) %>%
   simplify_trajectory() %>%
-  add_cell_waypoints(num_cells_selected = 100)
+  add_cell_waypoints(num_cells_selected = length(dataset$cell_ids)/2)
 
 trajectory_positions <- with(
   dataset,
@@ -168,10 +168,10 @@ plot_datasets <- wrap_plots(
 ##  ............................................................................
 ##  Combine plots                                                           ####
 plot_waypoints_overview <- wrap_plots(
-  plot_datasets %>% tag_first("a"),
-  plot_correlation_distributions_overview %>% tag_first("b"),
+  plot_datasets %>% wrap_elements(),
+  plot_correlation_distributions_overview %>% wrap_elements(),
   nrow = 1
-)
+) + plot_annotation(tag_levels = "a")
 
 write_rds(plot_waypoints_overview, result_file("waypoints_overview.rds"))
 
