@@ -58,17 +58,18 @@ scores <- bind_rows(
   )
 
 # plot the example
-plot_normalisation_example <- scores %>%
+plot_normalisation_reasoning <- scores %>%
   ggplot(aes(dataset_id, score, color = method_id, shape = method_id)) +
     geom_point(size = 4) +
+    geom_vline(xintercept = 3.5) +
     scale_y_continuous(limits = c(0, 1)) +
-    scale_x_discrete("", labels = label_long) +
+    scale_x_discrete("", labels = label_short) +
     scale_shape_manual("", values = methods %>% select(id, shape) %>% deframe()) +
     scale_color_manual("", values = methods %>% select(id, color) %>% deframe()) +
     theme_pub() +
     guides(fill=guide_legend(ncol=2), shape=guide_legend(ncol=2)) +
     theme(legend.position = "top")
 
-plot_normalisation_example
+plot_normalisation_reasoning
 
-write_rds(plot_normalisation_example, result_file("normalisation_example.rds"))
+write_rds(plot_normalisation_reasoning, result_file("normalisation_reasoning.rds"))

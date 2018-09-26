@@ -32,16 +32,16 @@ palettes <- lst(
   trajectory_type = unique(table_original$trajectory_type) %>% create_discrete_palette("cartography", "green.pal"),
   metric_x = create_continuous_palette("cartography", "taupe.pal"),
   metric_y = metric_x,
-  metric_x_norm = metric_x,
-  metric_y_norm = metric_x,
-  geometric_mean = metric_x
+  metric_x_normalised = metric_x,
+  metric_y_normalised = metric_x,
+  overall_score = metric_x
 )
 
 labellers <- lst(
   metric_x = function(x) sprintf("%0.2f", as.numeric(x)),
   metric_y = metric_x,
-  metric_x_norm = metric_x,
-  metric_y_norm = metric_x,
+  metric_x_normalised = metric_x,
+  metric_y_normalised = metric_x,
   geometric_mean = metric_x
 )
 
@@ -56,9 +56,9 @@ get_color <- function(column, value) {
 }
 
 
-table_original <- read_csv(raw_file("example.csv"))
+table_original <- read_csv(raw_file("example.csv")) %>% mutate_if(is.character, forcats::fct_inorder)
 
-jump_on_change <- function(x) seq_along(x) + cumsum(lag(x, default = 0) != x)
+jump_on_change <- function(x) seq_along(x) + cumsum(lag(x, default = x[[1]]) != x)
 
 normalise <- dynbenchmark:::.benchmark_aggregate_normalisation$normal
 average <- function(x) round(mean(x), 2)
@@ -69,38 +69,43 @@ tables <- lst(
 
   normalised = split_datasets %>%
     group_by(dataset_id) %>%
-    mutate_at(c("metric_x", "metric_y"), funs(norm = normalise)) %>%
+    mutate_at(c("metric_x", "metric_y"), funs(normalised = normalise)) %>%
     select(-metric_x, -metric_y) %>%
     ungroup() %>%
     mutate(row_ix = jump_on_change(dataset_id)),
 
-  split_trajectory_type_and_dataset_source = normalised %>%
+  `for_each_method,_trajectory_type_and_dataset_source` = normalised %>%
     mutate(row_ix = jump_on_change(paste0(trajectory_type, dataset_source))) %>%
     group_by(trajectory_type, dataset_source, method_id),
 
-  aggregate_datasets = split_trajectory_type_and_dataset_source %>%
-    summarise_at(c("metric_x_norm", "metric_y_norm"), average) %>%
+  aggregate_datasets = `for_each_method,_trajectory_type_and_dataset_source` %>%
+    summarise_at(c("metric_x_normalised", "metric_y_normalised"), average) %>%
     ungroup() %>%
     mutate(row_ix = row_number()),
 
-  split_trajectory_type = aggregate_datasets %>%
+  for_each_method_and_trajectory_type = aggregate_datasets %>%
     mutate(row_ix = jump_on_change(paste0(trajectory_type))) %>%
     group_by(trajectory_type, method_id),
 
-  aggregate_dataset_source = split_trajectory_type %>%
-    summarise_at(c("metric_x_norm", "metric_y_norm"), average) %>%
+  aggregate_dataset_source = for_each_method_and_trajectory_type %>%
+    summarise_at(c("metric_x_normalised", "metric_y_normalised"), average) %>%
     ungroup() %>%
     mutate(row_ix = row_number()),
 
-  aggregate_trajectory_types = aggregate_dataset_source %>%
+  for_each_method = aggregate_dataset_source %>%
+    mutate(row_ix = row_number()),
+
+  aggregate_trajectory_types = for_each_method %>%
     group_by(method_id) %>%
-    summarise_at(c("metric_x_norm", "metric_y_norm"), average) %>%
+    summarise_at(c("metric_x_normalised", "metric_y_normalised"), average) %>%
     ungroup() %>%
     mutate(row_ix = row_number()),
+
+  overall_scores = aggregate_trajectory_types,
 
   average_metrics = aggregate_trajectory_types %>%
     group_by(method_id) %>%
-    transmute(geometric_mean = dyneval::calculate_geometric_mean(metric_x_norm, metric_y_norm)) %>%
+    mutate(overall_score = dyneval::calculate_geometric_mean(metric_x_normalised, metric_y_normalised)) %>%
     ungroup() %>%
     mutate(row_ix = row_number())
 )
@@ -146,7 +151,7 @@ plot_table <- function(table) {
 
 
 plot_tables <- map2(tables, names(tables), function(table, table_id) {
-  plot_table(table) + ggtitle(label_long(table_id))
+  plot_table(table) + ggtitle(label_short(table_id, 30))
 })
 
 
@@ -164,33 +169,47 @@ plot_arrow <- function(label = "") {
 # normalisation
 
 patchwork::wrap_plots(
-  patchwork::wrap_plots(
-    plot_tables$split_datasets,
-    plot_arrow("Normalise"),
-    plot_tables$normalise,
-    widths = c(1, 0.25, 1)
-  ),
-  patchwork::wrap_plots(
-    plot_tables$split_trajectory_type_and_dataset_source,
-    plot_arrow("Average scores"),
-    plot_tables$aggregate_datasets,
-    widths = c(1, 0.25, 1)
-  ),
-  patchwork::wrap_plots(
-    plot_tables$split_trajectory_type,
-    plot_arrow("Average scores"),
-    plot_tables$aggregate_dataset_source,
-    widths = c(1, 0.25, 1)
-  ),
-  patchwork::wrap_plots(
-    plot_tables$aggregate_trajectory_types,
-    plot_arrow("Geometric mean"),
-    plot_tables$average_metrics,
-    widths = c(1, 0.25, 1)
-  ),
+  plot_tables$split_datasets,
+  plot_arrow("Normalise"),
+  plot_tables$normalise,
+  widths = c(1, 0.25, 1)
+) %>% write_rds(result_file("normalisation_example.rds"))
 
-  ncol = 1
-) %>% write_rds(derived_file("aggregation_example.rds"))
+
+{
+  patchwork::wrap_plots(
+    patchwork::wrap_plots(
+      plot_tables$`for_each_method,_trajectory_type_and_dataset_source`,
+      plot_arrow("Arithmetic mean"),
+      plot_tables$aggregate_datasets,
+      widths = c(1, 0.25, 1)
+    ) %>% patchwork::wrap_elements(),
+    patchwork::wrap_plots(
+      plot_tables$for_each_method_and_trajectory_type,
+      plot_arrow("Weighted arithmetic mean"),
+      plot_tables$aggregate_dataset_source,
+      widths = c(1, 0.25, 1)
+    ) %>% patchwork::wrap_elements(),
+    patchwork::wrap_plots(
+      plot_tables$for_each_method,
+      plot_arrow("Arithmetic mean"),
+      plot_tables$aggregate_trajectory_types,
+      widths = c(1, 0.25, 1)
+    ) %>% patchwork::wrap_elements(),
+
+    ncol = 1
+  ) +
+    patchwork::plot_annotation(tag_levels = "a")
+} %>% write_rds(result_file("aggregation_example.rds"))
+
+
+
+patchwork::wrap_plots(
+  plot_tables$overall_scores,
+  plot_arrow("Geometric mean"),
+  plot_tables$average_metrics,
+  widths = c(1, 0.25, 1)
+) %>% write_rds(result_file("averaging_example.rds"))
 
 
 
