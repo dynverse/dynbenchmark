@@ -100,10 +100,14 @@ bench_sources <-
   spread(metric, score)
 
 benchmark_results <-
-  bind_rows(
+  left_join(
     bench_overall,
     bench_trajtypes,
-    bench_sources
+    by = "method_id"
+  ) %>%
+  left_join(
+    bench_sources,
+    by = "method_id"
   )
 
 rm(execution_metrics, bench_metrics, all_metrics, data_aggs, bench_overall, bench_trajtypes, bench_sources, benchmark_results_input, benchmark_results_normalised) # more than this haiku
