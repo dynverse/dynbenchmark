@@ -111,13 +111,13 @@ rm(execution_metrics, bench_metrics, all_metrics, data_aggs, benchmark_results_i
 #####################################################
 #                  COMBINE RESULTS                  #
 #####################################################
-results <-
-  method_info %>%
-  left_join(qc_results, by = "method_id") %>%
-  left_join(benchmark_results, by = "method_id") %>%
-  left_join(scaling_results, by = "method_id")
 
-rm(qc_results, benchmark_results, scaling_results)
+results <- Reduce(
+  function(a, b) left_join(a, b, by = "method_id"),
+  list(method_info, qc_results, scaling_results, scaling_models, bench_overall, bench_trajtypes, bench_sources)
+)
+
+rm(list = setdiff(ls(), "results"))
 
 #####################################################
 #              DETERMINE FINAL RANKING              #
