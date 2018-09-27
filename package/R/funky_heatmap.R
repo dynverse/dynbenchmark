@@ -113,6 +113,7 @@ funky_heatmap <- function(
     )
 
   # FIGURE OUT LEGENDS
+  if (!"legend" %in% colnames(column_info)) column_info$legend <- NA
   legends_to_plot <-
     column_info %>%
     mutate(legend = is.na(legend) | legend) %>%
