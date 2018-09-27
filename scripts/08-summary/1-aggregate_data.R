@@ -6,33 +6,16 @@ experiment("08-summary")
 #####################################################
 #                  GET METHODS INFO                 #
 #####################################################
-
-spread_trajtypes <- function(method_info) {
-  trajtypes <-
-    map_df(dynwrap::trajectory_types$id, function(trajtyp) {
-      data_frame(id = method_info$id, trajectory_type = paste0("detects_", trajtyp), value = map_lgl(method_info$trajectory_types, ~ trajtyp %in% .))
-    }) %>%
-    spread(trajectory_type, value)
-
-  left_join(method_info, trajtypes, by = "id")
-}
-
 method_info <-
   read_rds(result_file("methods.rds", experiment_id = "03-methods")) %>%
   mutate(
-    priors_required = map_chr(input, ~ .$required %>% setdiff(c("expression", "counts")) %>% paste0(collapse = ",")),
-    priors_optional = map_chr(input, ~ .$optional %>% paste0(collapse = ",")),
-    any_priors_required = priors_required != "",
-    any_priors_optional = priors_optional != ""
+    required_priors_str = map_chr(input, ~ .$required %>% setdiff(c("expression", "counts")) %>% paste0(collapse = ",")),
+    optional_priors_str = map_chr(input, ~ .$optional %>% paste0(collapse = ","))
   ) %>%
-  spread_trajtypes() %>%
   rename_all(function(x) paste0("method_", x)) %>%
   rename(tool_id = method_tool_id) %>%
-  select_if(is.atomic) %>%
   select_if(function(x) !all(is.na(x))) %>%
   filter(!method_id %in% c("error", "identity", "random", "shuffle"))
-
-rm(spread_trajtypes) # writing tidy code
 
 #####################################################
 #                  READ QC RESULTS                  #
@@ -58,7 +41,7 @@ qc_results <-
   ) %>%
   select(-tool_id)
 
-rm(tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores) # is important in large scripts
+rm(tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores) # writing tidy code
 
 #####################################################
 #                READ SCALING RESULTS               #
@@ -106,7 +89,7 @@ bench_sources <-
   spread(metric, score)
 
 
-rm(execution_metrics, bench_metrics, all_metrics, data_aggs, benchmark_results_input, benchmark_results_normalised) # more than this haiku
+rm(execution_metrics, bench_metrics, all_metrics, data_aggs, benchmark_results_input, benchmark_results_normalised) # is important in large scripts
 
 #####################################################
 #                  COMBINE RESULTS                  #
@@ -117,7 +100,7 @@ results <- Reduce(
   list(method_info, qc_results, scaling_results, scaling_models, bench_overall, bench_trajtypes, bench_sources)
 )
 
-rm(list = setdiff(ls(), "results"))
+rm(list = setdiff(ls(), "results")) # more than this haiku
 
 #####################################################
 #              DETERMINE FINAL RANKING              #
