@@ -36,7 +36,7 @@ reformat_tribbles <- function(script_file, align = c("left", "center", "right"))
     subset <-
       lines[starti:endi] %>%
       gsub(" *([\"`][^\"`]*[\"`]|[^ ,]*),? *", "\\1°", .) %>%
-      map(~ strsplit(., "°")[[1]])
+      map(~ strsplit(., "\U00B0")[[1]])
 
     numcols <- length(subset[[1]])
 
