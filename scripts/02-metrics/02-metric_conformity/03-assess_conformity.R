@@ -20,7 +20,7 @@ source(scripts_file("helper-perturbations.R"))
 metric_ids_geom_mean <- metrics_evaluated %>% filter(category != "average") %>% pull(metric_id)
 scores <- scores %>% bind_rows(
   scores %>%
-    filter(metric_id %in% metric_ids_harm_mean) %>%
+    filter(metric_id %in% metric_ids_geom_mean) %>%
     group_by(method_id, dataset_id, param_id) %>%
     summarise(
       score = dyneval:::calculate_geometric_mean(score),

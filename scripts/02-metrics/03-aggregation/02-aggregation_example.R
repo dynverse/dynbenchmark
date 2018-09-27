@@ -24,6 +24,7 @@ create_continuous_palette <- function(...) {
 
 }
 
+table_original <- read_csv(raw_file("example.csv")) %>% mutate_if(is.character, forcats::fct_inorder)
 
 palettes <- lst(
   dataset_id = unique(table_original$dataset_id) %>% create_discrete_palette("cartography", "blue.pal"),
@@ -42,7 +43,7 @@ labellers <- lst(
   metric_Y = metric_X,
   metric_X_normalised = metric_X,
   metric_Y_normalised = metric_X,
-  geometric_mean = metric_X
+  overall_score = metric_X
 )
 
 get_color <- function(column, value) {
@@ -55,19 +56,16 @@ get_color <- function(column, value) {
   })
 }
 
-
-table_original <- read_csv(raw_file("example.csv")) %>% mutate_if(is.character, forcats::fct_inorder)
-
 jump_on_change <- function(x) seq_along(x) + cumsum(lag(x, default = x[[1]]) != x)
 
 normalise <- dynbenchmark:::.benchmark_aggregate_normalisation$normal
-average <- function(x) round(mean(x), 2)
+average <- function(x) mean(x)
 
 tables <- lst(
-  split_datasets = table_original %>%
+  for_each_dataset = table_original %>%
     mutate(row_ix = jump_on_change(dataset_id)),
 
-  normalised = split_datasets %>%
+  normalised = for_each_dataset %>%
     group_by(dataset_id) %>%
     mutate_at(c("metric_X", "metric_Y"), funs(normalised = normalise)) %>%
     select(-metric_X, -metric_Y) %>%
@@ -101,9 +99,9 @@ tables <- lst(
     ungroup() %>%
     mutate(row_ix = row_number()),
 
-  overall_scores = aggregated_across_trajectory_types,
+  specific_scores = aggregated_across_trajectory_types,
 
-  average_metrics = aggregated_across_trajectory_types %>%
+  overall_score = specific_scores %>%
     group_by(method_id) %>%
     mutate(overall_score = dyneval::calculate_geometric_mean(metric_X_normalised, metric_Y_normalised)) %>%
     ungroup() %>%
@@ -159,7 +157,8 @@ plot_tables <- map2(tables, names(tables), function(table, table_id) {
 plot_arrow <- function(label = "") {
   ggplot() +
     geom_segment(aes(x = 0, y = 0, xend = 1, yend = 0), color = "black", arrow = arrow(type = "closed")) +
-    geom_text(aes(x = 0.5, y = 0), label = label, vjust = -1) +
+    geom_text(aes(x = 0.5, y = 0.2), label = label_short(label), vjust = 0) +
+    scale_y_continuous(limits = c(-1, 1)) +
     theme_void()
 }
 
@@ -169,7 +168,7 @@ plot_arrow <- function(label = "") {
 # normalisation
 
 patchwork::wrap_plots(
-  plot_tables$split_datasets,
+  plot_tables$for_each_dataset,
   plot_arrow("Normalise"),
   plot_tables$normalise,
   widths = c(1, 0.25, 1)
@@ -205,9 +204,9 @@ patchwork::wrap_plots(
 
 
 patchwork::wrap_plots(
-  plot_tables$overall_scores,
+  plot_tables$specific_scores,
   plot_arrow("Geometric mean"),
-  plot_tables$average_metrics,
+  plot_tables$overall_score,
   widths = c(1, 0.25, 1)
 ) %>% write_rds(result_file("averaging_example.rds"))
 

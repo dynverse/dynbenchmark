@@ -13,3 +13,7 @@ dynbenchmark::knit_nest("01-metric_characterisation")
 ```{r, results = "asis"}
 dynbenchmark::knit_nest("02-metric_conformity")
 ```
+
+```{r, results = "asis"}
+dynbenchmark::knit_nest("03-aggregation")
+```

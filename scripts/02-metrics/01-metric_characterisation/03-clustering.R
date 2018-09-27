@@ -12,7 +12,7 @@ dataset <- dyntoy::generate_dataset(model = dyntoy::model_binary_tree(num_branch
 plot_clustering_scores_overview <- wrap_plots(
   plot_graph(dataset, label_milestones = TRUE) + ggtitle("Reference"),
   plot_graph(dataset, grouping = group_onto_nearest_milestones(dataset), plot_milestones = TRUE) + ggtitle("Cells mapped to milestones"),
-  plot_graph(dataset, grouping = group_onto_trajectory_edges(dataset)) + ggtitle("Cells mapped to branches")
+  plot_graph(dataset, grouping = group_onto_trajectory_edges(dataset)) + ggtitle("Cells mapped to branches") + guides(color = guide_legend(ncol = 3))
 )
 
 plot_clustering_scores_overview

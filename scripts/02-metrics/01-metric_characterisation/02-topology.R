@@ -55,27 +55,6 @@ plot_scores <- ggplot(results, aes(model_id, model_id1)) +
   theme(axis.text.x.bottom = element_text(hjust = 1, angle = 45)) +
   coord_equal()
 
-# compare HIM and edgeflip
-results_spread <- results %>%
-  spread(metric_id, score) %>%
-  filter(as.numeric(model_id) >= as.numeric(model_id1))
-plot_topology_difference <- results_spread %>%
-  ggplot(aes(edge_flip, him)) +
-  geom_smooth(method = "lm", se = FALSE, color = "grey") +
-  geom_point(aes()) +
-  ggrepel::geom_text_repel(
-    aes(label = paste0(model_id, " \U2b0c ", model_id1)),
-    data = results_spread %>% top_n(5, abs(lm(results_spread$edge_flip ~ results_spread$him)$residuals)),
-    force = 10,
-    min.segment.length = 0
-  ) +
-  scale_color_discrete() +
-  theme_pub() +
-  labs(x = label_metric("edge_flip", parse = TRUE), y = label_metric("him", parse = TRUE), parse = TRUE) +
-  coord_equal()
-plot_topology_difference
-
-
 ##  ............................................................................
 ##  Compare lengths in topologies                                           ####
 
@@ -148,16 +127,13 @@ plot_topology_lengths <- patchwork::wrap_plots(
 ##  Combine plots                                                           ####
 library(patchwork)
 plot_topology_scores_overview <- patchwork::wrap_plots(
-  plot_datasets %>% tag_first("A"),
-  patchwork::wrap_plots(
-    plot_scores + labs(tag = "B"),
-    plot_topology_difference + labs(tag = "C"),
-    nrow = 1,
-    widths = c(2, 1)
-  ),
-  plot_topology_lengths %>% tag_first("D"),
+  plot_datasets %>% wrap_elements(),
+  plot_scores %>% wrap_elements(),
+  plot_topology_lengths %>% wrap_elements(),
   ncol = 1,
-  heights = c(1, 2, 2)
-)
+  heights = c(1, 2.5, 2)
+) + plot_annotation(tag_levels = "a")
+
+plot_topology_scores_overview
 
 write_rds(plot_topology_scores_overview, result_file("topology_scores_overview.rds"))
