@@ -518,7 +518,7 @@ combined_local_global_position_change <- rule_combined(
   ),
   method_ids = c("shuffle_edges", "shuffle_cells_edgewise", "shuffle_cells"),
   dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies), cell_positioning != "milestones", num_cells > 50) %>% pull(dataset_id),
-  observation = "Most metrics that look at the position of each cell conform to this rule."
+  observation = "Because the topology remains the same, the topology scores do not conform to this rule. Also the clustering based scores have some difficulties with this rule."
 )
 
 filter_cells <- rule_monotonic(
@@ -531,7 +531,7 @@ filter_cells <- rule_monotonic(
   varied_parameter_id = "filter_perc",
   varied_parameter_name = "Filtered cells",
   varied_parameter_labeller = scales::percent,
-  observation = "Only metrics which look only at the topology do not conform to this rule."
+  observation = "Metrics which look at the topology do not conform to this rule."
 )
 
 remove_divergence_regions <- rule_lower(
@@ -544,19 +544,19 @@ remove_divergence_regions <- rule_lower(
     num_cells >= 100
   ) %>% pull(dataset_id),
   method_id = "remove_divergence_regions",
-  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and {label_metric('edgeflip', 'latex')} fail here because neither the topology nor the branche assignment changes.")
+  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and {label_metric('edge_flip', 'latex')} fail here because neither the topology nor the branch assignment changes. Moreover, the decreases in score are relatively minor for all metrics, given that the impact of the positions of the cells is only minimal.")
 )
 
 time_warping_start <- rule_monotonic(
   id = "time_warping_start",
   name = "Move cells to start milestone",
-  description = "Moving the cells closer to their start milestone should lower the score. Cells were moved closer to the start milestone by doing $\\textit{percentage}^{\\textit{warp magnitude}}",
+  description = "Moving the cells closer to their start milestone should lower the score. Cells were moved closer to the start milestone using $\\textit{percentage}_{\\textit{new}} = \\textit{percentage}^{\\textit{warp magnitude}}$",
   dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
   parameters = list(time_warping_start = tibble(warp_magnitude = seq(0, 6)) %>% mutate(id = as.character(warp_magnitude))),
   varied_parameter_id = "warp_magnitude",
   method_id = "time_warping_start",
   varied_parameter_name = "Warp magnitude",
-  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and {label_metric('edgeflip', 'latex')} fail here because neither the topology nor the branche assignment changes.")
+  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and topology scores fail here because neither the topology nor the branch assignment changes. The score decreases only slightly for all the other metrics, given that only the relative distances change between cells, but not their actual ordering.")
 )
 
 time_warping_parabole <- rule_monotonic(
@@ -568,7 +568,7 @@ time_warping_parabole <- rule_monotonic(
   varied_parameter_id = "warp_magnitude",
   method_id = "time_warping_parabole",
   varied_parameter_name = "Warp magnitude",
-  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and {label_metric('edgeflip', 'latex')} fail here because neither the topology nor the branche assignment changes.")
+  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and topology scores fail here because neither the topology nor the branch assignment changes. The score decreases only slightly for all the other metrics, given that only the relative distances change between cells, but not their actual ordering.")
 )
 
 shuffle_lengths <- rule_lower(
@@ -632,7 +632,7 @@ combined_position_topology <- rule_combined(
   ),
   method_ids = c("shuffle_cells", "add_connecting_edges", "shuffle_cells_and_add_connecting_edges"),
   dataset_ids = dataset_design %>% filter(num_cells == 100) %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
-  observation = "Most metrics have problems with this rule as they focus on either the cellular positions or the topology individually. Only the {label_metric('featureimp_cor', 'latex')} and the {label_metric('harm_mean', 'latex')} conform to this rule."
+  observation = glue::glue("Most metrics have problems with this rule as they focus on either the cellular positions or the topology individually. Only the {label_metric('correlation')} and {label_metric('geom_mean', 'latex')} consistently conform to this rule.")
 )
 
 merge_bifurcation <- rule_lower(
@@ -656,7 +656,7 @@ combined_merge_bifurcation_shuffle_cells <- rule_combined(
   ),
   method_ids = c("shuffle_cells", "merge_bifurcation", "shuffle_cells_and_merge_bifurcation"),
   dataset_ids = dataset_design %>% filter(num_cells == 100, topology_id == "bifurcation_simple") %>% pull(dataset_id),
-  observation = "Only metrics which look uniquely at the topology do not conform to this rule."
+  observation = "Only metrics which look at the topology do not conform to this rule."
 )
 
 concatenate_bifurcation <- rule_lower(

@@ -24,6 +24,7 @@ create_continuous_palette <- function(...) {
 
 }
 
+table_original <- read_csv(raw_file("example.csv")) %>% mutate_if(is.character, forcats::fct_inorder)
 
 palettes <- lst(
   dataset_id = unique(table_original$dataset_id) %>% create_discrete_palette("cartography", "blue.pal"),
@@ -55,19 +56,16 @@ get_color <- function(column, value) {
   })
 }
 
-
-table_original <- read_csv(raw_file("example.csv")) %>% mutate_if(is.character, forcats::fct_inorder)
-
 jump_on_change <- function(x) seq_along(x) + cumsum(lag(x, default = x[[1]]) != x)
 
 normalise <- dynbenchmark:::.benchmark_aggregate_normalisation$normal
 average <- function(x) mean(x)
 
 tables <- lst(
-  for_each_dataset_and_method = table_original %>%
+  for_each_dataset = table_original %>%
     mutate(row_ix = jump_on_change(dataset_id)),
 
-  normalised = for_each_dataset_and_method %>%
+  normalised = for_each_dataset %>%
     group_by(dataset_id) %>%
     mutate_at(c("metric_X", "metric_Y"), funs(normalised = normalise)) %>%
     select(-metric_X, -metric_Y) %>%
@@ -170,7 +168,7 @@ plot_arrow <- function(label = "") {
 # normalisation
 
 patchwork::wrap_plots(
-  plot_tables$for_each_dataset_and_method,
+  plot_tables$for_each_dataset,
   plot_arrow("Normalise"),
   plot_tables$normalise,
   widths = c(1, 0.25, 1)
