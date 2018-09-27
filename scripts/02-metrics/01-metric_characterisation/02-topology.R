@@ -106,7 +106,7 @@ plot_length_scores <- scores %>%
       ggplot(aes(1, metric_id)) +
       geom_text(aes(label = round(score, 2))) +
       theme_pub() +
-      scale_y_discrete("", labels = label_metrics) +
+      scale_y_discrete("", labels = function(x) label_metrics(x, format = "plotmath")) +
       theme(axis.line = element_blank(), axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank())
   }) %>%
   {
