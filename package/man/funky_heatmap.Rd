@@ -4,26 +4,17 @@
 \alias{funky_heatmap}
 \title{Overview heatmap plotting}
 \usage{
-funky_heatmap(data, metric_ord, method_ord, add_timestamp = TRUE,
-  row_space = 0.1, row_bigspace = 0.5, col_space = 0.1,
-  col_bigspace = 0.5)
+funky_heatmap(data, column_info, column_groups, row_info, row_groups,
+  palettes, scale_column = TRUE, add_timestamp = TRUE)
 }
 \arguments{
 \item{data}{data}
 
+\item{add_timestamp}{Whether or not to add a timestamp at the bottom}
+
 \item{metric_ord}{metric_ord}
 
 \item{method_ord}{method_ord}
-
-\item{add_timestamp}{Whether or not to add a timestamp at the bottom}
-
-\item{row_space}{The space between rows}
-
-\item{row_bigspace}{The space between groups of rows}
-
-\item{col_space}{The space between columns}
-
-\item{col_bigspace}{The space between groups of columns}
 }
 \description{
 TODO: params need to be described

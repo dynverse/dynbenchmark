@@ -6,59 +6,59 @@
 #' @param metric_ord metric_ord
 #' @param method_ord method_ord
 #' @param add_timestamp Whether or not to add a timestamp at the bottom
-#' @param row_space The space between rows
-#' @param row_bigspace The space between groups of rows
-#' @param col_space The space between columns
-#' @param col_bigspace The space between groups of columns
 #'
 #' @export
 funky_heatmap <- function(
   data,
-  metric_ord,
-  method_ord,
-  add_timestamp = TRUE,
-  row_space = .1,
-  row_bigspace = .5,
-  col_space = .1,
-  col_bigspace = .5
+  column_info,
+  column_groups,
+  row_info,
+  row_groups,
+  palettes,
+  scale_column = TRUE,
+  add_timestamp = TRUE
 ) {
-  row_height <- 1 # must be fixed
+  # no point in making these parameters
+  row_height <- 1
+  row_space <- .1
+  row_bigspace <- .5
+  col_space <- .1
+  col_bigspace <- .5
 
   # SPREAD GEOM PARAMS
-  metric_ord <- process_geom_params(metric_ord)
+  column_info <- process_geom_params(column_info)
 
-  # GENERATE METHOD POSITIONS
-  method_pos <-
-    method_ord %>%
+  # GENERATE ROW POSITIONS
+  row_groups$group_spacing <- c(0, ifelse(diff(as.integer(factor(row_groups[[1]]))) != 0, row_bigspace, row_space))
+
+  row_pos <-
+    row_info %>%
     group_by(group) %>%
     mutate(group_i = row_number()) %>%
     ungroup() %>%
+    left_join(row_groups %>% select(group, group_spacing), by = "group") %>%
     mutate(
-      method_i = row_number(),
+      row_i = row_number(),
       colour_background = group_i %% 2 == 1,
       do_spacing = c(FALSE, diff(as.integer(factor(group))) != 0),
-      spacing = ifelse(do_spacing, row_bigspace, row_space),
-      y = - (method_i * row_height + cumsum(spacing)),
+      ysep = ifelse(do_spacing, group_spacing, row_space),
+      y = - (row_i * row_height + cumsum(ysep)),
       ymin = y - row_height / 2,
       ymax = y + row_height / 2
     )
 
-  # GENERATE METHOD ANNOTATION
-  method_annot <-
-    method_pos %>%
-    group_by(group) %>%
-    summarise(
-      ymin = min(ymin),
-      ymax = max(ymax),
-      y = (ymin + ymax) / 2,
-      x = -1
-    )
+  column_groups$group_spacing <- c(0, ifelse(diff(as.integer(factor(column_groups[[1]]))) != 0, col_bigspace, col_space))
 
-  # DETERMINE METRIC POSITIONS
-  metric_pos <-
-    metric_ord %>%
+  # DETERMINE COLUMN POSITIONS
+  if (!"overlay" %in% colnames(column_info)) {
+    column_info$overlay <- FALSE
+  }
+  column_pos <-
+    column_info %>%
+    left_join(column_groups %>% select(group, group_spacing), by = "group") %>%
     mutate(
-      xsep = c(0, ifelse(experiment[-1] != experiment[-n()] | category[-1] != category[-n()], col_bigspace, col_space)),
+      do_spacing = c(FALSE, diff(as.integer(factor(group))) != 0),
+      xsep = ifelse(do_spacing, group_spacing, col_space),
       xwidth = case_when(
         !is.na(width) ~ width,
         geom == "bar" ~ 4,
@@ -67,7 +67,6 @@ funky_heatmap <- function(
         TRUE ~ 1
       ),
       overlay = !is.na(overlay) & overlay,
-      show_label = is.na(show_label) | show_label,
       xsep = ifelse(overlay, c(0, -head(xwidth, -1)), xsep),
       xwidth = ifelse(overlay, -xsep, xwidth),
       xmax = cumsum(xwidth + xsep),
@@ -75,52 +74,156 @@ funky_heatmap <- function(
       x = xmin + xwidth / 2
     )
 
-  # GENERATE METRIC ANNOTATION
-  metric_annot <-
-    metric_pos %>%
-    select(experiment, experiment_name, category_name, xmin, xmax) %>%
-    mutate(row = row_number()) %>%
-    gather(level, id, -row, -xmin, -xmax, -experiment) %>%
-    group_by(level, experiment, id) %>%
-    summarise(xmin = min(xmin), xmax = max(xmax)) %>%
+  # GENERATE ROW ANNOTATION
+  row_annotation <-
+    row_groups %>%
+    select(-group_spacing) %>%
+    gather(level, name, -group) %>%
+    left_join(row_pos %>% select(group, ymin, ymax), by = "group") %>%
+    group_by(level, name) %>%
+    summarise(
+      ymin = min(ymin),
+      ymax = max(ymax),
+      y = (ymin + ymax) / 2
+    ) %>%
     ungroup() %>%
-    arrange(level != "experiment_name", xmin) %>%
     mutate(
-      y = ifelse(level == "experiment_name", 4.5, 3.5),
-      key = ifelse(level == "experiment_name", letters[row_number()], ""),
-      x = (xmin + xmax) / 2
+      levelmatch = match(level, colnames(row_groups)),
+      xmin = levelmatch - max(levelmatch) - 2,
+      xmax = xmin + 1
     )
+
+  # GENERATE COLUMN ANNOTATION
+  column_annotation <-
+    column_groups %>%
+    select(-group_spacing) %>%
+    gather(level, name, -group) %>%
+    left_join(column_pos %>% select(group, xmin, xmax), by = "group") %>%
+    group_by(level, name) %>%
+    summarise(
+      xmin = min(xmin),
+      xmax = max(xmax),
+      x = (xmin + xmax) / 2
+    ) %>%
+    ungroup() %>%
+    mutate(
+      levelmatch = match(level, colnames(column_groups)),
+      ymin = max(levelmatch) - levelmatch + 1,
+      ymax = ymin + 1
+    )
+
+  # FIGURE OUT LEGENDS
+  legends_to_plot <-
+    column_info %>%
+    mutate(legend = is.na(legend) | legend) %>%
+    filter(!is.na(palette), legend) %>%
+    group_by(palette) %>%
+    arrange(desc(legend)) %>%
+    slice(1) %>%
+    ungroup() %>%
+    select(palette, group, geom)
+
+  # FIGURE OUT PALETTES
+  palette_assignment <-
+    column_info %>%
+    filter(!is.na(palette)) %>%
+    select(id, palette)
+
+  palette_list <- palettes %>% deframe()
 
   ####################################
   ###         PROCESS DATA         ###
   ####################################
   geom_data_processor <- function(geom_types, fun) {
-    map_df(seq_len(nrow(metric_pos)), function(i) {
-      if (!metric_pos$geom[[i]] %in% geom_types) {
-        NULL
+    column_sel <-
+      column_pos %>%
+      filter(geom %in% geom_types) %>%
+      select(-group, -name, -group_spacing, -do_spacing) %>%
+      rename(column_id = id)
+
+    if (nrow(column_sel) == 0) {
+      return(tibble(a = 1) %>% slice(integer()))
+    }
+
+    row_sel <-
+      row_pos %>%
+      select(-group, -group_i, -group_spacing, -row_i, -colour_background, -do_spacing) %>%
+      rename(row_id = id)
+
+    data_sel <-
+      data %>%
+      select(row_id = id, !!column_sel$column_id) %>%
+      gather(column_id, value, -row_id)
+
+    dat <-
+      data_sel %>%
+      left_join(column_sel, by = "column_id") %>%
+      left_join(row_sel, by = "row_id")
+
+    # apply function
+    dat <- fun(dat)
+
+    # scale data, if need be
+    if (scale_column && is.numeric(dat$value)) {
+      dat <-
+        dat %>%
+        group_by(column_id) %>%
+        mutate(value = dynutils::scale_minmax(value)) %>%
+        ungroup()
+    }
+
+    # determine colours
+    if (any(!is.na(column_sel$palette))) {
+      if (is.character(dat$value)) {
+        dat <- dat %>% mutate(col_value = ifelse(is.na(palette), NA, value))
+      } else if (is.numeric(dat$value)) {
+        dat <- dat %>% mutate(col_value = ifelse(is.na(palette), NA, round(value * 100) + 1))
       } else {
-        met_row <- metric_pos %>% slice(i)
-        met <- crossing(met_row %>% select(-metric), data_frame(metric = unlist(met_row$metric)))
-        dat <- data %>%
-          filter(!placeholder) %>%
-          inner_join(met, by = c("experiment", "category", "metric")) %>%
-          left_join(method_pos, by = "method_id")
-        fun(dat)
+        dat$col_value <- NA
       }
-    })
+
+
+      dat <-
+        dat %>%
+        group_by(palette) %>%
+        mutate(
+          colour = {
+            if (!is.na(palette[[1]])) {
+              case_when(
+                is.na(palette) ~ as.character(NA),
+                is.na(col_value) ~ "#444444FF",
+                palette %in% names(palette_list) ~ palette_list[[palette[[1]]]][col_value],
+                TRUE ~ as.character(NA)
+              )
+            } else {
+              as.character(NA)
+            }
+          }
+        ) %>%
+        ungroup()
+    }
+
+    dat
   }
   circle_data <- geom_data_processor("circle", function(dat) {
-    dat %>% transmute(x0 = x, y0 = y, size = row_height / 2 * value, colour)
+    dat %>% mutate(x0 = x, y0 = y, size = row_height / 2 * value)
   })
-  rect_data <- geom_data_processor("rect", function(dat) {
-    dat %>% transmute(xmin, xmax, ymin, ymax, colour)
-  })
+  rect_data <- geom_data_processor("rect", identity)
   textbox_data <- geom_data_processor("textbox", function(dat) {
-    dat %>% transmute(xmin, xmax, ymin, ymax, x, y, colour, label, colour_label = ifelse(value < .6, "white", "black"))
+    dat %>% mutate(
+      label = map_chr(value, ~ .$label),
+      value = map_dbl(value, ~ .$value),
+      colour_label = ifelse(value < .6, "white", "black")
+    )
   })
   bar_data <- geom_data_processor("bar", function(dat) {
-    # if ("inverse" %in% columns(dat)) {xmin = xmax - value * xmidth}
-    dat %>% transmute(xmin = xmin, xmax = xmin + value * xwidth, ymin, ymax, colour)
+    if (!"align_left" %in% colnames(dat)) {
+      dat$align_left <- TRUE
+    }
+    dat %>% mutate(
+      xmin = ifelse(align_left, xmin, xmax - value * xmidth),
+      xmax = ifelse(align_left, xmin + value * xwidth, xmax)
+    )
   })
   text_data <- geom_data_processor("text", function(dat) {
     if (!"hjust" %in% colnames(dat)) {
@@ -129,74 +232,67 @@ funky_heatmap <- function(
     if (!"vjust" %in% colnames(dat)) {
       dat$vjust <- NA
     }
-    if (!"format" %in% colnames(dat)) {
-      dat$format <- NA
-    }
 
-    dat %>% transmute(
+    dat %>% mutate(
       hjust = ifelse(is.na(hjust), .5, hjust),
       vjust = ifelse(is.na(vjust), .5, vjust),
       x = (1 - hjust) * xmin + hjust * xmax,
-      y,
-      colour = "black",
-      label = pmap_chr(lst(format, label, value), function(format, label, value) {
-        if (is.na(format) || format == "label") {
-          label
-        } else if (format == "value") {
-          value
-        } else if (format == "percentage") {
-          if (value < .01) {
-            "<1%"
-          } else {
-            paste0(ceiling(100 * value), "%")
-          }
-        }
-      })
+      colour = "black", # colour can be overridden of needed
+      label = value
     )
   })
   pie_data <- geom_data_processor("pie", function(dat) {
-    dat %>%
-      select(-colour) %>%
-      left_join(
-        pie_colours,
-        by = "metric"
+    dat <-
+      inner_join(
+        dat %>% select(-value) %>% mutate(iii = row_number()),
+        dat %>% select(value) %>% mutate(iii = row_number()) %>%
+          dynutils::mapdf_dfr(function(l) {
+            enframe(l$value) %>% mutate(iii = l$iii)
+          }),
+        by = "iii"
       ) %>%
-      group_by(method_id) %>%
-      transmute(
+      select(-iii)
+
+    dat %>%
+      group_by(row_id, column_id) %>%
+      mutate(
         y0 = y,
         x0 = x,
-        value = ifelse(is.finite(value), value, 0),
-        pct = value / sum(value),
+        pct = ifelse(is.finite(value), value, 0),
+        pct = pct / sum(pct),
         rad = pct * 2 * pi,
         rad_end = cumsum(rad),
         rad_start = rad_end - rad,
         r0 = 0,
         r = row_height / 2,
-        colour
+        value = name
       ) %>%
       filter(rad_end != rad_start) %>%
       ungroup()
   })
   barguides_data <- geom_data_processor("bar", function(dat) {
     crossing(
-      data_frame(x = c(dat$xmin[[1]], dat$xmax[[1]])),
-      method_annot %>% select(y = ymin, yend = ymax)
-    )
+      dat %>% group_by(column_id) %>% slice(1) %>% ungroup() %>% select(xmin, xmax) %>% gather(col, x) %>% select(-col),
+      row_pos %>% select(y = ymin, yend = ymax)
+    ) %>%
+      mutate(palette = NA, value = NA)
   })
   trajd <- geom_data_processor("traj", function(dat) {
     dat %>%
-      transmute(xmin, xmax, ymin, ymax, topinf = gsub("^gray_", "", label), colour = ifelse(grepl("^gray_", label), "lightgray", NA))
+      mutate(topinf = gsub("^gray_", "", value), colour = ifelse(grepl("^gray_", value), "lightgray", NA))
   })
+
+  minimum_x <- min(column_pos$xmin)
+  maximum_x <- max(column_pos$xmax)
+  minimum_y <- min(row_pos$ymin)
+  maximum_y <- max(row_pos$ymax)
 
   # Stamp
   if (add_timestamp) {
     stamp <- paste0("Generated on ", Sys.Date())
+    stamp_y <- minimum_y
+    minimum_y <- minimum_y - 1
   }
-
-  minimum_x <- min(metric_pos$xmin)
-  maximum_x <- max(metric_pos$xmax)
-  minimum_y <- min(method_pos$ymin)
-  maximum_y <- max(method_pos$ymax)
 
   # CREATE LEGENDS
   # leg_circles <- map_df(names(exp_palettes), function(experiment) {
@@ -235,35 +331,36 @@ funky_heatmap <- function(
     scale_fill_identity() +
     cowplot::theme_nothing()
 
-  # ADD METRIC ANNOTATION
-  df <- metric_annot %>% filter(id != "")
-  g <- g +
-    geom_segment(aes(x = xmin, xend = xmax, y = y, yend = y), df, size = 1) +
-    geom_text(aes(x = x, y = y+.25, label = id), df, vjust = 0, hjust = 0.5, fontface = "bold") +
-    geom_text(aes(x = xmin, y = y+.5, label = key), df %>% filter(key != ""), vjust = 0, hjust = 0, fontface = "bold", size = 5)
-
-  # ADD METHOD ANNOTATION
-  g <- g +
-    geom_segment(aes(x = x, xend = x, y = ymin, yend = ymax), method_annot, size = 1) +
-    geom_text(aes(x = x-.5, y = y, label = label_short(group)), method_annot, vjust = 0, hjust = .5, fontface = "bold", angle = 90)
-
-  # ADD DATE
-  if (add_timestamp) {
-    g <- g + geom_text(aes(1, minimum_y-1, label = stamp), colour = "#cccccc", hjust = 0, vjust = 0)
-  }
-
   # ADD SEPARATOR LINES
-  df <- method_pos %>% filter(colour_background)
+  df <- row_pos %>% filter(colour_background)
   if (nrow(df) > 0) {
     g <- g + geom_rect(aes(xmin = minimum_x-.25, xmax = maximum_x+.25, ymin = ymin - (row_space / 2), ymax = ymax + (row_space / 2)), df, fill = "#EEEEEE")
   }
 
+  # ADD COLUMN ANNOTATION
+  df <- column_annotation %>% filter(name != "")
+  g <- g +
+    geom_segment(aes(x = xmin, xend = xmax, y = ymin, yend = ymin), df, size = 1) +
+    geom_text(aes(x = x, y = ymax, label = name), df, vjust = 1, hjust = 0.5, fontface = "bold")
+    # geom_text(aes(x = xmin, y = y+.5, label = key), df %>% filter(key != ""), vjust = 0, hjust = 0, fontface = "bold", size = 5)
+
+  # ADD ROW ANNOTATION
+  df <- row_annotation %>% filter(name != "")
+  g <- g +
+    geom_segment(aes(x = xmax, xend = xmax, y = ymin, yend = ymax), df, size = 1) +
+    geom_text(aes(x = xmin, y = y, label = name), df, vjust = 1, hjust = 0.5, fontface = "bold", angle = 90)
+
+  # ADD DATE
+  if (add_timestamp) {
+    g <- g + geom_text(aes(1, stamp_y, label = stamp), colour = "#cccccc", hjust = 0, vjust = 0)
+  }
+
   # ADD METRIC NAMES
-  df <- metric_pos %>% filter(show_label)
+  df <- column_pos %>% filter(name != "")
   if (nrow(df) > 0) {
     g <- g +
-      geom_segment(aes(x = x, xend = x, y = -.3, yend = -.1), metric_pos %>% filter(show_label), size = .5) +
-      geom_text(aes(x = x, y = 0, label = label_long(name)), metric_pos %>% filter(show_label), angle = 30, vjust = 0, hjust = 0)
+      geom_segment(aes(x = x, xend = x, y = -.3, yend = -.1), df, size = .5) +
+      geom_text(aes(x = x, y = 0, label = label_long(name)), df, angle = 30, vjust = 0, hjust = 0)
   }
 
   # ADD BAR GUIDES

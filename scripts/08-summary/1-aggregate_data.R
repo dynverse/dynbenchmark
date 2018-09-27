@@ -46,10 +46,17 @@ rm(tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores) # writin
 #####################################################
 #                READ SCALING RESULTS               #
 #####################################################
-scaling_results <-
+scaling_scores <-
   read_rds(result_file("scaling_scores.rds", experiment_id = "05-scaling"))$scaling_scores %>%
-  mutate(metric = paste0("scaling_preds_", metric)) %>%
+  mutate(metric = paste0("scaling_pred_timescore_", metric)) %>%
   spread(metric, score)
+
+scaling_preds <-
+  read_rds(result_file("scaling_scores.rds", experiment_id = "05-scaling"))$scaling_preds %>%
+  gather(column, value, time, timestr) %>%
+  mutate(metric = paste0("scaling_pred_", column, "_", labnrow, "_", labncol)) %>%
+  select(method_id, metric, value) %>%
+  spread(metric, value)
 
 scaling_models <-
   read_rds(result_file("scaling.rds", experiment_id = "05-scaling"))$models %>%
@@ -97,7 +104,7 @@ rm(execution_metrics, bench_metrics, all_metrics, data_aggs, benchmark_results_i
 
 results <- Reduce(
   function(a, b) left_join(a, b, by = "method_id"),
-  list(method_info, qc_results, scaling_results, scaling_models, bench_overall, bench_trajtypes, bench_sources)
+  list(method_info, qc_results, scaling_scores, scaling_preds, scaling_models, bench_overall, bench_trajtypes, bench_sources)
 )
 
 rm(list = setdiff(ls(), "results")) # more than this haiku
@@ -109,7 +116,7 @@ metric_weights <-
   c(
     benchmark_overall_overall = 2,
     qc_overall_overall = 1,
-    scaling_preds_overall = 1
+    scaling_pred_timescore_overall = 1
   )
 
 results$summary_overall_overall <-
