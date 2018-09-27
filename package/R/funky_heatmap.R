@@ -29,7 +29,7 @@ funky_heatmap <- function(
   column_info <- process_geom_params(column_info)
 
   # GENERATE ROW POSITIONS
-  row_groups$group_spacing <- c(0, ifelse(diff(as.integer(factor(row_groups[[1]]))) != 0, row_bigspace, row_space))
+  row_groups$group_spacing <- c(0, ifelse(diff(as.integer(factor(row_groups$group))) != 0, row_bigspace, row_space))
 
   row_pos <-
     row_info %>%
@@ -47,7 +47,7 @@ funky_heatmap <- function(
       ymax = y + row_height / 2
     )
 
-  column_groups$group_spacing <- c(0, ifelse(diff(as.integer(factor(column_groups[[1]]))) != 0, col_bigspace, col_space))
+  column_groups$group_spacing <- c(0, ifelse(diff(as.integer(factor(column_groups$group))) != 0, col_bigspace, col_space))
 
   # DETERMINE COLUMN POSITIONS
   if (!"overlay" %in% colnames(column_info)) {
@@ -90,7 +90,8 @@ funky_heatmap <- function(
     mutate(
       levelmatch = match(level, colnames(row_groups)),
       xmin = levelmatch - max(levelmatch) - 2,
-      xmax = xmin + 1
+      xmax = xmin + 1,
+      x = (xmin + xmax) / 2
     )
 
   # GENERATE COLUMN ANNOTATION
@@ -108,8 +109,9 @@ funky_heatmap <- function(
     ungroup() %>%
     mutate(
       levelmatch = match(level, colnames(column_groups)),
-      ymin = max(levelmatch) - levelmatch + 1,
-      ymax = ymin + 1
+      ymin = max(levelmatch) - levelmatch + 3,
+      ymax = ymin + 1,
+      y = (ymin + ymax) / 2
     )
 
   # FIGURE OUT LEGENDS
@@ -291,8 +293,8 @@ funky_heatmap <- function(
   # Stamp
   if (add_timestamp) {
     stamp <- paste0("Generated on ", Sys.Date())
-    stamp_y <- minimum_y
     minimum_y <- minimum_y - 1
+    stamp_y <- minimum_y
   }
 
   # CREATE LEGENDS
@@ -342,14 +344,16 @@ funky_heatmap <- function(
   df <- column_annotation %>% filter(name != "")
   g <- g +
     geom_segment(aes(x = xmin, xend = xmax, y = ymin, yend = ymin), df, size = 1) +
-    geom_text(aes(x = x, y = ymax, label = name), df, vjust = 1, hjust = 0.5, fontface = "bold")
+    geom_text(aes(x = x, y = ymin, label = name), df, vjust = 0, hjust = 0.5, fontface = "bold", nudge_y = .1) +
+    expand_limits(y = max(df$ymax))
     # geom_text(aes(x = xmin, y = y+.5, label = key), df %>% filter(key != ""), vjust = 0, hjust = 0, fontface = "bold", size = 5)
 
   # ADD ROW ANNOTATION
   df <- row_annotation %>% filter(name != "")
   g <- g +
     geom_segment(aes(x = xmax, xend = xmax, y = ymin, yend = ymax), df, size = 1) +
-    geom_text(aes(x = xmin, y = y, label = name), df, vjust = 1, hjust = 0.5, fontface = "bold", angle = 90)
+    geom_text(aes(x = xmax, y = y, label = name), df, vjust = 0, hjust = 0.5, fontface = "bold", angle = 90, nudge_x = -.1) +
+    expand_limits(x = min(df$xmin))
 
   # ADD DATE
   if (add_timestamp) {
