@@ -4,9 +4,9 @@ library(dynplot)
 
 experiment("08-summary")
 
-####################################
-###         PROCESS DATA         ###
-####################################
+#####################################
+### ADD A FEW COLUMNS TO THE DATA ###
+#####################################
 method_groups <- c(rev(dynwrap::trajectory_types$id), c("adaptation", "offtheshelf", "control"))
 
 wrapper_type_map <- c(branch_trajectory = "Traj", linear_trajectory = "Linear", cyclic_trajectory = "Cycle", trajectory = "Traj", cell_graph = "Cell", cluster_graph = "Cluster", control = "", dimred_projection = "Proj", end_state_probabilities = "Prob")
