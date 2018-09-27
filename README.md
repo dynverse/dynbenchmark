@@ -25,7 +25,10 @@ This repo contains the scripts to reproduce the manuscript
 > <a href='https://github.com/saeyslab'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>  
 > [bioRxiv:276907](https://www.biorxiv.org/content/early/2018/03/05/276907)
 > [doi:10.1101/276907](https://doi.org/10.1101/276907)
-> [![altmetric](https://badges.altmetric.com/?size=100&score=100&types=btttttwg&style=bar)](https://altmetric.com/details/33972849)
+> [![altmetric](https://badges.altmetric.com/?size=100&score=101&types=btttttwg&style=bar)](https://altmetric.com/details/33972849)
+
+(Note that this preprint is currently outdated, but cannot be updated
+because the paper is under revision)
 
 ## Experiments
 
@@ -35,19 +38,21 @@ accompanied by documentation using github readmes and can thus be easily
 explored by going to the appropriate
 folders:
 
-| \# | id                  | scripts                                                       | results                                                                                                  |
-| :- | :------------------ | :------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------- |
-| 1  | Datasets            | [Datasets scripts](scripts/01-datasets)                       | [Datasets results](https://github.com/dynverse/dynbenchmark_results/tree/master/01-datasets)             |
-| 2  | Metrics             | [Metrics scripts](scripts/02-metrics)                         | [Metrics results](https://github.com/dynverse/dynbenchmark_results/tree/master/02-metrics)               |
-| 3  | Methods             | [Methods scripts](scripts/03-methods)                         | [Methods results](https://github.com/dynverse/dynbenchmark_results/tree/master/03-methods)               |
-| 4  | Method testing      | [Method testing scripts](scripts/04-method_testing)           | [Method testing results](https://github.com/dynverse/dynbenchmark_results/tree/master/04-method_testing) |
-| 5  | Scaling             | [Scaling scripts](scripts/05-scaling)                         | [Scaling results](https://github.com/dynverse/dynbenchmark_results/tree/master/05-scaling)               |
-| 6  | Optimise parameters | [Optimise parameters scripts](scripts/06-optimise_parameters) |                                                                                                          |
-| 7  | Benchmark           | [Benchmark scripts](scripts/07-benchmark)                     | [Benchmark results](https://github.com/dynverse/dynbenchmark_results/tree/master/07-benchmark)           |
-| 8  | Summary             | [Summary scripts](scripts/08-summary)                         | [Summary results](https://github.com/dynverse/dynbenchmark_results/tree/master/08-summary)               |
-| 9  | Guidelines          | [Guidelines scripts](scripts/09-guidelines)                   |                                                                                                          |
-| 10 | Topologies          | [Topologies scripts](scripts/10-topologies)                   |                                                                                                          |
-|    | Varia               | [Varia scripts](scripts/varia)                                |                                                                                                          |
+| \# | id                    | scripts                               | results                                                                                    |
+| :- | :-------------------- | :------------------------------------ | :----------------------------------------------------------------------------------------- |
+| 1  | Datasets              | [📄](scripts/01-datasets)              | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/01-datasets)              |
+| 2  | Metrics               | [📄](scripts/02-metrics)               | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/02-metrics)               |
+| 3  | Methods               | [📄](scripts/03-methods)               | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/03-methods)               |
+| 4  | Method testing        | [📄](scripts/04-method_testing)        | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/04-method_testing)        |
+| 5  | Scaling               | [📄](scripts/05-scaling)               | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/05-scaling)               |
+| 6  | Optimise parameters   | [📄](scripts/06-optimise_parameters)   |                                                                                            |
+| 7  | Benchmark             | [📄](scripts/07-benchmark)             | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/07-benchmark)             |
+| 8  | Summary               | [📄](scripts/08-summary)               | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/08-summary)               |
+| 9  | Guidelines            | [📄](scripts/09-guidelines)            | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/09-guidelines)            |
+| 10 | Topologies            | [📄](scripts/10-topologies)            | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/10-topologies)            |
+| 11 | Example predictions   | [📄](scripts/11-example_predictions)   | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/11-example_predictions)   |
+| 12 | Evaluation robustness | [📄](scripts/12-evaluation_robustness) | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/12-evaluation_robustness) |
+|    | Varia                 | [📄](scripts/varia)                    |                                                                                            |
 
 We also have several additional subfolders:
 
@@ -88,6 +93,12 @@ The benchmarking pipeline generates (and uses) the following datasets:
 
   - **General information about trajectory inference methods**,
     available as a data frame in `dynmethods::methods`
+
+## Methods
+
+All wrapped methods are wrapped as both docker and singularity
+containers. These can be easily run using
+[*dyn*methods](https://github.com/dynverse/dynmethods).
 
 ## Benchmarking your own method
 
