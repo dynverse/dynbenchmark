@@ -10,7 +10,7 @@ experiment("08-summary")
 spread_trajtypes <- function(method_info) {
   trajtypes <-
     map_df(dynwrap::trajectory_types$id, function(trajtyp) {
-      data_frame(id = method_info$id, trajectory_type = paste0("trajtyp_", trajtyp), value = map_lgl(method_info$trajectory_types, ~ trajtyp %in% .))
+      data_frame(id = method_info$id, trajectory_type = paste0("detects_", trajtyp), value = map_lgl(method_info$trajectory_types, ~ trajtyp %in% .))
     }) %>%
     spread(trajectory_type, value)
 
