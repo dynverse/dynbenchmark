@@ -77,11 +77,3 @@ column_groups <- tribble( # tribble_start
   "Quality control",  "Category",                     "qc_category"
 ) # tribble_end
 
-palettes <- tribble(
-  ~palette,        ~colours,
-  "overall",       viridisLite::viridis(101, option = "inferno"),
-  "benchmark",     viridisLite::viridis(101, option = "magma"),
-  "scaling",       viridisLite::viridis(101, option = "cividis"),
-  "qc",            viridisLite::viridis(101, option = "viridis"),
-  "error_reasons", error_reasons %>% select(name, colour) %>% deframe()
-)

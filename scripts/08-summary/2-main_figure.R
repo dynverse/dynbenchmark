@@ -62,31 +62,40 @@ row_groups <-
   unique()
 
 ####################################
-###   DETERMINE METRIC GROUPING  ###
+###   DETERMINE COLUMN GROUPING  ###
 ####################################
-script_file <- scripts_file("2a-metric_tbl.R")
-reformat_tribbles(script_file, "l")
-source(script_file)
 
-
+palettes <- tribble(
+  ~palette,        ~colours,
+  "overall",       viridisLite::viridis(101, option = "inferno"),
+  "benchmark",     viridisLite::viridis(101, option = "magma"),
+  "scaling",       viridisLite::viridis(101, option = "cividis"),
+  "qc",            viridisLite::viridis(101, option = "viridis"),
+  "error_reasons", error_reasons %>% select(name, colour) %>% deframe()
+)
 
 ####################################
-###        CREATE FIGURE         ###
+###        CREATE FIGURES        ###
 ####################################
-g <-
-  funky_heatmap(
-    data,
-    column_info,
-    column_groups,
-    row_info,
-    row_groups,
-    palettes,
-    add_timestamp = TRUE
-  )
+script_files <- tribble(
+  ~name, ~width, ~height,
+  "all", 26, 18,
+  "figure2", 26, 18,
+  "figure3", 26, 18,
+  "suppfig", 26, 18
+) %>%
+  mutate(file = map_chr(name, ~ scripts_file(paste0("2a_columns_", ., ".R"))))
 
-# WRITE FILES
-ggsave(result_file("overview.pdf"), g, device = cairo_pdf, width = 26, height = 18)
-# ggsave(result_file("overview.svg"), g, width = 20, height = 16)
-# ggsave(result_file("overview.png"), g, width = 20, height = 16)
+# fix formatting in scripts
+walk(script_files$file, reformat_tribbles)
+
+mapdf(script_files, function(list) {
+  cat("Processing ", list$name, "\n", sep = "")
+  source(list$file, local = TRUE)
+
+  g <- funky_heatmap(data, column_info, column_groups, row_info, row_groups, palettes)
+
+  ggsave(result_file(c("overview_", list$name, ".pdf")), g, device = cairo_pdf, width = list$width, height = list$height)
+})
 
 
