@@ -8,7 +8,7 @@ experiment("07-benchmark")
 ##########################################################
 
 # If you are the one who submitted the jobs, run:
-benchmark_fetch_results(TRUE)
+# benchmark_fetch_results(TRUE)
 # qsub::rsync_remote(
 #   remote_src = FALSE,
 #   path_src = derived_file(remote = FALSE, experiment = "07-benchmark"),

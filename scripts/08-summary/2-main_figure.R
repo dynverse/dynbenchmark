@@ -16,6 +16,7 @@ data <-
   rename(id = method_id) %>%
   mutate(
     group = ifelse(method_source %in% c("tool", "adaptation"), method_most_complex_trajectory_type, method_source),
+    # group = method_most_complex_trajectory_type,
     group = factor(group, levels = method_groups),
     control_label = ifelse(method_source == "tool", "", method_source),
     method_priors_required_str = case_when(
