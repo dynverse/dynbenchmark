@@ -43,7 +43,7 @@ column_info <- tribble( # tribble_start
   "benchmark_trajtype",            "benchmark_tt_acyclic_graph",                   "Acyclic",                  "circle",                      "benchmark",
   "benchmark_trajtype",            "benchmark_tt_graph",                           "Connected",                "circle",                      "benchmark",
   "benchmark_trajtype",            "benchmark_tt_disconnected_graph",              "Disconnected",             "circle",                      "benchmark",
-  "benchmark_execution",           "benchmark_overall_pct_errored_str",            "% Errored",                "text(hjust = 1)",             NA,
+  "benchmark_execution",           "benchmark_overall_pct_errored_str",            "% Errored",                "text(hjust = 1, width = 1)",  NA,
   "benchmark_execution",           "benchmark_overall_error_reasons",              "Reason",                   "pie",                         "error_reasons",
   "scaling_predtime_cells10k",     "scaling_pred_timecomb_cells10k_features1k",    "1k features",              "textbox",                     "scaling",
   "scaling_predtime_cells10k",     "scaling_pred_timecomb_cells10k_features10k",   "10k features",             "textbox",                     "scaling",
