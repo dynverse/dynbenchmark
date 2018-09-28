@@ -1,20 +1,24 @@
 #' @importFrom sigmoid sigmoid
 .benchmark_aggregate_normalisation <- list(
-  scalesigmoid = function (xnona, xnazero, multiplier = 1) {
-    y <- (xnazero - mean(xnona)) / var(xnona) * multiplier
+  scalesigmoid = function (xnona, xnazero = xnona, multiplier = 1) {
+    y <- (xnazero - mean(xnona)) / sd(xnona) * multiplier
 
     sigmoid::sigmoid(y)
   },
-  scaletanh = function (xnona, xnazero, multiplier = 1) {
-    y <- (xnazero - mean(xnona)) / var(xnona) * multiplier
+  scaletanh = function (xnona, xnazero = xnona, multiplier = 1) {
+    y <- (xnazero - mean(xnona)) / sd(xnona) * multiplier
 
     tanh(y)
   },
-  minmax = function (xnona, xnazero) {
+  minmax = function (xnona, xnazero = xnona) {
     (xnazero - min(xnona)) / (max(xnona) - min(xnona))
   },
-  percentrank = function(xnona, xnazero) {
+  percentrank = function(xnona, xnazero = xnona) {
     percent_rank(xnazero)
+  },
+  normal = function(xnona, xnazero = xnona) {
+    y <- (xnazero - mean(xnona)) / sd(xnona)
+    pnorm(y)
   },
   none = "none"
 )

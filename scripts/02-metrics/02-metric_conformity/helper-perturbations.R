@@ -35,7 +35,8 @@ perturb_shuffle_cells <- function(dataset, shuffle_perc = 1, seed = NULL) {
 }
 
 ## Shuffle edges
-perturb_shuffle_n_edges <- function(dataset, shuffle_n = Inf) {
+perturb_shuffle_n_edges <- function(dataset, shuffle_n = Inf, seed = NULL) {
+  if (!is.null(seed)) set.seed(seed)
   if (nrow(dataset$divergence_regions)) {stop("To shuffle branches, dataset cannot have divergence regions")}
 
   shuffle_n = min(shuffle_n, nrow(dataset$milestone_network))
@@ -73,15 +74,17 @@ perturb_shuffle_n_edges <- function(dataset, shuffle_n = Inf) {
   }
 }
 
-perturb_shuffle_edges <- function(dataset, shuffle_perc = 1) {
+perturb_shuffle_edges <- function(dataset, shuffle_perc = 1, seed = NULL) {
   source(scripts_file("helper-perturbations.R", experiment_id = "02-metrics/02-metric_conformity"))
 
-  perturb_shuffle_n_edges(dataset, shuffle_n = round(nrow(dataset$milestone_network) * shuffle_perc))
+  perturb_shuffle_n_edges(dataset, shuffle_n = round(nrow(dataset$milestone_network) * shuffle_perc), seed = seed)
 }
 
 
 ## Remove cells
-perturb_filter_cells <- function(dataset, filter_perc = 0.6) {
+perturb_filter_cells <- function(dataset, filter_perc = 0.6, seed = NULL) {
+  if (!is.null(seed)) set.seed(seed)
+
   filter_cell_ids <- sample(dataset$cell_ids, length(dataset$cell_ids) * filter_perc)
   progressions <- dataset$progressions %>% filter(!(cell_id %in% filter_cell_ids))
 
@@ -95,7 +98,9 @@ perturb_filter_cells <- function(dataset, filter_perc = 0.6) {
 
 
 ## Shuffle within edge
-perturb_shuffle_cells_edgewise <- function(dataset) {
+perturb_shuffle_cells_edgewise <- function(dataset, seed = NULL) {
+  if (!is.null(seed)) set.seed(seed)
+
   progressions <- dataset$progressions %>% mutate(percentage = runif(n()))
 
   dataset %>%
@@ -176,7 +181,7 @@ perturb_concatenate_bifurcation <- function(dataset) {
 ##  ............................................................................
 ##  Changing cyclic trajectories                                            ####
 perturb_break_cycle <- function(dataset) {
-  if (dataset$trajectory_type != "directed_cycle") {stop("Need a cyclic dataset")}
+  if (dataset$trajectory_type != "cycle") {stop("Need a cyclic dataset")}
 
   unlink_milestone <- sample(dataset$milestone_ids, 1)
 
@@ -194,7 +199,7 @@ perturb_break_cycle <- function(dataset) {
 ##  ............................................................................
 ##  Changing linear trajectories                                            ####
 perturb_join_linear <- function(dataset) {
-  if(dataset$trajectory_type != "directed_linear") {stop("joining non-linear trajectories not supported")}
+  if(dataset$trajectory_type != "linear") {stop("joining non-linear trajectories not supported")}
   if(nrow(dataset$milestone_network) < 3) {stop("Need at least 3 edges in the linear dataset to be able to join")}
 
   start_milestone_id <- setdiff(dataset$milestone_network$from, dataset$milestone_network$to)

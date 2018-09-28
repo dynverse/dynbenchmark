@@ -55,6 +55,7 @@ Imports:
   qsub,
   xml2
 Suggests:
+  cowplot,
   dyngen,
   dyntoy,
   dynnormaliser,
@@ -81,6 +82,7 @@ Roxygen: list(markdown = TRUE)
 Collate: 
     'data.R'
     'datasets_preprocessing.R'
+    'funky_heatmap.R'
     'google_scholar.R'
     'headtail.R'
     'install_fontawesome.R'
@@ -95,6 +97,7 @@ Collate:
     'plotting_themes.R'
     'plotting_trajectory_types.R'
     'qsub.R'
+    'reformat_tribbles.R'
     'scaling_utils.R'
     'setup_experiment.R'
     'setup_datasets.R'

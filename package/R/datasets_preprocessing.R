@@ -50,7 +50,7 @@ process_raw_dataset <- function(
   # wrap dataset
   dataset <-
     dynwrap::wrap_data(
-      source = str_replace(id, "/.*", ""),
+      source = str_replace(id, "/[^/]*$", ""),
       id = id,
       cell_ids = cell_ids,
       cell_info = cell_info,

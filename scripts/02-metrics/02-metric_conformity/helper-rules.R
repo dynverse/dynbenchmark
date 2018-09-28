@@ -74,7 +74,7 @@ equal_identity <- lst(
         panel.border = element_blank()
       )
 
-    plot_scores$width <- 6
+    plot_scores$width <- length(unique(scores$metric_id)) * 1.2
     plot_scores$height <- 4
 
     lst(
@@ -92,10 +92,10 @@ equal_identity <- lst(
       pull(dataset) %>%
       {.[[1]]()}
 
-    plot_datasets <- plot_graph(identity) + ggtitle("Identity") + theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+    plot_datasets <- plot_graph(identity) + ggtitle("Reference") + theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
 
     plot_datasets$width <- 4
-    plot_datasets$height <- length(unique(scores$metric_id)) / 2
+    plot_datasets$height <- 4
 
     plot_datasets
   }
@@ -160,7 +160,7 @@ rule_lower <- function(
           panel.border = element_blank()
         )
 
-      plot_scores$width <- length(unique(scores$metric_id))
+      plot_scores$width <- length(unique(scores$metric_id)) * 1.2
       plot_scores$height <- 4
 
       lst(
@@ -189,7 +189,7 @@ rule_lower <- function(
       grouping <- dynwrap::group_onto_trajectory_edges(identity)
       plot_datasets <- map2(
         list(identity, perturbed),
-        c("Identity", name),
+        c("Reference", name),
         function(model, title) {
           plot_graph(model, grouping=grouping) + ggtitle(label_long(title)) + theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
         }) %>%
@@ -393,10 +393,10 @@ rule_combined <- function(
             axis.text.x = element_text(angle = 30, hjust = 1)
           )
       })
-    plot_scores <- patchwork::wrap_plots(plots, nrow = 1)
+    plot_scores <- patchwork::wrap_plots(plots, nrow = 2)
 
-    plot_scores$width <- length(unique(scores$metric_id)) * 1.5
-    plot_scores$height <- 4
+    plot_scores$width <- length(unique(scores$metric_id)) * 1.5 / 2
+    plot_scores$height <- 8
 
     lst(
       conformity,
@@ -490,7 +490,7 @@ shuffle_edges <- rule_monotonic(
   varied_parameter_id = "shuffle_perc",
   varied_parameter_name = "shuffled edges",
   varied_parameter_labeller = scales::percent,
-  observation = "Only metrics which only look at the topology do not conform to this rule."
+  observation = "Metrics which only look at the topology do not conform to this rule."
 )
 
 shuffle_cells <- rule_monotonic(
@@ -518,7 +518,7 @@ combined_local_global_position_change <- rule_combined(
   ),
   method_ids = c("shuffle_edges", "shuffle_cells_edgewise", "shuffle_cells"),
   dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies), cell_positioning != "milestones", num_cells > 50) %>% pull(dataset_id),
-  observation = "Most metrics that look at the position of each cell conform to this rule."
+  observation = "Because the topology remains the same, the topology scores do not conform to this rule. Also the clustering based scores have some difficulties with this rule."
 )
 
 filter_cells <- rule_monotonic(
@@ -531,7 +531,7 @@ filter_cells <- rule_monotonic(
   varied_parameter_id = "filter_perc",
   varied_parameter_name = "Filtered cells",
   varied_parameter_labeller = scales::percent,
-  observation = "Only metrics which look only at the topology do not conform to this rule."
+  observation = "Metrics which look at the topology do not conform to this rule."
 )
 
 remove_divergence_regions <- rule_lower(
@@ -544,19 +544,19 @@ remove_divergence_regions <- rule_lower(
     num_cells >= 100
   ) %>% pull(dataset_id),
   method_id = "remove_divergence_regions",
-  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and {label_metric('edgeflip', 'latex')} fail here because neither the topology nor the branche assignment changes.")
+  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and {label_metric('edge_flip', 'latex')} fail here because neither the topology nor the branch assignment changes. Moreover, the decreases in score are relatively minor for all metrics, given that the impact of the positions of the cells is only minimal.")
 )
 
 time_warping_start <- rule_monotonic(
   id = "time_warping_start",
   name = "Move cells to start milestone",
-  description = "Moving the cells closer to their start milestone should lower the score. Cells were moved closer to the start milestone by doing $\\textit{percentage}^{\\textit{warp magnitude}}",
+  description = "Moving the cells closer to their start milestone should lower the score. Cells were moved closer to the start milestone using $\\textit{percentage}_{\\textit{new}} = \\textit{percentage}^{\\textit{warp magnitude}}$",
   dataset_ids = dataset_design %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
   parameters = list(time_warping_start = tibble(warp_magnitude = seq(0, 6)) %>% mutate(id = as.character(warp_magnitude))),
   varied_parameter_id = "warp_magnitude",
   method_id = "time_warping_start",
   varied_parameter_name = "Warp magnitude",
-  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and {label_metric('edgeflip', 'latex')} fail here because neither the topology nor the branche assignment changes.")
+  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and topology scores fail here because neither the topology nor the branch assignment changes. The score decreases only slightly for all the other metrics, given that only the relative distances change between cells, but not their actual ordering.")
 )
 
 time_warping_parabole <- rule_monotonic(
@@ -568,7 +568,7 @@ time_warping_parabole <- rule_monotonic(
   varied_parameter_id = "warp_magnitude",
   method_id = "time_warping_parabole",
   varied_parameter_name = "Warp magnitude",
-  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and {label_metric('edgeflip', 'latex')} fail here because neither the topology nor the branche assignment changes.")
+  observation = glue::glue("Both {label_metric('F1_branches', 'latex')} and topology scores fail here because neither the topology nor the branch assignment changes. The score decreases only slightly for all the other metrics, given that only the relative distances change between cells, but not their actual ordering.")
 )
 
 shuffle_lengths <- rule_lower(
@@ -581,7 +581,7 @@ shuffle_lengths <- rule_lower(
     num_cells >= 100
   ) %>% pull(dataset_id),
   method_id = "shuffle_lengths",
-  observation = "Only the correlation scores is consequently decreased when the lengths of the edges change."
+  observation = "Only the correlation between geodesic distances is consistently decreases when the lengths of the edges change."
 )
 
 move_cells_subedges <- rule_monotonic(
@@ -617,7 +617,7 @@ add_connecting_edges <- rule_monotonic(
   varied_parameter_id = "n_edges",
   method_id = "add_connecting_edges",
   varied_parameter_name = "Number of edges",
-  observation = glue::glue("Even though the positions of the cells change, the {label_metric('correlation', 'latex')} still conforms to this rule because new edges can create shortcuts which will affect the geodesic distances between cells. Apart from this, metrics which investigate the clustering quality and topology also conform to this rule.")
+  observation = glue::glue("Even though the positions of the cells do not change, the {label_metric('correlation', 'latex')} still conforms to this rule because new edges can create shortcuts which will affect the geodesic distances between cells. Apart from this, metrics which investigate the clustering quality and topology also conform to this rule.")
 )
 
 combined_position_topology <- rule_combined(
@@ -632,7 +632,7 @@ combined_position_topology <- rule_combined(
   ),
   method_ids = c("shuffle_cells", "add_connecting_edges", "shuffle_cells_and_add_connecting_edges"),
   dataset_ids = dataset_design %>% filter(num_cells == 100) %>% filter(topology_id %in% names(topologies)) %>% pull(dataset_id),
-  observation = "Most metrics have problems with this rule as they focus on either the cellular positions or the topology individually. Only the {label_metric('featureimp_cor', 'latex')} and the {label_metric('harm_mean', 'latex')} conform to this rule."
+  observation = glue::glue("Most metrics have problems with this rule as they focus on either the cellular positions or the topology individually. Only the {label_metric('correlation')} and {label_metric('geom_mean', 'latex')} consistently conform to this rule.")
 )
 
 merge_bifurcation <- rule_lower(
@@ -656,7 +656,7 @@ combined_merge_bifurcation_shuffle_cells <- rule_combined(
   ),
   method_ids = c("shuffle_cells", "merge_bifurcation", "shuffle_cells_and_merge_bifurcation"),
   dataset_ids = dataset_design %>% filter(num_cells == 100, topology_id == "bifurcation_simple") %>% pull(dataset_id),
-  observation = "Only metrics which look uniquely at the topology do not conform to this rule."
+  observation = "Only metrics which look at the topology do not conform to this rule."
 )
 
 concatenate_bifurcation <- rule_lower(
@@ -824,7 +824,7 @@ cell_gathering <- lst(
   id = "cell_gathering",
   name = "Cells on milestones vs edges",
   description = "A score should behave similarly both when cells are located on the milestones (as is the case in real datasets) or on the edges between milestones (as is the case in synthetic datasets).",
-  conforms_if = "\\mathit{corr} \\left( \\mathit{score}_{\\textit{edges}} , \\mathit{score}_{\\textit{milestones}} \\right) > 0.9",
+  conforms_if = "\\mathit{corr} \\left( \\mathit{score}_{\\textit{edges}} , \\mathit{score}_{\\textit{milestones}} \\right) > 0.8",
   parameters = shuffle_cells$parameters,
   crossing = shuffle_cells$crossing,
   assessment = function(scores) {
@@ -904,7 +904,7 @@ cell_gathering <- lst(
     # plot a continuous and grouped model
     grouping <- group_onto_nearest_milestones(identities[[1]])
 
-    titles <- paste0("Cells on ", c("edges", "milestones", "edges", "milestones"), " \n", c("Identity", "Identity", "Shuffled cells", "Shuffled cells"))
+    titles <- paste0("Cells on ", c("edges", "milestones", "edges", "milestones"), " \n", c("Reference", "Reference", "Shuffled cells", "Shuffled cells"))
 
     plot_datasets <- map2(
       c(identities, shuffleds),

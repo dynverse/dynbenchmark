@@ -40,6 +40,8 @@ Helena Todorov <a href='https://github.com/Helena-todd'><img src='https://github
 <em> Yvan Saeys </em> <a href='https://github.com/saeyslab'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>  
 [bioRxiv:276907](https://www.biorxiv.org/content/early/2018/03/05/276907) [doi:10.1101/276907](https://doi.org/10.1101/276907) [![altmetric](`r get_altmetric_badge()`)](https://altmetric.com/details/33972849)
 
+(Note that this preprint is currently outdated, but cannot be updated because the paper is under revision)
+
 ## Experiments
 
 From start to finish, the repository is divided into several experiments, each with their own scripts and results. These are accompanied by documentation using github readmes and can thus be easily explored by going to the appropriate folders:
@@ -53,8 +55,8 @@ extract_scripts_documentation("scripts", recursive = FALSE) %>%
   mutate(
     ix = case_when(is.na(ix) ~ "", TRUE ~ as.character(ix)),
     id = label_long(id),
-    scripts = paste0("[", id, " scripts](", scripts, ")"),
-    results = case_when(is.na(results) ~ "", TRUE ~ paste0("[", id, " results](", results, ")"))
+    scripts = paste0("[\U1F4C4](", scripts, ")"),
+    results = case_when(is.na(results) ~ "", TRUE ~ paste0("[\U1F4CA](", results, ")"))
   ) %>% 
   select(`\\#` = ix, id, scripts, results) %>% 
   knitr::kable()
@@ -94,6 +96,10 @@ ggplot2::ggsave("package/man/figures/datasets.png", width = nrow(datasets)*3, he
 * **The performance of methods** used for the [results overview figure](`r dynbenchmark::link_to_results("scripts/08-summary/overview.pdf")`) and the [dynguidelines](https://www.github.com/dynverse/dynguidelines) app. _Not yet available_, but can be accessed in the results folder.
 
 * **General information about trajectory inference methods**, available as a data frame in `dynmethods::methods`
+
+## Methods
+
+All wrapped methods are wrapped as both docker and singularity containers. These can be easily run using [*dyn*methods](https://github.com/dynverse/dynmethods).
 
 ## Benchmarking your own method
 

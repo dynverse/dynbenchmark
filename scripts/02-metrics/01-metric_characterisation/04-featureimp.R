@@ -6,7 +6,7 @@ library(patchwork)
 
 experiment("02-metrics/01-metric_characterisation")
 
-dataset <- load_dataset("real/fibroblast-reprogramming_treutlein")
+dataset <- load_dataset("real/silver/fibroblast-reprogramming_treutlein")
 
 ##  ............................................................................
 ##  Example                                                                 ####
@@ -39,7 +39,7 @@ plot_feature_expression <- feature_importances %>%
       plot_trajectory = FALSE,
       dimred = dimred,
       feature_oi = feature_id
-    ) + theme(legend.position = "bottom")
+    ) + theme(legend.position = "bottom") + guides(color = guide_colorbar(title.position = "bottom"))
   }) %>%
   wrap_plots(nrow = 1)
 
@@ -57,12 +57,14 @@ plot_featureimp_overview <- wrap_plots(
   plot_dataset,
   wrap_plots(
     plot_feature_importances,
-    plot_feature_expression,
+    plot_feature_expression %>% wrap_elements(),
     ncol = 1
   ),
   nrow = 1,
-  widths = c(1, 3)
-)
+  widths = c(1.5, 3)
+) + plot_annotation(tag_levels = "a")
+
+plot_featureimp_overview
 
 write_rds(plot_featureimp_overview, result_file("featureimp_overview.rds"))
 

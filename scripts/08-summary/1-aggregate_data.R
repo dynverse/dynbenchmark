@@ -6,77 +6,63 @@ experiment("08-summary")
 #####################################################
 #                  GET METHODS INFO                 #
 #####################################################
-
-spread_trajtypes <- function(method_info) {
-  trajtypes <-
-    map_df(dynwrap::trajectory_types$id, function(trajtyp) {
-      data_frame(id = method_info$id, trajectory_type = paste0("trajtyp_", trajtyp), value = map_lgl(method_info$trajectory_types, ~ trajtyp %in% .))
-    }) %>%
-    spread(trajectory_type, value)
-
-  left_join(method_info, trajtypes, by = "id")
-}
-
 method_info <-
   read_rds(result_file("methods.rds", experiment_id = "03-methods")) %>%
   mutate(
-    priors_required = map_chr(input, ~ .$required %>% setdiff(c("expression", "counts")) %>% paste0(collapse = ",")),
-    priors_optional = map_chr(input, ~ .$optional %>% paste0(collapse = ",")),
-    any_priors_required = priors_required != "",
-    any_priors_optional = priors_optional != ""
+    required_priors_str = map_chr(input, ~ .$required %>% setdiff(c("expression", "counts")) %>% paste0(collapse = ",")),
+    optional_priors_str = map_chr(input, ~ .$optional %>% paste0(collapse = ","))
   ) %>%
-  spread_trajtypes() %>%
   rename_all(function(x) paste0("method_", x)) %>%
   rename(tool_id = method_tool_id) %>%
-  select_if(is.atomic) %>%
   select_if(function(x) !all(is.na(x))) %>%
   filter(!method_id %in% c("error", "identity", "random", "shuffle"))
-
 
 #####################################################
 #                  READ QC RESULTS                  #
 #####################################################
 tool_qc_scores <- read_rds(result_file("tool_qc_scores.rds", experiment_id = "03-methods"))
-tool_qc_scores <- read_rds(result_file("tool_qc_scores.rds", experiment_id = "03-methods"))
 tool_qc_category_scores <- read_rds(result_file("tool_qc_category_scores.rds", experiment_id = "03-methods"))
 tool_qc_application_scores <- read_rds(result_file("tool_qc_application_scores.rds", experiment_id = "03-methods"))
 
-method_qc_overall_scores <-
-  method_info %>%
-  select(method_id, tool_id) %>%
-  inner_join(tool_qc_scores, by = "tool_id") %>%
-  mutate(experiment = "qc", category = "overall", metric = "overall") %>%
-  select(method_id, experiment, category, metric, value = qc_score)
-
-method_qc_category_scores <-
-  method_info %>%
-  select(method_id, tool_id) %>%
-  inner_join(tool_qc_category_scores, by = "tool_id") %>%
-  rename(metric = category) %>%
-  mutate(experiment = "qc", category = "category") %>%
-  select(method_id, experiment, category, metric, value = qc_score)
-
-method_qc_application_scores <-
-  method_info %>%
-  select(method_id, tool_id) %>%
-  inner_join(tool_qc_application_scores, by = "tool_id") %>%
-  rename(metric = application) %>%
-  mutate(experiment = "qc", category = "application") %>%
-  select(method_id, experiment, category, metric, value = score)
-
 qc_results <-
-  bind_rows(
-    method_qc_overall_scores,
-    method_qc_category_scores,
-    method_qc_application_scores
-  )
-rm(tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores, method_qc_overall_scores, method_qc_category_scores, method_qc_application_scores)
+  method_info %>%
+  select(method_id, tool_id) %>%
+  left_join(
+    tool_qc_scores %>% select(tool_id, qc_overall_overall = qc_score),
+    by = "tool_id"
+  ) %>%
+  left_join(
+    tool_qc_category_scores %>% mutate(category = paste0("qc_cat_", category)) %>% spread(category, qc_score),
+    by = "tool_id"
+  ) %>%
+  left_join(
+    tool_qc_application_scores %>% mutate(application = paste0("qc_app_", application)) %>% spread(application, score),
+    by = "tool_id"
+  ) %>%
+  select(-tool_id)
 
+rm(tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores) # writing tidy code
 
 #####################################################
 #                READ SCALING RESULTS               #
 #####################################################
-scaling_results <- read_rds(result_file("scaling_results.rds", experiment_id = "05-scaling"))
+scaling_scores <-
+  read_rds(result_file("scaling_scores.rds", experiment_id = "05-scaling"))$scaling_scores %>%
+  mutate(metric = paste0("scaling_pred_timescore_", metric)) %>%
+  spread(metric, score)
+
+scaling_preds <-
+  read_rds(result_file("scaling_scores.rds", experiment_id = "05-scaling"))$scaling_preds %>%
+  gather(column, value, time, timestr) %>%
+  mutate(metric = paste0("scaling_pred_", column, "_", labnrow, "_", labncol)) %>%
+  select(method_id, metric, value) %>%
+  spread(metric, value)
+
+scaling_models <-
+  read_rds(result_file("scaling.rds", experiment_id = "05-scaling"))$models %>%
+  select(-method_name) %>%
+  rename_at(., setdiff(colnames(.), "method_id"), function(x) paste0("scaling_models_", x))
+
 
 #####################################################
 #             READ BENCHMARKING RESULTS             #
@@ -84,131 +70,64 @@ scaling_results <- read_rds(result_file("scaling_results.rds", experiment_id = "
 benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", experiment_id = "07-benchmark"))
 benchmark_results_normalised <- read_rds(result_file("benchmark_results_normalised.rds", experiment_id = "07-benchmark"))
 
-data_aggs <-
-  benchmark_results_normalised$data_aggregations %>%
-  select(-n, -method_name) %>%
-  gather(metric, value, -method_id:-dataset_source) %>%
-  mutate(experiment = "benchmark")
-
 execution_metrics <- c("pct_errored", "pct_execution_error", "pct_memory_limit", "pct_method_error_all", "pct_method_error_stoch", "pct_time_limit")
 bench_metrics <- paste0("norm_", benchmark_results_input$metrics)
+all_metrics <- c(bench_metrics, "overall", execution_metrics)
+
+data_aggs <-
+  benchmark_results_normalised$data_aggregations %>%
+  select(method_id, param_id, dataset_trajectory_type, dataset_source, !!all_metrics)
 
 bench_overall <-
   data_aggs %>%
-  filter(dataset_trajectory_type == "overall", dataset_source == "mean", metric %in% c(bench_metrics, "overall", execution_metrics)) %>%
-  select(method_id, metric, value, experiment) %>%
-  mutate(
-    category = case_when(
-      metric %in% execution_metrics ~ "execution",
-      metric %in% bench_metrics ~ "metric",
-      metric == "overall" ~ "overall"
-    )
-  )
+  filter(dataset_trajectory_type == "overall", dataset_source == "mean") %>%
+  select(method_id, param_id, !!set_names(all_metrics, paste0("benchmark_overall_", all_metrics)))
 
 bench_trajtypes <-
   data_aggs %>%
-  filter(dataset_trajectory_type != "overall", dataset_source == "mean", metric == "overall") %>%
-  select(method_id, metric = dataset_trajectory_type, value, experiment) %>%
-  mutate(category = "trajtypes")
+  filter(dataset_trajectory_type != "overall", dataset_source == "mean") %>%
+  transmute(method_id, metric = paste0("benchmark_tt_", dataset_trajectory_type), score = overall) %>%
+  spread(metric, score)
 
 bench_sources <-
   data_aggs %>%
-  filter(dataset_trajectory_type == "overall", dataset_source != "mean", metric == "overall") %>%
-  select(method_id, metric = dataset_source, value, experiment) %>%
-  mutate(category = "sources")
-
-bench_vars <-
-  benchmark_results_normalised$data_var %>%
-  transmute(method_id, metric, value, experiment = "benchmark", category = "stability")
-
-bench_vars2 <-
-  benchmark_results_normalised$data_var %>%
-  group_by(method_id) %>%
-  summarise(value = mean(value)) %>%
-  transmute(method_id, metric = "stability", value, experiment = "summary", category = "overall")
-
-benchmark_results <-
-  bind_rows(
-    bench_overall,
-    bench_trajtypes,
-    bench_sources,
-    bench_vars,
-    bench_vars2
-  )
-
-rm(data_aggs, bench_overall, bench_trajtypes, bench_sources, bench_vars, bench_vars2)
+  filter(dataset_trajectory_type == "overall", dataset_source != "mean") %>%
+  transmute(method_id, metric = paste0("benchmark_source_", gsub("/", "_", dataset_source)), score = overall) %>%
+  spread(metric, score)
 
 
+rm(execution_metrics, bench_metrics, all_metrics, data_aggs, benchmark_results_input, benchmark_results_normalised) # is important in large scripts
 
 #####################################################
 #                  COMBINE RESULTS                  #
 #####################################################
-results <-
-  bind_rows(qc_results, benchmark_results, scaling_results) %>%
-  mutate(method_id = ifelse(method_id == "projected_gng", "gng", method_id))
 
-not_available_methods <- setdiff(unique(results$method_id), method_info$method_id)
-warning("THESE METHODS DO NOT HAVE BENCHMARKING RESULTS: ", paste0(not_available_methods, collapse = ", "))
+results <- Reduce(
+  function(a, b) left_join(a, b, by = "method_id"),
+  list(method_info, qc_results, scaling_scores, scaling_preds, scaling_models, bench_overall, bench_trajtypes, bench_sources)
+)
 
-results <- results %>% filter(method_id %in% method_info$method_id)
-
-metric_info <- results %>%
-  group_by(experiment, category, metric) %>%
-  summarise(min = min(value), max = max(value)) %>%
-  ungroup() %>%
-  mutate_if(is.numeric, function(x) round(x, 2))
-
-metric_info %>% as.data.frame()
-
-
-
-
-
-# make sure each method has a value for each metric
-results <- full_join(
-  results,
-  crossing(method_info %>% select(method_id), metric_info %>% select(experiment, category, metric)),
-  by = c("method_id", "experiment", "category", "metric")
-) %>%
-  group_by(experiment, metric, category) %>%
-  mutate(placeholder = is.na(value), value = ifelse(placeholder, mean(value, na.rm = TRUE), value)) %>%
-  # mutate(placeholder = is.na(value), value = ifelse(placeholder, .5, value)) %>%
-  ungroup()
-
-rm(qc_results, benchmark_results, scaling_results)
-
-
-
+rm(list = setdiff(ls(), "results")) # more than this haiku
 
 #####################################################
 #              DETERMINE FINAL RANKING              #
 #####################################################
 metric_weights <-
-  tribble(
-    ~experiment, ~category, ~metric, ~weight,
-    "benchmark", "overall", "overall", 1,
-    "qc", "overall", "overall", 1,
-    "scalability", "overall", "overall", 1
+  c(
+    benchmark_overall_overall = 2,
+    qc_overall_overall = 1,
+    scaling_pred_timescore_overall = 1
   )
 
-results <-
-  inner_join(
-    results,
-    metric_weights,
-    by = c("experiment", "category", "metric")
-  ) %>%
-  group_by(method_id) %>%
-  summarise(placeholder = FALSE, value = prod(value ^ weight) ^ (1 / sum(weight))) %>% #weighted geometric mean
-  mutate(experiment = "summary", metric = "overall", category = "overall") %>%
-  bind_rows(results)
-
-metric_info <- metric_info %>% add_row(experiment = "summary", metric = "overall", category = "overall")
-
-
+results$summary_overall_overall <-
+  results %>%
+  select(!!names(metric_weights)) %>%
+  mutate_all(function(x) ifelse(is.na(x), mean(x, na.rm = TRUE), x)) %>%
+  dyneval::calculate_geometric_mean(weights = metric_weights)
 
 
 #####################################################
 #                    WRITE OUTPUT                   #
 #####################################################
-write_rds(lst(method_info, results, metric_info), result_file("results.rds"), compress = "xz")
+write_rds(results, result_file("results.rds"), compress = "xz")
 

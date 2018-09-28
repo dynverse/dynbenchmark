@@ -10,24 +10,25 @@ experiment("05-scaling")
 ###################################################
 
 # If you are the one who submitted the jobs, run:
-# benchmark_fetch_results()
+# benchmark_fetch_results(TRUE)
 # qsub::rsync_remote(
 #   remote_src = FALSE,
 #   path_src = derived_file(remote = FALSE, experiment = "05-scaling"),
 #   remote_dest = TRUE,
 #   path_dest = derived_file(remote = TRUE, experiment = "05-scaling"),
-#   verbose = TRUE
+#   verbose = TRUE,
+#   exclude = "*/r2gridengine/*"
 # )
 
 # If you want to download the output from prism
-qsub::rsync_remote(
-  remote_src = TRUE,
-  path_src = derived_file(remote = TRUE, experiment = "05-scaling"),
-  remote_dest = FALSE,
-  path_dest = derived_file(remote = FALSE, experiment = "05-scaling"),
-  verbose = TRUE,
-  exclude = "*/r2gridengine/*"
-)
+# qsub::rsync_remote(
+#   remote_src = TRUE,
+#   path_src = derived_file(remote = TRUE, experiment = "05-scaling"),
+#   remote_dest = FALSE,
+#   path_dest = derived_file(remote = FALSE, experiment = "05-scaling"),
+#   verbose = TRUE,
+#   exclude = "*/r2gridengine/*"
+# )
 
 # bind results in one data frame (without models)
 execution_output <- benchmark_bind_results(load_models = FALSE)
@@ -141,16 +142,15 @@ write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "
 ##########################################################
 
 scaling_exp <- tribble(
-  ~ experiment, ~ category, ~ metric, ~ lnrow, ~ lncol,
-  "scalability", "10k features", "1k cells", 3, 3,
-  "scalability", "10k features", "10k cells", 4, 3,
-  "scalability", "10k features", "100k cells", 5, 3,
-  "scalability", "10k cells", "1k features", 3, 3,
-  "scalability", "10k cells", "10k features", 3, 4,
-  "scalability", "10k cells", "100k features", 3, 5
+  ~ labnrow, ~ labncol, ~ lnrow, ~ lncol,
+  "cells1k", "features10k", 3, 4,
+  "cells10k", "features1k", 4, 3,
+  "cells10k", "features10k", 4, 4,
+  "cells10k", "features100k", 4, 5,
+  "cells100k", "features10k", 5, 4
 )
 
-scaling_process <-
+scaling_preds <-
   models %>%
   select(method_id, model_time) %>%
   rowwise() %>%
@@ -176,15 +176,15 @@ scaling_process <-
     )
   )
 
-scaling_agg <- scaling_process %>%
+scaling_agg <-
+  scaling_preds %>%
   group_by(method_id) %>%
-  summarise(
-    score = mean(score)
+  summarise_at("score", mean)
+
+scaling_scores <-
+  bind_rows(
+    scaling_preds %>% transmute(method_id, metric = paste0(labnrow, "_", labncol), score),
+    scaling_agg %>% transmute(method_id, metric = "overall", score)
   )
 
-scaling_results <- bind_rows(
-  scaling_process %>% transmute(method_id, experiment, category, metric, value = score, label = timestr),
-  scaling_agg %>% transmute(method_id, experiment = "scalability", category = "overall", metric = "overall", value = score)
-)
-
-write_rds(scaling_results, result_file("scaling_results.rds"), compress = "xz")
+write_rds(lst(scaling_preds, scaling_agg, scaling_scores), result_file("scaling_scores.rds"), compress = "xz")
