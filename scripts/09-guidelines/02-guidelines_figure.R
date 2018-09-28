@@ -5,7 +5,7 @@ library(xml2)
 experiment("09-guidelines")
 
 # get the results and method info
-results <- read_rds(result_file("results.rds", "08-summary"))$results
+results <- read_rds(result_file("results.rds", "08-summary"))
 methods <- read_rds(result_file("methods.rds", "03-methods"))
 
 
@@ -27,56 +27,41 @@ extract_top_methods <- function(trajectory_types, top_n = 4) {
     pull(id)
 
   # get benchmark scores (average)
+  columns <- paste0("benchmark_tt_", trajectory_types)
   benchmark <- results %>%
     filter(
       method_id %in% method_ids_detectable,
-      method_id %in% method_ids_soft_prior,
-      experiment == "benchmark",
-      metric %in% trajectory_types
+      method_id %in% method_ids_soft_prior
     ) %>%
+    select(method_id, !!columns) %>%
+    gather(metric_id, benchmark, -method_id) %>%
     group_by(method_id) %>%
-    summarise(value = mean(value)) %>%
-    mutate(metric = "benchmark", experiment = "benchmark") %>%
-    mutate(value = dynutils::scale_minmax(value))
+    summarise(benchmark = mean(benchmark)) %>%
+    mutate(benchmark = dynutils::scale_minmax(benchmark))
 
-  # get qc scores
-  qc <- results %>%
-    filter(experiment == "qc", metric %in% c("user_friendly")) %>%
-    mutate(metric = "qc") %>%
-    select(experiment, method_id, metric, label, value)
-
-  # get scalability scores
-  scalability <- results %>%
-    filter(
-      experiment == "scalability",
-      metric %in% c("1k cells", "10k cells", "100k cells")
-    ) %>%
-    select(experiment, method_id, metric, label, value)
-
-  # required priors
-  required_priors <- methods %>%
-    mutate(
-      value = as.numeric(requires_prior),
-      experiment = "priors",
-      metric = "priors",
-      label = map_chr(required_priors, function(required_priors) {
-        dynwrap::priors$name[match(required_priors, dynwrap::priors$prior_id)] %>% paste0(collapse =  ", ")
-      })
-    ) %>%
-    select(experiment, metric, method_id = id, value, label)
+  # get qc & scalability
+  other_results <- results %>%
+    select(
+      method_id,
+      qc_app_user_friendly,
+      scaling_pred_time_cells1k_features10k,
+      scaling_pred_time_cells10k_features10k,
+      scaling_pred_time_cells100k_features10k,
+      method_required_priors
+    )
 
   # combine
-  results_top <- bind_rows(
+  results_top <- left_join(
     benchmark,
-    qc,
-    scalability,
-    required_priors
+    other_results,
+    "method_id"
   )
 
   # get top methods
-  method_ids_top <- benchmark %>% arrange(-value) %>% top_n(top_n, value) %>% pull(method_id)
+  method_ids_top <- benchmark %>% arrange(-benchmark) %>% top_n(top_n, benchmark) %>% pull(method_id)
   results_top %>%
     filter(method_id %in% method_ids_top) %>%
+    gather(metric, value, -method_id) %>%
     mutate(method_rank = match(method_id, method_ids_top))
 }
 
@@ -116,25 +101,46 @@ split_renderer <- function(breaks, labels, palette_name) {
   breaks <- c(-Inf, breaks)
   palette <- palettes[[palette_name]]
   palette <- palette[floor((seq_along(breaks)) * length(palette)/(length(breaks)))]
-  function(x, label) {
+  function(x) {
     index <- last(which(x >= breaks))
 
     lst(
       fill = palette[index],
-      label = if(is.na(label)) {labels[index]} else {label}
+      label = labels[index]
     )
   }
 }
-time_renderer <- function(x, label) {
-  list(
-    fill = "white",
-    label = label
-  )
+time_renderer <- function(breaks, palette_name) {
+  breaks <- c(breaks, Inf)
+  palette <- palettes[[palette_name]]
+  palette <- palette[floor((seq_along(breaks)) * length(palette)/(length(breaks)))] %>% rev()
+
+  function(time) {
+    time <- as.numeric(time)
+    timestr = case_when(
+      time < 1 ~ "<1s",
+      time < 60 ~ paste0(floor(time), "s"),
+      time < 3600 ~ paste0(floor(time / 60), "m"),
+      time < 3600 * 24 ~ paste0(floor(time / 3600), "h"),
+      time < 3600 * 24 * 7 ~ paste0(floor(time / 3600 / 24), "d"),
+      TRUE ~ ">7d"
+    )
+
+    index <- first(which(time <= breaks))
+
+    print(time >= breaks)
+
+    list(
+      fill = palette[index],
+      label = timestr
+    )
+  }
 }
-prior_renderer <- function(x, label) {
+
+prior_renderer <- function(x) {
   list(
-    fill = ifelse(label != "", palettes$RdYlGn[[1]], "white"),
-    label = label
+    fill = ifelse(length(x) == 0, "white", palettes$RdYlGn[[1]]),
+    label = ifelse(length(x) == 0, "", glue::glue_collapse(label_long(x), ","))
   )
 }
 
@@ -145,11 +151,11 @@ category_x_padding <- 0.1
 metrics <- tribble(
   ~id, ~name, ~renderer, ~category, ~width,
   "benchmark", "Benchmark\nscore", split_renderer(c(0.6, 0.95), quintuple_checks, palette_names["benchmark"]), "benchmark",1,
-  "qc", "User\nFriendliness", split_renderer(c(0.6, 0.9), quintuple_checks, palette_names["qc"]), "qc",1,
-  "1k cells", " \n1k cells", split_renderer(c(0.5, 0.8), quintuple_checks, palette_names["scalability"]),  "scalability",1,
-  "10k cells", "Est. running time @ 10k features\n10k cells", split_renderer(c(0.5, 0.8), quintuple_checks, palette_names["scalability"]), "scalability",1,
-  "100k cells", "\n100k cells", split_renderer(c(0.5, 0.8), quintuple_checks, palette_names["scalability"]), "scalability",1,
-  "priors", "\nRequired priors", prior_renderer, "priors", 2
+  "qc_app_user_friendly", "User\nFriendliness", split_renderer(c(0.6, 0.9), quintuple_checks, palette_names["qc"]), "qc",1,
+  "scaling_pred_time_cells1k_features10k", " \n1k cells", time_renderer(c(60, 60*60), palette_names["scalability"]),  "scalability",1,
+  "scaling_pred_time_cells10k_features10k", "Est. running time @ 10k features\n10k cells", time_renderer(c(60, 60*60), palette_names["scalability"]), "scalability",1,
+  "scaling_pred_time_cells100k_features10k", "\n100k cells", time_renderer(c(60, 60*60), palette_names["scalability"]), "scalability",1,
+  "method_required_priors", "\nRequired priors", prior_renderer, "priors", 2
 ) %>%
   mutate(
     xmin = lag(cumsum(width), default = 0) + c(0, cumsum(tail(category, -1) != head(category, -1))) * category_x_padding,
@@ -164,9 +170,11 @@ results_outcomes <- outcomes %>%
   mutate(top_methods = map(outcome_trajectory_types, extract_top_methods)) %>%
   unnest(top_methods)
 
+setdiff(results_outcomes$metric, names(metric2renderer))
+
 results_outcomes <- results_outcomes %>%
   mutate(
-    render = pmap(lst(renderer = metric2renderer[metric], value, label), function(renderer, value, label) {renderer(value, label)}),
+    render = pmap(lst(renderer = metric2renderer[metric], value), function(renderer, value) {renderer(value)}),
     fill = map_chr(render, "fill"),
     label = map_chr(render, "label"),
     color = ifelse(shades::lightness(fill) > 60, "black", "white")
