@@ -79,11 +79,11 @@ palettes <- tribble(
 ###        CREATE FIGURES        ###
 ####################################
 script_files <- tribble(
-  ~name, ~width, ~height,
-  "all", 26, 18,
-  "figure2", 26, 18,
-  "figure3", 26, 18,
-  "suppfig", 26, 18
+  ~name,
+  "all",
+  "summary",
+  "detailed",
+  "suppfig"
 ) %>%
   mutate(file = map_chr(name, ~ scripts_file(paste0("2a_columns_", ., ".R"))))
 
@@ -96,7 +96,7 @@ mapdf(script_files, function(list) {
 
   g <- funky_heatmap(data, column_info, column_groups, row_info, row_groups, palettes)
 
-  ggsave(result_file(c("overview_", list$name, ".pdf")), g, device = cairo_pdf, width = list$width, height = list$height)
+  ggsave(result_file(c("overview_", list$name, ".pdf")), g, device = cairo_pdf, width = g$width/4, height = g$height/4)
 })
 
 
