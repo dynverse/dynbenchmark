@@ -3,7 +3,7 @@ library(tidyverse)
 library(furrr)
 plan(multiprocess)
 
-experiment("10-topologies")
+experiment("10-benchmark_interpretation")
 
 # load in output models
 output <- benchmark_bind_results(load_models = TRUE, experiment_id = "04-method_testing") %>%

@@ -3,7 +3,7 @@ library(tidyverse)
 library(furrr)
 plan(multiprocess)
 
-experiment("10-topologies")
+experiment("10-benchmark_interpretation")
 
 # load in output models
 output <- benchmark_bind_results(load_models = TRUE, experiment_id = "07-benchmark") %>%
@@ -86,12 +86,16 @@ statistics <- statistics %>%
 # determine order based on average
 method_order <- statistics %>% arrange(complexity_difference_mean) %>% pull(method_id) %>% unique()
 
-max_complexity_difference <- 10
+max_complexity_difference <- 30.0
 bandwidth <- 1
 
 plot_overall_complexity_difference <- statistics %>%
   mutate(method_id = factor(method_id, method_order)) %>%
-  mutate(complexity_difference = ifelse(complexity_difference > max_complexity_difference, max_complexity_difference, complexity_difference)) %>%
+  mutate(complexity_difference = case_when(
+    complexity_difference > max_complexity_difference ~ max_complexity_difference,
+    complexity_difference < -max_complexity_difference ~ -max_complexity_difference,
+    TRUE ~ as.double(complexity_difference)
+  )) %>%
   ggplot(aes(complexity_difference, method_id)) +
   ggridges::geom_density_ridges2(aes(fill = complexity_difference_mean), bandwidth = bandwidth) +
   geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
@@ -125,7 +129,7 @@ write_rds(plot_overall_complexity_difference, result_file("overall_him.rds"))
 ##  ............................................................................
 ##  Trajectory type specific complexity                                     ####
 
-method_ids <- c("slingshot", "paga_tree", "gng")
+method_ids <- c("slingshot", "paga_tree", "gng", "monocle_ddrtree", "projected_tscan")
 
 # add a row "all trajectory types"
 statistics_complexity <- bind_rows(
@@ -134,7 +138,7 @@ statistics_complexity <- bind_rows(
 )
 
 # some parameters of the plot
-bw <- 1.5
+bw <- 3
 alpha <- 0.8
 trajectory_type_colors <- c(set_names(trajectory_types$colour, trajectory_types$id), "all_trajectory_types" = "#333333")
 arrow_y <- length(trajectory_type_colors) + 1
