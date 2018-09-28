@@ -430,6 +430,10 @@ funky_heatmap <- function(
       )
   }
 
+  # ADD SIZE
+  g$width <- maximum_x - minimum_x
+  g$height <- maximum_y - minimum_y
+
     # # RESERVE SPACE
     # expand_limits(x = c(-3, max(metric_pos$xmax)+3), y = c(legy_start - 4.3, 6.5)) +
     #
