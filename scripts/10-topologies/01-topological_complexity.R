@@ -7,12 +7,13 @@ experiment("10-topologies")
 
 # load in output models
 output <- benchmark_bind_results(load_models = TRUE, experiment_id = "07-benchmark") %>%
-  filter(!map_lgl(model, is.null)) %>%
   select(method_id, dataset_id, model, him)
 
 # only take into account methods with free topology and tree detection
 relevant_methods <- load_methods() %>% filter(source != "control", topology_inference == "free", detects_tree) %>% pull(id)
-output <- output %>% filter(method_id %in% relevant_methods)
+output <- output %>%
+  filter(method_id %in% relevant_methods) %>%
+  filter(!map_lgl(model, is.null))
 
 # simplify all milestone networks
 simplify_milestone_network <- function(milestone_network) {
@@ -124,7 +125,7 @@ write_rds(plot_overall_complexity_difference, result_file("overall_him.rds"))
 ##  ............................................................................
 ##  Trajectory type specific complexity                                     ####
 
-method_ids <- c("slingshot", "paga", "monocle_ddrtree", "grandprix", "scorpius", "mst")
+method_ids <- c("slingshot", "paga_tree", "gng")
 
 # add a row "all trajectory types"
 statistics_complexity <- bind_rows(
@@ -134,9 +135,9 @@ statistics_complexity <- bind_rows(
 
 # some parameters of the plot
 bw <- 1.5
-arrow_y <- 5
 alpha <- 0.8
 trajectory_type_colors <- c(set_names(trajectory_types$colour, trajectory_types$id), "all_trajectory_types" = "#333333")
+arrow_y <- length(trajectory_type_colors) + 1
 complexity_difference_limits <- statistics_complexity %>%
   filter(method_id %in% method_ids) %>%
   pull(complexity_difference) %>%
