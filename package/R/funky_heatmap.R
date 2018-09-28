@@ -3,8 +3,12 @@
 #' TODO: params need to be described
 #'
 #' @param data data
-#' @param metric_ord metric_ord
-#' @param method_ord method_ord
+#' @param column_info a
+#' @param column_groups b
+#' @param row_info c
+#' @param row_groups d
+#' @param palettes e
+#' @param scale_column f
 #' @param add_timestamp Whether or not to add a timestamp at the bottom
 #'
 #' @export

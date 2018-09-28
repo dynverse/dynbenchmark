@@ -10,11 +10,19 @@ funky_heatmap(data, column_info, column_groups, row_info, row_groups,
 \arguments{
 \item{data}{data}
 
+\item{column_info}{a}
+
+\item{column_groups}{b}
+
+\item{row_info}{c}
+
+\item{row_groups}{d}
+
+\item{palettes}{e}
+
+\item{scale_column}{f}
+
 \item{add_timestamp}{Whether or not to add a timestamp at the bottom}
-
-\item{metric_ord}{metric_ord}
-
-\item{method_ord}{method_ord}
 }
 \description{
 TODO: params need to be described
