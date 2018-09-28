@@ -96,7 +96,7 @@ mapdf(script_files, function(list) {
 
   g <- funky_heatmap(data, column_info, column_groups, row_info, row_groups, palettes)
 
-  ggsave(result_file(c("overview_", list$name, ".pdf")), g, device = cairo_pdf, width = g$width/4, height = g$height/4)
+  ggsave(result_file(c("results_", list$name, ".pdf")), g, device = cairo_pdf, width = g$width/4, height = g$height/4)
 })
 
 
