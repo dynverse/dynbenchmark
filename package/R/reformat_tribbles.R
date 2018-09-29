@@ -35,7 +35,7 @@ reformat_tribbles <- function(script_file, align = c("left", "center", "right"))
     endi <- tribble_end[[i]] - 1
     subset <-
       lines[starti:endi] %>%
-      gsub(" *([\"`][^\"`]*[\"`]|[^ ,]*),? *", "\\1\U00B0", .) %>%
+      gsub(" *([\"`][^\"`]*[\"`]|[a-zA-Z_]*\\([^\\)]*\\)|[^ ,]*),? *", "\\1\U00B0", .) %>%
       map(~ strsplit(., "\U00B0")[[1]])
 
     numcols <- length(subset[[1]])
