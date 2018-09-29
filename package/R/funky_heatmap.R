@@ -15,7 +15,7 @@
 #'     - `legend`: Whether or not to add a legend for this column.
 #'     - `hjust`, `vjust`, `size`: see [ggplot2::geom_text].
 #'     - `label` (`geom = "text"`): Which column to use as a label.
-#'     - `hjust` (`geom = "bar"`): Horizontal alignment of the bar, must be between [0,1].
+#'     - `hjust` (`geom = "bar"`): Horizontal alignment of the bar, must be between \[0,1\].
 #' @param row_info A data frame describing the rows of `data`. This data should contain the following columns:`
 #'   * `id` (`character`): The corresponding row name in `data`.
 #'   * `group` (`character`): The group of the row. If all are `NA`, the rows will not be split up into groups.

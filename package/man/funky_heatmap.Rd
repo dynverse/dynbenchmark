@@ -25,7 +25,7 @@ funky_heatmap(data, column_info, row_info, palettes,
 \item \code{legend}: Whether or not to add a legend for this column.
 \item \code{hjust}, \code{vjust}, \code{size}: see \link[ggplot2:geom_text]{ggplot2::geom_text}.
 \item \code{label} (\code{geom = "text"}): Which column to use as a label.
-\item \code{hjust} (\code{geom = "bar"}): Horizontal alignment of the bar, must be between \link{0,1}.
+\item \code{hjust} (\code{geom = "bar"}): Horizontal alignment of the bar, must be between [0,1].
 }
 }}
 
