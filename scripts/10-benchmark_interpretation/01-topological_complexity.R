@@ -30,13 +30,13 @@ output$milestone_network <- output$model %>%
 
 # calculate milestone network statistics
 calculate_milestone_network_statistics <- function(milestone_network) {
-  classification <- dynwrap::classify_milestone_network(milestone_network)
+  # classification <- dynwrap::classify_milestone_network(milestone_network)
 
   lst(
       n_nodes = length(unique(c(milestone_network$from, milestone_network$to))),
       n_edges = nrow(milestone_network),
-      complexity = n_nodes + n_edges,
-      trajectory_type = classification$network_type
+      complexity = n_nodes + n_edges#,
+      # trajectory_type = classification$network_type
   )
 }
 
@@ -55,6 +55,7 @@ datasets$milestone_network <- datasets$milestone_network %>%
 
 dataset_statistics <- future_map_dfr(datasets$milestone_network, calculate_milestone_network_statistics) %>%
   mutate(dataset_id = datasets$id)
+dataset_statistics$trajectory_type_dataset <- datasets$trajectory_type[match(dataset_statistics$dataset_id, datasets$id)]
 
 # now combine and compare
 statistics <- left_join(
@@ -138,13 +139,21 @@ statistics_complexity <- bind_rows(
 )
 
 # some parameters of the plot
-bw <- 3
+bw <- 2
 alpha <- 0.8
-trajectory_type_colors <- c(set_names(trajectory_types$colour, trajectory_types$id), "all_trajectory_types" = "#333333")
+trajectory_type_colors <- c(set_names(dynwrap::trajectory_types$colour, dynwrap::trajectory_types$id), "all_trajectory_types" = "#333333")
 arrow_y <- length(trajectory_type_colors) + 1
+
+complexity_difference_clip <- 25
+statistics_complexity$complexity_difference_clipped <- case_when(
+  statistics_complexity$complexity_difference > complexity_difference_clip ~ complexity_difference_clip,
+  statistics_complexity$complexity_difference < -complexity_difference_clip ~ -complexity_difference_clip,
+  TRUE ~ as.double(statistics_complexity$complexity_difference)
+)
+
 complexity_difference_limits <- statistics_complexity %>%
   filter(method_id %in% method_ids) %>%
-  pull(complexity_difference) %>%
+  pull(complexity_difference_clipped) %>%
   range() %>%
   {. + c(-bw, +bw)}
 
@@ -160,7 +169,7 @@ plot_topology_complexity <- statistics_complexity %>%
   mutate(trajectory_type_dataset = factor(trajectory_type_dataset, names(trajectory_type_colors))) %>%
   filter(method_id %in% method_ids) %>%
   mutate(method_id = factor(method_id, method_ids)) %>%
-  ggplot(aes(complexity_difference, trajectory_type_dataset)) +
+  ggplot(aes(complexity_difference_clipped, trajectory_type_dataset)) +
   ggridges::geom_density_ridges2(
     aes(fill = trajectory_type_dataset),
     bandwidth = bw,
@@ -170,11 +179,11 @@ plot_topology_complexity <- statistics_complexity %>%
   ) +
   # geom_point() +
   geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
-  geom_text(aes(x = x, y = arrow_y, hjust = hjust, label = text), colour = "#333333", vjust = 1, lineheight = 0.8, size = 3.2, data = arrow_annot_data) +
+  geom_text(aes(x = x, y = arrow_y, hjust = hjust, label = text), colour = "#333333", vjust = 1, lineheight = 0.8, size = 3.2, data = arrow_annot_data %>% mutate(arrow_y = arrow_y)) +
   facet_grid(.~method_id, labeller = label_facet(label_method)) +
   scale_fill_manual(values = trajectory_type_colors, labels = label_long, guide = "none") +
   scale_y_discrete(label_long("Reference trajectory type"), expand = c(0,0), labels = label_long) +
-  scale_x_continuous(label_long("Difference in topology size (= # nodes + # edges)\nbetween prediction and reference"), expand = c(0, 0), limits = complexity_difference_limits) +
+  scale_x_continuous(label_long("Difference in topology size (= # milestones + # edges)\nbetween prediction and reference"), expand = c(0, 0), limits = complexity_difference_limits) +
   theme_pub()
 
 plot_topology_complexity
