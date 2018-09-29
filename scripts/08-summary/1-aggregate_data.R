@@ -114,7 +114,7 @@ rm(list = setdiff(ls(), "results")) # more than this haiku
 #####################################################
 metric_weights <-
   c(
-    benchmark_overall_overall = 2,
+    benchmark_overall_overall = 1,
     qc_overall_overall = 1,
     scaling_pred_timescore_overall = 1
   )
@@ -124,6 +124,10 @@ results$summary_overall_overall <-
   select(!!names(metric_weights)) %>%
   mutate_all(function(x) ifelse(is.na(x), mean(x, na.rm = TRUE), x)) %>%
   dyneval::calculate_geometric_mean(weights = metric_weights)
+
+
+g <- GGally::ggpairs(results %>% select(summary_overall_overall, !!names(metric_weights))) + theme_bw()
+ggsave(result_file("compare_metrics.pdf"), g, width = 10, height = 10)
 
 
 #####################################################
