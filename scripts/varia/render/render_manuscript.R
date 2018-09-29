@@ -15,6 +15,7 @@ rmarkdown::render("manuscript/supplementary.Rmd", output_format = pdf_manuscript
 
 # browse
 system("/usr/bin/xdg-open manuscript/paper.pdf")
+system("/usr/bin/xdg-open manuscript/paper_changes.pdf")
 system("/usr/bin/xdg-open manuscript/supplementary.pdf")
 
 # upload to google drive
