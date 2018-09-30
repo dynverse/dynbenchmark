@@ -1,3 +1,5 @@
+#' Several figures for looking at the history and diversity of TI methods/tools
+
 #   ____________________________________________________________________________
 #   Loading                                                                 ####
 

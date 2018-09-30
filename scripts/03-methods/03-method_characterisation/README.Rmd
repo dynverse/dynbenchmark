@@ -1,0 +1,11 @@
+---
+output: dynbenchmark::github_markdown_nested
+---
+
+# Method characterisation
+
+Here we have a look at the diversity of TI methods
+
+```{r}
+dynbenchmark::render_scripts_documentation()
+```

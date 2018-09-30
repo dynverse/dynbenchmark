@@ -1,7 +1,7 @@
 
 # Aggregation
 
-We create some examples here for why and how we aggregate the
+Here, we create some examples here for why and how we aggregate the
 scores.
 
 | \# | script/folder                                                | description |
