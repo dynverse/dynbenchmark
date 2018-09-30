@@ -10,3 +10,4 @@
 | 3b | [📄`time_mem_predictions.R`](3b-time_mem_predictions.R) |             |
 | 3c | [📄`normalisation.R`](3c-normalisation.R)               |             |
 | 3d | [📄`compare_sources.R`](3d-compare_sources.R)           |             |
+| 3e | [📄`stability.R`](3e-stability.R)                       |             |

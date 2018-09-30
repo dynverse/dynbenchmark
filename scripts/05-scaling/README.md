@@ -4,14 +4,16 @@
 Here we test how well a method scales with increasing number of features
 (genes) and/or cells.
 
-Each method is run on randomly generated data with increasing gene set
-and cell set sizes, and the execution times and memory usages are
-modelled using linear models.
+Each method is run on down- and upscaled datasets with increasing gene
+set and cell set sizes, and the execution times and memory usages are
+modelled using thin plate regressions splines within a generalised
+additivate
+model.
 
-| \# | script/folder                                 | description |
-| :- | :-------------------------------------------- | :---------- |
-| 0  | [📄`generate_data.R`](0-generate_data.R)       |             |
-| 1  | [📄`submit_jobs.R`](1-submit_jobs.R)           |             |
-| 2  | [📄`retrieve_results.R`](2-retrieve_results.R) |             |
-| 3  | [📄`generate_figures.R`](3-generate_figures.R) |             |
-|    | [📄`generate_dataset.R`](generate_dataset.R)   |             |
+| \# | script/folder                                 | description                                                                                   |
+| :- | :-------------------------------------------- | :-------------------------------------------------------------------------------------------- |
+| 0  | [📄`generate_data.R`](0-generate_data.R)       | Generate up- and downscaled datasets                                                          |
+| 1  | [📄`submit_jobs.R`](1-submit_jobs.R)           | Run the methods on the cluster                                                                |
+| 2  | [📄`retrieve_results.R`](2-retrieve_results.R) | Retrieve the results and generate the scalability models                                      |
+| 3  | [📄`generate_figures.R`](3-generate_figures.R) | Classify the models and generate scalability figures                                          |
+|    | [📄`generate_dataset.R`](generate_dataset.R)   | Helper to generate an up- and downscaled dataset which looks similar to the original datasets |
