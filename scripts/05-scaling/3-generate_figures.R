@@ -74,7 +74,7 @@ barplot_data <-
 
 g <-
   ggplot() +
-  geom_text(aes(1, y, label = method_name), models, hjust = 1) +
+  geom_text(aes(1, y, label = method_name), models %>% select(-model_time, -model_mem), hjust = 1) +
   geom_text(aes(x + .5, 2.5, label = name), columns, hjust = .5) +
   geom_text(aes(x, .5, label = round(min, 2)), columns, hjust = 0) +
   geom_text(aes(x + 1, .5, label = round(max, 2)), columns, hjust = 1) +
@@ -99,6 +99,8 @@ g <-
 
 g
 ggsave(result_file("ranking.svg"), g, width = 14, height = 12)
+
+write_rds(g, result_file("ranking.rds"))
 
 
 ##########################################################

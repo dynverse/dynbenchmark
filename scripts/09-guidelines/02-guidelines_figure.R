@@ -81,25 +81,9 @@ outcomes <- tribble(
   mutate(y = row_number()*4 + cumsum(padding))
 
 # columns
-palettes <-
-  c(
-    map(c("viridis", "magma", "cividis"), ~viridisLite::viridis(100, option = .)) %>% set_names(c("viridis", "magma", "cividis")),
-    map(c("RdYlGn", "RdYlBu"), RColorBrewer::brewer.pal, n = 8) %>% set_names(c("RdYlGn", "RdYlBu")),
-    list(
-      wouter = c("#d73027", "#fdae61", "#ffd217", "#4575b4", "#313695"),
-      wouter2 = c("#d73027", "#fee08b","#9bcde1")
-    )
-  )
-
-# palette_names <- c(qc = "viridis", benchmark = "magma", scalability = "cividis")
-# palette_names <- c(qc = "RdYlGn", benchmark = "RdYlGn", scalability = "RdYlGn")
-# palette_names <- c(qc = "RdYlBu", benchmark = "RdYlBu", scalability = "RdYlBu")
-# palette_names <- c(qc = "wouter", benchmark = "wouter", scalability = "wouter")
-palette_names <- c(qc = "wouter2", benchmark = "wouter2", scalability = "wouter2")
-
+palette <- c("#d73027", "#fee08b","#9bcde1")
 split_renderer <- function(breaks, labels, palette_name) {
   breaks <- c(-Inf, breaks)
-  palette <- palettes[[palette_name]]
   palette <- palette[floor((seq_along(breaks)) * length(palette)/(length(breaks)))]
   function(x) {
     index <- last(which(x >= breaks))
@@ -110,9 +94,8 @@ split_renderer <- function(breaks, labels, palette_name) {
     )
   }
 }
-time_renderer <- function(breaks, palette_name) {
+time_renderer <- function(breaks) {
   breaks <- c(breaks, Inf)
-  palette <- palettes[[palette_name]]
   palette <- palette[floor((seq_along(breaks)) * length(palette)/(length(breaks)))] %>% rev()
 
   function(time) {
@@ -128,8 +111,6 @@ time_renderer <- function(breaks, palette_name) {
 
     index <- first(which(time <= breaks))
 
-    print(time >= breaks)
-
     list(
       fill = palette[index],
       label = timestr
@@ -144,17 +125,15 @@ prior_renderer <- function(x) {
   )
 }
 
-quintuple_checks <- c("-", "\U00B1", "+")
-# quintuple_checks <- c("\U2716", "\U2715", "\U2713", "\U2713\U2713", "\U2713\U2713\U2713")
-
 category_x_padding <- 0.1
+triple_checks <- c("-", "\U00B1", "+")
 metrics <- tribble(
   ~id, ~name, ~renderer, ~category, ~width,
-  "benchmark", "Benchmark\nscore", split_renderer(c(0.6, 0.95), quintuple_checks, palette_names["benchmark"]), "benchmark",1,
-  "qc_app_user_friendly", "User\nFriendliness", split_renderer(c(0.6, 0.9), quintuple_checks, palette_names["qc"]), "qc",1,
-  "scaling_pred_time_cells1k_features10k", " \n1k cells", time_renderer(c(60, 60*60), palette_names["scalability"]),  "scalability",1,
-  "scaling_pred_time_cells10k_features10k", "Est. running time @ 10k features\n10k cells", time_renderer(c(60, 60*60), palette_names["scalability"]), "scalability",1,
-  "scaling_pred_time_cells100k_features10k", "\n100k cells", time_renderer(c(60, 60*60), palette_names["scalability"]), "scalability",1,
+  "benchmark", "Benchmark\nscore", split_renderer(c(0.6, 0.95), triple_checks), "benchmark",1,
+  "qc_app_user_friendly", "User\nFriendliness", split_renderer(c(0.6, 0.9), triple_checks), "qc",1,
+  "scaling_pred_time_cells1k_features10k", " \n1k cells", time_renderer(c(60, 60*60)),  "scalability",1,
+  "scaling_pred_time_cells10k_features10k", "Est. running time @ 10k features\n10k cells", time_renderer(c(60, 60*60)), "scalability",1,
+  "scaling_pred_time_cells100k_features10k", "\n100k cells", time_renderer(c(60, 60*60)), "scalability",1,
   "method_required_priors", "\nRequired priors", prior_renderer, "priors", 2
 ) %>%
   mutate(
