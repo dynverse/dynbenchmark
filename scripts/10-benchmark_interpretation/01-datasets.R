@@ -7,10 +7,10 @@ plan(multiprocess)
 
 experiment("10-benchmark_interpretation")
 
-list2env(read_rds(result_file("benchmark_results_input.rds", "07-benchmark")), environment())
-raw_data <- read_rds(result_file("benchmark_results_unnormalised.rds", "07-benchmark"))$raw_data
-data <- read_rds(result_file("benchmark_results_normalised.rds", "07-benchmark"))$data
-data_aggregations <- read_rds(result_file("benchmark_results_normalised.rds", "07-benchmark"))$data_aggregations
+list2env(read_rds(result_file("benchmark_results_input.rds", "06-benchmark")), environment())
+raw_data <- read_rds(result_file("benchmark_results_unnormalised.rds", "06-benchmark"))$raw_data
+data <- read_rds(result_file("benchmark_results_normalised.rds", "06-benchmark"))$data
+data_aggregations <- read_rds(result_file("benchmark_results_normalised.rds", "06-benchmark"))$data_aggregations
 
 aggregate <- function(raw_data) {
   out <- benchmark_aggregate(
