@@ -80,18 +80,11 @@ table(raw_data$dataset_source, raw_data$error_status)
 ############### NORM PARAMS ###############
 ###########################################
 
-
-norm_fun <- "normal"
-mean_fun <- "geometric"
-mean_weights <- c("correlation" = 1, "him" = 1, "featureimp_wcor" = 1, "F1_branches" = 1)
-
+metrics <- eval(formals(benchmark_aggregate)$metrics)
+norm_fun <- formals(benchmark_aggregate)$norm_fun
+mean_fun <- formals(benchmark_aggregate)$mean_fun
 tmp <- benchmark_aggregate(
-  data = raw_data %>% filter(error_status == "no_error"),
-  metrics = metrics,
-  norm_fun = norm_fun,
-  mean_fun = mean_fun,
-  mean_weights = mean_weights,
-  dataset_source_weights = c("real/gold" = 1, "real/silver" = 1, "synthetic/dyngen" = 1, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
+  data = raw_data %>% filter(error_status == "no_error")
 )
 
 dataset_source_weights <-
@@ -109,7 +102,8 @@ dataset_source_weights <-
 #########################################
 ############### SAVE DATA ###############
 #########################################
-write_rds(lst(trajtypes, metrics, datasets_info, methods_info, norm_fun, mean_fun, mean_weights, dataset_source_weights), result_file("benchmark_results_input.rds"), compress = "xz")
+write_rds(dataset_source_weights, result_file("dataset_source_weights.rds"))
+write_rds(lst(trajtypes, metrics, datasets_info, methods_info, norm_fun, mean_fun, dataset_source_weights), result_file("benchmark_results_input.rds"), compress = "xz")
 write_rds(lst(raw_data, metrics), result_file("benchmark_results_unnormalised.rds"), compress = "xz")
 
 
@@ -123,7 +117,6 @@ out <- benchmark_aggregate(
   metrics = metrics,
   norm_fun = norm_fun,
   mean_fun = mean_fun,
-  mean_weights = mean_weights,
   dataset_source_weights = dataset_source_weights
 )
 
