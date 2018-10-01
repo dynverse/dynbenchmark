@@ -1,4 +1,4 @@
- library(dynbenchmark)
+library(dynbenchmark)
 library(tidyverse)
 library(dynplot)
 
@@ -80,7 +80,6 @@ palettes <- tribble(
 ###        CREATE FIGURES        ###
 ####################################
 script_files <- c("all", "summary", "detailed", "suppfig")
-script_files <- name <- "all"
 
 walk(script_files, function(name) {
   cat("Processing ", name, "\n", sep = "")
