@@ -20,10 +20,6 @@ scaling_avail <- qsub::ls_remote(derived_file("", experiment = "05-scaling/datas
 #'
 #' data <- readr::read_rds(dynbenchmark::derived_file("datasets.rds", experiment_id = "05-scaling")) %>% filter(id == "scaling_0001") %>% pull(fun) %>% first() %>% invoke()
 
-
-axis_scale <- data_frame(lnrow = seq(1, 6), nrow = 10^lnrow)
-method_ids <- unique(data$method_id) %>% setdiff("error")
-
 ##########################################################
 ###############        CLASSIFY TIME       ###############
 ##########################################################
@@ -80,9 +76,10 @@ scale_y_methods <- scale_y_continuous("", breaks = seq_along(method_order), labe
 scale_y_methods_empty <- scale_y_continuous("", breaks = seq_along(method_order) + 0.5, labels = NULL, expand = c(0, 0))
 no_margin_sides <- theme(plot.margin = margin(), axis.ticks.y = element_blank(), axis.title.y = element_blank())
 
-time_limits <- c(log10(0.1), log10(60*60*48.01))
-time_breaks <- log10(c(1, 60, 60*60, 60*60*48.01))
-scale_x_time <- scale_x_continuous(label_long("average_time"), limits = time_limits, breaks = time_breaks, labels = label_time(10^time_breaks), expand = c(0, 00))
+time_limits <- c(log10(0.1), log10(60*60*72.01))
+time_breaks <- log10(c(1, 60, 60*60, 60*60*24.01))
+scale_x_time <- scale_x_continuous(label_long("average_time"), limits = time_limits, breaks = time_breaks, labels = label_time(10^time_breaks), expand = c(0, 00), position = "top")
+scale_x_time
 even_background <- geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = as.numeric(method_id) - 0.5, ymax = as.numeric(method_id) + 0.5), data = tibble(method_id = factor(method_order, method_order)) %>% filter(as.numeric(method_id) %% 2 == 1), fill = "#DDDDDD")
 
 ## Plot average time
@@ -94,8 +91,8 @@ plot_average_time <- models %>%
   select(method_id, time_lpred) %>%
   ggplot() +
   even_background +
-  geom_rect(aes(xmin = time_limits[[1]], xmax = time_lpred, ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#222222") +
-  geom_text(aes(x = time_lpred + 0.1, y = as.numeric(method_id), label = label_time(10^time_lpred)), hjust = 0) +
+  geom_rect(aes(xmin = time_limits[[1]], xmax = time_lpred, ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#333333") +
+  geom_text(aes(x = time_lpred, y = as.numeric(method_id), label = paste0(" ", label_time(10^time_lpred))), hjust = 0) +
   scale_y_methods +
   scale_x_time +
   theme_pub() +
@@ -105,15 +102,15 @@ plot_average_time
 ## Plot average memory
 mem_limits <- log10(c(10^8, 10^10))
 mem_breaks <- log10(c(10^8, 10^9, 10^10))
-scale_x_mem <- scale_x_continuous(label_long("average_memory"), limits = mem_limits, breaks = mem_breaks, labels = label_memory(10^mem_breaks), expand = c(0, 0))
+scale_x_mem <- scale_x_continuous(label_long("average_max_memory"), limits = mem_limits, breaks = mem_breaks, labels = label_memory(10^mem_breaks), expand = c(0, 0), position = "top")
 
 plot_average_memory <- models %>%
   mutate(method_id = factor(method_id, method_order)) %>%
   select(method_id, mem_lpred) %>%
   ggplot() +
   even_background +
-  geom_rect(aes(xmin = mem_limits[[1]], xmax = mem_lpred, ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#222222") +
-  geom_text(aes(x = mem_lpred, y = as.numeric(method_id), label = label_memory(10^mem_lpred)), hjust = 0) +
+  geom_rect(aes(xmin = mem_limits[[1]], xmax = mem_lpred, ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#333333") +
+  geom_text(aes(x = mem_lpred, y = as.numeric(method_id), label = paste0(" ", label_memory(10^mem_lpred))), hjust = 0) +
   scale_y_methods +
   scale_x_mem +
   theme_pub() +
@@ -131,6 +128,9 @@ plotdata_time_classification <- time_classification_timings %>%
   ) %>%
   group_by(
     method_id, feature
+  ) %>%
+  filter(
+    row_number() %% 10 == 0
   ) %>%
   mutate(
     x = xmin + row_number() / n() * 0.95 + 0.025,
@@ -150,6 +150,8 @@ plotdata_time_classification_boxes <- plotdata_time_classification %>%
   ) %>%
   left_join(time_classification, c("method_id", "feature"))
 
+plotdata_time_classification <- plotdata_time_classification %>% select(method_id, feature, x, y)
+
 
 plot_time_classification <- plotdata_time_classification %>%
   ggplot(aes(group = paste0(method_id, feature))) +
@@ -157,7 +159,7 @@ plot_time_classification <- plotdata_time_classification %>%
   geom_line(aes(x = x, y = y), color = "white", size = 1) +
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), data = plotdata_time_classification_boxes, color = "#333333", fill = NA, size = 0.25) +
   scale_y_methods_empty +
-  scale_x_continuous("" , expand = c(0, 0), breaks = c(1.5, 2.5), labels = c("Cells", "Features")) +
+  scale_x_continuous("Time complexity" , expand = c(0, 0), breaks = c(1.5, 2.5), labels = c("Cells", "Features"), position = "top") +
   scale_fill_manual("", values = c("constant / low slope" = "#2ECC40", "sublinear" = "#0074D9", "linear" = "#FF851B", "superlinear" = "#FF4136")) +
   theme_pub() +
   theme(legend.position = "bottom") +
@@ -166,20 +168,19 @@ plot_time_classification <- plotdata_time_classification %>%
 plot_time_classification
 
 ##
-slope_limits <- c(-2, log10(max(time_classification$slope)))
-slope_breaks <- log10(c(1, 60, 60*60, 10^max(slope_limits)))
-scale_x_slope <- scale_x_continuous(limits = slope_limits, breaks = slope_breaks, labels = label_time(10^slope_breaks), expand = c(0, 0))
+slope_limits <- c(-2, log10(60*60*72.01))
+slope_breaks <- log10(c(1, 60, 60*60, 60*60*24.01))
+scale_x_slope <- scale_x_continuous(limits = slope_limits, breaks = slope_breaks, labels = label_time(10^slope_breaks), expand = c(0, 0), position = "top")
 
 plot_slope <- function(feature) {
   time_classification %>%
     filter(feature == !!feature) %>%
     mutate(method_id = factor(method_id, method_order)) %>%
-    mutate(slope = ifelse(slope < 0, 0.000001, slope)) %>%
+    mutate(slope = scales::squish(slope, 10^slope_limits)) %>%
     ggplot() +
     even_background +
-    # geom_text(aes(x = first(slope_limits), y = as.numeric(method_id), label = label_method(method_id)), hjust = 0, size = 3) +
-    geom_rect(aes(xmin = first(slope_limits), xmax = log10(slope), ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#222222") +
-    # geom_text(aes(x = first(slope_limits), y = as.numeric(method_id), label = label_method(method_id)), hjust = 0, color = "#888888", size = 3) +
+    geom_rect(aes(xmin = first(slope_limits), xmax = log10(slope), ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#333333") +
+    geom_text(aes(x = log10(slope), y = as.numeric(method_id), label = paste0(" ", label_time(slope))), hjust = 0) +
     scale_y_methods_empty +
     scale_x_slope +
     labs(x = label_long(paste0("time_per_100_", gsub("n_", "", feature)))) +
@@ -207,14 +208,19 @@ g <- patchwork::wrap_plots(
 
 g
 ggsave(result_file("ranking.svg"), g, width = 14, height = 12)
-
 write_rds(g, result_file("ranking.rds"))
 
 
 ##########################################################
 ############### GENERATE INDIVIDUAL FIGURE ###############
 ##########################################################
+scale_x_nrow <- scale_x_continuous(breaks = seq(1, 6), labels = label_thousands(10^seq(1, 6)), expand = c(0,0))
+scale_y_ncol <- scale_y_continuous(breaks = seq(1, 6), labels = label_thousands(10^seq(1, 6)), expand = c(0,0))
+
+method_ids <- unique(data$method_id) %>% setdiff("error")
+
 plots <- map(method_ids, function(method_id) {
+  print(method_id)
   data_method <- data %>% filter(method_id == !!method_id)
   model_method <- models %>% filter(method_id == !!method_id)
   data_noerror <- data_method %>% filter(error_status == "no_error")
@@ -234,8 +240,7 @@ plots <- map(method_ids, function(method_id) {
     ggplot(data_method) +
     geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = error_status)) +
     scale_fill_manual(values = dynbenchmark::method_status_colours) +
-    scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-    scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+    scale_x_nrow + scale_y_ncol +
     theme_classic() +
     theme(legend.position = "bottom") +
     labs(x = "# cells", y = "# features", fill = "Status") +
@@ -244,19 +249,18 @@ plots <- map(method_ids, function(method_id) {
   # g1
 
   if (nrow(data_noerror) > 0) {
+    # g2
     g2 <-
       ggplot(data_noerror) +
       geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1), fill = "darkgray", data_error) +
       geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = log10(time_method))) +
       scale_fill_distiller(palette = "RdYlBu") +
-      scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-      scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+      scale_x_nrow + scale_y_ncol +
       theme_classic() +
       theme(legend.position = "bottom") +
       labs(x = "# cells", y = "# features", fill = "Log10(Time)") +
       facet_wrap(~ orig_dataset_id, ncol = 1) +
       coord_equal()
-    # g2
 
     tmp_error <- bind_rows(data_error, data_noerror %>% filter(log10(max_mem) < 8))
     g3 <-
@@ -264,8 +268,7 @@ plots <- map(method_ids, function(method_id) {
       geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1), fill = "darkgray", tmp_error) +
       geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = log10(max_mem))) +
       scale_fill_distiller(palette = "RdYlBu") +
-      scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-      scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+      scale_x_nrow + scale_y_ncol +
       theme_classic() +
       theme(legend.position = "bottom") +
       labs(x = "# cells", y = "# features", fill = "Log10(Max mem)") +
@@ -274,21 +277,20 @@ plots <- map(method_ids, function(method_id) {
     # g3
 
     g4a <-
-      ggplot(pred_method) +
+      ggplot(pred_method %>% select(lnrow, lncol, time_lpred)) +
       geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = time_lpred)) +
       scale_fill_distiller(palette = "RdYlBu") +
-      scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-      scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+      scale_x_nrow + scale_y_ncol +
       theme_classic() +
       theme(legend.position = "bottom") +
       labs(x = "# cells", y = "# features", fill = "Predicted time") +
       coord_equal()
+
     g4b <-
       ggplot(pred_method) +
       geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = mem_lpred)) +
       scale_fill_distiller(palette = "RdYlBu") +
-      scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-      scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+      scale_x_nrow + scale_y_ncol +
       theme_classic() +
       theme(legend.position = "bottom") +
       labs(x = "# cells", y = "# features", fill = "Predicted memory") +
@@ -328,7 +330,7 @@ dir.create(result_file("results"), showWarnings = FALSE)
 dir.create(result_file("results/error_class_plots"), showWarnings = FALSE)
 # pdf(result_file("results.pdf"), width = 16, height = 12)
 # walk(seq_along(method_ids), function(i) {
-pbapply::pblapply(seq_along(method_ids), cl = 8, function(i) {
+map(seq_along(method_ids), function(i) {
   mid <- method_ids[[i]]
   pl <- plots[[i]]
   cat("Plotting ", mid, "\n", sep = "")
@@ -338,6 +340,50 @@ pbapply::pblapply(seq_along(method_ids), cl = 8, function(i) {
 # dev.off()
 
 
+##########################################################
+########### GENERATE INDIVIDUAL EXAMPLE FIGURE ###########
+##########################################################
+
+method_ids <- c("mst", "paga", "slingshot", "elpigraph", "monocle_ddrtree", "ouija")
+
+scale_fill_time <- scale_fill_viridis_c("", option = "inferno", labels = label_time, trans = "log", breaks = function(range) {c(first(range), 10^mean(log10(range)), last(range))}, limits = c(1, 60*60*72), oob = scales::squish)
+
+plots <- list()
+for (method_id in method_ids) {
+  data_method <- data %>% filter(method_id == !!method_id)
+  model_method <- models %>% filter(method_id == !!method_id)
+  data_noerror <- data_method %>% filter(error_status == "no_error")
+  data_error <- data_method %>% filter(error_status != "no_error")
+  pred_method <- data_pred %>% filter(method_id == !!method_id)
+
+  g2b <- ggplot(data_noerror, aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1)) +
+    geom_rect(fill = "darkgray", data = data_error) +
+    geom_rect(aes(fill = time_method)) +
+    scale_fill_time + scale_x_nrow + scale_y_ncol +
+    labs(x = "# cells", y = "# features") +
+    coord_equal() +
+    ggtitle(glue::glue("{label_method(method_id)}\nObserved time")) +
+    theme_pub() +
+    theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1), plot.title = element_text(size = 12))
+  plots <- c(plots, list(g2b))
+  g4a <-
+    ggplot(pred_method %>% select(lnrow, lncol, time_lpred)) +
+    geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = 10^time_lpred)) +
+    scale_x_nrow + scale_y_ncol + scale_fill_time +
+    labs(x = "# cells", y = "# features") +
+    coord_equal() +
+    ggtitle(glue::glue("Predicted time")) +
+    theme_pub() +
+    theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1), plot.title = element_text(size = 12))
+  plots <- c(plots, list(g4a))
+}
+
+plot_example <- plots %>%
+  map_at(2:9999, ~. + theme(axis.title = element_blank())) %>%
+  map_at(1, ~. + theme(legend.position = "left")) %>%
+  patchwork::wrap_plots(nrow = 2, byrow = FALSE)
+plot_example
+write_rds(plot_example, result_file("example.rds"))
 
 ##########################################################
 ###############     GENERATE ERROR LOGS    ###############
@@ -407,8 +453,7 @@ pbapply::pblapply(method_ids, cl = 8, function(mid) {
         geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1), datasets_info %>% anti_join(sel_cl, by = "dataset_id"), fill = "lightgray") +
         geom_rect(aes(xmin = lnrow - .1, xmax = lnrow + .1, ymin = lncol - .1, ymax = lncol + .1, fill = error_status)) +
         scale_fill_manual(values = dynbenchmark::method_status_colours) +
-        scale_x_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
-        scale_y_continuous(breaks = axis_scale$lnrow, labels = axis_scale$nrow) +
+        scale_x_nrow + scale_y_ncol +
         theme_classic() +
         theme(legend.position = "bottom") +
         labs(x = "# cells", y = "# features", fill = "Status") +
@@ -455,3 +500,19 @@ pbapply::pblapply(method_ids, cl = 8, function(mid) {
 
   invisible()
 })
+
+
+##########################################################
+###############   GENERATE SUPP FIGURE     ###############
+##########################################################
+
+plot_scaling <- patchwork::wrap_plots(
+  read_rds(result_file("example.rds")) %>% patchwork::wrap_elements(),
+  read_rds(result_file("ranking.rds")) %>% patchwork::wrap_elements(),
+  heights = c(2, 5),
+  ncol = 1
+) +
+  patchwork::plot_annotation(tag_levels = "a")
+
+ggsave(result_file("scaling.pdf"), width = 14, height = 16)
+

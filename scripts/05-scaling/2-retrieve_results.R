@@ -76,6 +76,7 @@ models <-
     # predict time
     model_time <- mgcv::gam(ltime ~ s(lnrow, lncol), data = dat)
     predict_time <- function(n_cells, n_features) {
+      requireNamespace("mgcv")
       data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
       10^predict(model_time, data)
     }
@@ -86,6 +87,7 @@ models <-
     # predict memory
     model_mem <- mgcv::gam(lmem ~ s(lnrow, lncol), data = dat %>% filter(!is.infinite(lmem)))
     predict_mem <- function(n_cells, n_features) {
+      requireNamespace("mgcv")
       data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
       10^predict(model_mem, data)
     }
