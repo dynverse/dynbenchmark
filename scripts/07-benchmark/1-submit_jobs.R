@@ -66,11 +66,11 @@ if (!file.exists(derived_file("design.rds"))) {
   # determine method execution order by predicting
   # the running times of each method
   predicted_times <-
-    pmap_df(scaling$models, function(method_id, model_time, model_mem, ...) {
+    pmap_df(scaling$models, function(method_id, predict_time, predict_mem, ...) {
       datasets2 <- datasets %>% rename(dataset_id = id)
       datasets2$method_id <- method_id
-      datasets2$time_lpred = pmin(predict(model_time, datasets2)[,1], log10(timeout_sec))
-      datasets2$mem_lpred = pmin(predict(model_mem, datasets2)[,1], log10(memory_gb * 1e9))
+      datasets2$time_lpred = pmin(log10(predict_time(10^datasets2$lnrow, 10^datasets2$lncol)), log10(timeout_sec))
+      datasets2$mem_lpred = pmin(log10(predict_mem(10^datasets2$lnrow, 10^datasets2$lncol)), log10(memory_gb * 1e9))
       datasets2
     }) %>%
     mutate(time_pred = 10^time_lpred, mem_pred = 10^mem_lpred)
