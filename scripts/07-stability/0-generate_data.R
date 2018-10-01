@@ -1,7 +1,7 @@
 library(dynbenchmark)
 library(tidyverse)
 
-experiment("07b-stability")
+experiment("07-stability")
 
 num_bootstraps <- 10
 bootstrap_pct_cells <- .95
@@ -13,9 +13,9 @@ bootstrap_pct_features <- .95
 ##########################################################
 
 if (!file.exists(result_file("fitdata.rds"))) {
-  benchmark_results_normalised <- read_rds(result_file("benchmark_results_normalised.rds", "07-benchmark"))
-  benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", "07-benchmark"))
-  benchmark_results_unnormalised <- read_rds(result_file("benchmark_results_unnormalised.rds", "07-benchmark"))
+  benchmark_results_normalised <- read_rds(result_file("benchmark_results_normalised.rds", "06-benchmark"))
+  benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", "06-benchmark"))
+  benchmark_results_unnormalised <- read_rds(result_file("benchmark_results_unnormalised.rds", "06-benchmark"))
 
   dataset_ids <- benchmark_results_input$datasets_info$dataset_id
   metrics <- c("overall", benchmark_results_input$metrics)
@@ -106,7 +106,7 @@ datasets <-
     type = "function",
     pct_cells = bootstrap_pct_cells,
     pct_features = bootstrap_pct_features,
-    fun = map(id, ~ function() readr::read_rds(dynbenchmark::derived_file(c(., ".rds"), experiment_id = "07b-stability/dataset")))
+    fun = map(id, ~ function() readr::read_rds(dynbenchmark::derived_file(c(., ".rds"), experiment_id = "07-stability/dataset")))
   ) %>%
   select(id, type, fun, everything())
 
@@ -118,7 +118,7 @@ handle <- qsub::qsub_lapply(
   qsub_environment = c("datasets", "num_cores", "generate_dataset"),
   qsub_config = qsub::override_qsub_config(name = "datastability", memory = "10G", num_cores = num_cores, wait = FALSE, max_wall_time = "12:00:00"),
   FUN = function(i) {
-    filename <- dynbenchmark::derived_file(c(datasets$id[[i]], ".rds"), experiment_id = "07b-stability/dataset")
+    filename <- dynbenchmark::derived_file(c(datasets$id[[i]], ".rds"), experiment_id = "07-stability/dataset")
     # check whether dataset already exists
     if (file.exists(filename)) {
       success <-
@@ -159,9 +159,9 @@ readr::write_rds(lst(num_bootstraps, bootstrap_pct_cells, bootstrap_pct_features
 #' download datasets from prism
 #' qsub::rsync_remote(
 #'   remote_src = TRUE,
-#'   path_src = derived_file(experiment_id = "07b-stability/dataset", remote = TRUE),
+#'   path_src = derived_file(experiment_id = "07-stability/dataset", remote = TRUE),
 #'   remote_dest = FALSE,
-#'   path_dest = derived_file(experiment_id = "07b-stability/dataset", remote = FALSE),
+#'   path_dest = derived_file(experiment_id = "07-stability/dataset", remote = FALSE),
 #'   verbose = TRUE,
 #'   compress = FALSE
 #' )

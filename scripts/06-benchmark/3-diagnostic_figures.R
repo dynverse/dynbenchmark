@@ -2,7 +2,7 @@ library(dynbenchmark)
 library(tidyverse)
 library(dynplot)
 
-experiment("07-benchmark")
+experiment("06-benchmark")
 
 
 ############################################################

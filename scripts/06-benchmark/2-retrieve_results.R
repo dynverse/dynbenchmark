@@ -1,7 +1,7 @@
 library(dynbenchmark)
 library(tidyverse)
 
-experiment("07-benchmark")
+experiment("06-benchmark")
 
 ##########################################################
 ############### PART TWO: RETRIEVE RESULTS ###############
@@ -11,9 +11,9 @@ experiment("07-benchmark")
 # benchmark_fetch_results(TRUE)
 # qsub::rsync_remote(
 #   remote_src = FALSE,
-#   path_src = derived_file(remote = FALSE, experiment = "07-benchmark"),
+#   path_src = derived_file(remote = FALSE, experiment = "06-benchmark"),
 #   remote_dest = TRUE,
-#   path_dest = derived_file(remote = TRUE, experiment = "07-benchmark"),
+#   path_dest = derived_file(remote = TRUE, experiment = "06-benchmark"),
 #   verbose = TRUE,
 #   exclude = "*/r2gridengine/*"
 # )
@@ -21,9 +21,9 @@ experiment("07-benchmark")
 # If you want to download the output from prism
 # qsub::rsync_remote(
 #   remote_src = TRUE,
-#   path_src = derived_file(remote = TRUE, experiment = "07-benchmark"),
+#   path_src = derived_file(remote = TRUE, experiment = "06-benchmark"),
 #   remote_dest = FALSE,
-#   path_dest = derived_file(remote = FALSE, experiment = "07-benchmark"),
+#   path_dest = derived_file(remote = FALSE, experiment = "06-benchmark"),
 #   verbose = TRUE,
 #   exclude = "*/r2gridengine/*"
 # )
@@ -116,7 +116,7 @@ write_rds(lst(raw_data, metrics), result_file("benchmark_results_unnormalised.rd
 ###################################################
 ############### CREATE AGGREGATIONS ###############
 ###################################################
-list2env(read_rds(result_file("benchmark_results_unnormalised.rds", "07-benchmark")), environment())
+list2env(read_rds(result_file("benchmark_results_unnormalised.rds", "06-benchmark")), environment())
 
 out <- benchmark_aggregate(
   data = raw_data,
