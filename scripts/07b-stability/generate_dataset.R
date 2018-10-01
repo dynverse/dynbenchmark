@@ -2,12 +2,10 @@ generate_dataset <- function(
   orig_dataset_id,
   pct_cells,
   pct_features,
-  seed = 1,
+  seed,
   cores = 1,
   verbose = TRUE
 ) {
-  library(tidyverse)
-
   prev_seed <- .Random.seed[[1]]
 
   set.seed(seed)
@@ -44,7 +42,8 @@ generate_dataset <- function(
     dynwrap::add_trajectory(
       milestone_ids = base_traj$milestone_ids,
       milestone_network = base_traj$milestone_network,
-      progressions = progressions
+      progressions = progressions,
+      divergence_regions = base_traj$divergence_regions
     ) %>%
     dynwrap::add_expression(
       counts = counts,
