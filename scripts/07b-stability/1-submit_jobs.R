@@ -3,88 +3,11 @@ library(tidyverse)
 
 experiment("07b-stability")
 
-if (!file.exists(result_file("fitdata.rds"))) {
-  benchmark_results_normalised <- read_rds(result_file("benchmark_results_normalised.rds", "07-benchmark"))
-  benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", "07-benchmark"))
-  benchmark_results_unnormalised <- read_rds(result_file("benchmark_results_unnormalised.rds", "07-benchmark"))
-
-  dataset_ids <- benchmark_results_input$datasets_info$dataset_id
-  metrics <- c("overall", benchmark_results_input$metrics)
-
-  bench_compare <-
-    benchmark_results_normalised$data_aggregations %>%
-    filter(dataset_source == "mean") %>%
-    select(method_id, param_id, dataset_trajectory_type, !!metrics) %>%
-    gather(metric, experiment, !!metrics)
-
-  benchmark_results_unnormalised$raw_data <-
-    benchmark_results_unnormalised$raw_data %>%
-    select(method_id, method_name, dataset_id, dataset_trajectory_type, dataset_source, param_id, prior_id, repeat_ix, error_status, time_method, !!benchmark_results_input$metrics) %>%
-    mutate(time_method = ifelse(is.na(time_method), 3600, time_method))
-
-
-  bools <- sample(c(1, 0), length(dataset_ids), replace = TRUE)
-
-  fitness <- function(bools, benchmark_results_unnormalised, benchmark_results_input, dataset_ids, bench_compare, metrics) {
-    # retain subset of datasets
-    rawd <- benchmark_results_unnormalised$raw_data
-    rawd <- rawd[rawd$dataset_id %in%  dataset_ids[bools == 1], , drop = FALSE]
-
-    # replicate aggregation with subset of datasets
-    out <- benchmark_aggregate(
-      data = rawd,
-      metrics = benchmark_results_input$metrics,
-      norm_fun = benchmark_results_input$norm_fun,
-      mean_fun = benchmark_results_input$mean_fun,
-      mean_weights = benchmark_results_input$mean_weights,
-      dataset_source_weights = benchmark_results_input$dataset_source_weights
-    )
-
-    # calculate percentage of original execution time
-    pct_time <- sum(rawd$time_method) / sum(benchmark_results_unnormalised$raw_data$time_method)
-
-    # join previous scores with current scores
-    # why can't i use dplyr Y_Y
-    subset_compare <- out$data_aggregations
-    subset_compare <- subset_compare[subset_compare$dataset_source == "mean", , drop = FALSE]
-    subset_compare <- subset_compare[, c("method_id", "param_id", "dataset_trajectory_type", metrics), drop = FALSE]
-    subset_compare <- gather(subset_compare, "metric", "subset", !!metrics)
-
-    joined <- full_join(bench_compare, subset_compare, by = setdiff(colnames(bench_compare), "experiment"))
-    joined$subset[is.na(joined$subset)] <- 0
-
-    # calculate scores
-    corscore <- nacor(joined$experiment, joined$subset)
-    boolscore <- 1 - mean(bools) / 20 # 0.95: we were able to throw away all datasets! 1: we had to retain all datasets
-    timescore <- 1 - pct_time / 20 # 0.95: pipeline ran for 0 seconds! 1: nothing changed time-wise
-    dyneval::calculate_geometric_mean(corscore, boolscore, timescore)
-  }
-
-  fit <- GA::ga(
-    type = "binary",
-    fitness = fitness,
-    nBits = length(dataset_ids),
-    parallel = TRUE,
-    popSize = 8 * 8,
-    maxiter = 500,
-    seed = 1,
-    benchmark_results_unnormalised, benchmark_results_input, dataset_ids, bench_compare, metrics
-  )
-
-  did_sel <- dataset_ids[fit@solution[1,] == 1]
-
-  readr::write_rds(lst(dataset_ids, did_sel, fit), result_file("fitdata.rds"))
-}
-
-list2env(readr::read_rds(result_file("fitdata.rds")), .GlobalEnv)
 
 if (!file.exists(derived_file("design.rds"))) {
   timeout_sec <- 60 * 60
   memory_gb <- 16
   num_repeats <- 1
-  num_bootstraps <- 10
-  bootstrap_pct_cells <- .95
-  bootstrap_pct_features <- .95
 
   metrics <- c("correlation", "edge_flip", "featureimp_cor", "featureimp_wcor", "F1_branches", "him")
 
@@ -130,37 +53,7 @@ if (!file.exists(derived_file("design.rds"))) {
   ##########################################################
   ###############       DEFINE DATASETS      ###############
   ##########################################################
-
-  # use helper function to generate datasets
-  source(scripts_file("generate_dataset.R"))
-
-  set.seed(1)
-
-  # construct datasets tibble
-  datasets <-
-    crossing(
-      orig_dataset_id = did_sel,
-      seed = sample.int(10000, num_bootstraps)
-    ) %>%
-    as_tibble() %>%
-    mutate(
-      id = sprintf(paste0("scaling_%0", ceiling(log10(n())), "d"), seq_len(n())),
-      type = "function",
-      pct_cells = bootstrap_pct_cells,
-      pct_features = bootstrap_pct_features,
-      fun = pmap(
-        lst(odid = orig_dataset_id, se = seed, pce = pct_cells, pfe = pct_features),
-        function(odid, se, pce, pfe) {
-          env <- new.env()
-          lst(odid, se, pce, pfe, generate_dataset) %>% list2env(envir = env)
-          fun <- function() {
-            generate_dataset(orig_dataset_id = odid, pct_cells = pce, pct_features = pfe, seed = se)
-          }
-          environment(fun) <- env
-          fun
-        })
-    ) %>%
-    select(id, type, fun, everything())
+  datasets <- readr::read_rds(derived_file("datasets.rds"))
 
   ##########################################################
   ###############       CREATE DESIGN        ###############
