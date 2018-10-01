@@ -49,8 +49,10 @@ benchmark_aggregate <- function(
     pct_memory_limit = (error_status == "memory_limit") + 0,
     pct_execution_error = (error_status == "execution_error") + 0,
     pct_method_error = (error_status == "method_error") + 0
-  ) %>%
-    mutate_at(metrics, function(x) ifelse(is.na(x), 0, x) %>% pmax(0) %>% pmin(1))
+  )
+
+  # clip values
+  data <- data %>% mutate_at(metrics, function(x) ifelse(is.na(x), 0, x) %>% pmax(0) %>% pmin(1))
 
 
   # check normalise parameter
