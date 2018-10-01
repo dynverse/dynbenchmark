@@ -155,6 +155,6 @@ benchmark_aggregate <- function(
     data_aggregations
   )
 }
-if (file.exists(result_file("dataset_source_weights.rds", "07-benchmark"))) {
+if (tryCatch(is.character(get_dynbenchmark_folder()), error = function(e) FALSE) && file.exists(result_file("dataset_source_weights.rds", "07-benchmark"))) {
   formals(benchmark_aggregate)$dataset_source_weights <- read_rds(result_file("dataset_source_weights.rds", "07-benchmark"))
 }
