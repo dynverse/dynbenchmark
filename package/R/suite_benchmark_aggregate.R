@@ -39,7 +39,7 @@ benchmark_aggregate <- function(
   norm_fun = "normal",
   mean_fun = "geometric",
   mean_weights = set_names(rep(1, length(metrics)), metrics),
-  dataset_source_weights = c("real" = 5, "synthetic/dyngen" = 5, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
+  dataset_source_weights = get_default_dataset_weights()
 ) {
 
   # add a few columns
@@ -155,6 +155,12 @@ benchmark_aggregate <- function(
     data_aggregations
   )
 }
-if (tryCatch(is.character(get_dynbenchmark_folder()), error = function(e) FALSE) && file.exists(result_file("dataset_source_weights.rds", "07-benchmark"))) {
-  formals(benchmark_aggregate)$dataset_source_weights <- read_rds(result_file("dataset_source_weights.rds", "07-benchmark"))
+
+
+get_default_dataset_weights <- function() {
+  if (tryCatch(is.character(get_dynbenchmark_folder()), error = function(e) FALSE) && file.exists(result_file("dataset_source_weights.rds", "07-benchmark"))) {
+    read_rds(result_file("dataset_source_weights.rds", "07-benchmark"))
+  } else {
+    c("real" = 5, "synthetic/dyngen" = 5, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
+  }
 }
