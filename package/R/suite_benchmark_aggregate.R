@@ -35,9 +35,9 @@
 #' @export
 benchmark_aggregate <- function(
   data,
-  metrics,
-  norm_fun = names(.benchmark_aggregate_normalisation),
-  mean_fun = c("geometric", "harmonic", "arithmetic"),
+  metrics = c("correlation", "him", "featureimp_cor", "F1_branches"),
+  norm_fun = "normal",
+  mean_fun = "geometric",
   mean_weights = set_names(rep(1, length(metrics)), metrics),
   dataset_source_weights = c("real" = 5, "synthetic/dyngen" = 5, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
 ) {
@@ -155,4 +155,6 @@ benchmark_aggregate <- function(
     data_aggregations
   )
 }
-formals(benchmark_aggregate)$norm_fun <- names(.benchmark_aggregate_normalisation)
+if (file.exists(result_file("dataset_source_weights.rds", "07-benchmark"))) {
+  formals(benchmark_aggregate)$dataset_source_weights <- read_rds(result_file("dataset_source_weights.rds", "07-benchmark"))
+}
