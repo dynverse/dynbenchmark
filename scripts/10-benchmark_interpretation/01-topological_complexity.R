@@ -6,7 +6,7 @@ plan(multiprocess)
 experiment("10-benchmark_interpretation")
 
 # load in output models
-output <- benchmark_bind_results(load_models = TRUE, experiment_id = "07-benchmark") %>%
+output <- benchmark_bind_results(load_models = TRUE, experiment_id = "06-benchmark") %>%
   select(method_id, dataset_id, model, him)
 
 # only take into account methods with free topology and tree detection

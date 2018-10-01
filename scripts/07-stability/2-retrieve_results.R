@@ -1,7 +1,7 @@
 library(dynbenchmark)
 library(tidyverse)
 
-experiment("07b-stability")
+experiment("07-stability")
 
 ##########################################################
 ############### PART TWO: RETRIEVE RESULTS ###############
@@ -11,9 +11,9 @@ experiment("07b-stability")
 benchmark_fetch_results(TRUE)
 # qsub::rsync_remote(
 #   remote_src = FALSE,
-#   path_src = derived_file(remote = FALSE, experiment = "07-benchmark"),
+#   path_src = derived_file(remote = FALSE, experiment = "06-benchmark"),
 #   remote_dest = TRUE,
-#   path_dest = derived_file(remote = TRUE, experiment = "07-benchmark"),
+#   path_dest = derived_file(remote = TRUE, experiment = "06-benchmark"),
 #   verbose = TRUE,
 #   exclude = "*/r2gridengine/*"
 # )
@@ -21,9 +21,9 @@ benchmark_fetch_results(TRUE)
 # If you want to download the output from prism
 # qsub::rsync_remote(
 #   remote_src = TRUE,
-#   path_src = derived_file(remote = TRUE, experiment = "07-benchmark"),
+#   path_src = derived_file(remote = TRUE, experiment = "06-benchmark"),
 #   remote_dest = FALSE,
-#   path_dest = derived_file(remote = FALSE, experiment = "07-benchmark"),
+#   path_dest = derived_file(remote = FALSE, experiment = "06-benchmark"),
 #   verbose = TRUE,
 #   exclude = "*/r2gridengine/*"
 # )
@@ -37,7 +37,7 @@ table(execution_output$method_id, execution_output$error_status)
 ############### JOIN DATA ###############
 #########################################
 
-datasets <- read_rds(derived_file("datasets.rds", "07b-stability"))
+datasets <- read_rds(derived_file("datasets.rds", "07-stability"))
 
 raw_data <-
   execution_output %>%
@@ -51,8 +51,8 @@ write_rds(raw_data, result_file("benchmark_results_unnormalised.rds"), compress 
 ###################################################
 ############### CREATE AGGREGATIONS ###############
 ###################################################
-benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", "07-benchmark"))
-stability_params <- read_rds(result_file("params.rds", "07b-stability"))
+benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", "06-benchmark"))
+stability_params <- read_rds(result_file("params.rds", "07-stability"))
 
 out <- benchmark_aggregate(
   data = raw_data %>% mutate(method_name = method_id),
@@ -82,7 +82,7 @@ norm_var <- function(x) {
 
 met2 <- c(stability_params$metrics, "overall")
 
-out$data_var <-
+data_var <-
   out$data %>%
   select(method_id, method_name, dataset_id, param_id, !!met2) %>%
   group_by(method_id, method_name, dataset_id, param_id) %>%

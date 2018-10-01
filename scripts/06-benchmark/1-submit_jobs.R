@@ -1,7 +1,7 @@
 library(dynbenchmark)
 library(tidyverse)
 
-experiment("07-benchmark")
+experiment("06-benchmark")
 
 if (!file.exists(derived_file("design.rds"))) {
   timeout_sec <- 60 * 60

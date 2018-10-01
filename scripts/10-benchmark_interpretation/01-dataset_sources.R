@@ -3,8 +3,8 @@ library(dynbenchmark)
 
 experiment("10-benchmark_interpretation")
 
-out <- read_rds(result_file("benchmark_results_normalised.rds", "07-benchmark"))
-list2env(read_rds(result_file("benchmark_results_input.rds", "07-benchmark")), environment())
+out <- read_rds(result_file("benchmark_results_normalised.rds", "06-benchmark"))
+list2env(read_rds(result_file("benchmark_results_input.rds", "06-benchmark")), environment())
 
 # aggregate without errors
 tmp <- benchmark_aggregate(
