@@ -154,14 +154,17 @@ limits_metric <- function(metric_id) {
 
 #' Label time
 #'
-#' @param x Time
+#' @param time Time
 #'
 #' @export
-label_time <- function(x) {
+label_time <- function(time) {
   case_when(
-    x < 60 ~ paste0(round(x), "s"),
-    x < 60*60 ~ paste0(round(x/60), "m"),
-    TRUE ~ paste0(round(x/(60*60)), "h")
+    time < 1 ~ "<1s",
+    time < 60 ~ paste0(floor(time), "s"),
+    time < 3600 ~ paste0(floor(time / 60), "m"),
+    time < 3600 * 24 ~ paste0(floor(time / 3600), "h"),
+    time < 3600 * 24 * 7 ~ paste0(floor(time / 3600 / 24), "d"),
+    TRUE ~ ">7d"
   )
 }
 
@@ -210,3 +213,6 @@ label_method <- function(method_ids) {
   methods <- load_methods()
   methods$name[match(method_ids, methods$id)]
 }
+
+
+

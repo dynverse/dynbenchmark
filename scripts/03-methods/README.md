@@ -14,7 +14,7 @@ Here we
 | :- | :------------------------------------------------------------- | :------------------------------------------------------ |
 | 1  | [📁`gather_methods_information`](01-gather_methods_information) | Gathering all the information we have about the methods |
 | 2  | [📁`tool_qc`](02-tool_qc)                                       | Tool quality control                                    |
-| 3  | [📁`method_characterisation`](03-method_characterisation)       |                                                         |
+| 3  | [📁`method_characterisation`](03-method_characterisation)       | Method characterisation                                 |
 |    | [📁`varia`](varia)                                              |                                                         |
 
 ## [Gathering all the information we have about the methods](01-gather_methods_information)

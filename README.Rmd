@@ -55,8 +55,8 @@ extract_scripts_documentation("scripts", recursive = FALSE) %>%
   mutate(
     ix = case_when(is.na(ix) ~ "", TRUE ~ as.character(ix)),
     id = label_long(id),
-    scripts = paste0("[\U1F4C4](", scripts, ")"),
-    results = case_when(is.na(results) ~ "", TRUE ~ paste0("[\U1F4CA](", results, ")"))
+    scripts = paste0("[\U1F4C4\U27A1](", scripts, ")"),
+    results = case_when(is.na(results) ~ "", TRUE ~ paste0("[\U1F4CA\U27A1](", results, ")"))
   ) %>% 
   select(`\\#` = ix, id, scripts, results) %>% 
   knitr::kable()

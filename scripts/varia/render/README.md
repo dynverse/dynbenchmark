@@ -3,6 +3,7 @@
 
 | \# | script/folder                                                   | description                               |
 | :- | :-------------------------------------------------------------- | :---------------------------------------- |
+|    | [📄`paper_stats.R`](paper_stats.R)                               |                                           |
 |    | [📄`render_manuscript.R`](render_manuscript.R)                   | Renders the manuscript                    |
 |    | [📄`render_readmes.R`](render_readmes.R)                         | Renders all the READMEs in the repository |
 |    | [📄`render_results.R`](render_results.R)                         | Renders results READMEs                   |

@@ -4,10 +4,10 @@
 \alias{label_time}
 \title{Label time}
 \usage{
-label_time(x)
+label_time(time)
 }
 \arguments{
-\item{x}{Time}
+\item{time}{Time}
 }
 \description{
 Label time
