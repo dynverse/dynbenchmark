@@ -153,6 +153,7 @@ handle <- qsub::qsub_lapply(
 )
 
 readr::write_rds(datasets, path = derived_file("datasets.rds"), compress = "xz")
+readr::write_rds(lst(num_bootstraps, bootstrap_pct_cells, bootstrap_pct_features), path = derived_file("dataset_params.rds"), compress = "xz")
 
 #' @examples
 #' download datasets from prism

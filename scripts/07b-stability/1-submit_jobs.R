@@ -3,7 +3,6 @@ library(tidyverse)
 
 experiment("07b-stability")
 
-
 if (!file.exists(derived_file("design.rds"))) {
   timeout_sec <- 60 * 60
   memory_gb <- 16
@@ -11,6 +10,7 @@ if (!file.exists(derived_file("design.rds"))) {
 
   metrics <- c("correlation", "edge_flip", "featureimp_cor", "featureimp_wcor", "F1_branches", "him")
 
+  list2env(readr::read_rds(path = derived_file("dataset_params.rds")), environment())
   benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", "07-benchmark"))
   benchmark_results_unnormalised <- read_rds(result_file("benchmark_results_unnormalised.rds", "07-benchmark"))
 
