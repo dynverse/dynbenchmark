@@ -11,6 +11,7 @@ extract_scripts_documentation <- function(folder = getwd(), recursive = TRUE) {
     filter(
       !str_detect(location, ".*\\.md") &
         !str_detect(location, ".*\\.Rmd") &
+        !str_detect(location, ".*\\.Rproj") &
         !fs::is_link(location)
     ) %>%
     mutate(
