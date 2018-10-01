@@ -45,9 +45,8 @@ folders:
 | 3  | Methods                  | [📄➡](scripts/03-methods)                  | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/03-methods)                  |
 | 4  | Method testing           | [📄➡](scripts/04-method_testing)           | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/04-method_testing)           |
 | 5  | Scaling                  | [📄➡](scripts/05-scaling)                  | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/05-scaling)                  |
-| 6  | Optimise parameters      | [📄➡](scripts/06-optimise_parameters)      |                                                                                                |
-| 7  | Benchmark                | [📄➡](scripts/07-benchmark)                | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/07-benchmark)                |
-| 7  | Stability                | [📄➡](scripts/07b-stability)               |                                                                                                |
+| 6  | Benchmark                | [📄➡](scripts/06-benchmark)                | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/06-benchmark)                |
+| 7  | Stability                | [📄➡](scripts/07-stability)                |                                                                                                |
 | 8  | Summary                  | [📄➡](scripts/08-summary)                  | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/08-summary)                  |
 | 9  | Guidelines               | [📄➡](scripts/09-guidelines)               | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/09-guidelines)               |
 | 10 | Benchmark interpretation | [📄➡](scripts/10-benchmark_interpretation) | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/10-benchmark_interpretation) |
