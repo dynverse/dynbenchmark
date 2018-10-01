@@ -189,6 +189,24 @@ label_memory <- function(x) {
 }
 
 
+#' Label thousands
+#' @param x Numeric value
+#'
+#' @export
+label_thousands <- function(x) {
+  map_chr(x, function(x) {
+    if (is.na(x)) {
+      NA
+    } else if (x < 10^3) {
+      as.character(round(x))
+    } else if (x < 10^6) {
+      paste0(round(x/10^3), "k")
+    } else {
+      paste0(round(x/10^6), "M")
+    }
+  })
+}
+
 #' tag the first plot of an assemble
 #'
 #' @param x A ggassemble
