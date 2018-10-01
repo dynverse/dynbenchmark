@@ -168,6 +168,26 @@ label_time <- function(time) {
   )
 }
 
+#' Label memory
+#' @param x Memory in bytes
+#'
+#' @export
+label_memory <- function(x) {
+  map_chr(x, function(x) {
+    if (is.na(x)) {
+      NA
+    } else if (x < 10^6) {
+      paste0(round(x/10^3), "kB")
+    } else if (x < 10^9) {
+      paste0(round(x/10^6), "MB")
+    } else if (x < 10^12) {
+      paste0(round(x/10^9), "GB")
+    } else {
+      paste0(round(x/10^12), "TB")
+    }
+  })
+}
+
 
 #' tag the first plot of an assemble
 #'

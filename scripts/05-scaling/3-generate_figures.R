@@ -80,25 +80,46 @@ scale_y_methods <- scale_y_continuous("", breaks = seq_along(method_order), labe
 scale_y_methods_empty <- scale_y_continuous("", breaks = seq_along(method_order) + 0.5, labels = NULL, expand = c(0, 0))
 no_margin_sides <- theme(plot.margin = margin(), axis.ticks.y = element_blank(), axis.title.y = element_blank())
 
-time_limits <- c(log10(0.1), max(models$time_lpred) + 0.5)
-time_breaks <- log10(c(0.1, 1, 60, 60*60, 10^max(time_limits)))
-scale_x_time <- scale_x_continuous(label_long("average_time"), limits = time_limits, breaks = time_breaks, labels = label_time(10^time_breaks), expand = c(0, 0))
-
-models <- models %>%
-  mutate(method_id = factor(method_id, method_order))
+time_limits <- c(log10(0.1), log10(60*60*48.01))
+time_breaks <- log10(c(1, 60, 60*60, 60*60*48.01))
+scale_x_time <- scale_x_continuous(label_long("average_time"), limits = time_limits, breaks = time_breaks, labels = label_time(10^time_breaks), expand = c(0, 00))
+even_background <- geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = as.numeric(method_id) - 0.5, ymax = as.numeric(method_id) + 0.5), data = tibble(method_id = factor(method_order, method_order)) %>% filter(as.numeric(method_id) %% 2 == 1), fill = "#DDDDDD")
 
 ## Plot average time
 plot_average_time <- models %>%
+  mutate(
+    method_id = factor(method_id, method_order),
+    time_lpred = ifelse(time_lpred < -1, -0.8, time_lpred)
+  ) %>%
   select(method_id, time_lpred) %>%
   ggplot() +
-  geom_rect(aes(xmin = time_limits[[1]], xmax = time_lpred, ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity") +
-  geom_text(aes(x = time_lpred, y = as.numeric(method_id), label = label_time(10^time_lpred)), hjust = 0) +
+  even_background +
+  geom_rect(aes(xmin = time_limits[[1]], xmax = time_lpred, ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#222222") +
+  geom_text(aes(x = time_lpred + 0.1, y = as.numeric(method_id), label = label_time(10^time_lpred)), hjust = 0) +
   scale_y_methods +
   scale_x_time +
   theme_pub() +
   theme(panel.grid.minor.y = element_line(color = "#AAAAAA"), plot.margin = margin())
-
 plot_average_time
+
+## Plot average memory
+mem_limits <- log10(c(10^8, 10^10))
+mem_breaks <- log10(c(10^8, 10^9, 10^10))
+scale_x_mem <- scale_x_continuous(label_long("average_memory"), limits = mem_limits, breaks = mem_breaks, labels = label_memory(10^mem_breaks), expand = c(0, 0))
+
+plot_average_memory <- models %>%
+  mutate(method_id = factor(method_id, method_order)) %>%
+  select(method_id, mem_lpred) %>%
+  ggplot() +
+  even_background +
+  geom_rect(aes(xmin = mem_limits[[1]], xmax = mem_lpred, ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#222222") +
+  geom_text(aes(x = mem_lpred, y = as.numeric(method_id), label = label_memory(10^mem_lpred)), hjust = 0) +
+  scale_y_methods +
+  scale_x_mem +
+  theme_pub() +
+  theme(panel.grid.minor.y = element_line(color = "#AAAAAA"), plot.margin = margin())
+
+plot_average_memory
 
 ## Plot the classification and small multiples
 plotdata_time_classification <- time_classification_timings %>%
@@ -134,7 +155,7 @@ plot_time_classification <- plotdata_time_classification %>%
   ggplot(aes(group = paste0(method_id, feature))) +
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = class), data = plotdata_time_classification_boxes, color = NA) +
   geom_line(aes(x = x, y = y), color = "white", size = 1) +
-  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), data = plotdata_time_classification_boxes, color = "black", fill = NA, size = 0.25) +
+  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), data = plotdata_time_classification_boxes, color = "#333333", fill = NA, size = 0.25) +
   scale_y_methods_empty +
   scale_x_continuous("" , expand = c(0, 0), breaks = c(1.5, 2.5), labels = c("Cells", "Features")) +
   scale_fill_manual("", values = c("constant / low slope" = "#2ECC40", "sublinear" = "#0074D9", "linear" = "#FF851B", "superlinear" = "#FF4136")) +
@@ -155,10 +176,13 @@ plot_slope <- function(feature) {
     mutate(method_id = factor(method_id, method_order)) %>%
     mutate(slope = ifelse(slope < 0, 0.000001, slope)) %>%
     ggplot() +
-    geom_rect(aes(xmin = first(slope_limits), xmax = log10(slope), ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity") +
+    even_background +
+    # geom_text(aes(x = first(slope_limits), y = as.numeric(method_id), label = label_method(method_id)), hjust = 0, size = 3) +
+    geom_rect(aes(xmin = first(slope_limits), xmax = log10(slope), ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#222222") +
+    # geom_text(aes(x = first(slope_limits), y = as.numeric(method_id), label = label_method(method_id)), hjust = 0, color = "#888888", size = 3) +
     scale_y_methods_empty +
     scale_x_slope +
-    labs(x = label_long(paste0("time_increase_per_100_", gsub("n_", "", feature)))) +
+    labs(x = label_long(paste0("time_per_100_", gsub("n_", "", feature)))) +
     theme_pub() +
     no_margin_sides +
     theme(panel.grid.major.y = element_line(color = "#AAAAAA"))
@@ -166,13 +190,18 @@ plot_slope <- function(feature) {
 
 plot_slope_cells <- plot_slope("n_cells")
 plot_slope_features <- plot_slope("n_features")
+plot_slope_cells
+
+
+##
 
 g <- patchwork::wrap_plots(
   plot_average_time,
   plot_time_classification,
   plot_slope_cells,
   plot_slope_features,
-  widths = c(2, 1, 2, 2),
+  plot_average_memory,
+  widths = c(2, 1, 2, 2, 2),
   nrow = 1
 )
 

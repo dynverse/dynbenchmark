@@ -3,7 +3,6 @@
 library(dynbenchmark)
 library(tidyverse)
 library(dynutils)
-library(survival)
 
 experiment("05-scaling")
 
@@ -70,7 +69,8 @@ models <-
       mutate(
         time = time_method,
         ltime = log10(time_method),
-        mem = max_mem
+        mem = max_mem,
+        lmem = log10(mem)
       )
 
     # predict time
@@ -81,11 +81,13 @@ models <-
     }
     environment(predict_time) <- list2env(lst(model_time))
 
+    print(dat$method_id[[1]])
+
     # predict memory
-    model_mem <- mgcv::gam(mem ~ s(lnrow, lncol), data = dat)
+    model_mem <- mgcv::gam(lmem ~ s(lnrow, lncol), data = dat %>% filter(!is.infinite(lmem)))
     predict_mem <- function(n_cells, n_features) {
       data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
-      predict(model_mem, data)
+      10^predict(model_mem, data)
     }
     environment(predict_mem) <- list2env(lst(model_mem))
 
