@@ -27,8 +27,8 @@ This repo contains the scripts to reproduce the manuscript
 > [doi:10.1101/276907](https://doi.org/10.1101/276907)
 > [![altmetric](https://badges.altmetric.com/?size=100&score=101&types=btttttwg&style=bar)](https://altmetric.com/details/33972849)
 
-(Note that this preprint is currently outdated, but cannot be updated
-because the paper is under revision)
+(Note that this preprint is currently very outdated, see below for more
+recent results)
 
 ## Experiments
 
@@ -46,7 +46,7 @@ folders:
 | 4  | Method testing           | [📄➡](scripts/04-method_testing)           | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/04-method_testing)           |
 | 5  | Scaling                  | [📄➡](scripts/05-scaling)                  | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/05-scaling)                  |
 | 6  | Benchmark                | [📄➡](scripts/06-benchmark)                | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/06-benchmark)                |
-| 7  | Stability                | [📄➡](scripts/07-stability)                |                                                                                                |
+| 7  | Stability                | [📄➡](scripts/07-stability)                | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/07-stability)                |
 | 8  | Summary                  | [📄➡](scripts/08-summary)                  | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/08-summary)                  |
 | 9  | Guidelines               | [📄➡](scripts/09-guidelines)               | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/09-guidelines)               |
 | 10 | Benchmark interpretation | [📄➡](scripts/10-benchmark_interpretation) | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/10-benchmark_interpretation) |

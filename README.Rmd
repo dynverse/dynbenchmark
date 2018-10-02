@@ -40,7 +40,7 @@ Helena Todorov <a href='https://github.com/Helena-todd'><img src='https://github
 <em> Yvan Saeys </em> <a href='https://github.com/saeyslab'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>  
 [bioRxiv:276907](https://www.biorxiv.org/content/early/2018/03/05/276907) [doi:10.1101/276907](https://doi.org/10.1101/276907) [![altmetric](`r get_altmetric_badge()`)](https://altmetric.com/details/33972849)
 
-(Note that this preprint is currently outdated, but cannot be updated because the paper is under revision)
+(Note that this preprint is currently very outdated, see below for more recent results)
 
 ## Experiments
 

@@ -1,9 +1,6 @@
 
 # Dataset characterisation
 
-| \# | script/folder                                       | description |
-| :- | :-------------------------------------------------- | :---------- |
-| 1  | [📄`topology.R`](01-topology.R)                      |             |
-| 1  | [📄`synthetic.R`](1-synthetic.R)                     |             |
-| 2  | [📄`real.R`](2-real.R)                               |             |
-| 3  | [📄`trajectory_type_dag.R`](3-trajectory_type_dag.R) |             |
+| \# | script/folder                  | description                                               |
+| :- | :----------------------------- | :-------------------------------------------------------- |
+| 1  | [📄`topology.R`](01-topology.R) | An overview of all the topologies present in the datasets |

@@ -69,9 +69,6 @@ dynwrap.
 
 ## [Dataset characterisation](04-dataset_characterisation)
 
-| \# | script/folder                                                                   | description |
-| :- | :------------------------------------------------------------------------------ | :---------- |
-| 1  | [📄`topology.R`](04-dataset_characterisation/01-topology.R)                      |             |
-| 1  | [📄`synthetic.R`](04-dataset_characterisation/1-synthetic.R)                     |             |
-| 2  | [📄`real.R`](04-dataset_characterisation/2-real.R)                               |             |
-| 3  | [📄`trajectory_type_dag.R`](04-dataset_characterisation/3-trajectory_type_dag.R) |             |
+| \# | script/folder                                              | description                                               |
+| :- | :--------------------------------------------------------- | :-------------------------------------------------------- |
+| 1  | [📄`topology.R`](04-dataset_characterisation/01-topology.R) | An overview of all the topologies present in the datasets |
