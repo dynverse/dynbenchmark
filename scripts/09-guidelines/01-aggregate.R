@@ -49,7 +49,7 @@ methods_aggr <- methods_aggr %>%
 
 # benchmarking
 benchmark_metrics <- dynbenchmark::metrics_evaluated %>% filter(type != "overall")
-benchmark_results <- read_rds(result_file("benchmark_results_unnormalised.rds", experiment_id = "07-benchmark"))
+benchmark_results <- read_rds(result_file("benchmark_results_unnormalised.rds", experiment_id = "06-benchmark"))
 benchmark <- benchmark_results$raw_data %>%
   select(-prior_df) %>%
   select(method_id, dataset_id, dataset_trajectory_type, !!!benchmark_metrics$metric_id) %>%

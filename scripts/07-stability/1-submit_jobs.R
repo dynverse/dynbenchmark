@@ -1,22 +1,24 @@
 library(dynbenchmark)
 library(tidyverse)
 
-experiment("07-benchmark")
+experiment("07-stability")
 
 if (!file.exists(derived_file("design.rds"))) {
   timeout_sec <- 60 * 60
   memory_gb <- 16
   num_repeats <- 1
+
   metrics <- c("correlation", "edge_flip", "featureimp_cor", "featureimp_wcor", "F1_branches", "him")
+
+  list2env(readr::read_rds(path = derived_file("dataset_params.rds")), environment())
+  benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", "06-benchmark"))
+  benchmark_results_unnormalised <- read_rds(result_file("benchmark_results_unnormalised.rds", "06-benchmark"))
 
   ##########################################################
   ###############       DEFINE METHODS       ###############
   ##########################################################
 
-  scaling <- read_rds(result_file("scaling.rds", "05-scaling"))
-
-  # need to look into scaling results of these methods first
-  method_ids <- scaling$models$method_id
+  method_ids <- benchmark_results_input$methods_info$method_id
 
   methods <-
     dynwrap::get_ti_methods(method_ids, evaluate = FALSE) %>%
@@ -51,41 +53,7 @@ if (!file.exists(derived_file("design.rds"))) {
   ##########################################################
   ###############       DEFINE DATASETS      ###############
   ##########################################################
-  datasets <-
-    load_datasets() %>%
-    mutate(
-      lnrow = log10(map_dbl(cell_ids, length)),
-      lncol = log10(map_dbl(feature_info, nrow))
-    ) %>%
-    select_if(is.atomic) %>%
-    mutate(
-      type = "character",
-      fun = map(id, ~ function() load_dataset(., as_tibble = FALSE))
-    )
-
-  # determine method execution order by predicting
-  # the running times of each method
-  predicted_times <-
-    pmap_df(scaling$models, function(method_id, model_time, model_mem, ...) {
-      datasets2 <- datasets %>% rename(dataset_id = id)
-      datasets2$method_id <- method_id
-      datasets2$time_lpred = pmin(predict(model_time, datasets2)[,1], log10(timeout_sec))
-      datasets2$mem_lpred = pmin(predict(model_mem, datasets2)[,1], log10(memory_gb * 1e9))
-      datasets2
-    }) %>%
-    mutate(time_pred = 10^time_lpred, mem_pred = 10^mem_lpred)
-
-  preds_dataset <-
-    predicted_times %>%
-    group_by(dataset_id) %>%
-    summarise_at(c("time_lpred", "mem_lpred", "time_pred", "mem_pred"), sum) %>%
-    mutate(
-      category = paste0("Cat", cut(log10(time_pred), breaks = 5, labels = FALSE))
-    )
-
-  datasets <- datasets %>% left_join(preds_dataset %>% select(id = dataset_id, category), by = "id")
-
-  preds_dataset %>% group_by(category) %>% summarise(time_pred = sum(time_pred), n = n()) %>% mutate(realtime = time_pred / 3600 / 192)
+  datasets <- readr::read_rds(derived_file("datasets.rds"))
 
   ##########################################################
   ###############       CREATE DESIGN        ###############
@@ -95,28 +63,35 @@ if (!file.exists(derived_file("design.rds"))) {
       datasets = datasets,
       methods = methods,
       parameters = parameters,
-      num_repeats = num_repeats
+      num_repeats = 1
     )
+
+  predicted_times <-
+    inner_join(
+      benchmark_results_unnormalised$raw_data %>% select(orig_dataset_id = dataset_id, method_id, time_method),
+      datasets %>% select(id, orig_dataset_id),
+      by = "orig_dataset_id"
+    ) %>%
+    mutate(time_method = ifelse(is.na(time_method), timeout_sec, time_method))
 
   method_ord <-
     predicted_times %>%
     group_by(method_id) %>%
-    summarise(time_lpred = mean(time_lpred), mem_lpred = mean(mem_lpred)) %>%
-    arrange(time_lpred) %>%
+    summarise(time_method = sum(time_method)) %>%
+    arrange(time_method) %>%
     pull(method_id)
 
-  design$crossing <- design$crossing %>%
-    left_join(preds_dataset %>% select(dataset_id, category), by = "dataset_id") %>%
-    left_join(predicted_times, by = c("method_id", "dataset_id")) %>%
+  design$crossing <-
+    design$crossing %>%
     mutate(
       method_order = match(method_id, method_ord)
     ) %>%
-    arrange(category, method_order)
+    arrange(method_order)
 
   # save configuration
   write_rds(design, derived_file("design.rds"), compress = "xz")
   write_rds(metrics, result_file("metrics.rds"), compress = "xz")
-  write_rds(lst(timeout_sec, memory_gb, metrics, num_repeats), result_file("params.rds"), compress = "xz")
+  write_rds(lst(timeout_sec, memory_gb, metrics, num_repeats, num_bootstraps, bootstrap_pct_cells, bootstrap_pct_features, orig_dataset_ids = did_sel), result_file("params.rds"), compress = "xz")
 }
 
 ##########################################################
@@ -126,22 +101,14 @@ design_filt <- read_rds(derived_file("design.rds"))
 list2env(read_rds(result_file("params.rds")), environment())
 
 # step 1:
-# design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("identity", "scorpius", "paga", "mst"), category == "Cat1")
-
-# step 2:
-# design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2"))
-
-# step 3:
-# design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2", "Cat3"))
-
-# step 4:
+# design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("identity", "scorpius", "paga", "mst"))
 
 # submit job
 benchmark_submit(
   design = design_filt,
-  qsub_grouping = "{method_id}/{param_id}/{category}",
+  qsub_grouping = "{method_id}/{param_id}",
   qsub_params = lst(timeout = timeout_sec, memory = paste0(memory_gb, "G")),
   metrics = metrics,
   verbose = TRUE,
-  output_models = TRUE
+  output_models = FALSE
 )

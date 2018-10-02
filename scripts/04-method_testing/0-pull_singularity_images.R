@@ -8,9 +8,8 @@ library(tidyverse)
 experiment("singularity_images")
 
 # If nothing is running on the cluster, run this on the login node to clear temporary folders:
-# rm -rf /tmp/* /data/*
-# for i in $(seq 1 8); do ssh prismcls0$i 'rm -rf /tmp/* /data/*'; done
-# for i in $(seq 1 8); do ssh prismcls0$i 'mkdir /data/tmp'; done
+# rm -rf /tmp/* /data/*; mkdir /data/tmp
+# for i in $(seq 1 8); do ssh prismcls0$i 'rm -rf /tmp/* /data/*; mkdir /data/tmp'; done
 
 handle <- qsub::qsub_lapply(
   X = dynmethods::methods$docker_repository,

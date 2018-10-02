@@ -67,8 +67,8 @@ scaling_models <-
 #####################################################
 #             READ BENCHMARKING RESULTS             #
 #####################################################
-benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", experiment_id = "07-benchmark"))
-benchmark_results_normalised <- read_rds(result_file("benchmark_results_normalised.rds", experiment_id = "07-benchmark"))
+benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", experiment_id = "06-benchmark"))
+benchmark_results_normalised <- read_rds(result_file("benchmark_results_normalised.rds", experiment_id = "06-benchmark"))
 
 execution_metrics <- c("pct_errored", "pct_execution_error", "pct_memory_limit", "pct_method_error_all", "pct_method_error_stoch", "pct_time_limit")
 bench_metrics <- paste0("norm_", benchmark_results_input$metrics)
@@ -99,12 +99,17 @@ bench_sources <-
 rm(execution_metrics, bench_metrics, all_metrics, data_aggs, benchmark_results_input, benchmark_results_normalised) # is important in large scripts
 
 #####################################################
+#               READ STABILITY RESULTS              #
+#####################################################
+stability <- read_rds(result_file("stability_results.rds", experiment_id = "07-stability")) %>% select(-param_id) %>% spread(metric, value)
+
+#####################################################
 #                  COMBINE RESULTS                  #
 #####################################################
 
 results <- Reduce(
   function(a, b) left_join(a, b, by = "method_id"),
-  list(method_info, qc_results, scaling_scores, scaling_preds, scaling_models, bench_overall, bench_trajtypes, bench_sources)
+  list(method_info, qc_results, scaling_scores, scaling_preds, scaling_models, bench_overall, bench_trajtypes, bench_sources, stability)
 )
 
 rm(list = setdiff(ls(), "results")) # more than this haiku
@@ -114,9 +119,10 @@ rm(list = setdiff(ls(), "results")) # more than this haiku
 #####################################################
 metric_weights <-
   c(
-    benchmark_overall_overall = 2,
+    benchmark_overall_overall = 1,
     qc_overall_overall = 1,
-    scaling_pred_timescore_overall = 1
+    scaling_pred_timescore_overall = 1,
+    stability_overall_overall = 1
   )
 
 results$summary_overall_overall <-
@@ -124,6 +130,10 @@ results$summary_overall_overall <-
   select(!!names(metric_weights)) %>%
   mutate_all(function(x) ifelse(is.na(x), mean(x, na.rm = TRUE), x)) %>%
   dyneval::calculate_geometric_mean(weights = metric_weights)
+
+
+g <- GGally::ggpairs(results %>% select(summary_overall_overall, !!names(metric_weights))) + theme_bw()
+ggsave(result_file("compare_metrics.pdf"), g, width = 10, height = 10)
 
 
 #####################################################

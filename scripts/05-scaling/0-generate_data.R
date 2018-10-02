@@ -1,3 +1,5 @@
+#' Generate up- and downscaled datasets
+
 library(dynbenchmark)
 library(tidyverse)
 

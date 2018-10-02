@@ -1,4 +1,4 @@
-
+#' Helper to generate an up- and downscaled dataset which looks similar to the original datasets
 
 # define dataset function. two datasets with the same seed but different
 # dimensionalities should have the same values in overlapping columns and rows.

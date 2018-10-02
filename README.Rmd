@@ -40,7 +40,7 @@ Helena Todorov <a href='https://github.com/Helena-todd'><img src='https://github
 <em> Yvan Saeys </em> <a href='https://github.com/saeyslab'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>  
 [bioRxiv:276907](https://www.biorxiv.org/content/early/2018/03/05/276907) [doi:10.1101/276907](https://doi.org/10.1101/276907) [![altmetric](`r get_altmetric_badge()`)](https://altmetric.com/details/33972849)
 
-(Note that this preprint is currently outdated, but cannot be updated because the paper is under revision)
+(Note that this preprint is currently very outdated, see below for more recent results)
 
 ## Experiments
 
@@ -55,8 +55,8 @@ extract_scripts_documentation("scripts", recursive = FALSE) %>%
   mutate(
     ix = case_when(is.na(ix) ~ "", TRUE ~ as.character(ix)),
     id = label_long(id),
-    scripts = paste0("[\U1F4C4](", scripts, ")"),
-    results = case_when(is.na(results) ~ "", TRUE ~ paste0("[\U1F4CA](", results, ")"))
+    scripts = paste0("[\U1F4C4\U27A1](", scripts, ")"),
+    results = case_when(is.na(results) ~ "", TRUE ~ paste0("[\U1F4CA\U27A1](", results, ")"))
   ) %>% 
   select(`\\#` = ix, id, scripts, results) %>% 
   knitr::kable()
@@ -82,7 +82,7 @@ The benchmarking pipeline generates (and uses) the following datasets:
 * **Gold standard single-cell datasets**, both real and synthetic, used to evaluated the trajectory inference methods [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1211533.svg)](https://doi.org/10.5281/zenodo.1211533)
 
 ```{r, echo = FALSE, message=FALSE}
-set.seed(1)
+set.seed(3)
 
 datasets <- list_datasets() %>% group_by(source) %>% sample_n(1) %>% pull(id) %>% load_datasets()
 

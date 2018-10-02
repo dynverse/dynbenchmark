@@ -1,3 +1,5 @@
+#' Run the methods on the cluster
+
 library(dynbenchmark)
 library(tidyverse)
 

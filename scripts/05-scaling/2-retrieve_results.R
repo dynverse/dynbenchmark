@@ -1,7 +1,8 @@
+#' Retrieve the results and generate the scalability models
+
 library(dynbenchmark)
 library(tidyverse)
 library(dynutils)
-library(survival)
 
 experiment("05-scaling")
 
@@ -63,50 +64,46 @@ models <-
   filter(sum(error_status == "no_error") > 10) %>% # need at least a few data points
   do({
     dat <- .
+    dat <- dat %>%
+      filter(error_status %in% c("no_error")) %>%
+      mutate(
+        time = time_method,
+        ltime = log10(time_method),
+        mem = max_mem,
+        lmem = log10(mem)
+      )
 
     # predict time
-    dat_time <- dat %>%
-      filter(error_status %in% c("no_error", "time_limit")) %>%
-      mutate(
-        ltime = log10(ifelse(error_status == "time_limit", 3600, time_method))
-      )
-    model_time <- VGAM::vglm(ltime ~ lnrow + lncol, VGAM:::tobit(Upper = log10(3600), Lower = -5), data = dat_time)
+    model_time <- mgcv::gam(ltime ~ s(lnrow, lncol), data = dat)
+    predict_time <- function(n_cells, n_features) {
+      requireNamespace("mgcv")
+      data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
+      10^predict(model_time, data)
+    }
+    environment(predict_time) <- list2env(lst(model_time))
 
-    # reducing object size
-    environment(model_time@terms$terms) <- NULL
-    environment(model_time@misc$formula) <- NULL
-
-    coef_values_time <- set_names(
-      model_time@coefficients[c("(Intercept):1", "lnrow", "lncol")],
-      c("time_intercept", "time_lnrow", "time_lncol")
-    )
+    print(dat$method_id[[1]])
 
     # predict memory
-    dat_mem <- dat %>%
-      filter(error_status %in% c("no_error", "memory_limit")) %>%
-      mutate(
-        lmem = log10(ifelse(error_status == "memory_limit", 10 * 1e9, max_mem))
-      )
-    model_mem <- VGAM::vglm(lmem ~ lnrow + lncol, VGAM:::tobit(Upper = log10(10 * 1e9), Lower = 8), data = dat_mem)
-
-    # reducing object size
-    environment(model_mem@terms$terms) <- NULL
-    environment(model_mem@misc$formula) <- NULL
-
-    coef_values_mem <- set_names(
-      model_mem@coefficients[c("(Intercept):1", "lnrow", "lncol")],
-      c("mem_intercept", "mem_lnrow", "mem_lncol")
-    )
+    model_mem <- mgcv::gam(lmem ~ s(lnrow, lncol), data = dat %>% filter(!is.infinite(lmem)))
+    predict_mem <- function(n_cells, n_features) {
+      requireNamespace("mgcv")
+      data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
+      10^predict(model_mem, data)
+    }
+    environment(predict_mem) <- list2env(lst(model_mem))
 
     # calculate preds
     pred_ind <-
       datasets_info %>%
-      select(dataset_id = id, lnrow, lncol) %>%
+      select(dataset_id = id, nrow, ncol, lnrow, lncol) %>%
       mutate(
         method_id = dat$method_id[[1]],
         method_name = dat$method_name[[1]],
-        time_lpred = predict(model_time, datasets_info)[,1],
-        mem_lpred = predict(model_mem, datasets_info)[,1]
+        time_pred = predict_time(nrow, ncol),
+        mem_pred = predict_mem(nrow, ncol),
+        time_lpred = log10(time_pred),
+        mem_lpred = log10(mem_pred)
       )
 
     # format output
@@ -115,14 +112,13 @@ models <-
       summarise(pct_errored = mean(error_status != "no_error")) %>%
       ungroup() %>%
       mutate(
-        model_time = list(model_time),
-        model_mem = list(model_mem),
+        predict_time = list(predict_time),
+        predict_mem = list(predict_mem),
         pred_ind = list(pred_ind)
       ) %>%
-      bind_cols(as.data.frame(t(c(coef_values_time, coef_values_mem)))) %>%
       mutate(
-        time_lpred = mean(pred_ind[[1]]$time_lpred),
-        mem_lpred = mean(pred_ind[[1]]$mem_lpred)
+        time_lpred = mean(log10(pred_ind[[1]]$time_pred)),
+        mem_lpred = mean(log10(pred_ind[[1]]$mem_pred))
       )
   }) %>%
   ungroup()
@@ -148,17 +144,18 @@ scaling_exp <- tribble(
   "cells10k", "features10k", 4, 4,
   "cells10k", "features100k", 4, 5,
   "cells100k", "features10k", 5, 4
-)
+) %>% mutate(n_cells = 10^lnrow, n_features = 10^lncol)
 
 scaling_preds <-
   models %>%
-  select(method_id, model_time) %>%
+  select(method_id, predict_time) %>%
   rowwise() %>%
   do({
     df <- .
     exp <- scaling_exp
     exp$method_id <- df$method_id
-    exp$logtime <- predict(df$model_time, exp)[,1]
+    exp$time <- df$predict_time(exp$n_cells, exp$n_features)
+    exp$logtime <- log10(exp$time)
     exp
   }) %>%
   ungroup() %>%
@@ -166,14 +163,7 @@ scaling_preds <-
     scaletime = (logtime - log10(10)) / (log10(3600 * 24 * 7) - log10(10)),
     score = 1 - ifelse(scaletime > 1, 1, ifelse(scaletime < 0, 0, scaletime)),
     time = 10^logtime,
-    timestr = case_when(
-      time < 1 ~ "<1s",
-      time < 60 ~ paste0(floor(time), "s"),
-      time < 3600 ~ paste0(floor(time / 60), "m"),
-      time < 3600 * 24 ~ paste0(floor(time / 3600), "h"),
-      time < 3600 * 24 * 7 ~ paste0(floor(time / 3600 / 24), "d"),
-      TRUE ~ ">7d"
-    )
+    timestr = label_time(time)
   )
 
 scaling_agg <-

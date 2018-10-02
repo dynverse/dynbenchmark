@@ -1,7 +1,7 @@
 library(dynbenchmark)
 library(tidyverse)
 
-experiment("07-benchmark")
+experiment("06-benchmark")
 
 ##########################################################
 ############### PART TWO: RETRIEVE RESULTS ###############
@@ -11,9 +11,9 @@ experiment("07-benchmark")
 # benchmark_fetch_results(TRUE)
 # qsub::rsync_remote(
 #   remote_src = FALSE,
-#   path_src = derived_file(remote = FALSE, experiment = "07-benchmark"),
+#   path_src = derived_file(remote = FALSE, experiment = "06-benchmark"),
 #   remote_dest = TRUE,
-#   path_dest = derived_file(remote = TRUE, experiment = "07-benchmark"),
+#   path_dest = derived_file(remote = TRUE, experiment = "06-benchmark"),
 #   verbose = TRUE,
 #   exclude = "*/r2gridengine/*"
 # )
@@ -21,9 +21,9 @@ experiment("07-benchmark")
 # If you want to download the output from prism
 # qsub::rsync_remote(
 #   remote_src = TRUE,
-#   path_src = derived_file(remote = TRUE, experiment = "07-benchmark"),
+#   path_src = derived_file(remote = TRUE, experiment = "06-benchmark"),
 #   remote_dest = FALSE,
-#   path_dest = derived_file(remote = FALSE, experiment = "07-benchmark"),
+#   path_dest = derived_file(remote = FALSE, experiment = "06-benchmark"),
 #   verbose = TRUE,
 #   exclude = "*/r2gridengine/*"
 # )
@@ -80,18 +80,11 @@ table(raw_data$dataset_source, raw_data$error_status)
 ############### NORM PARAMS ###############
 ###########################################
 
-
-norm_fun <- "normal"
-mean_fun <- "geometric"
-mean_weights <- c("correlation" = 1, "him" = 1, "featureimp_wcor" = 1, "F1_branches" = 1)
-
+metrics <- eval(formals(benchmark_aggregate)$metrics)
+norm_fun <- formals(benchmark_aggregate)$norm_fun
+mean_fun <- formals(benchmark_aggregate)$mean_fun
 tmp <- benchmark_aggregate(
-  data = raw_data %>% filter(error_status == "no_error"),
-  metrics = metrics,
-  norm_fun = norm_fun,
-  mean_fun = mean_fun,
-  mean_weights = mean_weights,
-  dataset_source_weights = c("real/gold" = 1, "real/silver" = 1, "synthetic/dyngen" = 1, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
+  data = raw_data %>% filter(error_status == "no_error")
 )
 
 dataset_source_weights <-
@@ -109,21 +102,21 @@ dataset_source_weights <-
 #########################################
 ############### SAVE DATA ###############
 #########################################
-write_rds(lst(trajtypes, metrics, datasets_info, methods_info, norm_fun, mean_fun, mean_weights, dataset_source_weights), result_file("benchmark_results_input.rds"), compress = "xz")
+write_rds(dataset_source_weights, result_file("dataset_source_weights.rds"))
+write_rds(lst(trajtypes, metrics, datasets_info, methods_info, norm_fun, mean_fun, dataset_source_weights), result_file("benchmark_results_input.rds"), compress = "xz")
 write_rds(lst(raw_data, metrics), result_file("benchmark_results_unnormalised.rds"), compress = "xz")
 
 
 ###################################################
 ############### CREATE AGGREGATIONS ###############
 ###################################################
-list2env(read_rds(result_file("benchmark_results_unnormalised.rds", "07-benchmark")), environment())
+list2env(read_rds(result_file("benchmark_results_unnormalised.rds", "06-benchmark")), environment())
 
 out <- benchmark_aggregate(
   data = raw_data,
   metrics = metrics,
   norm_fun = norm_fun,
   mean_fun = mean_fun,
-  mean_weights = mean_weights,
   dataset_source_weights = dataset_source_weights
 )
 

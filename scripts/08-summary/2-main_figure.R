@@ -72,31 +72,27 @@ palettes <- tribble(
   "benchmark",     viridisLite::viridis(101, option = "magma"),
   "scaling",       viridisLite::viridis(101, option = "cividis"),
   "qc",            viridisLite::viridis(101, option = "viridis"),
-  "error_reasons", error_reasons %>% select(name, colour) %>% deframe()
+  "stability",     viridisLite::viridis(101, option = "plasma"),
+  "error_reasons", error_reasons %>% select(name, colour) %>% deframe(),
+  "white6black4",    c(rep("white", 6), rep("black", 4))
 )
 
 ####################################
 ###        CREATE FIGURES        ###
 ####################################
-script_files <- tribble(
-  ~name, ~width, ~height,
-  "all", 26, 18,
-  "figure2", 26, 18,
-  "figure3", 26, 18,
-  "suppfig", 26, 18
-) %>%
-  mutate(file = map_chr(name, ~ scripts_file(paste0("2a_columns_", ., ".R"))))
+script_files <- c("all", "summary", "detailed", "suppfig")
 
-# fix formatting in scripts
-walk(script_files$file, reformat_tribbles)
+walk(script_files, function(name) {
+  cat("Processing ", name, "\n", sep = "")
+  script_file <- scripts_file(c("2a_columns_", name, ".R"))
+  plot_file <- result_file(c("results_", name, ".pdf"))
 
-mapdf(script_files, function(list) {
-  cat("Processing ", list$name, "\n", sep = "")
-  source(list$file, local = TRUE)
+  reformat_tribbles(script_file)
+  source(script_file, local = TRUE)
 
-  g <- funky_heatmap(data, column_info, column_groups, row_info, row_groups, palettes)
+  g <- funky_heatmap(data = data, column_info = column_info, column_groups = column_groups, row_info = row_info, row_groups = row_groups, palettes = palettes)
 
-  ggsave(result_file(c("overview_", list$name, ".pdf")), g, device = cairo_pdf, width = list$width, height = list$height)
+  ggsave(plot_file, g, device = cairo_pdf, width = g$width/4, height = g$height/4)
 })
 
 

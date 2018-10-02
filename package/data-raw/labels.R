@@ -25,7 +25,8 @@ common_labels <- tribble(
   "harm_mean", "Harmonic mean", "Harmonic mean",
   "dataset_source", "Dataset source", "Dataset source",
   "source", "Dataset source", "Dataset source",
-  "qc", "Quality Control", "QC"
+  "qc", "Quality Control", "QC",
+  "graph", "Connected graph", "Connected graph"
 )
 
 

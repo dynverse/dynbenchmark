@@ -1,3 +1,5 @@
+#' Create an overview figure of the quality control
+
 library(dynbenchmark)
 library(tidyverse)
 library(patchwork)
@@ -175,6 +177,8 @@ plot_qc_overview <- wrap_plots(
   heights = c(0.2, 0.8),
   widths = c(1, 8, 3)
 )
+
+plot_qc_overview
 
 write_rds(
   plot_qc_overview,

@@ -27,8 +27,8 @@ This repo contains the scripts to reproduce the manuscript
 > [doi:10.1101/276907](https://doi.org/10.1101/276907)
 > [![altmetric](https://badges.altmetric.com/?size=100&score=101&types=btttttwg&style=bar)](https://altmetric.com/details/33972849)
 
-(Note that this preprint is currently outdated, but cannot be updated
-because the paper is under revision)
+(Note that this preprint is currently very outdated, see below for more
+recent results)
 
 ## Experiments
 
@@ -38,21 +38,20 @@ accompanied by documentation using github readmes and can thus be easily
 explored by going to the appropriate
 folders:
 
-| \# | id                    | scripts                               | results                                                                                    |
-| :- | :-------------------- | :------------------------------------ | :----------------------------------------------------------------------------------------- |
-| 1  | Datasets              | [📄](scripts/01-datasets)              | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/01-datasets)              |
-| 2  | Metrics               | [📄](scripts/02-metrics)               | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/02-metrics)               |
-| 3  | Methods               | [📄](scripts/03-methods)               | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/03-methods)               |
-| 4  | Method testing        | [📄](scripts/04-method_testing)        | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/04-method_testing)        |
-| 5  | Scaling               | [📄](scripts/05-scaling)               | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/05-scaling)               |
-| 6  | Optimise parameters   | [📄](scripts/06-optimise_parameters)   |                                                                                            |
-| 7  | Benchmark             | [📄](scripts/07-benchmark)             | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/07-benchmark)             |
-| 8  | Summary               | [📄](scripts/08-summary)               | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/08-summary)               |
-| 9  | Guidelines            | [📄](scripts/09-guidelines)            | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/09-guidelines)            |
-| 10 | Topologies            | [📄](scripts/10-topologies)            | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/10-topologies)            |
-| 11 | Example predictions   | [📄](scripts/11-example_predictions)   | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/11-example_predictions)   |
-| 12 | Evaluation robustness | [📄](scripts/12-evaluation_robustness) | [📊](https://github.com/dynverse/dynbenchmark_results/tree/master/12-evaluation_robustness) |
-|    | Varia                 | [📄](scripts/varia)                    |                                                                                            |
+| \# | id                       | scripts                                   | results                                                                                        |
+| :- | :----------------------- | :---------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| 1  | Datasets                 | [📄➡](scripts/01-datasets)                 | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/01-datasets)                 |
+| 2  | Metrics                  | [📄➡](scripts/02-metrics)                  | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/02-metrics)                  |
+| 3  | Methods                  | [📄➡](scripts/03-methods)                  | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/03-methods)                  |
+| 4  | Method testing           | [📄➡](scripts/04-method_testing)           | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/04-method_testing)           |
+| 5  | Scaling                  | [📄➡](scripts/05-scaling)                  | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/05-scaling)                  |
+| 6  | Benchmark                | [📄➡](scripts/06-benchmark)                | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/06-benchmark)                |
+| 7  | Stability                | [📄➡](scripts/07-stability)                | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/07-stability)                |
+| 8  | Summary                  | [📄➡](scripts/08-summary)                  | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/08-summary)                  |
+| 9  | Guidelines               | [📄➡](scripts/09-guidelines)               | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/09-guidelines)               |
+| 10 | Benchmark interpretation | [📄➡](scripts/10-benchmark_interpretation) | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/10-benchmark_interpretation) |
+| 11 | Example predictions      | [📄➡](scripts/11-example_predictions)      | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/11-example_predictions)      |
+|    | Varia                    | [📄➡](scripts/varia)                       |                                                                                                |
 
 We also have several additional subfolders:
 
@@ -86,8 +85,7 @@ The benchmarking pipeline generates (and uses) the following datasets:
 ![datasets](package/man/figures/datasets.png)
 
   - **The performance of methods** used for the [results overview
-    figure](https://github.com/dynverse/dynbenchmark_results/tree/master/08-summary/overview.pdf)
-    and the
+    figure](NA) and the
     [dynguidelines](https://www.github.com/dynverse/dynguidelines) app.
     *Not yet available*, but can be accessed in the results folder.
 

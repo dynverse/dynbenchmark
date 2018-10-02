@@ -29,3 +29,5 @@ dynwrap.
 | 2b | [📄`simulate_prosstt_datasets.R`](02b-simulate_prosstt_datasets.R)   | [PROSSTT](https://github.com/soedinglab/prosstt), expression is sampled from a linear model which depends on pseudotime     |
 | 2c | [📄`simulate_splatter_datasets.R`](02c-simulate_splatter_datasets.R) | [Splatter](https://github.com/Oshlack/splatter), simulations of non-linear paths between different states                   |
 | 2d | [📄`simulate_dyntoy_datasets.R`](02d-simulate_dyntoy_datasets.R)     | [dyntoy](https://github.com/dynverse/dyntoy), simulations of toy data using random expression gradients in a reduced space  |
+| 3  | [📄`gather_metadata.R`](03-gather_metadata.R)                        | Gathers some metadata about all the synthetic datasets                                                                      |
+| 4  | [📄`dyngen_samplers_table.R`](04-dyngen_samplers_table.R)            |                                                                                                                             |

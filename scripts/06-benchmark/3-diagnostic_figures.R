@@ -2,7 +2,7 @@ library(dynbenchmark)
 library(tidyverse)
 library(dynplot)
 
-experiment("07-benchmark")
+experiment("06-benchmark")
 
 
 ############################################################
@@ -33,6 +33,6 @@ data <- data %>% mutate(method_id = factor(method_id, levels = method_ord$method
 # execute plotting scripts
 source(scripts_file("3a-overall_comparison.R"))
 source(scripts_file("3b-time_mem_predictions.R"))
-# source(scripts_file("3c-normalisation.R"))
+source(scripts_file("3c-normalisation.R"))
 source(scripts_file("3d-compare_sources.R"))
 # source(scripts_file("3e-stability.R"))

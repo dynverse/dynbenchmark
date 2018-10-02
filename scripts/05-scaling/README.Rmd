@@ -6,7 +6,7 @@ output: dynbenchmark::github_markdown_nested
 
 Here we test how well a method scales with increasing number of features (genes) and/or cells.
 
-Each method is run on randomly generated data with increasing gene set and cell set sizes, and the execution times and memory usages are modelled using linear models.
+Each method is run on down- and upscaled datasets with increasing gene set and cell set sizes, and the execution times and memory usages are modelled using thin plate regressions splines within a generalised additivate model.
 
 ```{r}
 dynbenchmark::render_scripts_documentation()
