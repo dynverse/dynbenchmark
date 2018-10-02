@@ -160,6 +160,7 @@ summary <-
   summarise(mse_test = mean(mse_test, na.rm = TRUE), mse_valid = mean(mse_valid)) %>%
   arrange(mse_test)
 
-write_rds(summary, result_file("summary.rds"))
-write_rds(join, result_file("join.rds"))
+write_rds(summary, result_file("summary.rds"), compress = "xz")
+join2 <- join %>% select(-model_fit.x, -model_fit.y, -test_data, -valid_data) %>% as.data.frame()
+write_rds(join2, result_file("join.rds"), compress = "xz")
 
