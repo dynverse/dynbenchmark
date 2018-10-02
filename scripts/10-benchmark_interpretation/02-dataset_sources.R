@@ -3,20 +3,14 @@ library(dynbenchmark)
 
 experiment("10-benchmark_interpretation")
 
-out <- read_rds(result_file("benchmark_results_normalised.rds", "06-benchmark"))
-list2env(read_rds(result_file("benchmark_results_input.rds", "06-benchmark")), environment())
+data <- read_rds(result_file("benchmark_results_normalised.rds", "06-benchmark"))$data
 
 # aggregate without errors
-tmp <- benchmark_aggregate(
-  data = out$data %>% filter(error_status == "no_error"),
-  metrics = metrics,
-  norm_fun = norm_fun,
-  mean_fun = mean_fun,
-  mean_weights = mean_weights,
-  dataset_source_weights = c("real/gold" = 1, "real/silver" = 1, "synthetic/dyngen" = 1, "synthetic/dyntoy" = 1, "synthetic/prosstt" = 1, "synthetic/splatter" = 1)
-)
+data_aggregations <- benchmark_aggregate(
+  data = data %>% filter(error_status == "no_error")
+)$data_aggregations
 
-overall_dataset_source_scores <- tmp$data_aggregations %>%
+overall_dataset_source_scores <- data_aggregations %>%
   filter(dataset_trajectory_type == "overall", dataset_source != "mean") %>%
   select(method_id, dataset_source, overall) %>%
   spread(dataset_source, overall)
@@ -39,9 +33,9 @@ plot_dataset_source_correlation <- gold_dataset_source_scores %>%
     facet_grid(.~dataset_source) +
     scale_x_continuous(limits = c(0, 1)) +
     scale_y_continuous(limits = c(0, 1)) +
-    labs(x = "Overall performance on datasets from source", y = "Overall performance on real gold datasets") +
+    labs(x = "Overall performance on datasets from source", y = "Overall performance on real/gold datasets") +
     theme_pub()
 
 plot_dataset_source_correlation
 
-write_rds(plot_dataset_source_correlation, result_file("dataset_source_correlation.rds"))
+write_rds(plot_dataset_source_correlation, derived_file("dataset_source_correlation.rds"))

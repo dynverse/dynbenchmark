@@ -1,34 +1,42 @@
+library(tidyverse)
+library(dynbenchmark)
+
+experiment("10-benchmark_interpretation")
+
+data <- read_rds(result_file("benchmark_results_normalised.rds", "06-benchmark"))$data
+
+
 ##  ............................................................................
 ##  Find a "good-enough" subset of methods                                  ####
-method_subset_preparer_range <- function(data, range = 0.05) {
-  data <- data %>%
+method_subset_preparer_range <- function(data_oi, range = 0.05) {
+  data_oi <- data_oi %>%
     group_by(dataset_id) %>%
     mutate(success = overall >= max(overall) * (1-range)) %>%
     ungroup()
 
-  data
+  data_oi
 }
 
-method_subset_preparer_overall_cutoff <- function(data, overall_cutoff = 0.75) {
-  data <- data %>%
+method_subset_preparer_overall_cutoff <- function(data_oi, overall_cutoff = 0.75) {
+  data_oi <- data_oi %>%
     group_by(dataset_id) %>%
     mutate(success = overall >= overall_cutoff) %>%
     ungroup()
 
-  data
+  data_oi
 }
 
-method_subset_preparer_top <- function(data) {
-  data <- data %>%
+method_subset_preparer_top <- function(data_oi) {
+  data_oi <- data_oi %>%
     group_by(dataset_id) %>%
     mutate(success = overall == max(overall)) %>%
     ungroup()
 
-  data
+  data_oi
 }
 
-scorer <- function(method_ids, data) {
-  data %>%
+scorer <- function(method_ids, data_oi) {
+  data_oi %>%
     filter(method_id %in% !!method_ids) %>%
     filter(success) %>%
     group_by(dataset_id) %>%
@@ -39,14 +47,15 @@ scorer <- function(method_ids, data) {
 
 
 #' @example
-#' data <- out$data
 #' trajectory_types_oi <- "tree"
 
 # preparer <- method_subset_preparer_top
-preparer <- function(data) {method_subset_preparer_range(data, range = 0.05)}
+preparer <- function(data_oi) {method_subset_preparer_range(data_oi, range = 0.05)}
 
 
 get_top_methods <- function(data, trajectory_types_oi) {
+  data_oi <- data
+
   # filter methods:
   # - can detect at least one of the requested trajectory type(s)
   # - does not require any prior information
@@ -57,21 +66,28 @@ get_top_methods <- function(data, trajectory_types_oi) {
       TRUE
     ) %>%
     pull(id)
+  data_oi <- data_oi %>% filter(method_id %in% relevant_method_ids)
 
-  # filter methods & datasets
-  data <- data %>%
+  # filter datasets
+  data_oi <- data_oi %>%
     filter(dataset_trajectory_type %in% !!trajectory_types_oi) %>% # filter datasets on trajectory type
-    filter(method_id %in% relevant_method_ids) %>%  # filter methods on trajectory type
-    complete(dataset_id, method_id, fill = list(overall = 0)) # make sure all methods have all datasets, even if this means that they get a zero
+    complete(dataset_id, method_id, fill = list(overall = 0)) # make sure all methods have all datasets, even if this means that they get a zero overall score
 
-  data <- data %>% left_join(dataset_weights %>% select(dataset_id, weight), "dataset_id")
+  # add dataset weights
+  dataset_weights_oi <- dataset_weights %>%
+    select(dataset_id, weight) %>%
+    filter(dataset_id %in% data_oi$dataset_id) %>%
+    mutate(weight = weight/sum(weight))
 
-  if(nrow(data) == 0) stop("No data found!")
+  data_oi <- data_oi %>%
+    left_join(dataset_weights_oi, "dataset_id")
 
-  all_method_ids <- unique(data$method_id)
+  if(nrow(data_oi) == 0) stop("No data found!")
 
-  # prepare data specific for this scorer
-  data <- preparer(data)
+  all_method_ids <- unique(data_oi$method_id)
+
+  # get the successes for this data_oi
+  data_oi <- preparer(data_oi)
 
   # add one method step by step
   step_ix <- 1
@@ -83,7 +99,7 @@ get_top_methods <- function(data, trajectory_types_oi) {
       method_id = setdiff(all_method_ids, method_ids)
     ) %>%
       mutate(
-        score = map(method_id, c, method_ids) %>% map_dbl(scorer, data = data)
+        score = map(method_id, c, method_ids) %>% map_dbl(scorer, data_oi = data_oi)
       ) %>%
       arrange(-score) %>%
       mutate(step_ix = step_ix)
@@ -115,7 +131,7 @@ trajectory_types_oi <- c("tree")
 # trajectory_types_oi <- c("linear", "bifurcation", "multifurcation", "tree")
 # trajectory_types_oi <- dynwrap::trajectory_types$id
 colour <- dynwrap::trajectory_types$colour[dynwrap::trajectory_types$id == last(trajectory_types_oi)]
-steps <- get_top_methods(out$data, trajectory_types_oi)
+steps <- get_top_methods(data, trajectory_types_oi)
 
 
 relevant_steps <- steps %>%
@@ -168,7 +184,7 @@ steps_combinations <- tibble(
     combination_id = map_chr(trajectory_types_oi, ~if(length(.) > 1) {paste0(first(.), " \U2192 ", last(.))} else {.}) %>% fct_inorder(),
     most_complex_trajectory_type = map_chr(trajectory_types_oi, last)
   ) %>%
-  mutate(steps = map(trajectory_types_oi, get_top_methods, data = out$data))
+  mutate(steps = map(trajectory_types_oi, get_top_methods, data = data))
 
 
 all_steps <- steps_combinations %>%
