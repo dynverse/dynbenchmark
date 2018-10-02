@@ -48,6 +48,7 @@ scorer <- function(method_ids, data_oi) {
 
 #' @example
 #' trajectory_types_oi <- "tree"
+#' data_oi <- data
 
 # preparer <- method_subset_preparer_top
 preparer <- method_subset_preparer_range
@@ -122,15 +123,15 @@ get_top_methods <- function(data_oi, trajectory_types_oi) {
 
 ##  ............................................................................
 ##  Plot a single combination of trajectory types                           ####
-trajectory_types_oi <- c("tree")
+# trajectory_types_oi <- c("tree")
 # trajectory_types_oi <- c("linear", "bifurcation", "multifurcation", "tree")
-# trajectory_types_oi <- dynwrap::trajectory_types$id
+trajectory_types_oi <- dynwrap::trajectory_types$id
 colour <- dynwrap::trajectory_types$colour[dynwrap::trajectory_types$id == last(trajectory_types_oi)]
 steps <- get_top_methods(data, trajectory_types_oi)
 
 relevant_steps <- steps %>%
   group_by(step_ix) %>%
-  filter(any(score < 0.95)) %>%
+  filter(any(score < 0.9)) %>%
   ungroup()
 
 relevant_steps_labels <- relevant_steps %>%
@@ -140,10 +141,10 @@ relevant_steps_labels <- relevant_steps %>%
 
 plot_complementarity_example <- relevant_steps %>%
   ggplot(aes(step_ix, score)) +
+    geom_hline(yintercept = 1, linetype = "dashed", color = "#333333", alpha = 0.5) +
     ggbeeswarm::geom_quasirandom(aes(color = chosen), data = filter(relevant_steps, !chosen), color = "#888888", alpha = 0.5, groupOnX = TRUE) +
   ggrepel::geom_label_repel(aes(y = score, label = label), data = relevant_steps_labels, angle = 0, label.size = 0, size = 3, lineheight = 0.8, nudge_y = 0.1, direction = "y") +
     geom_point(data = relevant_steps %>% filter(chosen), color = colour) +
-    geom_hline(yintercept = 1, linetype = "dashed", color = "#333333", alpha = 0.5) +
     scale_x_continuous(label_long("n_methods"), breaks = seq_len(max(relevant_steps$step_ix)), expand = c(0, 0), limits = c(0, max(relevant_steps$step_ix) + 1)) +
     scale_y_continuous("Datasets with a top model\n(at least a performance of 95% of best model)", limits = c(0, 1.2), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = scales::percent, expand = c(0, 0)) +
     expand_limits(y = c(0, 0)) +
@@ -153,7 +154,8 @@ plot_complementarity_example <- relevant_steps %>%
 
 plot_complementarity_example
 
-write_rds(plot_complementarity_example, result_file("complementarity_example.rds"))
+ggsave(result_file("complementarity_example.pdf"), plot_complementarity_example, width = 6, height = 6)
+write_rds(plot_complementarity_example, derived_file("complementarity_example.rds"))
 
 
 
@@ -200,7 +202,6 @@ trajectory_type_colours <- dynwrap::trajectory_types %>% select(id, colour) %>% 
 
 plot_complementarity_combinations <- relevant_steps %>%
   ggplot(aes(x = score, xend = score, y = 1, yend = 0)) +
-  # ggbeeswarm::geom_quasirandom(groupOnX = F) +
   geom_rect(aes(xmin = score_start, xmax = score, ymin = 0, ymax = 1, fill = factor(step_ix)), data = relevant_steps_labels) +
   geom_hline(yintercept = 0, color = "#888888") +
   geom_hline(yintercept = 1, color = "#888888") +
@@ -239,21 +240,16 @@ plot_complementarity_combinations <- relevant_steps %>%
 
 plot_complementarity_combinations
 
-write_rds(plot_complementarity_combinations, result_file("complementarity_combinations.rds"))
-
-
-
-
 ##  ............................................................................
-##  Combined combination plot                                               ####
+##  Combined complementarity plot                                           ####
 
 plot_complementarity <- patchwork::wrap_plots(
-  read_rds(result_file("complementarity_example.rds")) %>% patchwork::wrap_elements(),
-  read_rds(result_file("complementarity_combinations.rds")) %>% patchwork::wrap_elements(),
+  read_rds(derived_file("complementarity_example.rds")) %>% patchwork::wrap_elements(),
+  read_rds(derived_file("complementarity_combinations.rds")) %>% patchwork::wrap_elements(),
   nrow = 1,
   widths = c(1, 1.5)
 ) + patchwork::plot_annotation(tag_levels = "a")
 
 plot_complementarity
 
-write_rds(plot_complementarity, result_file("complementarity.rds"))
+ggsave(result_file("complementarity.pdf"), plot_complementarity, width = 12, height = 6, device = cairo_pdf)
