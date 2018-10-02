@@ -158,6 +158,13 @@ plot_fig <- function(
     fig <- NULL
   }
 
+  # if fig path is a pdf and  format is html/markdown -> convert to png
+  if (format %in% c("html", "markdown") && fs::path_ext(fig_path) == "pdf") {
+    new_fig_path <- fs::path_ext_set(fig_path, "png")
+    system(glue::glue("convert -density 300 {fig_path} {new_fig_path}"))
+    fig_path <- new_fig_path
+  }
+
   # save the figure in the appropriate format
   # plot figure if rds
   if (!is.null(fig)) {
