@@ -383,7 +383,7 @@ plot_example <- plots %>%
   map_at(1, ~. + theme(legend.position = "left")) %>%
   patchwork::wrap_plots(nrow = 2, byrow = FALSE)
 plot_example
-write_rds(plot_example, result_file("example.rds"))
+write_rds(plot_example, derived_file("example.rds"))
 
 ##########################################################
 ###############     GENERATE ERROR LOGS    ###############
@@ -507,7 +507,7 @@ pbapply::pblapply(method_ids, cl = 8, function(mid) {
 ##########################################################
 
 plot_scaling <- patchwork::wrap_plots(
-  read_rds(result_file("example.rds")) %>% patchwork::wrap_elements(),
+  read_rds(derived_file("example.rds")) %>% patchwork::wrap_elements(),
   read_rds(result_file("ranking.rds")) %>% patchwork::wrap_elements(),
   heights = c(2, 5),
   ncol = 1
