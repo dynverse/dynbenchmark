@@ -74,10 +74,7 @@ get_top_methods <- function(data, trajectory_types_oi) {
     complete(dataset_id, method_id, fill = list(overall = 0)) # make sure all methods have all datasets, even if this means that they get a zero overall score
 
   # add dataset weights
-  dataset_weights_oi <- dataset_weights %>%
-    select(dataset_id, weight) %>%
-    filter(dataset_id %in% data_oi$dataset_id) %>%
-    mutate(weight = weight/sum(weight))
+  dataset_weights_oi <- get_dataset_weighting(data_oi %>% distinct(dataset_id, dataset_source, dataset_trajectory_type))
 
   data_oi <- data_oi %>%
     left_join(dataset_weights_oi, "dataset_id")
@@ -132,7 +129,6 @@ trajectory_types_oi <- c("tree")
 # trajectory_types_oi <- dynwrap::trajectory_types$id
 colour <- dynwrap::trajectory_types$colour[dynwrap::trajectory_types$id == last(trajectory_types_oi)]
 steps <- get_top_methods(data, trajectory_types_oi)
-
 
 relevant_steps <- steps %>%
   group_by(step_ix) %>%
