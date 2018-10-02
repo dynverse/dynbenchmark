@@ -72,6 +72,7 @@ palettes <- tribble(
   "benchmark",     viridisLite::viridis(101, option = "magma"),
   "scaling",       viridisLite::viridis(101, option = "cividis"),
   "qc",            viridisLite::viridis(101, option = "viridis"),
+  "stability",     viridisLite::viridis(101, option = "plasma"),
   "error_reasons", error_reasons %>% select(name, colour) %>% deframe(),
   "white6black4",    c(rep("white", 6), rep("black", 4))
 )

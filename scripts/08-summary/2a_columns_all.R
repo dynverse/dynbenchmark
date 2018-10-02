@@ -22,6 +22,7 @@ column_info <- tribble( # tribble_start
   "score_overall",                 "summary_overall_overall",                       "Overall",                  "bar",     "overall",        list(width = 4, legend = FALSE),
   "score_overall",                 "benchmark_overall_overall",                     "Benchmark",                "bar",     "benchmark",      list(width = 4, legend = FALSE),
   "score_overall",                 "scaling_pred_timescore_overall",                "Scalability",              "bar",     "scaling",        list(width = 4, legend = FALSE),
+  "score_overall",                 "stability_overall_overall",                     "Stability",                "bar",     "stability",      list(width = 4, legend = FALSE),
   "score_overall",                 "qc_overall_overall",                            "QC",                       "bar",     "qc",             list(width = 4, legend = FALSE),
   "score_overall",                 "control_label",                                 "",                         "text",    NA,               list(overlay = TRUE),
   "benchmark_metric",              "benchmark_overall_norm_correlation",            "Ordering",                 "circle",  "benchmark",      lst(),
@@ -57,6 +58,11 @@ column_info <- tribble( # tribble_start
   "scaling_predtime_cells10k",     "scaling_pred_timescore_cells10k_features10k",   "1k features",              "text",    "white6black4",   lst(label = "scaling_pred_timestr_cells10k_features10k", overlay = TRUE, size = 3),
   "scaling_predtime_features10k",  "scaling_pred_timescore_cells100k_features10k",  "100k cells",               "rect",    "scaling",        lst(),
   "scaling_predtime_cells10k",     "scaling_pred_timescore_cells100k_features10k",  "1k features",              "text",    "white6black4",   lst(label = "scaling_pred_timestr_cells100k_features10k", overlay = TRUE, size = 3),
+  "stability",                     "stability_metric_overall",                      "Overall",                  "circle",  "stability",      lst(),
+  "stability",                     "stability_metric_correlation",                  "Ordering",                 "circle",  "stability",      lst(),
+  "stability",                     "stability_metric_him",                          "Topology",                 "circle",  "stability",      lst(),
+  "stability",                     "stability_metric_featureimp_wcor",              "Features",                 "circle",  "stability",      lst(),
+  "stability",                     "stability_metric_F1_branches",                  "Clustering",               "circle",  "stability",      lst(),
   "qc_application",                "qc_app_user_friendly",                          "User friendly",            "circle",  "qc",             lst(),
   "qc_application",                "qc_app_developer_friendly",                     "Developer friendly",       "circle",  "qc",             lst(),
   "qc_application",                "qc_app_future_proof",                           "Future proof",             "circle",  "qc",             lst(),
@@ -81,6 +87,7 @@ column_groups <- tribble( # tribble_start
   "Benchmark",        "Execution",                    "benchmark_execution",
   "Scalability",      "10k cells",                    "scaling_predtime_cells10k",
   "Scalability",      "10k features",                 "scaling_predtime_features10k",
+  "Stability",        "",                             "stability",
   "Quality control",  "Application",                  "qc_application",
   "Quality control",  "Category",                     "qc_category"
 ) # tribble_end
