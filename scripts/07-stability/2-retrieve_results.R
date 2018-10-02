@@ -29,8 +29,8 @@ benchmark_fetch_results(TRUE)
 # )
 
 # bind results in one data frame (without models)
-execution_output <- benchmark_bind_results(load_models = FALSE)# %>%
-  # filter(!method_id %in% c("identity", "shuffle", "error"))
+execution_output <- benchmark_bind_results(load_models = FALSE) %>%
+  filter(!method_id %in% c("identity", "shuffle", "error"))
 table(execution_output$method_id, execution_output$error_status)
 
 #########################################
@@ -82,21 +82,30 @@ norm_var <- function(x) {
 
 met2 <- c(stability_params$metrics, "overall")
 
-data_var <-
+data_stab <-
   out$data %>%
-  select(method_id, method_name, dataset_id, param_id, !!met2) %>%
-  group_by(method_id, method_name, dataset_id, param_id) %>%
+  select(method_id, dataset_id, param_id, !!met2) %>%
+  group_by(method_id, dataset_id, param_id) %>%
   summarise_if(is.numeric, norm_var) %>%
   ungroup() %>%
-  group_by(method_id, method_name, param_id) %>%
+  group_by(method_id, param_id) %>%
   summarise_if(is.numeric, mean) %>%
   ungroup() %>%
   gather(metric, value, !!met2) %>%
-  mutate(metric = paste0("var_", metric))
+  mutate(metric = paste0("stability_metric_", metric))
 
-# #####################################################
-# ############### SAVE DATA ###############
-# #####################################################
-#
-# write_rds(out, result_file("benchmark_results_normalised.rds"), compress = "xz")
+data_stab_overall <-
+  data_stab %>%
+  group_by(method_id, param_id) %>%
+  summarise(value = dyneval::calculate_arithmetic_mean(value)) %>%
+  mutate(metric = "stability_overall_overall")
+
+data_stab <- bind_rows(data_stab, data_stab_overall)
+
+
+#####################################################
+############### SAVE DATA ###############
+#####################################################
+
+write_rds(data_stab, result_file("stability_results.rds"), compress = "xz")
 
