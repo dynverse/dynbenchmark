@@ -99,12 +99,17 @@ bench_sources <-
 rm(execution_metrics, bench_metrics, all_metrics, data_aggs, benchmark_results_input, benchmark_results_normalised) # is important in large scripts
 
 #####################################################
+#               READ STABILITY RESULTS              #
+#####################################################
+stability <- read_rds(result_file("stability_results.rds", experiment_id = "07-stability")) %>% select(-param_id) %>% spread(metric, value)
+
+#####################################################
 #                  COMBINE RESULTS                  #
 #####################################################
 
 results <- Reduce(
   function(a, b) left_join(a, b, by = "method_id"),
-  list(method_info, qc_results, scaling_scores, scaling_preds, scaling_models, bench_overall, bench_trajtypes, bench_sources)
+  list(method_info, qc_results, scaling_scores, scaling_preds, scaling_models, bench_overall, bench_trajtypes, bench_sources, stability)
 )
 
 rm(list = setdiff(ls(), "results")) # more than this haiku
@@ -116,7 +121,8 @@ metric_weights <-
   c(
     benchmark_overall_overall = 1,
     qc_overall_overall = 1,
-    scaling_pred_timescore_overall = 1
+    scaling_pred_timescore_overall = 1,
+    stability_overall_overall = 1
   )
 
 results$summary_overall_overall <-
