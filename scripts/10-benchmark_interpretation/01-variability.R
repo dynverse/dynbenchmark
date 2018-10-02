@@ -78,7 +78,7 @@ densities_stacked <- densities %>%
   group_by(method_id, x) %>%
   mutate(dataset_trajectory_type = factor(dataset_trajectory_type, trajectory_types_all)) %>% # set order of trajectory types
   arrange(dataset_trajectory_type) %>%
-  # mutate(norm = sum(y), y = y * y, y = y / sum(y) * norm) %>% # adapt y if necessary
+  mutate(norm = sum(y), y = y * y, y = y / sum(y) * norm, y = ifelse(is.na(y), 0, y)) %>% # normalise between 0 and 1
   mutate(ymax = cumsum(y), ymin = lag(ymax, default = 0)) %>%
   ungroup() %>%
   group_by(method_id) %>%
@@ -116,4 +116,4 @@ plot_variability_trajectory_type <- densities_violin %>%
 plot_variability_trajectory_type
 
 ggsave(result_file("variability_trajectory_type.pdf"), plot_variability_trajectory_type, width = 14, height = 5)
-write_rds(plot_variability_trajectory_type %>% patchwork::wrap_plots(), derived_file("variability_trajectory_type.rds"))
+write_rds(plot_variability_trajectory_type, derived_file("variability_trajectory_type.rds"))

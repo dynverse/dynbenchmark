@@ -4,7 +4,7 @@ library(patchwork)
 
 experiment("10-benchmark_interpretation")
 
-plot_variability_dataset_source <- read_rds(derived_file("variability_dataset_source.rds"))
+plot_variability_trajectory_type <- read_rds(derived_file("variability_trajectory_type.rds"))
 plot_dataset_source_correlation <- read_rds(derived_file("dataset_source_correlation.rds"))
 plot_topology_complexity_examples <- read_rds(derived_file("topology_complexity_examples.rds"))
 
