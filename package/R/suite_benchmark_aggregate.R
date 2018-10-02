@@ -171,6 +171,7 @@ get_default_dataset_source_weights <- function() {
 
 #' @param datasets Tibble with dataset_id, dataset_source and dataset_trajectory_type
 #' @rdname benchmark_aggregate
+#' @export
 get_dataset_weighting <- function(datasets, dataset_source_weights = get_default_dataset_source_weights()) {
   testthat::expect_true(all(c("dataset_id", "dataset_source", "dataset_trajectory_type") %in% colnames(datasets)))
 

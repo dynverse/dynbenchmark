@@ -50,12 +50,10 @@ scorer <- function(method_ids, data_oi) {
 #' trajectory_types_oi <- "tree"
 
 # preparer <- method_subset_preparer_top
-preparer <- function(data_oi) {method_subset_preparer_range(data_oi, range = 0.05)}
+preparer <- method_subset_preparer_range
 
 
-get_top_methods <- function(data, trajectory_types_oi) {
-  data_oi <- data
-
+get_top_methods <- function(data_oi, trajectory_types_oi) {
   # filter methods:
   # - can detect at least one of the requested trajectory type(s)
   # - does not require any prior information
