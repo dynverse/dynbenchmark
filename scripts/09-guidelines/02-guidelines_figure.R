@@ -1,3 +1,5 @@
+#' Generate the guidelines figure where we show the top 4 methods for every (set of) trajectory types, with some other information relevant to the end user
+
 library(tidyverse)
 library(dynbenchmark)
 library(xml2)
@@ -120,7 +122,7 @@ time_renderer <- function(breaks) {
 
 prior_renderer <- function(x) {
   list(
-    fill = ifelse(length(x) == 0, "white", palettes$RdYlGn[[1]]),
+    fill = ifelse(length(x) == 0, "white", palette[[1]]),
     label = ifelse(length(x) == 0, "", glue::glue_collapse(label_long(x), ","))
   )
 }
