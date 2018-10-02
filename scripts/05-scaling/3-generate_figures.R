@@ -207,8 +207,8 @@ g <- patchwork::wrap_plots(
 )
 
 g
-ggsave(result_file("ranking.svg"), g, width = 14, height = 12)
-write_rds(g, result_file("ranking.rds"))
+ggsave(result_file("ranking.pdf"), g, width = 14, height = 12)
+write_rds(g, derived_file("ranking.rds"))
 
 
 ##########################################################
@@ -508,7 +508,7 @@ pbapply::pblapply(method_ids, cl = 8, function(mid) {
 
 plot_scaling <- patchwork::wrap_plots(
   read_rds(derived_file("example.rds")) %>% patchwork::wrap_elements(),
-  read_rds(result_file("ranking.rds")) %>% patchwork::wrap_elements(),
+  read_rds(derived_file("ranking.rds")) %>% patchwork::wrap_elements(),
   heights = c(2, 5),
   ncol = 1
 ) +
