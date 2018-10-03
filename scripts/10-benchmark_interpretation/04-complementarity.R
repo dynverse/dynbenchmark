@@ -8,6 +8,9 @@ data <- read_rds(result_file("benchmark_results_normalised.rds", "06-benchmark")
 
 ##  ............................................................................
 ##  Find a "good-enough" subset of methods                                  ####
+# several functions to define when a particular method has succeeded on a particular dataset
+
+# is it in range of the top method?
 method_subset_preparer_range <- function(data_oi, range = 0.05) {
   data_oi <- data_oi %>%
     group_by(dataset_id) %>%
@@ -17,6 +20,7 @@ method_subset_preparer_range <- function(data_oi, range = 0.05) {
   data_oi
 }
 
+# has it a high overall score?
 method_subset_preparer_overall_cutoff <- function(data_oi, overall_cutoff = 0.75) {
   data_oi <- data_oi %>%
     group_by(dataset_id) %>%
@@ -26,6 +30,7 @@ method_subset_preparer_overall_cutoff <- function(data_oi, overall_cutoff = 0.75
   data_oi
 }
 
+# does it have the top score?
 method_subset_preparer_top <- function(data_oi) {
   data_oi <- data_oi %>%
     group_by(dataset_id) %>%
@@ -35,6 +40,7 @@ method_subset_preparer_top <- function(data_oi) {
   data_oi
 }
 
+# score a given set of methods on the datasets, by summing over the weights of the successful datasets
 scorer <- function(method_ids, data_oi) {
   data_oi %>%
     filter(method_id %in% !!method_ids) %>%
@@ -49,12 +55,8 @@ scorer <- function(method_ids, data_oi) {
 #' @example
 #' trajectory_types_oi <- "tree"
 #' data_oi <- data
-
-# preparer <- method_subset_preparer_top
-preparer <- method_subset_preparer_range
-
-
-get_top_methods <- function(data_oi, trajectory_types_oi) {
+#' preparer <- method_subset_preparer_range
+get_top_methods <- function(data_oi, trajectory_types_oi, preparer = method_subset_preparer_range) {
   # filter methods:
   # - can detect at least one of the requested trajectory type(s)
   # - does not require any prior information
