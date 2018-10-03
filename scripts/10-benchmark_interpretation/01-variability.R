@@ -44,7 +44,7 @@ data_oi <- data_oi %>%
 
 plot_variability_dataset_source <- data_oi %>%
   ggplot(aes(factor(method_id, !!method_order), overall)) +
-  ggbeeswarm::geom_quasirandom(aes(color = dataset_source), shape = 16) +
+  ggbeeswarm::geom_quasirandom(aes(color = dataset_source), shape = 16, size = 1) +
   geom_point(data = data_mean, size = 7, shape = 45, color = "black") +
   scale_colour_dataset_source +
   scale_x_discrete("", labels = label_method) +
@@ -110,8 +110,8 @@ plot_variability_trajectory_type <- densities_violin %>%
     scale_alpha_manual(values = c(`TRUE` = 1, `FALSE` = 0.2)) +
     coord_flip() +
     theme_pub() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom", legend.justification = "center") +
-    guides(fill = guide_legend(position = "top", nrow = 1), alpha = FALSE)
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "top", legend.justification = "center") +
+    guides(fill = guide_legend(nrow = 1), alpha = FALSE)
 
 plot_variability_trajectory_type
 
