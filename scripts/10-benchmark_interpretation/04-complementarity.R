@@ -241,7 +241,7 @@ plot_complementarity_combinations <-
   ) +
   geom_segment(aes(x = score, xend = score, y = y, yend = y + bar_height, color = most_complex_trajectory_type), data = relevant_steps %>% filter(chosen)) +
   scale_y_continuous(limits = c(.5, max(comb_ypos$y) + .5), breaks = NULL, expand = c(0, 0)) +
-  scale_x_continuous(limits = c(-text_width, 1), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = scales::percent, expand = c(0, 0)) +
+  scale_x_continuous(limits = c(-text_width, 1), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = scales::percent, expand = c(0, .03)) +
   scale_fill_grey(label_long("n_methods"), start = 0.95, end = 0.2, limits = c(1, 2,3,4,5,6), na.value = "#333333") +
   scale_color_manual(values = trajectory_type_colours, guide = FALSE) +
   theme_pub() +
@@ -277,3 +277,4 @@ plot_complementarity <- patchwork::wrap_plots(
 plot_complementarity
 
 ggsave(result_file("complementarity.pdf"), plot_complementarity, width = 13, height = 6, device = cairo_pdf)
+
