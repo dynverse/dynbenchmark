@@ -24,7 +24,6 @@ BugReports: https://github.com/dynverse/dynalysis/issues
 Imports: 
   cluster,
   dplyr,
-  emoa,
   extrafont,
   fs,
   ggraph,
