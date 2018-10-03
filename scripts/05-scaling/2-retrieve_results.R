@@ -48,7 +48,7 @@ data <-
   left_join(methods_info %>% select(method_id = id, method_name = name), by = "method_id")
 
 #' @examples
-#' dat <- data %>% filter(method_id == "celltree_gibbs")
+#' dat <- data %>% filter(method_id == "scorpius")
 #' data %>%
 #'   group_by(method_id, error_status) %>%
 #'   summarise(n = n()) %>%
@@ -76,20 +76,24 @@ models <-
     print(dat$method_id[[1]])
 
     # predict time
-    model_time <- scam::scam(ltime ~ s(lnrow, lncol, bs = "tedmi"), data = dat %>% filter(is.finite(ltime)))
+    # model_time <- scam::scam(ltime ~ s(lnrow, lncol, bs = "tedmi"), data = dat %>% filter(is.finite(ltime)))
+    model_time <- mgcv::gam(ltime ~ s(lnrow, lncol), data = dat %>% filter(is.finite(ltime)))
     model_time <- strip::strip(model_time, keep = "predict")
     predict_time <- function(n_cells, n_features) {
       requireNamespace("mgcv")
+      requireNamespace("scam")
       data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
       10^stats::predict(model_time, data)
     }
     environment(predict_time) <- list2env(list(model_time = model_time), parent = baseenv())
 
     # predict memory
-    model_mem <- scam::scam(lmem ~ s(lnrow, lncol, bs = "tedmi"), data = dat %>% filter(!is.infinite(lmem), lmem >= 8))
+    # model_mem <- scam::scam(lmem ~ s(lnrow, lncol, bs = "tedmi"), data = dat %>% filter(!is.infinite(lmem), lmem >= 8))
+    model_mem <- mgcv::gam(lmem ~ s(lnrow, lncol), data = dat %>% filter(is.finite(ltime), lmem >= 8))
     model_mem <- strip::strip(model_mem, keep = "predict")
     predict_mem <- function(n_cells, n_features) {
       requireNamespace("mgcv")
+      requireNamespace("scam")
       data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
       10^stats::predict(model_mem, data)
     }
