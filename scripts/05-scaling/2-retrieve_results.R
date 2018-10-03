@@ -24,9 +24,9 @@ experiment("05-scaling")
 # If you want to download the output from prism
 # qsub::rsync_remote(
 #   remote_src = TRUE,
-#   path_src = derived_file("suite", remote = TRUE, experiment = "05-scaling"),
+#   path_src = derived_file("", remote = TRUE, experiment = "05-scaling"),
 #   remote_dest = FALSE,
-#   path_dest = derived_file("suite", remote = FALSE, experiment = "05-scaling"),
+#   path_dest = derived_file("", remote = FALSE, experiment = "05-scaling"),
 #   verbose = TRUE,
 #   exclude = "*/r2gridengine/*"
 # )
