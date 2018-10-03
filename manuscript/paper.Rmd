@@ -109,13 +109,13 @@ The main difference between trajectory inference methods is whether the method f
 
 
 <!-- Overall evaluation results -->
-We evaluated each method on four core aspects: (i) benchmarking given a gold or silver standard on `r n_datasets_real` real and `r n_datasets_synthetic` synthetic datasets, (ii) their scalability with both the number of cells and features (iii) the stability of the predictions across multiple bootstrap replicates, and (iv) the user friendliness of the provided software and documentation. Overall, we found a large diversity across all four evaluation criteria, with only a few methods, such as PAGA, GNG, Slingshot, Projected TSCAN and SCORPIUS, performing well across the board  (`r ref("fig", "results_summary", "b")`). We will first discuss each evaluation criterion in detail, after which we conclude with guidelines for method users and future perspectives for method developers.
+We evaluated each method on four core aspects: (i) benchmarking given a gold or silver standard on `r n_datasets_real` real and `r n_datasets_synthetic` synthetic datasets, (ii) their scalability with both the number of cells and features (iii) the stability of the predictions after subsampling the datasets, and (iv) the user friendliness of the provided software and documentation. Overall, we found a large diversity across all four evaluation criteria, with only a few methods, such as PAGA, GNG, Slingshot, Projected TSCAN and SCORPIUS, performing well across the board  (`r ref("fig", "results_summary", "b")`). We will first discuss each evaluation criterion in detail, after which we conclude with guidelines for method users and future perspectives for method developers.
 ```{r}
 add_fig(
   fig_path = result_file("results_summary.pdf", experiment_id = "08-summary"),
   ref_id = "results_summary", 
   caption_main = glue::glue("A characterisation of the {n_methods_evaluated} methods evaluated in this study, and their overall evaluation results."), 
-  caption_text = "(a) We characterised the methods according to the wrapper type, their required priors (soft = start or end cells, hard = cell grouping or time course), whether the inferred topology is constrained by the algorithm or a parameter and the types of inferreable topologies. The methods are grouped vertically based on the most complex trajectory type they can infer. (b) Overall results of the evaluation on four criteria: the benchmarking using a reference trajectory on real and synthetic data, the scalability with increasing number of cells and features, the stability across dataset bootstraps, and the implementation quality. ",
+  caption_text = "(a) We characterised the methods according to the wrapper type, their required priors (soft = start or end cells, hard = cell grouping or time course), whether the inferred topology is constrained by the algorithm or a parameter and the types of inferreable topologies. The methods are grouped vertically based on the most complex trajectory type they can infer. (b) Overall results of the evaluation on four criteria: the benchmarking using a reference trajectory on real and synthetic data, the scalability with increasing number of cells and features, the stability across dataset subsamples, and the implementation quality. ",
   width = 15,
   height = 18
 )
@@ -153,8 +153,8 @@ The high variability between datasets, together with the diversity in detected t
 add_fig(
   fig_path = result_file("complementarity.pdf", experiment_id = "10-benchmark_interpretation"),
   ref_id = "complementarity", 
-  caption_main = "Complementarity between different TI methods", 
-  caption_text = "(a) Here we tested how many methods are needed to obtain at least one  'top' model (defined as a model with overall score at least 95\\% of the best model) for all datasets. Shown are the percentage of datasets fulfilling this rule, with increasing number of methods. At each step, we test which method would be the most optimal (as indicated), and chose this method for all next steps. (b) Similar as (a), but now for datasets which contain varying trajectory types.",
+  caption_main = "Complementarity between different trajectory inference methods", 
+  caption_text = "(a) Here we tested how many methods are needed to obtain at least one  'top' model (defined as a model with overall score at least 95\\% of the best model) for all datasets. Shown are the percentage of datasets fulfilling this rule, with increasing number of methods. At each step, we test which method would be the most optimal (as indicated), and chose this method for all next steps. (b) Similar as (a), but now for datasets which contain varying trajectory types. For this figure, we did not include any methods requiring prior information.",
   width = 12,
   height = 6
 )
@@ -166,7 +166,7 @@ add_sfig(
   fig_path = result_file("benchmark_interpretation.pdf", experiment_id = "10-benchmark_interpretation"),
   ref_id = "benchmark_interpretation", 
   caption_main = "Benchmarking of trajectory inference methods", 
-  caption_text = "(a) Overall score for all methods and datasets, colored by the source of the datasets. (b)  hown are the distributions of the difference in size between predicted and reference topologies. A positive difference means that the topology predicted by the method is more complex than the one in the reference.",
+  caption_text = "(a) Overall score for all methods and datasets, colored by the source of the datasets. (b) Bias in the overall score towards trajectory types. (c) Similarity between the overall scores of all dataset sources with the real gold datasets. (d) Distributions of the difference in size between predicted and reference topologies. A positive difference means that the topology predicted by the method is more complex than the one in the reference.",
   width = 12,
   height = 15
 )
@@ -185,7 +185,7 @@ add_sfig(
   fig_path = result_file("scaling.pdf", experiment_id = "05-scaling"),
   ref_id = "scaling", 
   caption_main = "Scalability of trajectory inference methods", 
-  caption_text = "(a) Three examples of average observed running times across five datasets (left) and the predicted running time based on a generalized additive model (GAM, right). (b) Overview of the scalability results of all methods, ordered by their average predicted running time from (a). We used to GAM to predict running times for each method with increasing number of features or cells, and used these values to classify each method into constant / low slope, sublinear, linear and superlinear based on the shape of the curve. We also used the predicted timings to calculate the average increase per new 100 cells or features. Also shown is the average maximal memory usage..",
+  caption_text = "(a) Three examples of average observed running times across five datasets (left) and the predicted running time based on a generalized additive model (GAM, right). (b) Overview of the scalability results of all methods, ordered by their average predicted running time from (a). We used to GAM to predict running times for each method with increasing number of features or cells, and used these values to classify each method into constant / low slope, sublinear, linear and superlinear based on the shape of the curve. We also used the predicted timings to calculate the average increase per new 100 cells or features. Also shown is the average maximal memory usage.",
   width = 12,
   height = 15
 )
@@ -262,11 +262,11 @@ Critical to the broad applicability of TI methods is standardisation of the inpu
 
 ```{r}
 add_fig(
-  fig_path = result_file("example_predictions.rds", experiment_id = "11-example_predictions"),
+  fig_path = result_file("example_predictions.pdf", experiment_id = "11-example_predictions"),
   ref_id = "example_predictions", 
   caption_main = "Demonstration of how a common framework for TI methods facilitates broad applicability using an example dataset.", 
-  caption_text = "",
-  width = 13,
+  caption_text = "(a) The top methods applied on a dataset containing a linear trajectory of differentiation dendritic cells, going from MDP, CDP to PreDC. (b) The top methods applied on a dataset containing a bifurcating trajectory of ",
+  width = 14,
   height = 8
 )
 ```
@@ -274,7 +274,7 @@ add_fig(
 
 <!-- FOR METHOD DEVELOPERS -->
 <!-- New tools: challenges and possibilities -->
-Our study indicates that the field of trajectory inference is maturing, primarily for linear and bifurcating trajectories (as we illustrate with two datasets in `r ref("fig", "example_predictions", "a and b")`). Nonetheless, we also highlight several ongoing challenges, which should be addressed before TI can be a reliable and fast tool for analysing single-cell -omics datasets with complex trajectories. Foremost, new methods should focus on improving →the unbiased inference of tree, cyclic graph and disconnected topologies, as we found that methods repeatedly overestimate or underestimate the topology within a datasets, even if the trajectory can be easily identified in a dimensionality reduction (illustrated with some synthetic datasets in `r ref("fig", "example_predictions", "c and d")`). ← Furthermore, higher standards for code assurance and documentation could help the adoption of these tools across single-cell -omics field. Finally, new tools should focus on an improved scalability, as we found that only a handful of current methods are able to handle datasets with more than 100.000 cells within a reasonable timeframe, making the others possibly obsolete very soon given the rapid technological developments. To support the development of these new tools, we provide a series of vignettes on how to wrap a method within our common interface, and evaluate the method on the different measures proposed in this study at `r print_url("evaluate.dynverse.org")`.
+Our study indicates that the field of trajectory inference is maturing, primarily for linear and bifurcating trajectories (as we illustrate with two datasets in `r ref("fig", "example_predictions", "a and b")`). Nonetheless, we also highlight several ongoing challenges, which should be addressed before TI can be a reliable and fast tool for analysing single-cell -omics datasets with complex trajectories. Foremost, new methods should focus on improving →the unbiased inference of tree, cyclic graph and disconnected topologies, as we found that methods repeatedly overestimate or underestimate the topology within a datasets, even if the trajectory can be easily identified in a dimensionality reduction (illustrated with some synthetic datasets in `r ref("fig", "example_predictions", "c and d")`). ← Furthermore, higher standards for code assurance and documentation could help the adoption of these tools across single-cell -omics field. Finally, new tools should focus on an improved scalability, as we found that only a handful of current methods are able to handle datasets with more than 100.000 cells within a reasonable timeframe, making the others possibly obsolete very soon given the rapid technological developments. To support the development of these new tools, we provide a series of vignettes on how to wrap and evaluate a method and on the different measures proposed in this study at `r print_url("http://dynbenchmark.dynverse.org")`.
 
 
 <!-- The robustness of the evaluation & development of new methods -->
@@ -303,11 +303,9 @@ We welcome any contributions by creating an issue at →`r print_url("methods.dy
 Methods were excluded from the evaluation based on several criteria: `r glue::glue_collapse(glue::glue("({non_inclusion_reasons$footnote}) {non_inclusion_reasons$long}"), ", ")`. →The discussions on why these methods were excluded can be found at `r print_url("https://github.com/dynverse/dynmethods/issues?q=label:\"won't wrap\"")`. In the end, we included  `r n_tools_evaluated` tools in the evaluation, constituting `r n_methods_evaluated` methods.←
 
 
-<!-- Components -->
-The selected methods were dissected into a set of algorithmic components. Each component can have a significant impact on the performance, scalability, and output. Across all methods, these components can be broadly grouped into two stages; (i) conversion to a simplified representation using dimensionality reduction, clustering or graph building and (ii) ordering the cells along the simplified representation [@cannoodt_computational_2016]. Components are frequently shared between different algorithms. For example, minimal spanning trees (MST), used in the first single-cell RNA-seq trajectory inference methods [@trapnell_dynamics_2014], is shared by almost half of the methods we evaluated.
 →
 ### Method wrappers
-Each method was wrapped within docker and singularity containers (available at `r print_url("methods.dynverse.org")`). These containers are automatically built on both Singularity Hub (`r print_url("https://singularity-hub.org/")`) and Docker Hub (`r print_url("https://hub.docker.com/u/dynverse")`).
+Each method was wrapped within docker and singularity containers (available at `r print_url("http://dynmethods.dynverse.org")`). These containers are automatically built on both Singularity Hub (`r print_url("https://singularity-hub.org/")`) and Docker Hub (`r print_url("https://hub.docker.com/u/dynverse")`).
 For each method, we wrote a wrapper script based on example scripts or tutorials provided by the authors (as mentioned in the respective wrapper scripts). This script reads in the input data (as described below), runs the method, and outputs the files required to construct a trajectory (as described below). We also created a script to generate an example dataset, which is used to automatically test every method using travis continuous integration (`r print_url("https://travis-ci.org/dynverse")`).
 
 
@@ -649,8 +647,10 @@ After normalisation, we aggregated step by step the scores from different datase
 Finally, to get an overall benchmarking score, we aggregated the different metrics using a geometric mean.
 ←
 ## Method execution
-Each execution of a method on a dataset was performed in a separate task as part of a gridengine job. Each task was allocated one CPU core of an Intel(R) Xeon(R) CPU E5-2665 @ 2.40GHz, and one R session was started for each task. During the execution of a method on a dataset, if the time limit (>6h) or memory limit (32GB) was exceeded, or an error was produced, a zero score was returned for that execution. If a method consistently generated errors on this dataset across all replicates, the error is called “data-specific”, otherwise “stochastic”.
+Each execution of a method on a dataset was performed in a separate task as part of a gridengine job. Each task was allocated one CPU core of an Intel(R) Xeon(R) CPU E5-2665 @ 2.40GHz, and one R session was started for each task. During the execution of a method on a dataset, if the time limit (>6h) or memory limit (32GB) was exceeded, or an error was produced, a zero score was returned for that execution.
 →
+## Complementarity
+To assess the complementarity between different methods, we first calculated for every method and dataset whether the overall score is equal or higher than 95% of the best overall score for that particular dataset. We then calculated for every method the weighted percentage of datasets which fulfilled this rule, weighted similarly as in the benchmark aggregation, and chose the best method. We iteratively added new methods until all methods were selected. For this analysis, we did not include any methods which require prior information, and only included methods which can detect at least one of the trajectory types present in the datasets.
 ## Scalability
 To assess the scalability of each method, we started from 5 real datasets, selected using the centers from a k-medoids as discussed in the synthetic data generation section. We up- and downscaled these datasets between 10 to 100.000 cells and 10 to 100.000 features, while never going higher than 1.000.000 values in total. To generate new cells or features, we first generated a 10-nearest neighbour graph of both the cells and features from the expression space. For every new cell or feature, we used a linear combination of one to three existing cells or features, where each cell or features was given a weight sampled from $\textit{U}(0,1)$. 
 
@@ -665,6 +665,7 @@ To classify the time complexity of each method, we predicted the running time at
 
 
 ## Stability[b]
+We ran each method on a selection of datasets. This subset consisted of 25% of the datasets accounting for 15% of the total runtime, chosen such that after aggregation the overall scores still has > 0.99 correlation with the original overall ranking. We subsampled each dataset 10 times with 95% of the original cells and 95% of the original features, such that each method should produce slightly different results. 
 ←
 ## Method quality control
 
@@ -672,18 +673,19 @@ To classify the time complexity of each method, we predicted the running time at
 We created a transparent scoring scheme to check the quality of each method based on several existing tool quality and programming guidelines in literature and online (`r ref("stable", "qc_scoresheet")`). The goal of this quality control is in the first place is to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of dataset in which the usefulness of the method was shown, and the scope of method evaluation in the paper.
 
 
-Each aspect was further assigned to one or more applications, based on whether it influenced the user friendliness of the tool (such as code availability, good documentation or contains plotting functions) and/or the developer friendliness of the tool (such as unit testing, inline documentation and a clear licensing).
-
-
-Each quality aspect received a weight depending on how frequently it was found in several papers and online sources which discuss tool quality (`r ref("stable", "qc_scoresheet")`). This was to make sure that more important aspects, such as the open source availability of the method, outweighed other aspects, such as the availability of a graphical user interface. Within each aspect, we also assigned a weight to the individual questions being investigated (`r ref("stable", "qc_scoresheet")`). For calculating the final score, we weighed each of the six categories equally.
+Each quality aspect received a weight depending on how frequently it was found in several papers and online sources which discuss tool quality (`r ref("stable", "qc_scoresheet")`). This was to make sure that more important aspects, such as the open source availability of the method, outweighed other less important aspects, such as the availability of a graphical user interface. Within each aspect, we also assigned a weight to the individual questions being investigated (`r ref("stable", "qc_scoresheet")`). For calculating the final score, we weighed each of the six categories equally.
 ## Trajectory types
-We classified all possible trajectory topologies into distinct trajectory types, based on topological criteria (`r ref("fig", "ti_evaluation_overview", "c")`). These trajectory types start from the most general trajectory type, a disconnected directed graph, and move down (within a directed acyclic graph structure), progressively becoming more simple until the two basic types: linear and cyclical. A disconnected directed graph is a graph in which only one edge can exist between two nodes. A directed graph is a disconnected graph in which all nodes are (indirectly) connected. A directed acyclic graph is a graph containing no cycles. A rooted tree is a directed acyclic graph containing no convergences (no nodes with in-degree higher than 1). A rooted binary tree is a rooted tree with every node having maximally two outgoing edges. A convergence is a directed acyclic graph in which only one node has a degree larger than one and this same node has an indegree of one. A multifurcation is a rooted tree in which only one node has a degree larger than one. A bifurcation is a multifurcation in which only one node has a degree equal to 3. A directed linear graph is a graph in which no node has a degree larger than 3. Finally, a directed cycle is a directed graph in which no node has a degree larger than 3 but contains one cycle. For every directed trajectory type, a corresponding undirected trajectory type can also be defined, with directed acyclic graphs and directed graphs merging to undirected graph, and convergence and bifurcation merging to a simple fork. In most cases, a method which was able to detect a complex trajectory type, was also able to detect less complex trajectory types, with →some exceptions shown in `r ref("fig", "results_summary", "a")`.←
+We classified all possible trajectory topologies into distinct trajectory types, based on topological criteria (`r ref("fig", "ti_evaluation_overview", "c")`). These trajectory types start from the most general trajectory type, a disconnected graph, and move down (within a directed acyclic graph structure), progressively becoming more simple until the two basic types: linear and cyclical. A disconnected graph is a graph in which only one edge can exist between two nodes. A (connected) graph is a disconnected graph in which all nodes are connected. An acyclic graph is a graph containing no cycles. A tree is an acyclic graph containing no convergences (no nodes with in-degree higher than 1). A binary tree is a rooted tree with every node having maximally two outgoing edges. A convergence is a directed acyclic graph in which only one node has a degree larger than one and this same node has an indegree of one. A multifurcation is a rooted tree in which only one node has a degree larger than one. A bifurcation is a multifurcation in which only one node has a degree equal to 3. A linear topology is a graph in which no node has a degree larger than 3. Finally, a cycle is a connected graph in which no node has a degree larger than 3 but contains one cycle. In most cases, a method which was able to detect a complex trajectory type, was also able to detect less complex trajectory types, with →some exceptions shown in `r ref("fig", "results_summary", "a")`.←
 
 
 
 
 # Acknowledgements
-We would like to thank the original authors of the methods for their feedback and improvements on the method wrappers.
+
+
+
+
+# Author contributions
 
 
 
