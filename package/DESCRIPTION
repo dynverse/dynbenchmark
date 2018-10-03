@@ -63,6 +63,7 @@ Suggests:
   randomForest,
   reticulate,
   RColorBrewer,
+  scam,
   splatter,
   SingleCellExperiment,
   tidygraph
