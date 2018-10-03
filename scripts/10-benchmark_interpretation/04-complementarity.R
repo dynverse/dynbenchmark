@@ -149,7 +149,7 @@ plot_complementarity_example <- relevant_steps %>%
     scale_y_continuous(NULL, limits = c(0, 1.1), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = scales::percent, expand = c(0, 0)) +
     expand_limits(y = c(0, 0)) +
     theme_pub() +
-    theme(axis.line.y = element_blank(), plot.title = element_text(face = "plain", size = 14)) +
+    theme(axis.line.y = element_blank(), plot.title = element_text(face = "plain", size = 11)) +
     annotate("segment", x = 0, xend = 0, y = 0, yend = 1) +
     labs(title = "Datasets with a top model\n(at least a performance of 95% of best model)")
 
@@ -245,7 +245,8 @@ plot_complementarity_combinations <- relevant_steps %>%
     strip.background.y = element_blank(),
     panel.spacing = unit(0, "cm"),
     legend.position = "bottom",
-    legend.justification = "center"
+    legend.justification = "center",
+    axis.title.x = element_text(size = 11)
   ) +
   guides(fill = guide_legend(ncol = 6, label.position = "right"))
 
