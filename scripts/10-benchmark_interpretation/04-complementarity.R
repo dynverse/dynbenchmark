@@ -144,14 +144,14 @@ plot_complementarity_example <-
   geom_hline(yintercept = 1, linetype = "dashed", color = "#333333", alpha = 0.5) +
   ggbeeswarm::geom_quasirandom(aes(color = chosen), data = filter(relevant_steps, !chosen), color = "#888888", alpha = 0.5, groupOnX = TRUE) +
   ggrepel::geom_label_repel(aes(y = score, label = label), data = relevant_steps_labels, angle = 0, label.size = 0, size = 3, lineheight = 0.8, nudge_y = 0.1, direction = "y") +
-  geom_point(data = relevant_steps %>% filter(chosen), color = colour) +
-  scale_x_continuous(label_long("n_methods"), breaks = seq_len(max(relevant_steps$step_ix)), expand = c(0, 0), limits = c(0, max(relevant_steps$step_ix) + 1)) +
-  scale_y_continuous(NULL, limits = c(0, 1.1), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = scales::percent, expand = c(0, 0)) +
-  expand_limits(y = c(0, 0)) +
-  theme_pub() +
-  theme(axis.line.y = element_blank(), plot.title = element_text(face = "plain", size = 14)) +
-  annotate("segment", x = 0, xend = 0, y = 0, yend = 1) +
-  labs(title = "Datasets with a top model\n(at least a performance of 95% of best model)")
+    geom_point(data = relevant_steps %>% filter(chosen), color = colour) +
+    scale_x_continuous(label_long("n_methods"), breaks = seq_len(max(relevant_steps$step_ix)), expand = c(0, 0), limits = c(0, max(relevant_steps$step_ix) + 1)) +
+    scale_y_continuous(NULL, limits = c(0, 1.1), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = scales::percent, expand = c(0, 0)) +
+    expand_limits(y = c(0, 0)) +
+    theme_pub() +
+    theme(axis.line.y = element_blank(), plot.title = element_text(face = "plain", size = 11)) +
+    annotate("segment", x = 0, xend = 0, y = 0, yend = 1) +
+    labs(title = "Datasets with a top model\n(at least a performance of 95% of best model)")
 
 plot_complementarity_example
 
@@ -262,7 +262,8 @@ plot_complementarity_combinations <-
     strip.background.y = element_blank(),
     panel.spacing = unit(0, "cm"),
     legend.position = "bottom",
-    legend.justification = "center"
+    legend.justification = "center",
+    axis.title.x = element_text(size = 11)
   ) +
   guides(fill = guide_legend(ncol = 6, label.position = "right"))
 
