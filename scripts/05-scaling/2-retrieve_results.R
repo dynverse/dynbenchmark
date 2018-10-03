@@ -24,9 +24,9 @@ experiment("05-scaling")
 # If you want to download the output from prism
 # qsub::rsync_remote(
 #   remote_src = TRUE,
-#   path_src = derived_file("suite", remote = TRUE, experiment = "05-scaling"),
+#   path_src = derived_file("", remote = TRUE, experiment = "05-scaling"),
 #   remote_dest = FALSE,
-#   path_dest = derived_file("suite", remote = FALSE, experiment = "05-scaling"),
+#   path_dest = derived_file("", remote = FALSE, experiment = "05-scaling"),
 #   verbose = TRUE,
 #   exclude = "*/r2gridengine/*"
 # )
@@ -76,6 +76,7 @@ models <-
     print(dat$method_id[[1]])
 
     # predict time
+    # model_time <- scam::scam(ltime ~ s(lnrow, lncol, bs = "tedmi"), data = dat)
     model_time <- mgcv::gam(ltime ~ s(lnrow, lncol), data = dat)
     model_time <- strip_gam(model_time)
     predict_time <- function(n_cells, n_features) {
@@ -84,7 +85,6 @@ models <-
       10^stats::predict(model_time, data)
     }
     environment(predict_time) <- list2env(list(model_time = model_time), parent = baseenv())
-    predict_time(10, 10)
 
     # predict memory
     model_mem <- mgcv::gam(lmem ~ s(lnrow, lncol), data = dat %>% filter(!is.infinite(lmem)))
