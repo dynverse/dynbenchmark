@@ -158,7 +158,24 @@ plot_complementarity_example
 ggsave(result_file("complementarity_example.pdf"), plot_complementarity_example, width = 6, height = 6)
 write_rds(plot_complementarity_example, derived_file("complementarity_example.rds"))
 
-
+# ymax <- max(relevant_steps$step_ix)
+# ybreaks <- seq_len(ymax)
+# plot_complementarity_example <-
+#   ggplot(relevant_steps, aes(score, -step_ix)) +
+#   geom_vline(xintercept = 1, linetype = "dashed", color = "#333333", alpha = 0.5) +
+#   ggbeeswarm::geom_quasirandom(aes(color = chosen), data = filter(relevant_steps, !chosen), color = "#888888", alpha = 0.5, groupOnX = FALSE) +
+#   ggrepel::geom_label_repel(aes(x = score, label = label), data = relevant_steps_labels, angle = 0, label.size = 0, size = 3, lineheight = 0.8, nudge_y = .5, direction = "y") +
+#   geom_point(data = relevant_steps %>% filter(chosen), color = colour) +
+#   scale_y_continuous(breaks = -ybreaks, labels = ybreaks, expand = c(0, 0), limits = c(-(ymax + 1), 0)) +
+#   scale_x_continuous(limits = c(0, 1.1), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = scales::percent, expand = c(0, 0)) +
+#   expand_limits(x = c(0, 0)) +
+#   theme_pub() +
+#   theme(axis.line.x = element_blank(), plot.title = element_text(face = "plain", size = 14)) +
+#   annotate("segment", x = 0, xend = 1, y = -(ymax + 1), yend = -(ymax + 1)) +
+#   labs(
+#     x = "Likelihood of obtaining a top model",
+#     y = label_long("n_methods")
+#   )
 
 
 
@@ -209,8 +226,8 @@ relevant_steps_labels <- relevant_steps %>%
 
 trajectory_type_colours <- dynwrap::trajectory_types %>% select(id, colour) %>% deframe()
 
-plot_complementarity_combinations <- relevant_steps %>%
-  ggplot(aes(x = score, xend = score, y = 0, yend = 1)) +
+plot_complementarity_combinations <-
+  ggplot(relevant_steps, aes(x = score, xend = score, y = 0, yend = 1)) +
   geom_rect(aes(xmin = score_start, xmax = score, ymin = 0, ymax = 1, fill = factor(step_ix)), data = relevant_steps_labels) +
   geom_hline(yintercept = 0, color = "#888888") +
   geom_hline(yintercept = 1, color = "#888888") +
