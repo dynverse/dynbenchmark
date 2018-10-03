@@ -111,7 +111,7 @@ plot_variability_trajectory_type <- densities_violin %>%
     coord_flip() +
     theme_pub() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom", legend.justification = "center") +
-    guides(fill = guide_legend(position = "bottom", nrow = 1), alpha = FALSE)
+    guides(fill = guide_legend(position = "top", nrow = 1), alpha = FALSE)
 
 plot_variability_trajectory_type
 
