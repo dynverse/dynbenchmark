@@ -119,10 +119,10 @@ rm(list = setdiff(ls(), "results")) # more than this haiku
 #####################################################
 metric_weights <-
   c(
-    benchmark_overall_overall = 1,
+    benchmark_overall_overall = 2,
     qc_overall_overall = 1,
     scaling_pred_timescore_overall = 1,
-    stability_overall_overall = 1
+    stability_overall_overall = .5
   )
 
 results$summary_overall_overall <-
