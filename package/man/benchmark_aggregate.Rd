@@ -6,7 +6,7 @@
 \title{Normalisation and aggregation function}
 \usage{
 benchmark_aggregate(data, metrics = c("correlation", "him",
-  "featureimp_cor", "F1_branches"), norm_fun = "normal",
+  "featureimp_wcor", "F1_branches"), norm_fun = "normal",
   mean_fun = "geometric", mean_weights = set_names(rep(1,
   length(metrics)), metrics),
   dataset_source_weights = get_default_dataset_source_weights())
