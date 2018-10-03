@@ -19,7 +19,6 @@
 #' @importFrom mlrMBO makeMBOControl setMBOControlTermination setMBOControlInfill makeMBOInfillCritDIB makeMBOInfillCritCB
 #' @importFrom mlr makeLearner configureMlr
 #' @importFrom parallelMap parallelStartMulticore parallelStop
-#' @importFrom emoa emoa_control
 #' @importFrom dynwrap get_ti_methods
 #'
 #' @export
