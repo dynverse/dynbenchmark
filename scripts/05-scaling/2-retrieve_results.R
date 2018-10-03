@@ -97,9 +97,16 @@ models <-
     environment(predict_mem) <- list2env(list(model_mem = model_mem), parent = baseenv())
 
     # calculate preds
+    scalability_range <- seq(log10(10), log10(1000000), by = log10(10) / 5)
     pred_ind <-
-      datasets_info %>%
-      select(dataset_id = id, nrow, ncol, lnrow, lncol) %>%
+      crossing(
+        lnrow = scalability_range,
+        lncol = scalability_range
+      ) %>%
+      mutate(nrow = 10^lnrow, ncol = 10^lncol, lsum = lnrow + lncol) %>%
+      filter(4 - 1e-10 <= lsum, lsum <= 7 + 1e-10) %>%
+      # datasets_info %>%
+      # select(dataset_id = id, nrow, ncol, lnrow, lncol) %>%
       mutate(
         method_id = dat$method_id[[1]],
         method_name = dat$method_name[[1]],
@@ -108,6 +115,8 @@ models <-
         time_lpred = log10(time_pred),
         mem_lpred = log10(mem_pred)
       )
+
+    # ggplot(pred_ind) + geom_tile(aes(lnrow, lncol, fill = time_lpred)) + scale_fill_distiller(palette = "RdBu") + coord_equal() + theme_classic()
 
     # format output
     dat %>%
