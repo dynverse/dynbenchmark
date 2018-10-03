@@ -326,6 +326,7 @@ plots <- map(method_ids, function(method_id) {
   }
 })
 
+
 dir.create(result_file("results"), showWarnings = FALSE)
 dir.create(result_file("results/error_class_plots"), showWarnings = FALSE)
 # pdf(result_file("results.pdf"), width = 16, height = 12)

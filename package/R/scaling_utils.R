@@ -1,4 +1,4 @@
-#' Strip a vglm model, removing components which are not necessary for predictions
+#' Strip a vglm or gam model, only retaining those objects necessary for predicting
 #'
 #' @param model The vglm model
 #'
@@ -13,6 +13,7 @@
 #' predict(model, d.AD)
 #' predict(strip_vglm(model), d.AD)
 #' }
+#' @rdname strip
 #'
 #' @export
 strip_vglm = function(model) {
@@ -56,3 +57,43 @@ strip_vglm = function(model) {
 #' model2 <- strip_vglm(model)
 #' model2@family %>% maps4(pryr::object_size) %>% unlist() %>% sort()
 #' model2@family@linkinv %>% pryr::object_size()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#' @export
+#' @rdname strip
+#'
+strip_gam <-
+  function(object)
+  {
+    object$residuals <- NULL
+    # object$smooth <- NULL
+    object$fitted.values <- NULL
+    object$family <- NULL
+    object$linear.predictors <- NULL
+    object$weights <- NULL
+    object$prior.weights <- NULL
+    object$y <- NULL
+    object$hat <- NULL
+    object$formula <- NULL
+    object$model <- NULL
+    object$pred.formula <- NULL
+    object$offset <- NULL
+    attr(object$terms,".Environment") <- NULL
+    attr(object$pterms,".Environment") <- NULL
+
+    return(object)
+  }
