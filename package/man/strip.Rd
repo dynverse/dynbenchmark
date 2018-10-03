@@ -2,15 +2,18 @@
 % Please edit documentation in R/scaling_utils.R
 \name{strip_vglm}
 \alias{strip_vglm}
-\title{Strip a vglm model, removing components which are not necessary for predictions}
+\alias{strip_gam}
+\title{Strip a vglm or gam model, only retaining those objects necessary for predicting}
 \usage{
 strip_vglm(model)
+
+strip_gam(object)
 }
 \arguments{
 \item{model}{The vglm model}
 }
 \description{
-Strip a vglm model, removing components which are not necessary for predictions
+Strip a vglm or gam model, only retaining those objects necessary for predicting
 }
 \examples{
 \dontrun{
@@ -23,5 +26,8 @@ object.size(strip_vglm(model))
 predict(model, d.AD)
 predict(strip_vglm(model), d.AD)
 }
-
+model <- scaling_results$models$model_time[[1]]
+model2 <- strip_vglm(model)
+model2@family \%>\% maps4(pryr::object_size) \%>\% unlist() \%>\% sort()
+model2@family@linkinv \%>\% pryr::object_size()
 }

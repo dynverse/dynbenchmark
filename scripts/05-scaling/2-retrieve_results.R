@@ -22,14 +22,14 @@ experiment("05-scaling")
 # )
 
 # If you want to download the output from prism
-qsub::rsync_remote(
-  remote_src = TRUE,
-  path_src = derived_file("suite", remote = TRUE, experiment = "05-scaling"),
-  remote_dest = FALSE,
-  path_dest = derived_file("suite", remote = FALSE, experiment = "05-scaling"),
-  verbose = TRUE,
-  exclude = "*/r2gridengine/*"
-)
+# qsub::rsync_remote(
+#   remote_src = TRUE,
+#   path_src = derived_file("suite", remote = TRUE, experiment = "05-scaling"),
+#   remote_dest = FALSE,
+#   path_dest = derived_file("suite", remote = FALSE, experiment = "05-scaling"),
+#   verbose = TRUE,
+#   exclude = "*/r2gridengine/*"
+# )
 
 # bind results in one data frame (without models)
 execution_output <- benchmark_bind_results(load_models = FALSE)
@@ -73,25 +73,28 @@ models <-
         lmem = log10(mem)
       )
 
+    print(dat$method_id[[1]])
+
     # predict time
     model_time <- mgcv::gam(ltime ~ s(lnrow, lncol), data = dat)
+    model_time <- strip_gam(model_time)
     predict_time <- function(n_cells, n_features) {
       requireNamespace("mgcv")
       data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
-      10^predict(model_time, data)
+      10^stats::predict(model_time, data)
     }
-    environment(predict_time) <- list2env(lst(model_time))
-
-    print(dat$method_id[[1]])
+    environment(predict_time) <- list2env(list(model_time = model_time), parent = baseenv())
+    predict_time(10, 10)
 
     # predict memory
     model_mem <- mgcv::gam(lmem ~ s(lnrow, lncol), data = dat %>% filter(!is.infinite(lmem)))
+    model_mem <- strip_gam(model_mem)
     predict_mem <- function(n_cells, n_features) {
       requireNamespace("mgcv")
       data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
-      10^predict(model_mem, data)
+      10^stats::predict(model_mem, data)
     }
-    environment(predict_mem) <- list2env(lst(model_mem))
+    environment(predict_mem) <- list2env(list(model_mem = model_mem), parent = baseenv())
 
     # calculate preds
     pred_ind <-
