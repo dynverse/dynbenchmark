@@ -196,12 +196,23 @@ write_rds(plot_complementarity_example, derived_file("complementarity_example.rd
 
 ##  ............................................................................
 ##  Plot the complementarity of multiple combinations of trajectory_types   ####
-relevant_steps <- all_steps %>%
+comb_ypos <-
+  steps_combinations %>%
+  select(combination_id) %>%
+  mutate(y = as.integer(combination_id), y = max(y) - y + 1)
+
+bar_height <- .33
+text_width <- .2
+
+relevant_steps <-
+  all_steps %>%
   group_by(step_ix) %>%
   filter(any(round(score, 5) < 1)) %>%
-  ungroup()
+  ungroup() %>%
+  left_join(comb_ypos, by = "combination_id")
 
-relevant_steps_labels <- relevant_steps %>%
+relevant_steps_labels <-
+  relevant_steps %>%
   group_by(combination_id) %>%
   filter(chosen) %>%
   mutate(label = ifelse(step_ix > 1, paste0("+ ", label_wrap(label_method(method_id))), label_wrap(label_method(method_id)))) %>%
@@ -209,30 +220,28 @@ relevant_steps_labels <- relevant_steps %>%
   ungroup()
 
 plot_complementarity_combinations <-
-  ggplot(relevant_steps, aes(x = score, xend = score, y = 0, yend = 1)) +
-  geom_rect(aes(xmin = score_start, xmax = score, ymin = 0, ymax = 1, fill = factor(step_ix)), data = relevant_steps_labels) +
-  facet_grid(combination_id~., labeller = label_facet(label_short, width = 15), switch = "y") +
-  geom_hline(yintercept = 0, color = "#888888") +
-  geom_hline(yintercept = 1, color = "#888888") +
-  geom_segment(x = 0, xend = 0, y = 0, yend = 1, color = "#888888") +
-  geom_segment(color = "black", alpha = 0.1) +
-  geom_point(aes(color = most_complex_trajectory_type), data = relevant_steps %>% filter(chosen)) +
+  ggplot(relevant_steps) +
+  geom_rect(aes(xmin = score_start, xmax = score, ymin = y, ymax = y + bar_height, fill = factor(step_ix)), data = relevant_steps_labels) +
+  geom_rect(aes(xmin = 0, xmax = 1, ymin = y, ymax = y + bar_height), comb_ypos, colour = "#888888", fill = NA) +
+  geom_segment(aes(x = score, xend = score, y = y, yend = y + bar_height), color = "black", alpha = 0.1) +
+  geom_point(aes(x = score, y = y, color = most_complex_trajectory_type), data = relevant_steps %>% filter(chosen)) +
+  geom_text(aes(-text_width / 2, y + bar_height / 2, label = label_short(combination_id, width = 15)), comb_ypos, hjust = .5) +
   ggrepel::geom_text_repel(
     aes(
       x = score,
-      y = 0,
+      y = y,
       label = label
     ),
     data = relevant_steps_labels %>% filter(step_ix < 3 | (score < 0.9 & step_ix < 7)),
-    nudge_y = -1,
+    nudge_y = -(1 - bar_height)/2,
     direction = "x",
     lineheight = 0.8,
     min.segment.length = 0,
     size = 3
   ) +
-  geom_segment(aes(color = most_complex_trajectory_type), data = relevant_steps %>% filter(chosen)) +
-  scale_y_continuous(limits = c(-2, 1), breaks = NULL, expand = c(0, 0)) +
-  scale_x_continuous(limits = c(0, 1), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = scales::percent, expand = c(0, 0)) +
+  geom_segment(aes(x = score, xend = score, y = y, yend = y + bar_height, color = most_complex_trajectory_type), data = relevant_steps %>% filter(chosen)) +
+  scale_y_continuous(limits = c(.5, max(comb_ypos$y) + .5), breaks = NULL, expand = c(0, 0)) +
+  scale_x_continuous(limits = c(-text_width, 1), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = scales::percent, expand = c(0, 0)) +
   scale_fill_grey(label_long("n_methods"), start = 0.95, end = 0.2, limits = c(1, 2,3,4,5,6), na.value = "#333333") +
   scale_color_manual(values = trajectory_type_colours, guide = FALSE) +
   theme_pub() +
