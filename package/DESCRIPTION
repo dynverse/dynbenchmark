@@ -98,7 +98,6 @@ Collate:
     'plotting_trajectory_types.R'
     'qsub.R'
     'reformat_tribbles.R'
-    'scaling_utils.R'
     'setup_experiment.R'
     'setup_datasets.R'
     'setup_get_dynbenchmark_folder.R'
