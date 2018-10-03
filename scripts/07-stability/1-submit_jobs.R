@@ -90,7 +90,6 @@ if (!file.exists(derived_file("design.rds"))) {
 
   # save configuration
   write_rds(design, derived_file("design.rds"), compress = "xz")
-  write_rds(metrics, result_file("metrics.rds"), compress = "xz")
   write_rds(lst(timeout_sec, memory_gb, metrics, num_repeats, num_bootstraps, bootstrap_pct_cells, bootstrap_pct_features, orig_dataset_ids = did_sel), result_file("params.rds"), compress = "xz")
 }
 
