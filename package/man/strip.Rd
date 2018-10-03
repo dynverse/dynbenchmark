@@ -7,7 +7,7 @@
 \usage{
 strip_vglm(model)
 
-strip_gam(object, keep = "predict", ...)
+strip_gam(object)
 }
 \arguments{
 \item{model}{The vglm model}
