@@ -8,12 +8,12 @@ experiment("07-stability")
 ##########################################################
 
 # If you are the one who submitted the jobs, run:
-benchmark_fetch_results(TRUE)
+# benchmark_fetch_results(TRUE)
 # qsub::rsync_remote(
 #   remote_src = FALSE,
-#   path_src = derived_file(remote = FALSE, experiment = "06-benchmark"),
+#   path_src = derived_file(remote = FALSE, experiment = "07-stability"),
 #   remote_dest = TRUE,
-#   path_dest = derived_file(remote = TRUE, experiment = "06-benchmark"),
+#   path_dest = derived_file(remote = TRUE, experiment = "07-stability"),
 #   verbose = TRUE,
 #   exclude = "*/r2gridengine/*"
 # )
@@ -21,9 +21,9 @@ benchmark_fetch_results(TRUE)
 # If you want to download the output from prism
 # qsub::rsync_remote(
 #   remote_src = TRUE,
-#   path_src = derived_file(remote = TRUE, experiment = "06-benchmark"),
+#   path_src = derived_file(remote = TRUE, experiment = "07-stability"),
 #   remote_dest = FALSE,
-#   path_dest = derived_file(remote = FALSE, experiment = "06-benchmark"),
+#   path_dest = derived_file(remote = FALSE, experiment = "07-stability"),
 #   verbose = TRUE,
 #   exclude = "*/r2gridengine/*"
 # )
@@ -51,22 +51,17 @@ write_rds(raw_data, result_file("benchmark_results_unnormalised.rds"), compress 
 ###################################################
 ############### CREATE AGGREGATIONS ###############
 ###################################################
-benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", "06-benchmark"))
-stability_params <- read_rds(result_file("params.rds", "07-stability"))
+
 
 out <- benchmark_aggregate(
-  data = raw_data %>% mutate(method_name = method_id),
-  metrics = stability_params$metrics,
-  norm_fun = benchmark_results_input$norm_fun,
-  mean_fun = benchmark_results_input$mean_fun,
-  mean_weights = benchmark_results_input$mean_weights,
-  dataset_source_weights = benchmark_results_input$dataset_source_weights
+  data = raw_data %>% mutate(method_name = method_id)
 )
 out$data$overall <- ifelse(is.finite(out$data$overall), out$data$overall, 0)
 
 #####################################################
 ############### CALCULATE VARIABILITY ###############
 #####################################################
+stability_params <- read_rds(result_file("params.rds", "07-stability"))
 
 worst_var <- var(c(rep(0, floor(stability_params$num_bootstraps / 2)), rep(1, ceiling(stability_params$num_bootstraps / 2))))
 
