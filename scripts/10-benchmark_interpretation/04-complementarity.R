@@ -78,7 +78,7 @@ get_top_methods <- function(data_oi, trajectory_types_oi) {
   data_oi <- data_oi %>%
     left_join(dataset_weights_oi, "dataset_id")
 
-  if(nrow(data_oi) == 0) stop("No data found!")
+  if (nrow(data_oi) == 0) stop("No data found!")
 
   all_method_ids <- unique(data_oi$method_id)
 
@@ -89,7 +89,7 @@ get_top_methods <- function(data_oi, trajectory_types_oi) {
   step_ix <- 1
   steps <- list()
   method_ids <- character()
-  while(length(method_ids) != length(all_method_ids)) {
+  while (length(method_ids) != length(all_method_ids)) {
     print(length(method_ids))
     next_steps <- tibble(
       method_id = setdiff(all_method_ids, method_ids)
@@ -139,10 +139,10 @@ relevant_steps_labels <- relevant_steps %>%
   mutate(label = ifelse(step_ix > 1, paste0("+ ", label_wrap(label_method(method_id))), label_wrap(label_method(method_id)))) %>%
   mutate(score_start = lag(score, default = 0))
 
-plot_complementarity_example <- relevant_steps %>%
-  ggplot(aes(step_ix, score)) +
-    geom_hline(yintercept = 1, linetype = "dashed", color = "#333333", alpha = 0.5) +
-    ggbeeswarm::geom_quasirandom(aes(color = chosen), data = filter(relevant_steps, !chosen), color = "#888888", alpha = 0.5, groupOnX = TRUE) +
+plot_complementarity_example <-
+  ggplot(relevant_steps, aes(step_ix, score)) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "#333333", alpha = 0.5) +
+  ggbeeswarm::geom_quasirandom(aes(color = chosen), data = filter(relevant_steps, !chosen), color = "#888888", alpha = 0.5, groupOnX = TRUE) +
   ggrepel::geom_label_repel(aes(y = score, label = label), data = relevant_steps_labels, angle = 0, label.size = 0, size = 3, lineheight = 0.8, nudge_y = 0.1, direction = "y") +
     geom_point(data = relevant_steps %>% filter(chosen), color = colour) +
     scale_x_continuous(label_long("n_methods"), breaks = seq_len(max(relevant_steps$step_ix)), expand = c(0, 0), limits = c(0, max(relevant_steps$step_ix) + 1)) +
