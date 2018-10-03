@@ -345,12 +345,12 @@ map(seq_along(method_ids), function(i) {
 ########### GENERATE INDIVIDUAL EXAMPLE FIGURE ###########
 ##########################################################
 
-method_ids <- c("mst", "paga", "slingshot", "elpigraph", "monocle_ddrtree", "ouija")
+method_ids_sel <- c("mst", "paga", "slingshot", "elpigraph", "monocle_ddrtree", "ouija")
 
 scale_fill_time <- scale_fill_viridis_c("", option = "inferno", labels = label_time, trans = "log", breaks = function(range) {c(first(range), 10^mean(log10(range)), last(range))}, limits = c(1, 60*60*72), oob = scales::squish)
 
 plots <- list()
-for (method_id in method_ids) {
+for (method_id in method_ids_sel) {
   data_method <- data %>% filter(method_id == !!method_id)
   model_method <- models %>% filter(method_id == !!method_id)
   data_noerror <- data_method %>% filter(error_status == "no_error")
