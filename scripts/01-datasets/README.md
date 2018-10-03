@@ -72,3 +72,6 @@ dynwrap.
 | \# | script/folder                                              | description                                               |
 | :- | :--------------------------------------------------------- | :-------------------------------------------------------- |
 | 1  | [📄`topology.R`](04-dataset_characterisation/01-topology.R) | An overview of all the topologies present in the datasets |
+
+The results of this experiment are available
+[here](https://github.com/dynverse/dynbenchmark_results/tree/master/01-datasets).

@@ -17,3 +17,6 @@ model.
 | 2  | [📄`retrieve_results.R`](2-retrieve_results.R) | Retrieve the results and generate the scalability models                                      |
 | 3  | [📄`generate_figures.R`](3-generate_figures.R) | Classify the models and generate scalability figures                                          |
 |    | [📄`generate_dataset.R`](generate_dataset.R)   | Helper to generate an up- and downscaled dataset which looks similar to the original datasets |
+
+The results of this experiment are available
+[here](https://github.com/dynverse/dynbenchmark_results/tree/master/05-scaling).

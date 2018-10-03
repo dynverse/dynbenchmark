@@ -17,3 +17,13 @@ dynbenchmark::render_scripts_documentation()
 ```{r, results = "asis"}
 dynbenchmark::knit_nest("01-gather_methods_information")
 ```
+
+```{r, results = "asis"}
+dynbenchmark::knit_nest("02-tool_qc")
+```
+
+```{r, results = "asis"}
+dynbenchmark::knit_nest("03-method_characterisation")
+```
+
+The results of this experiment are available [here](`r dynbenchmark::link_to_results()`).

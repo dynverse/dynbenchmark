@@ -27,3 +27,5 @@ dynbenchmark::knit_nest("02-synthetic")
 dynbenchmark::knit_nest("04-dataset_characterisation")
 ```
 
+The results of this experiment are available [here](`r dynbenchmark::link_to_results()`).
+

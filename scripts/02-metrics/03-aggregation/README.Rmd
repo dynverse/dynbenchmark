@@ -9,3 +9,5 @@ Here, we create some examples here for why and how we aggregate the scores.
 ```{r, results = "asis"}
 dynbenchmark::render_scripts_documentation()
 ```
+
+The results of this experiment are available [here](`r dynbenchmark::link_to_results()`).
