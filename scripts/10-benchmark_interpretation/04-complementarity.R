@@ -172,6 +172,12 @@ relevant_steps_ex <-
   ungroup() %>%
   mutate(y = -step_ix + ifelse(step_ix == 1, .75, 0))
 
+# determine relevant step labels
+# some funky plotmath wizardry is performed here
+# the labels can look something like this:
+#
+# > phantom("Running ") * phantom(bold("Slingshot")) * phantom(" on all datasets")
+# > "will result in a top model 33% of the time"
 relevant_steps_labels_ex <-
   relevant_steps_ex %>%
   filter(chosen) %>%
