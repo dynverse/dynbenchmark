@@ -2,7 +2,6 @@
 
 library(tidyverse)
 library(dynbenchmark)
-library(xml2)
 
 experiment("09-guidelines")
 
@@ -155,7 +154,9 @@ setdiff(results_outcomes$metric, names(metric2renderer))
 
 results_outcomes <- results_outcomes %>%
   mutate(
-    render = pmap(lst(renderer = metric2renderer[metric], value), function(renderer, value) {renderer(value)}),
+    render = pmap(lst(renderer = metric2renderer[metric], value), function(renderer, value) {renderer(value)})
+  ) %>%
+  mutate(
     fill = map_chr(render, "fill"),
     label = map_chr(render, "label"),
     color = ifelse(shades::lightness(fill) > 60, "black", "white")
