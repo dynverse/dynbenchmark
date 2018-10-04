@@ -65,7 +65,7 @@ download_dataset_source_file <- function(filename, url, id = NULL) {
 #' @export
 dataset_raw_file <- function(id) {
   file <- derived_file(paste0(id, ".rds"), experiment_id = "01-datasets_preproc/raw")
-  dir.create(dirname(file), showWarnings = FALSE)
+  dir.create(dirname(file), showWarnings = FALSE, recursive = TRUE)
   file
 }
 
