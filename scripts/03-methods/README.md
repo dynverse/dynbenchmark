@@ -17,6 +17,9 @@ Here we
 | 3  | [📁`method_characterisation`](03-method_characterisation)       | Method characterisation                                 |
 |    | [📁`varia`](varia)                                              |                                                         |
 
+The results of this experiment are available
+[here](https://github.com/dynverse/dynbenchmark_results/tree/master/03-methods).
+
 ## [Gathering all the information we have about the methods](01-gather_methods_information)
 
 Most information of the methods are contained within their respective
@@ -53,6 +56,3 @@ methods
 | :- | :---------------------------------------------------------------------------------- | :--------------------------------------------------------------------------- |
 | 1  | [📄`tool_characterisation.R`](03-method_characterisation/01-tool_characterisation.R) | Several figures for looking at the history and diversity of TI methods/tools |
 | 2  | [📄`tools_table.R`](03-method_characterisation/02-tools_table.R)                     | Generate a table containing the methods                                      |
-
-The results of this experiment are available
-[here](https://github.com/dynverse/dynbenchmark_results/tree/master/03-methods).
