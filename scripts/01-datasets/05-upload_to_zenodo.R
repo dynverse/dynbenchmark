@@ -1,4 +1,4 @@
-#' Upload the datasets to Zenodo
+#' Upload the datasets to Zenodo ([10.5281/zenodo.1211532](https://doi.org/10.5281/zenodo.1211532))
 
 library(tidyverse)
 library(dynbenchmark)
