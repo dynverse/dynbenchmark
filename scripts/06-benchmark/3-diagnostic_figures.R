@@ -1,3 +1,5 @@
+#' Create some diagnostic figures to get an overview of the results
+
 library(dynbenchmark)
 library(tidyverse)
 library(dynplot)

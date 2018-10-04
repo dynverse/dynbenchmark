@@ -1,3 +1,5 @@
+#' Retrieve the results from the gridengine cluster and aggregate the data
+
 library(dynbenchmark)
 library(tidyverse)
 
