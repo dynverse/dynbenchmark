@@ -262,8 +262,8 @@ ggsave(result_file("complementarity_example.pdf"), device = cairo_pdf, plot_comp
 write_rds(plot_complementarity_example, derived_file("complementarity_example.rds"))
 
 
-ggplot() +
-  geom_text(aes(x = 1, y = 1, label = "While~other~bold(methods)~perform~less~well"), parse = T)
+
+
 
 
 ##  ............................................................................
