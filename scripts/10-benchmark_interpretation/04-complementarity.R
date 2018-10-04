@@ -189,6 +189,7 @@ relevant_steps_labels_ex <-
     label_bot = gsub(".*\\n", "", label)
   )
 
+# compute bracket positions
 source(scripts_file("04-complementarity_helper.R"))
 bracket_range <- relevant_steps_ex %>% filter(step_ix == 1, !chosen) %>% pull(score) %>% range()
 bracket_data <-
@@ -201,17 +202,19 @@ bracket_data <-
 plot_complementarity_example <-
   ggplot(relevant_steps_ex, aes(score, y)) +
 
-  # labels to the right
+  # plot first sentence of the labels to the right. allow phantom(...) text to be plotted, but don't plot phantom(bold(...)) text
   geom_text(
     aes(x = 1.25, y = y + .375, label = label_top),
     relevant_steps_labels_ex %>% mutate(label_top = gsub("phantom\\((\"[^)]*\")\\)", "\\1", label_top)),
     hjust = 1, lineheight = 1, parse = TRUE, vjust = 1
   ) +
+  # plot first sentence of the labels to the right. allow phantom(bold(...)) text to be plotted in a trajtype colour, but don't plot phantom(...) text
   geom_text(
     aes(x = 1.25, y = y + .375, label = label_top, colour = most_complex_trajectory_type),
     relevant_steps_labels_ex %>% filter(grepl("phantom\\(bold\\(", label_top)) %>% mutate(label_top = gsub("phantom\\((bold\\(\"[^)]*\"\\))\\)", "\\1", label_top)),
     hjust = 1, lineheight = 1, parse = TRUE, vjust = 1
   ) +
+  # plot second sentence of the labels to the right
   geom_text(
     aes(x = 1.25, y = y - .375, label = label_bot),
     relevant_steps_labels_ex,
