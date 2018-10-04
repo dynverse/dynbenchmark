@@ -7,6 +7,11 @@ data <- read_rds(result_file("benchmark_results_normalised.rds", "06-benchmark")
 
 trajectory_type_colours <- dynwrap::trajectory_types %>% select(id, colour) %>% deframe()
 
+# remove datasets on which all methods failed
+data_succeeded <- data %>% group_by(dataset_id) %>% summarise(pct_succeeded = mean(error_status == "no_error")) %>% arrange(desc(pct_succeeded))
+dataset_sel <- data_succeeded %>% filter(pct_succeeded > 0) %>% pull(dataset_id)
+data <- data %>% filter(dataset_id %in% dataset_sel)
+
 ##  ............................................................................
 ##  Find a "good-enough" subset of methods                                  ####
 # several functions to define when a particular method has succeeded on a particular dataset
