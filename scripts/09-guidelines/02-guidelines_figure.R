@@ -2,7 +2,6 @@
 
 library(tidyverse)
 library(dynbenchmark)
-library(xml2)
 
 experiment("09-guidelines")
 
@@ -134,7 +133,7 @@ metrics <- tribble(
   "benchmark", "Benchmark\nscore", split_renderer(c(0.6, 0.95), triple_checks), "benchmark",1,
   "qc_app_user_friendly", "User\nFriendliness", split_renderer(c(0.6, 0.9), triple_checks), "qc",1,
   "scaling_pred_time_cells1k_features10k", " \n1k cells", time_renderer(c(60, 60*60)),  "scalability",1,
-  "scaling_pred_time_cells10k_features10k", "Est. running time @ 10k features\n10k cells", time_renderer(c(60, 60*60)), "scalability",1,
+  "scaling_pred_time_cells10k_features10k", "Est. running time at 10k features\n10k cells", time_renderer(c(60, 60*60)), "scalability",1,
   "scaling_pred_time_cells100k_features10k", "\n100k cells", time_renderer(c(60, 60*60)), "scalability",1,
   "method_required_priors", "\nRequired priors", prior_renderer, "priors", 2
 ) %>%
@@ -155,7 +154,9 @@ setdiff(results_outcomes$metric, names(metric2renderer))
 
 results_outcomes <- results_outcomes %>%
   mutate(
-    render = pmap(lst(renderer = metric2renderer[metric], value), function(renderer, value) {renderer(value)}),
+    render = pmap(lst(renderer = metric2renderer[metric], value), function(renderer, value) {renderer(value)})
+  ) %>%
+  mutate(
     fill = map_chr(render, "fill"),
     label = map_chr(render, "label"),
     color = ifelse(shades::lightness(fill) > 60, "black", "white")
@@ -194,5 +195,5 @@ ggsave(result_file("guidelines_methods.png"), width = 8, height = 10)
 file.copy(raw_file("tree.svg"), result_file("guidelines.svg"), overwrite = TRUE)
 
 # embed the methods svg (not supported, we have to choose between saving guidelines_methods as png and embedding, or as svg and linking)
-system(glue::glue("inkscape {result_file('guidelines.svg')}  --verb=org.ekips.filter.embedimage.noprefs --verb=FileSave --verb=FileClose --verb=FileQuit"))
-
+system(glue::glue("inkscape {result_file('guidelines.svg')} --export-pdf {result_file('guidelines.pdf')}"))
+file.remove(result_file("guidelines.svg"))

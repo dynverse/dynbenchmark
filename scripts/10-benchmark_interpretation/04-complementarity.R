@@ -188,7 +188,7 @@ plot_complementarity_example <-
   # expand_limits(x = c(0, 0)) +
   theme_pub() +
   labs(
-    x = "Probability of obtaining a top model",
+    x = "Likelihood of obtaining a top model",
     y = label_long("n_methods")
   ) +
   lemon::coord_capped_cart(bottom = "both", left = lemon::brackets_vertical())
@@ -263,7 +263,7 @@ plot_complementarity_combinations <-
     legend.justification = "center"
   ) +
   guides(fill = guide_legend(ncol = 6, label.position = "right")) +
-  labs(x = "Probability of obtaining a top model") +
+  labs(x = "Likelihood of obtaining a top model") +
   lemon::coord_capped_cart(bottom = "both")
 
 plot_complementarity_combinations

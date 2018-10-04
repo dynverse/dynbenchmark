@@ -1,4 +1,5 @@
-############### OVERALL COMPARISON ###############
+#' Overall comparison
+
 metr_lev <- c(
   "overall", "real/gold", "real/silver", "synthetic/dyngen", "synthetic/dyntoy", "synthetic/prosstt", "synthetic/splatter",
   "norm_correlation", "norm_edge_flip", "norm_him", "norm_F1_branches", "norm_featureimp_cor", "norm_featureimp_wcor", "time_pred_cor",

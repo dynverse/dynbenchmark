@@ -1,3 +1,5 @@
+#' Test different models for scalability, using the running times from the benchmark as validation set
+
 library(dynbenchmark)
 library(tidyverse)
 

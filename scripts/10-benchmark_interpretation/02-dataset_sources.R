@@ -33,7 +33,7 @@ plot_dataset_source_correlation <- gold_dataset_source_scores %>%
     facet_grid(.~dataset_source) +
     scale_x_continuous(limits = c(0, 1)) +
     scale_y_continuous(limits = c(0, 1)) +
-    labs(x = "Overall performance on datasets from source", y = "Overall performance on real/gold datasets") +
+    labs(x = "Overall score on datasets from source", y = "Overall score on real/gold datasets") +
     theme_pub()
 
 plot_dataset_source_correlation

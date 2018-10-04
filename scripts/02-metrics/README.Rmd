@@ -17,3 +17,5 @@ dynbenchmark::knit_nest("02-metric_conformity")
 ```{r, results = "asis"}
 dynbenchmark::knit_nest("03-aggregation")
 ```
+
+The results of this experiment are available [here](`r dynbenchmark::link_to_results()`).

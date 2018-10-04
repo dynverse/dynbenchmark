@@ -1,4 +1,5 @@
-############### COMPARISON PREDICTED VERSUS ACTUAL TIMES / MEM USAGE ###############
+#' Comparison between predicted versus actual running time and memory usage
+
 join <-
   data %>%
   filter(error_status %in% c("no_error", "time_limit", "memory_limit")) %>%

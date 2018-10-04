@@ -11,3 +11,5 @@ Each method is run on down- and upscaled datasets with increasing gene set and c
 ```{r}
 dynbenchmark::render_scripts_documentation()
 ```
+
+The results of this experiment are available [here](`r dynbenchmark::link_to_results()`).

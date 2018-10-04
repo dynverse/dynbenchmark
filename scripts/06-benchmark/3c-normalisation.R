@@ -1,4 +1,5 @@
-## CHECK VARIANCES PER DATASET AND METRIC
+#' Compare the effect of normalisation on the results
+
 stat_funs <- c("sd", "mean")
 metricso <- c("overall", metrics)
 
