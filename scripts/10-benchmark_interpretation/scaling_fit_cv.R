@@ -3,51 +3,56 @@
 library(dynbenchmark)
 library(tidyverse)
 
-experiment("06-benchmark/scaling_fit_cv")
+experiment("10-benchmark_interpretation/scaling_fit_cv")
 
-# ###################################################
-# ###                 FORMAT DATA                 ###
-# ###################################################
-#
-# scaling <- read_rds(result_file("scaling.rds", "05-scaling"))
-# benchmark_results_unnormalised <- read_rds(result_file("benchmark_results_unnormalised.rds", experiment_id = "06-benchmark"))
-# benchmark_design <- read_rds(derived_file("design.rds", experiment_id = "06-benchmark"))
-#
-# max_memory <- 16 * 1e9
-# max_time <- 60 * 60
-#
-# rep_levels <- c(paste0("training_", seq_len(5)), "predicted")
-#
-# training <-
-#   scaling$data %>%
-#   filter(error_status %in% c("no_error", "time_limit", "memory_limit")) %>%
-#   transmute(
-#     method_id,
-#     replicate = factor(paste0("training_", match(orig_dataset_id, unique(orig_dataset_id))), levels = rep_levels),
-#     lnrow,
-#     lncol,
-#     error_status,
-#     ltime = case_when(error_status == "no_error" ~ log10(time_method), error_status == "time_limit" ~ log10(max_time), error_status == "memory_limit" ~ NA_real_),
-#     lmemory = case_when(error_status == "no_error" ~ log10(max_mem), error_status == "time_limit" ~ NA_real_, error_status == "memory_limit" ~ log10(max_memory))
-#   )
-#
-# validation <-
-#   benchmark_results_unnormalised$raw_data %>%
-#   left_join(benchmark_design$datasets %>% select(lnrow, lncol, dataset_id = id), by = "dataset_id") %>%
-#   filter(error_status %in% c("no_error", "time_limit", "memory_limit")) %>%
-#   transmute(
-#     method_id,
-#     replicate = factor("predicted", levels = rep_levels),
-#     lnrow,
-#     lncol,
-#     error_status,
-#     ltime = case_when(error_status == "no_error" ~ log10(time_method), error_status == "time_limit" ~ log10(max_time), error_status == "memory_limit" ~ NA_real_),
-#     lmemory = case_when(error_status == "no_error" ~ log10(max_mem), error_status == "time_limit" ~ NA_real_, error_status == "memory_limit" ~ log10(max_memory))
-#   )
-#
-# write_rds(training, derived_file("training.rds"))
-# write_rds(validation, derived_file("validation.rds"))
+###################################################
+###                 FORMAT DATA                 ###
+###################################################
 
+max_memory <- 16 * 1e9
+max_time <- 60 * 60
+
+rep_levels <- c(paste0("training_", seq_len(5)), "predicted")
+
+if (!file.exists(derived_file("training.rds"))) {
+  scaling <- read_rds(result_file("scaling.rds", "05-scaling"))
+
+  training <-
+    scaling$data %>%
+    filter(error_status %in% c("no_error", "time_limit", "memory_limit")) %>%
+    transmute(
+      method_id,
+      replicate = factor(paste0("training_", match(orig_dataset_id, unique(orig_dataset_id))), levels = rep_levels),
+      lnrow,
+      lncol,
+      error_status,
+      ltime = case_when(error_status == "no_error" ~ log10(time_method), error_status == "time_limit" ~ log10(max_time), error_status == "memory_limit" ~ NA_real_),
+      lmemory = case_when(error_status == "no_error" ~ log10(max_mem), error_status == "time_limit" ~ NA_real_, error_status == "memory_limit" ~ log10(max_memory))
+    )
+
+  write_rds(training, derived_file("training.rds"))
+}
+
+if (!file.exists(derived_file("validation.rds"))) {
+  benchmark_results_unnormalised <- read_rds(result_file("benchmark_results_unnormalised.rds", experiment_id = "06-benchmark"))
+  benchmark_design <- read_rds(derived_file("design.rds", experiment_id = "06-benchmark"))
+
+  validation <-
+    benchmark_results_unnormalised$raw_data %>%
+    left_join(benchmark_design$datasets %>% select(lnrow, lncol, dataset_id = id), by = "dataset_id") %>%
+    filter(error_status %in% c("no_error", "time_limit", "memory_limit")) %>%
+    transmute(
+      method_id,
+      replicate = factor("predicted", levels = rep_levels),
+      lnrow,
+      lncol,
+      error_status,
+      ltime = case_when(error_status == "no_error" ~ log10(time_method), error_status == "time_limit" ~ log10(max_time), error_status == "memory_limit" ~ NA_real_),
+      lmemory = case_when(error_status == "no_error" ~ log10(max_mem), error_status == "time_limit" ~ NA_real_, error_status == "memory_limit" ~ log10(max_memory))
+    )
+
+  write_rds(validation, derived_file("validation.rds"))
+}
 
 ###################################################
 ###               TRY A FEW MODELS              ###
