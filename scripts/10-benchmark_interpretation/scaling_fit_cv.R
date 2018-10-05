@@ -38,7 +38,7 @@ if (!file.exists(derived_file("validation.rds"))) {
   benchmark_design <- read_rds(derived_file("design.rds", experiment_id = "06-benchmark"))
 
   validation <-
-    benchmark_results_unnormalised$raw_data %>%
+    benchmark_results_unnormalised %>%
     left_join(benchmark_design$datasets %>% select(lnrow, lncol, dataset_id = id), by = "dataset_id") %>%
     filter(error_status %in% c("no_error", "time_limit", "memory_limit")) %>%
     transmute(

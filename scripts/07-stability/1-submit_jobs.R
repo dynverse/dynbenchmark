@@ -68,7 +68,7 @@ if (!file.exists(derived_file("design.rds"))) {
 
   predicted_times <-
     inner_join(
-      benchmark_results_unnormalised$raw_data %>% select(orig_dataset_id = dataset_id, method_id, time_method),
+      benchmark_results_unnormalised %>% select(orig_dataset_id = dataset_id, method_id, time_method),
       datasets %>% select(id, orig_dataset_id),
       by = "orig_dataset_id"
     ) %>%

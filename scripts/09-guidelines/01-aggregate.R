@@ -14,7 +14,7 @@ methods_aggr <- read_rds(result_file("results.rds", experiment_id = "08-summary"
 # benchmarking metrics
 benchmark_metrics <- dynbenchmark::metrics_evaluated %>% filter(type != "overall")
 benchmark_results <- read_rds(result_file("benchmark_results_unnormalised.rds", experiment_id = "06-benchmark"))
-benchmark <- benchmark_results$raw_data %>%
+benchmark <- benchmark_results %>%
   select(-prior_df) %>%
   select(method_id, dataset_id, dataset_trajectory_type, !!!benchmark_metrics$metric_id) %>%
   mutate_if(is.character, factor) %>%
@@ -27,7 +27,7 @@ methods_aggr %>% select(-benchmark) %>% pryr::object_size()
 methods_aggr %>% pryr::object_size()
 
 # benchmarking datasets
-benchmark_datasets_info <- load_datasets(unique(benchmark_results$raw_data$dataset_id)) %>%
+benchmark_datasets_info <- load_datasets(unique(benchmark_results$dataset_id)) %>%
   select(id, source, trajectory_type)
 
 methods_aggr <- methods_aggr %>%
