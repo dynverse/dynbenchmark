@@ -20,14 +20,14 @@ experiment("04-method_testing")
 # )
 
 # If you want to download the output from prism
-qsub::rsync_remote(
-  remote_src = TRUE,
-  path_src = derived_file(remote = TRUE, experiment = "04-method_testing"),
-  remote_dest = FALSE,
-  path_dest = derived_file(remote = FALSE, experiment = "04-method_testing"),
-  verbose = TRUE,
-  exclude = "*/r2gridengine/*"
-)
+# qsub::rsync_remote(
+#   remote_src = TRUE,
+#   path_src = derived_file(remote = TRUE, experiment = "04-method_testing"),
+#   remote_dest = FALSE,
+#   path_dest = derived_file(remote = FALSE, experiment = "04-method_testing"),
+#   verbose = TRUE,
+#   exclude = "*/r2gridengine/*"
+# )
 
 output <- benchmark_bind_results(load_models = TRUE)
 

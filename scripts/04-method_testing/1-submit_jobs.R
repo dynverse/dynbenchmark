@@ -75,7 +75,7 @@ design <- read_rds(derived_file("design.rds"))
 benchmark_submit(
   design = design,
   qsub_grouping = "{method_id}",
-  qsub_params = function(method_id) lst(timeout = 1200, memory = ifelse(method_id %in% c("ouija", "ouijaflow", "paga", "scimitar"), "32G", "10G")),
+  qsub_params = function(method_id) lst(timeout = 1200, memory = ifelse(method_id %in% c("ouija", "ouijaflow", "paga", "scimitar"), "32G", "16G")),
   metrics = c("correlation", "edge_flip", "featureimp_cor", "featureimp_wcor", "F1_branches", "him")
 )
 
