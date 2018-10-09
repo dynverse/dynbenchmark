@@ -8,15 +8,15 @@ experiment("07-stability")
 ##########################################################
 
 # If you are the one who submitted the jobs, run:
-benchmark_fetch_results(TRUE)
-qsub::rsync_remote(
-  remote_src = FALSE,
-  path_src = derived_file(remote = FALSE, experiment = "07-stability"),
-  remote_dest = TRUE,
-  path_dest = derived_file(remote = TRUE, experiment = "07-stability"),
-  verbose = TRUE,
-  exclude = "*/r2gridengine/*"
-)
+# benchmark_fetch_results(TRUE)
+# qsub::rsync_remote(
+#   remote_src = FALSE,
+#   path_src = derived_file(remote = FALSE, experiment = "07-stability"),
+#   remote_dest = TRUE,
+#   path_dest = derived_file(remote = TRUE, experiment = "07-stability"),
+#   verbose = TRUE,
+#   exclude = "*/r2gridengine/*"
+# )
 
 # If you want to download the output from prism
 # qsub::rsync_remote(
