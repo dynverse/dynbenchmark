@@ -89,7 +89,13 @@ models <-
 
     # predict memory
     # model_mem <- scam::scam(lmem ~ s(lnrow, lncol, bs = "tedmi"), data = dat %>% filter(!is.infinite(lmem), lmem >= 8))
-    model_mem <- mgcv::gam(lmem ~ s(lnrow, lncol), data = dat %>% filter(is.finite(ltime), lmem >= 8))
+    model_mem <-
+      tryCatch({
+        mgcv::gam(lmem ~ s(lnrow, lncol), data = dat %>% filter(is.finite(ltime), lmem >= 8))
+      }, error = function(e) {
+        warning(e)
+        lm(lmem ~ lnrow + lncol + lnrow * lncol, data = dat %>% filter(is.finite(ltime), lmem >= 8))
+      })
     model_mem <- strip::strip(model_mem, keep = "predict")
     predict_mem <- function(n_cells, n_features) {
       requireNamespace("mgcv")
@@ -108,8 +114,6 @@ models <-
       ) %>%
       mutate(nrow = 10^lnrow, ncol = 10^lncol, lsum = lnrow + lncol) %>%
       filter(4 - 1e-10 <= lsum, lsum <= 7 + 1e-10) %>%
-      # datasets_info %>%
-      # select(dataset_id = id, nrow, ncol, lnrow, lncol) %>%
       mutate(
         method_id = dat$method_id[[1]],
         method_name = dat$method_name[[1]],
@@ -118,8 +122,6 @@ models <-
         time_lpred = log10(time_pred),
         mem_lpred = log10(mem_pred)
       )
-
-    # ggplot(pred_ind) + geom_tile(aes(lnrow, lncol, fill = time_lpred)) + scale_fill_distiller(palette = "RdBu") + coord_equal() + theme_classic()
 
     # format output
     dat %>%
