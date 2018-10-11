@@ -10,7 +10,7 @@ method_info <- read_rds(derived_file("design.rds"))$methods
 list2env(read_rds(result_file("scaling.rds")), .GlobalEnv)
 
 # filter away control methods
-models_nocontrol <- models %>% filter(!method_id %in% (method_info %>% filter(source != "control") %>% pull(id)))
+models_nocontrol <- models %>% filter(method_id %in% (method_info %>% filter(source != "control") %>% pull(id)))
 
 # check which datasets are available on the remote (some may not have executed entirely)
 scaling_avail <- qsub::ls_remote(derived_file("", experiment = "05-scaling/dataset", remote = TRUE), remote = TRUE) %>% gsub("\\.rds$", "", .)
