@@ -11,6 +11,8 @@ experiment("10-benchmark_interpretation/scaling_fit_cv")
 
 max_memory <- 16 * 1e9
 max_time <- 60 * 60
+max_lmemory <- log10(max_memory)
+max_ltime <- log10(max_time)
 
 rep_levels <- c(paste0("training_", seq_len(5)), "predicted")
 
@@ -59,20 +61,16 @@ if (!file.exists(derived_file("validation.rds"))) {
 ###################################################
 library(tidyverse)
 
-experiment("06-benchmark/scaling_fit_cv")
+experiment("10-benchmark_interpretation/scaling_fit_cv")
 
 training <- read_rds(derived_file("training.rds")) %>% filter(!method_id %in% c("error", "identity", "random", "shuffle"))
 validation <- read_rds(derived_file("validation.rds")) %>% filter(!method_id %in% c("error", "identity", "random", "shuffle"))
-
-max_lmemory <- log10(16 * 1e9)
-max_ltime <- log10(60 * 60)
 
 
 library(survival)
 models <- list(
   "lm, lnrow + lncol" = function(train) lm(ltime ~ lnrow + lncol, train),
   "lm, lnrow + lncol + lnrow * lncol" = function(train) lm(ltime ~ lnrow + lncol + lnrow * lncol, train),
-  "survreg left right, lnrow + lncol" = function(train) fit <- survival::survreg(survival::Surv(ltime, status) ~ lnrow + lncol, dist = "gaussian", train %>% mutate(status = case_when(error_status == "time_limit" ~ 0, ltime < 1 ~ 2, TRUE ~ 1))),
   "survreg right, lnrow + lncol" = function(train) fit <- survival::survreg(survival::Surv(ltime, status) ~ lnrow + lncol, dist = "gaussian", train %>% mutate(status = case_when(error_status == "time_limit" ~ 0, TRUE ~ 1))),
   "gam select, s(lnrow) + s(lncol)" = function(train) mgcv::gam(ltime ~ s(lnrow) + s(lncol), data = train, select = TRUE),
   "gam select, s(lnrow, lncol)" = function(train) mgcv::gam(ltime ~ s(lnrow, lncol), data = train, select = TRUE),
@@ -82,7 +80,8 @@ models <- list(
   "gam, s(lnrow, lncol)" = function(train) mgcv::gam(ltime ~ s(lnrow, lncol), data = train, select = FALSE),
   "gam, te(lnrow, lncol)" = function(train) mgcv::gam(ltime ~ te(lnrow, lncol), data = train, select = FALSE),
   "gam, ti(lnrow) + ti(lncol) + ti(lnrow, lncol)" = function(train) mgcv::gam(ltime ~ ti(lnrow) + ti(lncol) + ti(lnrow, lncol), data = train, select = FALSE),
-  "gam bscc, s(lnrow) + s(lncol)" = function(train) mgcv::gam(ltime ~ s(lnrow,bs="cc") + s(lncol, bs="cc"), data = train, select = TRUE)
+  "gam bscc, s(lnrow) + s(lncol)" = function(train) mgcv::gam(ltime ~ s(lnrow,bs="cc") + s(lncol, bs="cc"), data = train, select = TRUE),
+  "scam, s(lnrow, lncol, bs = tedmi)" = function(train) scam::scam(ltime ~ s(lnrow, lncol, bs = "tedmi"), data = train)
 )
 
 ###################################################
@@ -112,8 +111,13 @@ cvdf <- bind_rows(pbapply::pblapply(seq_len(nrow(cvgrid)), cl = 8, function(i) {
       lst(model = NULL, predltime = rep(NA, nrow(test)))
     })
 
-  test$predltime <- out$predltime
-  mse_test <- mean((test$ltime - test$predltime)^2, na.rm = TRUE)
+  test <- test %>%
+    mutate(
+      predltime = out$predltime,
+      diff = ifelse(ltime >= max_ltime - .01 & predltime >= max_ltime - .01 , 0, ltime - predltime)
+    )
+
+  mse_test <- mean(test$diff^2, na.rm = TRUE)
 
   tibble(method_id = mid, replicate = repl, model = mod, mse_test, model_fit = list(out$model), test_data = list(test))
 }))
@@ -142,8 +146,13 @@ valdf <- bind_rows(pbapply::pblapply(seq_len(nrow(valgrid)), cl = 8, function(i)
       lst(model = NULL, predltime = rep(0, nrow(valid)))
     })
 
-  valid$predltime <- out$predltime
-  mse_valid <- mean((valid$ltime - valid$predltime)^2, na.rm = TRUE)
+  valid <- valid %>%
+    mutate(
+      predltime = out$predltime,
+      diff = ifelse(ltime >= max_ltime - .01 & predltime >= max_ltime - .01 , 0, ltime - predltime)
+    )
+
+  mse_valid <- mean(valid$diff^2, na.rm = TRUE)
 
   tibble(method_id = mid, model = mod, mse_valid, model_fit = list(out$model), valid_data = list(valid))
 }))
@@ -159,15 +168,119 @@ join <-
   )
 
 ###################################################
+###               CALCULATE AUROC               ###
+###################################################
+valid_data <- map2_df(valdf$model, valdf$valid_data, function(model, data) {
+  if (nrow(data) == 0) return(NULL)
+  data$model <- model
+  data
+}) %>%
+  filter(error_status %in% c("no_error", "time_limit"))
+
+evals <- map(unique(valid_data$model), function(model) {
+  dat <- valid_data %>% filter(model == !!model)
+  eval <- GENIE3::evaluate_ranking_direct(
+    values = dat$predltime,
+    are_true = dat$error_status == "time_limit",
+    num_positive_interactions = sum(dat$error_status == "time_limit"),
+    num_possible_interactions = nrow(dat)
+  )
+  eval$metrics$name <- model
+  eval$area_under$name <- model
+  eval
+})
+eval <- list(
+  metrics = map_df(evals, ~ .$metrics),
+  area_under = map_df(evals, ~ .$area_under)
+)
+
+area_under <- eval$area_under %>%
+  arrange(desc(F1)) %>%
+  select(model = name, everything())
+metrics <- eval$metrics %>% filter(name %in% area_under$model[1:12])
+
+g1 <- ggplot(metrics, aes(1 - spec, tpr, colour = name)) + geom_step() + labs(x = "False positive rate", y = "Precision") + scale_colour_brewer(palette = "Set3") + theme_bw() + theme(legend.position = "none")
+g2 <- ggplot(metrics, aes(tpr, prec, colour = name)) + geom_path() + labs(x = "Precision", y = "Recall") + scale_colour_brewer(palette = "Set3") + theme_bw()
+g <- patchwork::wrap_plots(g1, g2, nrow = 1, widths = c(1, 1.15))
+ggsave(result_file("auroc_aupr.pdf"), g, width = 12, height = 4)
+
+
+###################################################
 ###                 COMBINE DATA                ###
 ###################################################
 summary <-
   join %>%
   group_by(model) %>%
   summarise(mse_test = mean(mse_test, na.rm = TRUE), mse_valid = mean(mse_valid)) %>%
-  arrange(mse_test)
+  arrange(mse_valid) %>%
+  left_join(area_under, by = "model")
 
 write_rds(summary, result_file("summary.rds"), compress = "xz")
 join2 <- join %>% select(-model_fit.x, -model_fit.y, -test_data, -valid_data) %>% as.data.frame()
 write_rds(join2, result_file("join.rds"), compress = "xz")
 
+
+g <- ggplot(summary, aes(1 / mse_valid, F1)) + geom_point() + ggrepel::geom_text_repel(aes(label = model), nudge_y = .003) + theme_bw()
+ggsave(result_file("mse_f1.pdf"), g, width = 8, height = 8)
+
+
+# determine_cutoff <-
+#   crossing(
+#     test_data,
+#     data_frame(cutoff = seq(0, 5, by = .1) * max_ltime)
+#   ) %>%
+#   mutate(pos = error_status == "time_limit", pred = !is.na(predltime) & predltime >= cutoff) %>%
+#   group_by(model, cutoff) %>%
+#   summarise(
+#     tp = sum(pos & pred),
+#     tn = sum(!pos & !pred),
+#     fp = sum(!pos & pred),
+#     fn = sum(pos & !pred),
+#     sensitivity = tp / (tp + fn),
+#     specificity = tn / (tn + fp),
+#     precision = ifelse(tp + fp != 0, tp / (tp + fp), 0),
+#     accuracy = (tp + tn) / (tp + tn + fp + fn),
+#     bacc = 0.5 * tp / (tp + fn) + 0.5 * tn / (tn + fp),
+#     f1 = ifelse(precision + sensitivity > 0, 2 * precision * sensitivity / (precision + sensitivity), 0)
+#   ) %>%
+#   group_by(model) %>%
+#   arrange(desc(f1)) %>%
+#   slice(1) %>%
+#   ungroup() %>%
+#   arrange(desc(f1))
+#
+# valid_stats <-
+#   valid_data %>%
+#   left_join(determine_cutoff %>% select(model, cutoff), by = "model") %>%
+#   # crossing(
+#   #   data_frame(cutoff = seq(0, 5, by = .1) * max_ltime)
+#   # ) %>%
+#   mutate(pos = error_status == "time_limit", pred = predltime >= cutoff) %>%
+#   group_by(model, cutoff) %>%
+#   summarise(
+#     tp = sum(pos & pred),
+#     tn = sum(!pos & !pred),
+#     fp = sum(!pos & pred),
+#     fn = sum(pos & !pred),
+#     sensitivity = tp / (tp + fn),
+#     specificity = tn / (tn + fp),
+#     precision = ifelse(tp + fp != 0, tp / (tp + fp), 0),
+#     accuracy = (tp + tn) / (tp + tn + fp + fn),
+#     bacc = 0.5 * tp / (tp + fn) + 0.5 * tn / (tn + fp),
+#     f1 = ifelse(precision + sensitivity > 0, 2 * precision * sensitivity / (precision + sensitivity), 0)
+#   ) %>%
+#   group_by(model) %>%
+#   arrange(desc(f1)) %>%
+#   slice(1) %>%
+#   ungroup() %>%
+#   arrange(desc(f1))
+# valid_stats %>% arrange(desc(f1))
+#
+#
+#
+# ggplot(valid_data) +
+#   geom_point(aes(ltime, predltime, colour = diff), alpha = .8) +
+#   geom_abline(aes(intercept = intercept, colour = intercept), slope = 1, data_frame(intercept = -2:2)) +
+#   facet_wrap(~ model, scales = "free_y") +
+#   scale_colour_distiller(palette = "RdBu", limits = c(-2, 2)) +
+#   theme_bw()
