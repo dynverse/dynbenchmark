@@ -5,12 +5,12 @@
 time_classification_design <- bind_rows(
   tibble(
     feature = "n_cells",
-    n_cells = seq(100, 100000, 100),
+    n_cells = seq(100, 10000, 100),
     n_features = 10000
   ),
   tibble(
     feature = "n_features",
-    n_features = seq(100, 100000, 100),
+    n_features = seq(100, 10000, 100),
     n_cells = 10000
   )
 )
