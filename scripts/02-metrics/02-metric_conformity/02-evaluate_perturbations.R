@@ -58,10 +58,26 @@ metric_ids <- metrics_characterised %>%
   filter(type != "overall") %>%
   pull(metric_id)
 
+metrics <- as.list(metric_ids)
+metrics$featureimp_lite <- function(dataset, model) {
+  expr <- dynwrap::get_expression(dataset)
+  params <- list(
+    num.trees = 50000,
+    mtry = sqrt(ncol(expr) * .1),
+    sample.fraction = min(100 / nrow(expr), 1)
+  )
+  dataset_imp <- dynfeature::calculate_overall_feature_importance(dataset, expression_source = expr, method_params = params)
+  pred_imp <- dynfeature::calculate_overall_feature_importance(model, expression_source = expr, method_params = params)
+  dyneval:::.calculate_featureimp_cor(dataset_imp, pred_imp)$featureimp_wcor
+}
+# test first:
+# out <- evaluate_ti_method(generate_dataset(), ti_angle(), parameters = list(), metrics = metrics)
+# out$summary %>% as.data.frame
+
 # run evaluation on cluster
 benchmark_submit(
   design,
-  metrics = metric_ids,
+  metrics = metrics,
   qsub_params = list(memory = "2G", timeout = 3600),
   qsub_grouping = "{method_id}",
   output_models = FALSE
