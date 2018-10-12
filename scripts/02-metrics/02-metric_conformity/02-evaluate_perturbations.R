@@ -41,7 +41,7 @@ parameters <- map(perturbation_methods$id, function(method_id) {
 }) %>% set_names(perturbation_methods$id)
 
 # get dataset functions
-datasets <- dynbenchmark::process_datasets_design(dataset_design %>% select(dataset_id, dataset) %>% deframe())
+datasets <- dynbenchmark:::process_datasets_design(dataset_design %>% select(dataset_id, dataset) %>% deframe())
 
 design <- benchmark_generate_design(
   datasets = datasets,
@@ -92,6 +92,8 @@ results <- benchmark_bind_results(load_models = FALSE)
 if (any(results$error_status != "no_error")) stop("Errors: ", results %>% filter(error_status != "no_error") %>% pull(method_id) %>% unique() %>% glue::glue_collapse(", "))
 
 results %>% filter(error_status != "no_error") %>% select(method_id, error_message, stderr) %>% distinct()
+
+results %>% group_by(method_id) %>% summarise(error_pct = mean(error_status != "no_error")) %>% arrange(error_pct)
 
 # extract scores from successful results
 scores <- results %>%

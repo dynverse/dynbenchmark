@@ -16,8 +16,8 @@ dataset_design <-
       topologies %>% enframe("topology_id", "topology_model") %>% mutate(allow_tented_progressions = FALSE),
       tribble(
         ~topology_id, ~topology_model, ~allow_tented_progressions,
-        "bifurcation_simple", dyntoy::model_bifurcating(max_degree = 1), FALSE,
-        "bifurcation_tented", dyntoy::model_bifurcating(max_degree = 1), TRUE
+        "bifurcation_simple", dyntoy::model_bifurcating(), FALSE,
+        "bifurcation_tented", dyntoy::model_bifurcating(), TRUE
       )
     ),
     num_cells = c(10, 20, 50, 100, 200, 500),
