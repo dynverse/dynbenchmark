@@ -25,24 +25,112 @@ time_classification_timings <- crossing(
   mutate(time = first(method_predict_time[method_id])(n_cells, n_features)) %>%
   ungroup()
 
+# original solution
+#
+# classify_curve <- function(slope, curvature) {
+#   case_when(
+#     slope < -.001 ~ "negative slope",
+#     slope < 0.001 ~ "<linear",
+#     curvature < -0.05 ~ "<linear",
+#     curvature < 0.05 ~ "linear",
+#     TRUE ~ ">linear"
+#   )
+# }
+#
+# time_classification <- time_classification_timings %>%
+#   group_by(method_id, feature) %>%
+#   summarise(
+#     slope = mean(diff(time, differences = 1)),
+#     curvature = mean(seq(0, 1, length.out = n()) - scale_minmax(time)),
+#     class = classify_curve(slope, curvature)
+#   ) %>%
+#   ungroup()
 
-classify_curve <- function(slope, curvature) {
-  case_when(
-    slope < 0.001 ~ "constant / low slope",
-    curvature < -0.05 ~ "sublinear",
-    curvature < 0.05 ~ "linear",
-    TRUE ~ "superlinear"
-  )
+
+classify_curve <- function(method_id, feature, time, n_cells, n_features) {
+  # detect low or negative slopes
+  # these are likely mistakes in the model
+  slope <- mean(diff(time))
+  if (slope < -.001) return("negative slope")
+  if (slope < .001) return("<linear")
+
+  # detect sublinear separately
+  curvature <- mean(seq(0, 1, length.out = length(time)) - scale_minmax(time))
+  if (curvature < -0.1) return("<linear")
+
+  dat <-
+    data_frame(y = time, n_cells, n_features) %>%
+    select(x = !!feature, y)
+  dat <- dat %>%
+    mutate(
+      x = x / max(x),
+      y = y / max(y)
+    )
+
+  # train model and obtain coefs
+  # using glmnet instead of lm because lm would easily overfit
+  datm <- stats::model.matrix(y ~ log(x) + sqrt(x) + x + I(x^2) + I(x^3), data = dat)[,-1]
+  rr.cv <- glmnet::cv.glmnet(datm, dat$y, alpha = 1)
+  rr.fit <- glmnet::glmnet(datm, dat$y, alpha = 1, lambda = rr.cv$lambda.min)
+  coeffs <- rr.fit$beta[,1]
+
+  max_term <-
+    if (any(coeffs > .25)) {
+      # if at least one coefficient is very high,
+      # take the most complex one
+      which(coeffs > .25) %>% tail(1) %>% names()
+    } else {
+      # otherwise, just take the largest coefficient
+      which.max(coeffs) %>% names()
+    }
+
+  c(
+    "log(x)" = "<linear",
+    "sqrt(x)" = "<linear",
+    "x" = "linear",
+    "I(x * log(x))" = "nlogn",
+    "I(x^2)" = "quadratic",
+    "I(x^3)" = ">quadratic",
+    "I(x^4)" = ">quadratic",
+    "exp(x)" = "exponential"
+  )[max_term] %>% unname()
 }
 
-time_classification <- time_classification_timings %>%
+
+
+# biologists solution
+#
+# classify_curve <- function(method_id, feature, time, n_cells, n_features) {
+#   test <- 1:5
+#   mean_diffs <- map_dbl(test, ~ mean(diff(time, differences = .)))
+#   num <- first(which(mean_diffs < .1))
+#   if (is.na(num)) {
+#     "exponential"
+#   } else if (num == 1) {
+#     "<linear"
+#   } else if (num == 2) {
+#     "linear"
+#   } else if (num == 3) {
+#     "quadratic"
+#   } else if (num < max(test)) {
+#     ">quadratic"
+#   } else {
+#     "exponential"
+#   }
+# }
+
+time_classification <-
+  time_classification_timings %>%
   group_by(method_id, feature) %>%
   summarise(
     slope = mean(diff(time, differences = 1)),
     curvature = mean(seq(0, 1, length.out = n()) - scale_minmax(time)),
-    class = classify_curve(slope, curvature)
+    class = classify_curve(method_id[[1]], feature[[1]], time, n_cells, n_features)
   ) %>%
   ungroup()
+
+g <- ggplot(time_classification) + geom_density(aes(curvature, colour = class)) + facet_wrap(~feature, ncol = 1) + theme_bw() + scale_x_continuous(breaks = seq(-.5, .5, by = .05))
+ggsave(result_file("class_versus_curvature.pdf"), g, width = 8, height = 8)
 
 ##########################################################
 ###############  GENERATE SUMMARY FIGURE   ###############
@@ -130,17 +218,42 @@ plotdata_time_classification_boxes <-
   ) %>%
   left_join(time_classification, c("method_id", "feature"))
 
-plotdata_time_classification <- plotdata_time_classification %>% select(method_id, feature, x, y)
+plotdata_time_classification <- plotdata_time_classification %>% select(method_id, feature, x, y, class)
+
+# time_class_palette <- c("negative slope" = "#b666d9", "constant / low slope" = "#0074D9", "sublinear" = "#2ECC40", "linear" = "#d9c700", "quadratic" = "#FF851B", "superquadratic" = "#FF4136")
+# time_class_palette <- c("constant / low slope" = "#0074D9", "sublinear" = "#2ECC40", "linear" = "#d9c700", "quadratic" = "#FF851B", "superquadratic" = "#FF4136")
+# time_class_palette <- set_names(rev(viridisLite::viridis(length(time_class_palette), option = "cividis")), names(time_class_palette))
+
+# # oranje
+# time_class_palette <- c("negative slope" = "gray", "low slope" = "#3d87a6", "sublinear" = "#9bcde1", "linear" = "#fee08b", "quadratic" = "#d78a27", "superquadratic" = "#d73027")
+# white <- c("superquadratic", "quadratic", "low slope")
+
+# # groen
+# time_class_palette <- c("negative slope" = "gray", "low slope" = "#3d87a6", "sublinear" = "#9bcde1", "linear" = "#9be1ad", "quadratic" = "#fee08b", "superquadratic" = "#d73027")
+# white <- c("superquadratic", "low slope")
+
+# # blauw
+# time_class_palette <- c("negative slope" = "gray", "low slope" = "#3d87a6", "sublinear" = "#3d87a6", "linear" = "#9bcde1", "quadratic" = "#fee08b", "superquadratic" = "#d73027")
+# white <- c("superquadratic", "low slope", "sublinear")
+
+# oranjeblauw
+# time_class_palette <- c("negative slope" = "gray", "low slope" = "#3d87a6", "sublinear" = "#3d87a6", "linear" = "#9bcde1", "quadratic" = "#d78a27", "superquadratic" = "#d73027")
+# white <- c("superquadratic", "low slope", "sublinear", "quadratic")
+
+# new version
+time_class_palette <- c("negative slope" = "darkgray", "<linear" = "#3d87a6", "linear" = "#9bcde1", ">linear" = "#d73027", "quadratic" = "#d78a27", ">quadratic" = "#d73027", "exponential" = "black")
+white <- c(">quadratic", "<linear", "quadratic", ">linear")
+
 
 plot_time_classification <-
-  plotdata_time_classification %>%
-  ggplot(aes(group = paste0(method_id, feature))) +
-  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = class), data = plotdata_time_classification_boxes, color = NA) +
-  geom_line(aes(x = x, y = y), color = "white", size = 1) +
+  ggplot(plotdata_time_classification, aes(group = paste0(method_id, feature))) +
+  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = class), data = plotdata_time_classification_boxes %>% mutate(class = factor(class, levels = names(time_class_palette))), color = NA) +
+  geom_line(aes(x = x, y = y), plotdata_time_classification %>% filter(!class %in% white), color = "#333333", size = .75) +
+  geom_line(aes(x = x, y = y), plotdata_time_classification %>% filter(class %in% white), color = "white", size = 1) +
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), data = plotdata_time_classification_boxes, color = "#333333", fill = NA, size = 0.25) +
   scale_y_methods_empty +
   scale_x_continuous("Time complexity" , expand = c(0, 0), breaks = c(1.5, 2.5), labels = c("Cells", "Features"), position = "top") +
-  scale_fill_manual("", values = c("constant / low slope" = "#2ECC40", "sublinear" = "#0074D9", "linear" = "#FF851B", "superlinear" = "#FF4136")) +
+  scale_fill_manual("", values = time_class_palette) +
   theme_pub() +
   theme(legend.position = "bottom") +
   no_margin_sides
