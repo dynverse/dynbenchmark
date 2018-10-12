@@ -67,6 +67,10 @@ training <- read_rds(derived_file("training.rds")) %>% filter(!method_id %in% c(
 validation <- read_rds(derived_file("validation.rds")) %>% filter(!method_id %in% c("error", "identity", "random", "shuffle"))
 
 
+
+
+
+
 library(survival)
 models <- list(
   "lm, lnrow + lncol" = function(train) lm(ltime ~ lnrow + lncol, train),
@@ -81,7 +85,15 @@ models <- list(
   "gam, te(lnrow, lncol)" = function(train) mgcv::gam(ltime ~ te(lnrow, lncol), data = train, select = FALSE),
   "gam, ti(lnrow) + ti(lncol) + ti(lnrow, lncol)" = function(train) mgcv::gam(ltime ~ ti(lnrow) + ti(lncol) + ti(lnrow, lncol), data = train, select = FALSE),
   "gam bscc, s(lnrow) + s(lncol)" = function(train) mgcv::gam(ltime ~ s(lnrow,bs="cc") + s(lncol, bs="cc"), data = train, select = TRUE),
-  "scam, s(lnrow, lncol, bs = tedmi)" = function(train) scam::scam(ltime ~ s(lnrow, lncol, bs = "tedmi"), data = train)
+  "scam, s(lnrow, lncol, bs = tedmi)" = function(train) scam::scam(ltime ~ s(lnrow, lncol, bs = "tedmi"), data = train),
+  "glm" = function(train) {
+    x.tr <- stats::model.matrix(~ lnrow + lncol + lnrow * lncol, data = train)[,-1]
+    y.tr <- train$ltime
+    # rr.cv <- glmnet::cv.glmnet(x.tr, y.tr, alpha = 1)
+    # rr.bestlam <- rr.cv$lambda.min
+    # fit <- glmnet::glmnet(x.tr, y.tr, alpha = 1, lambda = rr.bestlam)
+    fit <- glmnet::glmnet(x.tr, y.tr, alpha = 1)
+  }
 )
 
 ###################################################
@@ -104,7 +116,13 @@ cvdf <- bind_rows(pbapply::pblapply(seq_len(nrow(cvgrid)), cl = 8, function(i) {
   out <-
     tryCatch({
       model <- models[[mod]](train)
-      predltime <- predict(model, test)
+
+      if (mod != "glm") {
+        predltime <- predict(model, test)
+      } else {
+        x.tr <- model.matrix(~ lnrow + lncol + lnrow * lncol, data = test)[,-1]
+        predltime <- predict(model, x.tr)[,1]
+      }
 
       lst(model, predltime)
     }, error = function(e) {
@@ -139,7 +157,14 @@ valdf <- bind_rows(pbapply::pblapply(seq_len(nrow(valgrid)), cl = 8, function(i)
   out <-
     tryCatch({
       model <- models[[mod]](train)
-      predltime <- predict(model, valid)
+      # predltime <- predict(model, valid)
+
+      if (mod != "glm") {
+        predltime <- predict(model, valid)
+      } else {
+        x.tr <- model.matrix(~ lnrow + lncol + lnrow * lncol, data = valid)[,-1]
+        predltime <- predict(model, x.tr)[,1]
+      }
 
       lst(model, predltime)
     }, error = function(e) {
@@ -199,9 +224,10 @@ area_under <- eval$area_under %>%
   select(model = name, everything())
 metrics <- eval$metrics %>% filter(name %in% area_under$model[1:12])
 
-g1 <- ggplot(metrics, aes(1 - spec, tpr, colour = name)) + geom_step() + labs(x = "False positive rate", y = "Precision") + scale_colour_brewer(palette = "Set3") + theme_bw() + theme(legend.position = "none")
-g2 <- ggplot(metrics, aes(tpr, prec, colour = name)) + geom_path() + labs(x = "Precision", y = "Recall") + scale_colour_brewer(palette = "Set3") + theme_bw()
+g1 <- ggplot(metrics, aes(1 - spec, tpr, colour = name)) + geom_step() + labs(x = "False positive rate", y = "Precision") + theme_bw() + theme(legend.position = "none") + scale_colour_brewer(palette = "Set3")
+g2 <- ggplot(metrics, aes(tpr, prec, colour = name)) + geom_path() + labs(x = "Precision", y = "Recall") + theme_bw() + scale_colour_brewer(palette = "Set3")
 g <- patchwork::wrap_plots(g1, g2, nrow = 1, widths = c(1, 1.15))
+g
 ggsave(result_file("auroc_aupr.pdf"), g, width = 12, height = 4)
 
 
