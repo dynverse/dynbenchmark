@@ -1,5 +1,3 @@
-#' Helper functions for perturbations
-
 ##  ............................................................................
 ##  Controls                                                                ####
 perturb_identity <- function(dataset) {
