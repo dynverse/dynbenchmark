@@ -11,12 +11,10 @@ metric_ids <- dyneval::metrics %>% filter(category %in% "topology") %>% pull(met
 
 ##  ............................................................................
 ##  Compare topologies                                                      ####
-source(scripts_file("helper-topologies.R", experiment = "02-metrics/02-metric_conformity"))
-
 plan(multiprocess)
 
 # generate datasets
-dataset_design <- enframe(topologies, "model_id", "model") %>% mutate(model_id = forcats::fct_inorder(model_id))
+dataset_design <- enframe(dynbenchmark::topologies_with_same_n_milestones, "model_id", "model") %>% mutate(model_id = forcats::fct_inorder(model_id))
 
 dataset_design$dataset <- pmap(dataset_design, function(model, ...) {
   dataset <- dyntoy::generate_trajectory(model = model %>% mutate(length = 1, directed = TRUE))

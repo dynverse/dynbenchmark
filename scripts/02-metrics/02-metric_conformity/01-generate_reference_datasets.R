@@ -6,14 +6,11 @@ library(dyntoy)
 
 experiment("02-metrics/02-metric_conformity")
 
-# the topologies are defined here because they need to have the same number of edges for perturb_change_topology
-source(scripts_file("helper-topologies.R"))
-
 # construct all different combinations of topologies, # cells, ...
 dataset_design <-
   crossing(
     bind_rows(
-      topologies %>% enframe("topology_id", "topology_model") %>% mutate(allow_tented_progressions = FALSE),
+      dynbenchmark::topologies_with_same_n_milestones %>% enframe("topology_id", "topology_model") %>% mutate(allow_tented_progressions = FALSE),
       tribble(
         ~topology_id, ~topology_model, ~allow_tented_progressions,
         "bifurcation_simple", dyntoy::model_bifurcating(), FALSE,
