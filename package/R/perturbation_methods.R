@@ -2,7 +2,9 @@
 
 ##  ............................................................................
 ##  Controls                                                                ####
-perturb_identity <- function(dataset) dataset
+perturb_identity <- function(dataset) {
+  dataset
+}
 
 
 ##  ............................................................................
@@ -29,7 +31,7 @@ perturb_shuffle_n_cells <- function(dataset, shuffle_n = Inf, seed = NULL) {
 }
 
 perturb_shuffle_cells <- function(dataset, shuffle_perc = 1, seed = NULL) {
-  source(scripts_file("helper-perturbations.R", experiment_id = "02-metrics/02-metric_conformity"))
+  # source(scripts_file("helper-perturbations.R", experiment_id = "02-metrics/02-metric_conformity"))
 
   perturb_shuffle_n_cells(dataset, shuffle_n = length(dataset$cell_ids) * shuffle_perc, seed = seed)
 }
@@ -75,7 +77,7 @@ perturb_shuffle_n_edges <- function(dataset, shuffle_n = Inf, seed = NULL) {
 }
 
 perturb_shuffle_edges <- function(dataset, shuffle_perc = 1, seed = NULL) {
-  source(scripts_file("helper-perturbations.R", experiment_id = "02-metrics/02-metric_conformity"))
+  # source(scripts_file("helper-perturbations.R", experiment_id = "02-metrics/02-metric_conformity"))
 
   perturb_shuffle_n_edges(dataset, shuffle_n = round(nrow(dataset$milestone_network) * shuffle_perc), seed = seed)
 }
@@ -393,7 +395,7 @@ perturb_add_connecting_edges <- function(dataset, n_edges = 1) {
     ),
     from,
     to
-    ) %>%
+  ) %>%
     filter(is.na(length)) %>%
     filter(from != to)
   n_edges <- min(nrow(possible_edges), n_edges)
@@ -468,8 +470,6 @@ perturb_shuffle_lengths <- function(dataset) {
 ##  ............................................................................
 ##  Direct topological changes                                              ####
 perturb_change_topology <- function(dataset, topology_id = "linear") {
-  source(scripts_file("helper-topologies.R", experiment_id = "02-metrics/02-metric_conformity"))
-
   if (nrow(dataset$milestone_network) != 5) {stop("Can only change topology if there are 5 edges")}
   if (nrow(dataset$divergence_regions)) {stop("To change the topology, dataset cannot have divergence regions")}
 
@@ -483,7 +483,7 @@ perturb_change_topology <- function(dataset, topology_id = "linear") {
   # now remove the from and to from milestone_network and progressions
   milestone_network <- milestone_network %>%
     select(-from, -to) %>%
-    bind_cols(topologies[[topology_id]])
+    bind_cols(dynbenchmark::topologies_with_same_n_milestones[[topology_id]])
 
   progressions <- progressions %>%
     select(-from, -to) %>%
@@ -504,8 +504,6 @@ perturb_change_topology <- function(dataset, topology_id = "linear") {
 ##  ............................................................................
 ##  Combined perturbations                                                  ####
 perturb_shuffle_cells_and_add_connecting_edges <- function(dataset, shuffle_perc = 0.2, n_edges = 1) {
-  source(scripts_file("helper-perturbations.R", experiment_id = "02-metrics/02-metric_conformity"))
-
   dataset <- perturb_add_connecting_edges(dataset, n_edges)
   dataset <- perturb_shuffle_cells(dataset, shuffle_perc)
 
@@ -513,24 +511,53 @@ perturb_shuffle_cells_and_add_connecting_edges <- function(dataset, shuffle_perc
 }
 
 perturb_shuffle_cells_and_merge_bifurcation <- function(dataset, shuffle_perc = 0.2) {
-  source(scripts_file("helper-perturbations.R", experiment_id = "02-metrics/02-metric_conformity"))
-
   dataset <- perturb_merge_bifurcation(dataset)
   dataset <- perturb_shuffle_cells(dataset, shuffle_perc)
 
   dataset
 }
 
+# perturb_function_names <-
+#   readr::read_lines("package/R/perturbation_methods.R") %>%
+#   stringr::str_subset("^(perturb_[^ ]*) *<- *function.*\\{$") %>%
+#   stringr::str_replace("^(perturb_[^ ]*) *<- *function.*\\{$", "\\1")
 
+#' @importFrom tibble lst
+perturbation_methods <- tibble::lst(
+  perturb_identity,
+  perturb_shuffle_n_cells,
+  perturb_shuffle_cells,
+  perturb_shuffle_n_edges,
+  perturb_shuffle_edges,
+  perturb_filter_cells,
+  perturb_shuffle_cells_edgewise,
+  perturb_remove_divergence_regions,
+  perturb_merge_bifurcation,
+  perturb_concatenate_bifurcation,
+  perturb_break_cycle,
+  perturb_join_linear,
+  perturb_move_terminal_branch,
+  perturb_add_intermediate_edges,
+  perturb_add_leaf_edges,
+  perturb_add_connecting_edges,
+  perturb_time_warping_start,
+  perturb_time_warping_parabole,
+  perturb_shuffle_lengths,
+  perturb_change_topology,
+  perturb_shuffle_cells_and_add_connecting_edges,
+  perturb_shuffle_cells_and_merge_bifurcation
+)
 
-
-##  ............................................................................
-##  Combine all perturbation methods                                        ####
-perturbation_methods <- ls() %>% stringr::str_subset("^perturb_") %>% purrr::map(function(x) {
-  id <- stringr::str_replace(x, "perturb_(.*)", "\\1")
-  run_fun <- get(x)
-
-  dynwrap::create_ti_method(id = id, run_fun = run_fun)()
-})
-
-perturbation_methods <- dynbenchmark:::process_methods_design(perturbation_methods)
+#' @importFrom dynwrap create_ti_method
+#' @include suite_benchmark_generate_design.R
+#' @include suite_benchmark_submit.R
+perturbation_methods_design <-
+  map(names(perturbation_methods), function(name) {
+    dynwrap::create_ti_method(
+      id = name,
+      run_fun = perturbation_methods[[name]],
+      package_loaded = c("dplyr", "purrr", "dynwrap", "dynbenchmark"),
+      type = "control"
+    )()
+  }) %>%
+  dynbenchmark:::process_methods_design()
