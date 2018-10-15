@@ -6,9 +6,7 @@ library(dynbenchmark)
 experiment("02-metrics/02-metric_conformity")
 
 dataset_design <- read_rds(derived_file("dataset_design.rds"))
-
-# load perturbations = dynwrap::ti_methods
-source(scripts_file("helper-perturbations.R"))
+method_design <- dynbenchmark:::perturbation_methods_design
 
 # load rules
 source(scripts_file("helper-rules.R"))

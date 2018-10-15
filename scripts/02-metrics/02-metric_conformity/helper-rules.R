@@ -46,7 +46,7 @@ equal_identity <- lst(
   observation = "Metrics which contain some stochasticity (random forest based metrics in particular), usually do not conform to this rule, even though their scores are still consistently high.",
   conforms_if = "0.99 \\leqslant \\mathit{score} \\leqslant 1",
   crossing = crossing(
-    dataset_id = dataset_design %>% filter(topology_id %in% names(dynbenchmark::topologies_with_same_n_milestones), num_cells > 50) %>% pull(dataset_id),
+    dataset_id = dataset_design %>% filter(topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones), num_cells > 50) %>% pull(dataset_id),
     method_id = "identity"
   ),
   assessment = function(scores) {
@@ -475,7 +475,7 @@ shuffle_cells_edgewise <- rule_lower(
   id = "shuffle_cells_edgewise",
   name = "Local cell shuffling",
   description = "Shuffling the positions of cells within each edge should lower the score. This is equivalent to changing the cellular position locally.",
-  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark::topologies_with_same_n_milestones), cell_positioning != "milestones", num_cells > 50) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones), cell_positioning != "milestones", num_cells > 50) %>% pull(dataset_id),
   method_id = "shuffle_cells_edgewise",
   observation = "Metrics which do not look at the cellular positioning, or group the cells within branches or milestones, do not conform to this rule."
 )
@@ -484,7 +484,7 @@ shuffle_edges <- rule_monotonic(
   id = "shuffle_edges",
   name = "Edge shuffling",
   description = "Shuffling the edges in the milestone network should lower the score. This is equivalent to changing the cellular positions only globally.",
-  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark::topologies_with_same_n_milestones)) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones)) %>% pull(dataset_id),
   method_id = "shuffle_edges",
   parameters = list(shuffle_edges = tibble(shuffle_perc = seq(0, 1, 0.25)) %>% mutate(id = as.character(shuffle_perc*10))),
   varied_parameter_id = "shuffle_perc",
@@ -497,7 +497,7 @@ shuffle_cells <- rule_monotonic(
   id = "shuffle_cells",
   name = "Local and global cell shuffling",
   description = "Shuffling the positions of cells should lower the score. This is equivalent to changing the cellular position both locally and globally.",
-  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark::topologies_with_same_n_milestones)) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones)) %>% pull(dataset_id),
   method_id = "shuffle_cells",
   parameters = list(shuffle_cells = tibble(shuffle_perc = seq(0, 1, 0.1)) %>% mutate(id = as.character(shuffle_perc*10))),
   varied_parameter_id = "shuffle_perc",
@@ -517,7 +517,7 @@ combined_local_global_position_change <- rule_combined(
     shuffle_cells = shuffle_cells$parameters$shuffle_cells %>% filter(shuffle_perc == 1)
   ),
   method_ids = c("shuffle_edges", "shuffle_cells_edgewise", "shuffle_cells"),
-  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark::topologies_with_same_n_milestones), cell_positioning != "milestones", num_cells > 50) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones), cell_positioning != "milestones", num_cells > 50) %>% pull(dataset_id),
   observation = "Because the topology remains the same, the topology scores do not conform to this rule. Also the clustering based scores have some difficulties with this rule."
 )
 
@@ -525,7 +525,7 @@ filter_cells <- rule_monotonic(
   id = "filter_cells",
   name = "Cell filtering",
   description = "Removing cells from the trajectory should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark::topologies_with_same_n_milestones)) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones)) %>% pull(dataset_id),
   method_id = "filter_cells",
   parameters = list(filter_cells = tibble(filter_perc = seq(0, 1, 0.1)) %>% mutate(id = as.character(filter_perc*10))),
   varied_parameter_id = "filter_perc",
@@ -551,7 +551,7 @@ time_warping_start <- rule_monotonic(
   id = "time_warping_start",
   name = "Move cells to start milestone",
   description = "Moving the cells closer to their start milestone should lower the score. Cells were moved closer to the start milestone using $\\textit{percentage}_{\\textit{new}} = \\textit{percentage}^{\\textit{warp magnitude}}$",
-  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark::topologies_with_same_n_milestones)) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones)) %>% pull(dataset_id),
   parameters = list(time_warping_start = tibble(warp_magnitude = seq(0, 6)) %>% mutate(id = as.character(warp_magnitude))),
   varied_parameter_id = "warp_magnitude",
   method_id = "time_warping_start",
@@ -563,7 +563,7 @@ time_warping_parabole <- rule_monotonic(
   id = "time_warping_parabole",
   name = "Move cells to closest milestone",
   description = "Moving the cells closer to their nearest milestone should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark::topologies_with_same_n_milestones)) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones)) %>% pull(dataset_id),
   parameters = list(time_warping_parabole = tibble(warp_magnitude = seq(1, 20, 2)) %>% mutate(id = as.character(warp_magnitude))),
   varied_parameter_id = "warp_magnitude",
   method_id = "time_warping_parabole",
@@ -576,7 +576,7 @@ shuffle_lengths <- rule_lower(
   name = "Length shuffling",
   description = "Shuffling the lengths of the edges of the milestone network should lower the score.",
   dataset_ids = dataset_design %>% filter(
-    topology_id %in% names(dynbenchmark::topologies_with_same_n_milestones),
+    topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones),
     cell_positioning != "milestones",
     num_cells >= 100
   ) %>% pull(dataset_id),
@@ -588,7 +588,7 @@ move_cells_subedges <- rule_monotonic(
   id = "move_cells_subedges",
   name = "Cells into small subedges",
   description = "Moving some cells into short subedges should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark::topologies_with_same_n_milestones)) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones)) %>% pull(dataset_id),
   method_id = "move_cells_subedges",
   parameters = list(move_cells_subedges = tibble(n_edges = seq(0, 6), subedge_length_magnification = 1) %>% mutate(id = as.character(n_edges))),
   varied_parameter_id = "n_edges",
@@ -600,7 +600,7 @@ add_leaf_edges <- rule_monotonic(
   id = "add_leaf_edges",
   name = "New leaf edges",
   description = "Adding new edges only connected to one existing milestone should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark::topologies_with_same_n_milestones)) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones)) %>% pull(dataset_id),
   parameters = list(add_leaf_edges = tibble(n_edges = seq(0, 6)) %>% mutate(id = as.character(n_edges))),
   varied_parameter_id = "n_edges",
   method_id = "add_leaf_edges",
@@ -612,7 +612,7 @@ add_connecting_edges <- rule_monotonic(
   id = "add_connecting_edges",
   name = "New connecting edges",
   description = "Adding new edges between existing milestones should lower the score",
-  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark::topologies_with_same_n_milestones)) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones)) %>% pull(dataset_id),
   parameters = list(add_connecting_edges = tibble(n_edges = seq(0, 4)) %>% mutate(id = as.character(n_edges))),
   varied_parameter_id = "n_edges",
   method_id = "add_connecting_edges",
@@ -631,7 +631,7 @@ combined_position_topology <- rule_combined(
     shuffle_cells_and_add_connecting_edges = tibble(shuffle_perc = 0.25, n_edges = 1, id = "combination")
   ),
   method_ids = c("shuffle_cells", "add_connecting_edges", "shuffle_cells_and_add_connecting_edges"),
-  dataset_ids = dataset_design %>% filter(num_cells == 100) %>% filter(topology_id %in% names(dynbenchmark::topologies_with_same_n_milestones)) %>% pull(dataset_id),
+  dataset_ids = dataset_design %>% filter(num_cells == 100) %>% filter(topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones)) %>% pull(dataset_id),
   observation = glue::glue("Most metrics have problems with this rule as they focus on either the cellular positions or the topology individually. Only the {label_metric('correlation')} and {label_metric('geom_mean', 'latex')} consistently conform to this rule.")
 )
 
@@ -712,9 +712,9 @@ change_topology <- lst(
   name = "Change of topology",
   description = "Changing the topology of the trajectory should lower the score",
   conforms_if = "\\mathit{score}_{\\textit{same topology}} > \\mathit{score}_{\\textit{different topology}}",
-  parameters = list(change_topology = tibble(topology_id = names(dynbenchmark::topologies_with_same_n_milestones), id = topology_id)),
+  parameters = list(change_topology = tibble(topology_id = names(dynbenchmark:::topologies_with_same_n_milestones), id = topology_id)),
   crossing = crossing(
-    dataset_id = dataset_design %>% filter(num_cells == 100) %>% filter(topology_id %in% names(dynbenchmark::topologies_with_same_n_milestones)) %>% pull(dataset_id),
+    dataset_id = dataset_design %>% filter(num_cells == 100) %>% filter(topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones)) %>% pull(dataset_id),
     method_id = "change_topology",
     param_id = parameters[[method_id]]$id
   ),

@@ -483,7 +483,7 @@ perturb_change_topology <- function(dataset, topology_id = "linear") {
   # now remove the from and to from milestone_network and progressions
   milestone_network <- milestone_network %>%
     select(-from, -to) %>%
-    bind_cols(dynbenchmark::topologies_with_same_n_milestones[[topology_id]])
+    bind_cols(dynbenchmark:::topologies_with_same_n_milestones[[topology_id]])
 
   progressions <- progressions %>%
     select(-from, -to) %>%
