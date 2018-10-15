@@ -6,6 +6,7 @@ library(dynbenchmark)
 experiment("02-metrics/02-metric_conformity")
 
 dataset_design <- read_rds(derived_file("dataset_design.rds"))
+perturbation_methods <- dynbenchmark:::perturbation_methods_design
 
 # load rules
 source(scripts_file("helper-rules.R"))
@@ -42,7 +43,7 @@ datasets <- dynbenchmark:::process_datasets_design(dataset_design %>% select(dat
 
 design <- benchmark_generate_design(
   datasets = datasets,
-  methods = dynbenchmark:::perturbation_methods_design,
+  methods = perturbation_methods,
   parameters = parameters,
   num_repeats = 1,
   crossing = crossing# %>% filter(method_id == "identity") %>% sample_n(3)

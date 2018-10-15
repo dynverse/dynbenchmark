@@ -517,8 +517,9 @@ perturb_shuffle_cells_and_merge_bifurcation <- function(dataset, shuffle_perc = 
 
 # perturb_function_names <-
 #   readr::read_lines("package/R/perturbation_methods.R") %>%
-#   stringr::str_subset("^(perturb_[^ ]*) *<- *function.*\\{$") %>%
-#   stringr::str_replace("^(perturb_[^ ]*) *<- *function.*\\{$", "\\1")
+#   stringr::str_subset("^(perturb_[^ ]*) *<- *function.*$") %>%
+#   stringr::str_replace("^(perturb_[^ ]*) *<- *function.*$", "\\1")
+# paste(perturb_function_names, collapse = ",\n  ") %>% cat
 
 #' @importFrom tibble lst
 perturbation_methods <- tibble::lst(
@@ -535,6 +536,7 @@ perturbation_methods <- tibble::lst(
   perturb_break_cycle,
   perturb_join_linear,
   perturb_move_terminal_branch,
+  perturb_move_cells_subedges,
   perturb_add_intermediate_edges,
   perturb_add_leaf_edges,
   perturb_add_connecting_edges,
@@ -552,7 +554,7 @@ perturbation_methods <- tibble::lst(
 perturbation_methods_design <-
   map(names(perturbation_methods), function(name) {
     dynwrap::create_ti_method(
-      id = name,
+      id = name %>% gsub("^perturb_", "", .),
       run_fun = perturbation_methods[[name]],
       package_loaded = c("dplyr", "purrr", "dynwrap", "dynbenchmark"),
       type = "control"
