@@ -898,7 +898,7 @@ cell_gathering <- lst(
       map(invoke)
 
     # shuffle these datasets
-    shuffleds <- map(identities, perturb_shuffle_cells)
+    shuffleds <- map(identities, dynbenchmark:::perturb_shuffle_cells)
 
     # plot a continuous and grouped model
     grouping <- group_onto_nearest_milestones(identities[[1]])

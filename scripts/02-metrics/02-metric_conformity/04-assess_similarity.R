@@ -6,8 +6,8 @@ library(dynbenchmark)
 experiment("02-metrics/02-metric_conformity")
 
 # load scores
-scores <- read_rds(derived_file("scores.rds")) %>%
-  filter(metric_id %in% evaluated_metrics)
+scores <-
+  read_rds(derived_file("scores.rds"))
 
 metric_ids <- unique(scores$metric_id)
 

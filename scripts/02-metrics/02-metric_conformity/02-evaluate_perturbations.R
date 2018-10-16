@@ -68,6 +68,8 @@ metrics$featureimp_lite <- function(dataset, model) {
   pred_imp <- dynfeature::calculate_overall_feature_importance(model, expression_source = expr, method_params = params)
   dyneval:::.calculate_featureimp_cor(dataset_imp, pred_imp)$featureimp_wcor
 }
+
+metric_ids <- ifelse(map_lgl(metrics, is.character), metrics, names(metrics)) %>% unlist() %>% unname()
 # test first:
 # out <- evaluate_ti_method(generate_dataset(), ti_angle(), parameters = list(), metrics = metrics)
 # out$summary %>% as.data.frame
@@ -110,7 +112,8 @@ results %>% filter(error_status != "no_error") %>% select(method_id, error_messa
 results %>% group_by(method_id) %>% summarise(error_pct = mean(error_status != "no_error")) %>% arrange(error_pct)
 
 # extract scores from successful results
-scores <- results %>%
+scores <-
+  results %>%
   filter(error_status == "no_error") %>%
   gather("metric_id", "score", intersect(metric_ids, colnames(results))) %>%
   select(method_id, dataset_id, param_id, metric_id, score)

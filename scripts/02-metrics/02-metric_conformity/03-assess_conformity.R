@@ -7,18 +7,16 @@ experiment("02-metrics/02-metric_conformity")
 
 dataset_design <- read_rds(derived_file("dataset_design.rds"))
 
+# load rules
+source(scripts_file("helper-rules.R"))
+
 # load scores and models
 scores <- read_rds(derived_file("scores.rds"))
 
-scores <- scores %>% filter(metric_id %in% metrics_characterised$metric_id)
-
-# load rules
-source(scripts_file("helper-rules.R"))
-source(scripts_file("helper-perturbations.R"))
-
 # add harmonic mean
 metric_ids_geom_mean <- metrics_evaluated %>% filter(category != "average") %>% pull(metric_id)
-scores <- scores %>% bind_rows(
+scores <- bind_rows(
+  scores,
   scores %>%
     filter(metric_id %in% metric_ids_geom_mean) %>%
     group_by(method_id, dataset_id, param_id) %>%
@@ -63,8 +61,10 @@ assess_conformity <- function(rule, scores) {
   assessment
 }
 
-
-assessments <- mapdf(rules, assess_conformity, scores=scores) %>% list_as_tibble() %>% mutate(rule_id = rules$id)
+assessments <-
+  mapdf(rules, assess_conformity, scores = scores) %>%
+  list_as_tibble() %>%
+  mutate(rule_id = rules$id)
 
 assessments %>%
   unnest(conformity) %>%
@@ -76,24 +76,13 @@ assessments %>%
 # test one rule
 rule <- rules %>% extract_row_to_list(which(rules$id == "filter_cells"))
 assessment <- assess_conformity(rule, scores)
-# assessment$conformity
 assessment$plot_scores
 assessment$plot_datasets
-#
-pdf("test.pdf", width=assessment$plot_scores$width, height = assessment$plot_scores$height)
-assessment$plot_scores
-dev.off()
-#
-# pdf("test.pdf", width=assessment$plot_datasets$width, height = assessment$plot_datasets$height)
-# assessment$plot_datasets
-# dev.off()
-
 
 # save assessment
 write_rds(assessments, derived_file("assessments.rds"))
 
 # add image location to rules and save
-# source(script_file("helper-create_perturbation_images.R))
 rules <- rules %>%
   mutate(
     image_location = map_chr(id, function(id) result_file(paste0("images/", id, ".png"))),
