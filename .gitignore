@@ -16,3 +16,4 @@ manuscript/paper*.tex
 *tmp.pdf
 *tmp.png
 .DS_Store
+.Renviron

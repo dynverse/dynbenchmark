@@ -11,25 +11,25 @@ experiment("05-scaling")
 ###################################################
 
 # If you are the one who submitted the jobs, run:
-# benchmark_fetch_results(TRUE)
-# qsub::rsync_remote(
-#   remote_src = FALSE,
-#   path_src = derived_file(remote = FALSE, experiment = "05-scaling"),
-#   remote_dest = TRUE,
-#   path_dest = derived_file(remote = TRUE, experiment = "05-scaling"),
-#   verbose = TRUE,
-#   exclude = "*/r2gridengine/*"
-# )
-
-# If you want to download the output from prism
+benchmark_fetch_results(TRUE)
 qsub::rsync_remote(
-  remote_src = TRUE,
-  path_src = derived_file("suite", remote = TRUE, experiment = "05-scaling"),
-  remote_dest = FALSE,
-  path_dest = derived_file("suite", remote = FALSE, experiment = "05-scaling"),
+  remote_src = FALSE,
+  path_src = derived_file(remote = FALSE, experiment = "05-scaling"),
+  remote_dest = TRUE,
+  path_dest = derived_file(remote = TRUE, experiment = "05-scaling"),
   verbose = TRUE,
   exclude = "*/r2gridengine/*"
 )
+
+# # If you want to download the output from prism
+# qsub::rsync_remote(
+#   remote_src = TRUE,
+#   path_src = derived_file("", remote = TRUE, experiment = "05-scaling"),
+#   remote_dest = FALSE,
+#   path_dest = derived_file("", remote = FALSE, experiment = "05-scaling"),
+#   verbose = TRUE,
+#   exclude = "*/r2gridengine/*"
+# )
 
 # bind results in one data frame (without models)
 execution_output <- benchmark_bind_results(load_models = FALSE)
@@ -49,79 +49,100 @@ data <-
 
 #' @examples
 #' dat <- data %>% filter(method_id == "scorpius")
-#' data %>%
-#'   group_by(method_id, error_status) %>%
-#'   summarise(n = n()) %>%
-#'   mutate(n = n / sum(n)) %>%
-#'   ungroup() %>%
-#'   reshape2::acast(method_id ~ error_status, value.var = "n", fill = 0) %>%
-#'   pheatmap::pheatmap(cluster_cols = FALSE, cluster_rows = FALSE)
 
-models <-
+method_ids <-
   data %>%
   as_tibble() %>%
   group_by(method_id) %>%
-  filter(sum(error_status == "no_error") > 10) %>% # need at least a few data points
-  do({
-    dat <- .
-    dat <- dat %>%
-      filter(error_status %in% c("no_error")) %>%
-      mutate(
-        time = time_method,
-        ltime = log10(time_method),
-        mem = max_mem,
-        lmem = log10(mem)
-      )
+  filter(sum(error_status == "no_error") > 10) %>%
+  summarise(n = n()) %>%
+  pull(method_id)
 
-    # predict time
-    model_time <- mgcv::gam(ltime ~ s(lnrow, lncol), data = dat)
-    predict_time <- function(n_cells, n_features) {
-      requireNamespace("mgcv")
-      data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
-      10^predict(model_time, data)
+models <-
+  bind_rows(pbapply::pblapply(
+    method_ids,
+    function(method_id) {
+      dat <-
+        data %>%
+        as_tibble() %>%
+        filter(method_id == !!method_id, error_status %in% c("no_error")) %>%
+        mutate(
+          time = time_method,
+          ltime = log10(time_method),
+          mem = max_mem,
+          lmem = log10(mem)
+        )
+
+      # predict time
+      dat_time <- dat %>% filter(is.finite(ltime))
+      model_time <-
+        tryCatch({
+          model_time <- scam::scam(ltime ~ s(lnrow, lncol, bs = "tedmi"), data = dat_time)
+          # model_time <- mgcv::gam(ltime ~ s(lnrow, lncol), data = dat_time)
+        }, error = function(e) {
+          warning(e)
+          lm(ltime ~ lnrow + lncol + lnrow * lncol, data = dat_time)
+        })
+
+      model_time <- strip::strip(model_time, keep = "predict")
+      predict_time <- carrier::crate(function(n_cells, n_features) {
+        requireNamespace("mgcv")
+        requireNamespace("scam")
+        data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
+        unname(10^stats::predict(model, data))
+      }, model = model_time)
+
+      # predict memory
+      dat_mem <- dat %>% filter(is.finite(lmem), lmem >= 8)
+      model_mem <-
+        tryCatch({
+          scam::scam(lmem ~ s(lnrow, lncol, bs = "tedmi"), data = dat_mem)
+          # mgcv::gam(lmem ~ s(lnrow, lncol), data = dat_mem)
+        }, error = function(e) {
+          warning(e)
+          lm(lmem ~ lnrow + lncol + lnrow * lncol, data = dat_mem)
+        })
+      model_mem <- strip::strip(model_mem, keep = "predict")
+      predict_mem <- carrier::crate(function(n_cells, n_features) {
+        requireNamespace("mgcv")
+        requireNamespace("scam")
+        data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
+        unname(10^stats::predict(model, data))
+      }, model = model_mem)
+
+      # calculate preds
+      scalability_range <- seq(log10(10), log10(1000000), by = log10(10) / 5)
+      pred_ind <-
+        crossing(
+          lnrow = scalability_range,
+          lncol = scalability_range
+        ) %>%
+        mutate(nrow = 10^lnrow, ncol = 10^lncol, lsum = lnrow + lncol) %>%
+        filter(4 - 1e-10 <= lsum, lsum <= 7 + 1e-10) %>%
+        mutate(
+          method_id = dat$method_id[[1]],
+          time_pred = predict_time(nrow, ncol),
+          mem_pred = predict_mem(nrow, ncol),
+          time_lpred = log10(time_pred),
+          mem_lpred = log10(mem_pred)
+        )
+
+      # format output
+      data %>%
+        filter(method_id == !!method_id) %>%
+        group_by(method_id) %>%
+        summarise(pct_errored = mean(error_status != "no_error")) %>%
+        mutate(
+          predict_time = list(predict_time),
+          predict_mem = list(predict_mem),
+          pred_ind = list(pred_ind)
+        ) %>%
+        mutate(
+          time_lpred = mean(log10(pred_ind[[1]]$time_pred)),
+          mem_lpred = mean(log10(pred_ind[[1]]$mem_pred))
+        )
     }
-    environment(predict_time) <- list2env(lst(model_time))
-
-    print(dat$method_id[[1]])
-
-    # predict memory
-    model_mem <- mgcv::gam(lmem ~ s(lnrow, lncol), data = dat %>% filter(!is.infinite(lmem)))
-    predict_mem <- function(n_cells, n_features) {
-      requireNamespace("mgcv")
-      data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
-      10^predict(model_mem, data)
-    }
-    environment(predict_mem) <- list2env(lst(model_mem))
-
-    # calculate preds
-    pred_ind <-
-      datasets_info %>%
-      select(dataset_id = id, nrow, ncol, lnrow, lncol) %>%
-      mutate(
-        method_id = dat$method_id[[1]],
-        method_name = dat$method_name[[1]],
-        time_pred = predict_time(nrow, ncol),
-        mem_pred = predict_mem(nrow, ncol),
-        time_lpred = log10(time_pred),
-        mem_lpred = log10(mem_pred)
-      )
-
-    # format output
-    dat %>%
-      group_by(method_id, method_name) %>%
-      summarise(pct_errored = mean(error_status != "no_error")) %>%
-      ungroup() %>%
-      mutate(
-        predict_time = list(predict_time),
-        predict_mem = list(predict_mem),
-        pred_ind = list(pred_ind)
-      ) %>%
-      mutate(
-        time_lpred = mean(log10(pred_ind[[1]]$time_pred)),
-        mem_lpred = mean(log10(pred_ind[[1]]$mem_pred))
-      )
-  }) %>%
-  ungroup()
+  ))
 
 data_pred <- bind_rows(models$pred_ind)
 models <- models %>% select(-pred_ind)

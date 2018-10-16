@@ -60,7 +60,6 @@ scaling_preds <-
 
 scaling_models <-
   read_rds(result_file("scaling.rds", experiment_id = "05-scaling"))$models %>%
-  select(-method_name) %>%
   rename_at(., setdiff(colnames(.), "method_id"), function(x) paste0("scaling_models_", x))
 
 
@@ -71,7 +70,7 @@ benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", e
 benchmark_results_normalised <- read_rds(result_file("benchmark_results_normalised.rds", experiment_id = "06-benchmark"))
 
 execution_metrics <- c("pct_errored", "pct_execution_error", "pct_memory_limit", "pct_method_error_all", "pct_method_error_stoch", "pct_time_limit")
-bench_metrics <- paste0("norm_", benchmark_results_input$metrics)
+bench_metrics <- paste0("norm_", benchmark_results_input$metrics %>% setdiff(c("edge_flip", "featureimp_cor")))
 all_metrics <- c(bench_metrics, "overall", execution_metrics)
 
 data_aggs <-
@@ -119,10 +118,10 @@ rm(list = setdiff(ls(), "results")) # more than this haiku
 #####################################################
 metric_weights <-
   c(
-    benchmark_overall_overall = 1,
+    benchmark_overall_overall = 2,
     qc_overall_overall = 1,
     scaling_pred_timescore_overall = 1,
-    stability_overall_overall = 1
+    stability_overall_overall = .5
   )
 
 results$summary_overall_overall <-

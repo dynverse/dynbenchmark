@@ -8,15 +8,18 @@ dropout probabilities, …) are used to generate synthetic datasets. The
 datasets are then characterised, after which they are uploaded to
 Zenodo.
 
-| \# | script/folder                                              | description                                    |
-| :- | :--------------------------------------------------------- | :--------------------------------------------- |
-| 0  | [📄`download_from_zenodo.R`](00-download_from_zenodo.R)     | Downloading the processed datasets from zenodo |
-| 1  | [📁`real`](01-real)                                         | Real datasets                                  |
-| 2  | [📁`synthetic`](02-synthetic)                               | Synthetic datasets                             |
-| 3  | [📄`download_from_prism.R`](03-download_from_prism.R)       | Download the datasets from the cluster         |
-| 4  | [📁`dataset_characterisation`](04-dataset_characterisation) | Dataset characterisation                       |
-| 5  | [📄`upload_to_zenodo.R`](05-upload_to_zenodo.R)             | Upload the datasets to Zenodo                  |
-|    | [📄`hotfix_datasets.R`](hotfix_datasets.R)                  |                                                |
+| \# | script/folder                                              | description                                                                                                       |
+| :- | :--------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
+| 0  | [📄`download_from_zenodo.R`](00-download_from_zenodo.R)     | Downloading the processed datasets from Zenodo ([10.5281/zenodo.1211532](https://doi.org/10.5281/zenodo.1211532)) |
+| 1  | [📁`real`](01-real)                                         | Real datasets                                                                                                     |
+| 2  | [📁`synthetic`](02-synthetic)                               | Synthetic datasets                                                                                                |
+| 3  | [📄`download_from_prism.R`](03-download_from_prism.R)       | Download the datasets from the cluster                                                                            |
+| 4  | [📁`dataset_characterisation`](04-dataset_characterisation) | Dataset characterisation                                                                                          |
+| 5  | [📄`upload_to_zenodo.R`](05-upload_to_zenodo.R)             | Upload the datasets to Zenodo ([10.5281/zenodo.1211532](https://doi.org/10.5281/zenodo.1211532))                  |
+|    | [📄`hotfix_datasets.R`](hotfix_datasets.R)                  |                                                                                                                   |
+
+The results of this experiment are available
+[here](https://github.com/dynverse/dynbenchmark_results/tree/master/01-datasets).
 
 ## [Real datasets](01-real)
 

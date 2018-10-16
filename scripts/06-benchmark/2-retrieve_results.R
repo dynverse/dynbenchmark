@@ -1,10 +1,12 @@
+#' Retrieve the results from the gridengine cluster and aggregate the data
+
 library(dynbenchmark)
 library(tidyverse)
 
 experiment("06-benchmark")
 
 ##########################################################
-############### PART TWO: RETRIEVE RESULTS ###############
+###            RETRIEVE RESULTS FROM PRISM             ###
 ##########################################################
 
 # If you are the one who submitted the jobs, run:
@@ -29,8 +31,7 @@ experiment("06-benchmark")
 # )
 
 # bind results in one data frame (without models)
-execution_output <- benchmark_bind_results(load_models = FALSE) %>%
-  filter(!method_id %in% c("identity", "shuffle", "error"))
+execution_output <- benchmark_bind_results(load_models = FALSE)
 
 execution_output %>% filter(error_status == "execution_error") %>% pull(error_message) %>% first() %>% cat
 
@@ -55,11 +56,11 @@ list2env(read_rds(result_file("params.rds")), environment())
 # save data
 write_rds(lst(trajtypes, metrics, datasets_info, methods_info), result_file("benchmark_results_input.rds"), compress = "xz")
 
-#########################################
-############### JOIN DATA ###############
-#########################################
-# execution_output$stdout <- headtail(execution_output$stdout, 50)
-execution_output <- execution_output %>% select(-stdout)
+##########################################################
+###                      JOIN DATA                     ###
+##########################################################
+execution_output$stdout <- headtail(execution_output$stdout, 50)
+# execution_output <- execution_output %>% select(-stdout)
 
 raw_data <-
   execution_output %>%
@@ -76,13 +77,16 @@ raw_data <-
   )
 
 table(raw_data$dataset_source, raw_data$error_status)
-###########################################
-############### NORM PARAMS ###############
-###########################################
+write_rds(raw_data, result_file("benchmark_results_unnormalised.rds"), compress = "xz")
 
-metrics <- eval(formals(benchmark_aggregate)$metrics)
-norm_fun <- formals(benchmark_aggregate)$norm_fun
-mean_fun <- formals(benchmark_aggregate)$mean_fun
+##########################################################
+###              DETERMINE SOURCE WEIGHTS              ###
+##########################################################
+
+raw_data <-
+  read_rds(result_file("benchmark_results_unnormalised.rds")) %>%
+  filter(method_id %in% c("identity", "error", "shuffle", "random"))
+
 tmp <- benchmark_aggregate(
   data = raw_data %>% filter(error_status == "no_error")
 )
@@ -99,61 +103,21 @@ dataset_source_weights <-
   summarise(cor = nacor(compare, value)) %>%
   deframe()
 
-#########################################
-############### SAVE DATA ###############
-#########################################
+# do not remove this line! this rds needs to be written as it gets used by `dynbenchmark:::get_default_dataset_source_weights()` ... :rolling_eyes:
 write_rds(dataset_source_weights, result_file("dataset_source_weights.rds"))
-write_rds(lst(trajtypes, metrics, datasets_info, methods_info, norm_fun, mean_fun, dataset_source_weights), result_file("benchmark_results_input.rds"), compress = "xz")
-write_rds(lst(raw_data, metrics), result_file("benchmark_results_unnormalised.rds"), compress = "xz")
 
-
-###################################################
-############### CREATE AGGREGATIONS ###############
-###################################################
-list2env(read_rds(result_file("benchmark_results_unnormalised.rds", "06-benchmark")), environment())
+##########################################################
+###                 AGGREGATE RESULTS                  ###
+##########################################################
+raw_data <- read_rds(result_file("benchmark_results_unnormalised.rds", "06-benchmark"))
 
 out <- benchmark_aggregate(
-  data = raw_data,
-  metrics = metrics,
-  norm_fun = norm_fun,
-  mean_fun = mean_fun,
-  dataset_source_weights = dataset_source_weights
+  data = raw_data
 )
 
-
-# #####################################################
-# ############### CALCULATE VARIABILITY ###############
-# #####################################################
-#
-# worst_var <- var(c(rep(0, floor(num_repeats / 2)), rep(1, ceiling(num_repeats / 2))))
-#
-# norm_var <- function(x) {
-#   maxx <- max(x)
-#
-#   if (maxx == 0) return(1)
-#
-#   worst_var_this <- worst_var * maxx ^ 2
-#
-#   (worst_var_this - var(x) ) / worst_var_this
-# }
-#
-# met2 <- c(metrics, "overall")
-#
-# out$data_var <-
-#   out$data %>%
-#   select(method_id, method_name, dataset_id, param_id, !!met2) %>%
-#   group_by(method_id, method_name, dataset_id, param_id) %>%
-#   summarise_if(is.numeric, norm_var) %>%
-#   ungroup() %>%
-#   group_by(method_id, method_name, param_id) %>%
-#   summarise_if(is.numeric, mean) %>%
-#   ungroup() %>%
-#   gather(metric, value, !!met2) %>%
-#   mutate(metric = paste0("var_", metric))
-
-#####################################################
-############### SAVE DATA ###############
-#####################################################
-
+##########################################################
+###                      SAVE DATA                     ###
+##########################################################
+write_rds(lst(trajtypes, metrics, datasets_info, methods_info, dataset_source_weights), result_file("benchmark_results_input.rds"), compress = "xz")
 write_rds(out, result_file("benchmark_results_normalised.rds"), compress = "xz")
 

@@ -26,8 +26,8 @@ if (!file.exists(result_file("fitdata.rds"))) {
     select(method_id, param_id, dataset_trajectory_type, !!metrics) %>%
     gather(metric, experiment, !!metrics)
 
-  benchmark_results_unnormalised$raw_data <-
-    benchmark_results_unnormalised$raw_data %>%
+  benchmark_results_unnormalised <-
+    benchmark_results_unnormalised %>%
     select(method_id, method_name, dataset_id, dataset_trajectory_type, dataset_source, param_id, prior_id, repeat_ix, error_status, time_method, !!benchmark_results_input$metrics) %>%
     mutate(time_method = ifelse(is.na(time_method), 3600, time_method))
 
@@ -36,7 +36,7 @@ if (!file.exists(result_file("fitdata.rds"))) {
 
   fitness <- function(bools, benchmark_results_unnormalised, benchmark_results_input, dataset_ids, bench_compare, metrics) {
     # retain subset of datasets
-    rawd <- benchmark_results_unnormalised$raw_data
+    rawd <- benchmark_results_unnormalised
     rawd <- rawd[rawd$dataset_id %in%  dataset_ids[bools == 1], , drop = FALSE]
 
     # replicate aggregation with subset of datasets
@@ -50,7 +50,7 @@ if (!file.exists(result_file("fitdata.rds"))) {
     )
 
     # calculate percentage of original execution time
-    pct_time <- sum(rawd$time_method) / sum(benchmark_results_unnormalised$raw_data$time_method)
+    pct_time <- sum(rawd$time_method) / sum(benchmark_results_unnormalised$time_method)
 
     # join previous scores with current scores
     # why can't i use dplyr Y_Y

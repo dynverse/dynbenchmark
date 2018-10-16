@@ -58,16 +58,17 @@ benchmark_fetch_results <- function(remote = NULL) {
       wait = FALSE
     )
 
-    if (is.null(output)) {
-      # the job is probably still running
-      suppressWarnings({
-        qstat_out <- qsub::qstat_j(qsub_handle)
-      })
-
-      if (is.null(qstat_out) || nrow(qstat_out) > 0) {
-        cat("The job is still running.\n")
-      } else {
+    if (is.null(output) || all(map_lgl(output, function(x) length(x) == 1 && is.na(x)))) {
+      qstat_out <-
+        tryCatch({
+          qsub::qstat_j(qsub_handle)
+        }, error = function(e) {
+          NULL
+        }, warning = function(w) {})
+      if (is.null(qstat_out)) {
         cat("The job had finished but no output was found.\n")
+      } else {
+        cat("The job is still running.\n")
       }
 
       return(FALSE)
@@ -122,15 +123,23 @@ benchmark_fetch_results <- function(remote = NULL) {
           disk_io_gb = disk_io / 1e9,
           max_mem_gb = max_mem / 1e9
         )
-      out <- bind_cols(out, qacct_variables)
 
-      out$error_status <- extract_error_status(
-        stdout = out$stdout,
-        stderr = out$stderr,
-        error_message = out$error_message,
-        job_exit_status = out$job_exit_status,
-        produced_model = ("model" %in% colnames(out)) && !is.null(out$model[[1]]) && !identical(out$model[[1]], FALSE)
-      )
+      if (nrow(qacct_variables) == 0) {
+        error_message <- paste0("Task ", i, " is missing qacct information. This job was likely interrupted before the job was finished, and thus no qacct information is present.")
+        warning(error_message)
+        out$error_status <- "execution_error"
+        out$error_message <- error_message
+      } else {
+        out <- bind_cols(out, qacct_variables)
+
+        out$error_status <- extract_error_status(
+          stdout = out$stdout,
+          stderr = out$stderr,
+          error_message = out$error_message,
+          job_exit_status = out$job_exit_status,
+          produced_model = ("model" %in% colnames(out)) && !is.null(out$model[[1]]) && !identical(out$model[[1]], FALSE)
+        )
+      }
 
       out
     })

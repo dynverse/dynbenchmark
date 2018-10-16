@@ -68,11 +68,14 @@ row_groups <-
 
 palettes <- tribble(
   ~palette,        ~colours,
-  "overall",       viridisLite::viridis(101, option = "inferno"),
+  # "overall",       viridisLite::viridis(101, option = "inferno"),
+  "overall",       grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Greys")))(101),
   "benchmark",     viridisLite::viridis(101, option = "magma"),
   "scaling",       viridisLite::viridis(101, option = "cividis"),
   "qc",            viridisLite::viridis(101, option = "viridis"),
-  "stability",     viridisLite::viridis(101, option = "plasma"),
+  #"stability",     viridisLite::viridis(101, option = "plasma"),
+  # "stability",     rev(pals::ocean.tempo(101)),
+  "stability",     viridisLite::viridis(101, option = "inferno"),
   "error_reasons", error_reasons %>% select(name, colour) %>% deframe(),
   "white6black4",    c(rep("white", 6), rep("black", 4))
 )
@@ -81,6 +84,7 @@ palettes <- tribble(
 ###        CREATE FIGURES        ###
 ####################################
 script_files <- c("all", "summary", "detailed", "suppfig")
+# script_files <- "all"
 
 walk(script_files, function(name) {
   cat("Processing ", name, "\n", sep = "")

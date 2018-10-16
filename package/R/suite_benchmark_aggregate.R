@@ -35,7 +35,7 @@
 #' @export
 benchmark_aggregate <- function(
   data,
-  metrics = c("correlation", "him", "featureimp_cor", "F1_branches"),
+  metrics = c("correlation", "him", "featureimp_wcor", "F1_branches"),
   norm_fun = "normal",
   mean_fun = "geometric",
   mean_weights = set_names(rep(1, length(metrics)), metrics),

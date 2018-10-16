@@ -1,4 +1,4 @@
-#' Downloading the processed datasets from zenodo
+#' Downloading the processed datasets from Zenodo ([10.5281/zenodo.1211532](https://doi.org/10.5281/zenodo.1211532))
 
 library(tidyverse)
 library(dynbenchmark)

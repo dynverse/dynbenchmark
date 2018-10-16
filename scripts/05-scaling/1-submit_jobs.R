@@ -9,7 +9,16 @@ if (!file.exists(derived_file("design.rds"))) {
   ##########################################################
   ###############      DEFINE DATASETS       ###############
   ##########################################################
-  datasets <- readr::read_rds(derived_file("datasets.rds"))
+  datasets <-
+    readr::read_rds(derived_file("datasets.rds")) %>%
+    mutate(
+      category = case_when(
+        lsum <= 5 ~ "Cat1",
+        lsum <= 6 ~ "Cat2",
+        lsum <= 7 ~ "Cat3",
+        TRUE ~ "Cat4"
+      )
+    )
 
   ##########################################################
   ###############       DEFINE METHODS       ###############
@@ -48,9 +57,9 @@ if (!file.exists(derived_file("design.rds"))) {
   )
 
   design$crossing <- design$crossing %>%
-    left_join(datasets %>% select(dataset_id = id, memory), by = "dataset_id") %>%
+    left_join(datasets %>% select(dataset_id = id, category), by = "dataset_id") %>%
     mutate(method_order = match(method_id, method_ids)) %>%
-    arrange(memory, method_order)
+    arrange(category, method_order)
 
   write_rds(design, derived_file("design.rds"), compress = "xz")
 }
@@ -61,16 +70,15 @@ if (!file.exists(derived_file("design.rds"))) {
 design_filt <- read_rds(derived_file("design.rds"))
 
 # only run the next stage when the first has finished
-# design_filt$crossing <- design_filt$crossing %>% filter(memory < 20, method_id %in% c("angle", "paga"))
-design_filt$crossing <- design_filt$crossing %>% filter(memory < 20)
-# design_filt$crossing <- design_filt$crossing %>% filter(memory < 50)
-# design_filt$crossing <- design_filt$crossing %>% filter(memory < 100)
-# design_filt$crossing <- design_filt$crossing
+# design_filt$crossing <- design_filt$crossing %>% filter(category == "Cat1", method_id %in% c("angle", "paga"))
+# design_filt$crossing <- design_filt$crossing %>% filter(category == "Cat1")
+design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2"))
+# design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2", "Cat3"))
 
 benchmark_submit(
   design = design_filt,
-  qsub_grouping = "{method_id}/{memory}",
-  qsub_params = function(method_id, memory) list(timeout = 3600, memory = paste0(memory, "G")),
+  qsub_grouping = "{method_id}/{category}",
+  qsub_params = list(timeout = 3600, memory = "16G"),
   metrics = list(dummy = function(dataset, model) 1),
   verbose = TRUE,
   output_models = FALSE

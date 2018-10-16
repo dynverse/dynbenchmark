@@ -1,3 +1,5 @@
+#' Create some diagnostic figures to get an overview of the results
+
 library(dynbenchmark)
 library(tidyverse)
 library(dynplot)
@@ -35,4 +37,3 @@ source(scripts_file("3a-overall_comparison.R"))
 source(scripts_file("3b-time_mem_predictions.R"))
 source(scripts_file("3c-normalisation.R"))
 source(scripts_file("3d-compare_sources.R"))
-# source(scripts_file("3e-stability.R"))
