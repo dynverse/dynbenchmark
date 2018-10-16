@@ -6,6 +6,7 @@ library(dynbenchmark)
 experiment("02-metrics/02-metric_conformity")
 
 dataset_design <- read_rds(derived_file("dataset_design.rds"))
+perturbation_methods <- dynbenchmark:::perturbation_methods_design
 
 # load rules
 source(scripts_file("helper-rules.R"))
@@ -78,6 +79,8 @@ rule <- rules %>% extract_row_to_list(which(rules$id == "filter_cells"))
 assessment <- assess_conformity(rule, scores)
 assessment$plot_scores
 assessment$plot_datasets
+
+
 
 # save assessment
 write_rds(assessments, derived_file("assessments.rds"))
