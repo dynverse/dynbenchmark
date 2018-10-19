@@ -274,17 +274,17 @@ if (im_lazy_and_just_want_to_run_the_plots_below) {
         map_df(~ .$.summary)
     )
 
-  write_rds(opt_path, result_file("opt_path.rds"))
+  write_rds(opt_path, result_file("opt_path.rds"), compress = "xz")
 }
 
 
-g1 <- ggplot(opt_path) + geom_point(aes(pnorm_cor, execution_time, colour = score)) + theme_bw() + scale_colour_distiller(palette = "RdBu")
+g1 <- ggplot(opt_path) + geom_point(aes(pnorm_cor, execution_time, colour = score), size = 3) + theme_bw() + viridis::scale_colour_viridis()
 ggsave(result_file("result_cor_vs_time.pdf"), g1, width = 6, height = 5)
 
 g2 <- ggplot(opt_path %>% gather(parameter, value, num_trees:min_node_size, execution_time)) +
-  geom_point(aes(value, pnorm_cor, score), size = 1) +
+  geom_point(aes(value, pnorm_cor, colour = score), size = 3) +
   theme_bw() +
-  scale_colour_distiller(palette = "RdBu") +
+  viridis::scale_colour_viridis() +
   facet_wrap(~parameter, scales = "free")
 ggsave(result_file("result_param_vs_cor.pdf"), g2, width = 12, height = 8)
 
