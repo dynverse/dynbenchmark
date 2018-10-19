@@ -39,7 +39,7 @@ if (!file.exists(result_file("fimp_orig.rds"))) {
       )
     })
 
-  write_rds(lst(dataset_ids, dataset_metadata, num_repeats), result_file("fimp_orig.rds"))
+  write_rds(lst(dataset_ids, dataset_metadata, num_repeats), result_file("fimp_orig.rds"), compress = "xz")
 }
 
 list2env(read_rds(result_file("fimp_orig.rds")), .GlobalEnv)
@@ -100,173 +100,196 @@ ggsave(result_file("pairwise_cor_orig_orig_dens.pdf"), g2, width = 10, height = 
 ###                       PARAM OPTIM                       ###
 ###############################################################
 
+# you need to load mlrMBO, otherwise some things might not work...
 library(mlrMBO) # install.packages(c("DiceKriging", "rgenoud"))
-
-param_set <- ParamHelpers::makeParamSet(
-  ParamHelpers::makeNumericParam(id = "num_trees", lower = log10(100), upper = log10(10000), trafo = function(x) round(10 ^ x)),
-  ParamHelpers::makeNumericParam(id = "num_mtry", lower = log10(5), upper = log10(100), trafo = function(x) round(10 ^ x)),
-  ParamHelpers::makeNumericParam(id = "num_sample", lower = log10(10), upper = log10(1000), trafo = function(x) round(10 ^ x)),
-  ParamHelpers::makeIntegerParam(id = "min_node_size", lower = 1L, upper = 20L)
-)
-
-# 1800 seconds: score = 0
-# 0 seconds: score = 1
-scale_execution_time <- function(x) {
-  1 - min(x / 1800, 1)
-}
 
 num_cores <- 1
 num_iters <- 200
-control <- mlrMBO::makeMBOControl(
-  n.objectives = 1,
-  propose.points = num_cores,
-  save.file.path = derived_file("mlr_progress.RData"),
-  save.on.disk.at = seq(0, num_iters + 1, by = 1),
-  y.name = "score"
-) %>%
-  mlrMBO::setMBOControlTermination(iters = num_iters)
 
-if (length(control$y.name) == 1) {
-  control <- control %>%
-    mlrMBO::setMBOControlInfill(mlrMBO::makeMBOInfillCritCB())
+# resume from previous results, if any exist
+design <-
+  if (!file.exists(result_file("opt_path.rds"))) {
+    crossing(
+      num_trees = c(500, 1000, 2000),
+      num_mtry = c(20, 50, 100),
+      num_sample = c(50, 100, 200),
+      min_node_size = c(1, 5, 10)
+    ) %>%
+      sample_n(30)
+  } else {
+    read_rds(result_file("opt_path.rds"))
+  }
+
+# toggle this to perform mlrmbo optimisation
+im_lazy_and_just_want_to_run_the_plots_below <-
+  TRUE && "score" %in% colnames(design)
+
+if (im_lazy_and_just_want_to_run_the_plots_below) {
+  opt_path <- design
 } else {
-  control <- control %>%
-    mlrMBO::setMBOControlInfill(mlrMBO::makeMBOInfillCritDIB())
-}
 
-obj_fun <-
-  smoof::makeSingleObjectiveFunction(
-    name = "TItrain",
-    vectorized = FALSE,
-    minimize = FALSE,
-    has.simple.signature = FALSE,
-    par.set = param_set,
-    fn = function(x) {
-      num_repeats <- 1
+  # determine params to optimise over
+  param_set <- ParamHelpers::makeParamSet(
+    ParamHelpers::makeNumericParam(id = "num_trees", lower = log10(100), upper = log10(10000), trafo = function(x) round(10 ^ x)),
+    ParamHelpers::makeNumericParam(id = "num_mtry", lower = log10(5), upper = log10(100), trafo = function(x) round(10 ^ x)),
+    ParamHelpers::makeNumericParam(id = "num_sample", lower = log10(10), upper = log10(1000), trafo = function(x) round(10 ^ x)),
+    ParamHelpers::makeIntegerParam(id = "min_node_size", lower = 1L, upper = 20L)
+  )
 
-      new_metadata <-
-        crossing(
-          dataset_id = dataset_ids,
-          repeat_ix = seq_len(num_repeats)
-        ) %>%
-        pmap_df(function(dataset_id, repeat_ix) {
-          dataset <- datasets[[dataset_id]]
-          expr <- get_expression(dataset)
+  # determine function for turning the execution time into a score
+  # 1800 seconds: score = 0
+  # 0 seconds: score = 1
+  scale_execution_time <- function(x) {
+    1 - pmin(x / 1800, 1)
+  }
 
-          method_params <- list(
-            num.trees = x$num_trees,
-            mtry = min(x$num_mtry, ncol(expr)),
-            sample.fraction = min(x$num_sample / nrow(expr), 1),
-            min.node.size = x$min_node_size,
-            splitrule = x$splitrule,
-            write.forest = FALSE
+  # define an objective function for the optimisation
+  obj_fun <-
+    smoof::makeSingleObjectiveFunction(
+      name = "TItrain",
+      vectorized = FALSE,
+      minimize = FALSE,
+      has.simple.signature = FALSE,
+      par.set = param_set,
+      fn = function(x) {
+        num_repeats <- 1
+
+        # run a fimp on each of the datasets with the given parameters
+        new_metadata <-
+          crossing(
+            dataset_id = dataset_ids,
+            repeat_ix = seq_len(num_repeats)
+          ) %>%
+          pmap_df(function(dataset_id, repeat_ix) {
+            dataset <- datasets[[dataset_id]]
+            expr <- get_expression(dataset)
+
+            # transform parameters
+            method_params <- list(
+              num.trees = x$num_trees,
+              mtry = min(x$num_mtry, ncol(expr)),
+              sample.fraction = min(x$num_sample / nrow(expr), 1),
+              min.node.size = x$min_node_size,
+              splitrule = x$splitrule,
+              write.forest = FALSE
+            )
+
+            # run fimp
+            time0 <- Sys.time()
+            importances <- dynfeature::calculate_overall_feature_importance(
+              traj = dataset,
+              expression_source = expr,
+              method_params = method_params
+            )
+            time1 <- Sys.time()
+
+            # calculate execution time
+            execution_time <- difftime(time1, time0, units = "secs") %>% as.numeric()
+
+            tibble(
+              repeat_ix,
+              id = dataset$id,
+              importances = list(importances),
+              execution_time
+            )
+          })
+
+        # calculate the sum of times (averages across replicates, if any)
+        execution_time <-
+          new_metadata %>%
+          group_by(id) %>%
+          summarise(mean = mean(execution_time)) %>%
+          summarise(sum = sum(mean)) %>%
+          pull(sum)
+
+        # determine how well the fimps correlate with the original datasets
+        pnorm_cor <-
+          pairwise_cor_fun(dataset_metadata, new_metadata) %>%
+          mutate(cor = ifelse(is.finite(cor), cor, 0)) %>%
+          left_join(pairwise_cor_dist, by = "id") %>%
+          mutate(pnorm_cor = pnorm(cor, mean, sd)) %>%
+          summarise(mean = mean(pnorm_cor)) %>%
+          pull(mean)
+
+        # create a summary table
+        summary <-
+          as_data_frame(x) %>%
+          mutate(
+            pnorm_cor,
+            execution_time,
+            execution_time_score = scale_execution_time(execution_time),
+            score = dyneval::calculate_geometric_mean(pnorm_cor, execution_time_score)
           )
 
-          time0 <- Sys.time()
-          importances <- dynfeature::calculate_overall_feature_importance(
-            traj = dataset,
-            expression_source = expr,
-            method_params = method_params
-          )
-          time1 <- Sys.time()
-          execution_time <- difftime(time1, time0, units = "secs") %>% as.numeric()
+        score <- summary$score
 
-          tibble(
-            repeat_ix,
-            id = dataset$id,
-            importances = list(importances),
-            execution_time
-          )
-        })
-
-      execution_time <-
-        new_metadata %>%
-        group_by(id) %>%
-        summarise(mean = mean(execution_time)) %>%
-        summarise(sum = sum(mean)) %>%
-        pull(sum)
-
-      pnorm_cor <-
-        pairwise_cor_fun(dataset_metadata, new_metadata) %>%
-        mutate(cor = ifelse(is.finite(cor), cor, 0)) %>%
-        left_join(pairwise_cor_dist, by = "id") %>%
-        mutate(pnorm_cor = pnorm(cor, mean, sd)) %>%
-        summarise(mean = mean(pnorm_cor)) %>%
-        pull(mean)
-
-      summary <-
-        as_data_frame(x) %>%
-        mutate(
-          pnorm_cor,
-          execution_time,
-          execution_time_score = scale_execution_time(execution_time),
-          score = dyneval::calculate_geometric_mean(pnorm_cor, execution_time_score)
+        attr(score, "extras") <- list(
+          .summary = summary
         )
 
-      score <- summary$score
+        score
+      }
+    )
 
-      attr(score, "extras") <- list(
-        .summary = summary
-      )
+  # determine some mlrmbo settings
+  progress_file <- derived_file("mlr_progress.RData")
 
-      score
-    }
-  )
+  if (file.exists(progress_file)) file.remove(progress_file)
+  control <-
+    mlrMBO::makeMBOControl(
+      n.objectives = 1,
+      propose.points = num_cores,
+      save.file.path = progress_file,
+      save.on.disk.at = seq(0, num_iters + 1, by = 1),
+      y.name = "score"
+    ) %>%
+    mlrMBO::setMBOControlTermination(iters = num_iters)
 
+  if (length(control$y.name) == 1) {
+    control <- control %>%
+      mlrMBO::setMBOControlInfill(mlrMBO::makeMBOInfillCritCB())
+  } else {
+    control <- control %>%
+      mlrMBO::setMBOControlInfill(mlrMBO::makeMBOInfillCritDIB())
+  }
 
-if (!file.exists(result_file("opt_path.rds"))) {
-  # design <- NULL
-  design <- crossing(
-    num_trees = c(500, 1000, 2000),
-    num_mtry = c(20, 50, 100),
-    num_sample = c(50, 100, 200),
-    min_node_size = c(1, 5, 10)
-  ) %>%
-    mutate_at(c("num_trees", "num_mtry", "num_sample"), log10) %>%
-    sample_n(30)
-} else {
-  design <- read_rds(result_file("opt_path.rds")) %>%
-    mutate_at(c("num_trees", "num_mtry", "num_sample"), log10)
+  # run mlrmbo
+  mbo_out <-
+    mlrMBO::mbo(
+      fun = obj_fun,
+      control = control,
+      design = design %>%
+        select(one_of(c(names(param_set$pars), "score"))) %>% # only pass the parameter columns and the score column, if any exists
+        mutate_at(c("num_trees", "num_mtry", "num_sample"), log10),
+      show.info = TRUE
+    )
+
+  # if mlrmbo errored or was cancelled, you can finalise the results as follows:
+  mbo_out <- mboFinalize(progress_file)
+
+  opt_path <-
+    bind_rows(
+      { if ("score" %in% colnames(design)) design else NULL },
+      mbo_out$opt.path$env$extra %>%
+        map_df(~ .$.summary)
+    )
+
+  write_rds(opt_path, result_file("opt_path.rds"))
 }
 
-mbo_out <-
-  mlrMBO::mbo(
-    fun = obj_fun,
-    control = control,
-    design = design %>% select(one_of(names(param_set$pars)), "score"),
-    show.info = TRUE
-  )
 
-mbo_out <- mboContinue(derived_file("mlr_progress.RData"))
-mbo_out <- mboFinalize(derived_file("mlr_progress.RData"))
-
-
-opt_path <-
-  bind_rows(
-    {
-      if ("score" %in% colnames(design)) {
-        design %>% mutate_at(c("num_trees", "num_mtry", "num_sample"), function(x) 10^x)
-      } else {
-        NULL
-      }
-    },
-    opt_path <- mbo_out$opt.path$env$extra %>% map_df(~ .$.summary)
-  )
-
-write_rds(opt_path, result_file("opt_path.rds"))
-
-
-g1 <- ggplot(opt_path) + geom_point(aes(pnorm_cor, execution_time)) + theme_bw()
+g1 <- ggplot(opt_path) + geom_point(aes(pnorm_cor, execution_time, colour = score)) + theme_bw() + scale_colour_distiller(palette = "RdBu")
 ggsave(result_file("result_cor_vs_time.pdf"), g1, width = 6, height = 5)
 
-g2 <- ggplot(opt_path %>% gather(parameter, value, num_trees:min_node_size)) +
-  geom_point(aes(value, pnorm_cor, colour = log10(execution_time)), size = 3) +
+g2 <- ggplot(opt_path %>% gather(parameter, value, num_trees:min_node_size, execution_time)) +
+  geom_point(aes(value, pnorm_cor, score), size = 1) +
   theme_bw() +
   scale_colour_distiller(palette = "RdBu") +
   facet_wrap(~parameter, scales = "free")
-ggsave(result_file("result_param_vs_cor.pdf"), g2, width = 12, height = 12)
+ggsave(result_file("result_param_vs_cor.pdf"), g2, width = 12, height = 8)
 
 opt_path %>% arrange(desc(pnorm_cor))
+opt_path %>% arrange(desc(score))
 
 
 
