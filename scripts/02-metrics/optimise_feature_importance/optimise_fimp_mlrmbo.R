@@ -131,8 +131,8 @@ if (im_lazy_and_just_want_to_run_the_plots_below) {
   # determine params to optimise over
   param_set <- ParamHelpers::makeParamSet(
     ParamHelpers::makeNumericParam(id = "num_trees", lower = log10(100), upper = log10(10000), trafo = function(x) round(10 ^ x)),
-    ParamHelpers::makeNumericParam(id = "num_mtry", lower = log10(5), upper = log10(100), trafo = function(x) round(10 ^ x)),
-    ParamHelpers::makeNumericParam(id = "num_sample", lower = log10(10), upper = log10(1000), trafo = function(x) round(10 ^ x)),
+    ParamHelpers::makeNumericParam(id = "num_mtry", lower = log10(5), upper = log10(500), trafo = function(x) round(10 ^ x)),
+    ParamHelpers::makeNumericParam(id = "num_sample", lower = log10(10), upper = log10(600), trafo = function(x) round(10 ^ x)),
     ParamHelpers::makeIntegerParam(id = "min_node_size", lower = 1L, upper = 20L)
   )
 
@@ -277,93 +277,148 @@ if (im_lazy_and_just_want_to_run_the_plots_below) {
   write_rds(opt_path, result_file("opt_path.rds"), compress = "xz")
 }
 
+opt_path <- read_rds(result_file("opt_path.rds"))
 
-g1 <- ggplot(opt_path) + geom_point(aes(pnorm_cor, execution_time, colour = score), size = 3) + theme_bw() + viridis::scale_colour_viridis()
+
+g1 <-
+  ggplot(opt_path, aes(pnorm_cor, execution_time)) +
+  # geom_path(colour = "lightgray") +
+  geom_point(aes(colour = score), size = 3) +
+  theme_bw() +
+  viridis::scale_colour_viridis()
 ggsave(result_file("result_cor_vs_time.pdf"), g1, width = 6, height = 5)
 
-g2 <- ggplot(opt_path %>% gather(parameter, value, num_trees:min_node_size, execution_time)) +
+g2 <-
+  ggplot(opt_path %>% gather(parameter, value, num_trees:min_node_size, execution_time)) +
   geom_point(aes(value, pnorm_cor, colour = score), size = 3) +
   theme_bw() +
   viridis::scale_colour_viridis() +
   facet_wrap(~parameter, scales = "free")
 ggsave(result_file("result_param_vs_cor.pdf"), g2, width = 12, height = 8)
 
+g1
+g2
 opt_path %>% arrange(desc(pnorm_cor))
 opt_path %>% arrange(desc(score))
 
 
+g3data <-
+  opt_path %>%
+  mutate(iteration = seq_len(n()), score_ = score) %>%
+  gather(parameter, value, num_trees:min_node_size, execution_time, pnorm_cor, score) %>%
+  mutate(param_label = paste0(ifelse(parameter %in% c("pnorm_cor", "execution_time", "score"), "SCORE", "PARAM"), ": ", parameter)) %>%
+  rename(score = score_)
+
+g3 <-
+  ggplot(g3data) +
+  geom_point(aes(score, value, colour = iteration), size = 2) +
+  viridis::scale_colour_viridis() +
+  facet_wrap(~param_label, scales = "free", dir = "v", nrow = 1) +
+  theme_bw()
+
+g4 <-
+  ggplot(g3data) +
+  geom_point(aes(iteration, value, colour = score), size = 2) +
+  viridis::scale_colour_viridis() +
+  facet_wrap(~param_label, scales = "free", dir = "v", nrow = 1) +
+  theme_bw()
+ggsave(result_file("result_compare_params_and_scores.pdf"), patchwork::wrap_plots(g3, g4, ncol = 1), width = 20, height = 6)
+
+###############################################################
+###                   LOOK AT BEST PARAMS                   ###
+###############################################################
+# params <- opt_path %>% arrange(desc(score)) %>% select(-execution_time:-score) %>% extract_row_to_list(1)
+
+many_params <- list(
+  list(name = "local", num_trees = 1900, num_mtry = 44, num_sample = 266, min_node_size = 19),
+  list(name = "qsub1", num_trees = 1400, num_mtry = 42, num_sample = 142, min_node_size = 8),
+  list(name = "qsub2", num_trees = 3400, num_mtry = 50, num_sample = 92, min_node_size = 19),
+  list(name = "qsub3", num_trees = 2000, num_mtry = 42, num_sample = 175, min_node_size = 11),
+  list(name = "manual", num_trees = 2000, num_mtry = 50, num_sample = 250, min_node_size = 20)
+)
+
+out <- map(many_params, function(params) {
+  # determine function for turning the execution time into a score
+  # 1800 seconds: score = 0
+  # 0 seconds: score = 1
+  scale_execution_time <- function(x) {
+    1 - pmin(x / 1800, 1)
+  }
+
+  cat(params$name, "\n", sep = "")
+  new_metadata <-
+    crossing(
+      dataset_id = dataset_ids,
+      repeat_ix = seq_len(num_repeats)
+    ) %>%
+    pmap_df(function(dataset_id, repeat_ix) {
+      dataset <- datasets[[dataset_id]]
+      expr <- get_expression(dataset)
+
+      method_params <- list(
+        num.trees = params$num_trees,
+        mtry = min(params$num_mtry, ncol(expr)),
+        sample.fraction = min(params$num_sample / nrow(expr), 1),
+        min.node.size = params$min_node_size,
+        write.forest = FALSE
+      )
+
+      time0 <- Sys.time()
+      importances <- dynfeature::calculate_overall_feature_importance(
+        traj = dataset,
+        expression_source = expr,
+        method_params = method_params
+      )
+      time1 <- Sys.time()
+      execution_time <- difftime(time1, time0, units = "secs") %>% as.numeric()
+
+      tibble(
+        repeat_ix,
+        id = dataset$id,
+        importances = list(importances),
+        execution_time
+      )
+    })
+
+  # calculate the sum of times (averages across replicates, if any)
+  execution_time <-
+    new_metadata %>%
+    group_by(id) %>%
+    summarise(mean = mean(execution_time)) %>%
+    summarise(sum = sum(mean)) %>%
+    pull(sum)
+
+  # determine how well the fimps correlate with the original datasets
+  pnorm_cor <-
+    pairwise_cor_fun(new_metadata, new_metadata) %>%
+    mutate(cor = ifelse(is.finite(cor), cor, 0)) %>%
+    left_join(pairwise_cor_dist, by = "id") %>%
+    mutate(pnorm_cor = pnorm(cor, mean, sd)) %>%
+    summarise(mean = mean(pnorm_cor)) %>%
+    pull(mean)
+
+  # create a summary table
+  summary <-
+    as_data_frame(params) %>%
+    mutate(
+      name = params$name,
+      pnorm_cor,
+      execution_time,
+      execution_time_score = scale_execution_time(execution_time),
+      score = dyneval::calculate_geometric_mean(pnorm_cor, execution_time_score)
+    )
+
+  lst(params, new_metadata, summary)
+})
+
+summary <- map_df(out, ~ .$summary)
 
 
-
-
-
-
-
-
-# ###############################################################
-# ###                   DETERMINE LITE IMPS                   ###
-# ###############################################################
-# params <- lst(
-#   num_trees = 1000,
-#   num_mtry = 20,
-#   num_sample = 100
-# )
-#
-# new_metadata <-
-#   crossing(
-#     dataset_id = dataset_ids,
-#     repeat_ix = seq_len(num_repeats)
-#   ) %>%
-#   pmap_df(function(dataset_id, repeat_ix) {
-#     dataset <- datasets[[dataset_id]]
-#     expr <- get_expression(dataset)
-#
-#     method_params <- list(
-#       num.trees = params$num_trees,
-#       mtry = min(params$num_mtry, ncol(expr)),
-#       sample.fraction = min(params$num_sample / nrow(expr), 1)
-#     )
-#
-#     time0 <- Sys.time()
-#     importances <- dynfeature::calculate_overall_feature_importance(
-#       traj = dataset,
-#       expression_source = expr,
-#       method_params = method_params
-#     )
-#     time1 <- Sys.time()
-#     execution_time <- difftime(time1, time0, units = "secs") %>% as.numeric()
-#
-#     tibble(
-#       repeat_ix,
-#       id = dataset$id,
-#       importances = list(importances),
-#       execution_time
-#     )
-#   })
-#
-# pairwise_cor_orig_new <- pairwise_cor_fun(dataset_metadata, new_metadata)
-# pairwise_cor_new_new <- pairwise_cor_fun(new_metadata, new_metadata, same = FALSE)
-#
-# pairwise_cor <-
-#   bind_rows(
-#     pairwise_cor_orig_orig %>% mutate(comparison = "orig vs. orig"),
-#     pairwise_cor_orig_new %>% mutate(comparison = "orig vs. new"),
-#     pairwise_cor_new_new %>% mutate(comparison = "new vs. new")
-#   )
-# ggplot(pairwise_cor) + geom_density(aes(cor, colour = id), size = 1) + theme_bw() +
-#   scale_colour_brewer(palette = "Set3") + labs(title = "Pairwise cor of importance scores, orig vs. new") + facet_wrap(~comparison, ncol = 1)
-#
-# execution_times <-
-#   bind_rows(
-#     dataset_metadata %>% mutate(comparison = "orig"),
-#     new_metadata %>% mutate(comparison = "new")
-#   ) %>%
-#   group_by(id, comparison) %>%
-#   summarise(execution_time = mean(execution_time)) %>%
-#   ungroup() %>%
-#   spread(comparison, execution_time)
-#
-# sum(dataset_metadata$execution_time)
-# sum(new_metadata$execution_time)
-#
-# ggplot(execution_times) + geom_point(aes(new, orig)) + theme_bw()
+# # A tibble: 5 x 9
+#   name   num_trees num_mtry num_sample min_node_size pnorm_cor execution_time execution_time_score score
+#   <chr>      <dbl>    <dbl>      <dbl>         <dbl>     <dbl>          <dbl>                <dbl> <dbl>
+# 1 local       1900       44        266            19     0.915           430.                0.761 0.835
+# 2 qsub1       1400       42        142             8     0.724           219.                0.878 0.798
+# 3 qsub2       3400       50         92            19     0.861           322.                0.821 0.841
+# 4 qsub3       2000       42        175            11     0.870           325.                0.820 0.844
+# 5 manual      2000       50        250            20     0.913           456.                0.746 0.826
