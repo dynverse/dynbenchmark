@@ -8,7 +8,7 @@ if (!file.exists(derived_file("design.rds"))) {
   memory_gb <- 16
   num_repeats <- 1
 
-  metrics <- c("correlation", "edge_flip", "featureimp_cor", "featureimp_wcor", "F1_branches", "him")
+  metrics <- c("correlation", "featureimp_wcor", "F1_branches", "him")
 
   list2env(readr::read_rds(path = derived_file("dataset_params.rds")), environment())
   benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", "06-benchmark"))
@@ -109,5 +109,5 @@ benchmark_submit(
   qsub_params = lst(timeout = timeout_sec, memory = paste0(memory_gb, "G")),
   metrics = metrics,
   verbose = TRUE,
-  output_models = FALSE
+  output_models = TRUE
 )

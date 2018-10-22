@@ -2,8 +2,8 @@
 
 metr_lev <- c(
   "overall", "real/gold", "real/silver", "synthetic/dyngen", "synthetic/dyntoy", "synthetic/prosstt", "synthetic/splatter",
-  "norm_correlation", "norm_edge_flip", "norm_him", "norm_F1_branches", "norm_featureimp_cor", "norm_featureimp_wcor", "time_pred_cor",
-  "pct_errored", "pct_execution_error", "pct_time_limit", "pct_memory_limit", "pct_method_error", "progress", "mem_pred_cor"
+  "norm_correlation", "norm_him", "norm_F1_branches", "norm_featureimp_wcor", "time_pred_cor", "mem_pred_cor", "progress",
+  "pct_errored", "pct_execution_error", "pct_time_limit", "pct_memory_limit", "pct_method_error"
 )
 
 # display barplots per metric
