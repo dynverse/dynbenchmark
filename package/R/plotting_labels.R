@@ -159,6 +159,7 @@ limits_metric <- function(metric_id) {
 #' @export
 label_time <- function(time) {
   case_when(
+    time < 1e-5 ~ "0s",
     time < 1 ~ "<1s",
     time < 60 ~ paste0(floor(time), "s"),
     time < 3600 ~ paste0(floor(time / 60), "m"),
