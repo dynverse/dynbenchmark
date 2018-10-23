@@ -89,11 +89,9 @@ models <- list(
   "glm" = function(train) {
     x.tr <- stats::model.matrix(~ lnrow + lncol + lnrow * lncol, data = train)[,-1]
     y.tr <- train$ltime
-    # rr.cv <- glmnet::cv.glmnet(x.tr, y.tr, alpha = 1)
-    # rr.bestlam <- rr.cv$lambda.min
-    # fit <- glmnet::glmnet(x.tr, y.tr, alpha = 1, lambda = rr.bestlam)
     fit <- glmnet::glmnet(x.tr, y.tr, alpha = 1)
-  }
+  },
+  "rf" = function(train) ranger::ranger(ltime ~ lnrow + lncol, data = train)
 )
 
 ###################################################
@@ -110,19 +108,22 @@ cvdf <- bind_rows(pbapply::pblapply(seq_len(nrow(cvgrid)), cl = 8, function(i) {
   repl <- cvgrid$replicate[[i]]
   mod <- cvgrid$model[[i]]
 
-  train <- training %>% filter(method_id == mid, replicate != repl, lnrow + lncol <= 5)
+  train <- training %>% filter(method_id == mid, replicate != repl, lnrow + lncol <= 7, !is.na(ltime))
   test <- training %>% filter(method_id == mid, replicate == repl)
 
   out <-
     tryCatch({
       model <- models[[mod]](train)
 
-      if (mod != "glm") {
-        predltime <- predict(model, test)
-      } else {
-        x.tr <- model.matrix(~ lnrow + lncol + lnrow * lncol, data = test)[,-1]
-        predltime <- predict(model, x.tr)[,1]
-      }
+      predltime <-
+        if (mod == "rf") {
+          predict(model, test)$predictions
+        } else if (mod == "glm") {
+          x.tr <- model.matrix(~ lnrow + lncol + lnrow * lncol, data = test)[,-1]
+          predict(model, x.tr)[,1]
+        } else {
+          predict(model, test)
+        }
 
       lst(model, predltime)
     }, error = function(e) {
@@ -151,7 +152,7 @@ valdf <- bind_rows(pbapply::pblapply(seq_len(nrow(valgrid)), cl = 8, function(i)
   mid <- valgrid$method[[i]]
   mod <- valgrid$model[[i]]
 
-  train <- training %>% filter(method_id == mid)
+  train <- training %>% filter(method_id == mid, !is.na(ltime))
   valid <- validation %>% filter(method_id == mid)
 
   out <-
@@ -159,12 +160,16 @@ valdf <- bind_rows(pbapply::pblapply(seq_len(nrow(valgrid)), cl = 8, function(i)
       model <- models[[mod]](train)
       # predltime <- predict(model, valid)
 
-      if (mod != "glm") {
-        predltime <- predict(model, valid)
-      } else {
-        x.tr <- model.matrix(~ lnrow + lncol + lnrow * lncol, data = valid)[,-1]
-        predltime <- predict(model, x.tr)[,1]
-      }
+      predltime <-
+        if (mod == "rf") {
+          predict(model, valid)$predictions
+        } else if (mod == "glm") {
+          x.tr <- model.matrix(~ lnrow + lncol + lnrow * lncol, data = valid)[,-1]
+          predict(model, x.tr)[,1]
+        } else {
+          predict(model, valid)
+        }
+
 
       lst(model, predltime)
     }, error = function(e) {
@@ -250,63 +255,29 @@ g <- ggplot(summary, aes(1 / mse_valid, F1)) + geom_point() + ggrepel::geom_text
 ggsave(result_file("mse_f1.pdf"), g, width = 8, height = 8)
 
 
-# determine_cutoff <-
-#   crossing(
-#     test_data,
-#     data_frame(cutoff = seq(0, 5, by = .1) * max_ltime)
-#   ) %>%
-#   mutate(pos = error_status == "time_limit", pred = !is.na(predltime) & predltime >= cutoff) %>%
-#   group_by(model, cutoff) %>%
-#   summarise(
-#     tp = sum(pos & pred),
-#     tn = sum(!pos & !pred),
-#     fp = sum(!pos & pred),
-#     fn = sum(pos & !pred),
-#     sensitivity = tp / (tp + fn),
-#     specificity = tn / (tn + fp),
-#     precision = ifelse(tp + fp != 0, tp / (tp + fp), 0),
-#     accuracy = (tp + tn) / (tp + tn + fp + fn),
-#     bacc = 0.5 * tp / (tp + fn) + 0.5 * tn / (tn + fp),
-#     f1 = ifelse(precision + sensitivity > 0, 2 * precision * sensitivity / (precision + sensitivity), 0)
-#   ) %>%
-#   group_by(model) %>%
-#   arrange(desc(f1)) %>%
-#   slice(1) %>%
-#   ungroup() %>%
-#   arrange(desc(f1))
-#
-# valid_stats <-
-#   valid_data %>%
-#   left_join(determine_cutoff %>% select(model, cutoff), by = "model") %>%
-#   # crossing(
-#   #   data_frame(cutoff = seq(0, 5, by = .1) * max_ltime)
-#   # ) %>%
-#   mutate(pos = error_status == "time_limit", pred = predltime >= cutoff) %>%
-#   group_by(model, cutoff) %>%
-#   summarise(
-#     tp = sum(pos & pred),
-#     tn = sum(!pos & !pred),
-#     fp = sum(!pos & pred),
-#     fn = sum(pos & !pred),
-#     sensitivity = tp / (tp + fn),
-#     specificity = tn / (tn + fp),
-#     precision = ifelse(tp + fp != 0, tp / (tp + fp), 0),
-#     accuracy = (tp + tn) / (tp + tn + fp + fn),
-#     bacc = 0.5 * tp / (tp + fn) + 0.5 * tn / (tn + fp),
-#     f1 = ifelse(precision + sensitivity > 0, 2 * precision * sensitivity / (precision + sensitivity), 0)
-#   ) %>%
-#   group_by(model) %>%
-#   arrange(desc(f1)) %>%
-#   slice(1) %>%
-#   ungroup() %>%
-#   arrange(desc(f1))
-# valid_stats %>% arrange(desc(f1))
-#
-#
-#
-# ggplot(valid_data) +
-#   geom_point(aes(ltime, predltime, colour = diff), alpha = .8) +
-#   geom_abline(aes(intercept = intercept, colour = intercept), slope = 1, data_frame(intercept = -2:2)) +
-#   facet_wrap(~ model, scales = "free_y") +
-#   scale_colour_distiller(palette = "RdBu", limits = c(-2, 2)) +
-#   theme_bw()
+
+summary %>% arrange(mse_test)
+summary %>% arrange(mse_valid)
+summary %>% arrange(desc(F1))
+summary %>% arrange(mse_test * mse_valid / F1)
+
+
+# > summary %>% arrange(mse_valid * mse_test / F1)
+# # A tibble: 15 x 6
+#    model                                                mse_test mse_valid auroc  aupr    F1
+#    <chr>                                                   <dbl>     <dbl> <dbl> <dbl> <dbl>
+#  1 gam, s(lnrow, lncol)                                   0.0483    0.0874 0.985 0.859 0.917
+#  2 gam select, s(lnrow, lncol)                            0.0485    0.0873 0.985 0.859 0.917
+#  3 rf                                                     0.111     0.0906 0.987 0.921 0.953
+#  4 gam select, ti(lnrow) + ti(lncol) + ti(lnrow, lncol)   0.122     0.0870 0.984 0.858 0.917
+#  5 gam select, s(lnrow) + s(lncol)                        0.100     0.106  0.981 0.857 0.915
+#  6 gam, s(lnrow) + s(lncol)                               0.102     0.106  0.981 0.856 0.915
+#  7 lm, lnrow + lncol + lnrow * lncol                      0.170     0.135  0.984 0.905 0.943
+#  8 lm, lnrow + lncol                                      0.189     0.159  0.979 0.869 0.921
+#  9 survreg right, lnrow + lncol                           0.189     0.183  0.978 0.878 0.925
+# 10 gam select, te(lnrow, lncol)                           0.508     0.0871 0.984 0.857 0.916
+# 11 gam bscc, s(lnrow) + s(lncol)                          0.381     0.130  0.977 0.853 0.911
+# 12 scam, s(lnrow, lncol, bs = tedmi)                      0.576     0.0980 0.984 0.864 0.920
+# 13 gam, ti(lnrow) + ti(lncol) + ti(lnrow, lncol)          0.776     0.0870 0.984 0.852 0.913
+# 14 gam, te(lnrow, lncol)                                  0.913     0.0871 0.984 0.852 0.913
+# 15 glm                                                    1.24      0.593  0.860 0.538 0.662

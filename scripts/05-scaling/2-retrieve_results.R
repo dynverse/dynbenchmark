@@ -11,15 +11,15 @@ experiment("05-scaling")
 ###################################################
 
 # If you are the one who submitted the jobs, run:
-benchmark_fetch_results(TRUE)
-qsub::rsync_remote(
-  remote_src = FALSE,
-  path_src = derived_file(remote = FALSE, experiment = "05-scaling"),
-  remote_dest = TRUE,
-  path_dest = derived_file(remote = TRUE, experiment = "05-scaling"),
-  verbose = TRUE,
-  exclude = "*/r2gridengine/*"
-)
+# benchmark_fetch_results(TRUE)
+# qsub::rsync_remote(
+#   remote_src = FALSE,
+#   path_src = derived_file(remote = FALSE, experiment = "05-scaling"),
+#   remote_dest = TRUE,
+#   path_dest = derived_file(remote = TRUE, experiment = "05-scaling"),
+#   verbose = TRUE,
+#   exclude = "*/r2gridengine/*"
+# )
 
 # # If you want to download the output from prism
 # qsub::rsync_remote(
@@ -77,8 +77,8 @@ models <-
       dat_time <- dat %>% filter(is.finite(ltime))
       model_time <-
         tryCatch({
-          model_time <- scam::scam(ltime ~ s(lnrow, lncol, bs = "tedmi"), data = dat_time)
-          # model_time <- mgcv::gam(ltime ~ s(lnrow, lncol), data = dat_time)
+          # model_time <- scam::scam(ltime ~ s(lnrow, lncol, bs = "tedmi"), data = dat_time)
+          model_time <- mgcv::gam(ltime ~ s(lnrow, lncol), data = dat_time)
         }, error = function(e) {
           warning(e)
           lm(ltime ~ lnrow + lncol + lnrow * lncol, data = dat_time)
@@ -96,8 +96,8 @@ models <-
       dat_mem <- dat %>% filter(is.finite(lmem), lmem >= 8)
       model_mem <-
         tryCatch({
-          scam::scam(lmem ~ s(lnrow, lncol, bs = "tedmi"), data = dat_mem)
-          # mgcv::gam(lmem ~ s(lnrow, lncol), data = dat_mem)
+          # scam::scam(lmem ~ s(lnrow, lncol, bs = "tedmi"), data = dat_mem)
+          mgcv::gam(lmem ~ s(lnrow, lncol), data = dat_mem)
         }, error = function(e) {
           warning(e)
           lm(lmem ~ lnrow + lncol + lnrow * lncol, data = dat_mem)
@@ -158,14 +158,30 @@ write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "
 ###############   MAKE A FEW PREDICTIONS   ###############
 ##########################################################
 
+list2env(read_rds(result_file("scaling.rds")), environment())
+
+# scaling_exp <- tribble(
+#   ~ labnrow, ~ labncol, ~ lnrow, ~ lncol,
+#   "cells1k", "features10k", 3, 4,
+#   "cells10k", "features1k", 4, 3,
+#   "cells10k", "features10k", 4, 4,
+#   "cells10k", "features100k", 4, 5,
+#   "cells100k", "features10k", 5, 4
+# ) %>% mutate(n_cells = 10^lnrow, n_features = 10^lncol)
+
 scaling_exp <- tribble(
   ~ labnrow, ~ labncol, ~ lnrow, ~ lncol,
-  "cells1k", "features10k", 3, 4,
-  "cells10k", "features1k", 4, 3,
+  # "cells1k", "features10k", 3, 4,
+  # "cells10k", "features1k", 4, 3,
+  # "cells10k", "features100k", 4, 5,
+  # "cells100k", "features10k", 5, 4,
+  "cells100", "features1m", 2, 6,
+  "cells1k", "features100k", 3, 5,
   "cells10k", "features10k", 4, 4,
-  "cells10k", "features100k", 4, 5,
-  "cells100k", "features10k", 5, 4
+  "cells100k", "features1k", 5, 3,
+  "cells1m", "features100", 6, 2
 ) %>% mutate(n_cells = 10^lnrow, n_features = 10^lncol)
+
 
 scaling_preds <-
   models %>%
@@ -199,3 +215,27 @@ scaling_scores <-
   )
 
 write_rds(lst(scaling_preds, scaling_agg, scaling_scores), result_file("scaling_scores.rds"), compress = "xz")
+
+# compare predictions versus reals
+realdata <-
+  data %>%
+  filter(error_status == "no_error") %>%
+  group_by(method_id, lnrow, lncol) %>%
+  summarise(realtime = mean(time_method)) %>%
+  ungroup() %>%
+  mutate(logrealtime = log10(realtime))
+
+compare <-
+  left_join(scaling_preds %>% rename(predtime = time, logpredtime = logtime), realdata, by = c("method_id", "lnrow", "lncol")) %>%
+  na.omit
+
+g <-
+  ggplot(compare, aes(logrealtime, logpredtime)) +
+  geom_point() +
+  ggrepel::geom_text_repel(aes(label = paste0(method_id, "\nlnrow=", lnrow, ", lncol=", lncol, "\nR=", label_time(realtime), ", P=", label_time(predtime))), compare %>% filter(abs(logpredtime - logrealtime) > log10(2))) +
+  geom_abline(intercept = 0, slope = 1) +
+  geom_abline(intercept = log10(2), slope = 1, colour = "red") +
+  geom_abline(intercept = -log10(2), slope = 1, colour = "blue") +
+  theme_bw()
+ggsave(result_file("compare_predtime_vs_realtime.pdf"), g, width = 20, height = 20)
+
