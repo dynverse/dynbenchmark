@@ -58,7 +58,7 @@ benchmark_fetch_results <- function(remote = NULL) {
       wait = FALSE
     )
 
-    if (is.null(output) || all(map_lgl(output, function(x) length(x) == 1 && is.na(x)))) {
+    if (is.null(output)) {
       qstat_out <-
         tryCatch({
           qsub::qstat_j(qsub_handle)
