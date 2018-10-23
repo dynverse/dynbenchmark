@@ -1,7 +1,7 @@
 source(scripts_file("2a_columns_all.R", experiment = "08-summary"), local = TRUE)
 
 selected_columns <- c("method_name")
-selected_groups <- c("benchmark_metric", "benchmark_source", "benchmark_trajtype", "scaling_predtime_cells10k", "scaling_predtime_features10k", "stability", "qc_category")
+selected_groups <- c("benchmark_metric", "benchmark_source", "benchmark_trajtype", "scaling_predtime", "stability", "qc_category")
 removed_columns <- c()
 
 column_info <-
