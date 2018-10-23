@@ -160,21 +160,8 @@ write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "
 
 list2env(read_rds(result_file("scaling.rds")), environment())
 
-# scaling_exp <- tribble(
-#   ~ labnrow, ~ labncol, ~ lnrow, ~ lncol,
-#   "cells1k", "features10k", 3, 4,
-#   "cells10k", "features1k", 4, 3,
-#   "cells10k", "features10k", 4, 4,
-#   "cells10k", "features100k", 4, 5,
-#   "cells100k", "features10k", 5, 4
-# ) %>% mutate(n_cells = 10^lnrow, n_features = 10^lncol)
-
 scaling_exp <- tribble(
   ~ labnrow, ~ labncol, ~ lnrow, ~ lncol,
-  # "cells1k", "features10k", 3, 4,
-  # "cells10k", "features1k", 4, 3,
-  # "cells10k", "features100k", 4, 5,
-  # "cells100k", "features10k", 5, 4,
   "cells100", "features1m", 2, 6,
   "cells1k", "features100k", 3, 5,
   "cells10k", "features10k", 4, 4,
