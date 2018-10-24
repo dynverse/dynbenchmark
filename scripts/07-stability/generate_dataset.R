@@ -27,7 +27,7 @@ generate_dataset <- function(
   dimnames(counts) <- dimnames(expression) <- list(cell_names %>% unname(), feature_names %>% unname())
 
   cell_id_map <- cell_names %>% enframe("old_id", "cell_id")
-  feature_id_map <- feature_names %>% enframe("old_id", "cell_id")
+  feature_id_map <- feature_names %>% enframe("old_id", "feature_id")
 
   progressions <-
     base_traj$progressions %>%
