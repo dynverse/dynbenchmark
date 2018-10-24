@@ -78,18 +78,20 @@ method_cols <- rep(cols, ceiling(length(lvls) / length(cols)))[seq_along(lvls)]
 
 pdf(result_file("2_trajtype_comparison.pdf"), 20, 25)
 for (i in seq_len(nrow(metrics_info))) {
-  g <-
-    ggplot(data_aggregations) +
-    geom_point(aes_string("fct_rev(method_id)", metrics_info$metric_id[[i]], colour = "method_id")) +
-    coord_flip() +
-    theme_bw() +
-    theme(legend.position = "none") +
-    scale_colour_manual(values = method_cols) +
-    facet_grid(dataset_source ~ dataset_trajectory_type) +
-    labs(
-      x = NULL,
-      title = paste0(metrics_info$metric_id[[i]], ": ", metrics_info$long_name[[i]])
-    )
-  print(g)
+  if (metrics_info$metric_id[[i]] %in% colnames(data_aggregations)) {
+    g <-
+      ggplot(data_aggregations) +
+      geom_point(aes_string("fct_rev(method_id)", metrics_info$metric_id[[i]], colour = "method_id")) +
+      coord_flip() +
+      theme_bw() +
+      theme(legend.position = "none") +
+      scale_colour_manual(values = method_cols) +
+      facet_grid(dataset_source ~ dataset_trajectory_type) +
+      labs(
+        x = NULL,
+        title = paste0(metrics_info$metric_id[[i]], ": ", metrics_info$long_name[[i]])
+      )
+    print(g)
+  }
 }
 dev.off()
