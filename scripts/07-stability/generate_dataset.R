@@ -27,6 +27,7 @@ generate_dataset <- function(
   dimnames(counts) <- dimnames(expression) <- list(cell_names %>% unname(), feature_names %>% unname())
 
   cell_id_map <- cell_names %>% enframe("old_id", "cell_id")
+  feature_id_map <- feature_names %>% enframe("old_id", "cell_id")
 
   progressions <-
     base_traj$progressions %>%
@@ -37,7 +38,9 @@ generate_dataset <- function(
   set.seed(seed)
   dataset <-
     dynwrap::wrap_data(
-      cell_ids = cell_names %>% unname()
+      cell_ids = cell_names %>% unname(),
+      cell_id_map = cell_id_map,
+      feature_id_map = feature_id_map
     ) %>%
     dynwrap::add_trajectory(
       milestone_ids = base_traj$milestone_ids,
