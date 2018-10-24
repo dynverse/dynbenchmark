@@ -88,7 +88,7 @@ if (!file.exists(derived_file("design.rds"))) {
     ) %>%
     arrange(method_order)
 
-  orig_dataset_id <- unique(datasets$orig_dataset_id)
+  orig_dataset_ids <- unique(datasets$orig_dataset_id)
 
   # save configuration
   write_rds(design, derived_file("design.rds"), compress = "xz")
