@@ -239,7 +239,7 @@ extract_error_status <- function(stdout, stderr, error_message, job_exit_status,
 #'
 #' @param load_models Whether or not to load the models as well.
 #' @param experiment_id The experiment_id, defaults to the current one
-#' @param filter_fun A function with which to filter the data as it is being read from files. Function takes a single data frame as input and returns a filtered data frame as a result.
+#' @param filter_fun A function with which to filter the data as it is being read from files. Function must take a single data frame as input and return a filtered data frame as a result.
 #'
 #' @importFrom readr read_rds
 #' @export
@@ -261,14 +261,21 @@ benchmark_bind_results <- function(load_models = FALSE, experiment_id = NULL, fi
       cat(name, ": Reading previous output\n", sep = "")
       output <- readr::read_rds(output_metrics_file)
 
-      # read models, if requested
-      if (load_models && file.exists(output_models_file)) {
-        models <- readr::read_rds(output_models_file)
-        output$model <- models
+      if (!is.null(filter_fun)) {
+        output$before_filter_index <- seq_len(nrow(output))
+        output <- output %>% filter_fun()
       }
 
-      if (!is.null(filter_fun)) {
-        output <- output %>% filter_fun()
+      # read models, if requested
+      if (load_models && file.exists(output_models_file) && nrow(output) > 0) {
+        models <- readr::read_rds(output_models_file)
+
+        if (!is.null(filter_fun)) {
+          models <- models[output$before_filter_index]
+          output <- output %>% select(-before_filter_index)
+        }
+
+        output$model <- models
       }
 
       output

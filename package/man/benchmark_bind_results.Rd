@@ -12,7 +12,7 @@ benchmark_bind_results(load_models = FALSE, experiment_id = NULL,
 
 \item{experiment_id}{The experiment_id, defaults to the current one}
 
-\item{filter_fun}{A function with which to filter the data as it is being read from files. Function takes a single data frame as input and returns a filtered data frame as a result.}
+\item{filter_fun}{A function with which to filter the data as it is being read from files. Function must take a single data frame as input and return a filtered data frame as a result.}
 }
 \description{
 Gather and bind the results of the benchmark jobs
