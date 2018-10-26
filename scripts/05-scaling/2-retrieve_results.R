@@ -77,8 +77,8 @@ models <-
       dat_time <- dat %>% filter(is.finite(ltime))
       model_time <-
         tryCatch({
-          # model_time <- scam::scam(ltime ~ s(lnrow, lncol, bs = "tedmi"), data = dat_time)
-          model_time <- mgcv::gam(ltime ~ s(lnrow, lncol), data = dat_time)
+          model_time <- scam::scam(ltime ~ s(lnrow, lncol, bs = "tedmi"), data = dat_time)
+          # model_time <- mgcv::gam(ltime ~ s(lnrow, lncol), data = dat_time)
         }, error = function(e) {
           warning(e)
           lm(ltime ~ lnrow + lncol + lnrow * lncol, data = dat_time)
@@ -96,8 +96,8 @@ models <-
       dat_mem <- dat %>% filter(is.finite(lmem), lmem >= 8)
       model_mem <-
         tryCatch({
-          # scam::scam(lmem ~ s(lnrow, lncol, bs = "tedmi"), data = dat_mem)
-          mgcv::gam(lmem ~ s(lnrow, lncol), data = dat_mem)
+          scam::scam(lmem ~ s(lnrow, lncol, bs = "tedmi"), data = dat_mem)
+          # mgcv::gam(lmem ~ s(lnrow, lncol), data = dat_mem)
         }, error = function(e) {
           warning(e)
           lm(lmem ~ lnrow + lncol + lnrow * lncol, data = dat_mem)
