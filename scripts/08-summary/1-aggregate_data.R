@@ -100,7 +100,9 @@ rm(execution_metrics, bench_metrics, all_metrics, data_aggs, benchmark_results_i
 #####################################################
 #               READ STABILITY RESULTS              #
 #####################################################
-stability <- read_rds(result_file("stability_results.rds", experiment_id = "07-stability")) %>% select(-param_id) %>% spread(metric, value)
+stability <- read_rds(result_file("stability_results.rds", experiment_id = "07-stability"))$summ %>%
+  rename_at(., setdiff(colnames(.), "method_id"), ~ paste0("stability_", .)) %>%
+  rename(stability_overall_overall = stability_geom_mean)
 
 #####################################################
 #                  COMBINE RESULTS                  #
