@@ -8,15 +8,15 @@ experiment("07-stability")
 ##############################################################
 
 # If you are the one who submitted the jobs, run:
-benchmark_fetch_results(TRUE)
-qsub::rsync_remote(
-  remote_src = FALSE,
-  path_src = derived_file(remote = FALSE, experiment = "07-stability"),
-  remote_dest = TRUE,
-  path_dest = derived_file(remote = TRUE, experiment = "07-stability"),
-  verbose = TRUE,
-  exclude = "*/r2gridengine/*"
-)
+# benchmark_fetch_results(TRUE)
+# qsub::rsync_remote(
+#   remote_src = FALSE,
+#   path_src = derived_file(remote = FALSE, experiment = "07-stability"),
+#   remote_dest = TRUE,
+#   path_dest = derived_file(remote = TRUE, experiment = "07-stability"),
+#   verbose = TRUE,
+#   exclude = "*/r2gridengine/*"
+# )
 
 # If you want to download the output from prism
 # qsub::rsync_remote(
@@ -31,7 +31,7 @@ qsub::rsync_remote(
 ##############################################################
 ###             SUBMIT PAIRWISE COMPARISON JOBS            ###
 ##############################################################
-metric_ids <- c("correlation", "him", "featureimp_wcor", "F1_milestones")
+metric_ids <- c("correlation", "him", "featureimp_wcor", "F1_branches")
 
 pairwise_submit <- function() {
   requireNamespace("qsub")
@@ -213,7 +213,7 @@ pairwise_submit <- function() {
   invisible()
 }
 
-pairwise_submit()
+# pairwise_submit()
 
 ##############################################################
 ###                 FETCH PAIRWISE RESULTS                 ###
@@ -307,6 +307,9 @@ pairwise_bind_results <- function() {
 
 df <- pairwise_bind_results()
 
+df %>% group_by(method_id) %>% summarise(error = mean(is.na(time_him))) %>% filter(error > 0)
+df %>% group_by(dataset_id) %>% summarise(error = mean(is.na(time_him))) %>% filter(error > 0)
+
 ##############################################################
 ###                        SAVE DATA                       ###
 ##############################################################
@@ -318,15 +321,14 @@ df_g <-
 summ <- df %>% group_by(method_id) %>% summarise_at(c("geom_mean", metric_ids), mean)
 summ
 
-write_rds(lst(df, summ), result_file("stability_results.rds"), compress = "xz")
-
 g <-
   ggplot(df_g) +
   geom_histogram(aes(value, fill = metric), binwidth = .05) +
-  facet_wrap(method_id~metric, ncol = length(metrics) + 1, scales = "free_y") +
+  facet_wrap(method_id~metric, ncol = length(metric_ids) + 1, scales = "free_y") +
   theme_bw() +
   scale_fill_brewer(palette = "Dark2")
 g
 
-ggsave(result_file("score_histogram.pdf"), g, width = 15, height = nrow(summ) * 3)
+ggsave(result_file("score_histogram.pdf"), g, width = 15, height = nrow(summ) * 2.5)
 
+write_rds(lst(df, summ), result_file("stability_results.rds"), compress = "xz")
