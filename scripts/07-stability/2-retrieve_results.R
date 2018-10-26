@@ -29,8 +29,14 @@ qsub::rsync_remote(
 # )
 
 # bind results in one data frame (without models)
-execution_output <- benchmark_bind_results(load_models = TRUE) %>%
-  filter(!method_id %in% c("identity", "shuffle", "error", "random"))
+execution_output <-
+  benchmark_bind_results(
+    load_models = FALSE,
+    filter_fun = function(df) {
+      df %>% filter(!method_id %in% c("identity", "shuffle", "error", "random"))
+    }
+  )
+
 table(execution_output$method_id, execution_output$error_status)
 
 ##############################################################
@@ -67,7 +73,7 @@ grid <-
 
 qsub_config <- qsub::override_qsub_config(
   name = "dynb07stability",
-  memory = "32G",
+  memory = "20G",
   max_wall_time = "01:00:00",
   wait = FALSE
 )
@@ -85,23 +91,27 @@ qsub_handle <-
 
       experiment("07-stability")
 
-      datasets <- read_rds(derived_file("datasets.rds", "07-stability"))
+      datasets <- read_rds(derived_file("datasets.rds", "07-stability")) %>%
+        filter(orig_dataset_id == !!dataset_id)
 
       raw_data <-
-        benchmark_bind_results(load_models = TRUE) %>%
+        benchmark_bind_results(
+          load_models = TRUE,
+          filter_fun = function(df) {
+            df %>% filter(method_id == !!method_id, dataset_id %in% !!datasets$id)
+          }
+        ) %>%
         rename(did_bs = dataset_id) %>%
-        left_join(datasets %>% select(did_bs = id, dataset_id = orig_dataset_id), by = "did_bs") %>%
-        filter(method_id == !!method_id, dataset_id == !!dataset_id)
+        mutate(dataset_id = !!dataset_id)
 
-      dataset_ids <- unique(raw_data$dataset_id)
-
-      orig_datasets <- load_datasets(ids = dataset_ids)
+      orig_datasets <- load_datasets(ids = dataset_id)
 
       crossing(
         i = seq_len(nrow(raw_data)),
         j = seq_len(nrow(raw_data))
       ) %>%
-        filter(i != j) %>%
+        # filter(i != j) %>%
+        filter(i + 1 == j) %>% # compare less models, for now
         pmap_dfr(function(i, j) {
           method_id <- raw_data$method_id[[i]]
           dataset_id <- raw_data$dataset_id[[i]]
@@ -111,12 +121,12 @@ qsub_handle <-
           modeli <- raw_data$model[[i]]
           modelj <- raw_data$model[[j]]
 
-          # eval_out <- tryCatch({
-          #   if (is.null(modeli)) stop("model i is null")
-          #   if (is.null(modelj)) stop("model j is null")
-            if (is.null(modeli) || is.null(modelj)) {
-              eval_out <- dyneval::metrics %>% select(metric_id, worst) %>% filter(metric_id %in% !!metrics) %>% deframe() %>% t() %>% as_data_frame()
-            }
+          eval_out <- tryCatch({
+            if (is.null(modeli)) stop("model i is null")
+            if (is.null(modelj)) stop("model j is null")
+            # if (is.null(modeli) || is.null(modelj)) {
+            #   eval_out <- dyneval::metrics %>% select(metric_id, worst) %>% filter(metric_id %in% !!metrics) %>% deframe() %>% t() %>% as_data_frame()
+            # }
 
             orig_dataset <- orig_datasets %>% inner_join(data_frame(id = dataset_id), by = "id") %>% extract_row_to_list(1)
             dataseti <- datasets %>% inner_join(data_frame(id = did_bs_i), by = "id") %>% pull(fun) %>% first() %>% invoke()
@@ -175,11 +185,11 @@ qsub_handle <-
             expr <- expr[cell_map$old_id, feature_map$old_id]
 
             # calculate metrics
-            eval_out <- dyneval::calculate_metrics(modeli, modelj, expression_source = expr, metrics = metrics)
-          #   dyneval::calculate_metrics(modeli, modelj, expression_source = expr, metrics = metrics)
-          # }, error = function(e) {
-          #   dyneval::metrics %>% select(metric_id, worst) %>% filter(metric_id %in% !!metrics) %>% deframe() %>% t() %>% as_data_frame()
-          # })
+            # eval_out <- dyneval::calculate_metrics(modeli, modelj, expression_source = expr, metrics = metrics)
+            dyneval::calculate_metrics(modeli, modelj, expression_source = expr, metrics = metrics)
+          }, error = function(e) {
+            dyneval::metrics %>% select(metric_id, worst) %>% filter(metric_id %in% !!metrics) %>% deframe() %>% t() %>% as_data_frame()
+          })
 
           # calculate geom mean
           eval_out$geom_mean <-
@@ -200,14 +210,18 @@ out <- qsub::qsub_retrieve(qsub_handle)
 
 pairwise_evals <- bind_rows(out)
 
-pairwise_evals %>% select(method_id, dataset_id, one_of(c(metrics, "geom_mean"))) %>% gather(metric, value, -method_id, -dataset_id) %>%
+
+df %>% select(method_id, dataset_id, one_of(c("geom_mean", metrics))) %>% gather(metric, value, -method_id, -dataset_id) %>%
   ggplot() +
-  # geom_density(aes(value, colour = metric)) +
   geom_histogram(aes(value, fill = metric), binwidth = .05) +
-  # facet_wrap(~metric, nrow = 1) +
+  facet_wrap(method_id~metric, ncol = length(metrics) + 1, scales = "free_y") +
   theme_bw() +
-  # scale_colour_brewer(palette = "Dark2")
   scale_fill_brewer(palette = "Dark2")
+
+
+df %>% group_by(method_id) %>% summarise_at(c("geom_mean", metrics), mean)
+
+
 
 # ##############################################################
 # ###                   CREATE AGGREGATIONS                  ###
