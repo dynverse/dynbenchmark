@@ -318,6 +318,7 @@ pairwise_fetch_results <- function(remote = NULL) {
       return(FALSE)
     }
 
+    cat("Output found! Saving results.\n")
     outputs <- bind_rows(output)
 
     # save output
@@ -344,90 +345,29 @@ pairwise_bind_results <- function() {
   map_dfr(handles, readr::read_rds)
 }
 
-pairwise_bind_results()
+df <- pairwise_bind_results()
 
+##############################################################
+###                        SAVE DATA                       ###
+##############################################################
 
+df_g <-
+  df %>%
+  select(method_id, dataset_id, one_of(c("geom_mean", metric_ids))) %>%
+  gather(metric, value, -method_id, -dataset_id)
 
+summ <- df %>% group_by(method_id) %>% summarise_at(c("geom_mean", metric_ids), mean)
+summ
 
+write_rds(lst(df, summ), result_file("stability_results.rds"), compress = "xz")
 
+g <-
+  ggplot(df_g) +
+  geom_histogram(aes(value, fill = metric), binwidth = .05) +
+  facet_wrap(method_id~metric, ncol = length(metrics) + 1, scales = "free_y") +
+  theme_bw() +
+  scale_fill_brewer(palette = "Dark2")
+g
 
-
-
-
-
-
-
-#
-# out <- qsub::qsub_retrieve(qsub_handle)
-#
-# pairwise_evals <- bind_rows(out)
-#
-#
-# df %>% select(method_id, dataset_id, one_of(c("geom_mean", metric_ids))) %>% gather(metric, value, -method_id, -dataset_id) %>%
-#   ggplot() +
-#   geom_histogram(aes(value, fill = metric), binwidth = .05) +
-#   facet_wrap(method_id~metric, ncol = length(metrics) + 1, scales = "free_y") +
-#   theme_bw() +
-#   scale_fill_brewer(palette = "Dark2")
-#
-#
-# df %>% group_by(method_id) %>% summarise_at(c("geom_mean", metrics), mean)
-
-
-
-# ##############################################################
-# ###                   CREATE AGGREGATIONS                  ###
-# ##############################################################
-#
-#
-# out <- benchmark_aggregate(
-#   data = raw_data %>% mutate(method_name = method_id)
-# )
-# out$data$overall <- ifelse(is.finite(out$data$overall), out$data$overall, 0)
-#
-# ##############################################################
-# ###                  CALCULATE VARIABILITY                 ###
-# ##############################################################
-# stability_params <- read_rds(result_file("params.rds", "07-stability"))
-#
-# worst_var <- var(c(rep(0, floor(stability_params$num_bootstraps / 2)), rep(1, ceiling(stability_params$num_bootstraps / 2))))
-#
-# norm_var <- function(x) {
-#   maxx <- max(x)
-#
-#   if (maxx == 0) return(1)
-#
-#   worst_var_this <- worst_var * maxx ^ 2
-#
-#   (worst_var_this - var(x) ) / worst_var_this
-# }
-#
-# met2 <- c(stability_params$metrics, "overall")
-#
-# data_stab <-
-#   out$data %>%
-#   select(method_id, dataset_id, param_id, !!met2) %>%
-#   group_by(method_id, dataset_id, param_id) %>%
-#   summarise_if(is.numeric, norm_var) %>%
-#   ungroup() %>%
-#   group_by(method_id, param_id) %>%
-#   summarise_if(is.numeric, mean) %>%
-#   ungroup() %>%
-#   gather(metric, value, !!met2) %>%
-#   mutate(metric = paste0("stability_metric_", metric))
-#
-# data_stab_overall <-
-#   data_stab %>%
-#   group_by(method_id, param_id) %>%
-#   summarise(value = dyneval::calculate_arithmetic_mean(value)) %>%
-#   mutate(metric = "stability_overall_overall")
-#
-# data_stab <- bind_rows(data_stab, data_stab_overall)
-#
-#
-# ##############################################################
-# ###                        SAVE DATA                       ###
-# ##############################################################
-#
-# write_rds(data_stab, result_file("stability_results.rds"), compress = "xz")
+ggsave(result_file("score_histogram.pdf"), g, width = 15, height = nrow(summ) * 3)
 
