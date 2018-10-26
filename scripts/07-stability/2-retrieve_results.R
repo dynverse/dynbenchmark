@@ -29,41 +29,6 @@ qsub::rsync_remote(
 # )
 
 
-
-# # bind results in one data frame (without models)
-# execution_output <-
-#   benchmark_bind_results(
-#     load_models = FALSE,
-#     filter_fun = function(df) {
-#       df %>% filter(!method_id %in% c("identity", "shuffle", "error", "random"))
-#     }
-#   )
-#
-# table(execution_output$method_id, execution_output$error_status)
-#
-# ##############################################################
-# ###                        JOIN DATA                       ###
-# ##############################################################
-#
-# datasets <- read_rds(derived_file("datasets.rds", "07-stability"))
-#
-# raw_data <-
-#   execution_output %>%
-#   rename(did_bs = dataset_id) %>%
-#   left_join(datasets %>% select(did_bs = id, dataset_id = orig_dataset_id), by = "did_bs")
-#
-# dataset_ids <- unique(raw_data$dataset_id)
-#
-# orig_datasets <- load_datasets(ids = dataset_ids)
-#
-# raw_data <- raw_data %>%
-#   left_join(orig_datasets %>% select(dataset_id = id, dataset_trajectory_type = trajectory_type, dataset_source = source), by = "dataset_id")
-# #
-# # write_rds(raw_data, derived_file("benchmark_results_unnormalised.rds"))
-# method_ids <- unique(raw_data$method_id)
-
-
-
 ##############################################################
 ###             SUBMIT PAIRWISE COMPARISON JOBS            ###
 ##############################################################
