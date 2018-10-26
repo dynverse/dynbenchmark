@@ -239,10 +239,11 @@ extract_error_status <- function(stdout, stderr, error_message, job_exit_status,
 #'
 #' @param load_models Whether or not to load the models as well.
 #' @param experiment_id The experiment_id, defaults to the current one
+#' @param filter_fun A function with which to filter the data as it is being read from files. Function takes a single data frame as input and returns a filtered data frame as a result.
 #'
 #' @importFrom readr read_rds
 #' @export
-benchmark_bind_results <- function(load_models = FALSE, experiment_id = NULL) {
+benchmark_bind_results <- function(load_models = FALSE, experiment_id = NULL, filter_fun = NULL) {
   local_output_folder <- derived_file("suite", experiment_id = experiment_id)
 
   # find all 2nd level folders with individual tasks
@@ -250,7 +251,10 @@ benchmark_bind_results <- function(load_models = FALSE, experiment_id = NULL) {
 
   # process each method separately
   as_tibble(map_df(files, function(output_metrics_file) {
-    name <- output_metrics_file %>% gsub(paste0(local_output_folder, "/"), "", ., fixed = TRUE) %>% gsub("/output_metrics.rds", "", ., fixed = TRUE)
+    name <- output_metrics_file %>%
+      gsub(paste0(local_output_folder, "/"), "", ., fixed = TRUE) %>%
+      gsub("/output_metrics.rds", "", ., fixed = TRUE)
+
     output_models_file <- gsub("output_metrics.rds", "output_models.rds", output_metrics_file, fixed = TRUE)
 
     if (file.exists(output_metrics_file)) {
@@ -261,6 +265,10 @@ benchmark_bind_results <- function(load_models = FALSE, experiment_id = NULL) {
       if (load_models && file.exists(output_models_file)) {
         models <- readr::read_rds(output_models_file)
         output$model <- models
+      }
+
+      if (!is.null(filter_fun)) {
+        output <- output %>% filter_fun()
       }
 
       output
