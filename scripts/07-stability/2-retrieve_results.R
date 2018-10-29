@@ -33,7 +33,7 @@ experiment("07-stability")
 ##############################################################
 metric_ids <- c("correlation", "him", "featureimp_wcor", "F1_branches")
 
-pairwise_submit <- function() {
+pairwise_submit <- function(memory = "10G", max_wall_time = "12:00:00") {
   requireNamespace("qsub")
 
   # load stability dataset info
@@ -51,10 +51,10 @@ pairwise_submit <- function() {
   walk(metric_files, function(metric_file) {
     folder <- gsub("/output_metrics\\.rds$", "", metric_file)
     name <- gsub(paste0(local_output_folder, "/"), "", folder, fixed = TRUE) %>% gsub("/", "_", .)
-    rem_folder <- gsub(local_output_folder, remote_output_folder, folder, fixed = TRUE)
+    subdir <- gsub(derived_file(""), "", folder, fixed = TRUE)
 
-    pairwise_file <- paste0(folder, "/output_pairwise.rds")
-    qsubhandle_file <- paste0(folder, "/qsubhandle_pairwise.rds")
+    pairwise_file <- derived_file(c(subdir, "/output_pairwise.rds"))
+    qsubhandle_file <- derived_file(c(subdir, "/qsubhandle_pairwise.rds"))
 
     if (file.exists(qsubhandle_file)) {
       cat(name, ": Job still running\n", sep = "")
@@ -71,8 +71,8 @@ pairwise_submit <- function() {
 
       qsub_config <- qsub::override_qsub_config(
         name = name,
-        memory = "10G",
-        max_wall_time = "12:00:00",
+        memory = memory,
+        max_wall_time = max_wall_time,
         wait = FALSE,
         local_tmp_path = tmp_path,
         remote_tmp_path = tmp_path_rem,
@@ -83,12 +83,12 @@ pairwise_submit <- function() {
       qsub_fun <- function(orig_dataset_id) {
         experiment("07-stability")
 
-        metric_file <- paste0(rem_folder, "/output_metrics.rds")
-        models_file <- paste0(rem_folder, "/output_models.rds")
+        metric_file <- derived_file(c(subdir, "/output_metrics.rds"))
+        models_file <- derived_file(c(subdir, "/output_models.rds"))
 
         # check which datasets were generated from the original dataset
         datasets <-
-          read_rds(derived_file("datasets.rds", "07-stability")) %>%
+          read_rds(derived_file("datasets.rds")) %>%
           filter(orig_dataset_id == !!orig_dataset_id)
 
         # load metrics and models
@@ -128,17 +128,17 @@ pairwise_submit <- function() {
 
               # join cell ids and feature ids
               cell_map <-
-                full_join(
+                inner_join(
                   dataseti$cell_id_map %>% rename(cell_id_i = cell_id),
                   datasetj$cell_id_map %>% rename(cell_id_j = cell_id),
                   by = "old_id"
-                ) %>% na.omit
+                )
               feature_map <-
-                full_join(
+                inner_join(
                   dataseti$feature_id_map %>% rename(feature_id_i = cell_id), # change this to feature_id
                   datasetj$feature_id_map %>% rename(feature_id_j = cell_id), # change this to feature_id
                   by = "old_id"
-                ) %>% na.omit
+                )
 
               # revert ids for modeli
               modeli$milestone_percentages <-
@@ -202,7 +202,7 @@ pairwise_submit <- function() {
         qsub::qsub_lapply(
           X = orig_dataset_ids,
           qsub_config = qsub_config,
-          qsub_environment = c("rem_folder", "metric_ids"),
+          qsub_environment = c("subdir", "metric_ids"),
           qsub_packages = c("dynbenchmark", "tidyverse"),
           FUN = qsub_fun
         )
@@ -213,7 +213,8 @@ pairwise_submit <- function() {
   invisible()
 }
 
-# pairwise_submit()
+# pairwise_submit(memory = "10G")
+# pairwise_submit(memory = "20G") # rerun those that crashed with 10G
 
 ##############################################################
 ###                 FETCH PAIRWISE RESULTS                 ###
@@ -305,10 +306,10 @@ pairwise_bind_results <- function() {
   map_dfr(handles, readr::read_rds)
 }
 
-df <- pairwise_bind_results()
+df <- pairwise_bind_results() %>% mutate_if(is.numeric, function(x) ifelse(!is.finite(x), 0, x))
 
-df %>% group_by(method_id) %>% summarise(error = mean(is.na(time_him))) %>% filter(error > 0)
-df %>% group_by(dataset_id) %>% summarise(error = mean(is.na(time_him))) %>% filter(error > 0)
+df %>% group_by(method_id) %>% summarise(error = mean(is.na(time_him))) %>% filter(error > 0) %>% arrange(desc(error))
+df %>% group_by(dataset_id) %>% summarise(error = mean(is.na(time_him))) %>% filter(error > 0) %>% arrange(desc(error))
 
 ##############################################################
 ###                        SAVE DATA                       ###
@@ -319,7 +320,7 @@ df_g <-
   gather(metric, value, -method_id, -dataset_id)
 
 summ <- df %>% group_by(method_id) %>% summarise_at(c("geom_mean", metric_ids), mean)
-summ
+summ %>% arrange(desc(geom_mean)) %>% as.data.frame
 
 g <-
   ggplot(df_g) +
@@ -329,6 +330,6 @@ g <-
   scale_fill_brewer(palette = "Dark2")
 g
 
-ggsave(result_file("score_histogram.pdf"), g, width = 15, height = nrow(summ) * 2.5)
+ggsave(result_file("score_histogram.pdf"), g, width = 15, height = nrow(summ) * 2.5, limitsize = FALSE)
 
 write_rds(lst(df, summ), result_file("stability_results.rds"), compress = "xz")
