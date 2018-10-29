@@ -55,8 +55,7 @@ generate_dataset <- function(
     dynwrap::add_prior_information(
       verbose = verbose
     ) %>%
-    dynwrap::add_cell_waypoints(100) %>%
-    dynwrap::add_root("Cell1")
+    dynwrap::add_cell_waypoints(100)
 
   set.seed(prev_seed)
 
