@@ -172,6 +172,13 @@ funky_heatmap <- function(
   # gather rect data
   rect_data <- geom_data_processor("rect", identity)
 
+  # gather funkyrect data
+  funkyrect_data <- geom_data_processor("funkyrect", function(dat) {
+    dat %>%
+      transmute(xmin, xmax, ymin, ymax, value) %>%
+      pmap_df(score_to_funky_rectangle, midpoint = .8)
+  })
+
   # gather bar data
   bar_data <- geom_data_processor("bar", function(dat) {
     if (!"opt_hjust" %in% colnames(dat)) {
@@ -361,6 +368,18 @@ funky_heatmap <- function(
     g <- g + geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour), rect_data, colour = "black", size = .25)
   }
 
+  # ADD FUNKY RECTANGLES
+  if (nrow(rect_data) > 0) {
+    funky_poly_data <- funkyrect_data %>% filter(is.na(r))
+    funky_arc_data <- funkyrect_data %>% filter(!is.na(r))
+
+    g <- g +
+      geom_polygon(aes(x, y, group = name, fill = colour), funky_poly_data) +
+      geom_arc_bar(aes(x0 = x, y0 = y, r0 = 0, r = r, start = start, end = end, fill = colour), funky_arc_data, colour = NA) +
+      geom_path(aes(x = x, y = y, group = paste0(name, "_", subgroup)), funky_poly_data, colour = "black", size = .25) +
+      geom_arc(aes(x0 = x, y0 = y, r = r, start = start, end = end), funky_arc_data, colour = "black", size = .25)
+  }
+
   # ADD CIRCLES
   if (nrow(circle_data) > 0) {
     g <- g + ggforce::geom_circle(aes(x0 = x0, y0 = y0, fill = colour, r = r), circle_data, size = .25)
@@ -531,4 +550,79 @@ make_geom_data_processor <- function(data, column_pos, row_pos, scale_column, pa
       dat
     })
   }
+}
+
+
+rounded_rectangle <- function(xmin, xmax, ymin, ymax, corner_size) {
+  # rename for ease of use
+  cs <- corner_size
+
+  arc_bars <-
+    tribble(
+      ~x, ~y, ~r, ~start, ~end,
+      xmax - cs, ymax - cs, cs, 0, pi / 2,
+      xmax - cs, ymin + cs, cs, pi / 2, pi,
+      xmin + cs, ymin + cs, cs, pi, pi * 3 / 2,
+      xmin + cs, ymax - cs, cs, pi * 3 / 2, 2 * pi
+    )
+
+  polygons <-
+    tribble(
+      ~x, ~y, ~subgroup,
+      xmin + cs, ymin, "bottom",
+      xmax - cs, ymin, "bottom",
+      xmax, ymin + cs, "right",
+      xmax, ymax - cs, "right",
+      xmax - cs, ymax, "top",
+      xmin + cs, ymax, "top",
+      xmin, ymax - cs, "left",
+      xmin, ymin + cs, "left"
+    )
+
+  lst(arc_bars, polygons)
+}
+
+score_to_funky_rectangle <- function(xmin, xmax, ymin, ymax, value, midpoint = .5, name = NULL) {
+  if (is.na(value)) {
+    return(NULL)
+  }
+
+  if (is.null(name)) {
+    name <- dynutils::random_time_string()
+  }
+
+  out <-
+    if (value >= midpoint) {
+      # transform value to a 0.5 .. 1.0 range
+      trans <- (value - midpoint) / (1 - midpoint) / 2 + .5
+      corner_size <- .9 - .8 * trans
+
+      rounded_rectangle(
+        xmin = xmin,
+        xmax = xmax,
+        ymin = ymin,
+        ymax = ymax,
+        corner_size = corner_size
+      )
+    } else {
+      # transform value to a 0.0 .. 0.5 range
+      trans <- value / midpoint / 2
+
+      xmid <- (xmin + xmax) / 2
+      ymid <- (ymin + ymax) / 2
+      xwidth <- xmax - xmin
+      ywidth <- ymax - ymin
+      circ_size <- trans / .5 * .9 + .1
+
+      rounded_rectangle(
+        xmin = xmid - xwidth / 2 * circ_size,
+        xmax = xmid + xwidth / 2 * circ_size,
+        ymin = ymid - ywidth / 2 * circ_size,
+        ymax = ymid + ywidth / 2 * circ_size,
+        corner_size = circ_size / 2
+      )
+    }
+
+  bind_rows(out) %>%
+    mutate(name, value)
 }
