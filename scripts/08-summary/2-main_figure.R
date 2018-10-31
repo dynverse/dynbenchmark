@@ -28,16 +28,19 @@ data <-
     method_topology_inference = label_short(ifelse(method_topology_inference == "parameter", "param", method_topology_inference)),
     method_wrapper_type = wrapper_type_map[method_wrapper_type],
     benchmark_overall_error_reasons = pmap(
-      lst(err = benchmark_overall_pct_errored, time = benchmark_overall_pct_time_limit, mem = benchmark_overall_pct_memory_limit),
-      function(err, time, mem) {
-        c(
-          pct_memory_limit = mem,
-          pct_time_limit = time,
-          pct_method_error = err - mem - time
-        )
-      }
+      lst(
+        pct_method_error = benchmark_overall_pct_method_error_all + benchmark_overall_pct_method_error_stoch,
+        pct_time_limit = benchmark_overall_pct_time_limit,
+        pct_memory_limit = benchmark_overall_pct_memory_limit,
+        pct_execution_error = benchmark_overall_pct_execution_error
+      ),
+      c
     ),
-    benchmark_overall_pct_errored_str = ifelse(benchmark_overall_pct_errored < .01, "<1%", paste0(round(benchmark_overall_pct_errored * 100), "%"))
+    benchmark_overall_pct_errored_str = case_when(
+      benchmark_overall_pct_errored < .00001 ~ "0%",
+      benchmark_overall_pct_errored < .01 ~ "<1%",
+      TRUE ~ paste0(round(benchmark_overall_pct_errored * 100), "%")
+    )
   ) %>%
   arrange(group, desc(summary_overall_overall))
 
