@@ -96,7 +96,8 @@ palettes <- tribble(
   # "qc", grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Greens")[-1] %>% c("#00250f")))(101),
 
   "error_reasons", error_reasons %>% select(name, colour) %>% deframe(),
-  "white6black4",    c(rep("white", 4), rep("black", 6))
+  "white6black4", c(rep("white", 4), rep("black", 6)),
+  "column_annotation", c(overall = "darkgray", benchmark = "#4292c6", scaling = "#f6483a", stability = "#fe9929", qc = "#41ab5d")
 )
 
 ####################################

@@ -40,10 +40,12 @@ funky_heatmap <- function(
   row_height <- 1
   row_space <- .1
   row_bigspace <- .5
+  col_width <- 1
   col_space <- .1
   col_bigspace <- .5
+
   row_annot_offset <- 1
-  column_annot_offset <- 3
+  col_annot_offset <- 3
 
   # SPREAD GEOM PARAMS
   column_info <- process_geom_params(column_info)
@@ -88,7 +90,7 @@ funky_heatmap <- function(
     mutate(
       do_spacing = c(FALSE, diff(as.integer(factor(group))) != 0),
       xsep = ifelse(do_spacing, col_bigspace, col_space),
-      xwidth = ifelse(!is.na(opt_width), opt_width, 1),
+      xwidth = ifelse(!is.na(opt_width), opt_width, col_width),
       opt_overlay = !is.na(opt_overlay) & opt_overlay,
       xsep = ifelse(opt_overlay, c(0, -head(xwidth, -1)), xsep),
       xwidth = ifelse(opt_overlay, -xsep, xwidth),
@@ -112,7 +114,7 @@ funky_heatmap <- function(
       ungroup() %>%
       mutate(
         levelmatch = match(level, colnames(row_groups)),
-        xmin = levelmatch - max(levelmatch) - 1 - row_annot_offset,
+        xmin = (levelmatch - max(levelmatch) - 1) * (col_width + col_space) - row_annot_offset,
         xmax = xmin + 1,
         x = (xmin + xmax) / 2
       )
@@ -122,9 +124,9 @@ funky_heatmap <- function(
   if (plot_column_annotation) {
     column_annotation <-
       column_groups %>%
-      gather(level, name, -group) %>%
+      gather(level, name, -group, -palette) %>%
       left_join(column_pos %>% select(group, xmin, xmax), by = "group") %>%
-      group_by(level, name) %>%
+      group_by(level, name, palette) %>%
       summarise(
         xmin = min(xmin),
         xmax = max(xmax),
@@ -133,7 +135,7 @@ funky_heatmap <- function(
       ungroup() %>%
       mutate(
         levelmatch = match(level, colnames(column_groups)),
-        ymin = max(levelmatch) - levelmatch + 1 + column_annot_offset,
+        ymin = (max(levelmatch) - levelmatch + 1) * (row_height + row_space) + col_annot_offset,
         ymax = ymin + 1,
         y = (ymin + ymax) / 2
       )
@@ -333,12 +335,18 @@ funky_heatmap <- function(
 
   # ADD COLUMN ANNOTATION
   if (plot_column_annotation) {
-    df <- column_annotation %>% filter(!is.na(name), name != "")
+    df <- column_annotation %>% filter(!is.na(name), name != "") %>%
+      mutate(colour = palette_list$column_annotation[palette])
     if (nrow(df) > 0) {
       g <- g +
-        geom_segment(aes(x = xmin, xend = xmax, y = ymin, yend = ymin), df, size = 1) +
-        geom_text(aes(x = x, y = ymin, label = name), df, vjust = 0, hjust = 0.5, fontface = "bold", nudge_y = .1) +
+        geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour, alpha = ifelse(levelmatch == 1, 1, .25)), df) +
+        geom_text(aes(x = x, y = y, label = name), df %>% filter(levelmatch == 1), vjust = 0.5, hjust = 0.5, fontface = "bold", colour = "white") +
+        geom_text(aes(x = x, y = y, label = name), df %>% filter(levelmatch != 1), vjust = 0.5, hjust = 0.5, colour = "black") +
         expand_limits(y = max(df$ymax))
+      # g <- g +
+      #   geom_segment(aes(x = xmin, xend = xmax, y = ymin, yend = ymin), df, size = 1) +
+      #   geom_text(aes(x = x, y = ymin, label = name), df, vjust = 0, hjust = 0.5, fontface = "bold", nudge_y = .1) +
+      #   expand_limits(y = max(df$ymax))
     }
   }
 

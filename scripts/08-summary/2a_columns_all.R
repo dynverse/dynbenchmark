@@ -74,17 +74,17 @@ column_info <- tribble( # tribble_start
 
 
 column_groups <- tribble( # tribble_start
-  ~Experiment,        ~Category,                      ~group,
-  "Method",           "",                             "method_characteristic",
-  "Method",           "Inferrable trajectory types",  "inferrable_trajtype",
-  "Summary",          "",                             "score_overall",
-  "Benchmark",        "Metrics",                      "benchmark_metric",
-  "Benchmark",        "Sources",                      "benchmark_source",
-  "Benchmark",        "Trajectory types",             "benchmark_trajtype",
-  "Benchmark",        "Execution",                    "benchmark_execution",
-  "Scalability",      "Predicted time",               "scaling_predtime",
-  "Stability",        "",                             "stability",
-  "Quality control",  "Application",                  "qc_application",
-  "Quality control",  "Category",                     "qc_category"
+  ~Experiment,        ~Category,                      ~group,                   ~palette,
+  "Method",           "",                             "method_characteristic",  "overall",
+  "Method",           "Inferrable trajectory types",  "inferrable_trajtype",    "overall",
+  "Summary",          "",                             "score_overall",          "overall",
+  "Benchmark",        "Metrics",                      "benchmark_metric",       "benchmark",
+  "Benchmark",        "Sources",                      "benchmark_source",       "benchmark",
+  "Benchmark",        "Trajectory types",             "benchmark_trajtype",     "benchmark",
+  "Benchmark",        "Errors",                       "benchmark_execution",    "benchmark",
+  "Scalability",      "Predicted time",               "scaling_predtime",       "scaling",
+  "Stability",        "",                             "stability",              "stability",
+  "Quality control",  "Application",                  "qc_application",         "qc",
+  "Quality control",  "Category",                     "qc_category",            "qc"
 ) # tribble_end
 
