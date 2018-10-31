@@ -244,7 +244,7 @@ funky_heatmap <- function(
   }) %>% filter(1e-10 <= pct)
 
   # plot 100% pies as circles
-  cirle_data <- bind_rows(
+  circle_data <- bind_rows(
     circle_data,
     pie_data %>% filter(pct >= (1-1e-10))
   )
