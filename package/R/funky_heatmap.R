@@ -179,6 +179,17 @@ funky_heatmap <- function(
       pmap_df(score_to_funky_rectangle, midpoint = .8)
   })
 
+  if (nrow(funkyrect_data) > 0) {
+    # offload circles in funkyrect to circles
+    funkyrect_data <- funkyrect_data %>% mutate(is_circle = !is.na(start) & start < 1e-10 & 2 * pi - 1e-10 < end)
+    circle_data <-
+      bind_rows(
+        circle_data,
+        funkyrect_data %>% filter(is_circle) %>% select(x0 = x, y0 = y, r, colour)
+      )
+    funkyrect_data <- funkyrect_data %>% filter(!is_circle)
+  }
+
   # gather bar data
   bar_data <- geom_data_processor("bar", function(dat) {
     if (!"opt_hjust" %in% colnames(dat)) {
@@ -243,12 +254,14 @@ funky_heatmap <- function(
       ungroup()
   }) %>% filter(1e-10 <= pct)
 
-  # plot 100% pies as circles
-  circle_data <- bind_rows(
-    circle_data,
-    pie_data %>% filter(pct >= (1-1e-10))
-  )
-  pie_data <- pie_data %>% filter(pct < (1-1e-10))
+  if (nrow(pie_data) > 0) {
+    # plot 100% pies as circles
+    circle_data <- bind_rows(
+      circle_data,
+      pie_data %>% filter(pct >= (1-1e-10))
+    )
+    pie_data <- pie_data %>% filter(pct < (1-1e-10))
+  }
 
   barguides_data <- geom_data_processor("bar", function(dat) {
     crossing(
@@ -368,6 +381,11 @@ funky_heatmap <- function(
     g <- g + geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour), rect_data, colour = "black", size = .25)
   }
 
+  # ADD CIRCLES
+  if (nrow(circle_data) > 0) {
+    g <- g + ggforce::geom_circle(aes(x0 = x0, y0 = y0, fill = colour, r = r), circle_data, size = .25)
+  }
+
   # ADD FUNKY RECTANGLES
   if (nrow(rect_data) > 0) {
     funky_poly_data <- funkyrect_data %>% filter(is.na(r))
@@ -378,11 +396,6 @@ funky_heatmap <- function(
       geom_arc_bar(aes(x0 = x, y0 = y, r0 = 0, r = r, start = start, end = end, fill = colour), funky_arc_data, colour = NA) +
       geom_path(aes(x = x, y = y, group = paste0(name, "_", subgroup)), funky_poly_data, colour = "black", size = .25) +
       geom_arc(aes(x0 = x, y0 = y, r = r, start = start, end = end), funky_arc_data, colour = "black", size = .25)
-  }
-
-  # ADD CIRCLES
-  if (nrow(circle_data) > 0) {
-    g <- g + ggforce::geom_circle(aes(x0 = x0, y0 = y0, fill = colour, r = r), circle_data, size = .25)
   }
 
   # ADD STARS
@@ -446,7 +459,6 @@ funky_heatmap <- function(
     # ggforce::geom_arc_bar(aes(x0 = header_xvals[["metric_errr"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = NA), size = .25, error_leg_df) +
     # geom_text(aes(x = header_xvals[["metric_errr"]] + .5 + lab_x + .5, y = legy_start - 2.5 + lab_y, label = label, vjust = vjust, hjust = hjust), error_leg_df) +
     # geom_segment(aes(x = header_xvals[["metric_errr"]] + .5, xend = header_xvals[["metric_errr"]] + .5, y = legy_start - 2.5, yend = legy_start - 2.5 + row_height*.75), data = data_frame(z = 1), size = .25) +
-
 
   g
 }
@@ -608,18 +620,12 @@ score_to_funky_rectangle <- function(xmin, xmax, ymin, ymax, value, midpoint = .
       # transform value to a 0.0 .. 0.5 range
       trans <- value / midpoint / 2
 
-      xmid <- (xmin + xmax) / 2
-      ymid <- (ymin + ymax) / 2
-      xwidth <- xmax - xmin
-      ywidth <- ymax - ymin
-      circ_size <- trans / .5 * .9 + .1
-
-      rounded_rectangle(
-        xmin = xmid - xwidth / 2 * circ_size,
-        xmax = xmid + xwidth / 2 * circ_size,
-        ymin = ymid - ywidth / 2 * circ_size,
-        ymax = ymid + ywidth / 2 * circ_size,
-        corner_size = circ_size / 2
+      data_frame(
+        x = xmin / 2 + xmax / 2,
+        y = ymin / 2 + ymax / 2,
+        r = trans * .9 + .1,
+        start = 0,
+        end = 2 * pi
       )
     }
 
