@@ -99,60 +99,6 @@ funky_heatmap <- function(
       x = xmin + xwidth / 2
     )
 
-  # GENERATE ROW ANNOTATION
-  if (plot_row_annotation) {
-    row_annotation <-
-      row_groups %>%
-      gather(level, name, -group) %>%
-      left_join(row_pos %>% select(group, ymin, ymax), by = "group") %>%
-      group_by(level, name) %>%
-      summarise(
-        ymin = min(ymin),
-        ymax = max(ymax),
-        y = (ymin + ymax) / 2
-      ) %>%
-      ungroup() %>%
-      mutate(
-        levelmatch = match(level, colnames(row_groups)),
-        xmin = (levelmatch - max(levelmatch) - 1) * (col_width + col_space) - row_annot_offset,
-        xmax = xmin + 1,
-        x = (xmin + xmax) / 2
-      )
-  }
-
-  # GENERATE COLUMN ANNOTATION
-  if (plot_column_annotation) {
-    column_annotation <-
-      column_groups %>%
-      gather(level, name, -group, -palette) %>%
-      left_join(column_pos %>% select(group, xmin, xmax), by = "group") %>%
-      group_by(level, name, palette) %>%
-      summarise(
-        xmin = min(xmin),
-        xmax = max(xmax),
-        x = (xmin + xmax) / 2
-      ) %>%
-      ungroup() %>%
-      mutate(
-        levelmatch = match(level, colnames(column_groups)),
-        ymin = (max(levelmatch) - levelmatch + 1) * (row_height + row_space) + col_annot_offset,
-        ymax = ymin + 1,
-        y = (ymin + ymax) / 2
-      )
-  }
-
-  # FIGURE OUT LEGENDS
-  if (!"opt_legend" %in% colnames(column_info)) column_info$opt_legend <- NA
-  legends_to_plot <-
-    column_info %>%
-    mutate(opt_legend = is.na(opt_legend) | opt_legend) %>%
-    filter(!is.na(palette), opt_legend) %>%
-    group_by(palette) %>%
-    arrange(desc(opt_legend)) %>%
-    slice(1) %>%
-    ungroup() %>%
-    select(palette, group, geom)
-
   # FIGURE OUT PALETTES
   palette_assignment <-
     column_info %>%
@@ -165,6 +111,9 @@ funky_heatmap <- function(
   ###         PROCESS DATA         ###
   ####################################
   geom_data_processor <- make_geom_data_processor(data, column_pos, row_pos, scale_column, palette_list)
+
+  # gather segment data
+  segment_data <- NULL # is this a use case?
 
   # gather circle data
   circle_data <- geom_data_processor("circle", function(dat) {
@@ -204,23 +153,15 @@ funky_heatmap <- function(
     )
   })
 
+  rect_data <-
+    bind_rows(
+      rect_data,
+      bar_data
+    )
+
   # gather text data
   text_data <- geom_data_processor("text", function(dat) {
-    if (!"opt_hjust" %in% colnames(dat)) {
-      dat$opt_hjust <- NA
-    }
-    if (!"opt_vjust" %in% colnames(dat)) {
-      dat$opt_vjust <- NA
-    }
-    if (!"opt_size" %in% colnames(dat)) {
-      dat$opt_size <- NA
-    }
-
     dat %>% mutate(
-      opt_hjust = ifelse(is.na(opt_hjust), .5, opt_hjust),
-      opt_vjust = ifelse(is.na(opt_vjust), .5, opt_vjust),
-      opt_size = ifelse(is.na(opt_size), 4, opt_size),
-      x = (1 - opt_hjust) * xmin + opt_hjust * xmax,
       colour = "black" # colour is overridden if !is.na(palette)
     )
   })
@@ -272,21 +213,11 @@ funky_heatmap <- function(
     ) %>%
       mutate(palette = NA, value = NA)
   })
+
   trajd <- geom_data_processor("traj", function(dat) {
     dat %>% mutate(topinf = gsub("^gray_", "", value), colour = ifelse(grepl("^gray_", value), "lightgray", NA))
   })
 
-  minimum_x <- min(column_pos$xmin)
-  maximum_x <- max(column_pos$xmax)
-  minimum_y <- min(row_pos$ymin)
-  maximum_y <- max(row_pos$ymax)
-
-  # Stamp
-  if (add_timestamp) {
-    stamp <- paste0("Generated on ", Sys.Date())
-    minimum_y <- minimum_y - 1
-    stamp_y <- minimum_y
-  }
 
   # CREATE LEGENDS
   # leg_circles <- map_df(names(exp_palettes), function(experiment) {
@@ -314,10 +245,126 @@ funky_heatmap <- function(
   #     vjust = .5
   #   )
 
+  ####################################
+  ###  ADD ANNOTATION TO GEOM DATA ###
+  ####################################
+
+  # GENERATE ROW ANNOTATION
+  if (plot_row_annotation) {
+    row_annotation <-
+      row_groups %>%
+      gather(level, name, -group) %>%
+      left_join(row_pos %>% select(group, ymin, ymax), by = "group") %>%
+      group_by(level, name) %>%
+      summarise(
+        ymin = min(ymin),
+        ymax = max(ymax),
+        y = (ymin + ymax) / 2
+      ) %>%
+      ungroup() %>%
+      mutate(
+        levelmatch = match(level, colnames(row_groups)),
+        xmin = (levelmatch - max(levelmatch) - 1) * (col_width + col_space) - row_annot_offset,
+        xmax = xmin + 1,
+        x = (xmin + xmax) / 2
+      ) %>%
+      filter(!is.na(name), name != "")
+
+    segment_data <-
+      bind_rows(
+        segment_data,
+        row_annotation %>% transmute(x = xmax, xend = xmax, y = ymin, yend = ymax)
+      )
+
+    text_data <-
+      bind_rows(
+        text_data,
+        row_annotation %>%
+          mutate(xmax = xmax - .1, ymin = y, ymax = y, label = name, opt_hjust = 0.5, opt_vjust = 0, opt_fontface = "bold", opt_angle = 90, lineheight = 1.1)
+      )
+  }
+
+  # GENERATE COLUMN ANNOTATION
+  if (plot_column_annotation) {
+    column_annotation <-
+      column_groups %>%
+      gather(level, name, -group, -palette) %>%
+      left_join(column_pos %>% select(group, xmin, xmax), by = "group") %>%
+      group_by(level, name, palette) %>%
+      summarise(
+        xmin = min(xmin),
+        xmax = max(xmax),
+        x = (xmin + xmax) / 2
+      ) %>%
+      ungroup() %>%
+      mutate(
+        levelmatch = match(level, colnames(column_groups)),
+        ymin = (max(levelmatch) - levelmatch + 1) * (row_height + row_space) + col_annot_offset,
+        ymax = ymin + 1,
+        y = (ymin + ymax) / 2
+      ) %>%
+      filter(!is.na(name), name != "") %>%
+      mutate(colour = palette_list$column_annotation[palette])
+
+      rect_data <-
+        bind_rows(
+          rect_data,
+          column_annotation %>% transmute(xmin, xmax, ymin, ymax, colour, alpha = ifelse(levelmatch == 1, 1, .25), border = FALSE)
+        )
+
+      text_data <-
+        bind_rows(
+          text_data,
+          column_annotation %>%
+            transmute(
+              xmin, xmax, ymin, ymax, opt_hjust = 0.5, opt_vjust = 0.5,
+              opt_fontface = ifelse(levelmatch == 1, "bold", NA),
+              colour = ifelse(levelmatch == 1, "white", "black"),
+              label = name
+            )
+        )
+  }
+
+  # ADD COLUMN NAMES
+  df <- column_pos %>% filter(name != "")
+  if (nrow(df) > 0) {
+    segment_data <-
+      bind_rows(
+        segment_data,
+        df %>% transmute(x = x, xend = x, y = -.3, yend = -.1, size = .5)
+      )
+    text_data <-
+      bind_rows(
+        text_data,
+        df %>% transmute(
+          xmin = x,
+          xmax = x,
+          ymin = 0,
+          ymax = 0,
+          opt_angle = 30,
+          opt_vjust = 0,
+          opt_hjust = 0,
+          label = label_long(name)
+        )
+      )
+  }
+
+  # FIGURE OUT LEGENDS
+  if (!"opt_legend" %in% colnames(column_info)) column_info$opt_legend <- NA
+  legends_to_plot <-
+    column_info %>%
+    mutate(opt_legend = is.na(opt_legend) | opt_legend) %>%
+    filter(!is.na(palette), opt_legend) %>%
+    group_by(palette) %>%
+    arrange(desc(opt_legend)) %>%
+    slice(1) %>%
+    ungroup() %>%
+    select(palette, group, geom)
 
   ####################################
   ###         COMPOSE PLOT         ###
   ####################################
+
   g <-
     ggplot() +
     coord_equal(expand = FALSE) +
@@ -330,48 +377,7 @@ funky_heatmap <- function(
   # ADD SEPARATOR LINES
   df <- row_pos %>% filter(colour_background)
   if (nrow(df) > 0) {
-    g <- g + geom_rect(aes(xmin = minimum_x-.25, xmax = maximum_x+.25, ymin = ymin - (row_space / 2), ymax = ymax + (row_space / 2)), df, fill = "#EEEEEE")
-  }
-
-  # ADD COLUMN ANNOTATION
-  if (plot_column_annotation) {
-    df <- column_annotation %>% filter(!is.na(name), name != "") %>%
-      mutate(colour = palette_list$column_annotation[palette])
-    if (nrow(df) > 0) {
-      g <- g +
-        geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour, alpha = ifelse(levelmatch == 1, 1, .25)), df) +
-        geom_text(aes(x = x, y = y, label = name), df %>% filter(levelmatch == 1), vjust = 0.5, hjust = 0.5, fontface = "bold", colour = "white") +
-        geom_text(aes(x = x, y = y, label = name), df %>% filter(levelmatch != 1), vjust = 0.5, hjust = 0.5, colour = "black") +
-        expand_limits(y = max(df$ymax))
-      # g <- g +
-      #   geom_segment(aes(x = xmin, xend = xmax, y = ymin, yend = ymin), df, size = 1) +
-      #   geom_text(aes(x = x, y = ymin, label = name), df, vjust = 0, hjust = 0.5, fontface = "bold", nudge_y = .1) +
-      #   expand_limits(y = max(df$ymax))
-    }
-  }
-
-  # ADD ROW ANNOTATION
-  if (plot_row_annotation) {
-    df <- row_annotation %>% filter(!is.na(name), name != "")
-    if (nrow(df) > 0) {
-      g <- g +
-        geom_segment(aes(x = xmax, xend = xmax, y = ymin, yend = ymax), df, size = 1) +
-        geom_text(aes(x = xmax, y = y, label = name), df, vjust = 0, hjust = 0.5, fontface = "bold", angle = 90, nudge_x = -.1) +
-        expand_limits(x = min(df$xmin))
-    }
-  }
-
-  # ADD DATE
-  if (add_timestamp) {
-    g <- g + geom_text(aes(1, stamp_y, label = stamp), colour = "#cccccc", hjust = 0, vjust = 0)
-  }
-
-  # ADD METRIC NAMES
-  df <- column_pos %>% filter(name != "")
-  if (nrow(df) > 0) {
-    g <- g +
-      geom_segment(aes(x = x, xend = x, y = -.3, yend = -.1), df, size = .5) +
-      geom_text(aes(x = x, y = 0, label = label_long(name)), df, angle = 30, vjust = 0, hjust = 0)
+    g <- g + geom_rect(aes(xmin = min(column_pos$xmin)-.25, xmax = max(column_pos$xmax)+.25, ymin = ymin - (row_space / 2), ymax = ymax + (row_space / 2)), df, fill = "#EEEEEE")
   }
 
   # ADD BAR GUIDES
@@ -379,14 +385,34 @@ funky_heatmap <- function(
     g <- g + geom_segment(aes(x = x, xend = x, y = y, yend = yend), barguides_data, colour = "black", size = .5, linetype = "dashed")
   }
 
-  # ADD BARS
-  if (nrow(bar_data) > 0) {
-    g <- g + geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour), bar_data, colour = "black", size = .25)
+  # ADD SEGMENTS
+  if (nrow(segment_data) > 0) {
+    if (!"size" %in% colnames(segment_data)) segment_data$size <- NA
+    if (!"colour" %in% colnames(segment_data)) segment_data$colour <- NA
+    if (!"linetype" %in% colnames(segment_data)) segment_data$linetype <- NA
+
+    segment_data <- segment_data %>%
+      mutate(
+        size = ifelse(is.na(size), 0.5, size),
+        colour = ifelse(is.na(colour), "black", colour),
+        linetype = ifelse(is.na(linetype), "solid", linetype)
+      )
+
+    g <- g + geom_segment(aes(x = x, xend = xend, y = y, yend = yend, size = size, colour = colour, linetype = linetype), segment_data)
   }
 
   # ADD RECTANGLES
   if (nrow(rect_data) > 0) {
-    g <- g + geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour), rect_data, colour = "black", size = .25)
+    if (!"alpha" %in% colnames(rect_data)) rect_data$alpha <- NA
+    if (!"border" %in% colnames(rect_data)) rect_data$border <- NA
+
+    rect_data <- rect_data %>%
+      mutate(
+        alpha = ifelse(is.na(alpha), 1, alpha),
+        border = ifelse(is.na(border), TRUE, border),
+        border_colour = ifelse(border, "black", NA)
+      )
+    g <- g + geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour, colour = border_colour, alpha = alpha), rect_data, size = .25)
   }
 
   # ADD CIRCLES
@@ -395,7 +421,7 @@ funky_heatmap <- function(
   }
 
   # ADD FUNKY RECTANGLES
-  if (nrow(rect_data) > 0) {
+  if (nrow(funkyrect_data) > 0) {
     funky_poly_data <- funkyrect_data %>% filter(is.na(r))
     funky_arc_data <- funkyrect_data %>% filter(!is.na(r))
 
@@ -413,7 +439,28 @@ funky_heatmap <- function(
 
   # ADD TEXT
   if (nrow(text_data) > 0) {
-    g <- g + geom_text(aes(x = x, y = y, label = label, colour = colour, hjust = opt_hjust, vjust = opt_vjust, size = opt_size), data = text_data)
+    if (!"opt_hjust" %in% colnames(text_data)) text_data$opt_hjust <- NA
+    if (!"opt_vjust" %in% colnames(text_data)) text_data$opt_vjust <- NA
+    if (!"opt_size" %in% colnames(text_data)) text_data$opt_size <- NA
+    if (!"opt_fontface" %in% colnames(text_data)) text_data$opt_fontface <- NA
+    if (!"opt_angle" %in% colnames(text_data)) text_data$opt_angle <- NA
+    if (!"colour" %in% colnames(text_data)) text_data$colour <- NA
+    if (!"lineheight" %in% colnames(text_data)) text_data$lineheight <- NA
+
+    text_data <- text_data %>% mutate(
+      opt_hjust = ifelse(is.na(opt_hjust), .5, opt_hjust),
+      opt_vjust = ifelse(is.na(opt_vjust), .5, opt_vjust),
+      opt_size = ifelse(is.na(opt_size), 4, opt_size),
+      opt_fontface = ifelse(is.na(opt_fontface), "plain", opt_fontface),
+      opt_angle = ifelse(is.na(opt_angle), 0, opt_angle),
+      colour = ifelse(is.na(colour), "black", colour),
+      lineheight = ifelse(is.na(lineheight), 1.2, lineheight),
+      x = (1 - opt_hjust) * xmin + opt_hjust * xmax,
+      y = (1 - opt_vjust) * ymin + opt_vjust * ymax
+    ) %>%
+      filter(label != "")
+
+    g <- g + geom_text(aes(x = x, y = y, label = label, colour = colour, hjust = opt_hjust, vjust = opt_vjust, size = opt_size, fontface = opt_fontface, angle = opt_angle), data = text_data)
   }
 
   # ADD TRAJ TYPES
@@ -434,9 +481,25 @@ funky_heatmap <- function(
       )
   }
 
+
   # ADD SIZE
+  suppressWarnings({
+    minimum_x <- min(column_pos$xmin, segment_data$x, segment_data$xend, rect_data$xmin, circle_data$x - circle_data$r, funkyrect_data$x - funkyrect_data$r, pie_data$xmin, text_data$xmin, na.rm = TRUE)
+    maximum_x <- max(column_pos$xmax, segment_data$x, segment_data$xend, rect_data$xmax, circle_data$x + circle_data$r, funkyrect_data$x + funkyrect_data$r, pie_data$xmax, text_data$xmax, na.rm = TRUE)
+    minimum_y <- min(row_pos$ymin, segment_data$y, segment_data$yend, rect_data$ymin, circle_data$y - circle_data$r, funkyrect_data$y - funkyrect_data$r, pie_data$ymin, text_data$ymin, na.rm = TRUE)
+    maximum_y <- max(row_pos$ymax, segment_data$y, segment_data$yend, rect_data$ymax, circle_data$y + circle_data$r, funkyrect_data$y + funkyrect_data$r, pie_data$ymax, text_data$ymax, na.rm = TRUE)
+  })
+
+  # reserve a bit more room for text that wants to go outside the frame
+  minimum_x <- minimum_x - 2
+  maximum_x <- maximum_x + 2
+  minimum_y <- minimum_y - 2
+  maximum_y <- maximum_y + 2
+
   g$width <- maximum_x - minimum_x
   g$height <- maximum_y - minimum_y
+
+  g <- g + expand_limits(x = c(minimum_x, maximum_x), y = c(minimum_y, maximum_y))
 
     # # RESERVE SPACE
     # expand_limits(x = c(-3, max(metric_pos$xmax)+3), y = c(legy_start - 4.3, 6.5)) +

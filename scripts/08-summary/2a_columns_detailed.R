@@ -9,5 +9,9 @@ column_info <-
   filter(id %in% selected_columns | group %in% selected_groups, !id %in% removed_columns)
 
 column_groups <-
-  column_groups %>% filter(group %in% column_info$group)
+  column_groups %>%
+  filter(group %in% column_info$group) %>%
+  mutate(
+    Category = ifelse(Experiment == "Quality control", "", Category)
+  )
 

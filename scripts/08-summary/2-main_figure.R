@@ -104,7 +104,7 @@ palettes <- tribble(
 ###        CREATE FIGURES        ###
 ####################################
 script_files <- c("all", "summary", "detailed", "suppfig")
-# script_files <- "all"
+# script_files <- "suppfig"
 # script_files <- c("summary", "detailed")
 
 walk(script_files, function(name) {
