@@ -3,6 +3,8 @@ library(tidyverse)
 
 experiment("07-stability")
 
+metric_ids <- c("correlation", "him", "featureimp_wcor", "F1_branches")
+
 ##############################################################
 ###               PART TWO: RETRIEVE RESULTS               ###
 ##############################################################
@@ -31,7 +33,6 @@ experiment("07-stability")
 ##############################################################
 ###             SUBMIT PAIRWISE COMPARISON JOBS            ###
 ##############################################################
-metric_ids <- c("correlation", "him", "featureimp_wcor", "F1_branches")
 
 pairwise_submit <- function(memory = "10G", max_wall_time = "12:00:00") {
   requireNamespace("qsub")
