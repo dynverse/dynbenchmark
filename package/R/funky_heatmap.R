@@ -76,7 +76,7 @@ funky_heatmap <- function(
     )
 
   # DETERMINE COLUMN POSITIONS
-    if (!"group" %in% colnames(column_info) || all(is.na(column_info$group))) {
+  if (!"group" %in% colnames(column_info) || all(is.na(column_info$group))) {
     column_info$group <- ""
     plot_column_annotation <- FALSE
   } else {
@@ -141,11 +141,9 @@ funky_heatmap <- function(
   if (nrow(funkyrect_data) > 0) {
     # offload circles in funkyrect to circles
     funkyrect_data <- funkyrect_data %>% mutate(is_circle = !is.na(start) & start < 1e-10 & 2 * pi - 1e-10 < end)
-    circle_data <-
-      bind_rows(
-        circle_data,
-        funkyrect_data %>% filter(is_circle) %>% select(x0 = x, y0 = y, r, colour)
-      )
+    circle_data <- circle_data %>% bind_rows(
+      funkyrect_data %>% filter(is_circle) %>% select(x0 = x, y0 = y, r, colour)
+    )
     funkyrect_data <- funkyrect_data %>% filter(!is_circle)
   }
 
@@ -228,33 +226,6 @@ funky_heatmap <- function(
   trajd <- geom_data_processor("traj", function(dat) {
     dat %>% mutate(topinf = gsub("^gray_", "", value), colour = ifelse(grepl("^gray_", value), "lightgray", NA))
   })
-
-
-  # CREATE LEGENDS
-  # leg_circles <- map_df(names(exp_palettes), function(experiment) {
-  #   data_frame(
-  #     r = c(.05, .1, .2, .4, .6, .8, 1)/2,
-  #     x = cumsum(c(0, (.05 + r[-1] + r[-length(r)]))),
-  #     exp = experiment,
-  #     pal = exp_palettes[[experiment]],
-  #     col = scale_viridis_funs[[exp_palettes[[experiment]]]](x)
-  #   )
-  # })
-  #
-  # error_leg_df <- error_reasons %>%
-  #   rename(fill = colour) %>%
-  #   mutate(
-  #     rad_start = seq(0, pi, length.out = 6) %>% head(-1),
-  #     rad_end = seq(0, pi, length.out = 6) %>% tail(-1),
-  #     rad = (rad_start + rad_end) / 2,
-  #     colour = rep("black", length(rad)),
-  #     lab_x = row_height * sin(rad),
-  #     # lab_y = row_height * cos(rad),
-  #     lab_y = seq(row_height * (cos(first(rad)) + .2), row_height * (cos(last(rad)) - .2), length.out = 5),
-  #     hjust = rep(0, length(rad)),
-  #     #vjust = seq(0, 1, length.out = length(rad)+2)[c(-1,-(length(rad)+2))]
-  #     vjust = .5
-  #   )
 
   ####################################
   ###  ADD ANNOTATION TO GEOM DATA ###
@@ -400,15 +371,107 @@ funky_heatmap <- function(
       )
   }
 
-  # FIGURE OUT LEGENDS
-  legends_to_plot <-
-    column_info %>%
-    filter(!is.na(palette), legend) %>%
-    group_by(palette) %>%
-    arrange(desc(legend)) %>%
-    slice(1) %>%
-    ungroup() %>%
-    select(palette, group, geom)
+  # determine dsize of current geoms
+  suppressWarnings({
+    minimum_x <- min(column_pos$xmin, segment_data$x, segment_data$xend, rect_data$xmin, circle_data$x - circle_data$r, funkyrect_data$x - funkyrect_data$r, pie_data$xmin, text_data$xmin, na.rm = TRUE)
+    maximum_x <- max(column_pos$xmax, segment_data$x, segment_data$xend, rect_data$xmax, circle_data$x + circle_data$r, funkyrect_data$x + funkyrect_data$r, pie_data$xmax, text_data$xmax, na.rm = TRUE)
+    minimum_y <- min(row_pos$ymin, segment_data$y, segment_data$yend, rect_data$ymin, circle_data$y - circle_data$r, funkyrect_data$y - funkyrect_data$r, pie_data$ymin, text_data$ymin, na.rm = TRUE)
+    maximum_y <- max(row_pos$ymax, segment_data$y, segment_data$yend, rect_data$ymax, circle_data$y + circle_data$r, funkyrect_data$y + funkyrect_data$r, pie_data$ymax, text_data$ymax, na.rm = TRUE)
+  })
+
+  ####################################
+  ###   CREATE HARDCODED LEGENDS   ###
+  ####################################
+
+
+  # CREATE LEGENDS
+  #
+  # error_leg_df <- error_reasons %>%
+  #   rename(fill = colour) %>%
+  #   mutate(
+  #     rad_start = seq(0, pi, length.out = 6) %>% head(-1),
+  #     rad_end = seq(0, pi, length.out = 6) %>% tail(-1),
+  #     rad = (rad_start + rad_end) / 2,
+  #     colour = rep("black", length(rad)),
+  #     lab_x = row_height * sin(rad),
+  #     # lab_y = row_height * cos(rad),
+  #     lab_y = seq(row_height * (cos(first(rad)) + .2), row_height * (cos(last(rad)) - .2), length.out = 5),
+  #     hjust = rep(0, length(rad)),
+  #     #vjust = seq(0, 1, length.out = length(rad)+2)[c(-1,-(length(rad)+2))]
+  #     vjust = .5
+  #   )
+
+  # funkyrect legend
+  if (any(column_pos$geom == "funkyrect")) {
+    fr_minimum_x <- column_pos %>% filter(geom == "funkyrect") %>% pull(xmin) %>% min
+
+    fr_legend_size <- 1
+    fr_legend_space <- .2
+
+    fr_legend_dat1 <-
+      data_frame(
+        value = seq(0, 1, by = .1),
+        xmin = 0, xmax = col_width * fr_legend_size,
+        ymin = 0, ymax = col_width * fr_legend_size
+      )
+
+    fr_poly_data1 <-
+      fr_legend_dat1 %>%
+      transmute(xmin, xmax, ymin, ymax, value) %>%
+      pmap_df(score_to_funky_rectangle, midpoint = .8)
+
+    fr_legend_dat2 <-
+      fr_poly_data1 %>%
+      filter(!is.na(r)) %>%
+      group_by(value) %>%
+      summarise(minx = min(x - r), maxx = max(x + r), miny = min(y - r), maxy = max(y + r)) %>%
+      mutate(
+        width = maxx - minx,
+        height = maxy - miny,
+        xmin = cumsum(width + fr_legend_space) - width - fr_legend_space,
+        xmin = fr_minimum_x + xmin - min(xmin),
+        xmax = xmin + width,
+        ymin = minimum_y - 2.5,
+        ymax = ymin + height
+      ) %>%
+      transmute(
+        width, height,
+        value, xmin, xmax, ymin, ymax,
+        x = (xmin + xmax) / 2, y = (ymin + ymax) / 2
+      )
+
+    fr_maximum_x <- max(fr_legend_dat2$xmax)
+
+    fr_poly_data2 <-
+      transmute(fr_legend_dat2, xmin = x - fr_legend_size / 2, xmax = x + fr_legend_size / 2, ymin = y - fr_legend_size / 2, ymax = y + fr_legend_size / 2, value) %>%
+      pmap_df(score_to_funky_rectangle, midpoint = .8) %>%
+      mutate(
+        col_value = round(value * (length(palette_list$overall) - 1)) + 1,
+        colour = ifelse(is.na(col_value), "#444444FF", palette_list$overall[col_value])
+      )
+
+    fr_title_data <-
+      data_frame(xmin = fr_minimum_x, xmax = fr_maximum_x, ymin = minimum_y - 1.5, ymax = minimum_y - .5, label_value = "Legend", hjust = 0, vjust = 1, fontface = "bold")
+
+    fr_value_data <-
+      fr_legend_dat2 %>% filter(value %% .2 == 0) %>% transmute(
+        ymin = ymin - 1,
+        ymax = ymin,
+        xmin, xmax,
+        hjust = .5,
+        vjust = 0,
+        label_value = ifelse(value %in% c(0, 1), sprintf("%.0f", value), sprintf("%.1f", value))
+      )
+
+    text_data <- bind_rows(
+      text_data,
+      fr_title_data,
+      fr_value_data
+    )
+    funkyrect_data <- bind_rows(funkyrect_data, fr_poly_data2)
+
+    minimum_y <- min(minimum_y, min(text_data$ymin, na.rm = TRUE))
+  }
 
   ####################################
   ###         COMPOSE PLOT         ###
@@ -523,12 +586,6 @@ funky_heatmap <- function(
 
 
   # ADD SIZE
-  suppressWarnings({
-    minimum_x <- min(column_pos$xmin, segment_data$x, segment_data$xend, rect_data$xmin, circle_data$x - circle_data$r, funkyrect_data$x - funkyrect_data$r, pie_data$xmin, text_data$xmin, na.rm = TRUE)
-    maximum_x <- max(column_pos$xmax, segment_data$x, segment_data$xend, rect_data$xmax, circle_data$x + circle_data$r, funkyrect_data$x + funkyrect_data$r, pie_data$xmax, text_data$xmax, na.rm = TRUE)
-    minimum_y <- min(row_pos$ymin, segment_data$y, segment_data$yend, rect_data$ymin, circle_data$y - circle_data$r, funkyrect_data$y - funkyrect_data$r, pie_data$ymin, text_data$ymin, na.rm = TRUE)
-    maximum_y <- max(row_pos$ymax, segment_data$y, segment_data$yend, rect_data$ymax, circle_data$y + circle_data$r, funkyrect_data$y + funkyrect_data$r, pie_data$ymax, text_data$ymax, na.rm = TRUE)
-  })
 
   # reserve a bit more room for text that wants to go outside the frame
   minimum_x <- minimum_x - 2
@@ -541,35 +598,32 @@ funky_heatmap <- function(
 
   g <- g + expand_limits(x = c(minimum_x, maximum_x), y = c(minimum_y, maximum_y))
 
-    # # RESERVE SPACE
-    # expand_limits(x = c(-3, max(metric_pos$xmax)+3), y = c(legy_start - 4.3, 6.5)) +
-    #
-    # # LEGEND: BENCHMARK
-    # geom_text(aes(header_xvals[["metric_prio"]], legy_start - 1, label = "Priors required"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-    # geom_text(aes(x = header_xvals[["metric_prio"]] + .8, y = legy_start - 2.3 + c(.8, 0, -.8), label = c("", "\u2715", "\u2716")), hjust = .5) +
-    # geom_text(aes(x = header_xvals[["metric_prio"]] + 2, y = legy_start - 2.3 + c(.8, 0, -.8), label = c("None", "Soft", "Hard")), hjust = 0) +
-    #
-    # # LEGEND: BENCHMARK
-    # geom_text(aes(header_xvals[["experiment_benchmark"]], legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-    # ggforce::geom_circle(aes(x0 = header_xvals[["experiment_benchmark"]] + .8 + x, y0 = legy_start - 2.3 + r, r = r, fill = col), size = .25, leg_circles %>% filter(exp == "benchmark")) +
-    # geom_text(aes(x = header_xvals[["experiment_benchmark"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "benchmark") %>% slice(c(1, n()))) +
+  # # LEGEND: BENCHMARK
+  # geom_text(aes(header_xvals[["metric_prio"]], legy_start - 1, label = "Priors required"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  # geom_text(aes(x = header_xvals[["metric_prio"]] + .8, y = legy_start - 2.3 + c(.8, 0, -.8), label = c("", "\u2715", "\u2716")), hjust = .5) +
+  # geom_text(aes(x = header_xvals[["metric_prio"]] + 2, y = legy_start - 2.3 + c(.8, 0, -.8), label = c("None", "Soft", "Hard")), hjust = 0) +
+  #
+  # # LEGEND: BENCHMARK
+  # geom_text(aes(header_xvals[["experiment_benchmark"]], legy_start - 1, label = "Benchmark score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  # ggforce::geom_circle(aes(x0 = header_xvals[["experiment_benchmark"]] + .8 + x, y0 = legy_start - 2.3 + r, r = r, fill = col), size = .25, leg_circles %>% filter(exp == "benchmark")) +
+  # geom_text(aes(x = header_xvals[["experiment_benchmark"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "benchmark") %>% slice(c(1, n()))) +
 
-    # # LEGEND: SCALING
-    # geom_text(aes(header_xvals[["experiment_scalability"]], legy_start - 1, label = "Estimated time"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-    # ggforce::geom_circle(aes(x0 = header_xvals[["experiment_scalability"]] + .8 + x, y0 = legy_start - 2.3 + r, r = r, fill = col), size = .25, leg_circles %>% filter(exp == "scalability")) +
-    # geom_text(aes(x = header_xvals[["experiment_scalability"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "scalability") %>% slice(c(1, n()))) +
+  # # LEGEND: SCALING
+  # geom_text(aes(header_xvals[["experiment_scalability"]], legy_start - 1, label = "Estimated time"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  # ggforce::geom_circle(aes(x0 = header_xvals[["experiment_scalability"]] + .8 + x, y0 = legy_start - 2.3 + r, r = r, fill = col), size = .25, leg_circles %>% filter(exp == "scalability")) +
+  # geom_text(aes(x = header_xvals[["experiment_scalability"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "scalability") %>% slice(c(1, n()))) +
 
-    # # LEGEND: QC
-    # geom_text(aes(header_xvals[["experiment_qc"]], legy_start - 1, label = "QC score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-    # ggforce::geom_circle(aes(x0 = header_xvals[["experiment_qc"]] + .8 + x, y0 = legy_start - 2.3 + r, r = r, fill = col), size = .25, leg_circles %>% filter(exp == "qc")) +
-    # geom_text(aes(x = header_xvals[["experiment_qc"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "qc") %>% slice(c(1, n()))) +
-    #
-    # # LEGEND: PCT ERRORED
-    # geom_text(aes(header_xvals[["metric_errr"]], legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
-    # ggforce::geom_arc_bar(aes(x0 = header_xvals[["metric_errr"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = fill), size = .25, error_leg_df) +
-    # ggforce::geom_arc_bar(aes(x0 = header_xvals[["metric_errr"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = NA), size = .25, error_leg_df) +
-    # geom_text(aes(x = header_xvals[["metric_errr"]] + .5 + lab_x + .5, y = legy_start - 2.5 + lab_y, label = label, vjust = vjust, hjust = hjust), error_leg_df) +
-    # geom_segment(aes(x = header_xvals[["metric_errr"]] + .5, xend = header_xvals[["metric_errr"]] + .5, y = legy_start - 2.5, yend = legy_start - 2.5 + row_height*.75), data = data_frame(z = 1), size = .25) +
+  # # LEGEND: QC
+  # geom_text(aes(header_xvals[["experiment_qc"]], legy_start - 1, label = "QC score"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  # ggforce::geom_circle(aes(x0 = header_xvals[["experiment_qc"]] + .8 + x, y0 = legy_start - 2.3 + r, r = r, fill = col), size = .25, leg_circles %>% filter(exp == "qc")) +
+  # geom_text(aes(x = header_xvals[["experiment_qc"]] + .8 + x, y = legy_start - 2.3 - .4, label = c("low", "high")), leg_circles %>% filter(exp == "qc") %>% slice(c(1, n()))) +
+  #
+  # # LEGEND: PCT ERRORED
+  # geom_text(aes(header_xvals[["metric_errr"]], legy_start - 1, label = "Error reason"), data_frame(i = 1), hjust = 0, vjust = 0, fontface = "bold") +
+  # ggforce::geom_arc_bar(aes(x0 = header_xvals[["metric_errr"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = fill), size = .25, error_leg_df) +
+  # ggforce::geom_arc_bar(aes(x0 = header_xvals[["metric_errr"]] + .5, y0 = legy_start - 2.5, r0 = 0, r = row_height*.75, start = rad_start, end = rad_end, fill = NA), size = .25, error_leg_df) +
+  # geom_text(aes(x = header_xvals[["metric_errr"]] + .5 + lab_x + .5, y = legy_start - 2.5 + lab_y, label = label, vjust = vjust, hjust = hjust), error_leg_df) +
+  # geom_segment(aes(x = header_xvals[["metric_errr"]] + .5, xend = header_xvals[["metric_errr"]] + .5, y = legy_start - 2.5, yend = legy_start - 2.5 + row_height*.75), data = data_frame(z = 1), size = .25) +
 
   g
 }
@@ -713,7 +767,7 @@ score_to_funky_rectangle <- function(xmin, xmax, ymin, ymax, value, midpoint = .
     if (value >= midpoint) {
       # transform value to a 0.5 .. 1.0 range
       trans <- (value - midpoint) / (1 - midpoint) / 2 + .5
-      corner_size <- .9 - .8 * trans
+      corner_size <- (.9 - .8 * trans) * min(xmax - xmin, ymax - ymin)
 
       rounded_rectangle(
         xmin = xmin,
@@ -729,7 +783,7 @@ score_to_funky_rectangle <- function(xmin, xmax, ymin, ymax, value, midpoint = .
       data_frame(
         x = xmin / 2 + xmax / 2,
         y = ymin / 2 + ymax / 2,
-        r = trans * .9 + .1,
+        r = (trans * .9 + .1) * min(xmax - xmin, ymax - ymin),
         start = 0,
         end = 2 * pi
       )
