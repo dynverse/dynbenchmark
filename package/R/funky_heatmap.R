@@ -25,7 +25,7 @@
 #' @param scale_column f
 #' @param add_timestamp Whether or not to add a timestamp at the bottom
 #'
-#' @importFrom ggforce geom_arc_bar geom_circle
+#' @importFrom ggforce geom_arc_bar geom_circle geom_arc
 #' @importFrom cowplot theme_nothing
 #'
 #' @export
@@ -50,10 +50,7 @@ funky_heatmap <- function(
   row_annot_offset <- 1
   col_annot_offset <- 3
 
-  # SPREAD GEOM PARAMS
-  column_info <- process_geom_params(column_info)
-
-  # GENERATE ROW POSITIONS
+  # DETERMINE ROW POSITIONS
   if (!"group" %in% colnames(row_info) || all(is.na(row_info$group))) {
     row_info$group <- ""
     row_groups <- tibble(group = "")
@@ -78,25 +75,28 @@ funky_heatmap <- function(
     )
 
   # DETERMINE COLUMN POSITIONS
-  if (!"group" %in% colnames(column_info) || all(is.na(column_info$group))) {
+    if (!"group" %in% colnames(column_info) || all(is.na(column_info$group))) {
     column_info$group <- ""
     plot_column_annotation <- FALSE
   } else {
     plot_column_annotation <- TRUE
   }
 
-  if (!"opt_width" %in% colnames(column_info)) column_info$opt_width <- NA
-  if (!"opt_overlay" %in% colnames(column_info)) column_info$opt_overlay <- NA
+  column_info <-
+    column_info %>%
+    process_geom_params() %>%
+    add_column_if_missing(width = col_width, overlay = FALSE, legend = TRUE)
 
   column_pos <-
     column_info %>%
     mutate(
       do_spacing = c(FALSE, diff(as.integer(factor(group))) != 0),
-      xsep = ifelse(do_spacing, col_bigspace, col_space),
-      xwidth = ifelse(!is.na(opt_width), opt_width, col_width),
-      opt_overlay = !is.na(opt_overlay) & opt_overlay,
-      xsep = ifelse(opt_overlay, c(0, -head(xwidth, -1)), xsep),
-      xwidth = ifelse(opt_overlay, -xsep, xwidth),
+      xsep = case_when(
+        overlay ~ c(0, -head(width, -1)),
+        do_spacing ~ col_bigspace,
+        TRUE ~ col_space
+      ),
+      xwidth = ifelse(overlay, -xsep, width),
       xmax = cumsum(xwidth + xsep),
       xmin = xmax - xwidth,
       x = xmin + xwidth / 2
@@ -116,7 +116,7 @@ funky_heatmap <- function(
   geom_data_processor <- make_geom_data_processor(data, column_pos, row_pos, scale_column, palette_list)
 
   # gather segment data
-  segment_data <- NULL # is this a use case?
+  segment_data <- NULL # placeholder for if this ever gets used
 
   # gather circle data
   circle_data <- geom_data_processor("circle", function(dat) {
@@ -146,13 +146,13 @@ funky_heatmap <- function(
 
   # gather bar data
   bar_data <- geom_data_processor("bar", function(dat) {
-    if (!"opt_hjust" %in% colnames(dat)) {
-      dat$opt_hjust <- NA
+    if (!"hjust" %in% colnames(dat)) {
+      dat$hjust <- NA
     }
     dat %>% mutate(
-      opt_hjust = ifelse(is.na(opt_hjust), 0, opt_hjust),
-      xmin = xmin + (1 - value) * xwidth * opt_hjust,
-      xmax = xmax - (1 - value) * xwidth * (1 - opt_hjust)
+      hjust = ifelse(is.na(hjust), 0, hjust),
+      xmin = xmin + (1 - value) * xwidth * hjust,
+      xmax = xmax - (1 - value) * xwidth * (1 - hjust)
     )
   })
 
@@ -162,11 +162,23 @@ funky_heatmap <- function(
       bar_data
     )
 
+  # gather bar guides data
+  barguides_data <- geom_data_processor("bar", function(dat) {
+    crossing(
+      dat %>% group_by(column_id) %>% slice(1) %>% ungroup() %>% select(xmin, xmax) %>% gather(col, x) %>% transmute(x, xend = x),
+      row_pos %>% select(y = ymin, yend = ymax)
+    ) %>%
+      mutate(palette = NA, value = NA)
+  })
+  segment_data <-
+    bind_rows(
+      segment_data,
+      barguides_data %>% mutate(colour = "black", size = .5, linetype = "dashed")
+    )
+
   # gather text data
   text_data <- geom_data_processor("text", function(dat) {
-    dat %>% mutate(
-      colour = "black" # colour is overridden if !is.na(palette)
-    )
+    dat %>% mutate(colour = "black") # colour "black" is overridden if !is.na(palette)
   })
 
   # gather pie data
@@ -209,14 +221,7 @@ funky_heatmap <- function(
     pie_data <- pie_data %>% filter(pct < (1-1e-10))
   }
 
-  barguides_data <- geom_data_processor("bar", function(dat) {
-    crossing(
-      dat %>% group_by(column_id) %>% slice(1) %>% ungroup() %>% select(xmin, xmax) %>% gather(col, x) %>% select(-col),
-      row_pos %>% select(y = ymin, yend = ymax)
-    ) %>%
-      mutate(palette = NA, value = NA)
-  })
-
+  # hidden feature trajectory plots
   trajd <- geom_data_processor("traj", function(dat) {
     dat %>% mutate(topinf = gsub("^gray_", "", value), colour = ifelse(grepl("^gray_", value), "lightgray", NA))
   })
@@ -283,7 +288,7 @@ funky_heatmap <- function(
       bind_rows(
         text_data,
         row_annotation %>%
-          mutate(xmax = xmax - .1, ymin = y, ymax = y, label = name, opt_hjust = 0.5, opt_vjust = 0, opt_fontface = "bold", opt_angle = 90, lineheight = 1.1)
+          mutate(xmax = xmax - .1, ymin = y, ymax = y, label = name, hjust = 0.5, vjust = 0, fontface = "bold", angle = 90, lineheight = 1.1)
       )
   }
 
@@ -320,10 +325,10 @@ funky_heatmap <- function(
           text_data,
           column_annotation %>%
             transmute(
-              xmin, xmax, ymin, ymax, opt_hjust = 0.5, opt_vjust = 0.5,
-              opt_fontface = ifelse(levelmatch == 1, "bold", NA),
+              xmin, xmax, ymin, ymax, hjust = 0.5, vjust = 0.5,
+              fontface = ifelse(levelmatch == 1, "bold", NA),
               colour = ifelse(levelmatch == 1, "white", "black"),
-              label = name
+              label_value = name
             )
         )
   }
@@ -344,22 +349,20 @@ funky_heatmap <- function(
           xmax = x,
           ymin = 0,
           ymax = 0,
-          opt_angle = 30,
-          opt_vjust = 0,
-          opt_hjust = 0,
-          label = label_long(name)
+          angle = 30,
+          vjust = 0,
+          hjust = 0,
+          label_value = label_long(name)
         )
       )
   }
 
   # FIGURE OUT LEGENDS
-  if (!"opt_legend" %in% colnames(column_info)) column_info$opt_legend <- NA
   legends_to_plot <-
     column_info %>%
-    mutate(opt_legend = is.na(opt_legend) | opt_legend) %>%
-    filter(!is.na(palette), opt_legend) %>%
+    filter(!is.na(palette), legend) %>%
     group_by(palette) %>%
-    arrange(desc(opt_legend)) %>%
+    arrange(desc(legend)) %>%
     slice(1) %>%
     ungroup() %>%
     select(palette, group, geom)
@@ -375,98 +378,82 @@ funky_heatmap <- function(
     scale_colour_identity() +
     scale_fill_identity() +
     scale_size_identity() +
+    scale_linetype_identity() +
     cowplot::theme_nothing()
 
-  # ADD SEPARATOR LINES
+  # PLOT ROW BACKGROUNDS
   df <- row_pos %>% filter(colour_background)
   if (nrow(df) > 0) {
     g <- g + geom_rect(aes(xmin = min(column_pos$xmin)-.25, xmax = max(column_pos$xmax)+.25, ymin = ymin - (row_space / 2), ymax = ymax + (row_space / 2)), df, fill = "#EEEEEE")
   }
 
-  # ADD BAR GUIDES
-  if (nrow(barguides_data) > 0) {
-    g <- g + geom_segment(aes(x = x, xend = x, y = y, yend = yend), barguides_data, colour = "black", size = .5, linetype = "dashed")
-  }
-
-  # ADD SEGMENTS
+  # PLOT SEGMENTS
   if (nrow(segment_data) > 0) {
-    if (!"size" %in% colnames(segment_data)) segment_data$size <- NA
-    if (!"colour" %in% colnames(segment_data)) segment_data$colour <- NA
-    if (!"linetype" %in% colnames(segment_data)) segment_data$linetype <- NA
-
-    segment_data <- segment_data %>%
-      mutate(
-        size = ifelse(is.na(size), 0.5, size),
-        colour = ifelse(is.na(colour), "black", colour),
-        linetype = ifelse(is.na(linetype), "solid", linetype)
-      )
+    # add defaults for optional values
+    segment_data <- segment_data %>% add_column_if_missing(size = .5, colour = "black", linetype = "solid")
 
     g <- g + geom_segment(aes(x = x, xend = xend, y = y, yend = yend, size = size, colour = colour, linetype = linetype), segment_data)
   }
 
-  # ADD RECTANGLES
+  # PLOT RECTANGLES
   if (nrow(rect_data) > 0) {
-    if (!"alpha" %in% colnames(rect_data)) rect_data$alpha <- NA
-    if (!"border" %in% colnames(rect_data)) rect_data$border <- NA
+    # add defaults for optional values
+    rect_data <- rect_data %>% add_column_if_missing(alpha = 1, border = TRUE, border_colour = "black")
 
-    rect_data <- rect_data %>%
-      mutate(
-        alpha = ifelse(is.na(alpha), 1, alpha),
-        border = ifelse(is.na(border), TRUE, border),
-        border_colour = ifelse(border, "black", NA)
-      )
     g <- g + geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour, colour = border_colour, alpha = alpha), rect_data, size = .25)
   }
 
-  # ADD CIRCLES
+  # PLOT CIRCLES
   if (nrow(circle_data) > 0) {
     g <- g + ggforce::geom_circle(aes(x0 = x0, y0 = y0, fill = colour, r = r), circle_data, size = .25)
   }
 
-  # ADD FUNKY RECTANGLES
+  # PLOT FUNKY RECTANGLES
   if (nrow(funkyrect_data) > 0) {
+    # there are polygons and there are quarter-circles to be plotted
+    # it's possible to distinguish one from another by looking at the 'r' column
     funky_poly_data <- funkyrect_data %>% filter(is.na(r))
     funky_arc_data <- funkyrect_data %>% filter(!is.na(r))
 
     g <- g +
+      # plot polygon fill
       geom_polygon(aes(x, y, group = name, fill = colour), funky_poly_data) +
+      # plot quarter circle fill
       ggforce::geom_arc_bar(aes(x0 = x, y0 = y, r0 = 0, r = r, start = start, end = end, fill = colour), funky_arc_data, colour = NA) +
+      # plot polygon border
       geom_path(aes(x = x, y = y, group = paste0(name, "_", subgroup)), funky_poly_data, colour = "black", size = .25) +
-      geom_arc(aes(x0 = x, y0 = y, r = r, start = start, end = end), funky_arc_data, colour = "black", size = .25)
+      # plot quarter circle border
+      ggforce::geom_arc(aes(x0 = x, y0 = y, r = r, start = start, end = end), funky_arc_data, colour = "black", size = .25)
   }
 
-  # ADD STARS
+  # PLOT PIES
   if (nrow(pie_data) > 0) {
     g <- g + ggforce::geom_arc_bar(aes(x0 = x0, y0 = y0, r0 = r0, r = r, start = rad_start, end = rad_end, fill = colour), data = pie_data, size = .25)
   }
 
-  # ADD TEXT
+  # PLOT TEXT
   if (nrow(text_data) > 0) {
-    if (!"opt_hjust" %in% colnames(text_data)) text_data$opt_hjust <- NA
-    if (!"opt_vjust" %in% colnames(text_data)) text_data$opt_vjust <- NA
-    if (!"opt_size" %in% colnames(text_data)) text_data$opt_size <- NA
-    if (!"opt_fontface" %in% colnames(text_data)) text_data$opt_fontface <- NA
-    if (!"opt_angle" %in% colnames(text_data)) text_data$opt_angle <- NA
-    if (!"colour" %in% colnames(text_data)) text_data$colour <- NA
-    if (!"lineheight" %in% colnames(text_data)) text_data$lineheight <- NA
+    # add defaults for optional values
+    text_data <- text_data %>%
+      add_column_if_missing(
+        hjust = .5,
+        vjust = .5,
+        size = 5,
+        fontface = "plain",
+        colour = "black",
+        lineheight = 1.2,
+        angle = 0
+      ) %>%
+      mutate(
+        x = (1 - hjust) * xmin + hjust * xmax,
+        y = (1 - vjust) * ymin + vjust * ymax
+      ) %>%
+      filter(label_value != "")
 
-    text_data <- text_data %>% mutate(
-      opt_hjust = ifelse(is.na(opt_hjust), .5, opt_hjust),
-      opt_vjust = ifelse(is.na(opt_vjust), .5, opt_vjust),
-      opt_size = ifelse(is.na(opt_size), 4, opt_size),
-      opt_fontface = ifelse(is.na(opt_fontface), "plain", opt_fontface),
-      opt_angle = ifelse(is.na(opt_angle), 0, opt_angle),
-      colour = ifelse(is.na(colour), "black", colour),
-      lineheight = ifelse(is.na(lineheight), 1.2, lineheight),
-      x = (1 - opt_hjust) * xmin + opt_hjust * xmax,
-      y = (1 - opt_vjust) * ymin + opt_vjust * ymax
-    ) %>%
-      filter(label != "")
-
-    g <- g + geom_text(aes(x = x, y = y, label = label, colour = colour, hjust = opt_hjust, vjust = opt_vjust, size = opt_size, fontface = opt_fontface, angle = opt_angle), data = text_data)
+    g <- g + geom_text(aes(x = x, y = y, label = label_value, colour = colour, hjust = hjust, vjust = vjust, size = size, fontface = fontface, angle = angle), data = text_data)
   }
 
-  # ADD TRAJ TYPES
+  # PLOT TRAJ TYPES
   if (nrow(trajd) > 0) {
     g <-
       plot_trajectory_types(
@@ -544,7 +531,6 @@ process_geom_params <- function(column_info) {
       if (length(l) == 0 || (length(l) == 1) && is.na(l)) {
         tibble(a = 1)[,integer(0)]
       } else {
-        names(l) <- paste0("opt_", names(l))
         as_data_frame(l)
       }
     })
@@ -557,7 +543,8 @@ make_geom_data_processor <- function(data, column_pos, row_pos, scale_column, pa
       column_pos %>%
       filter(geom %in% geom_types) %>%
       select(-group, -name, -do_spacing) %>%
-      rename(column_id = id)
+      rename(column_id = id) %>%
+      add_column_if_missing("label")
 
     if (nrow(column_sels) == 0) {
       return(tibble(a = 1) %>% slice(integer()))
@@ -565,15 +552,10 @@ make_geom_data_processor <- function(data, column_pos, row_pos, scale_column, pa
 
     map_df(seq_len(nrow(column_sels)), function(ri) {
       # cat("Processing ", ri, "\n", sep = "")
-      column_sel <- column_sels %>% slice(ri)
-
-      if (!"opt_label" %in% colnames(column_sel)) {
-        column_sel$opt_label <- NA
-      }
-
       column_sel <-
-        column_sel %>%
-        mutate(opt_label = ifelse(geom == "text" & is.na(opt_label), column_id, opt_label))
+        column_sels %>%
+        slice(ri) %>%
+        mutate(label = ifelse(geom == "text" & is.na(label), column_id, label))
 
       row_sel <-
         row_pos %>%
@@ -586,15 +568,15 @@ make_geom_data_processor <- function(data, column_pos, row_pos, scale_column, pa
 
       labelcolumn_sel <-
         column_sel %>%
-        filter(!is.na(opt_label))
+        filter(!is.na(label))
 
       if (nrow(labelcolumn_sel) > 0) {
         label_sel <-
           data %>%
-          select(row_id = id, !!labelcolumn_sel$opt_label) %>%
-          gather(opt_label, label, -row_id) %>%
-          left_join(labelcolumn_sel %>% select(opt_label, column_id), by = "opt_label") %>%
-          select(-opt_label)
+          select(row_id = id, !!labelcolumn_sel$label) %>%
+          gather(label_column, label_value, -row_id) %>%
+          left_join(labelcolumn_sel %>% select(label_column = label, column_id), by = "label_column") %>%
+          select(-label_column)
         data_sel <-
           left_join(data_sel, label_sel, by = c("row_id", "column_id"))
       }
@@ -705,4 +687,18 @@ score_to_funky_rectangle <- function(xmin, xmax, ymin, ymax, value, midpoint = .
 
   bind_rows(out) %>%
     mutate(name, value)
+}
+
+add_column_if_missing <- function(df, ...) {
+  column_values <- list(...)
+  for (column_name in names(column_values)) {
+    default_val <- column_values[[column_name]]
+
+    if (column_name %in% colnames(df)) {
+      df[[column_name]] <- ifelse(is.na(df[[column_name]]), default_val, df[[column_name]])
+    } else {
+      df[[column_name]] <- default_val
+    }
+  }
+  df
 }
