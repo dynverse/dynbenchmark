@@ -97,7 +97,11 @@ funky_heatmap <- function(
         do_spacing ~ col_bigspace,
         TRUE ~ col_space
       ),
-      xwidth = ifelse(overlay, -xsep, width),
+      xwidth = case_when(
+        overlay & width < 0 ~ width - xsep,
+        overlay ~ -xsep,
+        TRUE ~ width
+      ),
       xmax = cumsum(xwidth + xsep),
       xmin = xmax - xwidth,
       x = xmin + xwidth / 2

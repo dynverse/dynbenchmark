@@ -7,7 +7,7 @@ experiment("08-summary")
 ####################################
 ###       PREP DATA TIBBLE       ###
 ####################################
-method_groups <- c(rev(dynwrap::trajectory_types$id), c("adaptation", "offtheshelf", "control"))
+method_groups <- c(rev(dynwrap::trajectory_types$id), c("Adaptation", "Off-the-shelf", "Control"))
 
 wrapper_type_map <- c(branch_trajectory = "Traj", linear_trajectory = "Linear", cyclic_trajectory = "Cycle", trajectory = "Traj", cell_graph = "Cell", cluster_graph = "Cluster", control = "", dimred_projection = "Proj", end_state_probabilities = "Prob")
 
@@ -15,10 +15,11 @@ data <-
   read_rds(result_file("results.rds", experiment_id = "08-summary")) %>%
   rename(id = method_id) %>%
   mutate(
-    group = ifelse(method_source %in% c("tool", "adaptation"), method_most_complex_trajectory_type, method_source),
+    group = ifelse(method_source == "offtheshelf", "Off-the-shelf", method_most_complex_trajectory_type),
     # group = method_most_complex_trajectory_type,
     group = factor(group, levels = method_groups),
-    control_label = ifelse(method_source == "tool", "", method_source),
+    control_label = c(adaptation = "Adaptation", offtheshelf = "Off-the-shelf", control = "Control", tool = "")[method_source],
+    control_label2 = c(adaptation = "", offtheshelf = "Off-the-shelf", control = "Control", tool = "")[method_source],
     method_priors_required_str = case_when(
       grepl("dataset", method_required_priors_str) ~ "All",
       grepl("(groups_id|features_id|timecourse_continuous|timecourse_discrete|groups_network)", method_required_priors_str) ~ "\u2716",

@@ -78,7 +78,8 @@ column_info <- tribble( # tribble_start
   "qc_category",            "qc_cat_code_assurance",                        "Code assurance",           "funkyrect",  "qc",             lst(),
   "qc_category",            "qc_cat_code_quality",                          "Code quality",             "funkyrect",  "qc",             lst(),
   "qc_category",            "qc_cat_documentation",                         "Documentation",            "funkyrect",  "qc",             lst(),
-  "qc_category",            "qc_cat_paper",                                 "Paper",                    "funkyrect",  "qc",             lst()
+  "qc_category",            "qc_cat_paper",                                 "Paper",                    "funkyrect",  "qc",             lst(),
+  "qc_category",            "control_label2",                               "",                         "text",       NA,               list(overlay = TRUE, width = -6)
 ) # tribble_end
 
 
@@ -94,8 +95,8 @@ column_groups <- tribble( # tribble_start
   "Benchmark",        "Errors",                            "benchmark_execution",    "benchmark",
   "Scalability",      "Predicted time",                    "scaling_predtime",       "scaling",
   "Scalability",      "Predicted memory",                  "scaling_predmem",        "scaling",
-  "Stability",        "Similarity\nacross runs",           "stability",              "stability",
-  "Quality control",  "Per application",                   "qc_application",         "qc",
+  "Stability",        "Compare runs",                      "stability",              "stability",
+  "Quality control",  "Per applic.",                       "qc_application",         "qc",
   "Quality control",  "Per category",                      "qc_category",            "qc"
 ) # tribble_end
 
