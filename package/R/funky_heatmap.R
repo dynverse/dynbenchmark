@@ -482,12 +482,17 @@ funky_heatmap <- function(
         size = 4,
         fontface = "plain",
         colour = "black",
-        lineheight = 1.05,
+        lineheight = 1,
         angle = 0
       ) %>%
       mutate(
-        x = (1 - hjust) * xmin + hjust * xmax,
-        y = (1 - vjust) * ymin + vjust * ymax
+        angle2 = angle / 360 * 2 * pi,
+        cosa = cos(angle2) %>% round(2),
+        sina = sin(angle2) %>% round(2),
+        alphax = ifelse(cosa < 0, 1 - hjust, hjust) * abs(cosa) + ifelse(sina > 0, 1 - vjust, vjust) * abs(sina),
+        alphay = ifelse(sina < 0, 1 - hjust, hjust) * abs(sina) + ifelse(cosa < 0, 1 - vjust, vjust) * abs(cosa),
+        x = (1 - alphax) * xmin + alphax * xmax,
+        y = (1 - alphay) * ymin + alphay * ymax
       ) %>%
       filter(label_value != "")
 
