@@ -23,7 +23,7 @@
 #' @param column_groups b
 #' @param row_groups d
 #' @param scale_column f
-#' @param add_timestamp Whether or not to add a timestamp at the bottom
+#' @param add_abc Whether or not to add subfigure labels to the different columns groups.
 #'
 #' @importFrom ggforce geom_arc_bar geom_circle geom_arc
 #' @importFrom cowplot theme_nothing
@@ -37,7 +37,7 @@ funky_heatmap <- function(
   column_groups = NULL,
   row_groups = NULL,
   scale_column = TRUE,
-  add_timestamp = TRUE
+  add_abc = TRUE
 ) {
   # no point in making these into parameters
   row_height <- 1
@@ -286,7 +286,7 @@ funky_heatmap <- function(
       bind_rows(
         text_data,
         row_annotation %>%
-          mutate(xmax = xmax - .1, ymin = y, ymax = y, label_value = name, hjust = 0.5, vjust = 0, fontface = "bold", angle = 90, lineheight = 1.1)
+          mutate(xmax = xmax - .1, ymin = y, ymax = y, label_value = name, hjust = 0.5, vjust = 0, fontface = "bold", angle = 90)
       )
   }
 
@@ -312,23 +312,36 @@ funky_heatmap <- function(
       filter(!is.na(name), name != "") %>%
       mutate(colour = palette_list$column_annotation[palette])
 
-      rect_data <-
-        bind_rows(
-          rect_data,
-          column_annotation %>% transmute(xmin, xmax, ymin, ymax, colour, alpha = ifelse(levelmatch == 1, 1, .25), border = FALSE)
-        )
+    rect_data <- rect_data %>% bind_rows(
+      column_annotation %>%
+        transmute(xmin, xmax, ymin, ymax, colour, alpha = ifelse(levelmatch == 1, 1, .25), border = FALSE)
+    )
 
-      text_data <-
-        bind_rows(
-          text_data,
-          column_annotation %>%
-            transmute(
-              xmin, xmax, ymin, ymax, hjust = 0.5, vjust = 0.5, lineheight = 1.1,
-              fontface = ifelse(levelmatch == 1, "bold", NA),
-              colour = ifelse(levelmatch == 1, "white", "black"),
-              label_value = name
-            )
+    text_data <- text_data %>% bind_rows(
+      column_annotation %>%
+        transmute(
+          xmin, xmax, ymin, ymax,
+          hjust = 0.5, vjust = 0.5,
+          fontface = ifelse(levelmatch == 1, "bold", NA),
+          colour = ifelse(levelmatch == 1, "white", "black"),
+          label_value = name
         )
+    )
+
+    if (add_abc) {
+      text_data <- text_data %>% bind_rows(
+        column_annotation %>%
+          filter(levelmatch == 1) %>%
+          arrange(x) %>%
+          transmute(
+            xmin = xmin + col_space, xmax = xmax - col_space, ymin, ymax,
+            hjust = 0, vjust = 0.5,
+            fontface = "bold",
+            colour = "white",
+            label_value = paste0(letters[row_number()], ")")
+          )
+      )
+    }
   }
 
   # ADD COLUMN NAMES
@@ -441,7 +454,7 @@ funky_heatmap <- function(
         size = 4,
         fontface = "plain",
         colour = "black",
-        lineheight = 1.2,
+        lineheight = 1.05,
         angle = 0
       ) %>%
       mutate(

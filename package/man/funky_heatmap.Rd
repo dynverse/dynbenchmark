@@ -6,7 +6,7 @@
 \usage{
 funky_heatmap(data, column_info, row_info, palettes,
   column_groups = NULL, row_groups = NULL, scale_column = TRUE,
-  add_timestamp = TRUE)
+  add_abc = TRUE)
 }
 \arguments{
 \item{data}{data}
@@ -43,7 +43,7 @@ funky_heatmap(data, column_info, row_info, palettes,
 
 \item{scale_column}{f}
 
-\item{add_timestamp}{Whether or not to add a timestamp at the bottom}
+\item{add_abc}{Whether or not to add subfigure labels to the different columns groups.}
 }
 \description{
 TODO: params need to be described
