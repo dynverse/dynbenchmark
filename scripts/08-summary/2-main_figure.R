@@ -83,7 +83,6 @@ palettes <- tribble(
   "stability", grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "YlOrBr")[-7:-9]))(101),
   "qc", grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Greens")[-1] %>% c("#00250f")))(101),
 
-
   "error_reasons", error_reasons %>% select(name, colour) %>% deframe(),
   "white6black4", c(rep("white", 4), rep("black", 6)),
   "column_annotation", c(overall = "darkgray", benchmark = "#4292c6", scaling = "#f6483a", stability = "#fe9929", qc = "#41ab5d")
@@ -104,7 +103,7 @@ walk(script_files, function(name) {
   reformat_tribbles(script_file)
   source(script_file, local = TRUE)
 
-  g <- funky_heatmap(data = data, column_info = column_info, column_groups = column_groups, row_info = row_info, row_groups = row_groups, palettes = palettes)
+  g <- funky_heatmap(data = data, column_info = column_info, column_groups = column_groups, row_info = row_info, row_groups = row_groups, palettes = palettes, col_annot_offset = 3)
 
   ggsave(plot_file, g, device = cairo_pdf, width = g$width/4, height = g$height/4)
 })

@@ -24,6 +24,8 @@
 #' @param row_groups d
 #' @param scale_column f
 #' @param add_abc Whether or not to add subfigure labels to the different columns groups.
+#' @param col_annot_offset How much the column annotation will be offset by.
+#' @param row_annot_offset How much the column annotation will be offset by.
 #'
 #' @importFrom ggforce geom_arc_bar geom_circle geom_arc
 #' @importFrom cowplot theme_nothing
@@ -37,7 +39,9 @@ funky_heatmap <- function(
   column_groups = NULL,
   row_groups = NULL,
   scale_column = TRUE,
-  add_abc = TRUE
+  add_abc = TRUE,
+  col_annot_offset = 3,
+  row_annot_offset = .5
 ) {
   # no point in making these into parameters
   row_height <- 1
@@ -46,9 +50,6 @@ funky_heatmap <- function(
   col_width <- 1
   col_space <- .1
   col_bigspace <- .5
-
-  row_annot_offset <- 1
-  col_annot_offset <- 3
 
   # DETERMINE ROW POSITIONS
   if (!"group" %in% colnames(row_info) || all(is.na(row_info$group))) {
@@ -257,10 +258,29 @@ funky_heatmap <- function(
 
   # GENERATE ROW ANNOTATION
   if (plot_row_annotation) {
-    row_annotation <-
-      row_groups %>%
+    row_join <- row_groups %>%
       gather(level, name, -group) %>%
-      left_join(row_pos %>% select(group, ymin, ymax), by = "group") %>%
+      left_join(row_pos %>% select(group, ymin, ymax), by = "group")
+
+    text_pct <- .9
+    level_widths <-
+      row_join %>%
+      group_by(level) %>%
+      summarise(max_newlines = max(str_count(name, "\n"))) %>%
+      mutate(
+        width = (max_newlines + 1) * text_pct + (1 - text_pct),
+        levelmatch = match(level, colnames(row_groups))
+      ) %>%
+      arrange(levelmatch) %>%
+      mutate(
+        xsep = col_space,
+        xmin = - row_annot_offset - cumsum(width + xsep) + xsep,
+        xmax = xmin + width,
+        x = (xmin + xmax) / 2
+      )
+
+    row_annotation <-
+      row_join %>%
       group_by(level, name) %>%
       summarise(
         ymin = min(ymin),
@@ -268,34 +288,54 @@ funky_heatmap <- function(
         y = (ymin + ymax) / 2
       ) %>%
       ungroup() %>%
-      mutate(
-        levelmatch = match(level, colnames(row_groups)),
-        xmin = (levelmatch - max(levelmatch) - 1) * (col_width + col_space) - row_annot_offset,
-        xmax = xmin + 1,
-        x = (xmin + xmax) / 2
-      ) %>%
+      left_join(level_widths, by = "level") %>%
       filter(!is.na(name), name != "")
 
-    segment_data <-
-      bind_rows(
-        segment_data,
-        row_annotation %>% transmute(x = xmax, xend = xmax, y = ymin, yend = ymax)
-      )
+    segment_data <- segment_data %>% bind_rows(
+      row_annotation %>% transmute(x = xmax, xend = xmax, y = ymin, yend = ymax)
+    )
+    text_data <- text_data %>% bind_rows(
+      row_annotation %>%
+        mutate(xmin, xmax = xmax - .2, ymin, ymax, label_value = name, hjust = 0.5, vjust = 0, fontface = "bold", angle = 90)
+    )
 
-    text_data <-
-      bind_rows(
-        text_data,
-        row_annotation %>%
-          mutate(xmax = xmax - .1, ymin = y, ymax = y, label_value = name, hjust = 0.5, vjust = 0, fontface = "bold", angle = 90)
-      )
+    # rect_data <- rect_data %>% bind_rows(
+    #   row_annotation %>%
+    #     transmute(xmin, xmax, ymin, ymax, colour = "#444444", alpha = .5, border = FALSE)
+    # )
+    # text_data <- text_data %>% bind_rows(
+    #   row_annotation %>%
+    #     mutate(xmin, xmax, ymin, ymax, label_value = name, hjust = 0.5, vjust = 0.5, fontface = "bold", angle = 90)
+    # )
   }
 
   # GENERATE COLUMN ANNOTATION
   if (plot_column_annotation) {
-    column_annotation <-
-      column_groups %>%
+    col_join <- column_groups %>%
       gather(level, name, -group, -palette) %>%
-      left_join(column_pos %>% select(group, xmin, xmax), by = "group") %>%
+      left_join(column_pos %>% select(group, xmin, xmax), by = "group")
+
+    text_pct <- .9
+    level_heights <-
+      col_join %>%
+      group_by(level) %>%
+      summarise(max_newlines = max(str_count(name, "\n"))) %>%
+      mutate(
+        height = (max_newlines + 1) * text_pct + (1 - text_pct),
+        levelmatch = match(level, colnames(column_groups))
+      ) %>%
+      arrange(desc(levelmatch)) %>%
+      mutate(
+        ysep = row_space,
+        ymax = col_annot_offset + cumsum(height + ysep) - ysep,
+        ymin = ymax - height,
+        y = (ymin + ymax) / 2
+      )
+
+    column_annotation <-
+      col_join %>%
+      group_by(level) %>%
+      mutate(max_newlines = max(str_count(name, "\n"))) %>%
       group_by(level, name, palette) %>%
       summarise(
         xmin = min(xmin),
@@ -303,12 +343,7 @@ funky_heatmap <- function(
         x = (xmin + xmax) / 2
       ) %>%
       ungroup() %>%
-      mutate(
-        levelmatch = match(level, colnames(column_groups)),
-        ymin = (max(levelmatch) - levelmatch + 1) * (row_height + row_space) + col_annot_offset,
-        ymax = ymin + 1,
-        y = (ymin + ymax) / 2
-      ) %>%
+      left_join(level_heights, by = "level") %>%
       filter(!is.na(name), name != "") %>%
       mutate(colour = palette_list$column_annotation[palette])
 
@@ -347,22 +382,15 @@ funky_heatmap <- function(
   # ADD COLUMN NAMES
   df <- column_pos %>% filter(name != "")
   if (nrow(df) > 0) {
-    segment_data <-
-      bind_rows(
-        segment_data,
-        df %>% transmute(x = x, xend = x, y = -.3, yend = -.1, size = .5)
-      )
+    segment_data <- segment_data %>% bind_rows(
+      df %>% transmute(x = x, xend = x, y = -.3, yend = -.1, size = .5)
+    )
     text_data <-
       bind_rows(
         text_data,
         df %>% transmute(
-          xmin = x,
-          xmax = x,
-          ymin = 0,
-          ymax = 0,
-          angle = 30,
-          vjust = 0,
-          hjust = 0,
+          xmin = x, xmax = x, ymin = 0, ymax = 0,
+          angle = 30, vjust = 0, hjust = 0,
           label_value = label_long(name)
         )
       )
