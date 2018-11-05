@@ -71,16 +71,6 @@ row_groups <-
 
 palettes <- tribble(
   ~palette,        ~colours,
-  # # original
-  # # "overall",       viridisLite::viridis(101, option = "inferno"),
-  # "overall",       grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Greys")))(101),
-  # "benchmark",     viridisLite::viridis(101, option = "magma"),
-  # "scaling",       viridisLite::viridis(101, option = "cividis"),
-  # "qc",            viridisLite::viridis(101, option = "viridis"),
-  # "stability",     viridisLite::viridis(101, option = "plasma"),
-  # # "stability",     rev(pals::ocean.tempo(101)),
-  # # "stability",     viridisLite::viridis(101, option = "inferno"),
-
   # blues palette
   "overall", grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Greys")[-1]))(101),
   "benchmark", grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Blues") %>% c("#011636")))(101),
@@ -88,12 +78,6 @@ palettes <- tribble(
   "stability", grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "YlOrBr")[-7:-9]))(101),
   "qc", grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Greens")[-1] %>% c("#00250f")))(101),
 
-  # # ylgnbu adjusted
-  # "overall", grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Greys")[-1]))(101),
-  # "benchmark", grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "YlGnBu") %>% c("#02103a")))(101),
-  # "scaling", grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Reds")[-8:-9]))(101),
-  # "stability", grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Purples")[-1] %>% c("#17002e")))(101),
-  # "qc", grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Greens")[-1] %>% c("#00250f")))(101),
 
   "error_reasons", error_reasons %>% select(name, colour) %>% deframe(),
   "white6black4", c(rep("white", 4), rep("black", 6)),
