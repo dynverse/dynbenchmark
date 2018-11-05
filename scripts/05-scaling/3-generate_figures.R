@@ -44,10 +44,10 @@ source(scripts_file("3d-error_logs.R"))
 plot_scaling <- patchwork::wrap_plots(
   read_rds(derived_file("example.rds")) %>% patchwork::wrap_elements(),
   read_rds(derived_file("ranking.rds")) %>% patchwork::wrap_elements(),
-  heights = c(2, 5),
+  heights = c(2, 6),
   ncol = 1
 ) +
   patchwork::plot_annotation(tag_levels = "a")
 
-ggsave(result_file("scaling.pdf"), width = 14, height = 16)
+ggsave(result_file("scaling.pdf"), width = 12, height = 16)
 
