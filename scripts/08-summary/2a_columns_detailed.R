@@ -10,8 +10,5 @@ column_info <-
 
 column_groups <-
   column_groups %>%
-  filter(group %in% column_info$group) %>%
-  mutate(
-    Category = ifelse(Experiment == "Quality control", "", Category)
-  )
+  filter(group %in% column_info$group)
 

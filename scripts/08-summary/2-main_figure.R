@@ -45,8 +45,13 @@ data <-
   arrange(group, desc(summary_overall_overall))
 
 for (col in stringr::str_subset(colnames(data), "^scaling_pred_timestr_")) {
-  col_score <- gsub("timestr", "timescore", col)
+  col_score <- gsub("timestr", "scoretime", col)
   col_comb <- gsub("timestr", "timecomb", col)
+  data[[col_comb]] <- map2(data[[col]], data[[col_score]], function(l, v) list(value = v, label = l))
+}
+for (col in stringr::str_subset(colnames(data), "^scaling_pred_memstr_")) {
+  col_score <- gsub("memstr", "scoremem", col)
+  col_comb <- gsub("memstr", "memcomb", col)
   data[[col_comb]] <- map2(data[[col]], data[[col_score]], function(l, v) list(value = v, label = l))
 }
 

@@ -160,45 +160,54 @@ write_rds(lst(data, data_pred, models), result_file("scaling.rds"), compress = "
 
 list2env(read_rds(result_file("scaling.rds")), environment())
 
-scaling_exp <- tribble(
-  ~ labnrow, ~ labncol, ~ lnrow, ~ lncol,
-  "cells100", "features1m", 2, 6,
-  "cells1k", "features100k", 3, 5,
-  "cells10k", "features10k", 4, 4,
-  "cells100k", "features1k", 5, 3,
-  "cells1m", "features100", 6, 2
-) %>% mutate(n_cells = 10^lnrow, n_features = 10^lncol)
+scaling_exp <-
+  tribble(
+    ~ labnrow, ~ labncol, ~ lnrow, ~ lncol,
+    "cells100", "features1m", 2, 6,
+    "cells1k", "features100k", 3, 5,
+    "cells10k", "features10k", 4, 4,
+    "cells100k", "features1k", 5, 3,
+    "cells1m", "features100", 6, 2
+  ) %>%
+  mutate(
+    n_cells = 10^lnrow,
+    n_features = 10^lncol
+  )
 
 
 scaling_preds <-
   models %>%
-  select(method_id, predict_time) %>%
+  select(method_id, predict_time, predict_mem) %>%
   rowwise() %>%
   do({
     df <- .
     exp <- scaling_exp
     exp$method_id <- df$method_id
     exp$time <- df$predict_time(exp$n_cells, exp$n_features)
+    exp$mem <- df$predict_mem(exp$n_cells, exp$n_features)
     exp$logtime <- log10(exp$time)
+    exp$logmem <- log10(exp$mem)
     exp
   }) %>%
   ungroup() %>%
   mutate(
     scaletime = (logtime - log10(10)) / (log10(3600 * 24 * 7) - log10(10)),
-    score = 1 - ifelse(scaletime > 1, 1, ifelse(scaletime < 0, 0, scaletime)),
-    time = 10^logtime,
-    timestr = label_time(time)
+    scalemem = (logmem - log10(1e9)) / (log10(64e9) - log10(1e9)),
+    scoretime = 1 - ifelse(scaletime > 1, 1, ifelse(scaletime < 0, 0, scaletime)),
+    scoremem = 1 - ifelse(scalemem > 1, 1, ifelse(scalemem < 0, 0, scalemem)),
+    timestr = label_time(time),
+    memstr = label_memory(mem)
   )
 
 scaling_agg <-
   scaling_preds %>%
   group_by(method_id) %>%
-  summarise_at("score", mean)
+  summarise_at(c("scoretime", "scoremem"), mean)
 
 scaling_scores <-
   bind_rows(
-    scaling_preds %>% transmute(method_id, metric = paste0(labnrow, "_", labncol), score),
-    scaling_agg %>% transmute(method_id, metric = "overall", score)
+    scaling_preds %>% transmute(method_id, metric = paste0(labnrow, "_", labncol), scoretime, scoremem),
+    scaling_agg %>% transmute(method_id, metric = "overall", scoretime, scoremem)
   )
 
 write_rds(lst(scaling_preds, scaling_agg, scaling_scores), result_file("scaling_scores.rds"), compress = "xz")
