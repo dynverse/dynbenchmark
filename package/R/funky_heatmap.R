@@ -25,6 +25,9 @@
 #' @param scale_column f
 #' @param add_timestamp Whether or not to add a timestamp at the bottom
 #'
+#' @importFrom ggforce geom_arc_bar geom_circle
+#' @importFrom cowplot theme_nothing
+#'
 #' @export
 funky_heatmap <- function(
   data,
@@ -427,7 +430,7 @@ funky_heatmap <- function(
 
     g <- g +
       geom_polygon(aes(x, y, group = name, fill = colour), funky_poly_data) +
-      geom_arc_bar(aes(x0 = x, y0 = y, r0 = 0, r = r, start = start, end = end, fill = colour), funky_arc_data, colour = NA) +
+      ggforce::geom_arc_bar(aes(x0 = x, y0 = y, r0 = 0, r = r, start = start, end = end, fill = colour), funky_arc_data, colour = NA) +
       geom_path(aes(x = x, y = y, group = paste0(name, "_", subgroup)), funky_poly_data, colour = "black", size = .25) +
       geom_arc(aes(x0 = x, y0 = y, r = r, start = start, end = end), funky_arc_data, colour = "black", size = .25)
   }
