@@ -165,7 +165,8 @@ label_time <- function(time) {
     time < 3600 ~ paste0(floor(time / 60), "m"),
     time < 3600 * 24 ~ paste0(floor(time / 3600), "h"),
     time < 3600 * 24 * 7 ~ paste0(floor(time / 3600 / 24), "d"),
-    TRUE ~ ">7d"
+    !is.na(time) ~ ">7d",
+    TRUE ~ NA_character_
   )
 }
 
@@ -174,19 +175,12 @@ label_time <- function(time) {
 #'
 #' @export
 label_memory <- function(x) {
-  map_chr(x, function(x) {
-    if (is.na(x)) {
-      NA
-    } else if (x < 10^6) {
-      paste0(round(x/10^3), "kB")
-    } else if (x < 10^9) {
-      paste0(round(x/10^6), "MB")
-    } else if (x < 10^12) {
-      paste0(round(x/10^9), "GB")
-    } else {
-      paste0(round(x/10^12), "TB")
-    }
-  })
+  case_when(
+    x < 1e9 ~ "<1GB",
+    x < 1e12 ~ paste0(round(x / 1e9), "GB"),
+    !is.na(x) ~ ">1TB",
+    TRUE ~ NA_character_
+  )
 }
 
 

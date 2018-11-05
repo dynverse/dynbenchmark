@@ -146,14 +146,12 @@ funky_heatmap <- function(
 
   # gather bar data
   bar_data <- geom_data_processor("bar", function(dat) {
-    if (!"hjust" %in% colnames(dat)) {
-      dat$hjust <- NA
-    }
-    dat %>% mutate(
-      hjust = ifelse(is.na(hjust), 0, hjust),
-      xmin = xmin + (1 - value) * xwidth * hjust,
-      xmax = xmax - (1 - value) * xwidth * (1 - hjust)
-    )
+    dat %>%
+      add_column_if_missing(hjust = 0) %>%
+      mutate(
+        xmin = xmin + (1 - value) * xwidth * hjust,
+        xmax = xmax - (1 - value) * xwidth * (1 - hjust)
+      )
   })
 
   rect_data <-
@@ -288,7 +286,7 @@ funky_heatmap <- function(
       bind_rows(
         text_data,
         row_annotation %>%
-          mutate(xmax = xmax - .1, ymin = y, ymax = y, label = name, hjust = 0.5, vjust = 0, fontface = "bold", angle = 90, lineheight = 1.1)
+          mutate(xmax = xmax - .1, ymin = y, ymax = y, label_value = name, hjust = 0.5, vjust = 0, fontface = "bold", angle = 90, lineheight = 1.1)
       )
   }
 
@@ -325,7 +323,7 @@ funky_heatmap <- function(
           text_data,
           column_annotation %>%
             transmute(
-              xmin, xmax, ymin, ymax, hjust = 0.5, vjust = 0.5,
+              xmin, xmax, ymin, ymax, hjust = 0.5, vjust = 0.5, lineheight = 1.1,
               fontface = ifelse(levelmatch == 1, "bold", NA),
               colour = ifelse(levelmatch == 1, "white", "black"),
               label_value = name
@@ -398,7 +396,9 @@ funky_heatmap <- function(
   # PLOT RECTANGLES
   if (nrow(rect_data) > 0) {
     # add defaults for optional values
-    rect_data <- rect_data %>% add_column_if_missing(alpha = 1, border = TRUE, border_colour = "black")
+    rect_data <- rect_data %>%
+      add_column_if_missing(alpha = 1, border = TRUE, border_colour = "black") %>%
+      mutate(border_colour = ifelse(border, border_colour, NA))
 
     g <- g + geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = colour, colour = border_colour, alpha = alpha), rect_data, size = .25)
   }
@@ -438,7 +438,7 @@ funky_heatmap <- function(
       add_column_if_missing(
         hjust = .5,
         vjust = .5,
-        size = 5,
+        size = 4,
         fontface = "plain",
         colour = "black",
         lineheight = 1.2,
@@ -544,7 +544,7 @@ make_geom_data_processor <- function(data, column_pos, row_pos, scale_column, pa
       filter(geom %in% geom_types) %>%
       select(-group, -name, -do_spacing) %>%
       rename(column_id = id) %>%
-      add_column_if_missing("label")
+      add_column_if_missing(label = NA_character_)
 
     if (nrow(column_sels) == 0) {
       return(tibble(a = 1) %>% slice(integer()))
@@ -692,7 +692,7 @@ score_to_funky_rectangle <- function(xmin, xmax, ymin, ymax, value, midpoint = .
 add_column_if_missing <- function(df, ...) {
   column_values <- list(...)
   for (column_name in names(column_values)) {
-    default_val <- column_values[[column_name]]
+    default_val <- rep(column_values[[column_name]], nrow(df))
 
     if (column_name %in% colnames(df)) {
       df[[column_name]] <- ifelse(is.na(df[[column_name]]), default_val, df[[column_name]])
