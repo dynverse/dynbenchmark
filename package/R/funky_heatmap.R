@@ -162,6 +162,7 @@ funky_heatmap <- function(
       rect_data,
       bar_data
     )
+  bar_data <- NULL
 
   # gather bar guides data
   barguides_data <- geom_data_processor("bar", function(dat) {
@@ -383,23 +384,53 @@ funky_heatmap <- function(
   ###   CREATE HARDCODED LEGENDS   ###
   ####################################
 
+  legend_pos <- minimum_y
 
   # CREATE LEGENDS
-  #
-  # error_leg_df <- error_reasons %>%
-  #   rename(fill = colour) %>%
-  #   mutate(
-  #     rad_start = seq(0, pi, length.out = 6) %>% head(-1),
-  #     rad_end = seq(0, pi, length.out = 6) %>% tail(-1),
-  #     rad = (rad_start + rad_end) / 2,
-  #     colour = rep("black", length(rad)),
-  #     lab_x = row_height * sin(rad),
-  #     # lab_y = row_height * cos(rad),
-  #     lab_y = seq(row_height * (cos(first(rad)) + .2), row_height * (cos(last(rad)) - .2), length.out = 5),
-  #     hjust = rep(0, length(rad)),
-  #     #vjust = seq(0, 1, length.out = length(rad)+2)[c(-1,-(length(rad)+2))]
-  #     vjust = .5
-  #   )
+  if (any(column_pos$geom == "pie")) {
+    rel_cols <- column_pos %>% filter(geom == "pie") %>% arrange(x) %>% group_by(palette) %>% slice(1) %>% ungroup()
+
+    for (i in seq_len(nrow(rel_cols))) {
+      palette <- palette_list[[rel_cols$palette[[i]]]]
+
+      pie_minimum_x <- rel_cols$xmin[[i]]
+
+      pie_legend_df <-
+        palette %>%
+        enframe(value = "fill") %>%
+        mutate(
+          rad_start = seq(0, pi, length.out = n() + 1) %>% head(-1),
+          rad_end = seq(0, pi, length.out = n() + 1) %>% tail(-1),
+          rad = (rad_start + rad_end) / 2,
+          colour = rep("black", length(rad)),
+          lab_x = row_height * sin(rad),
+          lab_y = seq(row_height * (cos(first(rad)) + .2), row_height * (cos(last(rad)) - .2), length.out = n()),
+          hjust = rep(0, length(rad)),
+          vjust = .5
+        )
+
+      pie_title_data <-
+        data_frame(xmin = pie_minimum_x, xmax = pie_minimum_x, ymin = legend_pos - 1.5, ymax = legend_pos - .5, label_value = "Error reason", hjust = 0, vjust = 1, fontface = "bold")
+
+      pie_pie_data <-
+        pie_legend_df %>%
+        transmute(x0 = pie_minimum_x + .5, y0 = legend_pos - 2.5, r0 = 0, r = row_height * .75, rad_start, rad_end, colour = fill)
+
+      pie_text_data <-
+        pie_legend_df %>%
+        transmute(x = pie_minimum_x + 1 + lab_x, y = legend_pos - 2.5 + lab_y, label_value = name, vjust, hjust, colour) %>%
+        mutate(xmin = x, xmax = x, ymin = y, ymax = y)
+
+      text_data <- text_data %>% bind_rows(
+        pie_title_data,
+        pie_text_data
+      )
+
+      pie_data <- pie_data %>% bind_rows(
+        pie_pie_data
+      )
+    }
+  }
 
   # funkyrect legend
   if (any(column_pos$geom == "funkyrect")) {
@@ -431,7 +462,7 @@ funky_heatmap <- function(
         xmin = cumsum(width + fr_legend_space) - width - fr_legend_space,
         xmin = fr_minimum_x + xmin - min(xmin),
         xmax = xmin + width,
-        ymin = minimum_y - 2.5,
+        ymin = legend_pos - 2.5,
         ymax = ymin + height
       ) %>%
       transmute(
@@ -451,7 +482,7 @@ funky_heatmap <- function(
       )
 
     fr_title_data <-
-      data_frame(xmin = fr_minimum_x, xmax = fr_maximum_x, ymin = minimum_y - 1.5, ymax = minimum_y - .5, label_value = "Legend", hjust = 0, vjust = 1, fontface = "bold")
+      data_frame(xmin = fr_minimum_x, xmax = fr_maximum_x, ymin = legend_pos - 1.5, ymax = legend_pos - .5, label_value = "Legend", hjust = 0, vjust = 1, fontface = "bold")
 
     fr_value_data <-
       fr_legend_dat2 %>% filter(value %% .2 == 0) %>% transmute(
@@ -469,9 +500,9 @@ funky_heatmap <- function(
       fr_value_data
     )
     funkyrect_data <- bind_rows(funkyrect_data, fr_poly_data2)
-
-    minimum_y <- min(minimum_y, min(text_data$ymin, na.rm = TRUE))
   }
+
+  minimum_y <- min(minimum_y, min(text_data$ymin, na.rm = TRUE))
 
   ####################################
   ###         COMPOSE PLOT         ###
