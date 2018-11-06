@@ -30,10 +30,10 @@ data <-
     method_wrapper_type = wrapper_type_map[method_wrapper_type],
     benchmark_overall_error_reasons = pmap(
       lst(
-        pct_method_error = benchmark_overall_pct_method_error_all + benchmark_overall_pct_method_error_stoch,
-        pct_time_limit = benchmark_overall_pct_time_limit,
-        pct_memory_limit = benchmark_overall_pct_memory_limit,
-        pct_execution_error = benchmark_overall_pct_execution_error
+        "Method error" = benchmark_overall_pct_method_error_all + benchmark_overall_pct_method_error_stoch,
+        "Time limit exceeded" = benchmark_overall_pct_time_limit,
+        "Memory limit exceeded" = benchmark_overall_pct_memory_limit,
+        "Execution error" = benchmark_overall_pct_execution_error
       ),
       c
     ),
@@ -84,7 +84,7 @@ palettes <- tribble(
   "stability", grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "YlOrBr")[-7:-9]))(101),
   "qc", grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Greens")[-1] %>% c("#00250f")))(101),
 
-  "error_reasons", error_reasons %>% select(name, colour) %>% deframe(),
+  "error_reasons", error_reasons %>% select(label, colour) %>% deframe(),
   "white6black4", c(rep("white", 4), rep("black", 6)),
   "column_annotation", c(overall = "darkgray", benchmark = "#4292c6", scaling = "#f6483a", stability = "#fe9929", qc = "#41ab5d")
 )
