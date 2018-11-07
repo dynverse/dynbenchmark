@@ -309,7 +309,7 @@ pairwise_bind_results <- function() {
 
 df <- pairwise_bind_results() %>%
   group_by(method_id, dataset_id) %>%
-  filter((all(is.na(time_corelation)) & n() == 1) | !is.na(time_correlation)) %>%
+  filter((all(is.na(time_correlation)) & n() == 1) | !is.na(time_correlation)) %>%
   mutate_if(is.numeric, function(x) ifelse(!is.finite(x), 0, x))
 
 df %>% group_by(method_id) %>% summarise(error = mean(is.na(time_him))) %>% filter(error > 0) %>% arrange(desc(error))
