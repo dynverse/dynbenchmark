@@ -14,11 +14,14 @@ wrapper_type_map <- c(branch_trajectory = "Traj", linear_trajectory = "Linear", 
 data <-
   read_rds(result_file("results.rds", experiment_id = "08-summary")) %>%
   rename(id = method_id) %>%
+  filter(!grepl("^projected_", id)) %>%
   mutate(
     group = ifelse(method_source == "offtheshelf", "Off-the-shelf", method_most_complex_trajectory_type),
     # group = method_most_complex_trajectory_type,
     group = factor(group, levels = method_groups),
-    control_label = c(adaptation = "Adaptation", offtheshelf = "Off-the-shelf", control = "Control", tool = "")[method_source],
+    # control_label = c(adaptation = "Adaptation", offtheshelf = "Off-the-shelf", control = "Control", tool = "")[method_source],
+    # control_label2 = c(adaptation = "", offtheshelf = "Off-the-shelf", control = "Control", tool = "")[method_source],
+    control_label = c(adaptation = "", offtheshelf = "Off-the-shelf", control = "Control", tool = "")[method_source],
     control_label2 = c(adaptation = "", offtheshelf = "Off-the-shelf", control = "Control", tool = "")[method_source],
     method_priors_required_str = case_when(
       grepl("dataset", method_required_priors_str) ~ "All",
