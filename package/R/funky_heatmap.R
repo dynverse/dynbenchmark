@@ -247,7 +247,16 @@ funky_heatmap <- function(
     )
     text_data <- text_data %>% bind_rows(
       row_annotation %>%
-        mutate(xmin, xmax = xmax - .2, ymin, ymax, label_value = name, hjust = 0.5, vjust = 0, fontface = "bold", angle = 90)
+        mutate(xmin, xmax = xmax - .2, ymin, ymax, label_value = name, hjust = 0.5, vjust = 0, fontface = "bold", angle = 90) %>%
+        mutate( # hardcode a few label modifications
+          ymax = ifelse(label_value == "Disconnected\ngraph", ymin, ymax),
+          ymin = ifelse(label_value == "Connected\ngraph", ymax, ymin),
+          hjust = case_when(
+            label_value == "Disconnected\ngraph" ~ 0,
+            label_value == "Connected\ngraph" ~ 1,
+            TRUE ~ 0.5
+          )
+        )
     )
 
     # rect_data <- rect_data %>% bind_rows(
