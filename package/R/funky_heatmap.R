@@ -138,15 +138,6 @@ funky_heatmap <- function(
       pmap_df(score_to_funky_rectangle, midpoint = .8)
   })
 
-  if (nrow(funkyrect_data) > 0) {
-    # offload circles in funkyrect to circles
-    funkyrect_data <- funkyrect_data %>% mutate(is_circle = !is.na(start) & start < 1e-10 & 2 * pi - 1e-10 < end)
-    circle_data <- circle_data %>% bind_rows(
-      funkyrect_data %>% filter(is_circle) %>% select(x0 = x, y0 = y, r, colour)
-    )
-    funkyrect_data <- funkyrect_data %>% filter(!is_circle)
-  }
-
   # gather bar data
   bar_data <- geom_data_processor("bar", function(dat) {
     dat %>%
@@ -156,13 +147,6 @@ funky_heatmap <- function(
         xmax = xmax - (1 - value) * xwidth * (1 - hjust)
       )
   })
-
-  rect_data <-
-    bind_rows(
-      rect_data,
-      bar_data
-    )
-  bar_data <- NULL
 
   # gather bar guides data
   barguides_data <- geom_data_processor("bar", function(dat) {
@@ -213,15 +197,6 @@ funky_heatmap <- function(
       filter(rad_end != rad_start) %>%
       ungroup()
   }) %>% filter(1e-10 <= pct)
-
-  if (nrow(pie_data) > 0) {
-    # plot 100% pies as circles
-    circle_data <- bind_rows(
-      circle_data,
-      pie_data %>% filter(pct >= (1-1e-10))
-    )
-    pie_data <- pie_data %>% filter(pct < (1-1e-10))
-  }
 
   # hidden feature trajectory plots
   trajd <- geom_data_processor("traj", function(dat) {
