@@ -502,7 +502,69 @@ funky_heatmap <- function(
     funkyrect_data <- bind_rows(funkyrect_data, fr_poly_data2)
   }
 
+  if (any(column_pos$id == "method_priors_required_str")) {
+    pr_minimum_x <- column_pos %>% filter(id == "method_priors_required_str") %>% pull(xmin) %>% min
+
+    legend_vals <- tribble(
+      ~symbol, ~value,
+      "", "None",
+      "\u2715", "Some",
+      "\u2716", "A lot"
+    )
+
+    pr_labels_df <-
+      legend_vals %>%
+      mutate(
+        lab_x1 = pr_minimum_x,
+        lab_x2 = pr_minimum_x + 1,
+        lab_y = legend_pos - 1 - row_number() * row_height * .9
+      )
+
+    pr_text_data <-
+      bind_rows(
+        data_frame(xmin = pr_minimum_x, xmax = pr_minimum_x, ymin = legend_pos - 1.5, ymax = legend_pos - .5, label_value = "Prior information required", hjust = 0, vjust = 1, fontface = "bold"),
+        pr_labels_df %>% transmute(xmin = lab_x1, xmax = lab_x1, ymin = lab_y, ymax = lab_y, label_value = symbol, hjust = 0, vjust = 0),
+        pr_labels_df %>% transmute(xmin = lab_x2, xmax = lab_x2, ymin = lab_y, ymax = lab_y, label_value = value, hjust = 0, vjust = 0)
+      )
+
+    text_data <- text_data %>% bind_rows(
+      pr_text_data
+    )
+  }
+
   minimum_y <- min(minimum_y, min(text_data$ymin, na.rm = TRUE))
+
+  ####################################
+  ###    SIMPLIFY CERTAIN GEOMS    ###
+  ####################################
+
+  # small funkyrects are circles
+  if (nrow(funkyrect_data) > 0) {
+    funkyrect_data <- funkyrect_data %>% mutate(is_circle = !is.na(start) & start < 1e-10 & 2 * pi - 1e-10 < end)
+    circle_data <- circle_data %>% bind_rows(
+      funkyrect_data %>% filter(is_circle) %>% select(x0 = x, y0 = y, r, colour)
+    )
+    funkyrect_data <- funkyrect_data %>% filter(!is_circle)
+  }
+
+  # bars are rects
+  rect_data <-
+    bind_rows(
+      rect_data,
+      bar_data
+    )
+  bar_data <- NULL
+
+  # 100% pies are circles
+  if (nrow(pie_data) > 0) {
+    pie_data <- pie_data %>% mutate(pct = (rad_end - rad_start) / 2 / pi)
+    # plot 100% pies as circles
+    circle_data <- bind_rows(
+      circle_data,
+      pie_data %>% filter(pct >= (1-1e-10))
+    )
+    pie_data <- pie_data %>% filter(pct < (1-1e-10))
+  }
 
   ####################################
   ###         COMPOSE PLOT         ###
