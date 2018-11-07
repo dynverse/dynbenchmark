@@ -307,7 +307,10 @@ pairwise_bind_results <- function() {
   map_dfr(handles, readr::read_rds)
 }
 
-df <- pairwise_bind_results() %>% mutate_if(is.numeric, function(x) ifelse(!is.finite(x), 0, x))
+df <- pairwise_bind_results() %>%
+  group_by(method_id, dataset_id) %>%
+  filter((all(is.na(time_corelation)) & n() == 1) | !is.na(time_correlation)) %>%
+  mutate_if(is.numeric, function(x) ifelse(!is.finite(x), 0, x))
 
 df %>% group_by(method_id) %>% summarise(error = mean(is.na(time_him))) %>% filter(error > 0) %>% arrange(desc(error))
 df %>% group_by(dataset_id) %>% summarise(error = mean(is.na(time_him))) %>% filter(error > 0) %>% arrange(desc(error))
