@@ -89,13 +89,13 @@ palettes <- tribble(
 
   "error_reasons", error_reasons %>% select(label, colour) %>% deframe(),
   "white6black4", c(rep("white", 4), rep("black", 6)),
-  "column_annotation", c(overall = "darkgray", benchmark = "#4292c6", scaling = "#f6483a", stability = "#fe9929", qc = "#41ab5d")
+  "column_annotation", c(overall = "#555555", benchmark = "#4292c6", scaling = "#f6483a", stability = "#fe9929", qc = "#41ab5d")
 )
 
 ####################################
 ###        CREATE FIGURES        ###
 ####################################
-script_files <- c("all", "summary", "detailed", "suppfig")
+script_files <- c("suppfig", "all", "summary", "detailed")
 # script_files <- "suppfig"
 # script_files <- c("summary", "detailed")
 
