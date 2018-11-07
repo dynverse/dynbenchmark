@@ -390,6 +390,8 @@ funky_heatmap <- function(
           lab_x = row_height * sin(rad),
           lab_y = seq(row_height * (cos(first(rad)) + .2), row_height * (cos(last(rad)) - .2), length.out = n()),
           hjust = rep(0, length(rad)),
+          xpt = row_height * sin(rad),
+          ypt = row_height * cos(rad),
           vjust = .5
         )
 
@@ -398,12 +400,16 @@ funky_heatmap <- function(
 
       pie_pie_data <-
         pie_legend_df %>%
-        transmute(x0 = pie_minimum_x + .5, y0 = legend_pos - 2.5, r0 = 0, r = row_height * .75, rad_start, rad_end, colour = fill)
+        transmute(x0 = pie_minimum_x, y0 = legend_pos - 2.75, r0 = 0, r = row_height * .75, rad_start, rad_end, colour = fill)
 
       pie_text_data <-
         pie_legend_df %>%
-        transmute(x = pie_minimum_x + 1 + lab_x, y = legend_pos - 2.5 + lab_y, label_value = name, vjust, hjust, colour) %>%
+        transmute(x = pie_minimum_x + .5 + lab_x, y = legend_pos - 2.75 + lab_y, label_value = name, vjust, hjust, colour) %>%
         mutate(xmin = x, xmax = x, ymin = y, ymax = y)
+
+      pie_seg_data <-
+        pie_legend_df %>%
+        transmute(x = pie_minimum_x + xpt * .85, xend = pie_minimum_x + xpt * 1.1, y = legend_pos - 2.75 + ypt * .85, yend = legend_pos - 2.75 + ypt * 1.1)
 
       text_data <- text_data %>% bind_rows(
         pie_title_data,
@@ -412,6 +418,10 @@ funky_heatmap <- function(
 
       pie_data <- pie_data %>% bind_rows(
         pie_pie_data
+      )
+
+      segment_data <- segment_data %>% bind_rows(
+        pie_seg_data
       )
     }
   }
