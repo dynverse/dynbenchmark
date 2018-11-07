@@ -476,7 +476,7 @@ funky_heatmap <- function(
       )
 
     fr_title_data <-
-      data_frame(xmin = fr_minimum_x, xmax = fr_maximum_x, ymin = legend_pos - 1.5, ymax = legend_pos - .5, label_value = "Legend", hjust = 0, vjust = 1, fontface = "bold")
+      data_frame(xmin = fr_minimum_x, xmax = fr_maximum_x, ymin = legend_pos - 1.5, ymax = legend_pos - .5, label_value = "Score", hjust = 0, vjust = 1, fontface = "bold")
 
     fr_value_data <-
       fr_legend_dat2 %>% filter(value %% .2 == 0) %>% transmute(
