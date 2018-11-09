@@ -69,7 +69,7 @@ funky_heatmap <- function(
       row_i = row_number(),
       colour_background = group_i %% 2 == 1,
       do_spacing = c(FALSE, diff(as.integer(factor(group))) != 0),
-      ysep = ifelse(do_spacing, row_bigspace, row_space),
+      ysep = ifelse(do_spacing, row_height + 2 * row_space, row_space),
       y = - (row_i * row_height + cumsum(ysep)),
       ymin = y - row_height / 2,
       ymax = y + row_height / 2
@@ -200,7 +200,7 @@ funky_heatmap <- function(
 
   # hidden feature trajectory plots
   trajd <- geom_data_processor("traj", function(dat) {
-    dat %>% mutate(topinf = gsub("^gray_", "", value), colour = ifelse(grepl("^gray_", value), "lightgray", NA))
+    dat %>% mutate(topinf = gsub("^gray_", "", value), colour = ifelse(grepl("^gray_", value), "#AAAAAA", NA))
   })
 
   ####################################
@@ -209,54 +209,27 @@ funky_heatmap <- function(
 
   # GENERATE ROW ANNOTATION
   if (plot_row_annotation) {
-    row_join <- row_groups %>%
-      gather(level, name, -group) %>%
-      left_join(row_pos %>% select(group, ymin, ymax), by = "group")
-
-    text_pct <- .9
-    level_widths <-
-      row_join %>%
-      group_by(level) %>%
-      summarise(max_newlines = max(str_count(name, "\n"))) %>%
-      mutate(
-        width = (max_newlines + 1) * text_pct + (1 - text_pct),
-        levelmatch = match(level, colnames(row_groups))
-      ) %>%
-      arrange(levelmatch) %>%
-      mutate(
-        xsep = col_space,
-        xmin = - row_annot_offset - cumsum(width + xsep) + xsep,
-        xmax = xmin + width,
-        x = (xmin + xmax) / 2
-      )
-
     row_annotation <-
-      row_join %>%
-      group_by(level, name) %>%
+      row_groups %>%
+      gather(level, name, -group) %>%
+      left_join(row_pos %>% select(group, ymin, ymax), by = "group") %>%
+      group_by(name) %>%
       summarise(
         ymin = min(ymin),
         ymax = max(ymax),
         y = (ymin + ymax) / 2
       ) %>%
       ungroup() %>%
-      left_join(level_widths, by = "level") %>%
+      mutate(xmin = -.5, xmax = 5) %>%
       filter(!is.na(name), name != "")
 
-    segment_data <- segment_data %>% bind_rows(
-      row_annotation %>% transmute(x = xmax, xend = xmax, y = ymin, yend = ymax)
-    )
+    # segment_data <- segment_data %>% bind_rows(
+    #   row_annotation %>% transmute(x = xmin, xend = xmin, y = ymin, yend = ymax)
+    # )
     text_data <- text_data %>% bind_rows(
       row_annotation %>%
-        mutate(xmin, xmax = xmax - .2, ymin, ymax, label_value = name, hjust = 0.5, vjust = 0, fontface = "bold", angle = 90) %>%
-        mutate( # hardcode a few label modifications
-          ymax = ifelse(label_value == "Disconnected\ngraph", ymin, ymax),
-          ymin = ifelse(label_value == "Connected\ngraph", ymax, ymin),
-          hjust = case_when(
-            label_value == "Disconnected\ngraph" ~ 0,
-            label_value == "Connected\ngraph" ~ 1,
-            TRUE ~ 0.5
-          )
-        )
+        transmute(xmin, xmax, ymin = ymax + row_space, label_value = name %>% gsub("\n", " ", .), hjust = 0, vjust = .5, fontface = "bold") %>%
+        mutate(ymax = ymin + row_height)
     )
 
     # rect_data <- rect_data %>% bind_rows(
@@ -577,7 +550,7 @@ funky_heatmap <- function(
   # PLOT ROW BACKGROUNDS
   df <- row_pos %>% filter(colour_background)
   if (nrow(df) > 0) {
-    g <- g + geom_rect(aes(xmin = min(column_pos$xmin)-.25, xmax = max(column_pos$xmax)+.25, ymin = ymin - (row_space / 2), ymax = ymax + (row_space / 2)), df, fill = "#EEEEEE")
+    g <- g + geom_rect(aes(xmin = min(column_pos$xmin)-.25, xmax = max(column_pos$xmax)+.25, ymin = ymin - (row_space / 2), ymax = ymax + (row_space / 2)), df, fill = "#DDDDDD")
   }
 
   # PLOT SEGMENTS
