@@ -16,13 +16,14 @@ data <-
   rename(id = method_id) %>%
   filter(!grepl("^projected_", id)) %>%
   mutate(
-    group = ifelse(method_source == "offtheshelf", "Off-the-shelf", method_most_complex_trajectory_type),
-    # group = method_most_complex_trajectory_type,
+    # group = ifelse(method_source == "offtheshelf", "Off-the-shelf", method_most_complex_trajectory_type),
+    group = case_when(
+      method_source == "offtheshelf" ~ "Off-the-shelf",
+      method_most_complex_trajectory_type %in% c("disconnected_graph", "connected_graph") ~ "graph",
+      TRUE ~ method_most_complex_trajectory_type
+    ),
     group = factor(group, levels = method_groups),
-    # control_label = c(adaptation = "Adaptation", offtheshelf = "Off-the-shelf", control = "Control", tool = "")[method_source],
-    # control_label2 = c(adaptation = "", offtheshelf = "Off-the-shelf", control = "Control", tool = "")[method_source],
     control_label = c(adaptation = "", offtheshelf = "Off-the-shelf", control = "Control", tool = "")[method_source],
-    control_label2 = c(adaptation = "", offtheshelf = "Off-the-shelf", control = "Control", tool = "")[method_source],
     method_priors_required_str = case_when(
       grepl("dataset", method_required_priors_str) ~ "All",
       grepl("(groups_id|features_id|timecourse_continuous|timecourse_discrete|groups_network)", method_required_priors_str) ~ "\u2716",
