@@ -72,7 +72,7 @@ row_info <-
   select(group, id)
 row_groups <-
   data %>%
-  transmute(Group = label_short(group), group) %>%
+  transmute(Group = paste0(label_short(group), " methods"), group) %>%
   unique()
 
 ####################################
