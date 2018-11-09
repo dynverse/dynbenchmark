@@ -20,10 +20,10 @@ column_info <- tribble( # tribble_start
   "inferrable_trajtype",    "itt_graph",                                    "Connected",                "traj",       NA,               list(width = 2),
   "inferrable_trajtype",    "itt_disconnected_graph",                       "Disconnected",             "traj",       NA,               list(width = 2),
   "score_overall",          "summary_overall_overall",                      "Overall",                  "bar",        "overall",        list(width = 4, legend = FALSE),
-  "score_overall",          "benchmark_overall_overall",                    "Benchmark",                "bar",        "benchmark",      list(width = 4, legend = FALSE),
+  "score_overall",          "benchmark_overall_overall",                    "Accuracy",                 "bar",        "benchmark",      list(width = 4, legend = FALSE),
   "score_overall",          "scaling_pred_scoretime_overall",               "Scalability",              "bar",        "scaling",        list(width = 4, legend = FALSE),
   "score_overall",          "stability_overall_overall",                    "Stability",                "bar",        "stability",      list(width = 4, legend = FALSE),
-  "score_overall",          "qc_overall_overall",                           "Quality control",          "bar",        "qc",             list(width = 4, legend = FALSE),
+  "score_overall",          "qc_overall_overall",                           "Meta-quality",             "bar",        "qc",             list(width = 4, legend = FALSE),
   "score_overall",          "control_label",                                "",                         "text",       NA,               list(overlay = TRUE),
   "benchmark_metric",       "benchmark_overall_norm_correlation",           "Ordering",                 "funkyrect",  "benchmark",      lst(),
   "benchmark_metric",       "benchmark_overall_norm_him",                   "Topology",                 "funkyrect",  "benchmark",      lst(),
@@ -79,24 +79,25 @@ column_info <- tribble( # tribble_start
   "qc_category",            "qc_cat_code_quality",                          "Code quality",             "funkyrect",  "qc",             lst(),
   "qc_category",            "qc_cat_documentation",                         "Documentation",            "funkyrect",  "qc",             lst(),
   "qc_category",            "qc_cat_paper",                                 "Paper",                    "funkyrect",  "qc",             lst(),
-  "qc_category",            "control_label2",                               "",                         "text",       NA,               list(overlay = TRUE, width = -6)
+  "qc_category",            "control_label",                                "",                         "text",       NA,               list(overlay = TRUE, width = -6)
 ) # tribble_end
 
 
 
 column_groups <- tribble( # tribble_start
-  ~Experiment,        ~Category,                           ~group,                   ~palette,
-  "Method",           "",                                  "method_characteristic",  "overall",
-  "Method",           "Inferrable trajectory types",       "inferrable_trajtype",    "overall",
-  "Summary",          "Aggregated scores per experiment",  "score_overall",          "overall",
-  "Benchmark",        "Per metric",                        "benchmark_metric",       "benchmark",
-  "Benchmark",        "Per source",                        "benchmark_source",       "benchmark",
-  "Benchmark",        "Per trajectory type",               "benchmark_trajtype",     "benchmark",
-  "Benchmark",        "Errors",                            "benchmark_execution",    "benchmark",
-  "Scalability",      "Predicted time",                    "scaling_predtime",       "scaling",
-  "Scalability",      "Predicted memory",                  "scaling_predmem",        "scaling",
-  "Stability",        "Compare runs",                      "stability",              "stability",
-  "Quality control",  "Per applic.",                       "qc_application",         "qc",
-  "Quality control",  "Per category",                      "qc_category",            "qc"
+  ~Experiment,     ~Category,                           ~group,                   ~palette,
+  "Method",        "",                                  "method_characteristic",  "overall",
+  "Method",        "Inferrable trajectory types",       "inferrable_trajtype",    "overall",
+  "Summary",       "Aggregated scores per experiment",  "score_overall",          "overall",
+  "Accuracy",      "Per metric",                        "benchmark_metric",       "benchmark",
+  "Accuracy",      "Per dataset source",                "benchmark_source",       "benchmark",
+  "Accuracy",      "Per trajectory type",               "benchmark_trajtype",     "benchmark",
+  "Accuracy",      "Errors",                            "benchmark_execution",    "benchmark",
+  "Scalability",   "Predicted time",                    "scaling_predtime",       "scaling",
+  "Scalability",   "Predicted memory",                  "scaling_predmem",        "scaling",
+  "Stability",     "Compare runs",                      "stability",              "stability",
+  "Meta-quality",  "Per applic.",                       "qc_application",         "qc",
+  "Meta-quality",  "Per category",                      "qc_category",            "qc"
 ) # tribble_end
+
 
