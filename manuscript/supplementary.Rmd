@@ -23,7 +23,7 @@ sfigs %>%
   left_join(refs %>% select(ref_id, name), "ref_id") %>% 
   arrange(name) %>% 
   select(-name) %>% 
-  pmap(dynbenchmark:::plot_fig, ref_type = "sfig") %>% modify(paste0, "\n\n") %>% walk(cat)
+  pmap(dynbenchmark:::plot_fig) %>% modify(paste0, "\n\n") %>% walk(cat)
 ```
 
 \clearpage
@@ -31,7 +31,11 @@ sfigs %>%
 # Supplementary tables
 
 ```{r, results="asis"}
-stables %>% pmap(dynbenchmark:::show_table, ref_type = "stable") %>% modify(paste0, "\n\n") %>% walk(cat)
+stables %>% 
+  left_join(refs %>% select(ref_id, name), "ref_id") %>% 
+  arrange(name) %>% 
+  select(-name) %>% 
+  pmap(dynbenchmark:::show_table) %>% modify(paste0, "\n\n") %>% walk(cat)
 ```
 
 \clearpage
