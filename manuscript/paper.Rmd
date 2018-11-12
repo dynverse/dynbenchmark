@@ -42,7 +42,7 @@ n_datasets_synthetic <- nrow(list_datasets("synthetic"))
 Recent technological advances allow unbiased investigation of cellular dynamic processes, by generating -omics profiles of thousands of single cells and computationally ordering these cells along a trajectory. Since 2014, at least →`r n_tools`← tools for trajectory inference have been developed, but due to high variability in their inputs and outputs, these methods are difficult to compare. As a result, a comprehensive assessment of the performance of trajectory inference methods is still lacking, and more importantly also guidelines for users in the field. 
 
 
-In this study, we evaluated a total of →`r n_methods_evaluated`← m[a]ethods in terms of cellular →ordering, topology, scalability, and user friendliness←. Our results highlight the complementarity of existing tools, and that there is no generally best performing method. Instead, the choice of method →mostly depends on the dataset characteristics and the trajectory topology present. To assist users in selecting the most appropriate method, we therefore developed a set of guidelines, available as an interactive app at `r print_url("http://guidelines.dynverse.org")`.← While the field certainly has matured significantly since its inception, further progress is still necessary in order to cope with increasingly complex and novel use cases. We hope to spearhead such developments, and the field as a whole, by making our evaluation pipeline easily extensible and freely available at `r print_url("https://www.github.com/dynverse/dynverse")`.
+In this study, we evaluated a total of →`r n_methods_evaluated`← methods in terms of cellular →ordering, topology, scalability, and user friendliness←. Our results highlight the complementarity of existing tools, and that there is no generally best performing method. Instead, the choice of method →mostly depends on the dataset characteristics and the trajectory topology present. To assist users in selecting the most appropriate method, we therefore developed a set of guidelines, available as an interactive app at `r print_url("http://guidelines.dynverse.org")`.← While the field certainly has matured significantly since its inception, further progress is still necessary in order to cope with increasingly complex and novel use cases. We hope to spearhead such developments, and the field as a whole, by making our evaluation pipeline easily extensible and freely available at `r print_url("https://www.github.com/dynverse/dynverse")`.
 
 
 # Introduction
@@ -75,7 +75,7 @@ Given the diversity in TI methods, an important issue to address is a quantitati
 add_fig(
   fig_path = raw_file("overview_evaluation_v6.svg", ""),
   ref_id = "ti_evaluation_overview", 
-  caption_main = "Overview of several key aspects of the evaluation[b].", 
+  caption_main = "Overview of several key aspects of the evaluation.", 
   caption_text = glue::glue("a) A schematic overview of our evaluation pipeline. b) In order to make the trajectories comparable to each other, a common trajectory model was used to represent →reference trajectories← from the real and synthetic datasets, as well as any predicted trajectories from TI methods. c) Trajectories are automatically classified into one of nine trajectory types, with increasing complexity. d) →We defined four metrics, each assessing the quality of a different aspect of the trajectory. The Hamming-Ipsen-Mikhailov (HIM) score will assess the similarity between the two topologies, taking into account differences in edge lengths and degree distributions. The {label_metric('F1_branches')} assesses the similarity of the assignment of cells onto branches. The {label_metric('correlation')} quantifies the similarity in cellular positions between two trajectories, by calculating the correlation between pairwise geodesic distances. Finally, {label_metric('featureimp_wcor')} quantifies the agreement between trajectory differentially expressed features from the known trajectory and the predicted trajectory.←"),
    width = 14,
   height = 8.5, 
@@ -87,7 +87,7 @@ add_fig(
 # Results
 ## Trajectory inference methods
 <!-- Method characterisation -->
-In this study, we performed a comprehensive evaluation of  `r n_methods_evaluated`[c] TI methods (`r ref("fig", "ti_evaluation_overview", "a")`). In order to make the outputs from different methods directly comparable to each other, we developed a common probabilistic model for representing trajectories from all possible sources (`r ref("fig", "ti_evaluation_overview", "b")`). In this model, the overall topology is represented by a network of "milestones", and the cells are placed within the space formed by each set of connected milestones. Although almost every method returned a unique set of outputs, we were able to classify these outputs into 7 distinct groups, and wrote a common output convertor for each of these groups (`r ref("fig", "results_summary", "a")` and `r ref("sfig", "overview_wrapping")`). When required, we also provided prior information to the method, the severity of which varies (`r ref("fig", "results_summary", "a")`). Namely, having to provide a start cell or an end cell is relatively easy to do and will only introduce moderate bias into the model, whereas having to provide a clustering or time course information will likely introduce heavy bias into the model.[d][e][f]
+In this study, we performed a comprehensive evaluation of  `r n_methods_evaluated` TI methods (`r ref("fig", "ti_evaluation_overview", "a")`). In order to make the outputs from different methods directly comparable to each other, we developed a common probabilistic model for representing trajectories from all possible sources (`r ref("fig", "ti_evaluation_overview", "b")`). In this model, the overall topology is represented by a network of "milestones", and the cells are placed within the space formed by each set of connected milestones. Although almost every method returned a unique set of outputs, we were able to classify these outputs into 7 distinct groups, and wrote a common output convertor for each of these groups (`r ref("fig", "results_summary", "a")` and `r ref("sfig", "overview_wrapping")`). When required, we also provided prior information to the method, which can range from weak priors which are easier to acquire, such as the start cells, to strong priors, such as a known grouping of cells, which are much harder to know a priori and which can potentially introduce a large bias into the analysis (`r ref("fig", "results_summary", "a")`).
 
 
 <!-- Topology characterisation -->
@@ -95,15 +95,7 @@ The main difference between trajectory inference methods is whether the method f
 
 
 <!-- Overall evaluation results -->
-We evaluated each method on four core aspects: (i) accuracy of a prediction, given a gold or silver standard on `r n_datasets_real`[g] real and `r n_datasets_synthetic` synthetic datasets, (ii) scalability with respect to the number of cells and features (e.g. genes) (iii) stability of the predictions after subsampling the datasets, and (iv) the quality of the tool in terms of software, documentation and the manuscript. Overall, we found a large diversity across the four evaluation criteria, with only a few methods, such as PAGA, Slingshot and SCORPIUS, performing well across the board (`r ref("fig", "results_summary", "b")`). 
-
-
-Unfortunately, only few methods seem to have been given consideration to the scalability or the usability of the tool. While less important than the accuracy, with increasing dataset sizes the scalability of the tool is becoming increasingly important, and a high usability score is important to ensure correct usage of the tool by a user. 
-
-
-Methods in which the topology of the model was fixed by the algorithm or by a parameter obtain a much higher stability score. As topology-free methods have more degrees of freedom, the stability of the method is also typically lower ─ with a few exceptions.[h][i]
- 
-We will discuss each evaluation criterion in more detail (`r ref("fig", "results_summary")` and `r ref("sfig", "results")`), after which we conclude with guidelines for method users and future perspectives for method developers.
+We evaluated each method on four core aspects: (i) accuracy of a prediction, given a gold or silver standard on `r n_datasets_real` real and `r n_datasets_synthetic` synthetic datasets, (ii) scalability with respect to the number of cells and features (e.g. genes) (iii) stability of the predictions after subsampling the datasets, and (iv) the quality of the tool in terms of software, documentation and the manuscript. Overall, we found a large diversity across the four evaluation criteria, with only a few methods, such as PAGA, Slingshot and SCORPIUS, performing well across the board (`r ref("fig", "results_summary", "b")`). We will discuss each evaluation criterion in more detail (`r ref("fig", "results_summary")` and `r ref("sfig", "results")`), after which we conclude with guidelines for method users and future perspectives for method developers.
 ```{r}
 add_fig(
   fig_path = result_file("results_summary.pdf", experiment_id = "08-summary"),
@@ -153,7 +145,7 @@ The performance of a method was strongly dependent on the type of trajectory pre
 
 
 <!-- Complementarity between methods -->
-The high variability between datasets, together with the diversity in detected topologies between methods, could indicate some complementarity between the different methods. To test this, we calculated the likelihood of obtaining a top model when using only a subset of all methods. A top model in this case was defined as a model with an overall score of at least 95% as the best model. On all datasets, using one method would result in getting a top model in about 40% of the time. This increased to up to 90% with the addition of 6 other methods (`r ref("fig", "complementarity", "a")`). This resulted in a relatively diverse set of methods, containing both strictly linear or cyclic methods such as periodic principal curves[j][k], and methods with a broad trajectory type range such as PAGA. We found similar indications of complementarity between the top methods on data containing only linear, bifurcation or multifurcating trajectories (`r ref("fig", "complementarity", "b")`), although in these cases less methods were necessary to obtain at least one top model for a given dataset. Altogether, this shows that there is considerable complementarity between the different methods, and that users should try out a diverse set of methods on their data, especially when the topology is unclear a priori. Moreover, it also opens up the possibilities for new ensemble methods which utilize this complementarity.
+The high variability between datasets, together with the diversity in detected topologies between methods, could indicate some complementarity between the different methods. To test this, we calculated the likelihood of obtaining a top model when using only a subset of all methods. A top model in this case was defined as a model with an overall score of at least 95% as the best model. On all datasets, using one method would result in getting a top model in about 27% of the time. This increased to up to 76% with the addition of 6 other methods (`r ref("fig", "complementarity", "a")`). This resulted in a relatively diverse set of methods, containing both strictly linear or cyclic methods, and methods with a broad trajectory type range such as PAGA. We found similar indications of complementarity between the top methods on data containing only linear, bifurcation or multifurcating trajectories (`r ref("fig", "complementarity", "b")`), although in these cases less methods were necessary to obtain at least one top model for a given dataset. Altogether, this shows that there is considerable complementarity between the different methods, and that users should try out a diverse set of methods on their data, especially when the topology is unclear a priori. Moreover, it also opens up the possibilities for new ensemble methods which utilize this complementarity.
 
 
 ```{r echo=FALSE, results="asis"}
@@ -181,10 +173,10 @@ add_sfig(
 
 
 ## Scalability
-While early TI methods were developed at a time where profiling more than a thousand cells was exceptional, methods now have to cope with hundreds of thousands of cells, and perhaps soon with more than ten million [@svensson_exponentialscalingsinglecell_2018]. Moreover, the recent application of TI methods on multi-omics single-cell data also showcases the increasing demands on the number of features [@cao_jointprofilingchromatin_2018]. To assess the scalability, we ran each method on up- and downscaled versions of five distinct real datasets. We modelled the running time and memory usage using a Shape Constrained Additive Model[@pya_shapeconstrainedadditive_2015] (`r ref("sfig", "scaling", "a")`). We assessed whether the time / memory complexity was sublinear, linear ,quadratic, or superquadratic with respect to the number of cells and features (`r ref("sfig", "scaling", "b")`). As a control, we compared the predicted time with the actual time on all benchmarking datasets, and found that these were moderately to highly correlated (0.5-0.9) for almost every method.[l][m][n]
+While early TI methods were developed at a time where profiling more than a thousand cells was exceptional, methods now have to cope with hundreds of thousands of cells, and perhaps soon with more than ten million [@svensson_exponentialscalingsinglecell_2018]. Moreover, the recent application of TI methods on multi-omics single-cell data also showcases the increasing demands on the number of features [@cao_jointprofilingchromatin_2018]. To assess the scalability, we ran each method on up- and downscaled versions of five distinct real datasets. We modelled the running time and memory usage using a Shape Constrained Additive Model[@pya_shapeconstrainedadditive_2015] (`r ref("sfig", "scaling", "a")`). We assessed whether the time / memory complexity was sublinear, linear ,quadratic, or superquadratic with respect to the number of cells and features (`r ref("sfig", "scaling", "b")`). As a control, we compared the predicted time with the actual time on all benchmarking datasets, and found that these were moderately to highly correlated (0.5-0.9) for almost every method, depending on to what extent the execution of a method succeeded during the scalability experiments.[a][b][c]
 
 
-Overall, methods which detected more complex trajectory types also had longer running times, except for PAGA and PAGA Tree (`r ref("fig", "results_detailed", "c")`). We looked at the running times of some common use cases, such as datasets with a lot of cells (100 thousand to 1 million) but only a limited number of features (100 - 1000), which is usually the case for droplet based datasets, and datasets with only a limited number of cells but a lot of features, relevant for flow and mass cytometry datasets[o]. Only a handful of methods had an acceptable running time on these datasets, with PAGA tree, GrandPrix and several linear methods able to finish in under 10 minutes on a dataset with one hundred thousand cells and one thousand features. Methods with a low running time typically had two defining aspects: they had a linear time complexity with respect to the features and/or cells, and adding new cells or features led to a relatively low increase in time (`r ref("sfig", "scaling", "b")`). We found that more than half of all methods had a linear or superlinear complexity with respect to the number of cells, which would make it difficult to apply any of these methods in a reasonable time frame on datasets with more than a thousand cells (`r ref("sfig", "scaling", "b")`).
+Overall, methods which detected more complex trajectory types also had longer running times, except for PAGA and PAGA Tree (`r ref("fig", "results_detailed", "c")`). We looked at the running times of the most immediate use case: datasets with a lot of cells (100 thousand to 1 million) but only a limited number of features (100 - 1000), which is usually the case for droplet based datasets, and datasets with only a limited number of cells but a lot of features. Only a handful of methods had an acceptable running time on these datasets, with PAGA tree, GrandPrix and several linear methods able to finish in under 10 minutes on a dataset with one hundred thousand cells and one thousand features. Methods with a low running time typically had two defining aspects: they had a linear time complexity with respect to the features and/or cells, and adding new cells or features led to a relatively low increase in time (`r ref("sfig", "scaling", "b")`). We found that more than half of all methods had a quadratic or superquadratic complexity with respect to the number of cells, which would make it difficult to apply any of these methods in a reasonable time frame on datasets with more than a thousand cells (`r ref("sfig", "scaling", "b")`).
 
 
 ```{r echo=FALSE, results="asis"}
@@ -192,7 +184,7 @@ add_sfig(
   fig_path = result_file("scaling.pdf", experiment_id = "05-scaling"),
   ref_id = "scaling", 
   caption_main = "Scalability of trajectory inference methods", 
-  caption_text = "(a) Three examples of average observed running times across five datasets (left) and the predicted running time based on a generalized additive model (GAM, right). (b) Overview of the scalability results of all methods, ordered by their average predicted running time from (a). We used the GAM to predict running times for each method with increasing number of features or cells, and used these values to classify each method into constant / low slope, sublinear, linear and superlinear based on the shape of the curve. We also used the predicted timings to calculate the average increase per new 100 cells or features. Also shown is the average maximal memory usage.",
+  caption_text = "(a) Three examples of average observed running times across five datasets (left) and the predicted running time (right). (b) Overview of the scalability results of all methods, ordered by their average predicted running time from (a). We predicted execution times and memory usage for each method with increasing number of features or cells, and used these values to classify each method into sublinear, linear, quadratic and superquadratic based on the shape of the curve.",
   width = 12,
   height = 15
 )
@@ -286,7 +278,7 @@ add_fig(
 
 <!-- FOR METHOD DEVELOPERS -->
 <!-- New tools: challenges and possibilities -->
-Our study indicates that the field of trajectory inference is maturing, primarily for linear and bifurcating trajectories (as we illustrate with two datasets in `r ref("fig", "example_predictions", "a and b")`). However, we also highlight several ongoing challenges, which should be addressed before TI can be a reliable tool for analysing single-cell -omics datasets with complex trajectories. Foremost, new methods should focus on improving →the unbiased inference of tree, cyclic graph and disconnected topologies, as we found that methods repeatedly overestimate or underestimate the complexity of the underlying topology, even if the trajectory can be easily identified in a dimensionality reduction (illustrated with some synthetic datasets in `r ref("fig", "example_predictions", "c and d")`). ← Furthermore, higher standards for code assurance and documentation could help in adopting these tools across the single-cell -omics field. Finally, new tools should be designed to scale well with the increasing number of cells and features. We found that only a handful of current methods are able to handle datasets with more than 10.000 cells within a reasonable timeframe, making the others possibly obsolete very soon given the rapid technological developments. To support the development of these new tools, we provide a series of vignettes on how to wrap and evaluate a method and on the different measures proposed in this study at `r print_url("https://benchmark.dynverse.org")`.
+Our study indicates that the field of trajectory inference is maturing, primarily for linear and bifurcating trajectories (as we illustrate with two datasets in `r ref("fig", "example_predictions", "a and b")`). However, we also highlight several ongoing challenges, which should be addressed before TI can be a reliable tool for analysing single-cell -omics datasets with complex trajectories. Foremost, new methods should focus on improving →the unbiased inference of tree, cyclic graph and disconnected topologies, as we found that methods repeatedly overestimate or underestimate the complexity of the underlying topology, even if the trajectory could easily be  identified using a dimensionality reduction method (illustrated with some synthetic datasets in `r ref("fig", "example_predictions", "c and d")`). ← Furthermore, higher standards for code assurance and documentation could help in adopting these tools across the single-cell -omics field. Finally, new tools should be designed to scale well with the increasing number of cells and features. We found that only a handful of current methods are able to handle datasets with more than 10.000 cells within a reasonable timeframe, making the others possibly obsolete very soon given the rapid technological developments. To support the development of these new tools, we provide a series of vignettes on how to wrap and evaluate a method and on the different measures proposed in this study at `r print_url("https://benchmark.dynverse.org")`.
 
 
 <!-- The robustness of the evaluation & development of new methods -->
@@ -297,7 +289,7 @@ ________________
 # Online Methods
 ## Data and code availability
 → 
-The processed real and synthetic datasets used in this study are deposited on Zenodo ([doi.org/10.5281/zenodo.1211533](https://doi.org/10.5281/zenodo.1211533[p])) [@cannoodt_goldstandardsinglecell_]. 
+The processed real and synthetic datasets used in this study are deposited on Zenodo ([doi.org/10.5281/zenodo.1211533](https://doi.org/10.5281/zenodo.1211533[d])) [@cannoodt_goldstandardsinglecell_]. 
 
 
 The main analysis repository is available at `r print_url("benchmark.dynverse.org")` and is divided into several experiments. Each experiment has its own set of scripts and results, each accompanied by an illustrated readme which can be easily browsed and explored on the github website.
@@ -366,7 +358,7 @@ special_methods <- c("mfa", "dpt", "slice", "sincell", "calista", "urd")
 # create functions to list the methods within a particular conversion category
 conversion <- function(conversion_oi) {
   methods_evaluated %>% 
-    filter(source %in% c("tool", "offtheshelf", "adaptation")) %>%
+    filter(source %in% c("tool")) %>%
     filter(map_lgl(output, ~conversion_oi %in% .$outputs)) %>% 
     mutate(name = paste0(name, ifelse(id %in% special_methods, "\\*", ""))) %>% 
     pull(name) %>% 
@@ -399,20 +391,6 @@ Special conversions were necessary for certain methods:
 
 
 More information on how each method was wrapped can be found within the comments of each wrapper script, available at `r print_url("https://github.com/dynverse/dynmethods")`.←
-
-
-→
-### Off-the-shelf methods
-For baseline performance, we added several "off-the-shelf" TI methods which can be run using just a couple of commands in R.←
-
-
-* **Component 1:** This method returns the first component of a PCA dimensionality reduction as a linear trajectory. Although conceptually very simple, it has been used in certain studies [@kouno_temporaldynamicstranscriptional_2013; @zeng_pseudotemporalorderingsingle_2017].
-* **Angle:** Similar to the previous method, this method computes the angle with respect to the origin in a two-dimensional PCA, and uses this angle as pseudotime for a cyclical trajectory.
-→
-* **Periodic PrinCurve:** Periodic principal curves, using the R princurve package
-* **MST:** Dimensionality reduction with PCA, followed by clustering using the R mclust package, after which the clusters are connected using a minimal spanning tree. The cells are then projected onto the edges of the MST.
-* **GNG**: Dimensionality reduction with PCA, followed by modelling of the topology with a growing neural gas using the R gng package (`r print_url("https://github.com/rcannood/gng")`). The cells are then projected onto the edges of the network.
-←
 
 
 ## Trajectory types
@@ -461,7 +439,7 @@ The dyngen ( `r print_url("https://github.com/dynverse/dyngen")`) workflow to ge
 One of the main processes involved in cellular dynamic processes is gene regulation, where regulatory cascades and feedback loops lead to progressive changes in expression and decision making. The exact way a cell chooses a certain path during its differentiation is still an active research field, although certain models have already emerged and been tested in vivo. One driver of bifurcation seems to be mutual antagonism, where genes [@xu_regulationbifurcatingcell_2015] strongly repress each other, forcing one of the two to become inactive [@graf_forcingcellschange_2009]. Such mutual antagonism can be modelled and simulated [@wang_quantifyingwaddingtonlandscape_2011; @ferrell_bistabilitybifurcationswaddington_2012]. Although such a two-gene model is simple and elegant, the reality is frequently more complex, with multiple genes (grouped into modules) repressing each other [@yosef_dynamicregulatorynetwork_2013].
 
 
-→To simulate certain trajectory topologies, we therefore designed module networks in which the cells follow a particular trajectory topology given certain parameters. Two module networks generated linear trajectories (linear and linear long), one generated a bifurcation, one generated a convergence, one generated a multifurcation (trifurcating), two generated a tree (consecutive bifurcating and binary tree), one generated an acyclic graph (bifurcating and converging), one generated a complex fork (trifurcating), one generated a rooted tree (consecutive bifurcating) and two generated simple graph structures (bifurcating loop and bifurcating cycle). The structure of these module networks is available at `r print_url("https://github.com/dynverse/dyngen/tree/master/inst/ext_data/modulenetworks")`.←
+→To simulate certain trajectory topologies, we therefore designed module networks in which the cells follow a particular trajectory topology given certain parameters. Two module networks generated linear trajectories (linear and linear long), one generated a bifurcation, one generated a convergence, one generated a multifurcation (trifurcating), two generated a tree (consecutive bifurcating and binary tree), one generated an acyclic graph (bifurcating and converging), one generated a complex fork (trifurcating), one generated a rooted tree (consecutive bifurcating) and two generated simple graph structures (bifurcating loop and bifurcating cycle). The structure of these module networks is available at[e] `r print_url("https://github.com/dynverse/dyngen/tree/master/inst/ext_data/modulenetworks")`.←
 
 
 From these module networks we generated gene regulatory networks in two steps: the main regulatory network was first generated, and extra target genes from real regulatory networks  were added. For each dataset, we used the same number of genes as were differentially expressed in the real datasets. 5% of the genes were assigned to be part of the main regulatory network, and were randomly distributed among all modules (with at least one gene per module). We sampled edges between these individual genes (according to the module network) using a uniform distribution between 1 and the number of possible targets in each module. To add additional target genes to the network, we assigned every regulator from the network to a real regulator in a real network (from regulatory circuits [@marbach_tissuespecificregulatorycircuits_2016]), and extracted for every regulator a local network around it using personalized pagerank (with damping factor set to 0.1), as implemented in the `page_rank` function of the *igraph* package. 
@@ -656,10 +634,10 @@ To rank methods, we needed to aggregate the different scores on two levels: acro
 To make sure easy and difficult datasets have equal influence on the final score, we first normalised the scores on each dataset across the different methods. We shifted and scaled the scores to $\sigma = 1$ and $\mu = 0$, and then applied the unit probability density function on these values to get the scores back into the $[0, 1]$ range.
 
 
-After normalisation, we aggregated step by step the scores from different datasets. We first aggregated the datasets with the same dataset source and trajectory type using an arithmetic mean of their scores. Next, the scores were averaged over different dataset sources, using a arithmetic mean which was weighted based on how much the synthetic and silver scores correlated with the real gold scores. Finally, the scores were aggregated over the different trajectory types again using a arithmetic mean.
+Since there is a bias in dataset source and trajectory type (e.g. there are many more linear datasets), we aggregated the scores per method and dataset in multiple steps. We first aggregated the datasets with the same dataset source and trajectory type using an arithmetic mean of their scores. Next, the scores were averaged over different dataset sources, using a arithmetic mean which was weighted based on how much the synthetic and silver scores correlated with the real gold scores. Finally, the scores were aggregated over the different trajectory types again using a arithmetic mean.
 
 
-Finally, to get an overall benchmarking score, we aggregated the different metrics using a geometric mean.[q][r][s][t]
+Finally, to get an overall benchmarking score, we aggregated the different metrics using a geometric mean.
 ←
 ## Method execution
 Each execution of a method on a dataset was performed in a separate task as part of a gridengine job. Each task was allocated one CPU core of an Intel(R) Xeon(R) CPU E5-2665 @ 2.40GHz, and one R session was started for each task. During the execution of a method on a dataset, if the time limit (>1h) or memory limit (16GB) was exceeded, or an error was produced, a zero score was returned for that execution.
@@ -670,17 +648,17 @@ To assess the complementarity between different methods, we first calculated for
 To assess the scalability of each method, we started from 5 real datasets, selected using the centers from a k-medoids as discussed in the synthetic data generation section. We up- and downscaled these datasets between 10 to 100.000 cells and 10 to 100.000 features, while never going higher than 1.000.000 values in total. To generate new cells or features, we first generated a 10-nearest neighbour graph of both the cells and features from the expression space. For every new cell or feature, we used a linear combination of one to three existing cells or features, where each cell or features was given a weight sampled from $\textit{U}(0,1)$. 
 
 
-We ran each method on each dataset for maximally 1 hour and gave each process 10GB of memory. To determine the running time of each method, we started the timer right after data loading and the loading of any packages, and stopped the clock before post-processing and saving of the output. Pre- and postprocessing steps specific to a method, such as dimensionality reduction and gene filtering, were included in the time. To estimate the maximal memory usage, we used the max_vmem value from the qacct command provided by the gridengine cluster. We acknowledge however that these values are very noisy, and the averages provided in this study are therefore only rough estimates.
+We ran each method on each dataset for maximally 1 hour and gave each process 10GB of memory. To determine the running time of each method, we started the timer right after data loading and the loading of any packages, and stopped the clock before post-processing and saving of the output. Pre- and postprocessing steps specific to a method, such as dimensionality reduction and gene filtering, were included in the time. To estimate the maximal memory usage, we used the `max_vmem` value from the `qacct` command provided by the gridengine cluster. We acknowledge however that these values are very noisy, and the averages provided in this study are therefore only rough estimates.
 
 
 The relationship between the dimensions of a dataset and the running time or maximal memory usage was modelled using generalized additive models. As smoothing bases, we used a thin-plate regression spline [@wood_thinplateregression_2003] , with $log_{10}|\textit{cells}|$ and $log_{10}|\textit{features}|$ as predictor variables, and fitted this model using the gam as implemented in the R mgcv package, with $log_{10}\textit{time}$ (or $log_{10}\textit{memory}$) as outcome.
 
 
-To classify the time complexity of each method, we predicted the running time at 10.000 features (cells) with increasing number of cells (features) from 100 to 100.000, with steps of 100. A method was classified as constant / low slope if on average an addition of 100 cells would increase the running time with less than 0.1 seconds. To classify as sublinear, linear or superlinear, we scaled the times between 0 and 1, and classified the method as sublinear if the running time was on average 5% above the diagonal, superlinear if on average 5% under the diagonal, and linear otherwise.
+To classify the time complexity of each method, we predicted the running time at 10.000 features with increasing number of cells from 100 to 100.000, with steps of 100. A method was classified as constant / low slope if on average an addition of 100 cells would increase the running time with less than 0.1 seconds. To classify as sublinear, linear, quadratic, or superquadratic, we scaled the times between 0 and 1, and classified the method as sublinear if the running time was on average 5% above the diagonal, superlinear if on average 5% under the diagonal, and linear otherwise.
 
 
-## Stability[u][v]
-We ran each method on a selection of datasets; which consisted of 25% of the datasets accounting for 15% of the total runtime, chosen such that after aggregation the overall scores still has > 0.99 correlation with the original overall ranking. We subsampled each dataset 10 times with 95% of the original cells and 95% of the original features, such that each method should produce slightly different results. 
+## Stability
+In the ideal case, a method should produce a similar trajectory, even when the input data is slightly different. However, running the method multiple times on the same input data would not be the ideal approach to assess the stability of a method, given that a lot of tools artificially are artificially deterministic by resetting the pseudorandom number generator (for example, using the set.seed function in R). To assess the stability of each method, we therefore selected a number of datasets, which consisted of 25% of the datasets accounting for 15% of the total runtime, chosen such that after aggregation the overall scores still has > 0.99 correlation with the original overall ranking. We subsampled each dataset 10 times with 95% of the original cells and 95% of the original features. We ran every method on each of the bootstraps, and assessed the stability by calculating the benchmarking scores between each pair of subsequent models (run $i$ is compared to run $i+1$). For the `r label_metric("correlation")` and `r label_metric("F1_branches")`, we only used the intersection between the cells of two datasets, while the intersection of the features was used for the `r label_metric("featureimp_wcor")`.
 ←
 ## Usability
 
@@ -696,7 +674,7 @@ Each quality aspect received a weight depending on how frequently it was found i
 # Acknowledgements
 We would like to thank the original authors of the methods for their feedback and improvements on the method wrappers. This study was supported by Fond Wetenschappelijk Onderzoek (W.S. and R.C.).
 # Author contributions
-W.S., R.C., H.T. and Y.S.  designed the study, performed the experiments and analysed the data. W.S., R.C., and H.T. implemented software packages. W.S., R.C., Y.S. and H.T. prepared the manuscript. Y.S. supervised the project.
+W.S., R.C., H.T. and Y.S. designed the study. W.S. and R.C. performed the experiments and analysed the data. W.S., R.C., and H.T. implemented software packages. W.S., R.C., Y.S. and H.T. prepared the manuscript. Y.S. supervised the project.
 # Competing financial interests
 The authors declare no competing financial interests
 
@@ -711,25 +689,8 @@ Make sure to pin the zotero bibtex references after first using them!
 -->
 
 
-[a]Check that this is now without the control methods
-[b]Mentions "55" methods instead of the "45" mentioned in the introduction. Also, the things written in the figure b are very small.
-[c]check consistency with Figure 1
-[d]Try to rewrite a little bi
-[e]somehing like his?
-[f]Hehe ;). Something like this?
-[g]Does not fit with the number in Figure 1
-[h]TODO: rework enumeration into a paragraph
-[i]something like this?
-[j]Isn't this a control method ?
-[k]yes, should be removed!
-[l](Not shown), or include in Supp Fig 4?
-[m]Yeah we don't include this yet, should be in sup fig 4
-[n]TODO: Will be added as sup fig
-[o]I would not mention flow/mass cytoemtry here
-[p]Update when final
-[q]This might give the impression of being a bit "overengineered".  Do we also show somewhere how much the resulting ranking using this aggregation would differ from a very simple "mean" ranking of the individual metrics/datasets ?
-[r]No we don't do this yet. If we do this, perhaps we should just add a "benchmarking robustness" supplementary note.
-[s]The results do change when we simply use a mean, but then they are very biased, eg. because 1/4 of our datasets are linear, the linear methods perform well..
-[t]I adapted the text a little bit to better explain the 'why'
-[u]Todo once this experiment is finished
-[v]Good enough?
+[a](Not shown), or include in Supp Fig 4?
+[b]Yeah we don't include this yet, should be in sup fig 4
+[c]TODO: Will be added as sup fig
+[d]Update when final
+[e]the following link renders as verbatim code!
