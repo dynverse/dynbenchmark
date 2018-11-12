@@ -22,9 +22,35 @@ deposit_id <- 1443566
 deposit <- GET(glue::glue("https://zenodo.org/api/deposit/depositions/{deposit_id}"), headers)
 bucket_url <- content(deposit)$links$bucket
 
-path <- "ozewieze/wozewieze/wowo/kristalla.rds"
-PUT(
-  glue::glue("{bucket_url}/{path}"),
-  body = upload_file("derived/01-datasets/real/gold/aging-hsc-old_kowalczyk/dataset.rds"),
-  headers
+datasets <- list_datasets()
+
+
+#' @examples
+#' dataset_id <- datasets$id[[1]]
+
+library(qsub)
+qsub_lapply(
+  datasets$id,
+  function(dataset_id) {
+    library(dynbenchmark)
+    library(tidyverse)
+    library(httr)
+
+    temp_dataset_file <- tempfile()
+
+    dataset <- load_dataset(dataset_id)
+    dataset$expression <- dynwrap::get_expression(dataset, "expression")
+    dataset$counts <- dynwrap::get_expression(dataset, "counts")
+
+    write_rds(dataset, temp_dataset_file, compress = "xz")
+
+    path <- paste0(dataset_id, ".rds")
+    PUT(
+      glue::glue("{bucket_url}/{path}"),
+      body = upload_file(temp_dataset_file),
+      headers
+    )
+
+    file.remove(temp_dataset_file)
+  }
 )
