@@ -7,19 +7,14 @@ experiment("08-summary")
 #                  GET METHODS INFO                 #
 #####################################################
 method_info <-
-  read_rds(result_file("methods.rds", experiment_id = "03-methods")) %>%
+  load_methods() %>%
   mutate(
     required_priors_str = map_chr(input, ~ .$required %>% setdiff(c("expression", "counts")) %>% paste0(collapse = ",")),
     optional_priors_str = map_chr(input, ~ .$optional %>% paste0(collapse = ","))
   ) %>%
   rename_all(function(x) paste0("method_", x)) %>%
   rename(tool_id = method_tool_id) %>%
-  select_if(function(x) !all(is.na(x))) %>%
-  filter(
-    !method_id %in% c("error", "identity", "random", "shuffle"),
-    !grepl("^projected_", method_id),
-    method_source != "offtheshelf"
-  )
+  select_if(function(x) !all(is.na(x)))
 
 #####################################################
 #                  READ QC RESULTS                  #
