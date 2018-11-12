@@ -2023,9 +2023,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.70710678"
-     inkscape:cx="41.997564"
-     inkscape:cy="266.58579"
+     inkscape:zoom="0.5"
+     inkscape:cx="-348.60094"
+     inkscape:cy="156.13196"
      inkscape:document-units="mm"
      inkscape:current-layer="g35197"
      showgrid="false"
@@ -3382,14 +3382,14 @@
        transform="translate(-4.2847327,-357.95901)">
       <text
          id="text20134"
-         y="788.7442"
-         x="184.49049"
+         y="783.7442"
+         x="212.99051"
          style="font-style:normal;font-weight:normal;font-size:20.57535172px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.54315138"
          xml:space="preserve"><tspan
            id="tspan20132"
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20.57535172px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:center;text-anchor:middle;stroke-width:1.54315138"
-           y="788.7442"
-           x="184.49049"
+           y="783.7442"
+           x="212.99051"
            sodipodi:role="line">Trajectory types</tspan></text>
       <g
          id="g2600">
