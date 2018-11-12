@@ -1,7 +1,11 @@
-#' Renders the manuscript
+#' Renders the manuscript, and prepares the files for submission
 
 library(dynbenchmark)
 library(tidyverse)
+
+output_directory <- "results/12-manuscript/"
+if (fs::dir_exists(output_directory)) fs::dir_delete(output_directory)
+fs::dir_create(output_directory)
 
 # download from google docs
 httr::set_config(httr::config(http_version = 0)) # avoid http2 framing layer bug
@@ -9,28 +13,33 @@ drive <- googledrive::drive_download(googledrive::as_id("1je6AaelApu2xcSNbYlvcuT
 system(pritt("sed -i '1s/^.//' {drive$local_path}")) # remove first character, because this is some strange unicode character added by google
 system(pritt("cat {drive$local_path} > manuscript/paper.Rmd"))
 
-# render
-rmarkdown::render("manuscript/paper.Rmd", output_format = pdf_manuscript())
-rmarkdown::render("manuscript/supplementary.Rmd", output_format = pdf_manuscript(render_changes = FALSE))
+# render main manuscript
+rmarkdown::render("manuscript/paper.Rmd", output_format = pdf_manuscript(), output_dir = output_directory)
+
+# copy and render figs, sfigs and stables
+pwalk(bind_rows(figs, sfigs), function(ref_id, ...) {
+  pdf_path <- plot_fig( ref_id = ref_id, format = "pdf", ...)
+  name <- refs %>% filter(ref_id == !!ref_id) %>% pull(name)
+  fs::file_copy(pdf_path, fs::path(output_directory, paste0(name, ".pdf")), overwrite = TRUE)
+})
+
+pwalk(stables, function(ref_id, table, ...) {
+  excel_path <- table$excel
+  if (!is.null(excel_path)) {
+    name <- refs %>% filter(ref_type == "stable", ref_id == !!ref_id) %>% pull(name)
+    fs::file_copy(excel_path, fs::path(output_directory, paste0(name, ".xlsx")), overwrite = TRUE)
+  }
+})
+
+# render supplementary
+rmarkdown::render("manuscript/supplementary.Rmd", output_format = pdf_manuscript(render_changes = FALSE), output_dir = output_directory)
 
 # browse
-system("/usr/bin/xdg-open manuscript/paper.pdf")
-system("/usr/bin/xdg-open manuscript/paper_changes.pdf")
-system("/usr/bin/xdg-open manuscript/supplementary.pdf")
+fs::file_show(str_glue("{output_directory}/paper.pdf"))
+fs::file_show(str_glue("{output_directory}/paper_changes.pdf"))
+fs::file_show(str_glue("{output_directory}/supplementary.pdf"))
 
 # upload to google drive
-googledrive::drive_update("dynverse/paper.pdf", "manuscript/paper.pdf")
-googledrive::drive_update("dynverse/paper_changes.pdf", "manuscript/paper_changes.pdf")
-googledrive::drive_update("dynverse/supplementary.pdf", "manuscript/supplementary.pdf")
-
-# prepare for submission
-# paper_folder <- "../../dyndocs/20180401_submission_nat_biotech/"
-# file.copy("analysis/paper/paper_latex.pdf", paste0(paper_folder, "paper.pdf"), overwrite=TRUE)
-# file.copy("analysis/paper/supplementary_latex.pdf", paste0(paper_folder, "supplementary_material.pdf"), overwrite=TRUE)
-#
-# figs <- read_rds(derived_file("figs.rds", "paper"))
-# figs$fig_id <- seq_len(nrow(figs))
-#
-# walk2(figs$fig_id, figs$fig_path, function(fig_id, fig_path) {
-#   file.copy(fig_path, paste0(paper_folder, glue::glue("fig_{fig_id}.pdf")), overwrite=TRUE)
-# })
+googledrive::drive_update("dynverse/paper.pdf", str_glue("{output_directory}/paper.pdf"))
+googledrive::drive_update("dynverse/paper_changes.pdf", str_glue("{output_directory}/paper.pdf"))
+googledrive::drive_update("dynverse/supplementary.pdf", str_glue("{output_directory}/paper.pdf"))
