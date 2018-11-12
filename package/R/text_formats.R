@@ -105,12 +105,17 @@ pdf_manuscript <- function(
     if (render_changes) {
       output_file_changes <- paste0(fs::path_ext_remove(output_file), "_changes.tex")
       read_lines(output_file) %>% process_changes(render_changes = TRUE) %>% write_lines(output_file_changes)
-      system(glue::glue("xelatex -interaction=nonstopmode {output_file_changes}"))
+      system(glue::glue("xelatex -interaction=nonstopmode -output-directory={fs::path_dir(output_file)} {output_file_changes}"))
+      # clean up files if requested
+      if (clean) clean_xelatex(output_file_changes)
     }
 
     # render without changes
     read_lines(output_file) %>% process_changes(render_changes = FALSE) %>% write_lines(output_file)
-    system(glue::glue("xelatex -interaction=nonstopmode {output_file}"))
+    system(glue::glue("xelatex -interaction=nonstopmode -output-directory={fs::path_dir(output_file)} {output_file}"))
+
+    # clean up files if requested
+    if (clean) clean_xelatex(output_file)
 
     # save the supplementary figures and tables
     write_rds(lst(sfigs = get("sfigs", envir = .GlobalEnv), stables, refs), "supplementary.rds")
@@ -120,6 +125,14 @@ pdf_manuscript <- function(
   }
 
   format
+}
+
+
+clean_xelatex <- function(output_file) {
+  fs::file_delete(fs::path_ext_set(output_file, "log"))
+  fs::file_delete(fs::path_ext_set(output_file, "tex"))
+  fs::file_delete(fs::path_ext_set(output_file, "aux"))
+  fs::file_delete(fs::path_ext_set(output_file, "out"))
 }
 
 #' Common dynbenchmark format
