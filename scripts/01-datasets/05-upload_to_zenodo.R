@@ -55,11 +55,9 @@ qsub_lapply(
   }
 )
 
-
-deposit <- GET(glue::glue("https://zenodo.org/api/deposit/depositions/{deposit_id}"), headers)
-
-
-
+# check which files are uploaded
 files <- GET(glue::glue("https://zenodo.org/api/deposit/depositions/{deposit_id}/files"), headers) %>% httr::content() %>% list_as_tibble()
 
-files$filename %>% gsub("\\.rds", "", .)
+uploaded_dataset_ids <- files$filename %>% gsub("\\.rds", "", .)
+
+setdiff(datasets$id, uploaded_dataset_ids)
