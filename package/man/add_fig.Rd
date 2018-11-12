@@ -3,6 +3,7 @@
 \name{add_fig}
 \alias{add_fig}
 \alias{add_sfig}
+\alias{plot_fig}
 \title{Add a figure}
 \usage{
 add_fig(fig_path, ref_id, caption_main, caption_text = "", width = 5,
@@ -10,6 +11,9 @@ add_fig(fig_path, ref_id, caption_main, caption_text = "", width = 5,
 
 add_sfig(fig_path, ref_id, caption_main, caption_text = "", width = 5,
   height = 7, format = get_default_format(), integrate = TRUE)
+
+plot_fig(ref_type, ref_id, fig_path, caption_main, caption_text,
+  width = 5, height = 7, format = "latex", integrate = TRUE)
 }
 \arguments{
 \item{fig_path}{Path to the figure}
@@ -25,6 +29,10 @@ add_sfig(fig_path, ref_id, caption_main, caption_text = "", width = 5,
 \item{height}{Height in inches}
 
 \item{format}{The format, in html or latex}
+
+\item{integrate}{Whether to integrate the figure, or direct the reader to a separate file}
+
+\item{ref_type}{fig, sfig, table, ...}
 }
 \description{
 Add a figure
