@@ -23,7 +23,7 @@ column_info <- tribble( # tribble_start
   "score_overall",          "benchmark_overall_overall",                    "Accuracy",                 "bar",        "benchmark",      list(width = 4, legend = FALSE),
   "score_overall",          "scaling_pred_scoretime_overall",               "Scalability",              "bar",        "scaling",        list(width = 4, legend = FALSE),
   "score_overall",          "stability_overall_overall",                    "Stability",                "bar",        "stability",      list(width = 4, legend = FALSE),
-  "score_overall",          "qc_overall_overall",                           "Meta-quality",             "bar",        "qc",             list(width = 4, legend = FALSE),
+  "score_overall",          "qc_overall_overall",                           "Usability",             "bar",        "qc",             list(width = 4, legend = FALSE),
   "benchmark_metric",       "benchmark_overall_norm_correlation",           "Ordering",                 "funkyrect",  "benchmark",      lst(),
   "benchmark_metric",       "benchmark_overall_norm_him",                   "Topology",                 "funkyrect",  "benchmark",      lst(),
   "benchmark_metric",       "benchmark_overall_norm_featureimp_wcor",       "Features",                 "funkyrect",  "benchmark",      lst(),
