@@ -475,8 +475,8 @@ funky_heatmap <- function(
     legend_vals <- tribble(
       ~symbol, ~value,
       "", "None",
-      "\u2715", "Some",
-      "\u2716", "A lot"
+      "\u2715", "Start or end cells",
+      "\u2716", "Cell grouping or time course"
     )
 
     pr_labels_df <-
