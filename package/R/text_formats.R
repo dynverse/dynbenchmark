@@ -5,8 +5,8 @@
 #'
 #' @export
 github_markdown_nested <- function(
-  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
+  bibliography = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib")),
+  csl = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl")),
   ...
 ) {
   format <- rmarkdown::github_document(...)
