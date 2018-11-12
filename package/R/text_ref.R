@@ -111,6 +111,7 @@ add_fig <- function(
 }
 
 #' @rdname add_fig
+#' @param integrate Whether to integrate the figure, or direct the reader to a separate file
 #' @export
 add_sfig <- function(
   fig_path,
@@ -135,7 +136,8 @@ add_sfig <- function(
   )
 }
 
-
+#' @rdname add_fig
+#' @export
 plot_fig <- function(
   ref_type,
   ref_id,
