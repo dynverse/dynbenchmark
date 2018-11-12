@@ -2,7 +2,7 @@
 ###############        CLASSIFY TIME       ###############
 ##########################################################
 
-time_classification_design <- bind_rows(
+classification_design <- bind_rows(
   tibble(
     feature = "n_cells",
     n_cells = seq(100, 10000, 100),
@@ -16,13 +16,17 @@ time_classification_design <- bind_rows(
 )
 
 method_predict_time <- models_nocontrol %>% select(method_id, predict_time) %>% deframe()
+method_predict_mem <- models_nocontrol %>% select(method_id, predict_mem) %>% deframe()
 
-time_classification_timings <- crossing(
-  time_classification_design,
+classification_values <- crossing(
+  classification_design,
   method_id = names(method_predict_time)
 ) %>%
   group_by(method_id) %>%
-  mutate(time = first(method_predict_time[method_id])(n_cells, n_features)) %>%
+  mutate(
+    time = first(method_predict_time[method_id])(n_cells, n_features),
+    mem = first(method_predict_mem[method_id])(n_cells, n_features)
+  ) %>%
   ungroup()
 
 # original solution
@@ -47,19 +51,19 @@ time_classification_timings <- crossing(
 #   ungroup()
 
 
-classify_curve <- function(method_id, feature, time, n_cells, n_features) {
+classify_curve <- function(method_id, feature, value, n_cells, n_features) {
   # detect low or negative slopes
   # these are likely mistakes in the model
-  slope <- mean(diff(time))
+  slope <- mean(diff(value))
   if (slope < -.001) return("negative slope")
   if (slope < .001) return("<linear")
 
   # detect sublinear separately
-  curvature <- mean(seq(0, 1, length.out = length(time)) - scale_minmax(time))
+  curvature <- mean(seq(0, 1, length.out = length(value)) - scale_minmax(value))
   if (curvature < -0.1) return("<linear")
 
   dat <-
-    data_frame(y = time, n_cells, n_features) %>%
+    data_frame(y = value, n_cells, n_features) %>%
     select(x = !!feature, y)
   dat <- dat %>%
     mutate(
@@ -119,18 +123,22 @@ classify_curve <- function(method_id, feature, time, n_cells, n_features) {
 #   }
 # }
 
-time_classification <-
-  time_classification_timings %>%
+classifications <-
+  classification_values %>%
   group_by(method_id, feature) %>%
   summarise(
-    slope = mean(diff(time, differences = 1)),
-    curvature = mean(seq(0, 1, length.out = n()) - scale_minmax(time)),
-    class = classify_curve(method_id[[1]], feature[[1]], time, n_cells, n_features)
+    slope_time = mean(diff(time, differences = 1)),
+    curvature_time = mean(seq(0, 1, length.out = n()) - scale_minmax(time)),
+    class_time = classify_curve(method_id[[1]], feature[[1]], time, n_cells, n_features),
+    slope_mem = mean(diff(mem, differences = 1)),
+    curvature_mem = mean(seq(0, 1, length.out = n()) - scale_minmax(mem)),
+    class_mem = classify_curve(method_id[[1]], feature[[1]], mem, n_cells, n_features)
   ) %>%
   ungroup()
 
-g <- ggplot(time_classification) + geom_density(aes(curvature, colour = class)) + facet_wrap(~feature, ncol = 1) + theme_bw() + scale_x_continuous(breaks = seq(-.5, .5, by = .05))
-ggsave(result_file("class_versus_curvature.pdf"), g, width = 8, height = 8)
+g <- classifications %>% crossing(pred = c("time", "mem")) %>% mutate(class = ifelse(pred == "time", class_time, class_mem), curvature = ifelse(pred == "time", curvature_time, curvature_mem)) %>%
+  ggplot() + geom_density(aes(curvature, colour = class)) + facet_wrap(~feature + pred, ncol = 2) + theme_bw() + scale_x_continuous(breaks = seq(-.5, .5, by = .05))
+ggsave(result_file("class_versus_curvature.pdf"), g, width = 12, height = 8)
 
 ##########################################################
 ###############  GENERATE SUMMARY FIGURE   ###############
@@ -186,8 +194,9 @@ plot_average_memory <-
 plot_average_memory
 
 ## Plot the classification and small multiples
-plotdata_time_classification <- time_classification_timings %>%
-  left_join(time_classification, c("method_id", "feature")) %>%
+plotdata_classification <-
+  classification_values %>%
+  left_join(classifications, c("method_id", "feature")) %>%
   mutate(method_id = factor(method_id, method_order)) %>%
   mutate(
     ymin = as.numeric(method_id),
@@ -201,12 +210,13 @@ plotdata_time_classification <- time_classification_timings %>%
   ) %>%
   mutate(
     x = xmin + row_number() / n() * 0.95 + 0.025,
-    y = ymin + scale_minmax(time) * 0.9 + 0.05
+    y_time = ymin + scale_minmax(time) * 0.9 + 0.05,
+    y_mem = ymin + scale_minmax(mem) * 0.9 + 0.05
   ) %>%
   ungroup()
 
-plotdata_time_classification_boxes <-
-  plotdata_time_classification %>%
+plotdata_classification_boxes <-
+  plotdata_classification %>%
   group_by(
     method_id, feature
   ) %>%
@@ -216,49 +226,52 @@ plotdata_time_classification_boxes <-
     ymin = first(ymin),
     ymax = ymin + 1
   ) %>%
-  left_join(time_classification, c("method_id", "feature"))
+  left_join(classifications, c("method_id", "feature"))
 
-plotdata_time_classification <- plotdata_time_classification %>% select(method_id, feature, x, y, class)
+plotdata_classification <- plotdata_classification %>% select(method_id, feature, x, y_time, y_mem, class_time, class_mem)
 
-# time_class_palette <- c("negative slope" = "#b666d9", "constant / low slope" = "#0074D9", "sublinear" = "#2ECC40", "linear" = "#d9c700", "quadratic" = "#FF851B", "superquadratic" = "#FF4136")
-# time_class_palette <- c("constant / low slope" = "#0074D9", "sublinear" = "#2ECC40", "linear" = "#d9c700", "quadratic" = "#FF851B", "superquadratic" = "#FF4136")
-# time_class_palette <- set_names(rev(viridisLite::viridis(length(time_class_palette), option = "cividis")), names(time_class_palette))
-
-# # oranje
-# time_class_palette <- c("negative slope" = "gray", "low slope" = "#3d87a6", "sublinear" = "#9bcde1", "linear" = "#fee08b", "quadratic" = "#d78a27", "superquadratic" = "#d73027")
-# white <- c("superquadratic", "quadratic", "low slope")
-
-# # groen
-# time_class_palette <- c("negative slope" = "gray", "low slope" = "#3d87a6", "sublinear" = "#9bcde1", "linear" = "#9be1ad", "quadratic" = "#fee08b", "superquadratic" = "#d73027")
-# white <- c("superquadratic", "low slope")
-
-# # blauw
-# time_class_palette <- c("negative slope" = "gray", "low slope" = "#3d87a6", "sublinear" = "#3d87a6", "linear" = "#9bcde1", "quadratic" = "#fee08b", "superquadratic" = "#d73027")
-# white <- c("superquadratic", "low slope", "sublinear")
-
-# oranjeblauw
-# time_class_palette <- c("negative slope" = "gray", "low slope" = "#3d87a6", "sublinear" = "#3d87a6", "linear" = "#9bcde1", "quadratic" = "#d78a27", "superquadratic" = "#d73027")
-# white <- c("superquadratic", "low slope", "sublinear", "quadratic")
-
-# new version
-time_class_palette <- c("negative slope" = "darkgray", "<linear" = "#3d87a6", "linear" = "#9bcde1", ">linear" = "#d73027", "quadratic" = "#d78a27", ">quadratic" = "#d73027", "exponential" = "black")
+# make plot
+class_palette <- c("negative slope" = "darkgray", "<linear" = "#3d87a6", "linear" = "#9bcde1", ">linear" = "#d73027", "quadratic" = "#d78a27", ">quadratic" = "#d73027", "exponential" = "black")
 white <- c(">quadratic", "<linear", "quadratic", ">linear")
 
 
 plot_time_classification <-
-  ggplot(plotdata_time_classification, aes(group = paste0(method_id, feature))) +
-  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = class), data = plotdata_time_classification_boxes %>% mutate(class = factor(class, levels = names(time_class_palette))), color = NA) +
-  geom_line(aes(x = x, y = y), plotdata_time_classification %>% filter(!class %in% white), color = "#333333", size = .75) +
-  geom_line(aes(x = x, y = y), plotdata_time_classification %>% filter(class %in% white), color = "white", size = 1) +
-  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), data = plotdata_time_classification_boxes, color = "#333333", fill = NA, size = 0.25) +
+  ggplot(plotdata_classification, aes(group = paste0(method_id, feature))) +
+  geom_rect(
+    aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = class_time),
+    data = plotdata_classification_boxes %>% mutate(class_time = factor(class_time, levels = names(class_palette))),
+    color = NA
+  ) +
+  geom_line(aes(x = x, y = y_time), plotdata_classification %>% filter(!class_time %in% white), color = "#333333", size = .75) +
+  geom_line(aes(x = x, y = y_time), plotdata_classification %>% filter(class_time %in% white), color = "white", size = 1) +
+  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), data = plotdata_classification_boxes, color = "#333333", fill = NA, size = 0.25) +
   scale_y_methods_empty +
   scale_x_continuous("Time complexity" , expand = c(0, 0), breaks = c(1.5, 2.5), labels = c("Cells", "Features"), position = "top") +
-  scale_fill_manual("", values = time_class_palette) +
+  scale_fill_manual("", values = class_palette) +
   theme_pub() +
   theme(legend.position = "bottom") +
   no_margin_sides
 
 plot_time_classification
+
+plot_mem_classification <-
+  ggplot(plotdata_classification, aes(group = paste0(method_id, feature))) +
+  geom_rect(
+    aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = class_mem),
+    data = plotdata_classification_boxes %>% mutate(class_mem = factor(class_mem, levels = names(class_palette))),
+    color = NA
+  ) +
+  geom_line(aes(x = x, y = y_mem), plotdata_classification %>% filter(!class_mem %in% white), color = "#333333", size = .75) +
+  geom_line(aes(x = x, y = y_mem), plotdata_classification %>% filter(class_mem %in% white), color = "white", size = 1) +
+  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), data = plotdata_classification_boxes, color = "#333333", fill = NA, size = 0.25) +
+  scale_y_methods_empty +
+  scale_x_continuous("Memory complexity" , expand = c(0, 0), breaks = c(1.5, 2.5), labels = c("Cells", "Features"), position = "top") +
+  scale_fill_manual("", values = class_palette) +
+  theme_pub() +
+  theme(legend.position = "bottom") +
+  no_margin_sides
+
+plot_mem_classification
 
 ##
 slope_limits <- c(-2, log10(60*60*72.01))
@@ -266,14 +279,14 @@ slope_breaks <- log10(c(1, 60, 60*60, 60*60*24.01))
 scale_x_slope <- scale_x_continuous(limits = slope_limits, breaks = slope_breaks, labels = label_time(10^slope_breaks), expand = c(0, 0), position = "top")
 
 plot_slope <- function(feature) {
-  time_classification %>%
+  classifications %>%
     filter(feature == !!feature) %>%
     mutate(method_id = factor(method_id, method_order)) %>%
-    mutate(slope = scales::squish(slope, 10^slope_limits)) %>%
+    mutate(slope_time = scales::squish(slope_time, 10^slope_limits)) %>%
     ggplot() +
     even_background +
-    geom_rect(aes(xmin = first(slope_limits), xmax = log10(slope), ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#333333") +
-    geom_text(aes(x = log10(slope), y = as.numeric(method_id), label = paste0(" ", label_time(slope))), hjust = 0) +
+    geom_rect(aes(xmin = first(slope_limits), xmax = log10(slope_time), ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#333333") +
+    geom_text(aes(x = log10(slope_time), y = as.numeric(method_id), label = paste0(" ", label_time(slope_time))), hjust = 0) +
     scale_y_methods_empty +
     scale_x_slope +
     labs(x = label_long(paste0("time_per_100_", gsub("n_", "", feature)))) +
@@ -292,13 +305,15 @@ plot_slope_cells
 g <- patchwork::wrap_plots(
   plot_average_time,
   plot_time_classification,
-  plot_slope_cells,
-  plot_slope_features,
+  # plot_slope_cells,
+  # plot_slope_features,
   plot_average_memory,
-  widths = c(2, 1, 2, 2, 2),
+  plot_mem_classification,
+  # widths = c(2, 1, 2, 2, 2),
+  widths = c(2, 1, 2, 1),
   nrow = 1
 )
 
 g
-ggsave(result_file("ranking.pdf"), g, width = 14, height = 12)
+ggsave(result_file("ranking.pdf"), g, width = 12, height = 12)
 write_rds(g, derived_file("ranking.rds"))

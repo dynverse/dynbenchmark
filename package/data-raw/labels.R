@@ -26,7 +26,8 @@ common_labels <- tribble(
   "dataset_source", "Dataset source", "Dataset source",
   "source", "Dataset source", "Dataset source",
   "qc", "Quality Control", "QC",
-  "graph", "Connected graph", "Connected graph"
+  "graph", "Graph", "Graph",
+  "offtheshelf", "Off-the-shelf", "Off-the-shelf"
 )
 
 
@@ -35,4 +36,5 @@ labels <- bind_rows(
   prior_types %>% select(id = prior_id, long = prior_name, short = prior_name)
 )
 
-devtools::use_data(labels, overwrite = TRUE, pkg = "package")
+usethis::proj_set("package")
+usethis::use_data(labels, overwrite = TRUE)

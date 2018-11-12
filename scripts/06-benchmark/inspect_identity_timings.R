@@ -5,7 +5,7 @@ library(tidyverse)
 
 experiment("06-benchmark/inspect_identity_timings")
 
-raw_data <- read_rds(result_file("benchmark_results_unnormalised.rds"))
+raw_data <- read_rds(result_file("benchmark_results_unnormalised.rds", experiment_id = "06-benchmark"))
 
 timings <-
   raw_data %>%

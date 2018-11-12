@@ -85,10 +85,13 @@ write_rds(raw_data, result_file("benchmark_results_unnormalised.rds"), compress 
 
 raw_data <-
   read_rds(result_file("benchmark_results_unnormalised.rds")) %>%
-  filter(method_id %in% c("identity", "error", "shuffle", "random"))
+  filter(!method_id %in% c("identity", "error", "shuffle", "random"))
+
+sources <- unique(raw_data$dataset_source)
 
 tmp <- benchmark_aggregate(
-  data = raw_data %>% filter(error_status == "no_error")
+  data = raw_data %>% filter(error_status == "no_error"),
+  dataset_source_weights = set_names(rep(1, length(sources)), sources)
 )
 
 dataset_source_weights <-

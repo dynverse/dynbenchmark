@@ -17,7 +17,7 @@ list2env(read_rds(result_file("benchmark_results_input.rds")), environment())
 list2env(read_rds(result_file("benchmark_results_normalised.rds")), environment())
 
 metrics_info <- dyneval::metrics %>%
-  slice(match(read_rds(result_file("metrics.rds")), metric_id)) %>%
+  slice(match(metrics, metric_id)) %>%
   add_row(metric_id = "overall", plotmath = "overall", latex = "\\textrm{overall}", html = "overall", long_name = "Overall score", category = "average", type = "overall", perfect = 1, worst = 0)
 
 # get ordering of methods

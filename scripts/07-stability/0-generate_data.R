@@ -41,12 +41,7 @@ if (!file.exists(result_file("fitdata.rds"))) {
 
     # replicate aggregation with subset of datasets
     out <- benchmark_aggregate(
-      data = rawd,
-      metrics = benchmark_results_input$metrics,
-      norm_fun = benchmark_results_input$norm_fun,
-      mean_fun = benchmark_results_input$mean_fun,
-      mean_weights = benchmark_results_input$mean_weights,
-      dataset_source_weights = benchmark_results_input$dataset_source_weights
+      data = rawd
     )
 
     # calculate percentage of original execution time
@@ -75,8 +70,9 @@ if (!file.exists(result_file("fitdata.rds"))) {
     nBits = length(dataset_ids),
     parallel = TRUE,
     popSize = 8 * 8,
-    maxiter = 500,
+    maxiter = 2000,
     seed = 1,
+    maxFitness = .99,
     benchmark_results_unnormalised, benchmark_results_input, dataset_ids, bench_compare, metrics
   )
 

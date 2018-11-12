@@ -15,7 +15,11 @@ method_info <-
   rename_all(function(x) paste0("method_", x)) %>%
   rename(tool_id = method_tool_id) %>%
   select_if(function(x) !all(is.na(x))) %>%
-  filter(!method_id %in% c("error", "identity", "random", "shuffle"))
+  filter(
+    !method_id %in% c("error", "identity", "random", "shuffle"),
+    !grepl("^projected_", method_id),
+    method_source != "offtheshelf"
+  )
 
 #####################################################
 #                  READ QC RESULTS                  #
@@ -48,12 +52,14 @@ rm(tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores) # writin
 #####################################################
 scaling_scores <-
   read_rds(result_file("scaling_scores.rds", experiment_id = "05-scaling"))$scaling_scores %>%
-  mutate(metric = paste0("scaling_pred_timescore_", metric)) %>%
+  gather(column, score, scoretime, scoremem) %>%
+  mutate(metric = paste0("scaling_pred_", column, "_", metric)) %>%
+  select(-column) %>%
   spread(metric, score)
 
 scaling_preds <-
   read_rds(result_file("scaling_scores.rds", experiment_id = "05-scaling"))$scaling_preds %>%
-  gather(column, value, time, timestr) %>%
+  gather(column, value, time, timestr, mem, memstr) %>%
   mutate(metric = paste0("scaling_pred_", column, "_", labnrow, "_", labncol)) %>%
   select(method_id, metric, value) %>%
   spread(metric, value)
@@ -100,7 +106,9 @@ rm(execution_metrics, bench_metrics, all_metrics, data_aggs, benchmark_results_i
 #####################################################
 #               READ STABILITY RESULTS              #
 #####################################################
-stability <- read_rds(result_file("stability_results.rds", experiment_id = "07-stability")) %>% select(-param_id) %>% spread(metric, value)
+stability <- read_rds(result_file("stability_results.rds", experiment_id = "07-stability"))$summ %>%
+  rename_at(., setdiff(colnames(.), "method_id"), ~ paste0("stability_", .)) %>%
+  rename(stability_overall_overall = stability_geom_mean)
 
 #####################################################
 #                  COMBINE RESULTS                  #
@@ -120,8 +128,8 @@ metric_weights <-
   c(
     benchmark_overall_overall = 2,
     qc_overall_overall = 1,
-    scaling_pred_timescore_overall = 1,
-    stability_overall_overall = .5
+    scaling_pred_scoretime_overall = 1,
+    stability_overall_overall = 1
   )
 
 results$summary_overall_overall <-

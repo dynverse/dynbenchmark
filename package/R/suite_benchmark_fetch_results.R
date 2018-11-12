@@ -58,7 +58,7 @@ benchmark_fetch_results <- function(remote = NULL) {
       wait = FALSE
     )
 
-    if (is.null(output) || all(map_lgl(output, function(x) length(x) == 1 && is.na(x)))) {
+    if (is.null(output)) {
       qstat_out <-
         tryCatch({
           qsub::qstat_j(qsub_handle)
@@ -239,10 +239,11 @@ extract_error_status <- function(stdout, stderr, error_message, job_exit_status,
 #'
 #' @param load_models Whether or not to load the models as well.
 #' @param experiment_id The experiment_id, defaults to the current one
+#' @param filter_fun A function with which to filter the data as it is being read from files. Function must take a single data frame as input and return a filtered data frame as a result.
 #'
 #' @importFrom readr read_rds
 #' @export
-benchmark_bind_results <- function(load_models = FALSE, experiment_id = NULL) {
+benchmark_bind_results <- function(load_models = FALSE, experiment_id = NULL, filter_fun = NULL) {
   local_output_folder <- derived_file("suite", experiment_id = experiment_id)
 
   # find all 2nd level folders with individual tasks
@@ -250,16 +251,30 @@ benchmark_bind_results <- function(load_models = FALSE, experiment_id = NULL) {
 
   # process each method separately
   as_tibble(map_df(files, function(output_metrics_file) {
-    name <- output_metrics_file %>% gsub(paste0(local_output_folder, "/"), "", ., fixed = TRUE) %>% gsub("/output_metrics.rds", "", ., fixed = TRUE)
+    name <- output_metrics_file %>%
+      gsub(paste0(local_output_folder, "/"), "", ., fixed = TRUE) %>%
+      gsub("/output_metrics.rds", "", ., fixed = TRUE)
+
     output_models_file <- gsub("output_metrics.rds", "output_models.rds", output_metrics_file, fixed = TRUE)
 
     if (file.exists(output_metrics_file)) {
       cat(name, ": Reading previous output\n", sep = "")
       output <- readr::read_rds(output_metrics_file)
 
+      if (!is.null(filter_fun)) {
+        output$before_filter_index <- seq_len(nrow(output))
+        output <- output %>% filter_fun()
+      }
+
       # read models, if requested
-      if (load_models && file.exists(output_models_file)) {
+      if (load_models && file.exists(output_models_file) && nrow(output) > 0) {
         models <- readr::read_rds(output_models_file)
+
+        if (!is.null(filter_fun)) {
+          models <- models[output$before_filter_index]
+          output <- output %>% select(-before_filter_index)
+        }
+
         output$model <- models
       }
 
