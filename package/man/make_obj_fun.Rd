@@ -15,16 +15,8 @@ make_obj_fun(method, metrics, noisy = FALSE, verbose = FALSE)
 \item{a dynguidelines data frame.}
 }}
 
-\item{metrics}{which metrics to evaluate:
-\enumerate{
-  \item Spearman correlation of geodesic distances: \code{"correlation"}
-  \item Edge flip score: \code{"edge_flip"}
-  \item Isomorphic: \code{"isomorphic"}
-  \item RF MSE: \code{"rf_mse"}, \code{"rf_rsq"}
-  \item Similarity in feature importance: \code{"featureimp_cor"}, \code{"featureimp_wcor"}, \code{"featureimp_ks"}, \code{"featureimp_wilcox"}
-  \item Overlap between branches: \code{"F1_branches"}
-  \item Custom metric function. Format: \code{function(dataset, model) { 1 }}
-}}
+\item{metrics}{Which metrics to evaluate. Check \code{dyneval::metrics} for a list of possible metrics.
+Passing a custom metric function with format \code{function(dataset, model) { 1 }} is also supported.}
 
 \item{noisy}{Whether or not the metric is noisy or not}
 

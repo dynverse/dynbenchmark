@@ -73,8 +73,10 @@ raw_data <-
     time = ifelse(error_status != "no_error", 6 * 3600, time_method),
     mem = ifelse(error_status != "no_error", 32 * 10e9, max_mem),
     ltime = log10(time),
-    lmem = log10(mem)
+    lmem = log10(mem),
+    featureimp_wcor = ifelse(!is.finite(featureimp_wcor), 0, featureimp_wcor)
   )
+
 
 table(raw_data$dataset_source, raw_data$error_status)
 write_rds(raw_data, result_file("benchmark_results_unnormalised.rds"), compress = "xz")
