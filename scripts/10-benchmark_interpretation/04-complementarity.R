@@ -67,12 +67,13 @@ scorer <- function(method_ids, data_oi) {
 get_top_methods <- function(data_oi, trajectory_types_oi, preparer = method_subset_preparer_range) {
   # filter methods:
   # - can detect at least one of the requested trajectory type(s)
-  # - does not require any prior information
+  # - does not require any hard prior information
+  hard_priors <- dynwrap::priors %>% filter(type == "hard") %>% pull(prior_id)
+
   relevant_method_ids <- load_methods() %>%
     filter(
-      map_lgl(trajectory_types, ~any(trajectory_types_oi %in% .)),
-      !requires_prior,
-      TRUE
+      map_lgl(trajectory_types, ~any(. %in% trajectory_types_oi)),
+      map_lgl(required_priors, ~!any(. %in% hard_priors))
     ) %>%
     pull(id)
   data_oi <- data_oi %>% filter(method_id %in% relevant_method_ids)
