@@ -223,23 +223,11 @@ funky_heatmap <- function(
       mutate(xmin = -.5, xmax = 5) %>%
       filter(!is.na(name), name != "")
 
-    # segment_data <- segment_data %>% bind_rows(
-    #   row_annotation %>% transmute(x = xmin, xend = xmin, y = ymin, yend = ymax)
-    # )
     text_data <- text_data %>% bind_rows(
       row_annotation %>%
         transmute(xmin, xmax, ymin = ymax + row_space, label_value = name %>% gsub("\n", " ", .), hjust = 0, vjust = .5, fontface = "bold") %>%
         mutate(ymax = ymin + row_height)
     )
-
-    # rect_data <- rect_data %>% bind_rows(
-    #   row_annotation %>%
-    #     transmute(xmin, xmax, ymin, ymax, colour = "#444444", alpha = .5, border = FALSE)
-    # )
-    # text_data <- text_data %>% bind_rows(
-    #   row_annotation %>%
-    #     mutate(xmin, xmax, ymin, ymax, label_value = name, hjust = 0.5, vjust = 0.5, fontface = "bold", angle = 90)
-    # )
   }
 
   # GENERATE COLUMN ANNOTATION
@@ -277,7 +265,7 @@ funky_heatmap <- function(
       ) %>%
       ungroup() %>%
       left_join(level_heights, by = "level") %>%
-      filter(!is.na(name), name != "") %>%
+      filter(!is.na(name), grepl("[A-Za-z]", name)) %>%
       mutate(colour = palette_list$column_annotation[palette])
 
     rect_data <- rect_data %>% bind_rows(
@@ -475,8 +463,8 @@ funky_heatmap <- function(
     legend_vals <- tribble(
       ~symbol, ~value,
       "", "None",
-      "\u2715", "Start or end cells",
-      "\u2716", "Cell grouping or time course"
+      "\u2715", "Weak: Start or end cells",
+      "\u2716", "Strong: Cell grouping or time course"
     )
 
     pr_labels_df <-
@@ -680,7 +668,7 @@ make_geom_data_processor <- function(data, column_pos, row_pos, scale_column, pa
       filter(geom %in% geom_types) %>%
       select(-group, -name, -do_spacing) %>%
       rename(column_id = id) %>%
-      add_column_if_missing(label = NA_character_)
+      add_column_if_missing(label = NA_character_, scale = TRUE)
 
     if (nrow(column_sels) == 0) {
       return(tibble(a = 1) %>% slice(integer()))
@@ -723,7 +711,7 @@ make_geom_data_processor <- function(data, column_pos, row_pos, scale_column, pa
         left_join(row_sel, by = "row_id")
 
       # scale data, if need be
-      if (scale_column && is.numeric(dat$value)) {
+      if (scale_column && column_sel$scale && is.numeric(dat$value)) {
         dat <-
           dat %>%
           group_by(column_id) %>%
