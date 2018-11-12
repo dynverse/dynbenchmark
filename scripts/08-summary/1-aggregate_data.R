@@ -15,7 +15,11 @@ method_info <-
   rename_all(function(x) paste0("method_", x)) %>%
   rename(tool_id = method_tool_id) %>%
   select_if(function(x) !all(is.na(x))) %>%
-  filter(!method_id %in% c("error", "identity", "random", "shuffle"))
+  filter(
+    !method_id %in% c("error", "identity", "random", "shuffle"),
+    !grepl("^projected_", method_id),
+    method_source != "offtheshelf"
+  )
 
 #####################################################
 #                  READ QC RESULTS                  #
