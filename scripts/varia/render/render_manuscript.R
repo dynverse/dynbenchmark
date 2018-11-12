@@ -43,6 +43,7 @@ fs::file_show(str_glue("{output_directory}/supplementary.pdf"))
 walk(
   fs::dir_ls(output_directory),
   function(file) {
+    googledrive::drive_trash(paste0("thesis/dynverse/output/", fs::path_file(file)))
     googledrive::drive_upload(file, path = "thesis/dynverse/output", name = fs::path_file(file))
   }
 )
