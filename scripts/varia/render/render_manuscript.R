@@ -47,4 +47,3 @@ walk(
     googledrive::drive_upload(file, path = "thesis/dynverse/output", name = fs::path_file(file))
   }
 )
-\
