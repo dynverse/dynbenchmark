@@ -26,7 +26,7 @@ common_labels <- tribble(
   "dataset_source", "Dataset source", "Dataset source",
   "source", "Dataset source", "Dataset source",
   "qc", "Quality Control", "QC",
-  "graph", "Graph", "Graph",
+  "graph", "Connected graph", "Connected graph",
   "offtheshelf", "Off-the-shelf", "Off-the-shelf"
 )
 

@@ -9,7 +9,7 @@ add_fig(fig_path, ref_id, caption_main, caption_text = "", width = 5,
   height = 7, format = get_default_format())
 
 add_sfig(fig_path, ref_id, caption_main, caption_text = "", width = 5,
-  height = 7, format = get_default_format())
+  height = 7, format = get_default_format(), integrate = TRUE)
 }
 \arguments{
 \item{fig_path}{Path to the figure}

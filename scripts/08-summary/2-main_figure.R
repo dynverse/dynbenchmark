@@ -68,7 +68,7 @@ row_info <-
   select(group, id)
 row_groups <-
   data %>%
-  transmute(Group = paste0(label_short(group), " methods"), group) %>%
+  transmute(Group = paste0(ifelse(group == "graph", "Graph", label_short(group)), " methods"), group) %>%
   unique()
 
 ####################################
