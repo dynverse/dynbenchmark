@@ -19,8 +19,14 @@ refs <- supplementary$refs
 
 # Supplementary figures
 ```{r, results="asis"}
-sfigs %>% pmap(dynbenchmark:::plot_fig, ref_type = "sfig") %>% modify(paste0, "\n\n") %>% walk(cat)
+sfigs %>% 
+  left_join(refs %>% select(ref_id, name), "ref_id") %>% 
+  arrange(name) %>% 
+  select(-name) %>% 
+  pmap(dynbenchmark:::plot_fig, ref_type = "sfig") %>% modify(paste0, "\n\n") %>% walk(cat)
 ```
+
+\clearpage
 
 # Supplementary tables
 
@@ -28,24 +34,10 @@ sfigs %>% pmap(dynbenchmark:::plot_fig, ref_type = "sfig") %>% modify(paste0, "\
 stables %>% pmap(dynbenchmark:::show_table, ref_type = "stable") %>% modify(paste0, "\n\n") %>% walk(cat)
 ```
 
+\clearpage
 
-```{r setup, include=FALSE}
-# source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/analysis/paper/setup.R"))
-# 
-# # knitr options
-# knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
-# knitr::opts_chunk$set(
-#   collapse = TRUE,
-#   warning = FALSE,
-#   message = FALSE,
-#   echo = FALSE,
-#   comment = "#>",
-#   fig.path = paste0(rprojroot::find_rstudio_root_file(), "/analysis/paper/.scratch/")
-# )
-# 
-# list2env(read_rds(derived_file("sfigs_stables.rds", "paper")), environment())
-```
+# Supplementary note 1
 
-```{r "supplementary", echo=FALSE, results='asis'}
-# source(paste0(dynbenchmark::get_dynbenchmark_folder(), "/analysis/paper/sfigs_stables.R"))
+```{r}
+# dynbenchmark::knit_nest("../results/02-metrics/")
 ```
