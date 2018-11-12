@@ -668,7 +668,7 @@ make_geom_data_processor <- function(data, column_pos, row_pos, scale_column, pa
       filter(geom %in% geom_types) %>%
       select(-group, -name, -do_spacing) %>%
       rename(column_id = id) %>%
-      add_column_if_missing(label = NA_character_)
+      add_column_if_missing(label = NA_character_, scale = TRUE)
 
     if (nrow(column_sels) == 0) {
       return(tibble(a = 1) %>% slice(integer()))
@@ -711,7 +711,7 @@ make_geom_data_processor <- function(data, column_pos, row_pos, scale_column, pa
         left_join(row_sel, by = "row_id")
 
       # scale data, if need be
-      if (scale_column && is.numeric(dat$value)) {
+      if (scale_column && column_sel$scale && is.numeric(dat$value)) {
         dat <-
           dat %>%
           group_by(column_id) %>%
