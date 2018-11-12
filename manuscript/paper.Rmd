@@ -1,5 +1,5 @@
 ---
-title: "Accuracy, scalability, robustness and usability of single-cell trajectory inference methods[a][b]"
+title: "A comparison of single-cell trajectory inference methods"
 output: dynbenchmark::pdf_manuscript
 ---
 
@@ -27,11 +27,11 @@ Wouter Saelens* ¹ ², Robrecht Cannoodt* ¹ ² ³, Helena Todorov¹ ² ⁴, Yva
 *`r format(Sys.time(), '%d %B, %Y')`*
 
 
-`www.github.com/dynverse/dynbenchmark/commit/`r git2r::revparse_single(".","HEAD")$sha``
+`www.github.com/dynverse/dynbenchmark/tree/`r git2r::revparse_single(".","HEAD")$sha``
 ```{r}
 n_tools <- nrow(tools)
 n_tools_evaluated <- nrow(filter(tools, evaluated))
-n_methods_evaluated <- nrow(filter(methods, evaluated, source %in% c("tool", "adaptation", "offtheshelf")))
+n_methods_evaluated <- nrow(filter(methods, evaluated, source %in% "tool" | id == "paga_tree"))
 n_control_methods_evaluated <- nrow(filter(methods, evaluated, source %in% c("control")))
 n_datasets_real <- nrow(list_datasets("real"))
 n_datasets_synthetic <- nrow(list_datasets("synthetic"))
@@ -87,7 +87,7 @@ add_fig(
 # Results
 ## Trajectory inference methods
 <!-- Method characterisation -->
-In this study, we performed a comprehensive evaluation of  `r n_methods_evaluated` TI methods (`r ref("fig", "ti_evaluation_overview", "a")`). In order to make the outputs from different methods directly comparable to each other, we developed a common probabilistic model for representing trajectories from all possible sources (`r ref("fig", "ti_evaluation_overview", "b")`). In this model, the overall topology is represented by a network of "milestones", and the cells are placed within the space formed by each set of connected milestones. Although almost every method returned a unique set of outputs, we were able to classify these outputs into 7 distinct groups, and wrote a common output convertor for each of these groups (`r ref("fig", "results_summary", "a")` and `r ref("sfig", "overview_wrapping")`). When required, we also provided prior information to the method, the severity of which varies (`r ref("fig", "results_summary", "a")`). Namely, having to provide a start cell or an end cell is relatively easy to do and will only introduce moderate bias into the model, whereas having to provide a clustering or time course information will likely introduce heavy bias into the model.[c][d]
+In this study, we performed a comprehensive evaluation of  `r n_methods_evaluated` TI methods (`r ref("fig", "ti_evaluation_overview", "a")`). In order to make the outputs from different methods directly comparable to each other, we developed a common probabilistic model for representing trajectories from all possible sources (`r ref("fig", "ti_evaluation_overview", "b")`). In this model, the overall topology is represented by a network of "milestones", and the cells are placed within the space formed by each set of connected milestones. Although almost every method returned a unique set of outputs, we were able to classify these outputs into 7 distinct groups, and wrote a common output convertor for each of these groups (`r ref("fig", "results_summary", "a")` and `r ref("sfig", "overview_wrapping")`). When required, we also provided prior information to the method, the severity of which varies (`r ref("fig", "results_summary", "a")`). Namely, having to provide a start cell or an end cell is relatively easy to do and will only introduce moderate bias into the model, whereas having to provide a clustering or time course information will likely introduce heavy bias into the model.[a][b]
 
 
 <!-- Topology characterisation -->
@@ -101,9 +101,9 @@ We evaluated each method on four core aspects: (i) accuracy of a prediction, giv
 Unfortunately, few methods seem to have been given consideration to the scalability or the usability of the tool. While less important than the accuracy, with increasing dataset sizes the scalability of the tool is becoming increasingly important, and a high usability score is important to ensure correct usage of the tool by a user. 
 
 
-Methods in which the topology of the model was fixed by the algorithm or by a parameter obtain a much higher stability score. As topology-free methods have more degrees of freedom, the stability of the method is also typically lower ─ with a few exceptions.[e][f]
+Methods in which the topology of the model was fixed by the algorithm or by a parameter obtain a much higher stability score. As topology-free methods have more degrees of freedom, the stability of the method is also typically lower ─ with a few exceptions.[c][d]
  
-We will discuss each evaluation criterion in more detail, after which we conclude with guidelines for method users and future perspectives for method developers.
+We will discuss each evaluation criterion in more detail (`r ref("fig", "results_summary")` and `r ref("sfig", "results")`), after which we conclude with guidelines for method users and future perspectives for method developers.
 ```{r}
 add_fig(
   fig_path = result_file("results_summary.pdf", experiment_id = "08-summary"),
@@ -121,7 +121,7 @@ add_fig(
   fig_path = result_file("results_detailed.pdf", experiment_id = "08-summary"),
   ref_id = "results_detailed", 
   caption_main = glue::glue("Detailed results of the four main evaluation criteria: benchmarking, scalability, stability and quality control."), 
-  caption_text = glue::glue("(a) The names of the methods. (b) Results of the benchmark across metrics, dataset sources and dataset trajectory types. The performance of a method is generally more stable across dataset sources, but very variable depending on the metric and trajectory type. (c) Predicted execution times for varying numbers of cells and features (# cells × # features). Predictions were made by training a regression model after running each method on bootstrapped datasets with varying numbers of cells and features. (d) Stability results by calculating the average pairwise similarity between models inferred across multiple runs of the same method.  (e) Usability scores of the tool and corresponding manuscript, grouped per category."),
+  caption_text = glue::glue("(a) The names of the methods, ordered as in {ref('fig', 'results_summary')}. (b) Results of the benchmark across metrics, dataset sources and dataset trajectory types. The performance of a method is generally more stable across dataset sources, but very variable depending on the metric and trajectory type. (c) Predicted execution times for varying numbers of cells and features (# cells × # features). Predictions were made by training a regression model after running each method on bootstrapped datasets with varying numbers of cells and features. (d) Stability results by calculating the average pairwise similarity between models inferred across multiple runs of the same method.  (e) Usability scores of the tool and corresponding manuscript, grouped per category."),
   width = 15,
   height = 18
 )
@@ -131,7 +131,7 @@ add_fig(
 ```{r}
 add_sfig(
   fig_path = result_file("results_suppfig.pdf", experiment_id = "08-summary"),
-  ref_id = "results_suppfig", 
+  ref_id = "results", 
   caption_main = glue::glue(""), 
   caption_text = glue::glue(""),
   width = 30,
@@ -181,7 +181,7 @@ add_sfig(
 
 
 ## Scalability
-While early TI methods were developed at a time where profiling more than a thousand cells was exceptional, methods now have to cope with hundreds of thousands of cells, and perhaps soon with more than ten million [@svensson_exponentialscalingsinglecell_2018]. Moreover, the recent application of TI methods on multi-omics single-cell data also showcases the increasing demands on the number of features [@cao_jointprofilingchromatin_2018]. To assess the scalability, we ran each method on up- and downscaled versions of five distinct real datasets. We then modelled the running time using a generalized additive model[@wood_thinplateregression_2003] (`r ref("sfig", "scaling", "a")`), and assessed whether the method had sublinear, linear or superlinear time complexity with respect to the number of cells and features (`r ref("sfig", "scaling", "b")`). As a control, we compared the predicted time with the actual time on all benchmarking datasets, and found that these were moderately to highly correlated (0.5-0.9) for almost every method.[g][h]
+While early TI methods were developed at a time where profiling more than a thousand cells was exceptional, methods now have to cope with hundreds of thousands of cells, and perhaps soon with more than ten million [@svensson_exponentialscalingsinglecell_2018]. Moreover, the recent application of TI methods on multi-omics single-cell data also showcases the increasing demands on the number of features [@cao_jointprofilingchromatin_2018]. To assess the scalability, we ran each method on up- and downscaled versions of five distinct real datasets. We then modelled the running time using a generalized additive model[@wood_thinplateregression_2003] (`r ref("sfig", "scaling", "a")`), and assessed whether the method had sublinear, linear or superlinear time complexity with respect to the number of cells and features (`r ref("sfig", "scaling", "b")`). As a control, we compared the predicted time with the actual time on all benchmarking datasets, and found that these were moderately to highly correlated (0.5-0.9) for almost every method.[e][f]
 
 
 Overall, methods which detect more complex trajectory types also have longer running times, although two exceptions stand out: GNG and PAGA (and its derivatives Projected PAGA and PAGA tree). Despite their ability to detect all trajectory types, these two methods are still able to accurately detect a trajectory with 100.000 cells and 10.000 features in less than 10 minutes (`r ref("fig", "results_detailed", "b")`). Methods with a low running time typically have two defining aspects: they have a sublinear time complexity with respect to the features and/or cells, and adding new cells or features leads to a relatively low increase in time (`r ref("sfig", "scaling", "b")`). We found that over half of all methods had a linear or superlinear complexity with respect to the number of cells, which makes it difficult to apply any of these methods in a reasonable time frame on datasets with more than a thousand cells (`r ref("sfig", "scaling", "b")`).
@@ -203,14 +203,14 @@ It is not only important that a method is able to infer an accurate model, but a
 
 
 
+
+
+## Usability
 ←
-## Implementation quality and user friendliness
+While not directly related to the accuracy of the inferred trajectory, it is also important to assess the quality of the implementation and how easy it is for a biological user to use [@_doesyourcode_2018]. We scored each method using a transparent checklist of important scientific and software development practices, including software packaging, documentation, automated code testing, and publication into a peer-reviewed journal (`r ref("stable", "qc_scoresheet")`).
 
 
-While not directly related to the accuracy of the inferred trajectory, it is also important to assess the quality of the implementation and how easy it is for a biological user to use [@_doesyourcode_2018]. We scored each method using a transparent checklist of important scientific and software development practices, including software packaging, documentation, automated code testing, and publication into a peer-reviewed journal (`r ref("stable", "qc_scorseheet")`).
-
-
-We found that most methods fulfilled the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "results_detailed", "c")` and `r ref("sfig", "qc_overview")`). While recent methods had a slightly better quality score than older methods, several quality aspects were consistently lacking for the majority of the methods (`r ref("sfig", "qc_overview", " right")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas, notwithstanding several studies pinpointing these as good practices [@wilson_best_2014; @artaza_top10metrics_2016].
+We found that most methods fulfilled the basic criteria, such as free availability and basic code quality criteria (`r ref("fig", "results_detailed", "d")` and `r ref("sfig", "qc_overview")`). While recent methods had a slightly better quality score than older methods, several quality aspects were consistently lacking for the majority of the methods (`r ref("sfig", "qc_overview", " right")`) and we believe that these should receive extra attention from developers. Although these outstanding issues cover all five categories, code assurance and documentation in particular are problematic areas, notwithstanding several studies pinpointing these as good practices [@wilson_best_2014; @artaza_top10metrics_2016].
 
 
 
@@ -219,8 +219,8 @@ We found that most methods fulfilled the basic criteria, such as free availabili
 add_sfig(
   fig_path = result_file("qc_overview.rds", experiment_id = "03-methods/02-tool_qc"),
   ref_id = "qc_overview", 
-  caption_main = "Quality control of trajectory inference methods.", 
-  caption_text = glue::glue("Shown is the score given for each method on every item from our quality control score sheet ({ref('stable', 'qc_scoresheet')}). Each aspect of the quality control was part of a category, and each category was weighted so that it contributed equally to the final quality score. Within each category, each aspect also received a weight depending on how often it was mentioned in a set of papers discussing good practices in tool development and evaluation. This is represented in the plot as the height on the y-axis. Top: Average QC score for each method. Right: The average score of each quality control item. Shown into more detail are those items which had an average score lower than 0.5."),
+  caption_main = "Usability of trajectory inference methods.", 
+  caption_text = glue::glue("Shown is the score given for each method on every item from our usability score sheet ({ref('stable', 'qc_scoresheet')}). Each aspect of the quality control was part of a category, and each category was weighted so that it contributed equally to the final quality score. Within each category, each aspect also received a weight depending on how often it was mentioned in a set of papers discussing good practices in tool development and evaluation. This is represented in the plot as the height on the y-axis. Top: Average QC score for each method. Right: The average score of each quality control item. Shown into more detail are those items which had an average score lower than 0.5."),
    width = 15,
    height = 18
 )
@@ -231,7 +231,7 @@ add_sfig(
 add_stable(
  result_file("qc_scoresheet.xlsx", "03-methods/02-tool_qc"),
   "qc_scoresheet",
-paste0("→Scoring sheet for method quality control. Each quality aspect was given a weight based on how many times it was mentioned in a set of articles discussing best practices for tool development.←"),
+paste0("→Scoring sheet for assessing usability of trajectory inference methods. Each quality aspect was given a weight based on how many times it was mentioned in a set of articles discussing best practices for tool development.←"),
   ""
 )
 ```
@@ -297,7 +297,7 @@ ________________
 # Online Methods
 ## Data and code availability
 → 
-The processed real and synthetic datasets used in this study are deposited on Zenodo ([doi.org/10.5281/zenodo.1211533](https://doi.org/10.5281/zenodo.1211533[i])) [@cannoodt_goldstandardsinglecell_]. 
+The processed real and synthetic datasets used in this study are deposited on Zenodo ([doi.org/10.5281/zenodo.1211533](https://doi.org/10.5281/zenodo.1211533[g])) [@cannoodt_goldstandardsinglecell_]. 
 
 
 The main analysis repository is available at `r print_url("benchmark.dynverse.org")` and is divided into several experiments. Each experiment has its own set of scripts and results, each accompanied by an illustrated readme which can be easily browsed and explored on the github website.
@@ -350,7 +350,7 @@ add_sfig(
   raw_file("overview_wrapping_v2.svg", "03-methods"),
   "overview_wrapping", 
   "A common interface for TI methods.", 
-  "a) The input and output of each TI method is standardised. As input, each TI method receives either raw or normalised counts, several parameters, and a selection of prior information. After its execution, a method uses one of the seven wrapper functions to transform its output to the common trajectory model. This common model then allows to perform common analysis functions on trajectory models produced by any TI method. b) The specific transformations performed by each of the wrapper functions is shown in more detail.", 
+  "a) The input and output of each TI method is standardised. As input, each TI method receives either raw or normalised counts, several parameters, and a selection of prior information. After its execution, a method uses one of the seven wrapper functions to transform its output to the common trajectory model. This common model then allows to perform common analysis functions on trajectory models produced by any TI method. b) Illustrations of the specific transformations performed by each of the wrapper functions.", 
   13, 
   7.5
 )
@@ -428,7 +428,7 @@ We gathered real datasets by searching for "single-cell" at the Gene Expression 
 
 ```{r}
 add_stable(
-  result_file("metadata.xlsx","01-datasets/01-real"), 
+  result_file("real_datasets.xlsx","01-datasets/01-real"), 
   "datasets", 
   "Real datasets used in this study."
 )
@@ -659,7 +659,7 @@ To make sure easy and difficult datasets have equal influence on the final score
 After normalisation, we aggregated step by step the scores from different datasets. We first aggregated the datasets with the same dataset source and trajectory type using an arithmetic mean of their scores. Next, the scores were averaged over different dataset sources, using a arithmetic mean which was weighted based on how much the synthetic and silver scores correlated with the real gold scores. Finally, the scores were aggregated over the different trajectory types again using a arithmetic mean.
 
 
-Finally, to get an overall benchmarking score, we aggregated the different metrics using a geometric mean.[j][k][l][m]
+Finally, to get an overall benchmarking score, we aggregated the different metrics using a geometric mean.[h][i][j][k]
 ←
 ## Method execution
 Each execution of a method on a dataset was performed in a separate task as part of a gridengine job. Each task was allocated one CPU core of an Intel(R) Xeon(R) CPU E5-2665 @ 2.40GHz, and one R session was started for each task. During the execution of a method on a dataset, if the time limit (>1h) or memory limit (16GB) was exceeded, or an error was produced, a zero score was returned for that execution.
@@ -679,13 +679,13 @@ The relationship between the dimensions of a dataset and the running time or max
 To classify the time complexity of each method, we predicted the running time at 10.000 features (cells) with increasing number of cells (features) from 100 to 100.000, with steps of 100. A method was classified as constant / low slope if on average an addition of 100 cells would increase the running time with less than 0.1 seconds. To classify as sublinear, linear or superlinear, we scaled the times between 0 and 1, and classified the method as sublinear if the running time was on average 5% above the diagonal, superlinear if on average 5% under the diagonal, and linear otherwise.
 
 
-## Stability[n][o]
+## Stability[l][m]
 We ran each method on a selection of datasets; which consisted of 25% of the datasets accounting for 15% of the total runtime, chosen such that after aggregation the overall scores still has > 0.99 correlation with the original overall ranking. We subsampled each dataset 10 times with 95% of the original cells and 95% of the original features, such that each method should produce slightly different results. 
 ←
-## Method quality control
+## Usability
 
 
-We created a transparent scoring scheme to check the quality of each method based on several existing tool quality and programming guidelines in literature and online (`r ref("stable", "qc_scoresheet")`). The goal of this quality control is in the first place to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of datasets in which the usefulness of the method was shown, and the scope of method evaluation in the paper.
+We created a transparent scoring scheme to quantify the quality of each method based on several existing tool quality and programming guidelines in literature and online (`r ref("stable", "qc_scoresheet")`). The goal of this quality control is in the first place to stimulate the improvement of current methods, and the development of user and developer friendly new methods. The quality control assessed 6 categories, each looking at several aspects, which are further divided into individual items. The availability category checks whether the method is easily available, whether the code and dependencies can be easily installed, and how the method can be used. The code quality assesses the quality of the code both from a user perspective (function naming, dummy proofing and availability of plotting functions) and a developer perspective (consistent style and code duplication). The code assurance category is frequently overlooked, and checks for code testing, continuous integration [@beaulieu-jones_reproducibility_2017] and an active support system. The documentation category checks the quality of the documentation, both externally (tutorials and function documentation) and internally (inline documentation). The behaviour category assesses the ease by which the method can be run, by looking for unexpected output files and messages, prior information and how easy the trajectory model can be extracted from the output. Finally, we also assessed certain aspects of the study in which the method was proposed, such as publication in a peer-reviewed journal, the number of datasets in which the usefulness of the method was shown, and the scope of method evaluation in the paper.
 
 
 Each quality aspect received a weight depending on how frequently it was found in several papers and online sources which discuss tool quality (`r ref("stable", "qc_scoresheet")`). This was to make sure that more important aspects, such as the open source availability of the method, outweighed other less important aspects, such as the availability of a graphical user interface. For each aspect, we also assigned a weight to the individual questions being investigated (`r ref("stable", "qc_scoresheet")`). For calculating the final score, we weighed each of the six categories equally.
@@ -711,18 +711,16 @@ Make sure to pin the zotero bibtex references after first using them!
 -->
 
 
-[a]?
-[b]we changed the title :)
-[c]Try to rewrite a little bi
-[d]somehing like his?
-[e]TODO: rework enumeration into a paragraph
-[f]something like this?
-[g](Not shown), or include in Supp Fig 4?
-[h]Yeah we don't include this yet, should be in sup fig 4
-[i]Update when final
-[j]This might give the impression of being a bit "overengineered".  Do we also show somewhere how much the resulting ranking using this aggregation would differ from a very simple "mean" ranking of the individual metrics/datasets ?
-[k]No we don't do this yet. If we do this, perhaps we should just add a "benchmarking robustness" supplementary note.
-[l]The results do change when we simply use a mean, but then they are very biased, eg. because 1/4 of our datasets are linear, the linear methods perform well..
-[m]I adapted the text a little bit to better explain the 'why'
-[n]Todo once this experiment is finished
-[o]Good enough?
+[a]Try to rewrite a little bi
+[b]somehing like his?
+[c]TODO: rework enumeration into a paragraph
+[d]something like this?
+[e](Not shown), or include in Supp Fig 4?
+[f]Yeah we don't include this yet, should be in sup fig 4
+[g]Update when final
+[h]This might give the impression of being a bit "overengineered".  Do we also show somewhere how much the resulting ranking using this aggregation would differ from a very simple "mean" ranking of the individual metrics/datasets ?
+[i]No we don't do this yet. If we do this, perhaps we should just add a "benchmarking robustness" supplementary note.
+[j]The results do change when we simply use a mean, but then they are very biased, eg. because 1/4 of our datasets are linear, the linear methods perform well..
+[k]I adapted the text a little bit to better explain the 'why'
+[l]Todo once this experiment is finished
+[m]Good enough?

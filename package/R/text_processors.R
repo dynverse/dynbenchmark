@@ -11,7 +11,7 @@ append_pre_processor <- function(format, func) {
 # read the file, apply the pre knit, and save the file
 apply_pre_processor <- function(func) {
   function(metadata, input_file, runtime, knit_meta, files_dir, output_dir) {
-    readr::read_lines(file.path(output_dir, input_file)) %>% func() %>% readr::write_lines(file.path(output_dir, input_file))
+    readr::read_lines(input_file) %>% func() %>% readr::write_lines(input_file)
     invisible()
   }
 }
