@@ -17,7 +17,7 @@ rawToChar(r$content) %>% rjson::fromJSON() %>% list_as_tibble()
 deposit_id <- 1443566
 
 # get bucket link
-# this uses the new file API, not yet documented, see https://github.com/zenodo/zenodo/issues/940
+# this uses the new file API, as of 9 november 2018 not yet documented, see https://github.com/zenodo/zenodo/issues/940
 # we use this new API because it can handle larger files + you can choose the destination path name
 deposit <- GET(glue::glue("https://zenodo.org/api/deposit/depositions/{deposit_id}"), headers)
 bucket_url <- content(deposit)$links$bucket
@@ -54,3 +54,12 @@ qsub_lapply(
     file.remove(temp_dataset_file)
   }
 )
+
+
+deposit <- GET(glue::glue("https://zenodo.org/api/deposit/depositions/{deposit_id}"), headers)
+
+
+
+files <- GET(glue::glue("https://zenodo.org/api/deposit/depositions/{deposit_id}/files"), headers) %>% httr::content() %>% list_as_tibble()
+
+files$filename %>% gsub("\\.rds", "", .)
