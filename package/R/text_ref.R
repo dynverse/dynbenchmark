@@ -73,7 +73,7 @@ setup_figs <- function() {
 #' @rdname setup_refs
 #' @export
 setup_sfigs <- function() {
-  tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width = numeric(), height = numeric())
+  tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width = numeric(), height = numeric(), integrate = logical())
 }
 
 #' Add a figure
@@ -118,7 +118,8 @@ add_sfig <- function(
   caption_text = "",
   width = 5,
   height = 7,
-  format = get_default_format()
+  format = get_default_format(),
+  integrate = TRUE
 ) {
   # save it because it's necessary
   sfigs <<- sfigs %>% add_row(
@@ -127,7 +128,8 @@ add_sfig <- function(
     caption_main = caption_main,
     caption_text = caption_text,
     width = width,
-    height = height
+    height = height,
+    integrate = integrate
   )
 }
 
@@ -140,7 +142,8 @@ plot_fig <- function(
   caption_text,
   width = 5,
   height = 7,
-  format = "latex"
+  format = "latex",
+  integrate = TRUE
 ) {
   fig_anch <- anchor(ref_type, ref_id)
 
@@ -198,15 +201,23 @@ plot_fig <- function(
     }
 
     fig_name <- ref(ref_type, ref_id)
+
+    include_graphics <- if (integrate) {
+      "\\includegraphics[height={height/2}in, width={width/2}in]{{{fig_path}}}\n\n"
+    } else {
+      "Figure provided as a separate pdf"
+    }
+
     subchunk <- glue::glue(
       "\\begin{{myfigure}}{{{ifelse(ref_type == 'fig', '!htbp', 'H')}}}\n",
       "\\begin{{center}}\n",
       "{fig_anch}\n",
-      "\\includegraphics[height={height/2}in, width={width/2}in]{{{fig_path}}}\n\n",
+      include_graphics,
       "\\end{{center}}\n",
       "\\textbf{{{fig_name}: {caption_main}}} {caption_text}\n\n",
       "\\end{{myfigure}}\n"
     )
+
   } else if (format %in% c("html", "markdown")){
     width <- width * 70
     height = height * 70

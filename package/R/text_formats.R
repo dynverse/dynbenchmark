@@ -165,7 +165,9 @@ knit_nest <- function(file) {
   if (fs::is_dir(file)) {
     file <- file.path(file, "README.Rmd")
   }
-  folder <- fs::path_dir(file) %>% fs::path_rel()
+  # get relative path based on current working directory of knitr
+  file <- fs::path(knitr::opts_chunk$get("root.dir") %||% ".", file)
+  folder <- fs::path_dir(file) %>% fs::path_abs()
 
   # stop if file not present
   if (!file.exists(file)) {
@@ -192,10 +194,16 @@ knit_nest <- function(file) {
     # make sure duplicated labels are allowed
     options(knitr.duplicate.label = "allow")
 
+    # make sure to run inside new folder
+    # knitr::opts_chunk$set(root.dir = folder)
+
     # knit as a child
     knitr::knit_child(
       text = readr::read_lines(file) %>% stringr::str_replace_all("^#", "##"),
+      options = list(root.dir = folder),
       quiet = TRUE
     ) %>% knitr::asis_output()
+
+    # knitr::opts_chunk$set(root.dir = folder)
   }
 }
