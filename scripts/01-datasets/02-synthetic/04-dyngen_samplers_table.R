@@ -14,7 +14,7 @@ table <- map(c("latex", "html"), function(format) {
     mutate(text = kableExtra::cell_spec(text, format, escape = FALSE)) %>%
     knitr::kable(format, escape = FALSE, col.names = NULL) %>%
     kableExtra::kable_styling(bootstrap_options = "condensed") %>%
-    kableExtra::footnote(notes, general_title = "where") %>%
+    kableExtra::footnote(notes, general_title = "where", escape = FALSE) %>%
     gsub("&amp;", "&", .)
   table
 }) %>% set_names(c("latex", "html"))
