@@ -83,19 +83,19 @@ column_info <- tribble( # tribble_start
 
 
 column_groups <- tribble( # tribble_start
-  ~Experiment,     ~Category,                           ~group,                   ~palette,
-  "Method",        "",                                  "method_characteristic",  "overall",
-  "Method",        "Inferrable trajectory types",       "inferrable_trajtype",    "overall",
-  "Summary",       "Aggregated scores per experiment",  "score_overall",          "overall",
-  "Accuracy",      "Per metric",                        "benchmark_metric",       "benchmark",
-  "Accuracy",      "Per dataset source",                "benchmark_source",       "benchmark",
-  "Accuracy",      "Per trajectory type",               "benchmark_trajtype",     "benchmark",
-  "Accuracy",      "Errors",                            "benchmark_execution",    "benchmark",
-  "Scalability",   "Predicted time",                    "scaling_predtime",       "scaling",
-  "Scalability",   "Predicted memory",                  "scaling_predmem",        "scaling",
-  "Stability",     "Compare runs",                      "stability",              "stability",
-  "Meta-quality",  "Per applic.",                       "qc_application",         "qc",
-  "Meta-quality",  "Per category",                      "qc_category",            "qc"
+  ~Experiment,    ~Category,                           ~group,                   ~palette,
+  "Method",       "",                                  "method_characteristic",  "overall",
+  "Method",       "Inferrable trajectory types",       "inferrable_trajtype",    "overall",
+  "Summary",      "Aggregated scores per experiment",  "score_overall",          "overall",
+  "Accuracy",     "Per metric",                        "benchmark_metric",       "benchmark",
+  "Accuracy",     "Per dataset source",                "benchmark_source",       "benchmark",
+  "Accuracy",     "Per trajectory type",               "benchmark_trajtype",     "benchmark",
+  "Accuracy",     "Errors",                            "benchmark_execution",    "benchmark",
+  "Scalability",  "Predicted time",                    "scaling_predtime",       "scaling",
+  "Scalability",  "Predicted memory",                  "scaling_predmem",        "scaling",
+  "Stability",    "Compare runs",                      "stability",              "stability",
+  "Usability",    "Per applic.",                       "qc_application",         "qc",
+  "Usability",    "Per category",                      "qc_category",            "qc"
 ) # tribble_end
 
 
