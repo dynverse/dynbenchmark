@@ -40,6 +40,10 @@ fs::file_show(str_glue("{output_directory}/paper_changes.pdf"))
 fs::file_show(str_glue("{output_directory}/supplementary.pdf"))
 
 # upload to google drive
-googledrive::drive_update("dynverse/paper.pdf", str_glue("{output_directory}/paper.pdf"))
-googledrive::drive_update("dynverse/paper_changes.pdf", str_glue("{output_directory}/paper.pdf"))
-googledrive::drive_update("dynverse/supplementary.pdf", str_glue("{output_directory}/paper.pdf"))
+walk(
+  fs::dir_ls(output_directory),
+  function(file) {
+    googledrive::drive_upload(file, path = "thesis/dynverse/output", name = fs::path_file(file))
+  }
+)
+\
