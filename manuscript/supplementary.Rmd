@@ -1,5 +1,5 @@
 ---
-title: "Supplementary material for: \nA comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
+title: "Supplementary material for: \nAccuracy, scalability, robustness and usability of single-cell trajectory inference methods"
 output: 
   dynbenchmark::pdf_manuscript:
       render_change: FALSE
