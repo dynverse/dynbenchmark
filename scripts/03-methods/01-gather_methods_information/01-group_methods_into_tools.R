@@ -14,13 +14,11 @@ sheet <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE")
 
 ##  ............................................................................
 ##  Methods                                                                 ####
-methods <- dynmethods::methods
+methods <- dynmethods::methods %>%
+  filter(source == "tool")
 
 # tool_id is default the method_id
-methods$tool_id <- case_when(
-  is.na(methods$implementation_id) ~ gsub("projected_", "", methods$id),
-  TRUE ~ methods$implementation_id
-)
+methods <- methods %>% mutate(tool_id = map2_chr(implementation_id, id, function(a, b) ifelse(is.na(a), b, a)))
 
 # add detects_... columns for trajectory types
 trajectory_type_ids <- trajectory_types$id
@@ -29,9 +27,6 @@ methods_detects <- methods$trajectory_types %>%
   bind_rows() %>%
   rename_all(~paste0("detects_", .))
 methods <- methods %>% bind_cols(methods_detects)
-
-# TEMP FIX
-methods$topology_inference <- ifelse(methods$topology_inference == "param", "parameter", methods$topology_inference)
 
 # add most complex trajectory type (the latest in dynwrap::trajectory_types)
 methods$most_complex_trajectory_type <- methods$trajectory_types %>% map_chr(~ last(trajectory_type_ids[trajectory_type_ids %in% .]))
@@ -63,7 +58,6 @@ tools_google <- sheet %>%
   gs_read(ws = "tools")
 
 tools <- methods %>%
-  filter(source == "tool") %>%
   group_by(tool_id) %>%
   filter(row_number() == 1) %>%
   ungroup()

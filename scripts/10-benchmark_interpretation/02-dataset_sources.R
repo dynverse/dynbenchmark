@@ -3,7 +3,8 @@ library(dynbenchmark)
 
 experiment("10-benchmark_interpretation")
 
-data <- read_rds(result_file("benchmark_results_normalised.rds", "06-benchmark"))$data
+methods <- load_methods()
+data <- read_rds(result_file("benchmark_results_normalised.rds", "06-benchmark"))$data %>% filter(method_id %in% methods$id)
 
 # aggregate without errors
 data_aggregations <- benchmark_aggregate(
