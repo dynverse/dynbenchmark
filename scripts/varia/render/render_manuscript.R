@@ -6,7 +6,7 @@ library(tidyverse)
 # download from google docs
 httr::set_config(httr::config(http_version = 0)) # avoid http2 framing layer bug
 drive <- googledrive::drive_download(googledrive::as_id("1je6AaelApu2xcSNbYlvcuTzUeUJBOpTUPHz0L9Houfw"), type="text/plain", overwrite=TRUE, path = tempfile())
-system(pritt("sed -i '1s/^.//' {drive$local_path}")) # remove first character, because this is some strange unicode character
+system(pritt("sed -i '1s/^.//' {drive$local_path}")) # remove first character, because this is some strange unicode character added by google
 system(pritt("cat {drive$local_path} > manuscript/paper.Rmd"))
 
 # render

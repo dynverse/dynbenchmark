@@ -205,7 +205,7 @@ plot_fig <- function(
     include_graphics <- if (integrate) {
       "\\includegraphics[height={height/2}in, width={width/2}in]{{{fig_path}}}\n\n"
     } else {
-      "Figure provided as a separate pdf"
+      "This table is provided as a separate pdf file"
     }
 
     subchunk <- glue::glue(
@@ -318,9 +318,9 @@ process_table <- function(table) {
   # if an excel, add a note that this table was submitted separately
   if (is.character(table) && fs::path_ext(table) == "xlsx") {
     table <- list(
-      html = "This table was provided as a separate excel file",
-      latex = "This table was provided as a separate excel file",
-      markdown = "This table was provided as a separate excel file"
+      html = "This table is provided as a separate excel file",
+      latex = "This table is provided as a separate excel file",
+      markdown = "This table is provided as a separate excel file"
     )
   }
 
