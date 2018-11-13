@@ -15,7 +15,7 @@ setup_singularity_methods <- function() {
 #'
 #' @export
 load_methods <- function(
-  filter_fun = function(tib) tib %>% filter(source == "tool" | id %in% c("angle", "comp1 ", "mst"))
+  filter_fun = function(tib) tib %>% filter(source == "tool" | id %in% c("angle", "comp1", "mst"))
 ) {
   tib <- read_rds(result_file("methods.rds", "03-methods"))
 
