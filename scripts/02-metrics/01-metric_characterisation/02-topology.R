@@ -135,3 +135,5 @@ plot_topology_scores_overview <- patchwork::wrap_plots(
 plot_topology_scores_overview
 
 write_rds(plot_topology_scores_overview, result_file("topology_scores_overview.rds"))
+
+ggsave(result_file("topology_scores_overview.rds"), width = 12, height = 12)
