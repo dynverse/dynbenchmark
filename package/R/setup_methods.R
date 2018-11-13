@@ -11,7 +11,15 @@ setup_singularity_methods <- function() {
 
 #' Load the information on the methods
 #'
+#' @param filter_fun A function with which to filter the methods tibble.
+#'
 #' @export
-load_methods <- function() {
-  read_rds(result_file("methods.rds", "03-methods"))
+load_methods <- function(
+  filter_fun = function(tib) tib %>% filter(source == "tool" | id %in% c("angle", "comp1 ", "mst"))
+) {
+  tib <- read_rds(result_file("methods.rds", "03-methods"))
+
+  if (!is.null(filter_fun)) tib <- tib %>% filter_fun()
+
+  tib
 }
