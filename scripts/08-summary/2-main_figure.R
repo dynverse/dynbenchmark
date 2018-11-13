@@ -20,6 +20,7 @@ data <-
       TRUE ~ method_most_complex_trajectory_type
     ),
     group = factor(group, levels = method_groups),
+    control_label = c(adaptation = "", offtheshelf = "Off-the-shelf", control = "", tool = "")[method_source],
     method_priors_required_str = case_when(
       grepl("dataset", method_required_priors_str) ~ "All",
       grepl("(groups_id|features_id|timecourse_continuous|timecourse_discrete|groups_network)", method_required_priors_str) ~ "\u2716",
