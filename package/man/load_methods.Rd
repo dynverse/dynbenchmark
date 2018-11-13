@@ -4,11 +4,13 @@
 \alias{load_methods}
 \title{Load the information on the methods}
 \usage{
-load_methods(filter_fun = function(tib) tib \%>\% filter(source == "tool"
-  | id \%in\% c("angle", "comp1 ", "mst")))
+load_methods(default_filter = source == "tool" | id \%in\% c("angle",
+  "comp1", "mst"), ...)
 }
 \arguments{
-\item{filter_fun}{A function with which to filter the methods tibble.}
+\item{default_filter}{Default filtering for the benchmark.}
+
+\item{...}{Other filters for the method tibble.}
 }
 \description{
 Load the information on the methods
