@@ -367,7 +367,7 @@ funky_heatmap <- function(
       pie_text_data <-
         pie_legend_df %>%
         transmute(x = pie_minimum_x + .5 + lab_x, y = legend_pos - 2.75 + lab_y, label_value = name, vjust, hjust, colour) %>%
-        mutate(xmin = x, xmax = x, ymin = y, ymax = y)
+        mutate(xmin = x, xmax = x, ymin = y - .4, ymax = y + .4)
 
       pie_seg_data <-
         pie_legend_df %>%
@@ -662,10 +662,10 @@ funky_heatmap <- function(
 
   # ADD SIZE
   # reserve a bit more room for text that wants to go outside the frame
-  minimum_x <- minimum_x - 2
-  maximum_x <- maximum_x + 2
-  minimum_y <- minimum_y - 2
-  maximum_y <- maximum_y + 2
+  # minimum_x <- minimum_x - 2
+  if ("qc_cat_documentation" %in% column_info$id) maximum_x <- maximum_x + 2
+  # minimum_y <- minimum_y - 2
+  # maximum_y <- maximum_y + 2
 
   g$width <- maximum_x - minimum_x
   g$height <- maximum_y - minimum_y
