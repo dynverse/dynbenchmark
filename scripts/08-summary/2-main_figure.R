@@ -42,7 +42,9 @@ data <-
       benchmark_overall_pct_errored < .00001 ~ "0%",
       benchmark_overall_pct_errored < .01 ~ "<1%",
       TRUE ~ paste0(round(benchmark_overall_pct_errored * 100), "%")
-    )
+    ),
+    benchmark_overall_mem_predcor_str = sprintf("%.02f", benchmark_overall_mem_predcor),
+    benchmark_overall_time_predcor_str = sprintf("%.02f", benchmark_overall_time_predcor)
   ) %>%
   arrange(group, desc(summary_overall_overall))
 
