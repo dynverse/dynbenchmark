@@ -7,7 +7,7 @@ experiment("02-metrics/02-metric_conformity")
 
 perturbation_methods <- dynbenchmark:::perturbation_methods_design
 
-dataset_design <- read_rds(derived_file("dataset_design.rds"))
+dataset_design <- read_rds(result_file_file("dataset_design.rds"))
 perturbation_methods <- dynbenchmark:::perturbation_methods_design
 
 # load rules
@@ -96,4 +96,4 @@ rules <- rules %>%
 
 if (any(!rules$image_found)) {stop("Files not found: ", basename(rules$image_location[!rules$image_found]))}
 
-write_rds(rules, derived_file("rules.rds"))
+write_rds(rules, result_file("rules.rds"))
