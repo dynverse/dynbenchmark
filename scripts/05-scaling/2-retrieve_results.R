@@ -62,7 +62,7 @@ models <-
   qsub::qsub_lapply(
     X = method_ids,
     qsub_environment = "data",
-    qsub_config = qsub::override_qsub_config(memory = "9G", compress = "none"),
+    qsub_config = qsub::override_qsub_config(memory = "9G"),
     qsub_packages = c("tidyverse", "akima", "carrier", "scam", "strip"),
     FUN = function(method_id) {
       dat <-
@@ -105,11 +105,11 @@ models <-
       predict_time <- carrier::crate(function(n_cells, n_features) {
         requireNamespace("akima")
         10^akima::bicubic(x = model_seq, y = model_seq, z = pred_mat, x0 = log10(n_cells), y0 = log10(n_features))$z
-      }, pred_mat = pred_ltime_mat, model_seq)
+      }, pred_mat = pred_ltime_mat, model_seq = model_seq)
       predict_mem <- carrier::crate(function(n_cells, n_features) {
         requireNamespace("akima")
         10^akima::bicubic(x = model_seq, y = model_seq, z = pred_mat, x0 = log10(n_cells), y0 = log10(n_features))$z
-      }, pred_mat = pred_lmem_mat, model_seq)
+      }, pred_mat = pred_lmem_mat, model_seq = model_seq)
 
       # calculate preds
       pred_ind <-

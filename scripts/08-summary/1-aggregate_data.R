@@ -63,13 +63,21 @@ scaling_models <-
   read_rds(result_file("scaling.rds", experiment_id = "05-scaling"))$models %>%
   rename_at(., setdiff(colnames(.), "method_id"), function(x) paste0("scaling_models_", x))
 
-# TODO: reduce scaling models
-
 #####################################################
 #             READ BENCHMARKING RESULTS             #
 #####################################################
 benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", experiment_id = "06-benchmark"))
 benchmark_results_normalised <- read_rds(result_file("benchmark_results_normalised.rds", experiment_id = "06-benchmark"))
+
+bench_predcors <-
+  benchmark_results_normalised$data %>%
+  select(method_id, param_id, time_lpred, time_pred, mem_lpred, mem_pred, time, ltime, mem, lmem) %>%
+  group_by(method_id, param_id) %>%
+  summarise(
+    benchmark_overall_time_predcor = nacor(time_lpred, ltime),
+    benchmark_overall_mem_predcor = nacor(mem_lpred, lmem)
+  ) %>%
+  ungroup()
 
 execution_metrics <- c("pct_errored", "pct_execution_error", "pct_memory_limit", "pct_method_error_all", "pct_method_error_stoch", "pct_time_limit")
 bench_metrics <- paste0("norm_", benchmark_results_input$metrics %>% setdiff(c("edge_flip", "featureimp_cor")))
@@ -110,10 +118,9 @@ stability <- read_rds(result_file("stability_results.rds", experiment_id = "07-s
 #                  COMBINE RESULTS                  #
 #####################################################
 
-# TODO: add back scaling models when they have become decently sized
 results <- Reduce(
   function(a, b) left_join(a, b, by = "method_id"),
-  list(method_info, qc_results, scaling_scores, scaling_preds, bench_overall, bench_trajtypes, bench_sources, stability) # scaling_models,
+  list(method_info, qc_results, scaling_scores, scaling_preds, scaling_models, bench_overall, bench_trajtypes, bench_sources, bench_predcors, stability)
 )
 
 rm(list = setdiff(ls(), "results")) # more than this haiku
