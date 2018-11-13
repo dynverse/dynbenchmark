@@ -51,7 +51,7 @@ googledrive::drive_download(
 )
 
 # copy reports
-fs::dir_ls(raw_file(experiment_id = "12-manuscript")) %>% fs::file_copy(result_file(experiment_id))
+fs::dir_ls(raw_file()) %>% fs::file_copy(result_file())
 
 # browse
 # fs::file_show(str_glue("{output_directory}/paper.pdf"))
