@@ -47,7 +47,9 @@ rm(tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores) # writin
 #####################################################
 scaling_scores <-
   read_rds(result_file("scaling_scores.rds", experiment_id = "05-scaling"))$scaling_scores %>%
-  gather(column, score, scoretime, scoremem) %>%
+  mutate(overall = (scoretime + scoremem) / 2) %>%
+  gather(column, score, scoretime, scoremem, overall) %>%
+  filter(column != "overall" | metric == "overall") %>%
   mutate(metric = paste0("scaling_pred_", column, "_", metric)) %>%
   select(-column) %>%
   spread(metric, score)
@@ -132,7 +134,7 @@ metric_weights <-
   c(
     benchmark_overall_overall = 2,
     qc_overall_overall = 1,
-    scaling_pred_scoretime_overall = 1,
+    scaling_pred_overall_overall = 1,
     stability_overall_overall = 1
   )
 
