@@ -59,13 +59,16 @@ method_ids <-
   pull(method_id)
 
 models <-
-  bind_rows(pbapply::pblapply(
-    method_ids,
-    function(method_id) {
+  qsub::qsub_lapply(
+    X = method_ids,
+    qsub_environment = "data",
+    qsub_config = qsub::override_qsub_config(memory = "9G", compress = "none"),
+    qsub_packages = c("tidyverse", "akima", "carrier", "scam", "strip"),
+    FUN = function(method_id) {
       dat <-
         data %>%
         as_tibble() %>%
-        filter(method_id == !!method_id, error_status %in% c("no_error")) %>%
+        filter(method_id == !!method_id, error_status == "no_error") %>%
         mutate(
           time = time_method,
           ltime = log10(time_method),
@@ -73,59 +76,53 @@ models <-
           lmem = log10(mem)
         )
 
-      # predict time
+      # create a model reduction grid
+      model_resolution <- .5
+      model_seq <- seq(.5, 9, by = model_resolution)
+      model_grid <-
+        crossing(
+          lnrow = model_seq,
+          lncol = model_seq
+        )
+
+      # train time model
       dat_time <- dat %>% filter(is.finite(ltime))
-      model_time <-
-        tryCatch({
-          model_time <- scam::scam(ltime ~ s(lnrow, lncol, bs = "tedmi"), data = dat_time)
-          # model_time <- mgcv::gam(ltime ~ s(lnrow, lncol), data = dat_time)
-        }, error = function(e) {
-          warning(e)
-          lm(ltime ~ lnrow + lncol + lnrow * lncol, data = dat_time)
-        })
+      model_time <- scam::scam(ltime ~ s(lnrow, lncol, bs = "tedmi"), data = dat_time) %>%
+        strip::strip(keep = "predict")
 
-      model_time <- strip::strip(model_time, keep = "predict")
-      predict_time <- carrier::crate(function(n_cells, n_features) {
-        requireNamespace("mgcv")
-        requireNamespace("scam")
-        data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
-        unname(10^stats::predict(model, data))
-      }, model = model_time)
-
-      # predict memory
+      # train memory model
       dat_mem <- dat %>% filter(is.finite(lmem), lmem >= 8)
-      model_mem <-
-        tryCatch({
-          scam::scam(lmem ~ s(lnrow, lncol, bs = "tedmi"), data = dat_mem)
-          # mgcv::gam(lmem ~ s(lnrow, lncol), data = dat_mem)
-        }, error = function(e) {
-          warning(e)
-          lm(lmem ~ lnrow + lncol + lnrow * lncol, data = dat_mem)
-        })
-      model_mem <- strip::strip(model_mem, keep = "predict")
+      model_mem <- scam::scam(lmem ~ s(lnrow, lncol, bs = "tedmi"), data = dat_mem) %>%
+        strip::strip(keep = "predict")
+
+      # create predict functions
+      model_grid$time_lpred <- stats::predict(model_time, model_grid)
+      model_grid$mem_lpred <- stats::predict(model_mem, model_grid)
+
+      pred_ltime_mat <- t(matrix(model_grid$time_lpred, nrow = length(model_seq), ncol = length(model_seq)))
+      pred_lmem_mat <- t(matrix(model_grid$mem_lpred, nrow = length(model_seq), ncol = length(model_seq)))
+
+      predict_time <- carrier::crate(function(n_cells, n_features) {
+        requireNamespace("akima")
+        10^akima::bicubic(x = model_seq, y = model_seq, z = pred_mat, x0 = log10(n_cells), y0 = log10(n_features))$z
+      }, pred_mat = pred_ltime_mat, model_seq)
       predict_mem <- carrier::crate(function(n_cells, n_features) {
-        requireNamespace("mgcv")
-        requireNamespace("scam")
-        data <- data.frame(lnrow = log10(n_cells), lncol = log10(n_features))
-        unname(10^stats::predict(model, data))
-      }, model = model_mem)
+        requireNamespace("akima")
+        10^akima::bicubic(x = model_seq, y = model_seq, z = pred_mat, x0 = log10(n_cells), y0 = log10(n_features))$z
+      }, pred_mat = pred_lmem_mat, model_seq)
 
       # calculate preds
-      scalability_range <- seq(log10(10), log10(1000000), by = log10(10) / 5)
       pred_ind <-
-        crossing(
-          lnrow = scalability_range,
-          lncol = scalability_range
-        ) %>%
-        mutate(nrow = 10^lnrow, ncol = 10^lncol, lsum = lnrow + lncol) %>%
-        filter(4 - 1e-10 <= lsum, lsum <= 7 + 1e-10) %>%
+        model_grid %>%
         mutate(
           method_id = dat$method_id[[1]],
-          time_pred = predict_time(nrow, ncol),
-          mem_pred = predict_mem(nrow, ncol),
-          time_lpred = log10(time_pred),
-          mem_lpred = log10(mem_pred)
-        )
+          nrow = 10^lnrow,
+          ncol = 10^lncol,
+          lsum = lnrow + lncol,
+          time_pred = 10^time_lpred,
+          mem_pred = 10^mem_lpred
+        ) %>%
+        filter(4 - 1e-10 <= lsum, lsum <= 7 + 1e-10)
 
       # format output
       data %>%
@@ -142,7 +139,7 @@ models <-
           mem_lpred = mean(log10(pred_ind[[1]]$mem_pred))
         )
     }
-  ))
+  ) %>% bind_rows()
 
 data_pred <- bind_rows(models$pred_ind)
 models <- models %>% select(-pred_ind)

@@ -9,13 +9,13 @@ designs <- list(
     id = "linear",
     dataset_id = "real/gold/developing-dendritic-cells_schlitzer",
     answers = dynguidelines::answer_questions(time = "5m", multiple_disconnected = FALSE, expect_topology = TRUE, expected_topology = "linear"),
-    method_ids = c("scorpius", "monocle_ica", "slingshot", "paga", "waterfall", "tscan", "embeddr")
+    method_ids = c("scorpius", "monocle_ica", "slingshot", "paga", "waterfall", "tscan", "comp1")
   ),
   list(
     id = "bifurcating",
     dataset_id = "real/silver/fibroblast-reprogramming_treutlein",
     answers = dynguidelines::answer_questions(time = "5m", multiple_disconnected = FALSE, expect_topology = TRUE, expected_topology = "bifurcation"),
-    method_ids = c("monocle_ddrtree", "slingshot", "paga", "pcreode", "scuba", "raceid_stemid", "dpt")
+    method_ids = c("monocle_ddrtree", "slingshot", "paga", "pcreode", "scuba", "raceid_stemid", "dpt", "mst")
   ),
   list(
     id = "disconnected",
@@ -23,7 +23,7 @@ designs <- list(
     dataset_id = "synthetic/dyntoy/disconnected_1",
     # dataset_id = "real/mouse-cell-atlas-combination-8",
     answers = dynguidelines::answer_questions(time = "1d", multiple_disconnected = TRUE, prior_information = "start_id", memory = "10GB"),
-    method_ids = c("paga", "raceid_stemid")
+    method_ids = c("paga", "raceid_stemid", "mst")
   ),
   list(
     id = "cyclic",
@@ -31,7 +31,7 @@ designs <- list(
     # dataset_id = "synthetic/dyntoy/cyclic_1",
     # dataset_id = "real/cell-cycle_leng",
     answers = dynguidelines::answer_questions(time = "5m", multiple_disconnected = FALSE, expect_topology = TRUE, expected_topology = "cycle"),
-    method_ids = c("elpicycle", "paga")
+    method_ids = c("angle", "elpicycle", "paga")
   )
 )
 # design <- designs[[2]]
