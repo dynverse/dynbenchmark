@@ -31,11 +31,6 @@ timings <- bind_rows(benchmark, scaling) %>%
   ungroup() %>%
   mutate(label = ifelse(experiment == "benchmark", "Test (benchmark datasets)", "Training (scaling datasets)") %>% factor(levels = c("Training (scaling datasets)", "Test (benchmark datasets)")))
 
-nacor <- function(x, y) {
-  is_na <- !is.finite(x) | !is.finite(y)
-  stats::cor(x[!is_na], y[!is_na], method = "spearman")
-}
-
 cors <-
   timings %>%
   group_by(experiment, label) %>%
