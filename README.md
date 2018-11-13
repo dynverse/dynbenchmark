@@ -25,7 +25,7 @@ This repo contains the scripts to reproduce the manuscript
 > <a href='https://github.com/saeyslab'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>  
 > [bioRxiv:276907](https://www.biorxiv.org/content/early/2018/03/05/276907)
 > [doi:10.1101/276907](https://doi.org/10.1101/276907)
-> [![altmetric](https://badges.altmetric.com/?size=100&score=101&types=btttttwg&style=bar)](https://altmetric.com/details/33972849)
+> [![altmetric](https://badges.altmetric.com/?size=100&score=99&types=btttttwg&style=bar)](https://altmetric.com/details/33972849)
 
 (Note that this preprint is currently very outdated, see below for more
 recent results)
@@ -51,6 +51,7 @@ folders:
 | 9  | Guidelines               | [📄➡](scripts/09-guidelines)               | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/09-guidelines)               |
 | 10 | Benchmark interpretation | [📄➡](scripts/10-benchmark_interpretation) | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/10-benchmark_interpretation) |
 | 11 | Example predictions      | [📄➡](scripts/11-example_predictions)      | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/11-example_predictions)      |
+| 12 | Manuscript               | [📄➡](scripts/12-manuscript)               | [📊➡](https://github.com/dynverse/dynbenchmark_results/tree/master/12-manuscript)               |
 |    | Varia                    | [📄➡](scripts/varia)                       |                                                                                                |
 
 We also have several additional subfolders:
@@ -98,7 +99,64 @@ All wrapped methods are wrapped as both docker and singularity
 containers. These can be easily run using
 [*dyn*methods](https://github.com/dynverse/dynmethods).
 
-## Benchmarking your own method
+## Installation
 
-Explanation coming soon. Feel free to make an issue or send us an e-mail
-if you want your method to be included.
+dynbenchmark has been tested using R version 3.5.1 on Linux. While
+running the methods also works on on Windows and Mac (see
+[dyno](https://github.com/dynverse/dyno)), running the benchmark is
+currently not supported on these operating system, given that a lot of
+commands are linux specific.
+
+In R, you can install the dependencies of dynbenchmark from github
+using:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("dynverse/dynbenchmark")
+```
+
+This will install several other “dynverse” packages. Depending on the
+number of R packages already installed, this installation should take
+approximately 5 to 30 minutes.
+
+On Linux, you will need to install udunits and ImageMagick:
+
+  - Debian / Ubuntu / Linux Mint: `sudo apt-get install libudunits2-dev
+    imagemagick`
+  - Fedora / CentOS / RHEL: `sudo dnf install udunits2-devel
+    ImageMagick-c++-devel`
+
+[Docker](https://docs.docker.com/install) has to be installed to run TI
+methods. See <https://docs.docker.com/install> for instructions. For
+windows 10 you can install [Docker
+CE](https://store.docker.com/editions/community/docker-ce-desktop-windows),
+older windows installations require the [Docker
+toolbox](https://docs.docker.com/toolbox/overview/).
+
+You can test whether docker is correctly installed by
+    running:
+
+``` r
+dynwrap::test_docker_installation(detailed = TRUE)
+```
+
+    ## ✔ Docker is installed
+
+    ## ✔ Docker daemon is running
+
+    ## ✔ Docker is at correct version (>1.0): 1.39
+
+    ## ✔ Docker is in linux mode
+
+    ## ✔ Docker can pull images
+
+    ## ✔ Docker can run image
+
+    ## ✔ Docker can mount temporary volumes
+
+    ## ✔ Docker test successful -----------------------------------------------------------------
+
+    ## [1] TRUE
+
+This command will give helpful tips if some parts of the installation
+are missing.
