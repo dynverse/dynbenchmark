@@ -24,13 +24,25 @@ bucket_url <- content(deposit)$links$bucket
 
 datasets <- list_datasets()
 
+# check which files are uploaded
+files <- GET(glue::glue("https://zenodo.org/api/deposit/depositions/{deposit_id}/files"), headers) %>% httr::content() %>% list_as_tibble()
+
+uploaded_dataset_ids <- files$filename %>% gsub("\\.rds", "", .)
+
+setdiff(datasets$id, uploaded_dataset_ids)
+
+
+# choose which datasets to upload
+dataset_ids_oi <- datasets$id
+dataset_ids_oi <- setdiff(datasets$id, uploaded_dataset_ids)
+
 
 #' @examples
 #' dataset_id <- datasets$id[[1]]
 
 library(qsub)
 qsub_lapply(
-  datasets$id,
+  dataset_ids_oi,
   function(dataset_id) {
     library(dynbenchmark)
     library(tidyverse)
@@ -54,10 +66,3 @@ qsub_lapply(
     file.remove(temp_dataset_file)
   }
 )
-
-# check which files are uploaded
-files <- GET(glue::glue("https://zenodo.org/api/deposit/depositions/{deposit_id}/files"), headers) %>% httr::content() %>% list_as_tibble()
-
-uploaded_dataset_ids <- files$filename %>% gsub("\\.rds", "", .)
-
-setdiff(datasets$id, uploaded_dataset_ids)
