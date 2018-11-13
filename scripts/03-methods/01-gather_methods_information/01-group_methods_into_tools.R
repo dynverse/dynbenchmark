@@ -63,6 +63,7 @@ tools_google <- sheet %>%
   gs_read(ws = "tools")
 
 tools <- methods %>%
+  filter(source == "tool") %>%
   group_by(tool_id) %>%
   filter(row_number() == 1) %>%
   ungroup()
