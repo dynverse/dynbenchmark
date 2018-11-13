@@ -3,7 +3,9 @@
 library(dynbenchmark)
 library(tidyverse)
 
-output_directory <- "results/12-manuscript/"
+experiment("12-manuscript")
+
+output_directory <- result_file()
 if (fs::dir_exists(output_directory)) fs::dir_delete(output_directory)
 fs::dir_create(output_directory)
 
@@ -34,10 +36,27 @@ pwalk(stables, function(ref_id, table, ...) {
 # render supplementary
 rmarkdown::render("manuscript/supplementary.Rmd", output_format = pdf_manuscript(render_changes = FALSE), output_dir = output_directory)
 
+# download cover letter
+googledrive::drive_download(
+  googledrive::as_id("1p5EHvNNpSXRorwDDEIRiHn29F2yQrhnkidE1e30Www8"),
+  fs::path(output_directory, "cover_letter.pdf"),
+  overwrite = TRUE
+)
+
+# download rebuttal
+googledrive::drive_download(
+  googledrive::as_id("1KWgqwrv998yKLcyMv7Zm9o5LrwNRwbWu3gl8LTDVHpA"),
+  fs::path(output_directory, "rebuttal.pdf"),
+  overwrite = TRUE
+)
+
+# copy reports
+fs::dir_ls(raw_file(experiment_id = "12-manuscript")) %>% fs::file_copy(result_file(experiment_id))
+
 # browse
-fs::file_show(str_glue("{output_directory}/paper.pdf"))
-fs::file_show(str_glue("{output_directory}/paper_changes.pdf"))
-fs::file_show(str_glue("{output_directory}/supplementary.pdf"))
+# fs::file_show(str_glue("{output_directory}/paper.pdf"))
+# fs::file_show(str_glue("{output_directory}/paper_changes.pdf"))
+# fs::file_show(str_glue("{output_directory}/supplementary.pdf"))
 
 # upload to google drive
 walk(
