@@ -68,7 +68,13 @@ row_info <-
   select(group, id)
 row_groups <-
   data %>%
-  transmute(Group = paste0(ifelse(group == "graph", "Graph", label_short(group)), " methods"), group) %>%
+  transmute(
+    Group = case_when(
+      group == "graph" ~ "Graph methods",
+      group == "cycle" ~ "Cyclic methods",
+      TRUE ~ paste0(label_short(group), " methods")
+    ),
+    group) %>%
   unique()
 
 ####################################
@@ -104,7 +110,25 @@ walk(script_files, function(name) {
   reformat_tribbles(script_file)
   source(script_file, local = TRUE)
 
-  g <- funky_heatmap(data = data, column_info = column_info, column_groups = column_groups, row_info = row_info, row_groups = row_groups, palettes = palettes, col_annot_offset = 3)
+  data_sel <- data
+  data_removed <- NULL
+  if (name %in% c("summary", "detailed")) {
+    data_sel <- data_sel %>% filter(benchmark_overall_pct_errored < .5)
+    data_removed <- data_sel %>% filter(benchmark_overall_pct_errored >= .5)
+  }
+
+  row_info_sel <- row_info %>% filter(id %in% data_sel$id)
+  row_groups_sel <- row_groups %>% filter(group %in% row_info_sel$group)
+
+  g <- funky_heatmap(
+    data = data_sel,
+    column_info = column_info,
+    column_groups = column_groups,
+    row_info = row_info_sel,
+    row_groups = row_groups_sel,
+    palettes = palettes,
+    col_annot_offset = 3
+  )
 
   ggsave(plot_file, g, device = cairo_pdf, width = g$width/4, height = g$height/4)
 })
