@@ -43,5 +43,5 @@ stables %>%
 # Supplementary note 1
 
 ```{r}
-# dynbenchmark::knit_nest("../results/02-metrics/")
+dynbenchmark::knit_nest("../results/02-metrics/")
 ```

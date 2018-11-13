@@ -24,13 +24,22 @@ methods_aggr <- methods_aggr %>%
   left_join(benchmark, "method_id")
 
 methods_aggr %>% select(-benchmark) %>% pryr::object_size()
-methods_aggr %>% pryr::object_size()
+methods_aggr %>% map_dbl(pryr::object_size) %>%
 
 # benchmarking datasets
 benchmark_datasets_info <- load_datasets(unique(benchmark_results$dataset_id)) %>%
   select(id, source, trajectory_type)
 
-methods_aggr <- methods_aggr %>%
-  left_join(overall_results, "method_id")
+withr::with_dir(
+  "../dynguidelines",
+  {
+    usethis::use_data(
+      methods_aggr,
+      benchmark_datasets_info,
+      internal = TRUE,
+      compress = "xz",
+      overwrite = TRUE
+    )
+  }
+)
 
-devtools::use_data(methods_aggr, benchmark_datasets_info, internal = TRUE, pkg = "../dynguidelines", overwrite = TRUE)

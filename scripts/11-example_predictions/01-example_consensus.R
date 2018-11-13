@@ -31,7 +31,7 @@ designs <- list(
     # dataset_id = "synthetic/dyntoy/cyclic_1",
     # dataset_id = "real/cell-cycle_leng",
     answers = dynguidelines::answer_questions(time = "5m", multiple_disconnected = FALSE, expect_topology = TRUE, expected_topology = "cycle"),
-    method_ids = c("angle", "elpicycle", "paga")
+    method_ids = c("angle", "raceid_stemid", "paga")
   )
 )
 # design <- designs[[2]]
