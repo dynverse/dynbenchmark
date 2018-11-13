@@ -52,7 +52,7 @@ googledrive::drive_download(
 )
 
 # copy reports
-fs::dir_ls(raw_file()) %>% fs::file_copy(result_file())
+fs::dir_ls(raw_file()) %>% fs::file_copy(result_file(), overwrite = TRUE)
 
 # browse
 # fs::file_show(str_glue("{output_directory}/paper.pdf"))
