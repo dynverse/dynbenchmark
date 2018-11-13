@@ -63,6 +63,7 @@ scaling_models <-
   read_rds(result_file("scaling.rds", experiment_id = "05-scaling"))$models %>%
   rename_at(., setdiff(colnames(.), "method_id"), function(x) paste0("scaling_models_", x))
 
+# TODO: reduce scaling models
 
 #####################################################
 #             READ BENCHMARKING RESULTS             #
@@ -109,9 +110,10 @@ stability <- read_rds(result_file("stability_results.rds", experiment_id = "07-s
 #                  COMBINE RESULTS                  #
 #####################################################
 
+# TODO: add back scaling models when they have become decently sized
 results <- Reduce(
   function(a, b) left_join(a, b, by = "method_id"),
-  list(method_info, qc_results, scaling_scores, scaling_preds, scaling_models, bench_overall, bench_trajtypes, bench_sources, stability)
+  list(method_info, qc_results, scaling_scores, scaling_preds, bench_overall, bench_trajtypes, bench_sources, stability) # scaling_models,
 )
 
 rm(list = setdiff(ls(), "results")) # more than this haiku
