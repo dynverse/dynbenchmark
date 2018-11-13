@@ -14,11 +14,16 @@ sheet <- gs_key("1Mug0yz8BebzWt8cmEW306ie645SBh_tDHwjVw4OFhlE")
 
 ##  ............................................................................
 ##  Methods                                                                 ####
-methods <- dynmethods::methods %>%
-  filter(source == "tool")
 
-# tool_id is default the method_id
-methods <- methods %>% mutate(tool_id = map2_chr(implementation_id, id, function(a, b) ifelse(is.na(a), b, a)))
+are_na <- function(x) map_lgl(x, is.na)
+methods <- dynmethods::methods %>%
+  mutate(
+    tool_id = case_when(
+      !are_na(implementation_id) ~ implementation_id,
+      grepl("^projected_", id) ~ gsub("projected_", "", id),
+      TRUE ~ id
+    )
+  )
 
 # add detects_... columns for trajectory types
 trajectory_type_ids <- trajectory_types$id
