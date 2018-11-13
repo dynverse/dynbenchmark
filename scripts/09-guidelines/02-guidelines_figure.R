@@ -7,7 +7,7 @@ experiment("09-guidelines")
 
 # get the results and method info
 results <- read_rds(result_file("results.rds", "08-summary"))
-methods <- read_rds(result_file("methods.rds", "03-methods"))
+methods <- load_methods()
 
 extract_top_methods <- function(trajectory_types, top_n = 4) {
   # filter on non-hard priors
@@ -30,7 +30,7 @@ extract_top_methods <- function(trajectory_types, top_n = 4) {
   columns <- paste0("benchmark_tt_", trajectory_types)
   benchmark <- results %>%
     filter(
-      method_id %in% method_ids_detectable,
+      method_id %in% method_ids_detectable
       #method_id %in% method_ids_soft_prior
     ) %>%
     select(method_id, !!columns) %>%
