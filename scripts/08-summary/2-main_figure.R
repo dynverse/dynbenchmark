@@ -116,8 +116,8 @@ walk(script_files, function(name) {
   data_sel <- data
   data_removed <- NULL
   if (name %in% c("summary", "detailed")) {
-    data_sel <- data_sel %>% filter(benchmark_overall_pct_errored < .5)
     data_removed <- data_sel %>% filter(benchmark_overall_pct_errored >= .5)
+    data_sel <- data_sel %>% filter(benchmark_overall_pct_errored < .5)
   }
 
   row_info_sel <- row_info %>% filter(id %in% data_sel$id)
@@ -130,7 +130,8 @@ walk(script_files, function(name) {
     row_info = row_info_sel,
     row_groups = row_groups_sel,
     palettes = palettes,
-    col_annot_offset = 3
+    col_annot_offset = 3,
+    removed_methods = data_removed$method_name %>% sort
   )
 
   ggsave(plot_file, g, device = cairo_pdf, width = g$width/4, height = g$height/4)

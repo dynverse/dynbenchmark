@@ -41,7 +41,8 @@ funky_heatmap <- function(
   scale_column = TRUE,
   add_abc = TRUE,
   col_annot_offset = 3,
-  row_annot_offset = .5
+  row_annot_offset = .5,
+  removed_methods = NULL
 ) {
   # no point in making these into parameters
   row_height <- 1
@@ -484,6 +485,32 @@ funky_heatmap <- function(
 
     text_data <- text_data %>% bind_rows(
       pr_text_data
+    )
+  }
+
+  if (!is.null(removed_methods)) {
+    # rm_min_x <- column_pos %>% filter(!group %in% c("method_characteristic", "inferrable_trajtype", "benchmark_metric", "benchmark_source")) %>% slice(1) %>% pull(xmin)
+    rm_min_x <- 20
+
+    num_cols <- 2
+    num_rows <- ceiling(length(removed_methods) / num_cols)
+
+    rm_lab_df <-
+      data_frame(label_value = removed_methods) %>%
+      mutate(
+        row = (row_number() - 1) %% num_rows,
+        col = ceiling(row_number()  / num_rows) - 1,
+        x = rm_min_x + col * 5,
+        y = legend_pos - (row + 2) * row_height * .9
+      )
+    rm_text_data <-
+      bind_rows(
+        data_frame(xmin = rm_min_x, xmax = rm_min_x, ymin = legend_pos - 1.5, ymax = legend_pos - .5, label_value = "Not shown, insufficient data points", hjust = 0, vjust = 1, fontface = "bold"),
+        rm_lab_df %>% mutate(xmin = x, xmax = x, ymin = y, ymax = y, hjust = 0, vjust = 0)
+      )
+
+    text_data <- text_data %>% bind_rows(
+      rm_text_data
     )
   }
 
