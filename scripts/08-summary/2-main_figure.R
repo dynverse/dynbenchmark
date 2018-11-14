@@ -134,7 +134,7 @@ walk(script_files, function(name) {
     row_info = row_info_sel,
     row_groups = row_groups_sel,
     palettes = palettes,
-    col_annot_offset = 3,
+    col_annot_offset = 3.2,
     removed_methods = data_removed$method_name %>% sort
   )
 
