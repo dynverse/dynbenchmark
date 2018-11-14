@@ -4,7 +4,7 @@
 \alias{nacor}
 \title{Na removed cor}
 \usage{
-nacor(x, y)
+nacor(x, y, method = "spearman")
 }
 \arguments{
 \item{x}{a numeric vector, matrix or data frame.}
@@ -12,6 +12,11 @@ nacor(x, y)
 \item{y}{\code{NULL} (default) or a vector, matrix or data frame with
     compatible dimensions to \code{x}.   The default is equivalent to
     \code{y = x} (but more efficient).}
+
+\item{method}{a character string indicating which correlation
+    coefficient (or covariance) is to be computed.  One of
+    \code{"pearson"} (default), \code{"kendall"}, or \code{"spearman"}:
+    can be abbreviated.}
 }
 \description{
 Na removed cor
