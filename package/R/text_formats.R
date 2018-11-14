@@ -120,6 +120,7 @@ clean_xelatex <- function(output_file) {
   fs::file_delete(fs::path_ext_set(output_file, "tex"))
   fs::file_delete(fs::path_ext_set(output_file, "aux"))
   fs::file_delete(fs::path_ext_set(output_file, "out"))
+  fs::file_delete(fs::path_ext_set(output_file, "toc"))
 }
 
 #' Common dynbenchmark format

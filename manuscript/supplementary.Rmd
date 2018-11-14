@@ -1,7 +1,7 @@
 ---
 title: "Supplementary material for: \nA comparison of single-cell trajectory inference methods"
 output: 
-  dynbenchmark::pdf_manuscript:
+  dynbenchmark::pdf_supplementary_note:
       render_change: FALSE
 ---
 
