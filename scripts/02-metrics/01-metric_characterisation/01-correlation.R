@@ -173,9 +173,11 @@ plot_waypoints_overview <- wrap_plots(
   nrow = 1
 ) + plot_annotation(tag_levels = "a")
 
+plot_waypoints_overview
+
 write_rds(plot_waypoints_overview, result_file("waypoints_overview.rds"))
 
-
+ggsave(result_file("waypoints_overview.pdf"), width = 12, height = 8)
 
 
 #   ____________________________________________________________________________
@@ -197,4 +199,8 @@ plots_geodesic_distance_dimreds <- mapdf(datasets, function(dataset) {
 
 plot_geodesic_distance_dimreds <- wrap_plots(plots_geodesic_distance_dimreds)
 
+plot_geodesic_distance_dimreds
+
 write_rds(plot_geodesic_distance_dimreds, result_file("geodesic_distances_dimreds.rds"))
+ggsave(result_file("geodesic_distances_dimreds.pdf"), width = 12, height = 8)
+

@@ -8,13 +8,17 @@ plan(multiprocess)
 experiment("10-benchmark_interpretation")
 
 # load in output models
-output <- benchmark_bind_results(load_models = TRUE, experiment_id = "06-benchmark") %>%
-  select(method_id, dataset_id, model, him)
+
 
 # only take into account methods with free topology and tree detection
-relevant_methods <- load_methods() %>% filter(source != "control", topology_inference == "free", detects_tree) %>% pull(id)
-output <- output %>%
-  filter(method_id %in% relevant_methods) %>%
+relevant_methods <- load_methods() %>% filter(source == "tool", topology_inference == "free", detects_tree) %>% pull(id)
+
+output <- benchmark_bind_results(
+  load_models = TRUE,
+  experiment_id = "06-benchmark",
+  filter_fun = function(tib) tib %>% filter(method_id %in% relevant_methods)
+) %>%
+  select(method_id, dataset_id, model, him) %>%
   filter(!map_lgl(model, is.null))
 
 # simplify all milestone networks

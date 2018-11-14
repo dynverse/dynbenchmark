@@ -22,6 +22,7 @@ LazyData: true
 URL: https://github.com/dynverse/dynalysis
 BugReports: https://github.com/dynverse/dynalysis/issues
 Imports: 
+  cowplot,
   cluster,
   dplyr,
   extrafont,
@@ -41,6 +42,7 @@ Imports:
   readr,
   reshape2,
   rmarkdown,
+  rlang,
   rvest,
   sigmoid,
   smoof,
@@ -54,7 +56,6 @@ Imports:
   qsub,
   xml2
 Suggests:
-  cowplot,
   dyngen,
   dyntoy,
   dynnormaliser,

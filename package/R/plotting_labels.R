@@ -159,33 +159,39 @@ limits_metric <- function(metric_id) {
 #' @export
 label_time <- function(time) {
   case_when(
+    time < 1e-5 ~ "0s",
     time < 1 ~ "<1s",
     time < 60 ~ paste0(floor(time), "s"),
     time < 3600 ~ paste0(floor(time / 60), "m"),
     time < 3600 * 24 ~ paste0(floor(time / 3600), "h"),
     time < 3600 * 24 * 7 ~ paste0(floor(time / 3600 / 24), "d"),
-    TRUE ~ ">7d"
+    !is.na(time) ~ ">7d",
+    TRUE ~ NA_character_
   )
 }
 
 #' Label memory
 #' @param x Memory in bytes
+#' @param include_mb Also include MB values.
 #'
 #' @export
-label_memory <- function(x) {
-  map_chr(x, function(x) {
-    if (is.na(x)) {
-      NA
-    } else if (x < 10^6) {
-      paste0(round(x/10^3), "kB")
-    } else if (x < 10^9) {
-      paste0(round(x/10^6), "MB")
-    } else if (x < 10^12) {
-      paste0(round(x/10^9), "GB")
-    } else {
-      paste0(round(x/10^12), "TB")
-    }
-  })
+label_memory <- function(x, include_mb = FALSE) {
+  if (include_mb) {
+    case_when(
+      x < 1e6 ~ "<1MB",
+      x < 1e9 ~ paste0(round(x / 1e6), "MB"),
+      x < 1e12 ~ paste0(round(x / 1e9), "GB"),
+      !is.na(x) ~ ">1TB",
+      TRUE ~ NA_character_
+    )
+  } else {
+    case_when(
+      x < 1e9 ~ "<1GB",
+      x < 1e12 ~ paste0(round(x / 1e9), "GB"),
+      !is.na(x) ~ ">1TB",
+      TRUE ~ NA_character_
+    )
+  }
 }
 
 

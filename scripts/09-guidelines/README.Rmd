@@ -1,0 +1,16 @@
+---
+output: dynbenchmark::github_markdown_nested
+---
+
+# Guidelines
+
+```{r include=FALSE}
+library(dynbenchmark)
+library(tidyverse)
+```
+
+Preparing the data for the dynguidelines app and creation of the guidelines figure.
+
+```{r}
+dynbenchmark::render_scripts_documentation()
+```

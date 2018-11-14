@@ -73,8 +73,10 @@ raw_data <-
     time = ifelse(error_status != "no_error", 6 * 3600, time_method),
     mem = ifelse(error_status != "no_error", 32 * 10e9, max_mem),
     ltime = log10(time),
-    lmem = log10(mem)
+    lmem = log10(mem),
+    featureimp_wcor = ifelse(!is.finite(featureimp_wcor), 0, featureimp_wcor)
   )
+
 
 table(raw_data$dataset_source, raw_data$error_status)
 write_rds(raw_data, result_file("benchmark_results_unnormalised.rds"), compress = "xz")
@@ -85,10 +87,13 @@ write_rds(raw_data, result_file("benchmark_results_unnormalised.rds"), compress 
 
 raw_data <-
   read_rds(result_file("benchmark_results_unnormalised.rds")) %>%
-  filter(method_id %in% c("identity", "error", "shuffle", "random"))
+  filter(!method_id %in% c("identity", "error", "shuffle", "random"))
+
+sources <- unique(raw_data$dataset_source)
 
 tmp <- benchmark_aggregate(
-  data = raw_data %>% filter(error_status == "no_error")
+  data = raw_data %>% filter(error_status == "no_error"),
+  dataset_source_weights = set_names(rep(1, length(sources)), sources)
 )
 
 dataset_source_weights <-

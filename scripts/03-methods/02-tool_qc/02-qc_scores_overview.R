@@ -19,6 +19,13 @@ tools_evaluated <- tools_evaluated %>% mutate(tool_id = factor(tool_id, tool_ord
 
 label_tool <- function(tool_id) {tools_evaluated$tool_name[match(tool_id, tools_evaluated$tool_id)]}
 
+color_scale_qc <- grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Greens")[-1] %>% c("#00250f")))(101) %>%
+  scale_fill_gradientn(
+    "Usability score",
+    colours = .,
+    guide=guide_colorbar(title.position = "top", title.hjust=0.5, barwidth = unit(2, "inches"))
+  )
+
 # overall ordering plot of the tools
 plot_tool_ordering <- tools_evaluated %>%
   mutate(tool_label = label_tool(tool_id)) %>%
@@ -28,7 +35,8 @@ plot_tool_ordering <- tools_evaluated %>%
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
   scale_y_continuous(NULL, expand=c(0, 0), limits=c(0, 1)) +
   scale_x_continuous("", breaks=NULL, expand = c(0, 0)) +
-  viridis::scale_fill_viridis(label_long("qc_score"), option="D", guide=guide_colorbar(title.position = "top", title.hjust=0.5, barwidth = unit(2, "inches"))) +
+  color_scale_qc +
+  # viridis::scale_fill_viridis(label_long("qc_score"), option="D", guide=guide_colorbar(title.position = "top", title.hjust=0.5, barwidth = unit(2, "inches"))) +
   scale_color_identity() +
   annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf) +
   theme_pub() +
@@ -155,7 +163,7 @@ plot_check_difficulty <- check_difficulty_data %>%
   # hline_check + hline_aspect +
   # scale_fill_manual(values=set_names(qc_categories$color, qc_categories$category)) +
   # scale_fill_distiller("QC\ndifficulty", palette="Spectral", limits=c(0,1), breaks=c(0,0.5, 1), direction=1) +
-  scale_fill_gradientn("Average QC score", colors = c("#9e0142", "#d53e4f", "#f46d43", "#fee08b", "#abdda4", "#1a9850"), limits=c(0,1), breaks=c(0,0.5, 1), guide=guide_colorbar(title.position = "bottom", title.hjust=0.5, barwidth = unit(2, "inches"))) +
+  scale_fill_distiller("Average usability score", palette = "RdYlBu", limits=c(0,1), breaks=c(0,0.5, 1), guide=guide_colorbar(title.position = "bottom", title.hjust=0.5, barwidth = unit(2, "inches"))) +
   scale_x_continuous(NULL, breaks=NULL, limits=c(0, 12), expand=c(0,0)) +
   scale_y_reverse(NULL, breaks=NULL, expand=c(0,0)) +
   theme_pub() +
@@ -184,4 +192,9 @@ write_rds(
   plot_qc_overview,
   result_file("qc_overview.rds")
 )
-
+ggsave(
+  result_file("qc_overview.pdf"),
+  plot_qc_overview,
+  width = 15,
+  height = 18
+)

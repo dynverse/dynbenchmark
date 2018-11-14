@@ -5,10 +5,10 @@
 \title{A nested github markdown document}
 \usage{
 
-  github_markdown_nested(bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/assets/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/assets/nature-biotechnology.csl"), ...)
+  github_markdown_nested(bibliography = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(),
+  "manuscript/assets/references.bib")),
+  csl = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(),
+  "manuscript/assets/nature-biotechnology.csl")), ...)
 }
 \arguments{
 \item{bibliography}{Bibliography location}

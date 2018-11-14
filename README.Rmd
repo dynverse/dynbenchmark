@@ -79,7 +79,7 @@ Based on the results of the benchmark, we provide context-dependent user guideli
 
 The benchmarking pipeline generates (and uses) the following datasets:
 
-* **Gold standard single-cell datasets**, both real and synthetic, used to evaluated the trajectory inference methods [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1211533.svg)](https://doi.org/10.5281/zenodo.1211533)
+* **Gold standard single-cell datasets**, both real and synthetic, used to evaluated the trajectory inference methods [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1443566.svg)](https://doi.org/10.5281/zenodo.1443566)
 
 ```{r, echo = FALSE, message=FALSE}
 set.seed(3)
@@ -101,6 +101,30 @@ ggplot2::ggsave("package/man/figures/datasets.png", width = nrow(datasets)*3, he
 
 All wrapped methods are wrapped as both docker and singularity containers. These can be easily run using [*dyn*methods](https://github.com/dynverse/dynmethods).
 
-## Benchmarking your own method
+## Installation
 
-Explanation coming soon. Feel free to make an issue or send us an e-mail if you want your method to be included.
+dynbenchmark has been tested using R version 3.5.1 on Linux. While running the methods also works on on Windows and Mac (see [dyno](https://github.com/dynverse/dyno)), running the benchmark is currently not supported on these operating system, given that a lot of commands are linux specific.
+
+In R, you can install the dependencies of dynbenchmark from github using:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("dynverse/dynbenchmark")
+```
+
+This will install several other "dynverse" packages. Depending on the number of R packages already installed, this installation should take approximately 5 to 30 minutes.
+
+On Linux, you will need to install udunits and ImageMagick:
+
+* Debian / Ubuntu / Linux Mint: `sudo apt-get install libudunits2-dev imagemagick`
+* Fedora / CentOS / RHEL: `sudo dnf install udunits2-devel ImageMagick-c++-devel`
+
+[Docker](https://docs.docker.com/install) has to be installed to run TI methods. See https://docs.docker.com/install for instructions. For windows 10 you can install [Docker CE](https://store.docker.com/editions/community/docker-ce-desktop-windows), older windows installations require the [Docker toolbox](https://docs.docker.com/toolbox/overview/).
+
+You can test whether docker is correctly installed by running:
+
+```{r, message = FALSE, echo = TRUE}
+dynwrap::test_docker_installation(detailed = TRUE)
+```
+
+This command will give helpful tips if some parts of the installation are missing.

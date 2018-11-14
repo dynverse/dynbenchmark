@@ -6,11 +6,10 @@ library(dynutils)
 
 experiment("05-scaling")
 
-method_info <- read_rds(derived_file("design.rds"))$methods
+method_info <- load_methods()
 list2env(read_rds(result_file("scaling.rds")), .GlobalEnv)
 
-# filter away control methods
-models_nocontrol <- models %>% filter(method_id %in% (method_info %>% filter(source != "control") %>% pull(id)))
+models <- models %>% filter(method_id %in% method_info$id)
 
 # check which datasets are available on the remote (some may not have executed entirely)
 scaling_avail <- qsub::ls_remote(derived_file("", experiment = "05-scaling/dataset", remote = TRUE), remote = TRUE) %>% gsub("\\.rds$", "", .)
@@ -34,8 +33,8 @@ scale_y_ncol <- scale_y_continuous(breaks = seq(1, 6), labels = label_thousands(
 ##########################################################
 source(scripts_file("3a-summary_figure.R"))
 source(scripts_file("3b-individual_example.R"))
-source(scripts_file("3c-individual_overview.R"))
-source(scripts_file("3d-error_logs.R"))
+# source(scripts_file("3c-individual_overview.R"))
+# source(scripts_file("3d-error_logs.R"))
 
 ##########################################################
 ###                GENERATE SUPP FIGURE                ###
@@ -44,10 +43,10 @@ source(scripts_file("3d-error_logs.R"))
 plot_scaling <- patchwork::wrap_plots(
   read_rds(derived_file("example.rds")) %>% patchwork::wrap_elements(),
   read_rds(derived_file("ranking.rds")) %>% patchwork::wrap_elements(),
-  heights = c(2, 5),
+  heights = c(2, 6),
   ncol = 1
 ) +
   patchwork::plot_annotation(tag_levels = "a")
 
-ggsave(result_file("scaling.pdf"), width = 14, height = 16)
+ggsave(result_file("scaling.pdf"), width = 12, height = 16)
 

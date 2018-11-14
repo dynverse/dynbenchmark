@@ -67,13 +67,13 @@ get_default_format <- function() {
 #' @rdname setup_refs
 #' @export
 setup_figs <- function() {
-  tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width = numeric(), height = numeric())
+  tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width = numeric(), height = numeric(), ref_type = character())
 }
 
 #' @rdname setup_refs
 #' @export
 setup_sfigs <- function() {
-  tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width = numeric(), height = numeric())
+  tibble(ref_id = character(), fig_path = character(), caption_main = character(), caption_text = character(), width = numeric(), height = numeric(), integrate = logical(), ref_type = character())
 }
 
 #' Add a figure
@@ -99,6 +99,7 @@ add_fig <- function(
   # save it because why not
   figs <<- figs %>% add_row(
     ref_id = ref_id,
+    ref_type = "fig",
     fig_path = if(is.character(fig_path)) {fig_path} else {list(fig_path)},
     caption_main = caption_main,
     caption_text = caption_text,
@@ -110,6 +111,7 @@ add_fig <- function(
 }
 
 #' @rdname add_fig
+#' @param integrate Whether to integrate the figure, or direct the reader to a separate file
 #' @export
 add_sfig <- function(
   fig_path,
@@ -118,20 +120,24 @@ add_sfig <- function(
   caption_text = "",
   width = 5,
   height = 7,
-  format = get_default_format()
+  format = get_default_format(),
+  integrate = TRUE
 ) {
   # save it because it's necessary
   sfigs <<- sfigs %>% add_row(
     ref_id = ref_id,
+    ref_type = "sfig",
     fig_path = if(is.character(fig_path)) {fig_path} else {list(fig_path)},
     caption_main = caption_main,
     caption_text = caption_text,
     width = width,
-    height = height
+    height = height,
+    integrate = integrate
   )
 }
 
-
+#' @rdname add_fig
+#' @export
 plot_fig <- function(
   ref_type,
   ref_id,
@@ -140,7 +146,8 @@ plot_fig <- function(
   caption_text,
   width = 5,
   height = 7,
-  format = "latex"
+  format = "latex",
+  integrate = TRUE
 ) {
   fig_anch <- anchor(ref_type, ref_id)
 
@@ -168,7 +175,7 @@ plot_fig <- function(
   # save the figure in the appropriate format
   # plot figure if rds
   if (!is.null(fig)) {
-    if (format == "latex") {
+    if (format %in% c("latex", "pdf")) {
       fig_path <- fs::path_ext_set(fig_path, "pdf")
 
       ggsave(fig_path, fig, width = width, height = height, device = grDevices::cairo_pdf)
@@ -182,31 +189,38 @@ plot_fig <- function(
   # convert to relative path (for github markdown)
   fig_path <- fs::path_rel(fig_path)
 
+  # convert svg to pdf if required
+  if (fs::path_ext(fig_path) == "svg" && format %in% c("pdf", "latex")) {
+    new_fig_path <- fig_path
+    fs::path_ext(new_fig_path) <- "pdf"
+    system(glue::glue("inkscape {fig_path} --export-pdf={new_fig_path}"))
+    fig_path <- new_fig_path
+  }
 
   # check if path exists
   if (!file.exists(fig_path)) {
     stop(fig_path, " does not exist!")
   }
 
-  if (format == "latex") {
-    # convert svg to pdf
-    if (fs::path_ext(fig_path) == "svg") {
-      new_fig_path <- fig_path
-      fs::path_ext(new_fig_path) <- "pdf"
-      system(glue::glue("inkscape {fig_path} --export-pdf={new_fig_path}"))
-      fig_path <- new_fig_path
+  if (format %in% "latex") {
+    fig_name <- ref(ref_type, ref_id)
+
+    include_graphics <- if (integrate) {
+      "\\includegraphics[height={height/2}in, width={width/2}in]{{{fig_path}}}\n\n"
+    } else {
+      "This figure is provided as a separate pdf file"
     }
 
-    fig_name <- ref(ref_type, ref_id)
     subchunk <- glue::glue(
       "\\begin{{myfigure}}{{{ifelse(ref_type == 'fig', '!htbp', 'H')}}}\n",
       "\\begin{{center}}\n",
       "{fig_anch}\n",
-      "\\includegraphics[height={height/2}in, width={width/2}in]{{{fig_path}}}\n\n",
+      include_graphics,
       "\\end{{center}}\n",
       "\\textbf{{{fig_name}: {caption_main}}} {caption_text}\n\n",
       "\\end{{myfigure}}\n"
-    )
+    ) %>% knitr::asis_output()
+
   } else if (format %in% c("html", "markdown")){
     width <- width * 70
     height = height * 70
@@ -221,12 +235,14 @@ plot_fig <- function(
       "</p>\n",
       "___",
       "\n\n"
-    )
+    ) %>% knitr::asis_output()
+  } else if (format %in% "pdf") {
+    subchunk <- fig_path
   } else {
     stop("Invalid format for figures")
   }
 
-  knitr::asis_output(subchunk)
+  subchunk
 }
 
 
@@ -239,13 +255,13 @@ plot_fig <- function(
 #' @rdname setup_refs
 #' @export
 setup_tables <- function() {
-  tibble(ref_id = character(), table = list(), caption_main = character(), caption_text = character())
+  tibble(ref_id = character(), table = list(), caption_main = character(), caption_text = character(), ref_type = character())
 }
 
 #' @rdname setup_refs
 #' @export
 setup_stables <- function() {
-  tibble(ref_id = character(), table = list(), caption_main = character(), caption_text = character())
+  tibble(ref_id = character(), table = list(), caption_main = character(), caption_text = character(), ref_type = character())
 }
 
 #' Add a table
@@ -270,6 +286,7 @@ add_table <- function(
   # save it because why not
   tables <<- tables %>% add_row(
     table = list(table),
+    ref_type = "table",
     ref_id = ref_id,
     caption_main = caption_main,
     caption_text = caption_text
@@ -292,6 +309,7 @@ add_stable <- function(
   # save it because why not
   stables <<- stables %>% add_row(
     table = list(table),
+    ref_type = "stable",
     ref_id = ref_id,
     caption_main = caption_main,
     caption_text = caption_text
@@ -306,10 +324,13 @@ process_table <- function(table) {
 
   # if an excel, add a note that this table was submitted separately
   if (is.character(table) && fs::path_ext(table) == "xlsx") {
+    if (!fs::file_exists(table)) stop(table, " does not exist!")
+
     table <- list(
-      html = "This table was provided as a separate excel file",
-      latex = "This table was provided as a separate excel file",
-      markdown = "This table was provided as a separate excel file"
+      html = "This table is provided as a separate excel file",
+      latex = "This table is provided as a separate excel file",
+      markdown = "This table is provided as a separate excel file",
+      excel = table
     )
   }
 

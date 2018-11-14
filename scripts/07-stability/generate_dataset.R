@@ -1,3 +1,5 @@
+#' Helper function for generating a subsampled dataset
+
 generate_dataset <- function(
   orig_dataset_id,
   pct_cells,
@@ -27,6 +29,7 @@ generate_dataset <- function(
   dimnames(counts) <- dimnames(expression) <- list(cell_names %>% unname(), feature_names %>% unname())
 
   cell_id_map <- cell_names %>% enframe("old_id", "cell_id")
+  feature_id_map <- feature_names %>% enframe("old_id", "feature_id")
 
   progressions <-
     base_traj$progressions %>%
@@ -37,7 +40,9 @@ generate_dataset <- function(
   set.seed(seed)
   dataset <-
     dynwrap::wrap_data(
-      cell_ids = cell_names %>% unname()
+      cell_ids = cell_names %>% unname(),
+      cell_id_map = cell_id_map,
+      feature_id_map = feature_id_map
     ) %>%
     dynwrap::add_trajectory(
       milestone_ids = base_traj$milestone_ids,
@@ -52,8 +57,7 @@ generate_dataset <- function(
     dynwrap::add_prior_information(
       verbose = verbose
     ) %>%
-    dynwrap::add_cell_waypoints(100) %>%
-    dynwrap::add_root("Cell1")
+    dynwrap::add_cell_waypoints(100)
 
   set.seed(prev_seed)
 

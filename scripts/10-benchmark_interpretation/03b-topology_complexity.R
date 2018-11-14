@@ -35,7 +35,7 @@ ggsave(result_file("topology_complexity_difference.pdf"), plot_topology_complexi
 ##  ............................................................................
 ##  Trajectory type specific complexity                                     ####
 
-method_ids <- c("gng", "paga", "slingshot", "paga_tree","monocle_ddrtree", "pcreode")
+method_ids <- c("paga", "slingshot", "paga_tree", "monocle_ddrtree", "pcreode")
 
 # add a row "all trajectory types"
 statistics_complexity <- bind_rows(

@@ -1,11 +1,9 @@
+#' Create a figure containing predicted trajectories from the top methods on a couple of simple datasets
+
 library(dynbenchmark)
 library(tidyverse)
 
 experiment("11-example_predictions")
-
-# load in output models
-output <- benchmark_bind_results(load_models = TRUE, experiment_id = "06-benchmark") %>%
-  select(method_id, dataset_id, model, him)
 
 # load dataset
 designs <- list(
@@ -13,13 +11,13 @@ designs <- list(
     id = "linear",
     dataset_id = "real/gold/developing-dendritic-cells_schlitzer",
     answers = dynguidelines::answer_questions(time = "5m", multiple_disconnected = FALSE, expect_topology = TRUE, expected_topology = "linear"),
-    method_ids = c("scorpius", "monocle_ica", "slingshot", "paga", "waterfall", "tscan", "grandprix")
+    method_ids = c("scorpius", "monocle_ica", "slingshot", "paga", "waterfall", "tscan", "comp1")
   ),
   list(
     id = "bifurcating",
     dataset_id = "real/silver/fibroblast-reprogramming_treutlein",
     answers = dynguidelines::answer_questions(time = "5m", multiple_disconnected = FALSE, expect_topology = TRUE, expected_topology = "bifurcation"),
-    method_ids = c("monocle_ddrtree", "slingshot", "paga", "pcreode", "scuba", "raceid_stemid", "dpt")
+    method_ids = c("monocle_ddrtree", "slingshot", "paga", "pcreode", "scuba", "raceid_stemid", "dpt", "mst")
   ),
   list(
     id = "disconnected",
@@ -27,7 +25,7 @@ designs <- list(
     dataset_id = "synthetic/dyntoy/disconnected_1",
     # dataset_id = "real/mouse-cell-atlas-combination-8",
     answers = dynguidelines::answer_questions(time = "1d", multiple_disconnected = TRUE, prior_information = "start_id", memory = "10GB"),
-    method_ids = c("paga", "raceid_stemid", "gng")
+    method_ids = c("paga", "raceid_stemid", "mst")
   ),
   list(
     id = "cyclic",
@@ -35,10 +33,18 @@ designs <- list(
     # dataset_id = "synthetic/dyntoy/cyclic_1",
     # dataset_id = "real/cell-cycle_leng",
     answers = dynguidelines::answer_questions(time = "5m", multiple_disconnected = FALSE, expect_topology = TRUE, expected_topology = "cycle"),
-    method_ids = c("angle", "paga", "gng")
+    method_ids = c("angle", "raceid_stemid", "paga")
   )
 )
-design <- designs[[2]]
+# design <- designs[[2]]
+
+# load in output models
+to_load <- designs %>% map_df(~ data_frame(method_id = .$method_ids, dataset_id = .$dataset_id))
+output <- benchmark_bind_results(
+  load_models = TRUE, experiment_id = "06-benchmark",
+  filter_fun = function(tib) tib %>% inner_join(to_load, by = c("dataset_id", "method_id"))
+) %>%
+  select(method_id, dataset_id, model, him)
 
 plot_dimred_overviews <- list()
 

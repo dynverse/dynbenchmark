@@ -1,50 +1,34 @@
-#' Downloading the processed datasets from Zenodo ([10.5281/zenodo.1211532](https://doi.org/10.5281/zenodo.1211532))
+#' Downloading the processed datasets from Zenodo ([10.5281/zenodo.1443566](https://doi.org/10.5281/zenodo.1443566))
 
 library(tidyverse)
 library(dynbenchmark)
+library(httr)
 
 experiment("01-datasets")
 
-# download the zip file from zenodo
-dataset_file <- derived_file("datasets.zip")
-if (!file.exists(dataset_file)) download.file("https://zenodo.org/record/1211533/files/datasets.zip", dataset_file)
+# download the rds files from zenodo
+deposit_id <- 1443566
+files_list <- GET(glue::glue("https://zenodo.org/api/deposit/depositions/{deposit_id}/files"), headers) %>%
+  httr::content()
 
-# unzip the folder
-unzip(dataset_file, exdir = derived_file(""))
+files <- tibble(
+  filename = map_chr(files_list, "filename")
+  # url = map(files_list, "links") %>% map_chr("download") # this url does not work
+) %>%
+  mutate(
+    url = glue::glue("https://zenodo.org/record/{deposit_id}/files/{filename}"),
+    destfile = map_chr(filename, derived_file)
+  )
 
-# remove zip
-file.remove(dataset_file)
+# download one file
+download.file(files$url[[1]], files$destfile[[1]])
 
-# temporary fixes;
-# - the classes were accidentally removed from each dataset before submission to zenodo
-# - add divergence regions
-# - add cell waypoints
-# - process dates
-dataset_ids <- list.files(derived_file(""), pattern = ".rds", recursive = TRUE, full.names = FALSE) %>%
-  str_replace(".rds$", "") %>%
-  discard(~. == "datasets")
-
-pbapply::pblapply(dataset_ids, function(dataset_id) {
-  file <- derived_file(glue::glue("{dataset_id}.rds"))
-
-  dataset <- read_rds(file) %>%
-    add_class(paste0("dynwrap::", c("data_wrapper", "with_expression", "with_prior", "with_trajectory")))
-
-  dataset$divergence_regions <- tibble(milestone_id = character(), divergence_id = character(), is_start = logical())
-
-  dataset <- dynwrap::add_cell_waypoints(dataset)
-
-  names(dataset) <- str_replace(names(dataset), "^task_", "dataset_")
-  dataset$milenet_spr <- NULL
-  dataset$.object_class <- NULL
-  dataset$date <- as.Date(dataset$date, origin = "1970-01-01")
-  dataset$creation_date = as.POSIXct(dataset$creation_date, origin = "1970-01-01")
-
-  save_dataset(dataset, dataset_id)
-  file.remove(file)
-
-  invisible()
-})
+# download all files
+map2(
+  files$url,
+  files$destfile,
+  download.file
+)
 
 # upload to remote, if relevant
 # this assumes you have a gridengine cluster at hand

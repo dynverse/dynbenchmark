@@ -5,8 +5,8 @@
 #'
 #' @export
 github_markdown_nested <- function(
-  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
+  bibliography = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib")),
+  csl = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl")),
   ...
 ) {
   format <- rmarkdown::github_document(...)
@@ -38,27 +38,8 @@ github_markdown_nested <- function(
 #' @param ... Parameters for rmarkdown::pdf_document
 #'
 #' @export
-pdf_supplementary_note <- function(
-  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
-  ...
-) {
-  # setup the pdf format
-  format <- rmarkdown::pdf_document(
-    ...,
-    toc = TRUE,
-    includes = rmarkdown::includes(system.file("common.sty", package = "dynbenchmark")),
-    latex_engine = "xelatex",
-    number_sections = FALSE
-  )
-
-  format <- common_dynbenchmark_format(
-    format,
-    bibliography = bibliography,
-    csl = csl
-  )
-
-  format
+pdf_supplementary_note <- function(...) {
+  pdf_manuscript(..., render_changes = FALSE, toc = TRUE)
 }
 
 
@@ -67,6 +48,7 @@ pdf_supplementary_note <- function(
 #'
 #' @inheritParams common_dynbenchmark_format
 #' @param render_changes Whether to export a *_changes.pdf as well
+#' @param toc Whether to include a table of contents
 #' @param ... Parameters for rmarkdown::pdf_document
 #'
 #' @export
@@ -74,12 +56,13 @@ pdf_manuscript <- function(
   bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
   csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
   render_changes = TRUE,
+  toc = FALSE,
   ...
 ) {
   # setup the pdf format
   format <- rmarkdown::latex_document(
     ...,
-    toc = FALSE,
+    toc = toc,
     includes = rmarkdown::includes(
       in_header = c(
         system.file("common.sty", package = "dynbenchmark"),
@@ -105,12 +88,21 @@ pdf_manuscript <- function(
     if (render_changes) {
       output_file_changes <- paste0(fs::path_ext_remove(output_file), "_changes.tex")
       read_lines(output_file) %>% process_changes(render_changes = TRUE) %>% write_lines(output_file_changes)
-      system(glue::glue("xelatex -interaction=nonstopmode {output_file_changes}"))
+      system(glue::glue("xelatex -interaction=nonstopmode -output-directory={fs::path_dir(output_file)} {output_file_changes}"))
+      # clean up files if requested
+      if (clean) clean_xelatex(output_file_changes)
     }
 
     # render without changes
     read_lines(output_file) %>% process_changes(render_changes = FALSE) %>% write_lines(output_file)
-    system(glue::glue("xelatex -interaction=nonstopmode {output_file}"))
+    system(glue::glue("xelatex -interaction=nonstopmode -output-directory={fs::path_dir(output_file)} {output_file}"))
+
+    if (toc) {
+      system(glue::glue("xelatex -interaction=nonstopmode -output-directory={fs::path_dir(output_file)} {output_file}"))
+    }
+
+    # clean up files if requested
+    if (clean) clean_xelatex(output_file)
 
     # save the supplementary figures and tables
     write_rds(lst(sfigs = get("sfigs", envir = .GlobalEnv), stables, refs), "supplementary.rds")
@@ -120,6 +112,15 @@ pdf_manuscript <- function(
   }
 
   format
+}
+
+
+clean_xelatex <- function(output_file) {
+  fs::file_delete(fs::path_ext_set(output_file, "log"))
+  fs::file_delete(fs::path_ext_set(output_file, "tex"))
+  fs::file_delete(fs::path_ext_set(output_file, "aux"))
+  fs::file_delete(fs::path_ext_set(output_file, "out"))
+  if(fs::file_exists(fs::path_ext_set(output_file, "toc"))) fs::file_delete(fs::path_ext_set(output_file, "toc"))
 }
 
 #' Common dynbenchmark format
@@ -165,7 +166,9 @@ knit_nest <- function(file) {
   if (fs::is_dir(file)) {
     file <- file.path(file, "README.Rmd")
   }
-  folder <- fs::path_dir(file) %>% fs::path_rel()
+  # get absolute folder based on current working directory of knitr
+  file <- fs::path(knitr::opts_chunk$get("root.dir") %||% ".", file)
+  folder <- fs::path_dir(file) %>% fs::path_abs()
 
   # stop if file not present
   if (!file.exists(file)) {
@@ -183,7 +186,7 @@ knit_nest <- function(file) {
 
     # add extra header sublevels & add link
     knit <- knit %>%
-      str_replace_all("^(# )(.*)$", paste0("\\1[\\2](", folder, ")")) %>%
+      str_replace_all("^(# )(.*)$", paste0("\\1[\\2](", fs::path_rel(folder), ")")) %>%
       str_replace_all("^#", "##")
 
     # cat output
@@ -192,10 +195,16 @@ knit_nest <- function(file) {
     # make sure duplicated labels are allowed
     options(knitr.duplicate.label = "allow")
 
+    # make sure to run inside new folder
+    # knitr::opts_chunk$set(root.dir = folder)
+
     # knit as a child
     knitr::knit_child(
       text = readr::read_lines(file) %>% stringr::str_replace_all("^#", "##"),
+      options = list(root.dir = folder),
       quiet = TRUE
     ) %>% knitr::asis_output()
+
+    # knitr::opts_chunk$set(root.dir = folder)
   }
 }

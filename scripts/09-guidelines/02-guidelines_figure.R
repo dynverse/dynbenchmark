@@ -7,8 +7,7 @@ experiment("09-guidelines")
 
 # get the results and method info
 results <- read_rds(result_file("results.rds", "08-summary"))
-methods <- read_rds(result_file("methods.rds", "03-methods"))
-
+methods <- load_methods()
 
 extract_top_methods <- function(trajectory_types, top_n = 4) {
   # filter on non-hard priors
@@ -31,8 +30,8 @@ extract_top_methods <- function(trajectory_types, top_n = 4) {
   columns <- paste0("benchmark_tt_", trajectory_types)
   benchmark <- results %>%
     filter(
-      method_id %in% method_ids_detectable,
-      method_id %in% method_ids_soft_prior
+      method_id %in% method_ids_detectable
+      #method_id %in% method_ids_soft_prior
     ) %>%
     select(method_id, !!columns) %>%
     gather(metric_id, benchmark, -method_id) %>%
@@ -45,9 +44,9 @@ extract_top_methods <- function(trajectory_types, top_n = 4) {
     select(
       method_id,
       qc_app_user_friendly,
-      scaling_pred_time_cells1k_features10k,
+      scaling_pred_time_cells1k_features100k,
       scaling_pred_time_cells10k_features10k,
-      scaling_pred_time_cells100k_features10k,
+      scaling_pred_time_cells100k_features1k,
       method_required_priors
     )
 
@@ -120,9 +119,23 @@ time_renderer <- function(breaks) {
 }
 
 prior_renderer <- function(x) {
+  prior2name <- dynwrap::priors %>% select(prior_id, name) %>% deframe()
+
+  if (all(c("start_id", "end_id") %in% x)) {
+    x <- x[!x %in% c("start_id", "end_id")]
+    x <- c(x, "both_id")
+    prior2name["both_id"] <- "Start & end cells"
+  }
+
+  if (all(c("start_n", "end_n") %in% x)) {
+    x <- x[!x %in% c("start_n", "end_n")]
+    x <- c(x, "both_n")
+    prior2name["both_n"] <- "Number of end & start states"
+  }
+
   list(
     fill = ifelse(length(x) == 0, "white", palette[[1]]),
-    label = ifelse(length(x) == 0, "", glue::glue_collapse(label_long(x), ","))
+    label = ifelse(length(x) == 0, "", glue::glue_collapse(prior2name[x], ","))
   )
 }
 
@@ -130,12 +143,12 @@ category_x_padding <- 0.1
 triple_checks <- c("-", "\U00B1", "+")
 metrics <- tribble(
   ~id, ~name, ~renderer, ~category, ~width,
-  "benchmark", "Benchmark\nscore", split_renderer(c(0.6, 0.95), triple_checks), "benchmark",1,
-  "qc_app_user_friendly", "User\nFriendliness", split_renderer(c(0.6, 0.9), triple_checks), "qc",1,
-  "scaling_pred_time_cells1k_features10k", " \n1k cells", time_renderer(c(60, 60*60)),  "scalability",1,
-  "scaling_pred_time_cells10k_features10k", "Est. running time at 10k features\n10k cells", time_renderer(c(60, 60*60)), "scalability",1,
-  "scaling_pred_time_cells100k_features10k", "\n100k cells", time_renderer(c(60, 60*60)), "scalability",1,
-  "method_required_priors", "\nRequired priors", prior_renderer, "priors", 2
+  "benchmark", "\n\nAccuracy", split_renderer(c(0.6, 0.95), triple_checks), "benchmark",1,
+  "qc_app_user_friendly", "\n\nUsability", split_renderer(c(0.6, 0.9), triple_checks), "qc",1,
+  "scaling_pred_time_cells100k_features1k", paste0("\n\n100k\U00D7", "1k"), time_renderer(c(60, 60*60)),  "scalability",1,
+  "scaling_pred_time_cells10k_features10k", paste0("Estimated running time\n(cells \U00D7 features)\n10k\U00D7", "10k"), time_renderer(c(60, 60*60)), "scalability",1,
+  "scaling_pred_time_cells1k_features100k", paste0("\n\n1k\U00D7", "100k"), time_renderer(c(60, 60*60)), "scalability",1,
+  "method_required_priors", "\n\nRequired priors", prior_renderer, "priors", 4
 ) %>%
   mutate(
     xmin = lag(cumsum(width), default = 0) + c(0, cumsum(tail(category, -1) != head(category, -1))) * category_x_padding,

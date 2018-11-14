@@ -1,0 +1,16 @@
+---
+output: dynbenchmark::github_markdown_nested
+---
+
+# Example predictions
+
+```{r include=FALSE}
+library(dynbenchmark)
+library(tidyverse)
+```
+
+Look at some predicted trajectories
+
+```{r}
+dynbenchmark::render_scripts_documentation()
+```

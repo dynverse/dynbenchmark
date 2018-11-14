@@ -28,11 +28,6 @@
 #' @docType data
 "prior_usages"
 
-#' Metadata on metrics
-#'
-#' @docType data
-"metrics"
-
 #' Metadata on non-inclusion reasons
 #'
 #' @docType data

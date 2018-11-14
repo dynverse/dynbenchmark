@@ -9,7 +9,7 @@ if (!file.exists(derived_file("design.rds"))) {
   timeout_sec <- 60 * 60
   memory_gb <- 16
   num_repeats <- 1
-  metrics <- c("correlation", "edge_flip", "featureimp_cor", "featureimp_wcor", "F1_branches", "him")
+  metrics <- c("correlation", "featureimp_wcor", "F1_branches", "him")
 
   ##########################################################
   ###############       DEFINE METHODS       ###############

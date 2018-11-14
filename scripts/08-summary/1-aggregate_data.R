@@ -1,3 +1,6 @@
+#' Aggregation of the results
+#' The main job is done by the dynbenchmark::benchmark_aggregate function
+
 library(dynbenchmark)
 library(tidyverse)
 
@@ -7,15 +10,14 @@ experiment("08-summary")
 #                  GET METHODS INFO                 #
 #####################################################
 method_info <-
-  read_rds(result_file("methods.rds", experiment_id = "03-methods")) %>%
+  load_methods() %>%
   mutate(
     required_priors_str = map_chr(input, ~ .$required %>% setdiff(c("expression", "counts")) %>% paste0(collapse = ",")),
     optional_priors_str = map_chr(input, ~ .$optional %>% paste0(collapse = ","))
   ) %>%
   rename_all(function(x) paste0("method_", x)) %>%
   rename(tool_id = method_tool_id) %>%
-  select_if(function(x) !all(is.na(x))) %>%
-  filter(!method_id %in% c("error", "identity", "random", "shuffle"))
+  select_if(function(x) !all(is.na(x)))
 
 #####################################################
 #                  READ QC RESULTS                  #
@@ -48,12 +50,16 @@ rm(tool_qc_scores, tool_qc_category_scores, tool_qc_application_scores) # writin
 #####################################################
 scaling_scores <-
   read_rds(result_file("scaling_scores.rds", experiment_id = "05-scaling"))$scaling_scores %>%
-  mutate(metric = paste0("scaling_pred_timescore_", metric)) %>%
+  mutate(overall = (scoretime + scoremem) / 2) %>%
+  gather(column, score, scoretime, scoremem, overall) %>%
+  filter(column != "overall" | metric == "overall") %>%
+  mutate(metric = paste0("scaling_pred_", column, "_", metric)) %>%
+  select(-column) %>%
   spread(metric, score)
 
 scaling_preds <-
   read_rds(result_file("scaling_scores.rds", experiment_id = "05-scaling"))$scaling_preds %>%
-  gather(column, value, time, timestr) %>%
+  gather(column, value, time, timestr, mem, memstr) %>%
   mutate(metric = paste0("scaling_pred_", column, "_", labnrow, "_", labncol)) %>%
   select(method_id, metric, value) %>%
   spread(metric, value)
@@ -62,12 +68,21 @@ scaling_models <-
   read_rds(result_file("scaling.rds", experiment_id = "05-scaling"))$models %>%
   rename_at(., setdiff(colnames(.), "method_id"), function(x) paste0("scaling_models_", x))
 
-
 #####################################################
 #             READ BENCHMARKING RESULTS             #
 #####################################################
 benchmark_results_input <- read_rds(result_file("benchmark_results_input.rds", experiment_id = "06-benchmark"))
 benchmark_results_normalised <- read_rds(result_file("benchmark_results_normalised.rds", experiment_id = "06-benchmark"))
+
+bench_predcors <-
+  benchmark_results_normalised$data %>%
+  select(method_id, param_id, time_lpred, time_pred, mem_lpred, mem_pred, time, ltime, mem, lmem) %>%
+  group_by(method_id, param_id) %>%
+  summarise(
+    benchmark_overall_time_predcor = nacor(time_lpred, ltime),
+    benchmark_overall_mem_predcor = nacor(mem_lpred, lmem)
+  ) %>%
+  ungroup()
 
 execution_metrics <- c("pct_errored", "pct_execution_error", "pct_memory_limit", "pct_method_error_all", "pct_method_error_stoch", "pct_time_limit")
 bench_metrics <- paste0("norm_", benchmark_results_input$metrics %>% setdiff(c("edge_flip", "featureimp_cor")))
@@ -100,7 +115,9 @@ rm(execution_metrics, bench_metrics, all_metrics, data_aggs, benchmark_results_i
 #####################################################
 #               READ STABILITY RESULTS              #
 #####################################################
-stability <- read_rds(result_file("stability_results.rds", experiment_id = "07-stability")) %>% select(-param_id) %>% spread(metric, value)
+stability <- read_rds(result_file("stability_results.rds", experiment_id = "07-stability"))$summ %>%
+  rename_at(., setdiff(colnames(.), "method_id"), ~ paste0("stability_", .)) %>%
+  rename(stability_overall_overall = stability_geom_mean)
 
 #####################################################
 #                  COMBINE RESULTS                  #
@@ -108,7 +125,7 @@ stability <- read_rds(result_file("stability_results.rds", experiment_id = "07-s
 
 results <- Reduce(
   function(a, b) left_join(a, b, by = "method_id"),
-  list(method_info, qc_results, scaling_scores, scaling_preds, scaling_models, bench_overall, bench_trajtypes, bench_sources, stability)
+  list(method_info, qc_results, scaling_scores, scaling_preds, scaling_models, bench_overall, bench_trajtypes, bench_sources, bench_predcors, stability)
 )
 
 rm(list = setdiff(ls(), "results")) # more than this haiku
@@ -120,8 +137,8 @@ metric_weights <-
   c(
     benchmark_overall_overall = 2,
     qc_overall_overall = 1,
-    scaling_pred_timescore_overall = 1,
-    stability_overall_overall = .5
+    scaling_pred_overall_overall = 1,
+    stability_overall_overall = 1
   )
 
 results$summary_overall_overall <-

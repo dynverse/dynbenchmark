@@ -1,3 +1,5 @@
+#' Helper plotting functions the complementarity experiment
+
 quarter_circ <- function(xstart, ystart, from_angle, to_angle, size) {
   data_frame(
     angle = seq(from_angle, to_angle, length.out = 20) * 2 * pi,

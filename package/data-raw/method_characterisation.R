@@ -6,8 +6,9 @@ topinf_types <- tibble(
 )
 
 error_reasons <- tibble(
-  name = c("pct_memory_limit", "pct_time_limit", "pct_method_error_all", "pct_method_error_stoch", "pct_execution_error", "pct_method_error"),
-  label = c("Memory limit exceeded", "Time limit exceeded", "Dataset-specific error", "Stochastic error", "Execution error", "Method error"),
+  name = c("pct_memory_limit", "pct_time_limit", "pct_execution_error", "pct_method_error"),
+  label = c("Memory limit exceeded", "Time limit exceeded", "Execution error", "Method error"),
   colour = RColorBrewer::brewer.pal(length(name), "Set3")
 )
-devtools::use_data(error_reasons, topinf_types, overwrite = TRUE, pkg = "package")
+usethis::proj_set("package")
+usethis::use_data(error_reasons = error_reasons, topinf_types = topinf_types, overwrite = TRUE)

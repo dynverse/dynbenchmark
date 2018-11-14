@@ -13,9 +13,9 @@ approx_equal <- function(x, y, tolerance = .Machine$double.eps ^ 0.5) {
 # is the value of y monotonically approximately increasing/decreasing with increasing x?
 is_monotonic <- function(x, y, decreasing = TRUE) {
   if (decreasing) {
-    all(diff(y[order(x)]) <= 0)
+    all(diff(y[order(x)]) <= 0.01) && (first(y) > last(y)) # add a little bit of room for noise here
   } else {
-    all(diff(y[order(x)]) >= 0)
+    all(diff(y[order(x)]) >= -0.01) && (first(y) < last(y))
   }
 }
 
@@ -135,7 +135,7 @@ rule_lower <- function(
       # spread the scores, then check whether the "identity" column is higher than the method_id column
       conformity <- differences %>%
         group_by(metric_id) %>%
-        summarise(conforms = all(difference < 0))
+        summarise(conforms = all(difference <= 0) && mean(difference < 0))
 
       # plot the scores using a dot plot
       differences_mean <- differences %>%
@@ -486,7 +486,7 @@ shuffle_edges <- rule_monotonic(
   description = "Shuffling the edges in the milestone network should lower the score. This is equivalent to changing the cellular positions only globally.",
   dataset_ids = dataset_design %>% filter(topology_id %in% names(dynbenchmark:::topologies_with_same_n_milestones)) %>% pull(dataset_id),
   method_id = "shuffle_edges",
-  parameters = list(shuffle_edges = tibble(shuffle_perc = seq(0, 1, 0.25)) %>% mutate(id = as.character(shuffle_perc*10))),
+  parameters = list(shuffle_edges = tibble(shuffle_perc = seq(0, 1, 0.5)) %>% mutate(id = as.character(shuffle_perc*10))),
   varied_parameter_id = "shuffle_perc",
   varied_parameter_name = "shuffled edges",
   varied_parameter_labeller = scales::percent,
@@ -898,7 +898,7 @@ cell_gathering <- lst(
       map(invoke)
 
     # shuffle these datasets
-    shuffleds <- map(identities, perturb_shuffle_cells)
+    shuffleds <- map(identities, dynbenchmark:::perturb_shuffle_cells)
 
     # plot a continuous and grouped model
     grouping <- group_onto_nearest_milestones(identities[[1]])

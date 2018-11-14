@@ -1,9 +1,13 @@
+#' Try to find good combinations of methods given a set of datasets, which could indicate some complementarity between methods
+
 library(tidyverse)
 library(dynbenchmark)
 
 experiment("10-benchmark_interpretation")
 
-data <- read_rds(result_file("benchmark_results_normalised.rds", "06-benchmark"))$data
+methods <- load_methods()
+data <- read_rds(result_file("benchmark_results_normalised.rds", "06-benchmark"))$data %>%
+  filter(method_id %in% methods$id)
 
 trajectory_type_colours <- dynwrap::trajectory_types %>% select(id, colour) %>% deframe()
 
@@ -65,12 +69,13 @@ scorer <- function(method_ids, data_oi) {
 get_top_methods <- function(data_oi, trajectory_types_oi, preparer = method_subset_preparer_range) {
   # filter methods:
   # - can detect at least one of the requested trajectory type(s)
-  # - does not require any prior information
+  # - does not require any hard prior information
+  hard_priors <- dynwrap::priors %>% filter(type == "hard") %>% pull(prior_id)
+
   relevant_method_ids <- load_methods() %>%
     filter(
-      map_lgl(trajectory_types, ~any(trajectory_types_oi %in% .)),
-      !requires_prior,
-      TRUE
+      map_lgl(trajectory_types, ~any(. %in% trajectory_types_oi)),
+      map_lgl(required_priors, ~!any(. %in% hard_priors))
     ) %>%
     pull(id)
   data_oi <- data_oi %>% filter(method_id %in% relevant_method_ids)
@@ -196,7 +201,7 @@ relevant_steps_labels_ex <-
   )
 
 # compute bracket positions
-source(scripts_file("04-complementarity_helper.R"))
+source(scripts_file("helper-04-complementarity.R"))
 bracket_range <- relevant_steps_ex %>% filter(step_ix == 1, !chosen) %>% pull(score) %>% range()
 bracket_data <-
   bracket(0, 1, 0, .3, flip = TRUE) %>%
