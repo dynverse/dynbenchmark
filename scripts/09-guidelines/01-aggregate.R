@@ -11,6 +11,10 @@ experiment("09-guidelines")
 # gathers scaling, methods, benchmark results
 methods_aggr <- read_rds(result_file("results.rds", experiment_id = "08-summary"))
 
+# temporary fix for stringlytyped scaling columns
+methods_aggr <- methods_aggr %>%
+  mutate_at(vars(matches("scaling_pred_(time|mem)_")), as.numeric)
+
 # benchmarking metrics
 benchmark_metrics <- dynbenchmark::metrics_evaluated %>% filter(type != "overall")
 benchmark_results <- read_rds(result_file("benchmark_results_unnormalised.rds", experiment_id = "06-benchmark"))
@@ -22,9 +26,6 @@ benchmark <- benchmark_results %>%
 
 methods_aggr <- methods_aggr %>%
   left_join(benchmark, "method_id")
-
-methods_aggr %>% select(-benchmark) %>% pryr::object_size()
-methods_aggr %>% map_dbl(pryr::object_size) %>%
 
 # benchmarking datasets
 benchmark_datasets_info <- load_datasets(unique(benchmark_results$dataset_id)) %>%
