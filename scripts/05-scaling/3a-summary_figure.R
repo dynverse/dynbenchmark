@@ -15,8 +15,8 @@ classification_design <- bind_rows(
   )
 )
 
-method_predict_time <- models_nocontrol %>% select(method_id, predict_time) %>% deframe()
-method_predict_mem <- models_nocontrol %>% select(method_id, predict_mem) %>% deframe()
+method_predict_time <- models %>% select(method_id, predict_time) %>% deframe()
+method_predict_mem <- models %>% select(method_id, predict_mem) %>% deframe()
 
 classification_values <- crossing(
   classification_design,
@@ -28,27 +28,6 @@ classification_values <- crossing(
     mem = first(method_predict_mem[method_id])(n_cells, n_features)
   ) %>%
   ungroup()
-
-# original solution
-#
-# classify_curve <- function(slope, curvature) {
-#   case_when(
-#     slope < -.001 ~ "negative slope",
-#     slope < 0.001 ~ "<linear",
-#     curvature < -0.05 ~ "<linear",
-#     curvature < 0.05 ~ "linear",
-#     TRUE ~ ">linear"
-#   )
-# }
-#
-# time_classification <- time_classification_timings %>%
-#   group_by(method_id, feature) %>%
-#   summarise(
-#     slope = mean(diff(time, differences = 1)),
-#     curvature = mean(seq(0, 1, length.out = n()) - scale_minmax(time)),
-#     class = classify_curve(slope, curvature)
-#   ) %>%
-#   ungroup()
 
 
 classify_curve <- function(method_id, feature, value, n_cells, n_features) {
@@ -100,29 +79,6 @@ classify_curve <- function(method_id, feature, value, n_cells, n_features) {
   )[max_term] %>% unname()
 }
 
-
-
-# biologists solution
-#
-# classify_curve <- function(method_id, feature, time, n_cells, n_features) {
-#   test <- 1:5
-#   mean_diffs <- map_dbl(test, ~ mean(diff(time, differences = .)))
-#   num <- first(which(mean_diffs < .1))
-#   if (is.na(num)) {
-#     "exponential"
-#   } else if (num == 1) {
-#     "<linear"
-#   } else if (num == 2) {
-#     "linear"
-#   } else if (num == 3) {
-#     "quadratic"
-#   } else if (num < max(test)) {
-#     ">quadratic"
-#   } else {
-#     "exponential"
-#   }
-# }
-
 classifications <-
   classification_values %>%
   group_by(method_id, feature) %>%
@@ -144,31 +100,38 @@ ggsave(result_file("class_versus_curvature.pdf"), g, width = 12, height = 8)
 ###############  GENERATE SUMMARY FIGURE   ###############
 ##########################################################
 
-method_order <- models_nocontrol %>% arrange(-time_lpred) %>% pull(method_id)
+method_order <- models %>% arrange(-time_lpred) %>% pull(method_id)
 scale_y_methods <- scale_y_continuous("", breaks = seq_along(method_order), labels = label_method(method_order), expand = c(0, 0))
 scale_y_methods_empty <- scale_y_continuous("", breaks = seq_along(method_order) + 0.5, labels = NULL, expand = c(0, 0))
 no_margin_sides <- theme(plot.margin = margin(), axis.ticks.y = element_blank(), axis.title.y = element_blank())
 
-time_limits <- c(log10(0.1), log10(60*60*72.01))
-time_breaks <- log10(c(1, 60, 60*60, 60*60*24.01))
+time_limits <- c(log10(0.1), log10(60*60*24.01))
+time_breaks <- log10(c(1, 60, 60*60, 60*60*24))
 scale_x_time <- scale_x_continuous(label_long("average_time"), limits = time_limits, breaks = time_breaks, labels = label_time(10^time_breaks), expand = c(0, 00), position = "top")
 scale_x_time
 even_background <- geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = as.numeric(method_id) - 0.5, ymax = as.numeric(method_id) + 0.5), data = tibble(method_id = factor(method_order, method_order)) %>% filter(as.numeric(method_id) %% 2 == 1), fill = "#DDDDDD")
 
 ## Plot average time
 plot_average_time <-
-  models_nocontrol %>%
+  models %>%
   mutate(
     method_id = factor(method_id, method_order),
-    time_lpred = ifelse(time_lpred < -1, -0.8, time_lpred)
+    val_time_lpred = case_when(
+      time_lpred < -1 ~ -.8,
+      time_lpred >= time_limits[[2]] ~ time_limits[[2]],
+      TRUE ~ time_lpred
+    ),
+    left_align = time_lpred <= time_limits[[2]] - .1,
+    label = ifelse(left_align, paste0(" ", label_time(10^time_lpred)), paste0(label_time(10^time_lpred), " "))
   ) %>%
-  select(method_id, time_lpred) %>%
+  select(method_id, time_lpred, val_time_lpred, left_align, label) %>%
   ggplot() +
   even_background +
-  geom_rect(aes(xmin = time_limits[[1]], xmax = time_lpred, ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#333333") +
-  geom_text(aes(x = time_lpred, y = as.numeric(method_id), label = paste0(" ", label_time(10^time_lpred))), hjust = 0) +
+  geom_rect(aes(xmin = time_limits[[1]], xmax = val_time_lpred, ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#333333") +
+  geom_text(aes(x = val_time_lpred, y = as.numeric(method_id), hjust = ifelse(left_align, 0, 1), colour = ifelse(left_align, "black", "white"), label = label)) +
   scale_y_methods +
   scale_x_time +
+  scale_colour_identity() +
   theme_pub() +
   theme(panel.grid.minor.y = element_line(color = "#AAAAAA"), plot.margin = margin())
 plot_average_time
@@ -176,18 +139,27 @@ plot_average_time
 ## Plot average memory
 mem_limits <- log10(c(10^8, 10^10))
 mem_breaks <- log10(c(10^8, 10^9, 10^10))
-scale_x_mem <- scale_x_continuous(label_long("average_max_memory"), limits = mem_limits, breaks = mem_breaks, labels = label_memory(10^mem_breaks), expand = c(0, 0), position = "top")
+scale_x_mem <- scale_x_continuous(label_long("average_max_memory"), limits = mem_limits, breaks = mem_breaks, labels = label_memory(10^mem_breaks, include_mb = TRUE), expand = c(0, 0), position = "top")
 
 plot_average_memory <-
-  models_nocontrol %>%
-  mutate(method_id = factor(method_id, method_order)) %>%
-  select(method_id, mem_lpred) %>%
+  models %>%
+  mutate(
+    method_id = factor(method_id, method_order),
+    val_mem_lpred = case_when(
+      mem_lpred >= mem_limits[[2]] ~ mem_limits[[2]],
+      TRUE ~ mem_lpred
+    ),
+    left_align = mem_lpred <= mem_limits[[2]] - .1,
+    label = ifelse(left_align, paste0(" ", label_memory(10^mem_lpred, include_mb = TRUE)), paste0(label_memory(10^mem_lpred, include_mb = TRUE), " "))
+  ) %>%
+  select(method_id, mem_lpred, val_mem_lpred, left_align, label) %>%
   ggplot() +
   even_background +
-  geom_rect(aes(xmin = mem_limits[[1]], xmax = mem_lpred, ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#333333") +
-  geom_text(aes(x = mem_lpred, y = as.numeric(method_id), label = paste0(" ", label_memory(10^mem_lpred))), hjust = 0) +
+  geom_rect(aes(xmin = mem_limits[[1]], xmax = val_mem_lpred, ymin = as.numeric(method_id) - 0.4, ymax = as.numeric(method_id) + 0.4), stat = "identity", fill = "#333333") +
+  geom_text(aes(x = val_mem_lpred, y = as.numeric(method_id), hjust = ifelse(left_align, 0, 1), colour = ifelse(left_align, "black", "white"), label = label)) +
   scale_y_methods +
   scale_x_mem +
+  scale_colour_identity() +
   theme_pub() +
   theme(panel.grid.minor.y = element_line(color = "#AAAAAA"), plot.margin = margin())
 
@@ -246,7 +218,7 @@ plot_time_classification <-
   geom_line(aes(x = x, y = y_time), plotdata_classification %>% filter(class_time %in% white), color = "white", size = 1) +
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), data = plotdata_classification_boxes, color = "#333333", fill = NA, size = 0.25) +
   scale_y_methods_empty +
-  scale_x_continuous("Time complexity" , expand = c(0, 0), breaks = c(1.5, 2.5), labels = c("Cells", "Features"), position = "top") +
+  scale_x_continuous("Time scalability" , expand = c(0, 0), breaks = c(1.5, 2.5), labels = c("Cells", "Features"), position = "top") +
   scale_fill_manual("", values = class_palette) +
   theme_pub() +
   theme(legend.position = "bottom") +
@@ -265,10 +237,10 @@ plot_mem_classification <-
   geom_line(aes(x = x, y = y_mem), plotdata_classification %>% filter(class_mem %in% white), color = "white", size = 1) +
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), data = plotdata_classification_boxes, color = "#333333", fill = NA, size = 0.25) +
   scale_y_methods_empty +
-  scale_x_continuous("Memory complexity" , expand = c(0, 0), breaks = c(1.5, 2.5), labels = c("Cells", "Features"), position = "top") +
+  scale_x_continuous("Memory scalability" , expand = c(0, 0), breaks = c(1.5, 2.5), labels = c("Cells", "Features"), position = "top") +
   scale_fill_manual("", values = class_palette) +
   theme_pub() +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "none") +
   no_margin_sides
 
 plot_mem_classification
@@ -305,11 +277,8 @@ plot_slope_cells
 g <- patchwork::wrap_plots(
   plot_average_time,
   plot_time_classification,
-  # plot_slope_cells,
-  # plot_slope_features,
   plot_average_memory,
   plot_mem_classification,
-  # widths = c(2, 1, 2, 2, 2),
   widths = c(2, 1, 2, 1),
   nrow = 1
 )

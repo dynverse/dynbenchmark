@@ -11,7 +11,9 @@ experiment("08-summary")
 ####################################
 method_groups <- c(rev(dynwrap::trajectory_types$id), c("Adaptation", "Off-the-shelf", "Control"))
 
-wrapper_type_map <- c(branch_trajectory = "Traj", linear_trajectory = "Linear", cyclic_trajectory = "Cycle", trajectory = "Traj", cell_graph = "Cell", cluster_graph = "Cluster", control = "", dimred_projection = "Proj", end_state_probabilities = "Prob")
+wrapper_type_map <- c(
+  branch_trajectory = "Direct", linear_trajectory = "Linear", cyclic_trajectory = "Cycle", trajectory = "Direct",
+  cell_graph = "Cell", cluster_graph = "Cluster", control = "", dimred_projection = "Proj", end_state_probabilities = "Prob")
 
 data <-
   read_rds(result_file("results.rds", experiment_id = "08-summary")) %>%
@@ -132,7 +134,7 @@ walk(script_files, function(name) {
     row_info = row_info_sel,
     row_groups = row_groups_sel,
     palettes = palettes,
-    col_annot_offset = 3,
+    col_annot_offset = 3.2,
     removed_methods = data_removed$method_name %>% sort
   )
 
