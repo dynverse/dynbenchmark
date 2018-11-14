@@ -1,0 +1,16 @@
+---
+output: dynbenchmark::github_markdown_nested
+---
+
+# Benchmark interpretation
+
+```{r include=FALSE}
+library(dynbenchmark)
+library(tidyverse)
+```
+
+Various attempts at interpreting the results of the benchmark.
+
+```{r}
+dynbenchmark::render_scripts_documentation()
+```

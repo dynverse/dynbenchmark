@@ -1,3 +1,5 @@
+#' Retrieve and process the stability results
+
 library(dynbenchmark)
 library(tidyverse)
 

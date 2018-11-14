@@ -1,3 +1,5 @@
+#' Compare the predicted exectuion times and memory usages with the actual ones
+
 library(tidyverse)
 library(dynbenchmark)
 

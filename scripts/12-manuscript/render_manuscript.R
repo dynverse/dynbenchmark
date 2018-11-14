@@ -35,7 +35,7 @@ pwalk(stables, function(ref_id, table, ...) {
 })
 
 # render supplementary
-rmarkdown::render("manuscript/supplementary.Rmd", output_format = pdf_manuscript(render_changes = FALSE), output_dir = output_directory)
+rmarkdown::render("manuscript/supplementary.Rmd", output_format = pdf_supplementary_note(), output_dir = output_directory)
 
 # download cover letter
 googledrive::drive_download(

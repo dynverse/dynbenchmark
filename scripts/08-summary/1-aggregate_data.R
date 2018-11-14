@@ -1,3 +1,6 @@
+#' Aggregation of the results
+#' The main job is done by the dynbenchmark::benchmark_aggregate function
+
 library(dynbenchmark)
 library(tidyverse)
 

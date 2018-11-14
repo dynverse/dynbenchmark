@@ -1,3 +1,5 @@
+#' Generation of the different funky heatmaps
+
 library(dynbenchmark)
 library(tidyverse)
 library(dynplot)

@@ -1,3 +1,5 @@
+#' Helper function for generating a subsampled dataset
+
 generate_dataset <- function(
   orig_dataset_id,
   pct_cells,

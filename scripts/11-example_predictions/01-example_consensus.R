@@ -1,3 +1,5 @@
+#' Create a figure containing predicted trajectories from the top methods on a couple of simple datasets
+
 library(dynbenchmark)
 library(tidyverse)
 

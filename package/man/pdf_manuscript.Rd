@@ -9,7 +9,7 @@
   "manuscript/assets/references.bib"),
   csl = paste0(dynbenchmark::get_dynbenchmark_folder(),
   "manuscript/assets/nature-biotechnology.csl"), render_changes = TRUE,
-  ...)
+  toc = FALSE, ...)
 }
 \arguments{
 \item{bibliography}{Bibliography location}
@@ -17,6 +17,8 @@
 \item{csl}{Csl file location}
 
 \item{render_changes}{Whether to export a *_changes.pdf as well}
+
+\item{toc}{Whether to include a table of contents}
 
 \item{...}{Parameters for rmarkdown::pdf_document}
 }

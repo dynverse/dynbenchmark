@@ -49,6 +49,8 @@ funky_heatmap(data, column_info, row_info, palettes,
 \item{col_annot_offset}{How much the column annotation will be offset by.}
 
 \item{row_annot_offset}{How much the column annotation will be offset by.}
+
+\item{removed_methods}{Which methods to not show in the rows}
 }
 \description{
 TODO: params need to be described

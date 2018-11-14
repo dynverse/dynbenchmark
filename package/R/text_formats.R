@@ -38,27 +38,8 @@ github_markdown_nested <- function(
 #' @param ... Parameters for rmarkdown::pdf_document
 #'
 #' @export
-pdf_supplementary_note <- function(
-  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
-  ...
-) {
-  # setup the pdf format
-  format <- rmarkdown::pdf_document(
-    ...,
-    toc = TRUE,
-    includes = rmarkdown::includes(system.file("common.sty", package = "dynbenchmark")),
-    latex_engine = "xelatex",
-    number_sections = FALSE
-  )
-
-  format <- common_dynbenchmark_format(
-    format,
-    bibliography = bibliography,
-    csl = csl
-  )
-
-  format
+pdf_supplementary_note <- function(...) {
+  pdf_manuscript(..., render_changes = FALSE, toc = TRUE)
 }
 
 
@@ -67,6 +48,7 @@ pdf_supplementary_note <- function(
 #'
 #' @inheritParams common_dynbenchmark_format
 #' @param render_changes Whether to export a *_changes.pdf as well
+#' @param toc Whether to include a table of contents
 #' @param ... Parameters for rmarkdown::pdf_document
 #'
 #' @export
@@ -74,12 +56,13 @@ pdf_manuscript <- function(
   bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
   csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
   render_changes = TRUE,
+  toc = FALSE,
   ...
 ) {
   # setup the pdf format
   format <- rmarkdown::latex_document(
     ...,
-    toc = FALSE,
+    toc = toc,
     includes = rmarkdown::includes(
       in_header = c(
         system.file("common.sty", package = "dynbenchmark"),
@@ -114,6 +97,10 @@ pdf_manuscript <- function(
     read_lines(output_file) %>% process_changes(render_changes = FALSE) %>% write_lines(output_file)
     system(glue::glue("xelatex -interaction=nonstopmode -output-directory={fs::path_dir(output_file)} {output_file}"))
 
+    if (toc) {
+      system(glue::glue("xelatex -interaction=nonstopmode -output-directory={fs::path_dir(output_file)} {output_file}"))
+    }
+
     # clean up files if requested
     if (clean) clean_xelatex(output_file)
 
@@ -133,6 +120,7 @@ clean_xelatex <- function(output_file) {
   fs::file_delete(fs::path_ext_set(output_file, "tex"))
   fs::file_delete(fs::path_ext_set(output_file, "aux"))
   fs::file_delete(fs::path_ext_set(output_file, "out"))
+  fs::file_delete(fs::path_ext_set(output_file, "toc"))
 }
 
 #' Common dynbenchmark format

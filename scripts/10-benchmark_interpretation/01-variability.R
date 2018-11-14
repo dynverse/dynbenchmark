@@ -1,4 +1,4 @@
-#' Checking out the variability in the benchmark
+#' The variability of the benchmarking results across dataset sources and trajectory types
 
 library(tidyverse)
 library(dynbenchmark)
