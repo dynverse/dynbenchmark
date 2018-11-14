@@ -26,6 +26,7 @@
 #' @param add_abc Whether or not to add subfigure labels to the different columns groups.
 #' @param col_annot_offset How much the column annotation will be offset by.
 #' @param row_annot_offset How much the column annotation will be offset by.
+#' @param removed_methods Which methods to not show in the rows
 #'
 #' @importFrom ggforce geom_arc_bar geom_circle geom_arc
 #' @importFrom cowplot theme_nothing
