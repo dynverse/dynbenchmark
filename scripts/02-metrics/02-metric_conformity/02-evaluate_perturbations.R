@@ -5,7 +5,7 @@ library(dynbenchmark)
 
 experiment("02-metrics/02-metric_conformity")
 
-dataset_design <- read_rds(result_file_file("dataset_design.rds"))
+dataset_design <- read_rds(result_file("dataset_design.rds"))
 perturbation_methods <- dynbenchmark:::perturbation_methods_design
 
 # load rules
@@ -57,17 +57,6 @@ metric_ids <- metrics_characterised %>%
   pull(metric_id)
 
 metrics <- as.list(metric_ids)
-metrics$featureimp_lite <- function(dataset, model) {
-  expr <- dynwrap::get_expression(dataset)
-  params <- list(
-    num.trees = 50000,
-    mtry = sqrt(ncol(expr) * .1),
-    sample.fraction = min(100 / nrow(expr), 1)
-  )
-  dataset_imp <- dynfeature::calculate_overall_feature_importance(dataset, expression_source = expr, method_params = params)
-  pred_imp <- dynfeature::calculate_overall_feature_importance(model, expression_source = expr, method_params = params)
-  dyneval:::.calculate_featureimp_cor(dataset_imp, pred_imp)$featureimp_wcor
-}
 
 metric_ids <- ifelse(map_lgl(metrics, is.character), metrics, names(metrics)) %>% unlist() %>% unname()
 # test first:
@@ -78,7 +67,7 @@ metric_ids <- ifelse(map_lgl(metrics, is.character), metrics, names(metrics)) %>
 benchmark_submit(
   design,
   metrics = metrics,
-  qsub_params = list(memory = "2G", timeout = 3600),
+  qsub_params = list(memory = "10G", timeout = 3600),
   qsub_grouping = "{method_id}",
   output_models = FALSE
 )
@@ -107,7 +96,7 @@ results <- benchmark_bind_results(load_models = FALSE)
 ###
 if (any(results$error_status != "no_error")) stop("Errors: ", results %>% filter(error_status != "no_error") %>% pull(method_id) %>% unique() %>% glue::glue_collapse(", "))
 
-results %>% filter(error_status != "no_error") %>% select(method_id, error_message, stderr) %>% distinct()
+results %>% filter(error_status != "no_error") %>% select(method_id, error_message, stderr) %>% distinct() %>% pull(stderr)
 
 results %>% group_by(method_id) %>% summarise(error_pct = mean(error_status != "no_error")) %>% arrange(error_pct)
 

@@ -7,7 +7,7 @@ experiment("02-metrics/02-metric_conformity")
 
 perturbation_methods <- dynbenchmark:::perturbation_methods_design
 
-dataset_design <- read_rds(result_file_file("dataset_design.rds"))
+dataset_design <- read_rds(result_file("dataset_design.rds"))
 perturbation_methods <- dynbenchmark:::perturbation_methods_design
 
 # load rules
@@ -77,13 +77,13 @@ assessments %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # test one rule
-rule <- rules %>% extract_row_to_list(which(rules$id == "filter_cells"))
+rule <- rules %>% extract_row_to_list(which(rules$id == "add_leaf_edges"))
 assessment <- assess_conformity(rule, scores)
 assessment$plot_scores
 assessment$plot_datasets
 
 # save assessment
-write_rds(assessments, derived_file("assessments.rds"))
+write_rds(assessments, result_file("assessments.rds"), compress = "xz")
 
 # add image location to rules and save
 rules <- rules %>%

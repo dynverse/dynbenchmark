@@ -45,3 +45,5 @@ stables %>%
 ```{r}
 dynbenchmark::knit_nest("../results/02-metrics/")
 ```
+
+\clearpage
