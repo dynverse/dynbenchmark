@@ -62,7 +62,7 @@ models <-
   qsub::qsub_lapply(
     X = method_ids,
     qsub_environment = "data",
-    qsub_config = qsub::override_qsub_config(memory = "9G"),
+    qsub_config = qsub::override_qsub_config(memory = "9G", compress = "gz"),
     qsub_packages = c("tidyverse", "akima", "carrier", "scam", "strip"),
     FUN = function(method_id) {
       dat <-
@@ -78,7 +78,7 @@ models <-
 
       # create a model reduction grid
       model_resolution <- .5
-      model_seq <- seq(.5, 9, by = model_resolution)
+      model_seq <- seq(0, 9, by = model_resolution)
       model_grid <-
         crossing(
           lnrow = model_seq,
@@ -113,16 +113,23 @@ models <-
 
       # calculate preds
       pred_ind <-
-        model_grid %>%
+        crossing(
+          lnrow = seq(0, 7, by = .2),
+          lncol = seq(0, 7, by = .2)
+        ) %>%
+        mutate(
+          lsum = lnrow + lncol
+        ) %>%
+        filter(4 - 1e-10 <= lsum, lsum <= 7 + 1e-10) %>%
         mutate(
           method_id = dat$method_id[[1]],
           nrow = 10^lnrow,
           ncol = 10^lncol,
-          lsum = lnrow + lncol,
-          time_pred = 10^time_lpred,
-          mem_pred = 10^mem_lpred
-        ) %>%
-        filter(4 - 1e-10 <= lsum, lsum <= 7 + 1e-10)
+          time_pred = predict_time(nrow, ncol),
+          mem_pred = predict_mem(nrow, ncol),
+          time_lpred = log10(time_pred),
+          mem_lpred = log10(mem_pred)
+        )
 
       # format output
       data %>%
