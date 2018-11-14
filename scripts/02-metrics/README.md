@@ -2,10 +2,9 @@
 # Metrics for comparing two trajectories
 
 Good metrics are crucial for an unbiased and comprehensive benchmarking.
-Here we test several possible metrics for comparing two
-trajectories.
+Here we test several possible metrics for comparing two trajectories.
 
-## [Metric characterisation](/home/wouters/thesis/projects/dynverse/dynbenchmark/scripts/02-metrics/01-metric_characterisation)
+## [Metric characterisation](01-metric_characterisation)
 
 A first characterisation of the metrics. For each metric we:
 
@@ -23,7 +22,7 @@ A first characterisation of the metrics. For each metric we:
 The results of this experiment are available
 [here](https://github.com/dynverse/dynbenchmark_results/tree/master/02-metrics/01-metric_characterisation)
 
-## [Metric conformity](/home/wouters/thesis/projects/dynverse/dynbenchmark/scripts/02-metrics/02-metric_conformity)
+## [Metric conformity](02-metric_conformity)
 
 Differences between two datasets should be reflected in certain changes
 in the metrics. This can be formalised in a set of rules, for example:
@@ -50,7 +49,7 @@ empirically:
 The results of this experiment are available
 [here](https://github.com/dynverse/dynbenchmark_results/tree/master/02-metrics/02-metric_conformity).
 
-## [Aggregation](/home/wouters/thesis/projects/dynverse/dynbenchmark/scripts/02-metrics/03-aggregation)
+## [Aggregation](03-aggregation)
 
 Here, we create some examples here for why and how we aggregate the
 scores.

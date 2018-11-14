@@ -133,28 +133,11 @@ CE](https://store.docker.com/editions/community/docker-ce-desktop-windows),
 older windows installations require the [Docker
 toolbox](https://docs.docker.com/toolbox/overview/).
 
-You can test whether docker is correctly installed by
-    running:
+You can test whether docker is correctly installed by running:
 
 ``` r
 dynwrap::test_docker_installation(detailed = TRUE)
 ```
-
-    ## ✔ Docker is installed
-
-    ## ✔ Docker daemon is running
-
-    ## ✔ Docker is at correct version (>1.0): 1.39
-
-    ## ✔ Docker is in linux mode
-
-    ## ✔ Docker can pull images
-
-    ## ✔ Docker can run image
-
-    ## ✔ Docker can mount temporary volumes
-
-    ## ✔ Docker test successful -----------------------------------------------------------------
 
     ## [1] TRUE
 

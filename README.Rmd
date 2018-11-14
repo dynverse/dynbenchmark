@@ -123,7 +123,7 @@ On Linux, you will need to install udunits and ImageMagick:
 
 You can test whether docker is correctly installed by running:
 
-```{r, message = TRUE, echo = TRUE}
+```{r, message = FALSE, echo = TRUE}
 dynwrap::test_docker_installation(detailed = TRUE)
 ```
 
