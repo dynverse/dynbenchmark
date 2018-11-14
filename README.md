@@ -81,7 +81,7 @@ The benchmarking pipeline generates (and uses) the following datasets:
 
   - **Gold standard single-cell datasets**, both real and synthetic,
     used to evaluated the trajectory inference methods
-    [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1211533.svg)](https://doi.org/10.5281/zenodo.1211533)
+    [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1443566.svg)](https://doi.org/10.5281/zenodo.1443566)
 
 ![datasets](package/man/figures/datasets.png)
 

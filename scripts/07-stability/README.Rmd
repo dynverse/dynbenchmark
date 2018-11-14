@@ -1,0 +1,18 @@
+---
+output: dynbenchmark::github_markdown_nested
+---
+
+# Stability
+
+```{r include=FALSE}
+library(dynbenchmark)
+library(tidyverse)
+```
+
+Analysis of the stability of each method: how similar are the trajectories when rerunning a method on slightly perturbed data?
+
+```{r}
+dynbenchmark::render_scripts_documentation()
+```
+
+The results of this experiment are available [here](`r dynbenchmark::link_to_results()`).

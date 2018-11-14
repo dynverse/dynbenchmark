@@ -1,3 +1,5 @@
+#' Try to find good combinations of methods given a set of datasets, which could indicate some complementarity between methods
+
 library(tidyverse)
 library(dynbenchmark)
 
@@ -199,7 +201,7 @@ relevant_steps_labels_ex <-
   )
 
 # compute bracket positions
-source(scripts_file("04-complementarity_helper.R"))
+source(scripts_file("helper-04-complementarity.R"))
 bracket_range <- relevant_steps_ex %>% filter(step_ix == 1, !chosen) %>% pull(score) %>% range()
 bracket_data <-
   bracket(0, 1, 0, .3, flip = TRUE) %>%

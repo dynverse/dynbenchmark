@@ -1,3 +1,5 @@
+#' Combine the different figures of this experiment into one
+
 library(tidyverse)
 library(dynbenchmark)
 library(patchwork)

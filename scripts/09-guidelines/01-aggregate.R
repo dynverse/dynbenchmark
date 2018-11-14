@@ -1,4 +1,4 @@
-#' Aggregation of the different bnchmarking results for user guidelines
+#' Aggregation of the different bnchmarking results for dynguidelines
 #' One big methods tibble is created, which contains the information for each method in each row
 #' This tibble is nested if a particular experiment generates multiple data points for a method
 #' Otherwise, the result is given by using {experiment_id}_{metric_id}

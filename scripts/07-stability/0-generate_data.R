@@ -1,3 +1,7 @@
+#' Generate the subsampled datasets
+#' First choose a set of datasets to be used
+#' Then subsample each dataset
+
 library(dynbenchmark)
 library(tidyverse)
 
