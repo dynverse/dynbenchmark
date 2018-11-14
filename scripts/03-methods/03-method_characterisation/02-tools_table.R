@@ -15,4 +15,4 @@ tools <- tools %>%
 tools %>%
   select(tool_id, tool_name, platform, date, doi) %>%
   as.data.frame() %>%
-  write.xlsx(result_file("tools.xlsx"), row.names = FALSE)
+  write.xlsx(result_file("tools.xlsx"), row.names = FALSE, showNA = FALSE)
