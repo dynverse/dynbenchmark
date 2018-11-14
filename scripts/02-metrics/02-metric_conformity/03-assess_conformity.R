@@ -82,8 +82,6 @@ assessment <- assess_conformity(rule, scores)
 assessment$plot_scores
 assessment$plot_datasets
 
-
-
 # save assessment
 write_rds(assessments, derived_file("assessments.rds"))
 

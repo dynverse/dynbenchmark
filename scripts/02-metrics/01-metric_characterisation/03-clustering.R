@@ -18,3 +18,5 @@ plot_clustering_scores_overview <- wrap_plots(
 plot_clustering_scores_overview
 
 write_rds(plot_clustering_scores_overview, result_file("clustering_scores_overview.rds"))
+
+ggsave(result_file("clustering_scores_overview.pdf"), width = 12, height = 5)

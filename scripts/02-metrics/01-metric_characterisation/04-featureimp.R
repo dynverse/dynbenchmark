@@ -67,6 +67,7 @@ plot_featureimp_overview <- wrap_plots(
 plot_featureimp_overview
 
 write_rds(plot_featureimp_overview, result_file("featureimp_overview.rds"))
+ggsave(result_file("featureimp_overview.pdf"), width = 12, height = 8)
 
 
 ##  ............................................................................
@@ -164,9 +165,7 @@ plot_featureimp_cor_distributions <- results %>%
 plot_featureimp_cor_distributions
 
 write_rds(plot_featureimp_cor_distributions, result_file("featureimp_cor_distributions.rds"))
-
-
-
+ggsave(result_file("featureimp_cor_distributions.rds"), width = 12, height = 8)
 
 ##  ............................................................................
 ##  Weighted featureimp                                                     ####
@@ -211,3 +210,4 @@ plot_featureimp_wcor_effect <- results %>%
   theme_pub()
 
 write_rds(plot_featureimp_wcor_effect, result_file("featureimp_wcor_effect.rds"))
+ggsave(plot_featureimp_wcor_effect, result_file("featureimp_wcor_effect.pdf"), width = 8, height = 5)
