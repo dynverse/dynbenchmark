@@ -44,6 +44,7 @@ for (i in seq_len(nrow(git_df))) {
 
   read_lines(gource_output) %>%
     str_replace("\\|/", paste0("|", prefix, "/")) %>%
+    str_replace("\\.REMOVED\\.git-id$", "") %>%
     write_lines(gource_output)
 }
 unlink(gitlinks_folder, recursive = T)

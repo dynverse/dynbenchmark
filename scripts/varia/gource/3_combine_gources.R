@@ -19,9 +19,18 @@ changes <- files %>%
   arrange(time) %>%
   mutate(type = c("A", type[-1])) %>%
   ungroup() %>%
+  arrange(time) %>%
+  mutate(filename = gsub(".*/", "", path))
+
+# remove duplicated dynmethods commits
+dynmethods_commits <- changes %>% filter(grepl("^/dynmethods", path))
+changes <- bind_rows(
+  changes %>% anti_join(dynmethods_commits %>% select(-path), by = c("time", "user", "type", "filename")),
+  dynmethods_commits
+) %>%
   arrange(time)
 
-write_delim(changes, derived_file("combined_out.txt"), delim = "|", col_names = FALSE)
+write_delim(changes %>% select(-filename), derived_file("combined_out.txt"), delim = "|", col_names = FALSE)
 
 system(pritt(
   "gource -1920x1080 -s 3 {derived_file('combined_out.txt')} --user-image-dir {raw_file('avatar/')} -o - | ",
@@ -30,6 +39,7 @@ system(pritt(
 ))
 
 changes_df <- changes %>%
+  filter(!grepl("automated_test", path)) %>%
   mutate(
     posix = as.POSIXct(time, origin = "1970-01-01"),
     is_doc = grepl("google_drive|dyndocs", path),
