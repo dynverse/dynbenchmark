@@ -4,17 +4,9 @@
 \alias{pdf_supplementary_note}
 \title{A supplementary note pdf document}
 \usage{
-
-  pdf_supplementary_note(bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/assets/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/assets/nature-biotechnology.csl"), ...)
+pdf_supplementary_note(...)
 }
 \arguments{
-\item{bibliography}{Bibliography location}
-
-\item{csl}{Csl file location}
-
 \item{...}{Parameters for rmarkdown::pdf_document}
 }
 \description{
