@@ -172,15 +172,26 @@ label_time <- function(time) {
 
 #' Label memory
 #' @param x Memory in bytes
+#' @param include_mb Also include MB values.
 #'
 #' @export
-label_memory <- function(x) {
-  case_when(
-    x < 1e9 ~ "<1GB",
-    x < 1e12 ~ paste0(round(x / 1e9), "GB"),
-    !is.na(x) ~ ">1TB",
-    TRUE ~ NA_character_
-  )
+label_memory <- function(x, include_mb = FALSE) {
+  if (include_mb) {
+    case_when(
+      x < 1e6 ~ "<1MB",
+      x < 1e9 ~ paste0(round(x / 1e6), "MB"),
+      x < 1e12 ~ paste0(round(x / 1e9), "GB"),
+      !is.na(x) ~ ">1TB",
+      TRUE ~ NA_character_
+    )
+  } else {
+    case_when(
+      x < 1e9 ~ "<1GB",
+      x < 1e12 ~ paste0(round(x / 1e9), "GB"),
+      !is.na(x) ~ ">1TB",
+      TRUE ~ NA_character_
+    )
+  }
 }
 
 

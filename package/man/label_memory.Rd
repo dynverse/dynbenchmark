@@ -4,10 +4,12 @@
 \alias{label_memory}
 \title{Label memory}
 \usage{
-label_memory(x)
+label_memory(x, include_mb = FALSE)
 }
 \arguments{
 \item{x}{Memory in bytes}
+
+\item{include_mb}{Also include MB values.}
 }
 \description{
 Label memory
