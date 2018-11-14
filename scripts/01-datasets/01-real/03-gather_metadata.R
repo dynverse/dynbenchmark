@@ -12,15 +12,15 @@ gs_auth()
 httr::set_config(httr::config(http_version = 0)) # avoid http2 framing layer bug
 
 # download from google sheets
-datasets_real_metadata <- gs_key("1SALZ2jt7TZJQJMEvvOwSR2r5yIl50qcGAZ-K5AC4DJo") %>%
+datasets_real_metadata_source <- gs_key("1SALZ2jt7TZJQJMEvvOwSR2r5yIl50qcGAZ-K5AC4DJo") %>%
   gs_read("included", col_types = list(pmid = col_character())) %>%
   tidyr::separate_rows(id, sep = ",\n")
 
 # link the dataset ids to the metadata
 dataset_ids_real <- list_datasets("real") %>% pull(id)
 
-datasets_real_metadata <- datasets_real_metadata %>%
-  mutate(id = map(paste0("real/(gold|silver)/", datasets_real_metadata$id), str_match, string = dataset_ids_real) %>% map(~.[!is.na(.)])) %>%
+datasets_real_metadata <- datasets_real_metadata_source %>%
+  mutate(id = map(paste0("real/(gold|silver)/", datasets_real_metadata_source$id), str_match, string = dataset_ids_real) %>% map(~.[,1]) %>% map(~.[!is.na(.)])) %>%
   unnest(id)
 
 if (any(!dataset_ids_real %in% datasets_real_metadata$id)) {
@@ -49,7 +49,7 @@ write_rds(datasets_real_metadata, result_file("metadata.rds"))
 
 # Define colours
 technology_colours <- unique(datasets_real_metadata$technology) %>%
-  setNames(RColorBrewer::brewer.pal(length(.), "Set1"), .)
+  setNames(RColorBrewer::brewer.pal(length(.), "Set3"), .)
 standard_colours <- c("gold" = "#ffeca9", "silver" = "#e3e3e3")
 
 
