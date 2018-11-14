@@ -6,7 +6,8 @@
 \usage{
 funky_heatmap(data, column_info, row_info, palettes,
   column_groups = NULL, row_groups = NULL, scale_column = TRUE,
-  add_abc = TRUE, col_annot_offset = 3, row_annot_offset = 0.5)
+  add_abc = TRUE, col_annot_offset = 3, row_annot_offset = 0.5,
+  removed_methods = NULL)
 }
 \arguments{
 \item{data}{data}
