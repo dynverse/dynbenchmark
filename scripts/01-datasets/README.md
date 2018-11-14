@@ -21,7 +21,7 @@ Zenodo.
 The results of this experiment are available
 [here](https://github.com/dynverse/dynbenchmark_results/tree/master/01-datasets).
 
-## [Real datasets](/home/wouters/thesis/projects/dynverse/dynbenchmark/scripts/01-datasets/01-real)
+## [Real datasets](01-real)
 
 The generation of the real datasets is divided in two parts. We first
 download all the (annotated) expression files from sites such as GEO.
@@ -37,7 +37,7 @@ common trajectory format of
 | 4  | [📄`datasets_table.R`](/home/wouters/thesis/projects/dynverse/dynbenchmark/scripts/01-datasets/01-real/04-datasets_table.R)                        | Creates a table of the datasets in, excuse me, excel (for supplementary material)                                                                                                                                                                                           |
 |    | [📁`helpers-download_from_sources`](/home/wouters/thesis/projects/dynverse/dynbenchmark/scripts/01-datasets/01-real/helpers-download_from_sources) |                                                                                                                                                                                                                                                                             |
 
-## [Synthetic datasets](/home/wouters/thesis/projects/dynverse/dynbenchmark/scripts/01-datasets/02-synthetic)
+## [Synthetic datasets](02-synthetic)
 
 Each synthetic dataset is based on some characteristics of some real
 datasets. These characteristics include:
@@ -70,7 +70,7 @@ dynwrap.
 | 3  | [📄`gather_metadata.R`](/home/wouters/thesis/projects/dynverse/dynbenchmark/scripts/01-datasets/02-synthetic/03-gather_metadata.R)                        | Gathers some metadata about all the synthetic datasets                                                                      |
 | 4  | [📄`dyngen_samplers_table.R`](/home/wouters/thesis/projects/dynverse/dynbenchmark/scripts/01-datasets/02-synthetic/04-dyngen_samplers_table.R)            |                                                                                                                             |
 
-## [Dataset characterisation](/home/wouters/thesis/projects/dynverse/dynbenchmark/scripts/01-datasets/04-dataset_characterisation)
+## [Dataset characterisation](04-dataset_characterisation)
 
 Characterisation of the datasets regarding the different topologies
 present.

@@ -166,7 +166,7 @@ knit_nest <- function(file) {
   if (fs::is_dir(file)) {
     file <- file.path(file, "README.Rmd")
   }
-  # get relative path based on current working directory of knitr
+  # get absolute folder based on current working directory of knitr
   file <- fs::path(knitr::opts_chunk$get("root.dir") %||% ".", file)
   folder <- fs::path_dir(file) %>% fs::path_abs()
 
@@ -186,7 +186,7 @@ knit_nest <- function(file) {
 
     # add extra header sublevels & add link
     knit <- knit %>%
-      str_replace_all("^(# )(.*)$", paste0("\\1[\\2](", folder, ")")) %>%
+      str_replace_all("^(# )(.*)$", paste0("\\1[\\2](", fs::path_rel(folder), ")")) %>%
       str_replace_all("^#", "##")
 
     # cat output
