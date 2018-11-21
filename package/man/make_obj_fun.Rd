@@ -16,7 +16,7 @@ make_obj_fun(method, metrics, noisy = FALSE, verbose = FALSE)
 }}
 
 \item{metrics}{Which metrics to evaluate. Check \code{dyneval::metrics} for a list of possible metrics.
-Passing a custom metric function with format \code{function(dataset, model) { 1 }} is also supported.}
+Passing a custom metric function with format \code{function(dataset, model) { 1 }} is also supported. The name of this function within the list will be used as the name of the metric.}
 
 \item{noisy}{Whether or not the metric is noisy or not}
 
