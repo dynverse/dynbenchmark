@@ -11,11 +11,11 @@ Description: This package contains functions used in the main analyses of the pa
              Using code from our other packages such as dyneval, dyngen and dynutils
 Depends: 
   R (>= 3.5.0),
-  dyneval,
+  dyneval (>= 0.2.2),
   dynmethods,
   dynplot,
-  dynutils,
-  dynwrap
+  dynutils (>= 1.0.1),
+  dynwrap (>= 0.3.1)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

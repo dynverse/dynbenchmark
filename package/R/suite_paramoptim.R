@@ -422,7 +422,7 @@ make_obj_fun <- function(method, metrics, noisy = FALSE, verbose = FALSE) {
     noisy = noisy,
     has.simple.signature = FALSE,
     par.set = method$par_set,
-    fn = function(x, datasets, output_model, mc_cores = 1) {
+    fn = function(x, datasets, output_model) {
 
       calc_metrics <- c(metrics, extra_metrics)
       calc_metrics <- calc_metrics[!duplicated(calc_metrics)]
@@ -444,7 +444,6 @@ make_obj_fun <- function(method, metrics, noisy = FALSE, verbose = FALSE) {
         parameters = x,
         metrics = calc_metrics,
         output_model = output_model,
-        mc_cores = mc_cores,
         verbose = verbose
       )
 
