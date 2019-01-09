@@ -25,6 +25,8 @@ github_markdown_nested <- function(
     invisible()
   }
 
+  format$pre_processor <- append_pre_processor(format, apply_pre_processor(process_header_newline))
+
   # apply common dynbenchmark format
   format <- common_dynbenchmark_format(format)
 
@@ -207,4 +209,27 @@ knit_nest <- function(file) {
 
     # knitr::opts_chunk$set(root.dir = folder)
   }
+}
+
+
+
+#' A nested github markdown document
+#'
+#' @inheritParams common_dynbenchmark_format
+#' @param ... Parameters for rmarkdown::github_document
+#'
+#' @export
+word_manuscript <- function(
+  bibliography = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib")),
+  csl = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl")),
+  ...
+) {
+  format <- rmarkdown::word_document(...)
+
+  format$pre_processor <- append_pre_processor(format, apply_pre_processor(process_header_newline))
+
+  # apply common dynbenchmark format
+  format <- common_dynbenchmark_format(format)
+
+  format
 }
