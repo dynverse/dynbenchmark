@@ -8,7 +8,7 @@ perturb_identity <- function(dataset) {
 ##  ............................................................................
 ##  Changing cell ordering                                                  ####
 ## Shuffle cells
-perturb_shuffle_n_cells <- function(dataset, shuffle_n = Inf, seed = NULL) {
+perturb_shuffle_n_cells <- function(dataset, shuffle_n = Inf, seed = NA) {
   if (is.numeric(seed) && !is.na(seed)) set.seed(seed)
 
   shuffle_n <- min(shuffle_n, length(dataset$cell_ids))
@@ -28,14 +28,14 @@ perturb_shuffle_n_cells <- function(dataset, shuffle_n = Inf, seed = NULL) {
     )
 }
 
-perturb_shuffle_cells <- function(dataset, shuffle_perc = 1, seed = NULL) {
+perturb_shuffle_cells <- function(dataset, shuffle_perc = 1, seed = NA) {
   # source(scripts_file("helper-perturbations.R", experiment_id = "02-metrics/02-metric_conformity"))
 
   perturb_shuffle_n_cells(dataset, shuffle_n = length(dataset$cell_ids) * shuffle_perc, seed = seed)
 }
 
 ## Shuffle edges
-perturb_shuffle_n_edges <- function(dataset, shuffle_n = Inf, seed = NULL) {
+perturb_shuffle_n_edges <- function(dataset, shuffle_n = Inf, seed = NA) {
   if (!is.null(seed)) set.seed(seed)
   if (nrow(dataset$divergence_regions)) {stop("To shuffle branches, dataset cannot have divergence regions")}
 
@@ -74,7 +74,7 @@ perturb_shuffle_n_edges <- function(dataset, shuffle_n = Inf, seed = NULL) {
   }
 }
 
-perturb_shuffle_edges <- function(dataset, shuffle_perc = 1, seed = NULL) {
+perturb_shuffle_edges <- function(dataset, shuffle_perc = 1, seed = NA) {
   # source(scripts_file("helper-perturbations.R", experiment_id = "02-metrics/02-metric_conformity"))
 
   perturb_shuffle_n_edges(dataset, shuffle_n = round(nrow(dataset$milestone_network) * shuffle_perc), seed = seed)
@@ -82,7 +82,7 @@ perturb_shuffle_edges <- function(dataset, shuffle_perc = 1, seed = NULL) {
 
 
 ## Remove cells
-perturb_filter_cells <- function(dataset, filter_perc = 0.6, seed = NULL) {
+perturb_filter_cells <- function(dataset, filter_perc = 0.6, seed = NA) {
   if (!is.null(seed)) set.seed(seed)
 
   filter_cell_ids <- sample(dataset$cell_ids, length(dataset$cell_ids) * filter_perc)
@@ -98,7 +98,7 @@ perturb_filter_cells <- function(dataset, filter_perc = 0.6, seed = NULL) {
 
 
 ## Shuffle within edge
-perturb_shuffle_cells_edgewise <- function(dataset, seed = NULL) {
+perturb_shuffle_cells_edgewise <- function(dataset, seed = NA) {
   if (!is.null(seed)) set.seed(seed)
 
   progressions <- dataset$progressions %>% mutate(percentage = runif(n()))
@@ -548,16 +548,30 @@ perturbation_methods <- tibble::lst(
   perturb_shuffle_cells_and_merge_bifurcation
 )
 
-#' @importFrom dynwrap create_ti_method
+
+#' @importFrom dynwrap create_ti_method_r
 #' @include suite_benchmark_generate_design.R
 #' @include suite_benchmark_submit.R
 perturbation_methods_design <-
   map(names(perturbation_methods), function(name) {
-    dynwrap::create_ti_method(
+    run_fun <- perturbation_methods[[name]]
+
+    if (!"verbose" %in% formalArgs(run_fun)) formals(run_fun)$verbose <- FALSE
+    if (!"seed" %in% formalArgs(run_fun)) formals(run_fun)$seed <- NA
+
+    param_names <- setdiff(formalArgs(run_fun), c("dataset", "seed", "verbose"))
+
+    dynwrap::create_ti_method_r(
       id = name %>% gsub("^perturb_", "", .),
-      run_fun = perturbation_methods[[name]],
+      run_fun = run_fun,
+      parameters = NULL,
       package_loaded = c("dplyr", "purrr", "dynwrap", "dynbenchmark"),
-      type = "control"
-    )()
+      input_required = "dataset",
+      input_optional = NULL,
+      output = "trajectory",
+      type = "control",
+      return_function = FALSE
+    )
+
   }) %>%
   dynbenchmark:::process_methods_design()

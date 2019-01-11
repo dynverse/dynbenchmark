@@ -1,4 +1,4 @@
-# open selenium server java -Dwebdriver.chrome.driver="./chromedriver" -jar ./selenium-serr-standalone-3.9.0.jar  -port 4449
+# open selenium server java -Dwebdriver.chrome.driver="./chromedriver" -jar ./selenium-serr-standalone.jar  -port 4449
 
 library(dynbenchmark)
 experiment("gource")
@@ -39,10 +39,8 @@ links <- tribble(
   "manuscript_v1_overview", "https://docs.google.com/document/d/12xrM1GDq4Lk3mHHQzazgL5eYq7yttrKFtUakgU2AvGs/edit",
   "manuscript_v1", "https://docs.google.com/document/d/1BCCaP21N2PXfzhj9H09yEpZz9lLY2HXd_LxTSsJ_wro/edit",
   "manuscript_v2", "https://docs.google.com/document/d/14ZzuesLq5u5l-Gp_r5tSkvwOpxxz9LuXS_HG6GAYfxw/edit",
-  "stemid_feedback" = "https://docs.google.com/document/d/1YweBb_8Q20FGT7MO5f5KnXdsrDmONWjmmUXfN49BIWQ/edit",
-  "journal_rejection_letter" = "https://docs.google.com/document/d/1QeyQNPH-0LmSo501KfHUGHtfaRiejaDMYAEotYCO7J4/edit",
-  "action_plan" = "https://docs.google.com/document/d/13soQw70c6gFGxnn0MUperC4Xnmydt1Bdi-7z431n4MU/edit#heading=h.oj9omuyq6ow8",
-  "feedback_nbt" = "https://docs.google.com/document/d/1KWgqwrv998yKLcyMv7Zm9o5LrwNRwbWu3gl8LTDVHpA/edit"
+  "manuscript_v3", "https://docs.google.com/document/d/1je6AaelApu2xcSNbYlvcuTzUeUJBOpTUPHz0L9Houfw/edit",
+  "rebuttal", "https://docs.google.com/document/d/1KWgqwrv998yKLcyMv7Zm9o5LrwNRwbWu3gl8LTDVHpA/edit"
 )
 
 library(xml2)

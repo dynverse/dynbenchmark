@@ -40,6 +40,21 @@ methods$most_complex_trajectory_type <- methods$trajectory_types %>% map_chr(~ l
 methods$requires_prior <- map_lgl(methods$input, ~any(dynwrap::priors$prior_id %in% .$required))
 methods$required_priors <- map(methods$input, ~intersect(dynwrap::priors$prior_id, .$required))
 
+# TEMPORARY fix for wrapper types, awaiting updated dynmethods
+wrapper_type_map <- c(
+  linear_trajectory = "linear",
+  cyclic_trajectory = "cyclic",
+  trajectory = "direct",
+  cell_graph = "cell_graph",
+  cluster_graph = "cluster_assignment",
+  control = NA,
+  dimred_projection = "orth_proj",
+  end_state_probabilities = "end_state_prob",
+  branch_trajectory = "direct"
+)
+methods$wrapper_type <- wrapper_type_map[methods$wrapper_type]
+testthat::expect_true(all((methods$wrapper_type %in% dynwrap::wrapper_types$id) | is.na(methods$wrapper_type)))
+
 # join with google sheet
 methods_google <- sheet %>%
   gs_read(ws = "methods")
