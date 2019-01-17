@@ -366,10 +366,17 @@ benchmark_run_evaluation <- function(
   )
 
   # create summary
+  error_helper <- function(x) {
+    if (is.null(x) || is.na(x)) {
+      ""
+    } else {
+      x$message
+    }
+  }
   bind_cols(
     data_frame(method_id, dataset_id, param_id, prior_id, repeat_ix = row$repeat_ix),
     out$summary %>%
-      mutate(error_message = ifelse(is.null(error[[1]]), "", error[[1]]$message)) %>%
+      mutate(error_message = error_helper(error[[1]])) %>%
       select(-error, -method_id, -method_name, -dataset_id), # remove duplicate columns with design row
     tibble(model = out$models)
   )
