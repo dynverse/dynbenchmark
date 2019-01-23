@@ -22,6 +22,7 @@ LazyData: true
 URL: https://github.com/dynverse/dynalysis
 BugReports: https://github.com/dynverse/dynalysis/issues
 Imports: 
+  assertthat,
   cowplot,
   cluster,
   dplyr,
