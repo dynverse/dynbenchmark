@@ -25,7 +25,7 @@ This repo contains the scripts to reproduce the manuscript
 > <a href='https://github.com/saeyslab'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>  
 > [bioRxiv:276907](https://www.biorxiv.org/content/early/2018/03/05/276907)
 > [doi:10.1101/276907](https://doi.org/10.1101/276907)
-> [![altmetric](https://badges.altmetric.com/?size=100&score=99&types=btttttwg&style=bar)](https://altmetric.com/details/33972849)
+> [![altmetric](https://badges.altmetric.com/?size=100&score=109&types=btttttwg&style=bar)](https://altmetric.com/details/33972849)
 
 (Note that this preprint is currently very outdated, see below for more
 recent results)
@@ -112,7 +112,7 @@ using:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("dynverse/dynbenchmark")
+devtools::install_github("dynverse/dynbenchmark/package")
 ```
 
 This will install several other “dynverse” packages. Depending on the
