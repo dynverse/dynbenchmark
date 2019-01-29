@@ -51,6 +51,7 @@ pdf_supplementary_note <- function(...) {
 #' @inheritParams common_dynbenchmark_format
 #' @param render_changes Whether to export a *_changes.pdf as well
 #' @param toc Whether to include a table of contents
+#' @param linenumbers Whether to add linenumbers to the left side
 #' @param ... Parameters for rmarkdown::pdf_document
 #'
 #' @export
@@ -59,18 +60,25 @@ pdf_manuscript <- function(
   csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
   render_changes = TRUE,
   toc = FALSE,
+  linenumbers = FALSE,
   ...
 ) {
+  header_includes <- c(
+    system.file("common.sty", package = "dynbenchmark"),
+    system.file("manuscript.sty", package = "dynbenchmark")
+  )
+
+  if (linenumbers) {
+    header_includes <- c(
+      header_includes,
+      system.file("linenumbers.sty", package = "dynbenchmark")
+    )
+  }
   # setup the pdf format
   format <- rmarkdown::latex_document(
     ...,
     toc = toc,
-    includes = rmarkdown::includes(
-      in_header = c(
-        system.file("common.sty", package = "dynbenchmark"),
-        system.file("manuscript.sty", package = "dynbenchmark")
-      )
-    ),
+    includes = rmarkdown::includes(in_header = header_includes),
     latex_engine = "xelatex",
     number_sections = FALSE
   )
