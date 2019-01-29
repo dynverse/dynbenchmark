@@ -41,7 +41,7 @@ github_markdown_nested <- function(
 #'
 #' @export
 pdf_supplementary_note <- function(...) {
-  pdf_manuscript(..., render_changes = FALSE, toc = TRUE)
+  pdf_manuscript(..., render_changes = FALSE)
 }
 
 
