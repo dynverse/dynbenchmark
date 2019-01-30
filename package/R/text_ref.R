@@ -9,19 +9,23 @@ setup_refs <- function() {
 #' @param ref_type fig, sfig, table, ...
 #' @param ref_id The identifier
 #' @param suffix Adding something to the index
+#' @param prefix Adding something before the index
 #' @param anchor Whether to anchor here
 #' @param format The output format (html, latex, markdown, ...)
 #'
 #' @export
-ref <- function(ref_type, ref_id, suffix = "", anchor = FALSE, format = get_default_format()) {
+ref <- function(ref_type, ref_id, suffix = "", prefix = "", anchor = FALSE, format = get_default_format()) {
   if(nrow(refs %>% filter(ref_id == !!ref_id)) == 0) {
+    ref_number <- paste0(prefix, sum(refs$ref_type == ref_type) + 1)
     refs <<- refs %>% bind_rows(tibble(
-      name = create_names[[ref_type]](sum(refs$ref_type == ref_type) + 1),
+      name = create_names[[ref_type]](ref_number),
       ref_type = ref_type,
       ref_id = ref_id
     ))
   }
-  ref_name <- refs %>% filter(ref_id == !!ref_id) %>%
+  ref_name <-
+    refs %>%
+    filter(ref_id == !!ref_id) %>%
     pull(name)
   ref_full_name <- paste0(ref_name, label_vector(suffix))
 

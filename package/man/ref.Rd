@@ -4,7 +4,7 @@
 \alias{ref}
 \title{Refer to a figure or table}
 \usage{
-ref(ref_type, ref_id, suffix = "", anchor = FALSE,
+ref(ref_type, ref_id, suffix = "", prefix = "", anchor = FALSE,
   format = get_default_format())
 }
 \arguments{
@@ -13,6 +13,8 @@ ref(ref_type, ref_id, suffix = "", anchor = FALSE,
 \item{ref_id}{The identifier}
 
 \item{suffix}{Adding something to the index}
+
+\item{prefix}{Adding something before the index}
 
 \item{anchor}{Whether to anchor here}
 
