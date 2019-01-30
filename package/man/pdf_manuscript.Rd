@@ -8,7 +8,8 @@ pdf_manuscript(bibliography = raw_file("references.bib",
   "12-manuscript"), csl = raw_file("nature-biotechnology.csl",
   "12-manuscript"), render_changes = TRUE, toc = FALSE,
   linenumbers = FALSE, sty_header = NULL, sty_beforebody = NULL,
-  sty_afterbody = NULL, ...)
+  sty_afterbody = NULL,
+  reference_section_title = reference_section_title, ...)
 }
 \arguments{
 \item{bibliography}{Bibliography location}
@@ -26,6 +27,8 @@ pdf_manuscript(bibliography = raw_file("references.bib",
 \item{sty_beforebody}{Extra sty files to be included before the body of the document}
 
 \item{sty_afterbody}{Extra sty files to be included after the body of the document}
+
+\item{reference_section_title}{The title of the reference section}
 
 \item{...}{Parameters for rmarkdown::pdf_document}
 }

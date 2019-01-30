@@ -44,7 +44,8 @@ pdf_supplementary_note <- function(
 ) {
   pdf_manuscript(
     ...,
-    render_changes = FALSE
+    render_changes = FALSE,
+    reference_section_title = "Supplementary References"
   )
 }
 
@@ -71,6 +72,7 @@ pdf_manuscript <- function(
   sty_header = NULL,
   sty_beforebody = NULL,
   sty_afterbody = NULL,
+  reference_section_title = reference_section_title,
   ...
 ) {
   header_includes <- c(
@@ -101,7 +103,8 @@ pdf_manuscript <- function(
   format <- common_dynbenchmark_format(
     format,
     bibliography = bibliography,
-    csl = csl
+    csl = csl,
+    reference_section_title = reference_section_title
   )
 
   # add changes formatter
@@ -152,10 +155,12 @@ clean_xelatex <- function(output_file) {
 #' @param format The format on which to apply common changes
 #' @param bibliography Bibliography location
 #' @param csl Csl file location
+#' @param reference_section_title The title of the reference section
 common_dynbenchmark_format <- function(
   format,
   bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl")
+  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
+  reference_section_title = "References"
 ) {
   # allow duplicate labels, needed for nested documents to work
   options(knitr.duplicate.label = 'allow')
@@ -173,7 +178,7 @@ common_dynbenchmark_format <- function(
     glue::glue("--bibliography={bibliography}"),
     glue::glue("--csl={csl}"),
     "--metadata", "link-citations=true",
-    "--metadata", "reference-section-title=References",
+    "--metadata", paste0("reference-section-title=", reference_section_title),
     "--filter=/usr/lib/rstudio/bin/pandoc/pandoc-citeproc"
   )
 
