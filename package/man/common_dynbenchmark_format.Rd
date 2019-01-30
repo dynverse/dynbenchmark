@@ -8,7 +8,8 @@ common_dynbenchmark_format(format,
   bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(),
   "manuscript/assets/references.bib"),
   csl = paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/assets/nature-biotechnology.csl"))
+  "manuscript/assets/nature-biotechnology.csl"),
+  reference_section_title = "References")
 }
 \arguments{
 \item{format}{The format on which to apply common changes}
@@ -16,6 +17,8 @@ common_dynbenchmark_format(format,
 \item{bibliography}{Bibliography location}
 
 \item{csl}{Csl file location}
+
+\item{reference_section_title}{The title of the reference section}
 }
 \description{
 Common dynbenchmark format
