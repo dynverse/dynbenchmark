@@ -9,6 +9,8 @@ github_markdown_nested <- function(
   csl = raw_file("nature-biotechnology.csl", "12-manuscript"),
   ...
 ) {
+  knitr::opts_knit$set("rmarkdown.pandoc.to", "markdown")
+
   format <- rmarkdown::github_document(...)
 
   # make sure atx headers are used, for knit_nest
