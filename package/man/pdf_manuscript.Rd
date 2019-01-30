@@ -4,12 +4,11 @@
 \alias{pdf_manuscript}
 \title{The manuscript pdf document}
 \usage{
-
-  pdf_manuscript(bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/assets/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/assets/nature-biotechnology.csl"), render_changes = TRUE,
-  toc = FALSE, linenumbers = FALSE, ...)
+pdf_manuscript(bibliography = raw_file("references.bib",
+  "12-manuscript"), csl = raw_file("nature-biotechnology.csl",
+  "12-manuscript"), render_changes = TRUE, toc = FALSE,
+  linenumbers = FALSE, sty_header = NULL, sty_beforebody = NULL,
+  sty_afterbody = NULL, ...)
 }
 \arguments{
 \item{bibliography}{Bibliography location}
@@ -21,6 +20,12 @@
 \item{toc}{Whether to include a table of contents}
 
 \item{linenumbers}{Whether to add linenumbers to the left side}
+
+\item{sty_header}{Extra sty files to be included in the header of the document}
+
+\item{sty_beforebody}{Extra sty files to be included before the body of the document}
+
+\item{sty_afterbody}{Extra sty files to be included after the body of the document}
 
 \item{...}{Parameters for rmarkdown::pdf_document}
 }

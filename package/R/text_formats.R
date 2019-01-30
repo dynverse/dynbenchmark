@@ -36,12 +36,16 @@ github_markdown_nested <- function(
 
 #' A supplementary note pdf document
 #'
-#' @inheritParams common_dynbenchmark_format
-#' @param ... Parameters for rmarkdown::pdf_document
+#' @inheritParams pdf_manuscript
 #'
 #' @export
-pdf_supplementary_note <- function(...) {
-  pdf_manuscript(..., render_changes = FALSE)
+pdf_supplementary_note <- function(
+  ...
+) {
+  pdf_manuscript(
+    ...,
+    render_changes = FALSE
+  )
 }
 
 
@@ -52,33 +56,44 @@ pdf_supplementary_note <- function(...) {
 #' @param render_changes Whether to export a *_changes.pdf as well
 #' @param toc Whether to include a table of contents
 #' @param linenumbers Whether to add linenumbers to the left side
+#' @param sty_header Extra sty files to be included in the header of the document
+#' @param sty_beforebody Extra sty files to be included before the body of the document
+#' @param sty_afterbody Extra sty files to be included after the body of the document
 #' @param ... Parameters for rmarkdown::pdf_document
 #'
 #' @export
 pdf_manuscript <- function(
-  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
+  bibliography = raw_file("references.bib", "12-manuscript"),
+  csl = raw_file("nature-biotechnology.csl", "12-manuscript"),
   render_changes = TRUE,
   toc = FALSE,
   linenumbers = FALSE,
+  sty_header = NULL,
+  sty_beforebody = NULL,
+  sty_afterbody = NULL,
   ...
 ) {
   header_includes <- c(
-    system.file("common.sty", package = "dynbenchmark"),
-    system.file("manuscript.sty", package = "dynbenchmark")
+    raw_file("common.sty", "12-manuscript"),
+    raw_file("manuscript.sty", "12-manuscript"),
+    sty_header
   )
 
   if (linenumbers) {
     header_includes <- c(
       header_includes,
-      system.file("linenumbers.sty", package = "dynbenchmark")
+      raw_file("linenumbers.sty", "12-manuscript")
     )
   }
   # setup the pdf format
   format <- rmarkdown::latex_document(
     ...,
     toc = toc,
-    includes = rmarkdown::includes(in_header = header_includes),
+    includes = rmarkdown::includes(
+      in_header = header_includes,
+      before_body = sty_beforebody,
+      after_body = sty_afterbody
+    ),
     latex_engine = "xelatex",
     number_sections = FALSE
   )
