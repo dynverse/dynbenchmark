@@ -1,4 +1,4 @@
-#' Compare the predicted exectuion times and memory usages with the actual ones
+#' Compare the predicted execution times and memory usages with the actual ones
 
 library(tidyverse)
 library(dynbenchmark)
