@@ -4,11 +4,9 @@
 \alias{word_manuscript}
 \title{A nested github markdown document}
 \usage{
-
-  word_manuscript(bibliography = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/assets/references.bib")),
-  csl = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/assets/nature-biotechnology.csl")), ...)
+word_manuscript(bibliography = raw_file("references.bib",
+  "12-manuscript"), csl = raw_file("nature-biotechnology.csl",
+  "12-manuscript"), ...)
 }
 \arguments{
 \item{bibliography}{Bibliography location}

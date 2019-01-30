@@ -4,11 +4,9 @@
 \alias{github_markdown_nested}
 \title{A nested github markdown document}
 \usage{
-
-  github_markdown_nested(bibliography = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/assets/references.bib")),
-  csl = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(),
-  "manuscript/assets/nature-biotechnology.csl")), ...)
+github_markdown_nested(bibliography = raw_file("references.bib",
+  "12-manuscript"), csl = raw_file("nature-biotechnology.csl",
+  "12-manuscript"), ...)
 }
 \arguments{
 \item{bibliography}{Bibliography location}

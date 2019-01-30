@@ -5,8 +5,8 @@
 #'
 #' @export
 github_markdown_nested <- function(
-  bibliography = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib")),
-  csl = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl")),
+  bibliography = raw_file("references.bib", "12-manuscript"),
+  csl = raw_file("nature-biotechnology.csl", "12-manuscript"),
   ...
 ) {
   format <- rmarkdown::github_document(...)
@@ -158,8 +158,8 @@ clean_xelatex <- function(output_file) {
 #' @param reference_section_title The title of the reference section
 common_dynbenchmark_format <- function(
   format,
-  bibliography = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib"),
-  csl = paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl"),
+  bibliography = raw_file("references.bib", "12-manuscript"),
+  csl = raw_file("nature-biotechnology.csl", "12-manuscript"),
   reference_section_title = "References"
 ) {
   # allow duplicate labels, needed for nested documents to work
@@ -248,8 +248,8 @@ knit_nest <- function(file) {
 #'
 #' @export
 word_manuscript <- function(
-  bibliography = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/references.bib")),
-  csl = fs::path_abs(paste0(dynbenchmark::get_dynbenchmark_folder(), "manuscript/assets/nature-biotechnology.csl")),
+  bibliography = raw_file("references.bib", "12-manuscript"),
+  csl = raw_file("nature-biotechnology.csl", "12-manuscript"),
   ...
 ) {
   format <- rmarkdown::word_document(...)
