@@ -25,7 +25,7 @@ This repo contains the scripts to reproduce the manuscript
 > <a href='https://github.com/saeyslab'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>  
 > [bioRxiv:276907](https://www.biorxiv.org/content/early/2018/03/05/276907)
 > [doi:10.1101/276907](https://doi.org/10.1101/276907)
-> [![altmetric](https://badges.altmetric.com/?size=100&score=109&types=btttttwg&style=bar)](https://altmetric.com/details/33972849)
+> [![altmetric](https://badges.altmetric.com/?size=100&score=110&types=btttttwg&style=bar)](https://altmetric.com/details/33972849)
 
 (Note that this preprint is currently very outdated, see below for more
 recent results)
@@ -86,9 +86,8 @@ The benchmarking pipeline generates (and uses) the following datasets:
 ![datasets](package/man/figures/datasets.png)
 
   - **The performance of methods** used for the [results overview
-    figure](NA) and the
-    [dynguidelines](https://www.github.com/dynverse/dynguidelines) app.
-    *Not yet available*, but can be accessed in the results folder.
+    figure](https://github.com/dynverse/dynbenchmark_results/tree/master/08-summary/results_suppfig.pdf)
+    and the [dynguidelines](http://guidelines.dynverse.org) app.
 
   - **General information about trajectory inference methods**,
     available as a data frame in `dynmethods::methods`
@@ -111,6 +110,7 @@ In R, you can install the dependencies of dynbenchmark from github
 using:
 
 ``` r
+
 # install.packages("devtools")
 devtools::install_github("dynverse/dynbenchmark/package")
 ```
@@ -139,7 +139,40 @@ You can test whether docker is correctly installed by running:
 dynwrap::test_docker_installation(detailed = TRUE)
 ```
 
-    ## [1] TRUE
+``` 
+
+## 
+-
+
+|
+
+-
+
+|
+
+-
+
+|
+
+-
+
+|
+
+-
+
+|
+
+-
+
+|
+
+ 
+```
+
+``` 
+
+## [1] TRUE
+```
 
 This command will give helpful tips if some parts of the installation
 are missing.

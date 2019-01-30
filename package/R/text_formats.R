@@ -214,7 +214,7 @@ knit_nest <- function(file) {
     knit <- readr::read_lines(fs::path_ext_set(file, "md"))
 
     # fix relative paths to links and figures
-    knit <- fix_relative_paths(knit, folder %>% fs::path_rel(folder))
+    knit <- fix_relative_paths(knit, fs::path_rel(fs::path_dir(file)))
 
     # add extra header sublevels & add link
     knit <- knit %>%
