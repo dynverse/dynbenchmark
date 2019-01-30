@@ -21,5 +21,6 @@ walk(supp_notes$rmd_path, function(supplementary_note_path) {
 })
 
 pwalk(supp_notes, function(rmd_path, final_path, pdf_path) {
-  file.copy(pdf_path, final_path, overwrite = TRUE)
+  if (file.exists(final_path)) file.remove(final_path)
+  file.rename(pdf_path, final_path, overwrite = TRUE)
 })
