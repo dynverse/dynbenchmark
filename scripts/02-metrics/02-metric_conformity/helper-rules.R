@@ -76,6 +76,7 @@ equal_identity <- lst(
 
     plot_scores$width <- length(unique(scores$metric_id)) * 1.2
     plot_scores$height <- 4
+    plot_scores$caption <- glue::glue("Score values of the different metrics across {length(unique(scores$dataset_id))} datasets.")
 
     lst(
       conformity = scores %>%
@@ -96,6 +97,8 @@ equal_identity <- lst(
 
     plot_datasets$width <- 4
     plot_datasets$height <- 4
+
+    plot_datasets$caption <- "Example trajectory that was used to assess this rule."
 
     plot_datasets
   }
@@ -162,6 +165,7 @@ rule_lower <- function(
 
       plot_scores$width <- length(unique(scores$metric_id)) * 1.2
       plot_scores$height <- 4
+      plot_scores$caption <- glue::glue("Differences in scores of {nrow(differences)} datasets before and after perturbation. Red bar gives the mean.")
 
       lst(
         conformity,
@@ -197,6 +201,7 @@ rule_lower <- function(
 
       plot_datasets$width <- 4 * 2
       plot_datasets$height <- 4
+      plot_datasets$caption <- "Example dataset before and after perturbation."
 
       plot_datasets
     }
@@ -265,6 +270,7 @@ rule_monotonic <- function(
 
     plot_scores$width <- 12
     plot_scores$height <- ceiling(length(plots)/4) * 3
+    plot_scores$caption <- glue::glue("Score values at different extents of the perturbation across {length(unique(scores$dataset_id))} datasets. Red line denotes the mean values.")
 
     lst(
       conformity,
@@ -308,6 +314,7 @@ rule_monotonic <- function(
 
     plot_datasets$width <- 12
     plot_datasets$height <- 4
+    plot_datasets$caption <- "Lowly (left), moderatly (middle) and highly (right) perturbed example dataset."
 
     plot_datasets
   }
@@ -397,6 +404,7 @@ rule_combined <- function(
 
     plot_scores$width <- length(unique(scores$metric_id)) * 1.5 / 2
     plot_scores$height <- 8
+    plot_scores$caption <- glue::glue("Score values before perturbation (identity), with any of the two perturbations (a and b) and both perturbations combined (a+b). The upper whisker of the boxplot extends from the hinge (75% percentile) to the largest value, no further than 1.5× the IQR from the hinge. The lower whisker extends from the hinge (25% percentile) to the smallest value, at most 1.5× the IQR of the hinge. We used {sum(scores$metric_id == first(scores$metric_id))} different datasets.")
 
     lst(
       conformity,
@@ -435,6 +443,7 @@ rule_combined <- function(
 
     plot_datasets$width <- 3 * 4
     plot_datasets$height <- 3
+    plot_datasets$caption <- "Example dataset before perturbation (identity), with any of the two perturbations (a and b) and both perturbations combined (a+b)."
 
     plot_datasets
   }
@@ -787,6 +796,7 @@ change_topology <- lst(
 
     plot_scores$width <- length(unique(scores$metric_id))*1.5
     plot_scores$height <- length(unique(scores$from_topology))*1.5
+    plot_scores$caption <- "Score values on different topologies (left)."
 
     lst(
       conformity,
@@ -810,6 +820,7 @@ change_topology <- lst(
 
     plot_datasets$width <- 3 * 4
     plot_datasets$height <- 3 * ceiling(length(models) / 4)
+    plot_datasets$caption <- "The different trajectory topologies that were used to compare the metrics."
 
     plot_datasets
   },
@@ -881,6 +892,7 @@ cell_gathering <- lst(
 
     plot_scores$width <- 3 * 4
     plot_scores$height <- 3 * ceiling(length(plots) / 4)
+    plot_scores$caption <- glue::glue("Score values of the same datasets (n = {length(unique(scores$dataset_id))}) in which cells were put either on the edges or on the milestones. Shown in the top left is the Spearman rank correlation.")
 
     lst(
       conformity = conformity %>% select(-cor),
@@ -917,6 +929,7 @@ cell_gathering <- lst(
 
     plot_datasets$width <- 3 * 4
     plot_datasets$height <- 6
+    plot_datasets$caption <- "Example dataset in which cells are placed on the edges (left) or on the milestones (right), and with their original positions (top) or shuffled (bottom)."
 
     plot_datasets
   },

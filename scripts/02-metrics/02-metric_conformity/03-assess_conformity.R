@@ -77,7 +77,7 @@ assessments %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # test one rule
-rule <- rules %>% extract_row_to_list(which(rules$id == "add_leaf_edges"))
+rule <- rules %>% extract_row_to_list(which(rules$id == "cell_gathering"))
 assessment <- assess_conformity(rule, scores)
 assessment$plot_scores
 assessment$plot_datasets
