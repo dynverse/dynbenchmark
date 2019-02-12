@@ -10,6 +10,7 @@ github_markdown_nested <- function(
   ...
 ) {
   knitr::opts_knit$set("rmarkdown.pandoc.to", "markdown")
+  options(knitr.table.format = "markdown")
 
   format <- rmarkdown::github_document(...)
 
@@ -165,7 +166,7 @@ common_dynbenchmark_format <- function(
   reference_section_title = "References"
 ) {
   # allow duplicate labels, needed for nested documents to work
-  options(knitr.duplicate.label = 'allow')
+  options(knitr.duplicate.label = "allow")
 
   # setup the refs globally
   format$pre_knit <- function(...) {setup_refs_globally()}
