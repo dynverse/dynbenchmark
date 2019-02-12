@@ -59,7 +59,7 @@ create_names <- list(
 
 get_default_format <- function() {
   case_when(
-    (knitr::opts_knit$get("rmarkdown.pandoc.to") %||% FALSE) == "latex"  ~ "latex",
+    (getOption("rmarkdown.pandoc.to") %||% FALSE) == "latex"  ~ "latex",
     TRUE ~ "markdown"
   )
 }
