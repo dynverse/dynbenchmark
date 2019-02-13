@@ -8,26 +8,50 @@ experiment("01-datasets")
 
 # download the rds files from zenodo
 deposit_id <- 1443566
-files_list <- GET(glue::glue("https://zenodo.org/api/deposit/depositions/{deposit_id}/files"), headers) %>%
-  httr::content()
 
-files <- tibble(
-  filename = map_chr(files_list, "filename")
-  # url = map(files_list, "links") %>% map_chr("download") # this url does not work
-) %>%
+files <-
+  GET(glue::glue("https://zenodo.org/api/records/{deposit_id}")) %>%
+  httr::content() %>%
+  .$files %>%
+  map(unlist) %>%
+  list_as_tibble() %>%
   mutate(
-    url = glue::glue("https://zenodo.org/record/{deposit_id}/files/{filename}"),
-    destfile = map_chr(filename, derived_file)
+    dataset_id = str_replace(filename, "\\.rds$", ""),
+    dest_folder = map_chr(dataset_id, derived_file)
   )
 
-# download one file
-download.file(files$url[[1]], files$destfile[[1]])
+pwalk(
+  files,
+  function(checksum, filename, filesize, links.download, dataset_id, dest_folder, ...) {
+    download_info <- paste0(dest_folder, "/download_info.json")
+    if (file.exists(download_info)) {
+      didata <- jsonlite::read_json(download_info, simplifyVector = TRUE)
 
-# download all files
-map2(
-  files$url,
-  files$destfile,
-  download.file
+      if (didata$checksum == checksum) {
+        return()
+      }
+    }
+
+    tmp_download_file <- tempfile()
+    on.exit(file.remove(tmp_download_file))
+    download.file(links.download, tmp_download_file)
+
+    if (tools::md5sum(tmp_download_file) != checksum) {
+      stop("MD5 checksum after downloading file '", dataset_id, "' is wrong!\nAborting downloading procedure.")
+    }
+
+    dataset <- read_rds(tmp_download_file)
+    save_dataset(dataset, id = dataset_id)
+    jsonlite::write_json(
+      lst(
+        deposit_id,
+        dataset_id,
+        checksum,
+        downloaded_on = as.character(Sys.time())
+      ),
+      download_info
+    )
+  }
 )
 
 # upload to remote, if relevant

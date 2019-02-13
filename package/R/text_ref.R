@@ -9,19 +9,23 @@ setup_refs <- function() {
 #' @param ref_type fig, sfig, table, ...
 #' @param ref_id The identifier
 #' @param suffix Adding something to the index
+#' @param prefix Adding something before the index
 #' @param anchor Whether to anchor here
 #' @param format The output format (html, latex, markdown, ...)
 #'
 #' @export
-ref <- function(ref_type, ref_id, suffix = "", anchor = FALSE, format = get_default_format()) {
+ref <- function(ref_type, ref_id, suffix = "", prefix = "", anchor = FALSE, format = get_default_format()) {
   if(nrow(refs %>% filter(ref_id == !!ref_id)) == 0) {
+    ref_number <- paste0(prefix, sum(refs$ref_type == ref_type) + 1)
     refs <<- refs %>% bind_rows(tibble(
-      name = create_names[[ref_type]](sum(refs$ref_type == ref_type) + 1),
+      name = create_names[[ref_type]](ref_number),
       ref_type = ref_type,
       ref_id = ref_id
     ))
   }
-  ref_name <- refs %>% filter(ref_id == !!ref_id) %>%
+  ref_name <-
+    refs %>%
+    filter(ref_id == !!ref_id) %>%
     pull(name)
   ref_full_name <- paste0(ref_name, label_vector(suffix))
 
@@ -54,10 +58,11 @@ create_names <- list(
 )
 
 get_default_format <- function() {
-  case_when(
-    (knitr::opts_knit$get("rmarkdown.pandoc.to") %||% FALSE) == "latex"  ~ "latex",
-    TRUE ~ "markdown"
-  )
+  if (identical(knitr::opts_knit$get("rmarkdown.pandoc.to"), "latex")) {
+    "latex"
+  } else {
+    "markdown"
+  }
 }
 
 
@@ -165,7 +170,7 @@ plot_fig <- function(
     fig <- NULL
   }
 
-  # if fig path is a pdf and  format is html/markdown -> convert to png
+  # if fig path is a pdf and format is html/markdown -> convert to png
   if (format %in% c("html", "markdown") && fs::path_ext(fig_path) == "pdf") {
     new_fig_path <- fs::path_ext_set(fig_path, "png")
     system(glue::glue("convert -density 300 {fig_path} {new_fig_path}"))
@@ -188,6 +193,17 @@ plot_fig <- function(
 
   # convert to relative path (for github markdown)
   fig_path <- fs::path_rel(fig_path)
+
+  # if format is markdown/html, and figure is not in a subdirectory: save figure to .figures
+  # this avoids problems with figures present in dynbenchmark, but present in the dynbenchmark_results repo
+  if (format %in% c("html", "markdown") && !fs::path_has_parent(fig_path, getwd())) {
+    if (!fs::dir_exists(".figures")) {
+      fs::dir_create(".figures")
+    }
+    new_fig_path <- paste0(".figures/", fs::path_file(fig_path))
+    fs::file_copy(fig_path, new_fig_path, overwrite = TRUE)
+    fig_path <- new_fig_path
+  }
 
   # convert svg to pdf if required
   if (fs::path_ext(fig_path) == "svg" && format %in% c("pdf", "latex")) {

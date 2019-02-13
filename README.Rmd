@@ -93,7 +93,7 @@ ggplot2::ggsave("package/man/figures/datasets.png", width = nrow(datasets)*3, he
 
 ![datasets](package/man/figures/datasets.png)
 
-* **The performance of methods** used for the [results overview figure](`r dynbenchmark::link_to_results("scripts/08-summary/overview.pdf")`) and the [dynguidelines](https://www.github.com/dynverse/dynguidelines) app. _Not yet available_, but can be accessed in the results folder.
+* **The performance of methods** used for the [results overview figure](`r dynbenchmark::link_to_results("scripts/08-summary/results_suppfig.pdf")`) and the [dynguidelines](http://guidelines.dynverse.org) app.
 
 * **General information about trajectory inference methods**, available as a data frame in `dynmethods::methods`
 
@@ -109,7 +109,7 @@ In R, you can install the dependencies of dynbenchmark from github using:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("dynverse/dynbenchmark")
+devtools::install_github("dynverse/dynbenchmark/package")
 ```
 
 This will install several other "dynverse" packages. Depending on the number of R packages already installed, this installation should take approximately 5 to 30 minutes.

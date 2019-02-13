@@ -45,5 +45,12 @@ stables %>%
 ```{r}
 dynbenchmark::knit_nest("../results/02-metrics/")
 ```
+\clearpage
+
+# Supplementary note 2
+
+```{r}
+dynbenchmark::knit_nest("../results/01-datasets/02-synthetic/")
+```
 
 \clearpage

@@ -25,16 +25,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8"
-     inkscape:cx="504.59661"
-     inkscape:cy="49.894493"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="405.03179"
+     inkscape:cy="149.37696"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="3840"
-     inkscape:window-height="2031"
-     inkscape:window-x="0"
-     inkscape:window-y="55"
+     inkscape:window-width="1920"
+     inkscape:window-height="1043"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      fit-margin-top="0"
      fit-margin-left="0"
@@ -1483,7 +1483,10 @@
          y="-31.952843"
          style="stroke-width:0.26458332" /></text>
     <g
-       id="g2053">
+       id="g2053"
+       inkscape:export-filename="/home/wouters/thesis/workshops/roscoff_2019/img/wrapping_1.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300">
       <g
          transform="matrix(1.7205121,0,0,1.7205121,-13.538612,5.2387009)"
          id="g8345">
@@ -2991,7 +2994,10 @@
          sodipodi:role="line">b)</tspan></text>
     <g
        id="g3384"
-       transform="translate(-104.25077,0.09246632)">
+       transform="translate(-104.25077,0.09246632)"
+       inkscape:export-filename="/home/wouters/thesis/workshops/roscoff_2019/img/wrapping_2.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300">
       <text
          id="text4390"
          y="202.40614"
@@ -3707,7 +3713,10 @@
     </g>
     <g
        id="g3257"
-       transform="translate(-56.593338,-0.05690235)">
+       transform="translate(-56.593338,-0.05690235)"
+       inkscape:export-filename="/home/wouters/thesis/workshops/roscoff_2019/img/wrapping_2.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:18.20875168px;line-height:1;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffa500;fill-opacity:1;stroke:none;stroke-width:0.45521879"
@@ -4376,7 +4385,10 @@
     </g>
     <g
        id="g2152"
-       transform="translate(3.5803377e-5)">
+       transform="translate(3.5803377e-5)"
+       inkscape:export-filename="/home/wouters/thesis/workshops/roscoff_2019/img/wrapping_2.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300">
       <path
          inkscape:connector-curvature="0"
          id="path4725"
@@ -4937,7 +4949,10 @@
     </g>
     <g
        id="g3004"
-       transform="translate(-13.743055)">
+       transform="translate(-13.743055)"
+       inkscape:export-filename="/home/wouters/thesis/workshops/roscoff_2019/img/wrapping_2.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300">
       <text
          id="text4360"
          y="201.69183"
@@ -5495,7 +5510,10 @@
     </g>
     <g
        id="g3040"
-       transform="translate(-103.59281)">
+       transform="translate(-103.59281)"
+       inkscape:export-filename="/home/wouters/thesis/workshops/roscoff_2019/img/wrapping_2.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:18.20875168px;line-height:1;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#0076dc;fill-opacity:1;stroke:none;stroke-width:0.45521879"
@@ -5676,7 +5694,10 @@
     </g>
     <g
        id="g3991"
-       transform="translate(107.96426)">
+       transform="translate(107.96426)"
+       inkscape:export-filename="/home/wouters/thesis/workshops/roscoff_2019/img/wrapping_2.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300">
       <g
          transform="translate(-114.65997)"
          id="g3118">
@@ -6097,7 +6118,10 @@
     </g>
     <g
        transform="translate(41.462859)"
-       id="g4449">
+       id="g4449"
+       inkscape:export-filename="/home/wouters/thesis/workshops/roscoff_2019/img/wrapping_2.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300">
       <text
          id="text4385"
          y="202.40614"

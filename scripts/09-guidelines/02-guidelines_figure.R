@@ -203,6 +203,7 @@ results_boxes %>%
 
 # write the methods as svg and add to existing svg
 ggsave(result_file("guidelines_methods.png"), width = 8, height = 10)
+ggsave(result_file("guidelines_methods.svg"), width = 8, height = 10)
 
 # the "tree.svg" file has a link to "guidelines_methods.svg", so make sure both are in the same directory
 file.copy(raw_file("tree.svg"), result_file("guidelines.svg"), overwrite = TRUE)
