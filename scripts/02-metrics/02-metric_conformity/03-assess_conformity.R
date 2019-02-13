@@ -88,7 +88,7 @@ write_rds(assessments, result_file("assessments.rds"), compress = "xz")
 # add image location to rules and save
 rules <- rules %>%
   mutate(
-    image_location = map_chr(id, function(id) result_file(paste0("images/", id, ".png"))),
+    image_location = map_chr(id, function(id) fs::path_rel(result_file(paste0("images/", id, ".png")))),
     image_found = file.exists(image_location)
   )
 
