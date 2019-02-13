@@ -54,5 +54,5 @@ for (i in seq_along(dataset_ids)) {
   # dataset$prior_information <- dynwrap::generate_prior_information(dataset$milestone_ids, dataset$milestone_network, dataset$progressions, dataset$milestone_percentages, dataset$counts, dataset$feature_info, dataset$cell_info)
   # dataset$progressions <- with(dataset, dynutils::convert_milestone_percentages_to_progressions(cell_ids, milestone_ids, milestone_network, milestone_percentages))
 
-  write_rds(dataset, dataset_file(id = id, filename = "dataset.rds"))
+  write_rds(dataset, dataset_file(id = id, filename = "dataset.rds"), compress = "xz")
 }

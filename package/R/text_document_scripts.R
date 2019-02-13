@@ -65,7 +65,9 @@ extract_scripts_documentation <- function(folder = getwd(), recursive = TRUE) {
 #' @rdname extract_scripts_documentation
 #' @export
 render_scripts_documentation <- function(folder = ".", recursive = FALSE) {
-  if(is.null(knitr::opts_knit$get("output.dir"))) {knitr::opts_knit$set("output.dir" = ".")} # fix for bizaroo knit_child error
+  if (is.null(knitr::opts_knit$get("output.dir"))) {
+    knitr::opts_knit$set("output.dir" = ".") # fix for bizaroo knit_child error
+  }
 
   # print table of scripts
   extract_scripts_documentation(folder, recursive = recursive) %>%
@@ -74,7 +76,9 @@ render_scripts_documentation <- function(folder = ".", recursive = FALSE) {
       symbol = case_when(type == "directory" ~ "\U1F4C1", type == "script" ~ "\U1F4C4", TRUE ~ ""),
       location = glue::glue("[{symbol}`{id}`]({file})"),
       order = paste0(ifelse(is.na(ix), "", ix), ifelse(is.na(subix), "", subix)),
-      description = map_chr(title, ~if(. != ""){knitr::knit_child(text = ., quiet = TRUE)}else{""})
+      description = map_chr(title, function(x) {
+        if (x != "") knitr::knit_child(text = x, quiet = TRUE) else ""
+      })
     ) %>%
     select(`\\#` = order, `script/folder` = location, description) %>%
     knitr::kable()
