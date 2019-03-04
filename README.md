@@ -127,9 +127,14 @@ On Linux, you will need to install udunits and ImageMagick:
   - Fedora / CentOS / RHEL: `sudo dnf install udunits2-devel
     ImageMagick-c++-devel`
 
-[Docker](https://docs.docker.com/install) has to be installed to run TI
-methods. See <https://docs.docker.com/install> for instructions. For
-windows 10 you can install [Docker
+[Docker](https://docs.docker.com/install) or
+[Singularity](https://www.sylabs.io/guides/3.0/user-guide/) (version ≥
+3.0) has to be installed to run TI methods. We suggest docker on Windows
+and MacOS, while both docker and singularity are fine when running on
+linux. Singularity is strongly recommended when running the method on
+shared computing clusters.
+
+For windows 10 you can install [Docker
 CE](https://store.docker.com/editions/community/docker-ce-desktop-windows),
 older Windows installations require the [Docker
 toolbox](https://docs.docker.com/toolbox/overview/).
@@ -159,5 +164,24 @@ dynwrap::test_docker_installation(detailed = TRUE)
 
     ## [1] TRUE
 
-This command will give helpful tips if some parts of the installation
+Same for
+    singularity:
+
+``` r
+dynwrap::test_singularity_installation(detailed = TRUE)
+```
+
+    ## ✔ Singularity is installed
+
+    ## ✔ Singularity is at correct version (>=3.0): v3.0.0-13-g0273e90f is installed
+
+    ## ✔ Singularity can pull and run a container from Dockerhub
+
+    ## ✔ Singularity can mount temporary volumes
+
+    ## ✔ Singularity test successful ------------------------------------------------------------
+
+    ## [1] TRUE
+
+These commands will give helpful tips if some parts of the installation
 are missing.
