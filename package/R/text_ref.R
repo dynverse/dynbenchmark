@@ -241,6 +241,14 @@ plot_fig <- function(
     width <- width * 70
     height = height * 70
 
+    maxwidth <- 900
+
+    if (width > maxwidth) {
+      ratio <- maxwidth/width
+      width <- width * ratio
+      height <- height * ratio
+    }
+
     fig_cap <- ref(ref_type, ref_id)
     subchunk <- glue::glue(
       "\n\n\n<p>\n",
