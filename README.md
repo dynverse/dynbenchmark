@@ -25,7 +25,7 @@ This repo contains the scripts to reproduce the manuscript
 > <a href='https://github.com/saeyslab'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>  
 > [bioRxiv:276907](https://www.biorxiv.org/content/early/2018/03/05/276907)
 > [doi:10.1101/276907](https://doi.org/10.1101/276907)
-> [![altmetric](https://badges.altmetric.com/?size=100&score=118&types=btttttwg&style=bar)](https://altmetric.com/details/33972849)
+> [![altmetric](https://badges.altmetric.com/?size=100&score=120&types=btttttwg&style=bar)](https://altmetric.com/details/33972849)
 
 *Note that this preprint is currently **very** outdated. An updated
 manuscript will be published soon, you can browse below for more recent
@@ -112,7 +112,6 @@ In R, you can install the dependencies of dynbenchmark from github
 using:
 
 ``` r
-
 # install.packages("devtools")
 devtools::install_github("dynverse/dynbenchmark/package")
 ```
@@ -135,56 +134,30 @@ CE](https://store.docker.com/editions/community/docker-ce-desktop-windows),
 older Windows installations require the [Docker
 toolbox](https://docs.docker.com/toolbox/overview/).
 
-You can test whether docker is correctly installed by running:
+You can test whether docker is correctly installed by
+    running:
 
 ``` r
 dynwrap::test_docker_installation(detailed = TRUE)
 ```
 
-``` 
+    ## ✔ Docker is installed
 
-## ✔ Docker is installed
-```
+    ## ✔ Docker daemon is running
 
-``` 
+    ## ✔ Docker is at correct version (>1.0): 1.39
 
-## ✔ Docker daemon is running
-```
+    ## ✔ Docker is in linux mode
 
-``` 
+    ## ✔ Docker can pull images
 
-## ✔ Docker is at correct version (>1.0): 1.39
-```
+    ## ✔ Docker can run image
 
-``` 
+    ## ✔ Docker can mount temporary volumes
 
-## ✔ Docker is in linux mode
-```
+    ## ✔ Docker test successful -----------------------------------------------------------------
 
-``` 
-
-## ✔ Docker can pull images
-```
-
-``` 
-
-## ✔ Docker can run image
-```
-
-``` 
-
-## ✔ Docker can mount temporary volumes
-```
-
-``` 
-
-## ✔ Docker test successful -----------------------------------------------------------------
-```
-
-``` 
-
-## [1] TRUE
-```
+    ## [1] TRUE
 
 This command will give helpful tips if some parts of the installation
 are missing.
