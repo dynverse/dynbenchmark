@@ -239,21 +239,13 @@ plot_fig <- function(
 
   } else if (format %in% c("html", "markdown")){
     width <- width * 70
-    height = height * 70
-
-    maxwidth <- 900
-
-    if (width > maxwidth) {
-      ratio <- maxwidth/width
-      width <- width * ratio
-      height <- height * ratio
-    }
+    height <- height * 70
 
     fig_cap <- ref(ref_type, ref_id)
     subchunk <- glue::glue(
       "\n\n\n<p>\n",
       "  {fig_anch}\n",
-      "  <img src = \"{fig_path}\" width = \"{width}\" height = \"{height}\" />\n",
+      "  <img src = \"{fig_path}\" />\n",
       "</p><p>\n",
       "  <strong>{fig_cap}: {caption_main}</strong> {caption_text}\n",
       "</p>\n",
