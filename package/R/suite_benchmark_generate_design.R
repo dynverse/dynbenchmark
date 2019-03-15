@@ -124,14 +124,14 @@ check_benchmark_design_parameters <- function(
     if (!check) {
       stop("methods is supposed be a vector of methods ids, or a list of dynwrap ti methods")
     }
-    method_names <- sapply(methods, function(x) if (is.character(x)) x else x$id)
+    method_names <- sapply(methods, function(x) if (is.character(x)) x else x$method$id)
   } else {
     method_names <- methods
   }
 
-  testthat::expect_true(all(parameters$method_id %in% method_names))
+  assert_that(parameters$method_id %all_in% method_names)
 
-  testthat::expect_true(is.numeric(num_repeats))
+  assert_that(is.numeric(num_repeats))
 }
 
 process_datasets_design <- function(datasets) {
@@ -195,7 +195,7 @@ process_methods_design <- function(methods) {
       assign("m", m, envir = env)
       environment(fun) <- env
       tibble(
-        id = m$id,
+        id = m$method$id,
         type = "ti_method",
         fun = list(fun)
       )
