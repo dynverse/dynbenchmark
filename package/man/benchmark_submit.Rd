@@ -34,7 +34,7 @@ A benchmark suite with which to run all the methods on the different datasets
 library(tibble)
 
 datasets <- c("synthetic/dyntoy/bifurcating_1", "synthetic/dyntoy/bifurcating_2")
-methods <- dynmethods::methods$id
+methods <- dynmethods::methods$method_id[1:3]
 
 design <- benchmark_generate_design(
   datasets = datasets,
