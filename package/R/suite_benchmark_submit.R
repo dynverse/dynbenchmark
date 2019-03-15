@@ -11,6 +11,8 @@
 #'   in \code{design$crossing} is allowed to be used. This string will later be parsed by [glue::glue()].
 #' @param verbose Whether or not to print extra information.
 #' @param output_models Whether or not the model will be outputted.
+#' @param local_output_folder A folder in which to output intermediate and final results.
+#' @param remote_output_folder A folder in which to store intermediate results in a remote directory when using the qsub package.
 #'
 #' @importFrom readr read_rds write_rds
 #'
@@ -45,12 +47,11 @@ benchmark_submit <- function(
   qsub_grouping = "{method_id}/{param_id}",
   qsub_params = list(timeout = 3600, memory = "10G"),
   verbose = TRUE,
-  output_models = TRUE
+  output_models = TRUE,
+  local_output_folder = derived_file("suite"),
+  remote_output_folder = derived_file("suite", remote = TRUE)
 ) {
   requireNamespace("qsub")
-
-  local_output_folder <- derived_file("suite")
-  remote_output_folder <- derived_file("suite", remote = TRUE)
 
   grouping_variables <- qsub_grouping %>%
     str_extract_all("\\{([^\\}]*)\\}") %>%

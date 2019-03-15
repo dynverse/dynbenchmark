@@ -15,7 +15,7 @@ relevant_methods <- load_methods() %>% filter(source == "tool", topology_inferen
 
 output <- benchmark_bind_results(
   load_models = TRUE,
-  experiment_id = "06-benchmark",
+  local_output_folder = derived_file("suite", experiment_id = "06-benchmark"),
   filter_fun = function(tib) tib %>% filter(method_id %in% relevant_methods)
 ) %>%
   select(method_id, dataset_id, model, him) %>%
