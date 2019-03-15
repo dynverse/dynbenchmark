@@ -549,7 +549,6 @@ perturbation_methods <- tibble::lst(
 )
 
 
-#' @importFrom dynwrap create_ti_method_r
 #' @include suite_benchmark_generate_design.R
 #' @include suite_benchmark_submit.R
 perturbation_methods_design <-
@@ -562,16 +561,20 @@ perturbation_methods_design <-
     param_names <- setdiff(formalArgs(run_fun), c("dataset", "seed", "verbose"))
 
     dynwrap::create_ti_method_r(
-      id = name %>% gsub("^perturb_", "", .),
+      definition = dynwrap::definition(
+        method = dynwrap::def_method(
+          id = name %>% gsub("^perturb_", "", .)
+        ),
+        wrapper = dynwrap::def_wrapper(
+          type = "control",
+          input_required = "dataset",
+          input_optional = NULL
+        ),
+        parameters = NULL
+      ),
       run_fun = run_fun,
-      parameters = NULL,
       package_loaded = c("dplyr", "purrr", "dynwrap", "dynbenchmark"),
-      input_required = "dataset",
-      input_optional = NULL,
-      output = "trajectory",
-      type = "control",
       return_function = FALSE
     )
-
   }) %>%
   dynbenchmark:::process_methods_design()
