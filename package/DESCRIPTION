@@ -79,7 +79,7 @@ Remotes:
   dynverse/dyntoy,
   dynverse/dynwrap,
   rcannood/qsub@devel
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)
 Collate: 
     'data.R'
