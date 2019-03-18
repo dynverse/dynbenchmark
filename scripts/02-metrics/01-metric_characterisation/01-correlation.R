@@ -186,7 +186,7 @@ ggsave(result_file("waypoints_overview.pdf"), width = 12, height = 8)
 datasets <- dyntoy::generate_datasets(allow_tented_progressions = FALSE, num_features = 2, num_cells = 500, add_prior_information = FALSE, num_replicates = 1)
 
 plots_geodesic_distance_dimreds <- mapdf(datasets, function(dataset) {
-  distances <- dynwrap::compute_tented_geodesic_distances(dataset) %>% t()
+  distances <- dynwrap::calculate_geodesic_distances(dataset) %>% t()
   distances[is.infinite(distances)] <- max(distances[!is.infinite(distances)])
 
   dimred <- dyndimred::dimred_mds(distances)
