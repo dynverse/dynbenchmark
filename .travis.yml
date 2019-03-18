@@ -16,7 +16,7 @@ git:
 before_install:
  - source <(curl -sSL https://raw.githubusercontent.com/dynverse/travis_scripts/master/helper.sh)
  - cd package
- install:
+install:
  - use_dynverse_devel
  - install_cran devtools covr
  - install_cran covr
