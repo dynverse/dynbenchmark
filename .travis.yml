@@ -27,6 +27,8 @@ after_success:
 jobs:
   include:
     - stage: prepare cache
-      script: echo Skip
-      after_success: echo Skip
+      script: 
+      - echo Skip
+      after_success: 
+      - echo Skip
     - stage: test
