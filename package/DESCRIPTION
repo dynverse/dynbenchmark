@@ -78,7 +78,7 @@ Remotes:
   dynverse/dynutils,
   dynverse/dyntoy,
   dynverse/dynwrap,
-  rcannood/qsub@devel
+  rcannood/qsub
 RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)
 Collate: 
