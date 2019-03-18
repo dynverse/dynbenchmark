@@ -62,8 +62,8 @@ parameters <- list(
 )
 
 priors <- list(
-  list(id = "none"),
-  list(id = "some", set = c("start_id", "end_n"))
+  list(id = "none", method_id = c("scorpius", "tscan", "comp1")),
+  list(id = "some", method_id = c("tscan"), set = c("start_id", "end_n"))
 )
 
 benchmark_generate_design(
