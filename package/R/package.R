@@ -19,6 +19,7 @@
 #' @import dyneval
 #' @import dynmethods
 #' @import dynwrap
+#' @import dynparam
 #'
 #' @docType package
 #' @name dynbenchmark
