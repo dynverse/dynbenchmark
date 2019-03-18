@@ -14,8 +14,8 @@ Depends:
   dyneval (>= 0.2.2),
   dynmethods,
   dynplot,
-  dynutils (>= 1.0.1),
-  dynwrap (>= 0.3.1)
+  dynutils (>= 1.0.1.9000),
+  dynwrap (>= 0.9.9)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
