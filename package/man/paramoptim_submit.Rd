@@ -2,7 +2,7 @@
 % Please edit documentation in R/suite_paramoptim_submit.R
 \name{paramoptim_submit}
 \alias{paramoptim_submit}
-\title{A benchmark suite with which to run all the methods on the different datasets}
+\title{A param optim suite with which to run all the methods on the different datasets}
 \usage{
 paramoptim_submit(design, metrics = "correlation",
   qsub_grouping = "{method_id}/{prior_id}/{repeat_ix}",
@@ -12,7 +12,7 @@ paramoptim_submit(design, metrics = "correlation",
   remote_output_folder = derived_file("suite", remote = TRUE))
 }
 \arguments{
-\item{design}{Design tibble of the experiment, created by \code{\link[=benchmark_generate_design]{benchmark_generate_design()}}.}
+\item{design}{Design tibble of the experiment, created by \code{\link[=paramoptim_generate_design]{paramoptim_generate_design()}}.}
 
 \item{metrics}{Which metrics to evaluate; see \code{\link[=calculate_metrics]{calculate_metrics()}} for a list of which metrics are available.}
 
@@ -39,7 +39,7 @@ and ZZZ is equal to some logic which always produces a \code{list(memory = ..., 
 \item{remote_output_folder}{A folder in which to store intermediate results in a remote directory when using the qsub package.}
 }
 \description{
-A benchmark suite with which to run all the methods on the different datasets
+A param optim suite with which to run all the methods on the different datasets
 }
 \examples{
 \dontrun{

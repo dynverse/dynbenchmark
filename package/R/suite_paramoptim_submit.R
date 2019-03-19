@@ -1,6 +1,6 @@
-#' A benchmark suite with which to run all the methods on the different datasets
+#' A param optim suite with which to run all the methods on the different datasets
 #'
-#' @param design Design tibble of the experiment, created by [benchmark_generate_design()].
+#' @param design Design tibble of the experiment, created by [paramoptim_generate_design()].
 #' @param metrics Which metrics to evaluate; see [calculate_metrics()] for a list of which metrics are available.
 #' @param qsub_params A list used to define execution parameters for each row in the design tibble.
 #'
@@ -175,7 +175,7 @@ paramoptim_submit <- function(
       qsub_environment = qsub_environment,
       qsub_packages = qsub_packages,
       qsub_config = qsub_config_method,
-      FUN = benchmark_qsub_fun
+      FUN = paramoptim_qsub_fun
     )
 
     # save data and handle to RDS file
@@ -201,7 +201,7 @@ paramoptim_submit <- function(
     invisible()
   }
 
-  # run benchmark per method seperately
+  # run param optim per method seperately
   design$crossing <- design$crossing %>% mutate(., qsub_group = glue::glue_data(., qsub_grouping))
   runs <- design$crossing %>% split(., .$qsub_group)
   order <- design$crossing %>% pull(qsub_group) %>% unique()
