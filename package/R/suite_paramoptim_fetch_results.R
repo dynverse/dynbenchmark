@@ -89,10 +89,8 @@ paramoptim_fetch_results <- function(
             mutate(
               iteration = dob[[param_i]],
               param_i,
-              param_row = list(path[param_i,,drop = F]),
-              error_message = sapply(error, function(err) ifelse(is.na(err), "", err$message))
-            ) %>%
-            select(-error)
+              param_row = list(path[param_i,,drop = F])
+            )
         })
       } else {
         # todo: mimic normal output
