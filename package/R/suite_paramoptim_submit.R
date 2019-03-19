@@ -384,8 +384,8 @@ make_obj_fun <- function(method, metrics, give_priors, noisy = FALSE, verbose = 
         }
       })
 
-      eval_out <- evaluate_ti_method(
-        dataset = datasets,
+      eval_out <- evaluate_ti_method( # to do: why can't this be a list of datasets?
+        dataset = list_as_tibble(datasets),
         method = method,
         parameters = x,
         give_priors = give_priors,
