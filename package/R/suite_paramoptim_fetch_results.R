@@ -81,15 +81,16 @@ paramoptim_fetch_results <- function(
         path <- mlr_out$opt.path$env$path %>% select(-one_of(metadata$metrics))
         extra <- mlr_out$opt.path$env$extra
 
+        grid <- subdesign$crossing %>% select(-dataset_id) %>% slice(1)
+
         map_df(seq_along(dob), function(param_i) {
-          extra[[param_i]]$.summary  %>%
+          extra[[param_i]]$.summary %>%
+            crossing(grid) %>%
             mutate(
-              repeat_i = grid$repeat_i[[grid_i]],
-              grid_i,
               iteration = dob[[param_i]],
               param_i,
               param_row = list(path[param_i,,drop = F]),
-              error_message = sapply(error, function(err) ifelse(is.null(err), "", err$message))
+              error_message = sapply(error, function(err) ifelse(is.na(err), "", err$message))
             ) %>%
             select(-error)
         })
