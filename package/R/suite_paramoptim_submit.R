@@ -306,7 +306,7 @@ paramoptim_run_evaluation <- function(
     length(method_id) == 1,
     length(prior_id) == 1
   )
-  datasets <- subdesign$datasets %>% filter(id %in% !!dataset_ids) %>% pull(fun) %>% first() %>% invoke()
+  datasets <- subdesign$datasets %>% filter(id %in% !!dataset_ids) %>% pull(fun) %>% map(invoke)
   method <- subdesign$methods %>% filter(id == !!method_id) %>% pull(fun) %>% first() %>% invoke()
   priors <- subdesign$priors %>% filter(id == prior_id) %>% pull(set) %>% first()
 
