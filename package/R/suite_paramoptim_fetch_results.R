@@ -49,7 +49,6 @@ paramoptim_fetch_results <- function(
     metadata <- readr::read_rds(handle)
     subdesign <- metadata$subdesign
     qsub_handle <- metadata$qsub_handle
-    num_datasets <- qsub_handle$num_datasets
 
     if (qsub_handle$job_id %in% running_job_ids) {
       cat("Job is still running.\n")
@@ -57,10 +56,16 @@ paramoptim_fetch_results <- function(
     }
 
     # attempt to retrieve results; return NULL if job is still busy or has failed
-    output <- qsub::qsub_retrieve(
-      qsub_handle,
-      wait = FALSE
+    qsub::cp_remote(
+      remote_src = qsub_handle$remote,
+      path_src = paste0(qsub_handle$remote_dir, "/mlrmbo",
+      remote_dest = FALSE,
+      path_dest = qsub_handle$
     )
+    # output <- qsub::qsub_retrieve(
+    #   qsub_handle,
+    #   wait = FALSE
+    # )
 
     ## Create summary from the last saved states
     summ_fun <- function() {
