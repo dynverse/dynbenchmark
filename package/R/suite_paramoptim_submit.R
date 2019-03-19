@@ -56,6 +56,7 @@ paramoptim_submit <- function(
   qsub_grouping = "{method_id}/{prior_id}/{repeat_ix}",
   qsub_params = list(timeout = 3600, memory = "10G", num_cores = 8, num_iterations = 100, num_init_params = 39),
   verbose = TRUE,
+  seed = function() random_seed(),
   local_output_folder = derived_file("suite"),
   remote_output_folder = derived_file("suite", remote = TRUE)
 ) {
@@ -173,7 +174,7 @@ paramoptim_submit <- function(
     qsub_packages <- c("dplyr", "purrr", "dyneval", "dynmethods", "readr", "dynbenchmark")
 
     # which data objects will need to be transferred to the cluster
-    qsub_environment <-  c("metrics", "verbose", "subdesign", "control", "learner", "ph_design")
+    qsub_environment <-  c("metrics", "verbose", "subdesign", "control", "learner", "ph_design", "seed")
 
     # submit to the cluster
     qsub_handle <- qsub::qsub_lapply(
@@ -200,7 +201,8 @@ paramoptim_submit <- function(
       qsub_params,
       qsub_handle,
       learner,
-      control
+      control,
+      seed
     )
 
     readr::write_rds(metadata, qsub_handle_file)
@@ -281,7 +283,8 @@ paramoptim_qsub_fun <- function(i) {
     control = control,
     learner = learner,
     ph_design = ph_design,
-    verbose = verbose
+    verbose = verbose,
+    seed = seed
   )
 }
 
@@ -295,7 +298,8 @@ paramoptim_run_evaluation <- function(
   control,
   learner,
   ph_design,
-  verbose
+  verbose,
+  seed
 ) {
   # objects
   dataset_ids <- as.character(subdesign$datasets$id)
@@ -314,7 +318,7 @@ paramoptim_run_evaluation <- function(
   mlr::configureMlr(show.learner.output = FALSE, on.learner.warning = "warn")
 
   # create an objective function
-  obj_fun <- make_obj_fun(method = method, metrics = metrics, give_priors = priors, verbose = verbose)
+  obj_fun <- make_obj_fun(method = method, metrics = metrics, give_priors = priors, verbose = verbose, seed = seed)
 
   ## create a folder to save the intermediate mbo files in
   save_file_path <- paste0(getwd(), "/mlrmbo")
@@ -355,7 +359,7 @@ paramoptim_run_evaluation <- function(
 #'
 #' @importFrom smoof makeSingleObjectiveFunction makeMultiObjectiveFunction
 #' @export
-make_obj_fun <- function(method, metrics, give_priors, noisy = FALSE, verbose = FALSE) {
+make_obj_fun <- function(method, metrics, give_priors, seed, noisy = FALSE, verbose = FALSE) {
   # Use different makefunction if there are multiple metrics versus one
   if (length(metrics) > 1) {
     make_fun <- function(...) makeMultiObjectiveFunction(..., n.objectives = length(metrics))
@@ -391,6 +395,7 @@ make_obj_fun <- function(method, metrics, give_priors, noisy = FALSE, verbose = 
         give_priors = give_priors,
         metrics = metrics,
         output_model = FALSE,
+        seed = seed,
         verbose = verbose
       )
 

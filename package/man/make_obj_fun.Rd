@@ -4,7 +4,7 @@
 \alias{make_obj_fun}
 \title{Used for wrapping an evaluation function around a TI method}
 \usage{
-make_obj_fun(method, metrics, give_priors, noisy = FALSE,
+make_obj_fun(method, metrics, give_priors, seed, noisy = FALSE,
   verbose = FALSE)
 }
 \arguments{
@@ -21,6 +21,8 @@ Passing a custom metric function with format \code{function(dataset, model) { 1 
 
 \item{give_priors}{All the priors a method is allowed to receive.
 Must be a subset of all available priors (\code{\link[dynwrap:priors]{priors}}).}
+
+\item{seed}{A seed to be passed to the TI method.}
 
 \item{noisy}{Whether or not the metric is noisy or not}
 

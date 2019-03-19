@@ -8,6 +8,7 @@ paramoptim_submit(design, metrics = "correlation",
   qsub_grouping = "{method_id}/{prior_id}/{repeat_ix}",
   qsub_params = list(timeout = 3600, memory = "10G", num_cores = 8,
   num_iterations = 100, num_init_params = 39), verbose = TRUE,
+  seed = function() random_seed(),
   local_output_folder = derived_file("suite"),
   remote_output_folder = derived_file("suite", remote = TRUE))
 }
