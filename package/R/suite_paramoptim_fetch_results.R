@@ -60,7 +60,7 @@ paramoptim_fetch_results <- function(
       remote_src = qsub_handle$remote,
       path_src = paste0(qsub_handle$remote_dir, "/mlrmbo",
       remote_dest = FALSE,
-      path_dest = qsub_handle$
+      path_dest = qsub_handle$src_dir
     )
     # output <- qsub::qsub_retrieve(
     #   qsub_handle,
