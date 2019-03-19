@@ -95,6 +95,13 @@ paramoptim_submit <- function(
       select(one_of(grouping_variables)) %>%
       extract_row_to_list(1)
 
+    # retrieve objects
+    method_id <- as.character(subdesign$methods$id) %>% unique
+    assert_that(
+      length(method_id) == 1
+    )
+    method <- subdesign$methods %>% filter(id == !!method_id) %>% pull(fun) %>% first() %>% invoke()
+
     # check whether results already exist
     dirname <- with(grouping_values, glue::glue(qsub_grouping))
     suite_method_folder <- file.path(local_output_folder, dirname)
