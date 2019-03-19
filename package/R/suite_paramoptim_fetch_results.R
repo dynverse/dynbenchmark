@@ -58,7 +58,7 @@ paramoptim_fetch_results <- function(
     # attempt to retrieve results; return NULL if job is still busy or has failed
     qsub::cp_remote(
       remote_src = qsub_handle$remote,
-      path_src = paste0(qsub_handle$remote_dir, "/mlrmbo",
+      path_src = paste0(qsub_handle$remote_dir, "/mlrmbo"),
       remote_dest = FALSE,
       path_dest = qsub_handle$src_dir
     )
