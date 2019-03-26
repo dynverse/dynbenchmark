@@ -23,7 +23,7 @@ NULL
 simulate_splatter <- function(
   dataset_id,
   topology_model = "linear",
-  platform = load_simple_platform(),
+  platform = dyngen::get_simple_platform(),
   n_steps_per_length = 100,
   path.skew = runif(1, 0, 1),
   path.nonlinearProb = runif(1, 0, 1),
@@ -140,7 +140,7 @@ simulate_splatter <- function(
 simulate_prosstt <- function(
   dataset_id,
   topology_model = "linear",
-  platform = load_simple_platform(),
+  platform = dyngen::get_simple_platform(),
   n_steps_per_length = 100,
   a = as.integer(round(runif(1, 1, 10))),
   intra_branch_tol = runif(1, 0, 0.9),
@@ -300,7 +300,7 @@ simulate_prosstt <- function(
 simulate_dyntoy <- function(
   dataset_id,
   topology_model = "linear",
-  platform = load_simple_platform(),
+  platform = dyngen::get_simple_platform(),
   count_mean_shape = runif(1, 1, 10),
   count_mean_scale = runif(1, 1, 10),
   dropout_probability_factor = runif(1, 10, 200),
@@ -353,11 +353,13 @@ simulate_dyntoy <- function(
 #' @inheritParams dyngen::generate_model_from_modulenet
 #'
 #' @rdname simulate_dataset
+#'
+#' @importFrom dyngen get_simple_platform base_params generate_model_from_modulenet simulate_multiple extract_goldstandard run_experiment
 #' @export
 simulate_dyngen <- function(
   dataset_id,
   modulenet_name = "linear",
-  platform = load_simple_platform(),
+  platform = dyngen::get_simple_platform(),
   use_cache = TRUE,
   seed = NULL
 ) {
