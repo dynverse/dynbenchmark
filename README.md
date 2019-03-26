@@ -4,7 +4,7 @@
 [![Build
 Status](https://api.travis-ci.org/dynverse/dynbenchmark.svg)](https://travis-ci.org/dynverse/dynbenchmark)
 ![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
-<a href = "package/man/figures/logo.svg"><img src="package/man/figures/logo.png" align="right" /></a>
+<a href = "package/man/figures/logo.svg"><img src="package/man/figures/logo2.png" align="right" width="125" height="144"/></a>
 [![doi](https://zenodo.org/badge/doi/10.1101/276907.svg)](https://doi.org/10.1101/276907)
 
 # Benchmarking trajectory inference methods
@@ -25,11 +25,14 @@ This repo contains the scripts to reproduce the manuscript
 > <a href='https://github.com/saeyslab'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>  
 > [bioRxiv:276907](https://www.biorxiv.org/content/early/2018/03/05/276907)
 > [doi:10.1101/276907](https://doi.org/10.1101/276907)
-> [![altmetric](https://badges.altmetric.com/?size=100&score=120&types=btttttwg&style=bar)](https://altmetric.com/details/33972849)
+> [![altmetric](https://badges.altmetric.com/?size=100&score=118&types=bvttttwg&style=bar)](https://altmetric.com/details/33972849)
 
-*Note that this preprint is currently **very** outdated. An updated
-manuscript will be published soon, you can browse below for more recent
-results*
+## Dynverse
+
+Under the hood, dynbenchmark makes use of most dynverse package for
+running the methods, comparing them to a gold standard, and plotting the
+output. Check out **[dynverse.org](https://dynverse.org)** for an
+overview\!
 
 ## Experiments
 
