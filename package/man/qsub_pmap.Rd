@@ -10,7 +10,7 @@ qsub_pmap(.x, .f, ...)
 \item{.x}{Vectors of the same length. A vector of length 1 will
 be recycled.}
 
-\item{.f}{A function, formula, or atomic vector.
+\item{.f}{A function, formula, or vector (not necessarily atomic).
 
 If a \strong{function}, it is used as is.
 
@@ -24,12 +24,11 @@ are three ways to refer to the arguments:
 
 This syntax allows you to create very compact anonymous functions.
 
-If \strong{character vector}, \strong{numeric vector}, or \strong{list}, it
-is converted to an extractor function. Character vectors index by name
-and numeric vectors index by position; use a list to index by position
-and name at different levels. Within a list, wrap strings in \code{\link[=get-attr]{get-attr()}}
-to extract named attributes. If a component is not present, the value of
-\code{.default} will be returned.}
+If \strong{character vector}, \strong{numeric vector}, or \strong{list}, it is
+converted to an extractor function. Character vectors index by
+name and numeric vectors index by position; use a list to index
+by position and name at different levels. If a component is not
+present, the value of \code{.default} will be returned.}
 
 \item{...}{Params given to \code{\link[qsub:qsub_lapply]{qsub::qsub_lapply()}}}
 }

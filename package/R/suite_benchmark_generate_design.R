@@ -46,8 +46,8 @@
 #' )
 #'
 #' priors <- list(
-#'   list(id = "none"),
-#'   list(id = "some", set = c("start_id", "end_n"))
+#'   list(id = "none", method_id = c("scorpius", "tscan", "comp1")),
+#'   list(id = "some", method_id = c("tscan"), set = c("start_id", "end_n"))
 #' )
 #'
 #' benchmark_generate_design(
@@ -68,27 +68,27 @@ benchmark_generate_design <- function(
   crossing = NULL
 ) {
   check_benchmark_design_parameters(
-    datasets,
-    methods,
-    parameters,
-    priors,
-    num_repeats
+    datasets = datasets,
+    methods = methods,
+    parameters = parameters,
+    priors = priors,
+    num_repeats = num_repeats
   )
 
   datasets <- process_datasets_design(datasets)
   methods <- process_methods_design(methods)
   parameters <- process_parameters_design(methods, parameters)
-  priors <- process_priors_design(priors)
+  priors <- process_priors_design(priors, methods$id)
 
   if (is.null(crossing)) {
     # generate designs of the different parts of the evaluation
     crossing <- crossing(
       dataset_id = factor(datasets$id),
       method_id = factor(methods$id),
-      prior_id = factor(priors$id),
       repeat_ix = seq_len(num_repeats)
     ) %>%
-      left_join(parameters %>% select(param_id = id, method_id), by = "method_id")
+      left_join(parameters %>% select(param_id = id, method_id), by = "method_id") %>%
+      left_join(priors %>% select(prior_id = id, method_id), by = "method_id")
   } else {
     testthat::expect_true(all(c("method_id", "dataset_id", "repeat_ix", "prior_id", "param_id") %in% colnames(crossing)))
   }
@@ -124,14 +124,14 @@ check_benchmark_design_parameters <- function(
     if (!check) {
       stop("methods is supposed be a vector of methods ids, or a list of dynwrap ti methods")
     }
-    method_names <- sapply(methods, function(x) if (is.character(x)) x else x$id)
+    method_names <- sapply(methods, function(x) if (is.character(x)) x else x$method$id)
   } else {
     method_names <- methods
   }
 
-  testthat::expect_true(all(parameters$method_id %in% method_names))
+  assert_that(parameters$method_id %all_in% method_names)
 
-  testthat::expect_true(is.numeric(num_repeats))
+  assert_that(is.numeric(num_repeats))
 }
 
 process_datasets_design <- function(datasets) {
@@ -195,7 +195,7 @@ process_methods_design <- function(methods) {
       assign("m", m, envir = env)
       environment(fun) <- env
       tibble(
-        id = m$id,
+        id = m$method$id,
         type = "ti_method",
         fun = list(fun)
       )
@@ -237,13 +237,14 @@ process_parameters_design <- function(methods, parameters) {
   )
 }
 
-process_priors_design <- function(priors) {
-  priors <- priors %||% list(list(id = "none", set = c()))
+process_priors_design <- function(priors, method_ids) {
+  priors <- priors %||% list(list(id = "none", method_id = method_ids, set = c()))
   map_df(
     priors,
     function(pr) {
       tibble(
         id = pr$id,
+        method_id = pr$method_id,
         set = list(pr$set)
       )
     }

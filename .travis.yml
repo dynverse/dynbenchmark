@@ -14,27 +14,21 @@ addons:
 git:
   submodules: false
 before_install:
+ - source <(curl -sSL https://raw.githubusercontent.com/dynverse/travis_scripts/master/helper.sh)
  - cd package
+install:
+ - use_dynverse_devel
+ - install_cran devtools covr
+ - install_cran covr
+ - install_withdeps
+after_success:
+ - R -e 'covr::codecov()'
+
 jobs:
   include:
     - stage: prepare cache
-      install:
-        - if [ `git branch | grep '* master' | wc -l` == 0 ]; then sed -i 's#\(dynverse/[^, ]*\)#\1@devel#' DESCRIPTION; fi
-        - R -e 'if ("devtools" %in% rownames(installed.packages())) update.packages(oldPkgs = "devtools", ask = FALSE) else install.packages("devtools")'
-        - R -e 'devtools::install_cran("covr")'
-        - R -e 'setRepositories(ind = 1:2); devtools::install(dependencies = c("Imports", "Depends"), upgrade = TRUE)'
-      script:
-        - echo No R CMD check since this is an init.
-      r_check_args: "--no-tests --no-manual --no-vignettes --no-build-vignettes --no-examples"
-      r_build_args: "--no-build-vignettes"
-      after_success:
-        - echo No codecov since this is an init.
+      script: 
+      - echo Skip
+      after_success: 
+      - echo Skip
     - stage: test
-      script: true
-      install:
-      - if [ `git branch | grep '* master' | wc -l` == 0 ]; then sed -i 's#\(dynverse/[^, ]*\)#\1@devel#' DESCRIPTION; fi
-      - R -e 'if ("devtools" %in% rownames(installed.packages())) update.packages(oldPkgs = "devtools", ask = FALSE) else install.packages("devtools")'
-      - R -e 'devtools::install_cran("covr")'
-      - R -e 'setRepositories(ind = 1:4); devtools::install(dependencies = TRUE, upgrade = TRUE)'
-      after_success:
-      - R -e 'covr::codecov()'

@@ -6,7 +6,8 @@
 #' The dynbenchmark package contains the code to generate/preprocess datasets, evaluate TI methods on these datasets, and finally wrap all results together in a scientific paper.
 #' The code within this package can be run locally, but can also be run within a docker environment, for which the scripts are contained in the `scripts` folder.
 #'
-#' @import tibble
+#' @import assertthat
+#' @importFrom tibble is_tibble as_tibble as_data_frame tibble data_frame enframe deframe lst tribble rownames_to_column column_to_rownames
 #' @import dplyr
 #' @import ggplot2
 #' @importFrom tidyr crossing
@@ -18,6 +19,7 @@
 #' @import dyneval
 #' @import dynmethods
 #' @import dynwrap
+#' @import dynparam
 #'
 #' @docType package
 #' @name dynbenchmark

@@ -11,6 +11,8 @@
 #'   in \code{design$crossing} is allowed to be used. This string will later be parsed by [glue::glue()].
 #' @param verbose Whether or not to print extra information.
 #' @param output_models Whether or not the model will be outputted.
+#' @param local_output_folder A folder in which to output intermediate and final results.
+#' @param remote_output_folder A folder in which to store intermediate results in a remote directory when using the qsub package.
 #'
 #' @importFrom readr read_rds write_rds
 #'
@@ -21,7 +23,7 @@
 #' library(tibble)
 #'
 #' datasets <- c("synthetic/dyntoy/bifurcating_1", "synthetic/dyntoy/bifurcating_2")
-#' methods <- dynmethods::methods$id
+#' methods <- dynmethods::methods$method_id[1:3]
 #'
 #' design <- benchmark_generate_design(
 #'   datasets = datasets,
@@ -45,12 +47,11 @@ benchmark_submit <- function(
   qsub_grouping = "{method_id}/{param_id}",
   qsub_params = list(timeout = 3600, memory = "10G"),
   verbose = TRUE,
-  output_models = TRUE
+  output_models = TRUE,
+  local_output_folder = derived_file("suite"),
+  remote_output_folder = derived_file("suite", remote = TRUE)
 ) {
   requireNamespace("qsub")
-
-  local_output_folder <- derived_file("suite")
-  remote_output_folder <- derived_file("suite", remote = TRUE)
 
   grouping_variables <- qsub_grouping %>%
     str_extract_all("\\{([^\\}]*)\\}") %>%
@@ -164,80 +165,78 @@ benchmark_submit <- function(
 
 #' @importFrom testthat expect_equal expect_is
 #' @importFrom assertthat assert_that
-benchmark_submit_check <-
-  dynutils::inherit_default_params(
-    benchmark_submit,
-    function(
-    design,
-    metrics,
-    qsub_grouping,
-    qsub_params
-  ) {
-    check_design_datasets(design$datasets)
-    assert_that(design$crossing$dataset_id %all_in% design$datasets$id)
+benchmark_submit_check <- function(
+  design,
+  metrics,
+  qsub_grouping,
+  qsub_params
+) {
+  check_design_datasets(design$datasets)
+  assert_that(design$crossing$dataset_id %all_in% design$datasets$id)
 
-    check_design_methods(design$methods)
-    assert_that(design$crossing$method_id %all_in% design$methods$id)
+  check_design_methods(design$methods)
+  assert_that(design$crossing$method_id %all_in% design$methods$id)
 
-    # check priors
-    assert_that(c("id", "set") %all_in% colnames(design$priors))
-    assert_that(is.character(design$priors$id))
+  # check priors
+  assert_that(design$priors %has_names% c("id", "set"))
+  assert_that(is.character(design$priors$id))
 
-    # check parameters
-    assert_that(c("id", "method_id", "params") %all_in% colnames(design$parameters))
-    assert_that(is.character(design$parameters$id))
-    assert_that(!any(duplicated(paste0(design$parameters$id, "_", design$parameters$method_id))))
+  # check parameters
+  assert_that(design$parameters %has_names% c("id", "method_id", "params"))
+  assert_that(is.character(design$parameters$id))
+  assert_that(!any(duplicated(paste0(design$parameters$id, "_", design$parameters$method_id))))
 
-    # l <- design$parameters %>% extract_row_to_list(14)
-    walkdf(
-      design$parameters,
-      function(l) {
-        cat(l$method_id %>% as.character(), "\n", sep = "")
-        passed_params <- l$params %>% names()
-        if (length(passed_params) != 0) {
-          method_description <-
-            design$methods %>%
-            filter(id == l$method_id) %>%
-            pull(fun) %>%
-            first() %>%
-            invoke()
-          method_params <- names(method_description$parameters)
-          assert_that(passed_params %all_in% method_params)
-        }
+  # l <- design$parameters %>% extract_row_to_list(14)
+  walkdf(
+    design$parameters,
+    function(l) {
+      cat(l$method_id %>% as.character(), "\n", sep = "")
+      passed_params <- l$params %>% names()
+      if (length(passed_params) != 0) {
+        method_description <-
+          design$methods %>%
+          filter(id == l$method_id) %>%
+          pull(fun) %>%
+          first() %>%
+          invoke()
+        method_params <- names(method_description$parameters)
+        assert_that(passed_params %all_in% method_params)
       }
-    )
-
-    # check grouping character
-    testthat::expect_is(qsub_grouping, "character")
-    qsub_config_no_braces <- qsub_grouping %>% str_replace_all("\\{[^\\}]*\\}", "")
-    testthat::expect_match(qsub_config_no_braces, "^[a-zA-Z_\\-\\.0-9/\\]*$")
-
-    grouping_variables <-
-      qsub_grouping %>%
-      str_extract_all("\\{([^\\}]*)\\}") %>%
-      .[[1]] %>%
-      str_replace_all("[\\{\\}]", "")
-    assert_that(grouping_variables %all_in% colnames(design$crossing))
-
-    # if qsub_params is a function, check it runs when provided all of these arguments
-    if (is.function(qsub_params)) {
-      assert_that(formalArgs(qsub_params) %all_in% grouping_variables)
-      example <- design$crossing %>% slice(1) %>% select(one_of(grouping_variables)) %>% extract_row_to_list(1)
-      qsub_params <- do.call(qsub_params, example)
     }
+  )
 
-    # make sure it has the correct format
-    assert_that(is.list(qsub_params))
-    testthat::expect_equal(sort(names(qsub_params)), c("memory", "timeout"))
+  # check grouping character
+  assert_that(is.character(qsub_grouping))
+  qsub_config_no_braces <- qsub_grouping %>% str_replace_all("\\{[^\\}]*\\}", "")
 
-    # check timeout_per_execution
-    assert_that(is.numeric(qsub_params[["timeout"]]))
+  assert_that(grepl("^[a-zA-Z_\\-\\.0-9/\\]*$", qsub_config_no_braces))
 
-    # check max_memory_per_execution
-    assert_that(is.character(qsub_params[["memory"]]))
-    testthat::expect_match(qsub_params[["memory"]], "[0-9]+G")
+  grouping_variables <-
+    qsub_grouping %>%
+    str_extract_all("\\{([^\\}]*)\\}") %>%
+    .[[1]] %>%
+    str_replace_all("[\\{\\}]", "")
+  assert_that(design$crossing %has_names% grouping_variables)
+
+  # if qsub_params is a function, check it runs when provided all of these arguments
+  if (is.function(qsub_params)) {
+    assert_that(formalArgs(qsub_params) %all_in% grouping_variables)
+    example <- design$crossing %>% slice(1) %>% select(one_of(grouping_variables)) %>% extract_row_to_list(1)
+    qsub_params <- do.call(qsub_params, example)
   }
-)
+
+
+  # make sure it has the correct format
+  assert_that(is.list(qsub_params))
+  testthat::expect_equal(sort(names(qsub_params)), c("memory", "timeout"))
+
+  # check timeout_per_execution
+  assert_that(is.numeric(qsub_params[["timeout"]]))
+
+  # check max_memory_per_execution
+  assert_that(is.character(qsub_params[["memory"]]))
+  testthat::expect_match(qsub_params[["memory"]], "[0-9]+G")
+}
 
 logical_error_wrapper <- function(expr, generate_error) {
   tryCatch({
@@ -259,22 +258,22 @@ logical_error_wrapper <- function(expr, generate_error) {
 check_design_datasets <- function(datasets, generate_error = TRUE) {
   # check datasets
   logical_error_wrapper(generate_error = generate_error, expr = {
-    testthat::expect_true(all(c("id", "type", "fun") %in% colnames(datasets)))
-    testthat::expect_is(datasets$id, "character")
-    testthat::expect_false(any(duplicated(datasets$id)))
-    testthat::expect_true(all(datasets$type %in% c("character", "dynwrap", "function")))
-    testthat::expect_true(datasets$fun %>% map_lgl(is.function) %>% all)
-    testthat::expect_true(all(datasets$type != "character" | datasets$id %in% list_datasets()$id))
+    assert_that(c("id", "type", "fun") %all_in% colnames(datasets))
+    assert_that(is.character(datasets$id))
+    assert_that(!any(duplicated(datasets$id)))
+    assert_that(datasets$type %all_in% c("character", "dynwrap", "function"))
+    assert_that(datasets$fun %>% map_lgl(is.function) %>% all)
+    assert_that(all(datasets$type != "character" | datasets$id %in% list_datasets()$id))
   })
 }
 
 check_design_methods <- function(methods, generate_error = TRUE) {
   # check methods
   logical_error_wrapper(generate_error = generate_error, expr = {
-    testthat::expect_true(all(c("id", "type", "fun") %in% colnames(methods)))
-    testthat::expect_is(methods$id, "character")
-    testthat::expect_false(any(duplicated(methods$id)))
-    testthat::expect_true(all(methods$type != "character" | methods$id %in% dynmethods::methods$id))
+    assert_that(c("id", "type", "fun") %all_in% colnames(methods))
+    assert_that(is.character(methods$id))
+    assert_that(!any(duplicated(methods$id)))
+    assert_that(all(methods$type != "character" | methods$id %in% dynmethods::methods$method_id))
   })
 }
 
@@ -283,16 +282,21 @@ subset_design <- function(design, subcrossing) {
   dataset_ids <- subcrossing$dataset_id %>% as.character() %>% unique
   prior_ids <- subcrossing$prior_id %>% as.character() %>% unique
   method_ids <- subcrossing$method_id %>% as.character() %>% unique
-  param_ids <- subcrossing$param_id %>% as.character() %>% unique
 
   # construct a new design
-  list(
+  out <- list(
     datasets = design$datasets %>% filter(id %in% dataset_ids),
     methods = design$methods %>% filter(id %in% method_ids),
     priors = design$priors %>% filter(id %in% prior_ids),
-    parameters = design$parameters %>% filter(method_id %in% method_ids, id %in% param_ids),
     crossing = subcrossing
   )
+
+  if (!is.null(design$parameters)) {
+    param_ids <- subcrossing$param_id %>% as.character() %>% unique
+    out$parameters <- design$parameters %>% filter(method_id %in% method_ids, id %in% param_ids)
+  }
+
+  out
 }
 
 #' Helper function for benchmark suite
@@ -333,12 +337,14 @@ benchmark_run_evaluation <- function(
     dataset <- dyntoy::toy_datasets %>% slice(1)
 
     # create a method that will just return the error generated by qsub
-    method <- create_ti_method_r(
-      id = "error",
+    method <- dynwrap::create_ti_method_r(
+      definition = dynwrap::definition(
+        method = dynwrap::def_method(id = "error"),
+        wrapper = dynwrap:def_wrapper(input_required = "expression")
+      ),
       run_fun = function(expression, ..., seed = NULL, verbose = FALSE) message(error_mode),
-      input_required = "expression",
-      output = "trajectory"
-    )()
+      return_function = FALSE
+    )
 
     params <- NULL
 

@@ -25,23 +25,25 @@ jsonlite::write_json(palettes %>% deframe(), file.path(folder, "palettes.json"))
 source(scripts_file("2-main_figure.R"))
 source(scripts_file("2a_columns_all.R"))
 
-data_sel <- data# %>%
-  # slice(1:10)
+data_sel <- data %>%
+  slice(1:10)
 
 # select colums
 column_infos_sel <- column_info %>%
-  filter(geom %in% c("bar", "funkyrect", "rect")) %>%
+  filter(geom %in% c("bar", "funkyrect", "rect") | id == "method_name") %>%
   select(-options, -name)
 
 # create experiments from groups
 group_infos_sel <- column_groups %>%
   mutate(experiment = Experiment) %>%
+  mutate(color = map_chr(deframe(palettes)[palette], first)) %>%
   select(-Experiment)
 
 experiment_infos_sel <- group_infos_sel %>%
   group_by(experiment) %>%
   summarise(
-    palette = first(palette)
+    palette = first(palette),
+    color = first(color)
   )
 
 column_infos_sel <- column_infos_sel %>%
@@ -50,20 +52,20 @@ column_infos_sel <- column_infos_sel %>%
 # precalculate column positions, and use those to precalculate positions of groups and experiments
 column_infos_sel <- column_infos_sel %>%
   mutate(
-    width = case_when(geom == "bar" ~ 4, TRUE ~ 1),
+    w = case_when(geom == "bar" ~ 4, TRUE ~ 1),
     padding = as.integer(lag(group, default = first(group)) != group),
-    x = cumsum(lag(width, default = 0) + padding)
+    x = cumsum(lag(w, default = 0) + padding)
   )
 
 group_infos_sel <- column_infos_sel %>%
   group_by(group) %>%
-  summarise(width = max(x + width) - min(x), x = min(x)) %>%
+  summarise(w = max(x + w) - min(x), x = min(x)) %>%
   left_join(group_infos_sel) %>%
   arrange(x)
 
 experiment_infos_sel <- group_infos_sel %>%
   group_by(experiment) %>%
-  summarise(width = max(x + width) - min(x), x = min(x)) %>%
+  summarise(w = max(x + w) - min(x), x = min(x)) %>%
   left_join(experiment_infos_sel) %>%
   arrange(x)
 

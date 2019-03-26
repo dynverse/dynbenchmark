@@ -31,12 +31,18 @@ methods_aggr <- methods_aggr %>%
 benchmark_datasets_info <- load_datasets(unique(benchmark_results$dataset_id)) %>%
   select(id, source, trajectory_type)
 
+# metrics
+benchmark_metrics <- dyneval::metrics %>%
+  filter(metric_id %in% c("correlation", "him", "F1_branches", "featureimp_wcor"))
+benchmark_metrics$description <- "todo"
+
 withr::with_dir(
   "../dynguidelines",
   {
     usethis::use_data(
       methods_aggr,
       benchmark_datasets_info,
+      benchmark_metrics,
       internal = TRUE,
       compress = "xz",
       overwrite = TRUE

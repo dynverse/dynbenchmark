@@ -3,13 +3,16 @@
 #' @param remote The host at which to check for running jobs.
 #'   If \code{NULL}, each qsub handle will be checked individually.
 #'   If \code{TRUE}, the default qsub handle will be used.
+#' @param local_output_folder A folder in which to output intermediate and final results.
+#'
 #'
 #' @importFrom readr read_rds write_rds
 #' @export
-benchmark_fetch_results <- function(remote = NULL) {
+benchmark_fetch_results <- function(
+  remote = NULL,
+  local_output_folder = derived_file("suite")
+) {
   requireNamespace("qsub")
-
-  local_output_folder <- derived_file("suite")
 
   # find all 2nd level folders with individual tasks
   handles <- list.files(local_output_folder, pattern = "qsubhandle.rds", recursive = TRUE, full.names = TRUE)
@@ -238,14 +241,17 @@ extract_error_status <- function(stdout, stderr, error_message, job_exit_status,
 #' Gather and bind the results of the benchmark jobs
 #'
 #' @param load_models Whether or not to load the models as well.
-#' @param experiment_id The experiment_id, defaults to the current one
 #' @param filter_fun A function with which to filter the data as it is being read from files. Function must take a single data frame as input and return a filtered data frame as a result.
+#' @param local_output_folder A folder in which to output intermediate and final results.
 #'
 #' @importFrom readr read_rds
 #' @export
-benchmark_bind_results <- function(load_models = FALSE, experiment_id = NULL, filter_fun = NULL) {
-  local_output_folder <- derived_file("suite", experiment_id = experiment_id)
+benchmark_bind_results <- function(
+  load_models = FALSE,
+  filter_fun = NULL,
+  local_output_folder = derived_file("suite")
 
+) {
   # find all 2nd level folders with individual tasks
   files <- list.files(local_output_folder, pattern = "output_metrics.rds", recursive = TRUE, full.names = TRUE)
 

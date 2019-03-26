@@ -14,8 +14,8 @@ Depends:
   dyneval (>= 0.2.2),
   dynmethods,
   dynplot,
-  dynutils (>= 1.0.1),
-  dynwrap (>= 0.3.1)
+  dynutils (>= 1.0.1.9000),
+  dynwrap (>= 0.9.9)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -78,8 +78,8 @@ Remotes:
   dynverse/dynutils,
   dynverse/dyntoy,
   dynverse/dynwrap,
-  rcannood/qsub@devel
-RoxygenNote: 6.1.0
+  rcannood/qsub
+RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)
 Collate: 
     'data.R'
@@ -111,7 +111,9 @@ Collate:
     'simulators.R'
     'suite_benchmark_aggregate.R'
     'suite_benchmark_fetch_results.R'
-    'suite_paramoptim.R'
+    'suite_paramoptim_fetch_results.R'
+    'suite_paramoptim_generate_design.R'
+    'suite_paramoptim_submit.R'
     'text_document_scripts.R'
     'text_equations.R'
     'text_formats.R'

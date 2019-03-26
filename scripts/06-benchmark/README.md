@@ -11,3 +11,6 @@
 | 3c | [📄`normalisation.R`](3c-normalisation.R)                    | Compare the effect of normalisation on the results                       |
 | 3d | [📄`compare_sources.R`](3d-compare_sources.R)                | Compare the different dataset sources                                    |
 |    | [📄`inspect_identity_timings.R`](inspect_identity_timings.R) | Check different benchmark component timings                              |
+
+The results of this experiment are available
+[here](https://github.com/dynverse/dynbenchmark_results/tree/master/06-benchmark).

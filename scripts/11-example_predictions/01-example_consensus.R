@@ -41,7 +41,8 @@ designs <- list(
 # load in output models
 to_load <- designs %>% map_df(~ data_frame(method_id = .$method_ids, dataset_id = .$dataset_id))
 output <- benchmark_bind_results(
-  load_models = TRUE, experiment_id = "06-benchmark",
+  load_models = TRUE,
+  local_output_folder = derived_file("suite", experiment_id = "06-benchmark"),
   filter_fun = function(tib) tib %>% inner_join(to_load, by = c("dataset_id", "method_id"))
 ) %>%
   select(method_id, dataset_id, model, him)

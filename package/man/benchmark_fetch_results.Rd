@@ -4,12 +4,15 @@
 \alias{benchmark_fetch_results}
 \title{Fetch the results of the benchmark jobs from the cluster.}
 \usage{
-benchmark_fetch_results(remote = NULL)
+benchmark_fetch_results(remote = NULL,
+  local_output_folder = derived_file("suite"))
 }
 \arguments{
 \item{remote}{The host at which to check for running jobs.
 If \code{NULL}, each qsub handle will be checked individually.
 If \code{TRUE}, the default qsub handle will be used.}
+
+\item{local_output_folder}{A folder in which to output intermediate and final results.}
 }
 \description{
 Fetch the results of the benchmark jobs from the cluster.

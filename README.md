@@ -4,7 +4,7 @@
 [![Build
 Status](https://api.travis-ci.org/dynverse/dynbenchmark.svg)](https://travis-ci.org/dynverse/dynbenchmark)
 ![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
-<a href = "package/man/figures/logo.svg"><img src="package/man/figures/logo.png" align="right" /></a>
+<a href = "package/man/figures/logo.svg"><img src="package/man/figures/logo2.png" align="right" width="125" height="144"/></a>
 [![doi](https://zenodo.org/badge/doi/10.1101/276907.svg)](https://doi.org/10.1101/276907)
 
 # Benchmarking trajectory inference methods
@@ -25,11 +25,14 @@ This repo contains the scripts to reproduce the manuscript
 > <a href='https://github.com/saeyslab'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>  
 > [bioRxiv:276907](https://www.biorxiv.org/content/early/2018/03/05/276907)
 > [doi:10.1101/276907](https://doi.org/10.1101/276907)
-> [![altmetric](https://badges.altmetric.com/?size=100&score=118&types=btttttwg&style=bar)](https://altmetric.com/details/33972849)
+> [![altmetric](https://badges.altmetric.com/?size=100&score=118&types=bvttttwg&style=bar)](https://altmetric.com/details/33972849)
 
-*Note that this preprint is currently **very** outdated. An updated
-manuscript will be published soon, you can browse below for more recent
-results*
+## Dynverse
+
+Under the hood, dynbenchmark makes use of most dynverse package for
+running the methods, comparing them to a gold standard, and plotting the
+output. Check out **[dynverse.org](https://dynverse.org)** for an
+overview\!
 
 ## Experiments
 
@@ -112,7 +115,6 @@ In R, you can install the dependencies of dynbenchmark from github
 using:
 
 ``` r
-
 # install.packages("devtools")
 devtools::install_github("dynverse/dynbenchmark/package")
 ```
@@ -128,63 +130,61 @@ On Linux, you will need to install udunits and ImageMagick:
   - Fedora / CentOS / RHEL: `sudo dnf install udunits2-devel
     ImageMagick-c++-devel`
 
-[Docker](https://docs.docker.com/install) has to be installed to run TI
-methods. See <https://docs.docker.com/install> for instructions. For
-windows 10 you can install [Docker
+[Docker](https://docs.docker.com/install) or
+[Singularity](https://www.sylabs.io/guides/3.0/user-guide/) (version ≥
+3.0) has to be installed to run TI methods. We suggest docker on Windows
+and MacOS, while both docker and singularity are fine when running on
+linux. Singularity is strongly recommended when running the method on
+shared computing clusters.
+
+For windows 10 you can install [Docker
 CE](https://store.docker.com/editions/community/docker-ce-desktop-windows),
 older Windows installations require the [Docker
 toolbox](https://docs.docker.com/toolbox/overview/).
 
-You can test whether docker is correctly installed by running:
+You can test whether docker is correctly installed by
+    running:
 
 ``` r
 dynwrap::test_docker_installation(detailed = TRUE)
 ```
 
-``` 
+    ## ✔ Docker is installed
 
-## ✔ Docker is installed
+    ## ✔ Docker daemon is running
+
+    ## ✔ Docker is at correct version (>1.0): 1.39
+
+    ## ✔ Docker is in linux mode
+
+    ## ✔ Docker can pull images
+
+    ## ✔ Docker can run image
+
+    ## ✔ Docker can mount temporary volumes
+
+    ## ✔ Docker test successful -----------------------------------------------------------------
+
+    ## [1] TRUE
+
+Same for
+    singularity:
+
+``` r
+dynwrap::test_singularity_installation(detailed = TRUE)
 ```
 
-``` 
+    ## ✔ Singularity is installed
 
-## ✔ Docker daemon is running
-```
+    ## ✔ Singularity is at correct version (>=3.0): v3.0.0-13-g0273e90f is installed
 
-``` 
+    ## ✔ Singularity can pull and run a container from Dockerhub
 
-## ✔ Docker is at correct version (>1.0): 1.39
-```
+    ## ✔ Singularity can mount temporary volumes
 
-``` 
+    ## ✔ Singularity test successful ------------------------------------------------------------
 
-## ✔ Docker is in linux mode
-```
+    ## [1] TRUE
 
-``` 
-
-## ✔ Docker can pull images
-```
-
-``` 
-
-## ✔ Docker can run image
-```
-
-``` 
-
-## ✔ Docker can mount temporary volumes
-```
-
-``` 
-
-## ✔ Docker test successful -----------------------------------------------------------------
-```
-
-``` 
-
-## [1] TRUE
-```
-
-This command will give helpful tips if some parts of the installation
+These commands will give helpful tips if some parts of the installation
 are missing.

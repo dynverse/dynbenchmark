@@ -6,7 +6,9 @@
 \usage{
 benchmark_submit(design, metrics = "correlation",
   qsub_grouping = "{method_id}/{param_id}", qsub_params = list(timeout
-  = 3600, memory = "10G"), verbose = TRUE, output_models = TRUE)
+  = 3600, memory = "10G"), verbose = TRUE, output_models = TRUE,
+  local_output_folder = derived_file("suite"),
+  remote_output_folder = derived_file("suite", remote = TRUE))
 }
 \arguments{
 \item{design}{Design tibble of the experiment, created by \code{\link[=benchmark_generate_design]{benchmark_generate_design()}}.}
@@ -25,6 +27,10 @@ and ZZZ is equal to some logic which always produces a \code{list(memory = ..., 
 \item{verbose}{Whether or not to print extra information.}
 
 \item{output_models}{Whether or not the model will be outputted.}
+
+\item{local_output_folder}{A folder in which to output intermediate and final results.}
+
+\item{remote_output_folder}{A folder in which to store intermediate results in a remote directory when using the qsub package.}
 }
 \description{
 A benchmark suite with which to run all the methods on the different datasets
@@ -34,7 +40,7 @@ A benchmark suite with which to run all the methods on the different datasets
 library(tibble)
 
 datasets <- c("synthetic/dyntoy/bifurcating_1", "synthetic/dyntoy/bifurcating_2")
-methods <- dynmethods::methods$id
+methods <- dynmethods::methods$method_id[1:3]
 
 design <- benchmark_generate_design(
   datasets = datasets,

@@ -28,8 +28,6 @@ github_markdown_nested <- function(
     invisible()
   }
 
-  format$pre_processor <- append_pre_processor(format, apply_pre_processor(process_header_newline))
-
   # apply common dynbenchmark format
   format <- common_dynbenchmark_format(format)
 
