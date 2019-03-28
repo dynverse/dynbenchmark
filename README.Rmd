@@ -16,7 +16,7 @@ library(dynbenchmark)
 ```
 
 [![Build Status](https://api.travis-ci.org/dynverse/dynbenchmark.svg)](https://travis-ci.org/dynverse/dynbenchmark)
-![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)  [**ℹ️ Tutorials**](https://dynverse.org)  &nbsp; <br><img src="package/man/figures/logo.png" align="right" width="125" height="144" /> [![doi](https://zenodo.org/badge/doi/10.1038/s41587-019-0071-9.svg)](https://doi.org/10.1038/s41587-019-0071-9)
+![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg) [![doi](https://zenodo.org/badge/doi/10.1038/s41587-019-0071-9.svg)](https://doi.org/10.1038/s41587-019-0071-9) [**ℹ️ Tutorials**](https://dynverse.org)  &nbsp; <br><img src="package/man/figures/logo.png" align="right" width="125" height="144" />
 
 # Benchmarking trajectory inference methods
 
