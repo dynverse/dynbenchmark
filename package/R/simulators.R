@@ -23,7 +23,7 @@ NULL
 simulate_splatter <- function(
   dataset_id,
   topology_model = "linear",
-  platform = dyngen::get_simple_platform(),
+  platform = dyngen::platform_simple(),
   n_steps_per_length = 100,
   path.skew = runif(1, 0, 1),
   path.nonlinearProb = runif(1, 0, 1),
@@ -140,7 +140,7 @@ simulate_splatter <- function(
 simulate_prosstt <- function(
   dataset_id,
   topology_model = "linear",
-  platform = dyngen::get_simple_platform(),
+  platform = dyngen::platform_simple(),
   n_steps_per_length = 100,
   a = as.integer(round(runif(1, 1, 10))),
   intra_branch_tol = runif(1, 0, 0.9),
@@ -300,7 +300,7 @@ simulate_prosstt <- function(
 simulate_dyntoy <- function(
   dataset_id,
   topology_model = "linear",
-  platform = dyngen::get_simple_platform(),
+  platform = dyngen::platform_simple(),
   count_mean_shape = runif(1, 1, 10),
   count_mean_scale = runif(1, 1, 10),
   dropout_probability_factor = runif(1, 10, 200),
@@ -350,82 +350,82 @@ simulate_dyntoy <- function(
 
 
 
-#' @inheritParams dyngen::generate_model_from_modulenet
+# #' @inheritParams dyngen::generate_model_from_modulenet
+# #'
+# #' @rdname simulate_dataset
+# #'
+# #' @importFrom dyngen get_simple_platform base_params generate_model_from_modulenet simulate_multiple extract_goldstandard run_experiment
+# #' @export
+# simulate_dyngen <- function(
+#   dataset_id,
+#   modulenet_name = "linear",
+#   platform = dyngen::platform_simple(),
+#   use_cache = TRUE,
+#   seed = NULL
+# ) {
+#   simulation_design <- as.list(environment())
 #'
-#' @rdname simulate_dataset
+#   if (missing(dataset_id)) stop("dataset_id is required")
+#   dataset_preprocessing(dataset_id)
 #'
-#' @importFrom dyngen get_simple_platform base_params generate_model_from_modulenet simulate_multiple extract_goldstandard run_experiment
-#' @export
-simulate_dyngen <- function(
-  dataset_id,
-  modulenet_name = "linear",
-  platform = dyngen::get_simple_platform(),
-  use_cache = TRUE,
-  seed = NULL
-) {
-  simulation_design <- as.list(environment())
-
-  if (missing(dataset_id)) stop("dataset_id is required")
-  dataset_preprocessing(dataset_id)
-
-  # if cache disallowed, clear cache files
-  if (!use_cache) {
-    qsub::rm_remote(dataset_source_file(), remote = NULL, recursive = TRUE, force = TRUE)
-  }
-
-  if (!is.null(seed)) set.seed(seed)
-
-  # generate dyngen params
-  params <- dyngen::base_params
-  params$model$modulenet_name <- modulenet_name
-  params$model$platform <- platform
-  params$experiment$platform <- platform
-
-  # generate model
-  model <- load_or_generate(
-    dataset_source_file("model.rds"),
-    invoke(dyngen::generate_model_from_modulenet, params$model)
-  )
-
-  # simulate model
-  simulation <- load_or_generate(
-    dataset_source_file("simulation.rds"),
-    invoke(dyngen::simulate_multiple, params$simulation, model$system)
-  )
-
-  # extract gold standard
-  gs <- load_or_generate(
-    dataset_source_file("gs.rds"),
-    invoke(dyngen::extract_goldstandard, params$gs, model = model, simulation = simulation)
-  )
-
-  # generate experiment
-  experiment <- load_or_generate(
-    dataset_source_file("experiment.rds"),
-    invoke(dyngen::run_experiment, params$experiment, simulation=simulation, gs=gs)
-  )
-
-  # normalise
-  normalisation <- load_or_generate(
-    dataset_source_file("normalisation.rds"),
-    invoke(dynnormaliser::normalise_filter_counts, params$normalisation, experiment$counts)
-  )
-
-  # generate dynwrap dataset
-  dataset <- load_or_generate(
-    dataset_source_file("dataset.rds"),
-    dyngen::wrap_dyngen_dataset(dataset_id, params, model, simulation, gs, experiment, normalisation)
-  )
-  dataset$source <- "synthetic/dyngen"
-  dataset$simulation_design <- list(
-    simulator = "dyngen",
-    simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyngen","splatter", "dynbenchmark"))
-  ) %>% c(simulation_design)
-
-  # add cell waypoints
-  dataset <- dataset %>% dynwrap::add_cell_waypoints()
-
-  # save dataset
-  save_dataset(dataset, dataset_id)
-  dataset
-}
+#   # if cache disallowed, clear cache files
+#   if (!use_cache) {
+#     qsub::rm_remote(dataset_source_file(), remote = NULL, recursive = TRUE, force = TRUE)
+#   }
+#'
+#   if (!is.null(seed)) set.seed(seed)
+#'
+#   # generate dyngen params
+#   params <- dyngen::base_params
+#   params$model$modulenet_name <- modulenet_name
+#   params$model$platform <- platform
+#   params$experiment$platform <- platform
+#'
+#   # generate model
+#   model <- load_or_generate(
+#     dataset_source_file("model.rds"),
+#     invoke(dyngen::generate_model_from_modulenet, params$model)
+#   )
+#'
+#   # simulate model
+#   simulation <- load_or_generate(
+#     dataset_source_file("simulation.rds"),
+#     invoke(dyngen::simulate_multiple, params$simulation, model$system)
+#   )
+#'
+#   # extract gold standard
+#   gs <- load_or_generate(
+#     dataset_source_file("gs.rds"),
+#     invoke(dyngen::extract_goldstandard, params$gs, model = model, simulation = simulation)
+#   )
+#'
+#   # generate experiment
+#   experiment <- load_or_generate(
+#     dataset_source_file("experiment.rds"),
+#     invoke(dyngen::run_experiment, params$experiment, simulation=simulation, gs=gs)
+#   )
+#'
+#   # normalise
+#   normalisation <- load_or_generate(
+#     dataset_source_file("normalisation.rds"),
+#     invoke(dynnormaliser::normalise_filter_counts, params$normalisation, experiment$counts)
+#   )
+#'
+#   # generate dynwrap dataset
+#   dataset <- load_or_generate(
+#     dataset_source_file("dataset.rds"),
+#     dyngen::wrap_dyngen_dataset(dataset_id, params, model, simulation, gs, experiment, normalisation)
+#   )
+#   dataset$source <- "synthetic/dyngen"
+#   dataset$simulation_design <- list(
+#     simulator = "dyngen",
+#     simulator_version = devtools::session_info()$packages %>% filter(package %in% c("dyngen","splatter", "dynbenchmark"))
+#   ) %>% c(simulation_design)
+#'
+#   # add cell waypoints
+#   dataset <- dataset %>% dynwrap::add_cell_waypoints()
+#'
+#   # save dataset
+#   save_dataset(dataset, dataset_id)
+#   dataset
+# }

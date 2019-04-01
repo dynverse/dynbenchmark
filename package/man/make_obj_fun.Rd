@@ -20,7 +20,7 @@ make_obj_fun(method, metrics, give_priors, seed, noisy = FALSE,
 Passing a custom metric function with format \code{function(dataset, model) { 1 }} is also supported. The name of this function within the list will be used as the name of the metric.}
 
 \item{give_priors}{All the priors a method is allowed to receive.
-Must be a subset of all available priors (\code{\link[dynwrap:priors]{priors}}).}
+Must be a subset of all available priors (\link[dynwrap:priors]{dynwrap::priors}).}
 
 \item{seed}{A seed to be passed to the TI method.}
 

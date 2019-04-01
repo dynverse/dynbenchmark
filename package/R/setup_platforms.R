@@ -63,8 +63,8 @@ select_platforms <- function(n_platforms) {
 
 #' Estimate a platform
 #' @param dataset_id The dataset_id from which the platform will be estimated, using the files in `datasets_preproc/raw``
-#' @inheritParams dyngen::get_platform_from_counts
-#' @importFrom dyngen get_platform_from_counts
+#' @inheritParams dyngen::platform_from_counts
+#' @importFrom dyngen platform_from_counts
 #' @export
 estimate_platform <- function(dataset_id, subsample = 500) {
   platform_location <- derived_file(paste0(dataset_id, ".rds"), experiment_id = "01-platforms")
@@ -78,7 +78,7 @@ estimate_platform <- function(dataset_id, subsample = 500) {
       counts <- dataset_raw$counts
       grouping <- dataset_raw$grouping
 
-      dyngen::get_platform_from_counts(counts, grouping, subsample = subsample)
+      dyngen::platform_from_counts(counts, grouping, subsample = subsample)
     }
   )
 
