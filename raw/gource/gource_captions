@@ -1,0 +1,27 @@
+2016/04/02|The beginnings of dynverse. dyngen and qsub
+2017/02/20|Resuming work on dygen
+2017/03/12|Creation of dyneval
+2017/03/15|Create a planning document
+2017/03/20|Planning, planning, planning
+2017/03/27|Discussing, discussing, discussing
+2017/04/04|First attempt at creating tests for dyneval and metrics
+2017/04/12|Working on implementing parameter optimisation
+2017/04/25|Extending to dyngen
+2017/05/11|Writing method wrappers
+2017/06/23|Improving wrappers
+2017/06/28|Extending dyngen
+2017/07/05|Collecting meta info on methods
+2017/07/28|Extending dyngen and writing more wrappers
+2017/08/10|Cleaning up dyngen
+2017/08/19|Adding wrappers and metrics
+2017/08/23|Creation of dynplot
+2017/08/27|Moving TI method code to separate repositories
+2017/08/31|Huge restructuring
+2017/09/06|Adding a lot of TI methods
+2017/09/06|Creation of dynbenchmark
+2017/09/07|Writing many tests
+2017/09/12|Doing many things! (can't keep up)
+2017/09/16|Creation of dyntoy
+2017/09/17|Cleaning up dyngen
+2018/03/05|Submission to bioRxiv!
+2018/04/05|Submission to NBT
