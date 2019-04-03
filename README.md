@@ -4,16 +4,16 @@
 [![Build
 Status](https://api.travis-ci.org/dynverse/dynbenchmark.svg)](https://travis-ci.org/dynverse/dynbenchmark)
 ![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
-<a href = "package/man/figures/logo.svg"><img src="package/man/figures/logo2.png" align="right" width="125" height="144"/></a>
-[![doi](https://zenodo.org/badge/doi/10.1101/276907.svg)](https://doi.org/10.1101/276907)
+[![doi](https://zenodo.org/badge/doi/10.1038/s41587-019-0071-9.svg)](https://doi.org/10.1038/s41587-019-0071-9)
+[**ℹ️ Tutorials**](https://dynverse.org)  
+<br><img src="package/man/figures/logo.png" align="right" width="125" height="144" />
 
 # Benchmarking trajectory inference methods
 
 This repo contains the scripts to reproduce the manuscript
 
-> A comparison of single-cell trajectory inference methods: towards more
-> accurate and robust tools  
-> <strong> Wouter Saelens\* </strong>
+> A comparison of single-cell trajectory inference methods <strong>
+> Wouter Saelens\* </strong>
 > <a href='https://orcid.org/0000-0002-7114-6248'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/orcid_logo.svg?sanitize=true' height='16'></a>
 > <a href='https://github.com/zouter'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>,
 > <strong> Robrecht Cannoodt\* </strong>
@@ -23,8 +23,7 @@ This repo contains the scripts to reproduce the manuscript
 > <a href='https://github.com/Helena-todd'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>,
 > <em> Yvan Saeys </em>
 > <a href='https://github.com/saeyslab'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>  
-> [bioRxiv:276907](https://www.biorxiv.org/content/early/2018/03/05/276907)
-> [doi:10.1101/276907](https://doi.org/10.1101/276907)
+> [doi:10.1038/s41587-019-0071-9](https://doi.org/10.1038/s41587-019-0071-9)
 > [![altmetric](https://badges.altmetric.com/?size=100&score=118&types=bvttttwg&style=bar)](https://altmetric.com/details/33972849)
 
 ## Dynverse

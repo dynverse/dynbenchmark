@@ -4,14 +4,10 @@
 \alias{estimate_platform}
 \title{Estimate a platform}
 \usage{
-estimate_platform(dataset_id, subsample = 500, override_fun = FALSE)
+estimate_platform(dataset_id, subsample = 500)
 }
 \arguments{
-\item{dataset_id}{The dataset_id from which the platform will be estimated, using the files in datasets_preproc/raw}
-
-\item{subsample}{The number of cells to subsample}
-
-\item{override_fun}{Whether or not to override one splatEstDropout params}
+\item{dataset_id}{The dataset_id from which the platform will be estimated, using the files in `datasets_preproc/raw``}
 }
 \description{
 Estimate a platform

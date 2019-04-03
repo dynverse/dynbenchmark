@@ -1,0 +1,44 @@
+2016/04/02|The birth of dynverse (dyngen and qsub)
+2017/01/15|But first, what are our hypotheses regarding this project?
+2017/02/25|Generating good synthetic data is fun
+2017/03/12|Birth of dyneval, taking baby steps in evaluation
+2017/03/20|Planning, planning, planning!
+2017/03/27|Discussing, discussing, discussing!
+2017/04/04|First TI methods are added to dyneval
+2017/05/13|Initial experiments in performing parameter optimisation
+2017/07/05|Collecting meta info on more TI methods
+2017/07/28|Restructuring of dyngen
+2017/07/31|Including code of other frameworks into our repository was not a good idea
+2017/08/10|Cleaning up dyngen
+2017/08/19|Adding wrappers and metrics
+2017/08/23|Creation of dynplot
+2017/08/27|Huge restructuring; bye bye monster matlab code
+2017/09/06|Birth of dynbenchmark
+2017/09/12|Doing many things! (can't keep up)
+2017/09/16|Creation of dyntoy, cleaning up dyngen
+2017/10/04|It's getting real; downloading lots of real datasets
+2017/11/01|Developing code base for setting up experiments
+2017/11/20|Moving TI methods from dyneval to dynmethods
+2017/12/15|Making presentations
+2018/02/01|Writing preprint manuscript
+2018/02/24|Still writing...
+2018/03/05|Submission to bioRxiv!
+2018/03/25|Preparing for submission to NBT
+2018/04/05|Submission to NBT
+2018/04/10|Initial experiments with Docker containerisation
+2018/04/11|First guest appearance: Koen Van den Berge
+2018/04/21|Birth of dynguidelines
+2018/04/28|Creating a decent dynplot
+2018/05/11|Wouter decides logos are a thing
+2018/06/10|Getting the reviews back, writing a rebuttal
+2018/06/20|Creating TI method dockers
+2018/06/21|with guests Philipp Angerer, Manu Setty and Alex Wolf
+2018/07/01|Watch out for a large restructuring of dynbenchmark...
+2018/08/14|Hello guests Daniel C Ellwanger and Chuck Herring!
+2018/08/29|Heavily integrating containerisation into dynmethods
+2018/09/11|Our avatars are getting hard to see
+2018/10/25|Preparing for revision
+2018/11/12|Revision submitted
+2019/02/04|Final revision
+2019/03/21|Preparing for release of dyno v1.0
+2019/04/01|TODAY!

@@ -14,7 +14,8 @@ git_df <-
   gsub(".*\"(.*)\".*", "\\1", .) %>%
   data_frame(path = ., prefix = paste0("/", .), filename = str_replace(., "/", "_"), gitmodule = TRUE) %>%
   add_row(path = "..", prefix = "", filename = "dynverse", gitmodule = FALSE) %>%
-  add_row(path = "../../dyndocs", prefix = "/dyndocs", filename = "dyndocs", gitmodule = FALSE)
+  add_row(path = "../../dyndocs", prefix = "/dyndocs", filename = "dyndocs", gitmodule = FALSE) %>%
+  add_row(path = "../../projects/qsub/", prefix = "/libraries/qsub", filename = "libraries_qsub", gitmodule = FALSE)
 
 unlink(gitlinks_folder, recursive = T)
 for (i in seq_len(nrow(git_df))) {
