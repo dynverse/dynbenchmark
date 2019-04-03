@@ -12,8 +12,8 @@ Status](https://api.travis-ci.org/dynverse/dynbenchmark.svg)](https://travis-ci.
 
 This repo contains the scripts to reproduce the manuscript
 
-> A comparison of single-cell trajectory inference methods <strong>
-> Wouter Saelens\* </strong>
+> A comparison of single-cell trajectory inference methods 
+> <strong> Wouter Saelens\* </strong>
 > <a href='https://orcid.org/0000-0002-7114-6248'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/orcid_logo.svg?sanitize=true' height='16'></a>
 > <a href='https://github.com/zouter'><img src='https://github.com/dynverse/dynmethods/raw/master/man/figures/github_logo.png' height='16'></a>,
 > <strong> Robrecht Cannoodt\* </strong>
