@@ -35,6 +35,8 @@ and ZZZ is equal to some logic which always produces a \code{list(memory = ..., 
 
 \item{verbose}{Whether or not to print extra information.}
 
+\item{seed}{A seed for the parameter optimisation}
+
 \item{local_output_folder}{A folder in which to output intermediate and final results.}
 
 \item{remote_output_folder}{A folder in which to store intermediate results in a remote directory when using the qsub package.}

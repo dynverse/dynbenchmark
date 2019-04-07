@@ -89,8 +89,8 @@ platform_from_counts <- function(counts, grouping, subsample = 500) {
 #' @param n_cells The number of cells
 #' @param n_features The number of features
 #' @param pct_main_features The percentage of features that are being driven by the trajectory (or vice versa)
-#' @param dropout_mean_rate The mean rate of dropouts
-#' @param dropout_mean_shape The shape of dropouts
+#' @param dropout_rate The mean rate of dropouts
+#' @param dropout_shape The shape of dropouts
 #'
 #' @rdname platform
 #'

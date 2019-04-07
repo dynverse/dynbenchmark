@@ -18,6 +18,7 @@
 #' @param verbose Whether or not to print extra information.
 #' @param local_output_folder A folder in which to output intermediate and final results.
 #' @param remote_output_folder A folder in which to store intermediate results in a remote directory when using the qsub package.
+#' @param seed A seed for the parameter optimisation
 #'
 #' @importFrom readr read_rds write_rds
 #' @importFrom mlrMBO makeMBOControl setMBOControlTermination setMBOControlInfill makeMBOInfillCritDIB makeMBOInfillCritCB
