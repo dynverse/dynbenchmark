@@ -26,7 +26,6 @@ Imports:
   cowplot,
   cluster,
   dplyr,
-  dyngen,
   dynparam,
   extrafont,
   fs,
@@ -72,7 +71,6 @@ Suggests:
   tidygraph
 Remotes:
   dynverse/dyneval,
-  dynverse/dyngen,
   dynverse/dynmethods,
   dynverse/dynnormaliser,
   dynverse/dynparam,
