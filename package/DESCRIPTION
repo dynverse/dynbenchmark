@@ -26,6 +26,8 @@ Imports:
   cowplot,
   cluster,
   dplyr,
+  dyngen,
+  dynparam,
   extrafont,
   fs,
   ggraph,
@@ -57,7 +59,6 @@ Imports:
   qsub,
   xml2
 Suggests:
-  dyngen,
   dyntoy,
   dynnormaliser,
   devtools,
@@ -74,6 +75,7 @@ Remotes:
   dynverse/dyngen,
   dynverse/dynmethods,
   dynverse/dynnormaliser,
+  dynverse/dynparam,
   dynverse/dynplot,
   dynverse/dynutils,
   dynverse/dyntoy,

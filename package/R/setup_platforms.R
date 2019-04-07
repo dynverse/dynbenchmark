@@ -63,7 +63,6 @@ select_platforms <- function(n_platforms) {
 
 #' Estimate a platform
 #' @param dataset_id The dataset_id from which the platform will be estimated, using the files in `datasets_preproc/raw``
-#' @inheritParams dyngen::get_platform_from_counts
 #' @importFrom dyngen get_platform_from_counts
 #' @export
 estimate_platform <- function(dataset_id, subsample = 500) {
