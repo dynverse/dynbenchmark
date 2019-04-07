@@ -1,6 +1,6 @@
 Package: dynbenchmark
 Title: Package of "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
-Version: 0.0.0.9000
+Version: 0.1.0.9000
 Authors@R: c(
   person("Yvan", "Saeys", email = "yvan.saeys@ugent.be", role = c("ths")),
   person("Robrecht", "Cannoodt", email="rcannood@gmail.com", role="aut"),
@@ -11,11 +11,11 @@ Description: This package contains functions used in the main analyses of the pa
              Using code from our other packages such as dyneval, dyngen and dynutils
 Depends: 
   R (>= 3.5.0),
-  dyneval (>= 0.2.2),
-  dynmethods,
-  dynplot,
-  dynutils (>= 1.0.1.9000),
-  dynwrap (>= 0.9.9)
+  dyneval (>= 0.9.9),
+  dynmethods (>= 1.0.1),
+  dynplot (>= 1.0.0),
+  dynutils (>= 1.0.2),
+  dynwrap (>= 1.0.0)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -26,6 +26,7 @@ Imports:
   cowplot,
   cluster,
   dplyr,
+  dynparam (>= 1.0.0),
   extrafont,
   fs,
   ggraph,
@@ -57,7 +58,6 @@ Imports:
   qsub,
   xml2
 Suggests:
-  dyngen,
   dyntoy,
   dynnormaliser,
   devtools,
@@ -71,9 +71,9 @@ Suggests:
   tidygraph
 Remotes:
   dynverse/dyneval,
-  dynverse/dyngen,
   dynverse/dynmethods,
   dynverse/dynnormaliser,
+  dynverse/dynparam,
   dynverse/dynplot,
   dynverse/dynutils,
   dynverse/dyntoy,

@@ -8,21 +8,21 @@
 \title{Simulating a trajectory dataset}
 \usage{
 simulate_splatter(dataset_id, topology_model = "linear",
-  platform = dyngen::platform_simple(), n_steps_per_length = 100,
+  platform = platform_simple(), n_steps_per_length = 100,
   path.skew = runif(1, 0, 1), path.nonlinearProb = runif(1, 0, 1),
   path.sigmaFac = runif(1, 0, 1), bcv.common.factor = runif(1, 10,
   200), seed = NULL, use_cache = TRUE)
 
 simulate_prosstt(dataset_id, topology_model = "linear",
-  platform = dyngen::platform_simple(), n_steps_per_length = 100,
+  platform = platform_simple(), n_steps_per_length = 100,
   a = as.integer(round(runif(1, 1, 10))), intra_branch_tol = runif(1,
   0, 0.9), inter_branch_tol = runif(1, 0, 0.9), alpha = exp(rnorm(1,
   log(0.2), log(1.5))), beta = exp(rnorm(1, log(1), log(1.5))) + 1,
   seed = NULL)
 
 simulate_dyntoy(dataset_id, topology_model = "linear",
-  platform = dyngen::platform_simple(), count_mean_shape = runif(1, 1,
-  10), count_mean_scale = runif(1, 1, 10),
+  platform = platform_simple(), count_mean_shape = runif(1, 1, 10),
+  count_mean_scale = runif(1, 1, 10),
   dropout_probability_factor = runif(1, 10, 200), seed = NULL)
 }
 \arguments{

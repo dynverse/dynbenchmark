@@ -15,20 +15,27 @@ git:
   submodules: false
 before_install:
  - source <(curl -sSL https://raw.githubusercontent.com/dynverse/travis_scripts/master/helper.sh)
+ - install_hdf5
  - cd package
 install:
- - use_dynverse_devel
  - install_cran devtools covr
- - install_cran covr
  - install_withdeps
 after_success:
  - R -e 'covr::codecov()'
 
 jobs:
   include:
-    - stage: prepare cache
-      script: 
+    - stage: Cache a few packages already
+      install:
+      - install_cran devtools covr tidyverse
+      - install_cran Rcpp RcppArmadillo RcppEigen SingleCellExperiment
+      script:
       - echo Skip
-      after_success: 
+      after_success:
+      - echo Skip
+    - stage: prepare cache
+      script:
+      - echo Skip
+      after_success:
       - echo Skip
     - stage: test

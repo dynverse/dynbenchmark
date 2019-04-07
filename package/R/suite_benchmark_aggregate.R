@@ -90,16 +90,15 @@ benchmark_aggregate <- function(
   if (is.character(mean_fun)) {
     mean_fun <- switch(
       mean_fun,
-      geometric = dyneval::calculate_geometric_mean,
-      harmonic = dyneval::calculate_harmonic_mean,
-      arithmetic = dyneval::calculate_arithmetic_mean
+      geometric = dynutils::calculate_geometric_mean,
+      harmonic = dynutils::calculate_harmonic_mean,
+      arithmetic = dynutils::calculate_arithmetic_mean
     )
   }
 
   calc_mean <- function(df) {
     lis <- df %>% select(!!names(mean_weights)) %>% as.list()
-    lis$weights <- mean_weights
-    df$overall <- do.call(mean_fun, lis)
+    df$overall <- mean_fun(lis, weights = mean_weights)
     df
   }
 
