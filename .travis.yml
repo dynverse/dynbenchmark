@@ -29,7 +29,7 @@ jobs:
     - stage: Cache a few packages already
       install:
       - use_dynverse_devel
-      - install_cran devtools covr
+      - install_cran devtools covr tidyverse
       - install_cran Rcpp RcppArmadillo RcppEigen SingleCellExperiment 
       script: 
       - echo Skip
