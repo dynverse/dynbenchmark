@@ -92,7 +92,7 @@ plot_real_characteristics <- cowplot::plot_grid(
 
       ggplot(pie_data, aes(ymin = 0, ymax = 1)) +
         geom_rect(aes(xmin = start, xmax = end, fill = variable_of_interest), stat = "identity", color = "white", size = 0.5) +
-        geom_text(aes(mid, text_position, label = pritt(label), vjust = 0.5), color = "black", hjust = 0.5, size = 4) +
+        geom_text(aes(mid, text_position, label = stringr::str_glue(label), vjust = 0.5), color = "black", hjust = 0.5, size = 4) +
         fill_scale +
         ggtitle(label_long(what)) +
         theme_void() +

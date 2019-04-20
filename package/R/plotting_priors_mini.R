@@ -10,7 +10,7 @@ generate_prior_mini <- function(method_priors, svg = xml2::read_xml(result_file(
   map2(method_priors$prior_id, method_priors$prior_usage, function(prior_id, usage) {
     color <- dynbenchmark::prior_usages$color[dynbenchmark::prior_usages$prior_usage == usage]
 
-    layer <- svg2 %>% xml2::xml_find_first(pritt(".//svg:g[@inkscape:label='{prior_id}']")) %>% xml2::xml_remove()
+    layer <- svg2 %>% xml2::xml_find_first(stringr::str_glue(".//svg:g[@inkscape:label='{prior_id}']")) %>% xml2::xml_remove()
 
     if(!is.na(usage) && usage != "no") {
 
@@ -18,8 +18,8 @@ generate_prior_mini <- function(method_priors, svg = xml2::read_xml(result_file(
       # only add layer back if needed
       layer %>%
         as.character() %>%
-        gsub("stroke:#fb1e00", pritt("stroke:{color}"), .) %>%
-        gsub("fill:#fb1e00", pritt("fill:{color}"), .) %>%
+        gsub("stroke:#fb1e00", stringr::str_glue("stroke:{color}"), .) %>%
+        gsub("fill:#fb1e00", stringr::str_glue("fill:{color}"), .) %>%
         {suppressWarnings(xml2::read_xml(.))} %>%
         xml2::xml_add_child(svg2, .)
     }

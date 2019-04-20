@@ -39,7 +39,7 @@ allcell_info <- data_frame(
 
 settings <- map(c("old", "young"), function(age) {
   list(
-    id = pritt("real/gold/aging-hsc-{age}_kowalczyk"),
+    id = stringr::str_glue("real/gold/aging-hsc-{age}_kowalczyk"),
     milestone_network = tribble(
       ~from, ~to,
       "LT-HSC", "ST-HSC",

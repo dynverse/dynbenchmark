@@ -9,7 +9,7 @@ samplers <- read_tsv(raw_file("samplers"))
 notes <- c("$y_{max} = r/d * p/q$")
 
 table <- map(c("latex", "html"), function(format) {
-  table <- samplers %>% mutate(text = pritt("${parameter} = {distribution}$")) %>%
+  table <- samplers %>% mutate(text = stringr::str_glue("${parameter} = {distribution}$")) %>%
     select(text) %>%
     mutate(text = kableExtra::cell_spec(text, format, escape = FALSE)) %>%
     knitr::kable(format, escape = FALSE, col.names = NULL) %>%

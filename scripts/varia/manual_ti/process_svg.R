@@ -18,7 +18,7 @@ run <- read_rds(derived_file(paste0(run_id, ".rds")))
 ##  Load bitmap                                                             ####
 
 processed_file <- derived_file(c(run_id, '_run', '.png'))
-processx::run(commandline=dynutils::pritt("inkscape -z {derived_file(c(run_id, '.svg'))} -e={processed_file} -d=100"))
+processx::run(commandline=dynutils::stringr::str_glue("inkscape -z {derived_file(c(run_id, '.svg'))} -e={processed_file} -d=100"))
 
 png <- readPNG(processed_file)
 red <- png[, , 1] - png[, , 2]
@@ -229,7 +229,7 @@ controls
 
 ##  ............................................................................
 ##  Save                                                                    ####
-predictions %>% write_rds(derived_file(pritt("predictions_{run$run_id}.rds")))
+predictions %>% write_rds(derived_file(stringr::str_glue("predictions_{run$run_id}.rds")))
 
 # upload to PRISM
 qsub:::rsync_remote(

@@ -12,7 +12,7 @@
 #' @import ggplot2
 #' @importFrom tidyr crossing
 #' @importFrom purrr %>% %||% walk set_names map map_dbl map_lgl map_chr map_df map2 map2_dbl map2_lgl map2_chr map2_df invoke
-#' @importFrom stringr str_replace_all str_replace str_detect str_sub str_subset
+#' @importFrom stringr str_replace_all str_replace str_detect str_sub str_subset str_glue
 #'
 #' @import dynutils
 #' @import dynplot

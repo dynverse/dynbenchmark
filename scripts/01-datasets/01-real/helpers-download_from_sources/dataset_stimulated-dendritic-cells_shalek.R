@@ -21,13 +21,13 @@ allcell_info <- data_frame(
 
 settings <- lapply(c("LPS", "PAM", "PIC"), function(stim) {
   list(
-    id = pritt("real/gold/stimulated-dendritic-cells-{stim}_shalek"),
+    id = stringr::str_glue("real/gold/stimulated-dendritic-cells-{stim}_shalek"),
     milestone_network = tribble(
       ~from, ~to, ~length,
-      "Unstimulated#0h", pritt("{stim}#1h"), 1,
-      pritt("{stim}#1h"), pritt("{stim}#2h"), 1,
-      pritt("{stim}#2h"), pritt("{stim}#4h"), 2,
-      pritt("{stim}#4h"), pritt("{stim}#6h"), 2
+      "Unstimulated#0h", stringr::str_glue("{stim}#1h"), 1,
+      stringr::str_glue("{stim}#1h"), stringr::str_glue("{stim}#2h"), 1,
+      stringr::str_glue("{stim}#2h"), stringr::str_glue("{stim}#4h"), 2,
+      stringr::str_glue("{stim}#4h"), stringr::str_glue("{stim}#6h"), 2
     ) %>% mutate(directed = TRUE)
   )
 })
