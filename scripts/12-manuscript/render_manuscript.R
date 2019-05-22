@@ -12,9 +12,9 @@ fs::dir_create(output_directory)
 # download from google docs
 httr::set_config(httr::config(http_version = 0)) # avoid http2 framing layer bug
 drive <- googledrive::drive_download(googledrive::as_id("1Xmuhp1_EGr4Qt6kKRiJGbeQMBBr50ulteFF4YJIeKhA"), type="text/plain", overwrite=TRUE, path = tempfile())
-system(pritt("sed -i '1s/^.//' {drive$local_path}")) # remove first character, because this is some strange unicode character added by google
-system(pritt("sed -i 's/ *\\(\\[@[^\\]]*\\]\\)/\\1/' {drive$local_path}")) # remote spaces before citations
-system(pritt("cat {drive$local_path} > manuscript/paper.Rmd"))
+system(stringr::str_glue("sed -i '1s/^.//' {drive$local_path}")) # remove first character, because this is some strange unicode character added by google
+system(stringr::str_glue("sed -i 's/ *\\(\\[@[^\\]]*\\]\\)/\\1/' {drive$local_path}")) # remote spaces before citations
+system(stringr::str_glue("cat {drive$local_path} > manuscript/paper.Rmd"))
 
 # render main manuscript
 rmarkdown::render("manuscript/paper.Rmd", output_format = pdf_manuscript(), output_dir = output_directory)

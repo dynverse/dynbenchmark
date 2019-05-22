@@ -156,7 +156,7 @@ n_tools_over_time <- publication_cumulative_by_type_interpolated %>%
   ) +
   scale_y_continuous(label_long("n_tools"), expand = c(0, 0), limits = c(0, nrow(tools)+2), breaks = c(0, 20, 40, 60, max(tools_per_year$cumn))) +
   scale_x_date(label_long("publication/preprint_date"), expand = c(0.05, 0.05), limits = c(start_date, end_date)) +
-  geom_text(aes(date, nrow(tools)+1, label = ifelse(year == "2018", pritt("{year}: +{n} so far"), pritt("{year}: +{n}"))), data = tools_per_year) +
+  geom_text(aes(date, nrow(tools)+1, label = ifelse(year == "2018", stringr::str_glue("{year}: +{n} so far"), stringr::str_glue("{year}: +{n}"))), data = tools_per_year) +
   geom_vline(aes(xintercept = min), data = tools_per_year, linetype = "dashed", color = "grey") +
   theme_pub() +
   theme(legend.position = c(0.05, 0.8))
@@ -178,7 +178,7 @@ platforms <- tools %>%
   mutate(pos = cumsum(quantity) - quantity/2) %>%
   ggplot(aes(1, quantity)) +
     geom_bar(aes(fill = platform), width = 1, stat = "identity") +
-    geom_text(aes(1, pos, label = pritt("{platform} \n {quantity}"), fill = platform), color = "white", fontface = "bold", direction = "y", segment.alpha = 0) +
+    geom_text(aes(1, pos, label = stringr::str_glue("{platform} \n {quantity}"), fill = platform), color = "white", fontface = "bold", direction = "y", segment.alpha = 0) +
     theme_void() +
     theme(legend.position = "none") +
     coord_flip() +
@@ -337,7 +337,7 @@ children[xml_name(children) == "rect"] %>% xml_remove()
 # text color
 texts <- xml_children(svg) %>% {xml_children(.)} %>% {.[xml_name(.) == "text"]} %>% {.[str_detect(xml_attr(., "style"), "fill:")]}
 walk(texts, function(text) {
-  # xml_attr(text, "style") <- xml_attr(text, "style") %>% gsub(pritt("fill: {toupper(trajectory_types$colour[trajectory_types$id == 'rooted_tree'])};"), "fill: #000;", .)
+  # xml_attr(text, "style") <- xml_attr(text, "style") %>% gsub(stringr::str_glue("fill: {toupper(trajectory_types$colour[trajectory_types$id == 'rooted_tree'])};"), "fill: #000;", .)
   xml_attr(text, "style") <- xml_attr(text, "style") %>% gsub("fill: #[A-Z0-9]{6};", "fill: #FFF;", .)
 })
 

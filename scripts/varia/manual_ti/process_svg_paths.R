@@ -303,7 +303,7 @@ controls
 
 ##  ............................................................................
 ##  Save                                                                    ####
-predictions %>% write_rds(derived_file(pritt("predictions_{run$run_id}.rds")))
+predictions %>% write_rds(derived_file(stringr::str_glue("predictions_{run$run_id}.rds")))
 
 # upload to PRISM
 qsub:::rsync_remote(

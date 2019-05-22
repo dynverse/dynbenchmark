@@ -134,12 +134,12 @@ conquer_infos <- list(
 
 for (source_info in conquer_infos) {
   id <- source_info$id
-  cat(pritt("Processing {id}"), sep = "\n")
+  cat(stringr::str_glue("Processing {id}"), sep = "\n")
 
   datas <- lapply(source_info$rds_name, function(rds_name) {
     rds_file <- download_dataset_source_file(
-      pritt("{rds_name}.rds"),
-      pritt("http://imlspenticton.uzh.ch/robinson_lab/conquer/data-mae/{rds_name}.rds")
+      stringr::str_glue("{rds_name}.rds"),
+      stringr::str_glue("http://imlspenticton.uzh.ch/robinson_lab/conquer/data-mae/{rds_name}.rds")
     )
     read_rds(rds_file)
   })
