@@ -340,7 +340,7 @@ benchmark_run_evaluation <- function(
     method <- dynwrap::create_ti_method_r(
       definition = dynwrap::definition(
         method = dynwrap::def_method(id = "error"),
-        wrapper = dynwrap:def_wrapper(input_required = "expression")
+        wrapper = dynwrap::def_wrapper(input_required = "expression")
       ),
       run_fun = function(expression, ..., seed = NULL, verbose = FALSE) message(error_mode),
       return_function = FALSE
