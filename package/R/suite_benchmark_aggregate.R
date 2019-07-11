@@ -2,7 +2,7 @@
 .benchmark_aggregate_normalisation <- list(
   scalesigmoid = function (xnona, xnazero = xnona, multiplier = 1) {
     vars <- list(
-      method = "scalesigmoid",
+      trafo_fun = "scalesigmoid",
       mean = mean(xnona),
       sd = sd(xnona),
       multiplier = multiplier
@@ -16,7 +16,7 @@
   },
   scaletanh = function (xnona, xnazero = xnona, multiplier = 1) {
     vars <- list(
-      method = "scaletanh",
+      trafo_fun = "scaletanh",
       mean = mean(xnona),
       sd = sd(xnona),
       multiplier = multiplier
@@ -30,7 +30,7 @@
   },
   minmax = function (xnona, xnazero = xnona) {
     vars <- list(
-      method = "minmax",
+      trafo_fun = "minmax",
       min = min(xnona),
       max = max(xnona)
     )
@@ -45,13 +45,13 @@
     list(
       y = percent_rank(xnazero),
       vars = list(
-        method = "percent_rank"
+        trafo_fun = "percent_rank"
       )
     )
   },
   normal = function(xnona, xnazero = xnona) {
     vars <- list(
-      method = "normal",
+      trafo_fun = "normal",
       mean = mean(xnona),
       sd = sd(xnona)
     )
@@ -65,7 +65,7 @@
   none = function(xnona, xnazero = xnona) {
     list(
       y = xnazero,
-      vars = list(method = "none")
+      vars = list(trafo_fun = "none")
     )
   }
 )
