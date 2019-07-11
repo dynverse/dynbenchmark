@@ -143,7 +143,7 @@ benchmark_aggregate <- function(
       values <- map(outs, "value") %>% unlist(recursive = FALSE) %>% as_tibble()
       vars <- map_df(outs, "vars") %>% mutate(dataset_id) %>% select(dataset_id, metric, everything())
 
-      data_did <- bind_cols(data_did %>% select(-one_of(colnames(values))), values)
+      data_did <- bind_cols(data_did[, setdiff(colnames(data_did), colnames(values))], values)
 
       lst(data = data_did, norm_vars = vars)
     })
