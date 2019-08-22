@@ -84,6 +84,16 @@ benchmark_aggregate <- function(
       mutate_at(set_names(metrics, paste0("norm_", metrics)), preproc_fun) %>%
       ungroup()
     names(mean_weights) <- paste0("norm_", names(mean_weights))
+
+    data_transformation <- data %>%
+      group_by(dataset_id) %>%
+      summarise_at(
+        metrics,
+        funs(
+          mean = mean(.[!is.na(.)]),
+          sd = sd(.[!is.na(.)])
+        )
+      )
   }
 
   # check mean parameter
@@ -154,7 +164,8 @@ benchmark_aggregate <- function(
 
   lst(
     data,
-    data_aggregations
+    data_aggregations,
+    data_transformation
   )
 }
 
