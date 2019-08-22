@@ -16,7 +16,7 @@ setup_singularity_methods <- function() {
 #'
 #' @export
 load_methods <- function(
-  default_filter = source == "tool" | id %in% c("angle", "comp1", "mst"),
+  default_filter = method_source == "tool" | method_id %in% c("angle", "comp1", "mst"),
   ...
 ) {
   read_rds(result_file("methods.rds", "03-methods")) %>%
