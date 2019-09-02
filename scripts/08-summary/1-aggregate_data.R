@@ -12,10 +12,9 @@ experiment("08-summary")
 method_info <-
   load_methods() %>%
   mutate(
-    required_priors_str = map_chr(input, ~ .$required %>% setdiff(c("expression", "counts")) %>% paste0(collapse = ",")),
-    optional_priors_str = map_chr(input, ~ .$optional %>% paste0(collapse = ","))
+    required_priors_str = map_chr(wrapper_input_required, ~ setdiff(., c("expression", "counts")) %>% paste0(collapse = ",")),
+    optional_priors_str = map_chr(wrapper_input_optional, ~ paste0(., collapse = ","))
   ) %>%
-  rename_all(function(x) paste0("method_", x)) %>%
   rename(tool_id = method_tool_id) %>%
   select_if(function(x) !all(is.na(x)))
 
