@@ -190,7 +190,7 @@ benchmark_submit_check <- function(
   walkdf(
     design$parameters,
     function(l) {
-      cat(l$method_id %>% as.character(), "\n", sep = "")
+      cat("Checking args of '", l$method_id %>% as.character(), "'\n", sep = "")
       passed_params <- l$params %>% names()
       if (length(passed_params) != 0) {
         method_description <-
@@ -199,7 +199,7 @@ benchmark_submit_check <- function(
           pull(fun) %>%
           first() %>%
           invoke()
-        method_params <- names(method_description$parameters)
+        method_params <- names(method_description$parameters$parameters)
         assert_that(passed_params %all_in% method_params)
       }
     }
