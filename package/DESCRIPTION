@@ -69,16 +69,16 @@ Suggests:
   splatter,
   SingleCellExperiment,
   tidygraph
-Remotes:
-  dynverse/dyneval,
-  dynverse/dynmethods,
-  dynverse/dynnormaliser,
-  dynverse/dynparam,
-  dynverse/dynplot,
-  dynverse/dynutils,
-  dynverse/dyntoy,
-  dynverse/dynwrap,
-  rcannood/qsub
+Remotes: 
+    rcannood/qsub,
+    dynverse/dyneval@devel,
+    dynverse/dynmethods@devel,
+    dynverse/dynnormaliser@devel,
+    dynverse/dynparam@devel,
+    dynverse/dynplot@devel,
+    dynverse/dynutils@devel,
+    dynverse/dyntoy@devel,
+    dynverse/dynwrap@devel
 RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)
 Collate: 
