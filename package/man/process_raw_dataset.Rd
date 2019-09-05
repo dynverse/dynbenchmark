@@ -12,17 +12,17 @@ process_raw_dataset(id, counts, milestone_network, grouping,
 \arguments{
 \item{id}{A unique identifier for the data. If \code{NULL}, a random string will be generated.}
 
-\item{counts}{The counts with genes in columns and cells in rows}
+\item{counts}{The counts values of genes (columns) within cells (rows). This can be both a dense and sparse matrix.}
 
 \item{milestone_network}{A network of milestones.}
 
-\item{grouping}{A grouping of the cells, can be a named vector or a dataframe with group_id (character) and cell_id (character)}
+\item{grouping}{A grouping of the cells, can be a named vector or a dataframe with \emph{group_id} and \emph{cell_id}}
 
 \item{root_milestone_id}{The root milestone, optional}
 
 \item{cell_info}{Optional meta-information pertaining the cells.}
 
-\item{feature_info}{Optional meta-information of the features, a data.frame with at least feature_id as column}
+\item{feature_info}{Optional meta-information of the features, a dataframe with at least \emph{feature_id} as column}
 }
 \description{
 Process a raw real or synthetic dataset
