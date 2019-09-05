@@ -4,7 +4,7 @@
 #'   If \code{NULL}, each qsub handle will be checked individually.
 #'   If \code{TRUE}, the default qsub handle will be used.
 #' @param local_output_folder A folder in which to output intermediate and final results.
-#'
+#' @param impatient If true, then the results will be fetched regardless of whether the optimisation has finished.
 #'
 #' @importFrom readr read_rds write_rds
 #' @importFrom mlrMBO mboFinalize
@@ -12,7 +12,8 @@
 #' @export
 paramoptim_fetch_results <- function(
   remote = NULL,
-  local_output_folder = derived_file("suite")
+  local_output_folder = derived_file("suite"),
+  impatient = FALSE
 ) {
   requireNamespace("qsub")
 
@@ -50,7 +51,7 @@ paramoptim_fetch_results <- function(
     subdesign <- metadata$subdesign
     qsub_handle <- metadata$qsub_handle
 
-    if (qsub_handle$job_id %in% running_job_ids) {
+    if (!impatient && qsub_handle$job_id %in% running_job_ids) {
       cat("Job is still running.\n")
       return(FALSE)
     }
@@ -62,10 +63,6 @@ paramoptim_fetch_results <- function(
       remote_dest = FALSE,
       path_dest = qsub_handle$src_dir
     )
-    # output <- qsub::qsub_retrieve(
-    #   qsub_handle,
-    #   wait = FALSE
-    # )
 
     ## Create summary from the last saved states
     summ_fun <- function() {
