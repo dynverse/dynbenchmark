@@ -10,7 +10,7 @@
 #' @importFrom tibble is_tibble as_tibble as_data_frame tibble data_frame enframe deframe lst tribble rownames_to_column column_to_rownames
 #' @import dplyr
 #' @import ggplot2
-#' @importFrom tidyr crossing gather
+#' @importFrom tidyr crossing gather spread gather
 #' @importFrom purrr %>% %||% walk set_names map map_dbl map_lgl map_chr map_df map2 map2_dbl map2_lgl map2_chr map2_df invoke
 #' @importFrom stringr str_replace_all str_replace str_detect str_sub str_subset str_glue
 #'

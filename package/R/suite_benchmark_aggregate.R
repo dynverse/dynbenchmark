@@ -219,7 +219,7 @@ benchmark_aggregate <- function(
           summarise_if(is.numeric, mean) %>%
           ungroup() %>%
           calc_mean() %>%
-          mutate(dataset_trajectory_type = factor("overall", levels = levels(data$dataset_trajectory_type)))
+          mutate(dataset_trajectory_type = "overall")
       )
     }
 
