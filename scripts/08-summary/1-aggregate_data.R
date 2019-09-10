@@ -99,13 +99,13 @@ bench_overall <-
 bench_trajtypes <-
   data_aggs %>%
   filter(dataset_trajectory_type != "overall", dataset_source == "mean") %>%
-  transmute(method_id, metric = paste0("benchmark_tt_", dataset_trajectory_type), score = overall) %>%
+  transmute(method_id, param_id, metric = paste0("benchmark_tt_", dataset_trajectory_type), score = overall) %>%
   spread(metric, score)
 
 bench_sources <-
   data_aggs %>%
   filter(dataset_trajectory_type == "overall", dataset_source != "mean") %>%
-  transmute(method_id, metric = paste0("benchmark_source_", gsub("/", "_", dataset_source)), score = overall) %>%
+  transmute(method_id, param_id, metric = paste0("benchmark_source_", gsub("/", "_", dataset_source)), score = overall) %>%
   spread(metric, score)
 
 
