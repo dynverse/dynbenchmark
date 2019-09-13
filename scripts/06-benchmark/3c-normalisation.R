@@ -13,7 +13,7 @@ preproc_fun <- function(x) {
   if (length(xnazero) == 1 || all(xnazero == 0)) {
     x
   } else {
-    dynbenchmark:::.benchmark_aggregate_normalisation$scalesigmoid(xnona, xnazero)
+    dynbenchmark:::.benchmark_aggregate_normalisation$scalesigmoid(xnona, xnazero)$y
   }
 }
 
@@ -98,6 +98,7 @@ dids <- unique(dircom_spr$dataset_id)
 
 pdf(result_file("normalisation_unnorm-v-norm_dataset.pdf"), width = 15, height = 3)
 for (did in dids) {
+  cat(did, "\n", sep = "")
   g <- ggplot(dircom_spr %>% filter(dataset_id == did)) +
     geom_point(aes(unnorm, norm, colour = met)) +
     facet_grid(dataset_id ~ met) +

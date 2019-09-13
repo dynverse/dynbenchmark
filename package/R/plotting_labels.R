@@ -255,7 +255,7 @@ label_vector <- function(x) {
 #' @export
 label_method <- function(method_ids) {
   methods <- load_methods()
-  methods$name[match(method_ids, methods$id)]
+  methods$method_name[match(method_ids, methods$method_id)]
 }
 
 

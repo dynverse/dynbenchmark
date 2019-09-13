@@ -11,7 +11,7 @@ experiment("05-scaling")
 ###################################################
 
 # If you are the one who submitted the jobs, run:
-# benchmark_fetch_results(TRUE)
+benchmark_fetch_results(TRUE)
 # qsub::rsync_remote(
 #   remote_src = FALSE,
 #   path_src = derived_file(remote = FALSE, experiment = "05-scaling"),
@@ -45,7 +45,7 @@ data <-
   execution_output %>%
   select(method_id, dataset_id, errored = dummy, error_status, starts_with("time_"), mem_io:max_mem_gb, stderr, stdout, error_message) %>%
   left_join(datasets_info %>% select(dataset_id = id, orig_dataset_id, lnrow, lncol, lsum, nrow, ncol, memory), by = "dataset_id") %>%
-  left_join(methods_info %>% select(method_id = id, method_name = name), by = "method_id")
+  left_join(methods_info %>% select(method_id = id, method_name), by = "method_id")
 
 #' @examples
 #' dat <- data %>% filter(method_id == "scorpius")

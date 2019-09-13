@@ -9,7 +9,7 @@ experiment("05-scaling")
 method_info <- load_methods()
 list2env(read_rds(result_file("scaling.rds")), .GlobalEnv)
 
-models <- models %>% filter(method_id %in% method_info$id)
+models <- models %>% filter(method_id %in% method_info$method_id)
 
 # check which datasets are available on the remote (some may not have executed entirely)
 scaling_avail <- qsub::ls_remote(derived_file("", experiment = "05-scaling/dataset", remote = TRUE), remote = TRUE) %>% gsub("\\.rds$", "", .)
@@ -33,8 +33,8 @@ scale_y_ncol <- scale_y_continuous(breaks = seq(1, 6), labels = label_thousands(
 ##########################################################
 source(scripts_file("3a-summary_figure.R"))
 source(scripts_file("3b-individual_example.R"))
-# source(scripts_file("3c-individual_overview.R"))
-# source(scripts_file("3d-error_logs.R"))
+source(scripts_file("3c-individual_overview.R"))
+source(scripts_file("3d-error_logs.R"))
 
 ##########################################################
 ###                GENERATE SUPP FIGURE                ###

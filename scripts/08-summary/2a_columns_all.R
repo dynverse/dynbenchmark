@@ -9,7 +9,7 @@ column_info <- tribble( # tribble_start
   "method_characteristic",  "method_wrapper_type",                          "Wrapper type",             "text",       NA,               list(width = 2),
   "method_characteristic",  "method_platform",                              "Platform",                 "text",       NA,               list(width = 2),
   "method_characteristic",  "method_topology_inference",                    "Topology inference",       "text",       NA,               list(width = 2),
-  "method_characteristic",  "method_most_complex_trajectory_type",          "Most complex traj. type",  "traj",       NA,               list(width = 2),
+  "method_characteristic",  "wrapper_most_complex_trajectory_type",         "Most complex traj. type",  "traj",       NA,               list(width = 2),
   "inferrable_trajtype",    "itt_cycle",                                    "Cycle",                    "traj",       NA,               list(width = 2),
   "inferrable_trajtype",    "itt_linear",                                   "Linear",                   "traj",       NA,               list(width = 2),
   "inferrable_trajtype",    "itt_bifurcation",                              "Bifurcation",              "traj",       NA,               list(width = 2),

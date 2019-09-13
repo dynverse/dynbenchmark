@@ -25,6 +25,11 @@ methods <- dynmethods::methods %>%
     )
   )
 
+methods$wrapper_trajectory_types <- map(methods$wrapper_trajectory_types, function(x) {
+  x[x == "cyclic"] <- "cycle"
+  x
+})
+
 # add detects_... columns for trajectory types
 trajectory_type_ids <- trajectory_types$id
 methods_detects <-
@@ -80,16 +85,17 @@ tools_google <- sheet %>%
 
 tools <- methods %>%
   filter(method_source == "tool") %>%
-  group_by(method_tool_id) %>%
+  rename(tool_id = method_tool_id) %>%
+  group_by(tool_id) %>%
   filter(row_number() == 1) %>%
   ungroup()
 
 tools <- tools %>%
-  full_join(tools_google, "method_tool_id")
+  full_join(tools_google, "tool_id")
 
 tools_excluded <- sheet %>%
-  gs_read(ws = "tools_excluded") %>%
-  filter(!method_tool_id %in% tools$method_tool_id) %>%
+  gs_read(ws = "tools_excluded", col_types = cols(.default = "c", method_evaluated = "l")) %>%
+  filter(!tool_id %in% tools$tool_id) %>%
   mutate(wrapper_trajectory_types = map(wrapper_trajectory_types, str_split, ", ", simplify = TRUE)) %>%
   mutate(wrapper_most_complex_trajectory_type = map_chr(wrapper_trajectory_types, ~ last(trajectory_type_ids[trajectory_type_ids %in% .]))) %>%
   mutate(
@@ -105,15 +111,26 @@ replace_date <- is.na(tools$manuscript_date) & !is.na(tools$manuscript_publicati
 tools$manuscript_date[replace_date] <- tools$manuscript_publication_date[replace_date]
 
 # Altmetrics ----------------------------
+cits <- map_int(tools$manuscript_google_scholar_cluster_id, function(gsid) {
+  cat("Polling ", gsid, sep = "")
+  # Sys.sleep(1)
+  cits <- google_scholar_num_citations(gsid)
+  cat(", number of citations: ", cits, "\n", sep = "")
+  as.integer(cits)
+})
+tools$manuscript_citations <- ifelse(is.na(cits), 0L, cits)
 tools_altmetrics <- map(tools$manuscript_doi, function(doi) {
   tryCatch(
-    rAltmetric::altmetrics(doi = doi) %>% rAltmetric::altmetric_data() %>% select(ends_with("_count")) %>% mutate_all(as.numeric),
+    rAltmetric::altmetrics(doi = doi) %>% rAltmetric::altmetric_data() %>% select(cited_by_posts_count) %>% mutate_all(as.numeric),
     error = function(x) tibble(cited_by_posts_count = 0)
   )
 }) %>% bind_rows()
 tools_altmetrics[is.na(tools_altmetrics)] <- 0
 colnames(tools_altmetrics) <- paste0("manuscript_", colnames(tools_altmetrics))
 tools <- bind_cols(tools, tools_altmetrics)
+
+methods <- methods %>%
+  left_join(tools %>% select(method_tool_id = tool_id, manuscript_bibtex, manuscript_date, manuscript_citations, manuscript_cited_by_posts_count), by = "method_tool_id")
 
 #   ____________________________________________________________________________
 #   Save output                                                             ####

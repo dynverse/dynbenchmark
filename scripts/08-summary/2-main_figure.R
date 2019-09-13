@@ -20,19 +20,19 @@ data <-
   rename(id = method_id) %>%
   mutate(
     group = case_when(
-      method_most_complex_trajectory_type %in% c("disconnected_graph", "connected_graph") ~ "graph",
-      TRUE ~ method_most_complex_trajectory_type
+      wrapper_most_complex_trajectory_type %in% c("disconnected_graph", "connected_graph") ~ "graph",
+      TRUE ~ wrapper_most_complex_trajectory_type
     ),
     group = factor(group, levels = method_groups),
     control_label = c(adaptation = "", offtheshelf = "Off-the-shelf", control = "", tool = "")[method_source],
     method_priors_required_str = case_when(
-      grepl("dataset", method_required_priors_str) ~ "All",
-      grepl("(groups_id|features_id|timecourse_continuous|timecourse_discrete|groups_network)", method_required_priors_str) ~ "\u2716",
-      grepl("(start_id|end_id|end_n|start_n|groups_n)", method_required_priors_str) ~ "\u2715",
+      grepl("dataset", required_priors_str) ~ "All",
+      grepl("(groups_id|features_id|timecourse_continuous|timecourse_discrete|groups_network)", required_priors_str) ~ "\u2716",
+      grepl("(start_id|end_id|end_n|start_n|groups_n)", required_priors_str) ~ "\u2715",
       TRUE ~ ""
     ),
-    method_topology_inference = label_short(ifelse(method_topology_inference == "parameter", "param", method_topology_inference)),
-    method_wrapper_type = wrapper_type_map[method_wrapper_type],
+    method_topology_inference = label_short(ifelse(wrapper_topology_inference == "parameter", "param", wrapper_topology_inference)),
+    method_wrapper_type = wrapper_type_map[wrapper_type],
     benchmark_overall_error_reasons = pmap(
       lst(
         "Method error" = benchmark_overall_pct_method_error_all + benchmark_overall_pct_method_error_stoch,
@@ -64,7 +64,7 @@ for (col in stringr::str_subset(colnames(data), "^scaling_pred_memstr_")) {
 }
 
 for (tt in dynwrap::trajectory_types$id) {
-  data[[paste0("itt_", tt)]] <- ifelse(data[[paste0("method_detects_", tt)]], tt, paste0("gray_", tt))
+  data[[paste0("itt_", tt)]] <- ifelse(data[[paste0("detects_", tt)]], tt, paste0("gray_", tt))
 }
 
 ####################################

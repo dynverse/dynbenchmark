@@ -12,7 +12,7 @@ metric_ids <- c("correlation", "him", "featureimp_wcor", "F1_branches")
 ##############################################################
 
 # If you are the one who submitted the jobs, run:
-# benchmark_fetch_results(TRUE)
+benchmark_fetch_results(TRUE)
 # qsub::rsync_remote(
 #   remote_src = FALSE,
 #   path_src = derived_file(remote = FALSE, experiment = "07-stability"),
@@ -59,11 +59,13 @@ pairwise_submit <- function(memory = "10G", max_wall_time = "12:00:00") {
     pairwise_file <- derived_file(c(subdir, "/output_pairwise.rds"))
     qsubhandle_file <- derived_file(c(subdir, "/qsubhandle_pairwise.rds"))
 
-    if (file.exists(qsubhandle_file)) {
-      cat(name, ": Job still running\n", sep = "")
-    }
     if (file.exists(pairwise_file)) {
       cat(name, ": Already calculated\n", sep = "")
+      return()
+    }
+    if (file.exists(qsubhandle_file)) {
+      cat(name, ": Job still running\n", sep = "")
+      return()
     }
 
     if (!file.exists(pairwise_file) && !file.exists(qsubhandle_file)) {
@@ -126,8 +128,8 @@ pairwise_submit <- function(memory = "10G", max_wall_time = "12:00:00") {
               if (is.null(modeli)) stop("model i is null")
               if (is.null(modelj)) stop("model j is null")
 
-              dataseti <- datasets %>% inner_join(data_frame(id = did_bs_i), by = "id") %>% pull(fun) %>% first() %>% invoke()
-              datasetj <- datasets %>% inner_join(data_frame(id = did_bs_j), by = "id") %>% pull(fun) %>% first() %>% invoke()
+              dataseti <- datasets %>% inner_join(tibble(id = did_bs_i), by = "id") %>% pull(fun) %>% first() %>% invoke()
+              datasetj <- datasets %>% inner_join(tibble(id = did_bs_j), by = "id") %>% pull(fun) %>% first() %>% invoke()
 
               # join cell ids and feature ids
               cell_map <-
@@ -138,8 +140,8 @@ pairwise_submit <- function(memory = "10G", max_wall_time = "12:00:00") {
                 )
               feature_map <-
                 inner_join(
-                  dataseti$feature_id_map %>% rename(feature_id_i = cell_id), # change this to feature_id
-                  datasetj$feature_id_map %>% rename(feature_id_j = cell_id), # change this to feature_id
+                  dataseti$feature_id_map %>% rename(feature_id_i = feature_id),
+                  datasetj$feature_id_map %>% rename(feature_id_j = feature_id),
                   by = "old_id"
                 )
 
@@ -191,7 +193,7 @@ pairwise_submit <- function(memory = "10G", max_wall_time = "12:00:00") {
             eval_out$geom_mean <-
               eval_out %>%
               select(one_of(metric_ids)) %>%
-              dyneval::calculate_geometric_mean()
+              dynutils::calculate_geometric_mean()
 
             # add information and reorder columns
             eval_out %>%
@@ -312,7 +314,8 @@ pairwise_bind_results <- function() {
 df <- pairwise_bind_results() %>%
   group_by(method_id, dataset_id) %>%
   filter((all(is.na(time_correlation)) & n() == 1) | !is.na(time_correlation)) %>%
-  mutate_if(is.numeric, function(x) ifelse(!is.finite(x), 0, x))
+  mutate_if(is.numeric, function(x) ifelse(!is.finite(x), 0, x)) %>%
+  ungroup()
 
 df %>% group_by(method_id) %>% summarise(error = mean(is.na(time_him))) %>% filter(error > 0) %>% arrange(desc(error))
 df %>% group_by(dataset_id) %>% summarise(error = mean(is.na(time_him))) %>% filter(error > 0) %>% arrange(desc(error))

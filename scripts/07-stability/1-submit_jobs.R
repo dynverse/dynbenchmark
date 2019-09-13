@@ -26,12 +26,18 @@ if (!file.exists(derived_file("design.rds"))) {
     dynwrap::get_ti_methods(method_ids, evaluate = FALSE) %>%
     mapdf(function(m) {
       l <- m$fun()
-      l$fun <- m$fun
-      l$type <- "function"
-      l
+      k <- list()
+      for (n in names(l)) {
+        for (p in names(l[[n]])) {
+          k[[paste0(n, "_", p)]] <- l[[n]][[p]]
+        }
+      }
+      k$fun <- m$fun
+      k$type <- "function"
+      k
     }) %>%
     list_as_tibble() %>%
-    select(id, type, fun, everything())
+    select(id = method_id, type, fun, everything())
 
   default_parameters <- list(
     fateid = tibble(id = "default", force = TRUE),
@@ -104,7 +110,7 @@ design_filt <- read_rds(derived_file("design.rds"))
 list2env(read_rds(result_file("params.rds")), environment())
 
 # step 1:
-# design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("identity", "scorpius", "paga", "mst"))
+design_filt$crossing <- design_filt$crossing %>% filter(method_id %in% c("scorpius", "monocle_ica", "monocle_ddrtree", "celltree_gibbs", "celltree_vem", "celltree_maptpx", "sincell", "celltrails", "gpfates"))
 
 # submit job
 benchmark_submit(
