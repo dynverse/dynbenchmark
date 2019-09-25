@@ -2,6 +2,7 @@
 
 library(dynbenchmark)
 library(googlesheets)
+library(tidyverse)
 
 experiment("01-datasets/01-real")
 
@@ -12,14 +13,16 @@ gs_auth()
 httr::set_config(httr::config(http_version = 0)) # avoid http2 framing layer bug
 
 # download from google sheets
-datasets_real_metadata_source <- gs_key("1SALZ2jt7TZJQJMEvvOwSR2r5yIl50qcGAZ-K5AC4DJo") %>%
+datasets_real_metadata_source <-
+  gs_key("1SALZ2jt7TZJQJMEvvOwSR2r5yIl50qcGAZ-K5AC4DJo") %>%
   gs_read("included", col_types = list(pmid = col_character())) %>%
   tidyr::separate_rows(id, sep = ",\n")
 
 # link the dataset ids to the metadata
 dataset_ids_real <- list_datasets("real") %>% pull(id)
 
-datasets_real_metadata <- datasets_real_metadata_source %>%
+datasets_real_metadata <-
+  datasets_real_metadata_source %>%
   mutate(id = map(paste0("real/(gold|silver)/", datasets_real_metadata_source$id), str_match, string = dataset_ids_real) %>% map(~.[,1]) %>% map(~.[!is.na(.)])) %>%
   unnest(id)
 

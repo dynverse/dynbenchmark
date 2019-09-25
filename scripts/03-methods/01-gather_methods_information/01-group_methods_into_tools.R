@@ -111,8 +111,10 @@ replace_date <- is.na(tools$manuscript_date) & !is.na(tools$manuscript_publicati
 tools$manuscript_date[replace_date] <- tools$manuscript_publication_date[replace_date]
 
 # Altmetrics ----------------------------
-cits <- map_int(tools$manuscript_google_scholar_cluster_id, function(gsid) {
-  cat("Polling ", gsid, sep = "")
+gsids <- tools$manuscript_google_scholar_cluster_id
+cits <- map_int(seq_along(gsids), function(i) {
+  gsid <- gsids[[i]]
+  cat("Polling ", i, "/", length(gsids), ": ", gsid, sep = "")
   # Sys.sleep(1)
   cits <- google_scholar_num_citations(gsid)
   cat(", number of citations: ", cits, "\n", sep = "")
