@@ -4,10 +4,12 @@
 \alias{knit_nest}
 \title{Knit a child, and add an extra level of headings + fix relative paths. Can be used both for latex and markdown output formats}
 \usage{
-knit_nest(file, levels = 1)
+knit_nest(file, format = get_default_format(), levels = 1)
 }
 \arguments{
 \item{file}{File to knit, can also be a directory in which case the README.Rmd will be knit}
+
+\item{format}{Which format to use.}
 
 \item{levels}{The number of levels to add onto section headings}
 }

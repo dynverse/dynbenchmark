@@ -192,8 +192,9 @@ common_dynbenchmark_format <- function(
 #'
 #' @param file File to knit, can also be a directory in which case the README.Rmd will be knit
 #' @param levels The number of levels to add onto section headings
+#' @param format Which format to use.
 #' @export
-knit_nest <- function(file, levels = 1) {
+knit_nest <- function(file, format = get_default_format(), levels = 1) {
   # check if directory -> use README
   if (fs::is_dir(file)) {
     file <- file.path(file, "README.Rmd")
@@ -208,7 +209,6 @@ knit_nest <- function(file, levels = 1) {
   }
 
   # choose between markdown output and latex output
-  format <- get_default_format()
   if (format == "markdown") {
     # when markdown, simply include the markdown file, but with some adaptations obviously
     knit <- readr::read_lines(fs::path_ext_set(file, "md"))
@@ -232,7 +232,8 @@ knit_nest <- function(file, levels = 1) {
 
     # knit as a child
     knitr::knit_child(
-      text = readr::read_lines(file) %>% stringr::str_replace_all("^#", "##"),
+      text = readr::read_lines(file) %>%
+        stringr::str_replace_all("^#", paste0(rep("#", levels + 1), collapse = "")),
       options = list(root.dir = folder),
       quiet = TRUE
     ) %>% knitr::asis_output()
