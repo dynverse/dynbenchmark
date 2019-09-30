@@ -191,8 +191,9 @@ common_dynbenchmark_format <- function(
 #' Knit a child, and add an extra level of headings + fix relative paths. Can be used both for latex and markdown output formats
 #'
 #' @param file File to knit, can also be a directory in which case the README.Rmd will be knit
+#' @param levels The number of levels to add onto section headings
 #' @export
-knit_nest <- function(file) {
+knit_nest <- function(file, levels = 1) {
   # check if directory -> use README
   if (fs::is_dir(file)) {
     file <- file.path(file, "README.Rmd")
@@ -218,7 +219,7 @@ knit_nest <- function(file) {
     # add extra header sublevels & add link
     knit <- knit %>%
       str_replace_all("^(# )(.*)$", paste0("\\1[\\2](", fs::path_rel(folder), ")")) %>%
-      str_replace_all("^#", "##")
+      str_replace_all("^#", paste0(rep("#", levels + 1), collapse = ""))
 
     # cat output
     knit %>% glue::glue_collapse("\n") %>% knitr::asis_output()
