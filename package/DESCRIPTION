@@ -16,7 +16,7 @@ Depends:
   dynplot (>= 1.0.0),
   dynutils (>= 1.0.2),
   dynwrap (>= 1.0.0)
-License: MIT + LICENSE file
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 URL: https://github.com/dynverse/dynbenchmark
