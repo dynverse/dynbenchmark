@@ -1,5 +1,5 @@
 Package: dynbenchmark
-Title: Package of "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
+Title: Helper package for benchmark manuscript
 Version: 0.1.0.9000
 Authors@R: c(
   person("Yvan", "Saeys", email = "yvan.saeys@ugent.be", role = c("ths")),
@@ -19,8 +19,8 @@ Depends:
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/dynverse/dynalysis
-BugReports: https://github.com/dynverse/dynalysis/issues
+URL: https://github.com/dynverse/dynbenchmark
+BugReports: https://github.com/dynverse/dynbenchmark/issues
 Imports: 
   assertthat,
   cowplot,
