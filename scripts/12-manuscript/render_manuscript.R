@@ -9,15 +9,15 @@ output_directory <- result_file()
 if (fs::dir_exists(output_directory)) fs::dir_delete(output_directory)
 fs::dir_create(output_directory)
 
-# download from google docs
-httr::set_config(httr::config(http_version = 0)) # avoid http2 framing layer bug
-drive <- googledrive::drive_download(googledrive::as_id("1Xmuhp1_EGr4Qt6kKRiJGbeQMBBr50ulteFF4YJIeKhA"), type="text/plain", overwrite=TRUE, path = tempfile())
-system(stringr::str_glue("sed -i '1s/^.//' {drive$local_path}")) # remove first character, because this is some strange unicode character added by google
-system(stringr::str_glue("sed -i 's/ *\\(\\[@[^\\]]*\\]\\)/\\1/' {drive$local_path}")) # remote spaces before citations
-system(stringr::str_glue("cat {drive$local_path} > manuscript/paper.Rmd"))
+# # download from google docs
+# httr::set_config(httr::config(http_version = 0)) # avoid http2 framing layer bug
+# drive <- googledrive::drive_download(googledrive::as_id("1Xmuhp1_EGr4Qt6kKRiJGbeQMBBr50ulteFF4YJIeKhA"), type="text/plain", overwrite=TRUE, path = tempfile())
+# system(stringr::str_glue("sed -i '1s/^.//' {drive$local_path}")) # remove first character, because this is some strange unicode character added by google
+# system(stringr::str_glue("sed -i 's/ *\\(\\[@[^\\]]*\\]\\)/\\1/' {drive$local_path}")) # remote spaces before citations
+# system(stringr::str_glue("cat {drive$local_path} > manuscript/paper.Rmd"))
 
 # render main manuscript
-rmarkdown::render("manuscript/paper.Rmd", output_format = pdf_manuscript(), output_dir = output_directory)
+rmarkdown::render("manuscript/paper.Rmd", output_format = dynbenchmark::pdf_manuscript(), output_dir = output_directory)
 
 rmarkdown::render("manuscript/paper.Rmd", output_format = word_manuscript())
 
@@ -25,6 +25,7 @@ rmarkdown::render("manuscript/paper.Rmd", output_format = word_manuscript())
 
 # copy and render figs, sfigs and stables
 pwalk(bind_rows(figs, sfigs), function(ref_id, ...) {
+  cat(ref_id, "\n", sep = "")
   pdf_path <- plot_fig( ref_id = ref_id, format = "pdf", ...)
   name <- refs %>% filter(ref_id == !!ref_id) %>% pull(name)
   fs::file_copy(pdf_path, fs::path(output_directory, paste0(name, ".pdf")), overwrite = TRUE)

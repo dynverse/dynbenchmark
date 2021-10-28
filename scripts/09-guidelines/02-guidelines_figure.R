@@ -209,5 +209,5 @@ ggsave(result_file("guidelines_methods.svg"), width = 8, height = 10)
 file.copy(raw_file("tree.svg"), result_file("guidelines.svg"), overwrite = TRUE)
 
 # embed the methods svg (not supported, we have to choose between saving guidelines_methods as png and embedding, or as svg and linking)
-system(glue::glue("inkscape {result_file('guidelines.svg')} --export-pdf {result_file('guidelines.pdf')}"))
+system(glue::glue("inkscape {result_file('guidelines.svg')} --export-filename={result_file('guidelines.pdf')} --export-type=pdf"))
 file.remove(result_file("guidelines.svg"))

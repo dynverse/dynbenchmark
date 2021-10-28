@@ -209,7 +209,7 @@ plot_fig <- function(
   if (fs::path_ext(fig_path) == "svg" && format %in% c("pdf", "latex")) {
     new_fig_path <- fig_path
     fs::path_ext(new_fig_path) <- "pdf"
-    system(glue::glue("inkscape {fig_path} --export-pdf={new_fig_path}"))
+    system(glue::glue("inkscape {fig_path} --export-filename={new_fig_path} --export-type=pdf"))
     fig_path <- new_fig_path
   }
 

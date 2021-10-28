@@ -46,7 +46,7 @@ pdf_supplementary_note <- function(
   pdf_manuscript(
     ...,
     render_changes = FALSE,
-    reference_section_title = "Supplementary References"
+    reference_section_title = "References"
   )
 }
 
@@ -73,7 +73,7 @@ pdf_manuscript <- function(
   sty_header = NULL,
   sty_beforebody = NULL,
   sty_afterbody = NULL,
-  reference_section_title = reference_section_title,
+  reference_section_title = "Supplementary References",
   ...
 ) {
   header_includes <- c(
@@ -145,11 +145,12 @@ pdf_manuscript <- function(
 
 
 clean_xelatex <- function(output_file) {
-  fs::file_delete(fs::path_ext_set(output_file, "log"))
-  fs::file_delete(fs::path_ext_set(output_file, "tex"))
-  fs::file_delete(fs::path_ext_set(output_file, "aux"))
-  fs::file_delete(fs::path_ext_set(output_file, "out"))
-  if(fs::file_exists(fs::path_ext_set(output_file, "toc"))) fs::file_delete(fs::path_ext_set(output_file, "toc"))
+  if_exist_rm <- function(fil) if (fs::file_exists(fil)) fs::file_delete(fil)
+  if_exist_rm(fs::path_ext_set(output_file, "log"))
+  if_exist_rm(fs::path_ext_set(output_file, "tex"))
+  if_exist_rm(fs::path_ext_set(output_file, "aux"))
+  if_exist_rm(fs::path_ext_set(output_file, "out"))
+  if_exist_rm(fs::path_ext_set(output_file, "toc"))
 }
 
 #' Common dynbenchmark format
@@ -180,7 +181,7 @@ common_dynbenchmark_format <- function(
     glue::glue("--csl={csl}"),
     "--metadata", "link-citations=true",
     "--metadata", paste0("reference-section-title=", reference_section_title),
-    "--filter=/usr/lib/rstudio/bin/pandoc/pandoc-citeproc"
+    "--citeproc"
   )
 
   format

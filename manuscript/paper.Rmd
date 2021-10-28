@@ -24,15 +24,13 @@ Wouter Saelens* ¹ ², Robrecht Cannoodt* ¹ ² ³, Helena Todorov¹ ² ⁴, Yva
 ⁴ Centre International de Recherche en Infectiologie, Inserm, U1111, Université Claude Bernard Lyon 1, CNRS, UMR5308, École Normale Supérieure de Lyon, Univ Lyon, F-69007, Lyon, France
 
 
-*`r format(Sys.time(), '%d %B, %Y')`*
+Published in Nat Biotechnol 37, 547–554 (2019). doi: [10.1038/s41587-019-0071-9](https://doi.org/10.1038/s41587-019-0071-9).
 
-
-Commit: `r print_url(paste0("https://www.github.com/dynverse/dynbenchmark/tree/", git2r::revparse_single(".","HEAD")$sha))`
 ```{r}
 n_tools <- nrow(tools)
-n_tools_evaluated <- nrow(filter(tools, evaluated))
-n_methods_evaluated <- nrow(filter(methods, evaluated, source == "tool"))
-n_control_methods_evaluated <- nrow(filter(methods, evaluated, source == "control"))
+n_tools_evaluated <- nrow(filter(tools, method_evaluated))
+n_methods_evaluated <- nrow(filter(methods, method_evaluated, method_source == "tool"))
+n_control_methods_evaluated <- nrow(filter(methods, method_evaluated, method_source == "control"))
 n_datasets_real <- nrow(list_datasets("real"))
 n_datasets_synthetic <- nrow(list_datasets("synthetic"))
 ```
@@ -375,7 +373,7 @@ special_methods <- c("mfa", "dpt", "slice", "sincell", "calista", "urd")
 list_wrapper_type_methods <- function(wrapper_types_oi) {
   methods_evaluated %>% 
     filter(wrapper_type %in% wrapper_types_oi) %>% 
-    mutate(name = paste0(name, ifelse(id %in% special_methods, "\\*", ""))) %>% 
+    mutate(name = paste0(method_name, ifelse(method_id %in% special_methods, "\\*", ""))) %>% 
     pull(name) %>% 
     sort() %>%
     label_vector()
