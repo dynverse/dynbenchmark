@@ -61,8 +61,8 @@ google_scholar <- function(cluster_id) {
 google_scholar_num_citations <- function(cluster_id) {
   df <- google_scholar(cluster_id)
   if (nrow(df) > 0) {
-    max(c(0, df$num_citations), na.rm = T)
+    max(c(0L, df$num_citations), na.rm = TRUE)
   } else {
-    NA
+    NA_integer_
   }
 }

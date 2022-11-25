@@ -10,7 +10,7 @@ experiment("06-benchmark")
 ##########################################################
 
 # If you are the one who submitted the jobs, run:
-# benchmark_fetch_results(TRUE)
+benchmark_fetch_results(TRUE)
 # qsub::rsync_remote(
 #   remote_src = FALSE,
 #   path_src = derived_file(remote = FALSE, experiment = "06-benchmark"),
@@ -38,7 +38,8 @@ execution_output %>% filter(error_status == "execution_error") %>% pull(error_me
 design <- read_rds(derived_file("design.rds"))
 
 methods_info <- design$methods %>%
-  rename_all(function(x) paste0("method_", x))
+  select(-type, -fun) %>%
+  rename(method_id = id)
 datasets_info <- design$datasets %>%
   rename_all(function(x) paste0("dataset_", x))
 

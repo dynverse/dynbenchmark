@@ -46,7 +46,7 @@ pdf_supplementary_note <- function(
   pdf_manuscript(
     ...,
     render_changes = FALSE,
-    reference_section_title = "Supplementary References"
+    reference_section_title = "References"
   )
 }
 
@@ -73,7 +73,7 @@ pdf_manuscript <- function(
   sty_header = NULL,
   sty_beforebody = NULL,
   sty_afterbody = NULL,
-  reference_section_title = reference_section_title,
+  reference_section_title = "Supplementary References",
   ...
 ) {
   header_includes <- c(
@@ -145,11 +145,12 @@ pdf_manuscript <- function(
 
 
 clean_xelatex <- function(output_file) {
-  fs::file_delete(fs::path_ext_set(output_file, "log"))
-  fs::file_delete(fs::path_ext_set(output_file, "tex"))
-  fs::file_delete(fs::path_ext_set(output_file, "aux"))
-  fs::file_delete(fs::path_ext_set(output_file, "out"))
-  if(fs::file_exists(fs::path_ext_set(output_file, "toc"))) fs::file_delete(fs::path_ext_set(output_file, "toc"))
+  if_exist_rm <- function(fil) if (fs::file_exists(fil)) fs::file_delete(fil)
+  if_exist_rm(fs::path_ext_set(output_file, "log"))
+  if_exist_rm(fs::path_ext_set(output_file, "tex"))
+  if_exist_rm(fs::path_ext_set(output_file, "aux"))
+  if_exist_rm(fs::path_ext_set(output_file, "out"))
+  if_exist_rm(fs::path_ext_set(output_file, "toc"))
 }
 
 #' Common dynbenchmark format
@@ -180,7 +181,7 @@ common_dynbenchmark_format <- function(
     glue::glue("--csl={csl}"),
     "--metadata", "link-citations=true",
     "--metadata", paste0("reference-section-title=", reference_section_title),
-    "--filter=/usr/lib/rstudio/bin/pandoc/pandoc-citeproc"
+    "--citeproc"
   )
 
   format
@@ -191,8 +192,10 @@ common_dynbenchmark_format <- function(
 #' Knit a child, and add an extra level of headings + fix relative paths. Can be used both for latex and markdown output formats
 #'
 #' @param file File to knit, can also be a directory in which case the README.Rmd will be knit
+#' @param levels The number of levels to add onto section headings
+#' @param format Which format to use.
 #' @export
-knit_nest <- function(file) {
+knit_nest <- function(file, format = get_default_format(), levels = 1) {
   # check if directory -> use README
   if (fs::is_dir(file)) {
     file <- file.path(file, "README.Rmd")
@@ -207,7 +210,6 @@ knit_nest <- function(file) {
   }
 
   # choose between markdown output and latex output
-  format <- get_default_format()
   if (format == "markdown") {
     # when markdown, simply include the markdown file, but with some adaptations obviously
     knit <- readr::read_lines(fs::path_ext_set(file, "md"))
@@ -218,7 +220,7 @@ knit_nest <- function(file) {
     # add extra header sublevels & add link
     knit <- knit %>%
       str_replace_all("^(# )(.*)$", paste0("\\1[\\2](", fs::path_rel(folder), ")")) %>%
-      str_replace_all("^#", "##")
+      str_replace_all("^#", paste0(rep("#", levels + 1), collapse = ""))
 
     # cat output
     knit %>% glue::glue_collapse("\n") %>% knitr::asis_output()
@@ -231,7 +233,8 @@ knit_nest <- function(file) {
 
     # knit as a child
     knitr::knit_child(
-      text = readr::read_lines(file) %>% stringr::str_replace_all("^#", "##"),
+      text = readr::read_lines(file) %>%
+        stringr::str_replace_all("^#", paste0(rep("#", levels + 1), collapse = "")),
       options = list(root.dir = folder),
       quiet = TRUE
     ) %>% knitr::asis_output()

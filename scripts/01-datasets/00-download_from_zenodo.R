@@ -3,6 +3,7 @@
 library(tidyverse)
 library(dynbenchmark)
 library(httr)
+library(Matrix)
 
 experiment("01-datasets")
 
@@ -41,6 +42,9 @@ pwalk(
     }
 
     dataset <- read_rds(tmp_download_file)
+    dataset$expression <- as(dataset$expression, "dgCMatrix")
+    dataset$counts <- as(dataset$counts, "dgCMatrix")
+
     save_dataset(dataset, id = dataset_id)
     jsonlite::write_json(
       lst(

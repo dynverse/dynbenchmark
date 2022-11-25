@@ -44,15 +44,18 @@ plot_trajectory_types <- function(
   if (!is.null(node_colours) && length(node_colours) == 1) node_colours <- rep(node_colours, length(trajectory_types))
   if (!is.null(edge_colours) && length(edge_colours) == 1) edge_colours <- rep(edge_colours, length(trajectory_types))
 
-  testthat::expect_true(length(unique(c(length(trajectory_types), length(xmins), length(xmaxs), length(ymins), length(ymaxs)))) == 1)
-  testthat::expect_true(is.null(node_colours) || length(node_colours) == length(trajectory_types))
-  testthat::expect_true(is.null(edge_colours) || length(edge_colours) == length(trajectory_types))
+  assert_that(
+    length(unique(c(length(trajectory_types), length(xmins), length(xmaxs), length(ymins), length(ymaxs)))) == 1,
+    is.null(node_colours) || length(node_colours) == length(trajectory_types),
+    is.null(edge_colours) || length(edge_colours) == length(trajectory_types)
+  )
 
   geom <- match.arg(geom)
 
   # loop over every trajectory type and plot
   # for (i in seq_along(trajectory_types)) {
   out <- map(seq_along(trajectory_types), function(i) {
+    cat(i, "\n", sep = "")
     trajectory_type <- trajectory_types[[i]]
     xmin <- xmins[[i]] + circ_size
     xmax <- xmaxs[[i]] - circ_size

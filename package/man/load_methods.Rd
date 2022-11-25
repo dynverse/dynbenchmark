@@ -4,8 +4,8 @@
 \alias{load_methods}
 \title{Load the information on the methods}
 \usage{
-load_methods(default_filter = source == "tool" | id \%in\% c("angle",
-  "comp1", "mst"), ...)
+load_methods(default_filter = method_source == "tool" | method_id \%in\%
+  c("angle", "comp1", "mst"), ...)
 }
 \arguments{
 \item{default_filter}{Default filtering for the benchmark.}

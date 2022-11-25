@@ -12,10 +12,9 @@ experiment("08-summary")
 method_info <-
   load_methods() %>%
   mutate(
-    required_priors_str = map_chr(input, ~ .$required %>% setdiff(c("expression", "counts")) %>% paste0(collapse = ",")),
-    optional_priors_str = map_chr(input, ~ .$optional %>% paste0(collapse = ","))
+    required_priors_str = map_chr(wrapper_input_required, ~ setdiff(., c("expression", "counts")) %>% paste0(collapse = ",")),
+    optional_priors_str = map_chr(wrapper_input_optional, ~ paste0(., collapse = ","))
   ) %>%
-  rename_all(function(x) paste0("method_", x)) %>%
   rename(tool_id = method_tool_id) %>%
   select_if(function(x) !all(is.na(x)))
 
@@ -100,17 +99,24 @@ bench_overall <-
 bench_trajtypes <-
   data_aggs %>%
   filter(dataset_trajectory_type != "overall", dataset_source == "mean") %>%
-  transmute(method_id, metric = paste0("benchmark_tt_", dataset_trajectory_type), score = overall) %>%
+  transmute(method_id, param_id, metric = paste0("benchmark_tt_", dataset_trajectory_type), score = overall) %>%
   spread(metric, score)
 
 bench_sources <-
   data_aggs %>%
   filter(dataset_trajectory_type == "overall", dataset_source != "mean") %>%
-  transmute(method_id, metric = paste0("benchmark_source_", gsub("/", "_", dataset_source)), score = overall) %>%
+  transmute(method_id, param_id, metric = paste0("benchmark_source_", gsub("/", "_", dataset_source)), score = overall) %>%
   spread(metric, score)
 
+bench <- bench_overall %>%
+  left_join(bench_trajtypes, by = c("method_id", "param_id")) %>%
+  left_join(bench_sources, by = c("method_id", "param_id")) %>%
+  left_join(bench_predcors, by = c("method_id", "param_id"))
 
-rm(execution_metrics, bench_metrics, all_metrics, data_aggs, benchmark_results_input, benchmark_results_normalised) # is important in large scripts
+rm(
+  execution_metrics, bench_metrics, all_metrics, data_aggs, benchmark_results_input, benchmark_results_normalised,
+  bench_overall, bench_trajtypes, bench_sources, bench_predcors
+) # is important in large scripts
 
 #####################################################
 #               READ STABILITY RESULTS              #
@@ -125,7 +131,7 @@ stability <- read_rds(result_file("stability_results.rds", experiment_id = "07-s
 
 results <- Reduce(
   function(a, b) left_join(a, b, by = "method_id"),
-  list(method_info, qc_results, scaling_scores, scaling_preds, scaling_models, bench_overall, bench_trajtypes, bench_sources, bench_predcors, stability)
+  list(method_info, qc_results, scaling_scores, scaling_preds, scaling_models, bench, stability)
 )
 
 rm(list = setdiff(ls(), "results")) # more than this haiku
@@ -145,7 +151,7 @@ results$summary_overall_overall <-
   results %>%
   select(!!names(metric_weights)) %>%
   mutate_all(function(x) ifelse(is.na(x), mean(x, na.rm = TRUE), x)) %>%
-  dyneval::calculate_geometric_mean(weights = metric_weights)
+  dynutils::calculate_geometric_mean(weights = metric_weights)
 
 
 g <- GGally::ggpairs(results %>% select(summary_overall_overall, !!names(metric_weights))) + theme_bw()

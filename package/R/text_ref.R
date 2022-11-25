@@ -35,26 +35,26 @@ ref <- function(ref_type, ref_id, suffix = "", prefix = "", anchor = FALSE, form
   } else {
     pattern <- "\\protect\\hyperlink{{{ref_type}_{ref_id}}}{{\\textbf{{{ref_full_name}}}}"
   }
-  ref <- pritt(pattern)
+  ref <- stringr::str_glue(pattern)
 
   # add anchor is requested
-  if (anchor)  ref <- pritt("{ref}{anchor(ref_type, ref_id, format = format)}")
+  if (anchor)  ref <- stringr::str_glue("{ref}{anchor(ref_type, ref_id, format = format)}")
   ref
 }
 anchor <- function(ref_type, ref_id, format = get_default_format()) {
   case_when(
-    format == "html" ~ pritt("<a name = '{ref_type}_{ref_id}'></a>"),
-    format == "latex" ~ pritt("\\protect\\hypertarget{{{ref_type}_{ref_id}}}{{}}"),
-    format == "markdown" ~ pritt("<a name = '{ref_type}_{ref_id}'></a>")
+    format == "html" ~ stringr::str_glue("<a name = '{ref_type}_{ref_id}'></a>"),
+    format == "latex" ~ stringr::str_glue("\\protect\\hypertarget{{{ref_type}_{ref_id}}}{{}}"),
+    format == "markdown" ~ stringr::str_glue("<a name = '{ref_type}_{ref_id}'></a>")
   )
 }
 create_names <- list(
-  sfig = function(i) pritt("Supplementary Figure {i}"),
-  fig = function(i) pritt("Figure {i}"),
-  snote = function(i) pritt("Supplementary Note {i}"),
-  table = function(i) pritt("Table {i}"),
-  stable = function(i) pritt("Supplementary Table {i}"),
-  section = function(i) pritt("")
+  sfig = function(i) stringr::str_glue("Supplementary Figure {i}"),
+  fig = function(i) stringr::str_glue("Figure {i}"),
+  snote = function(i) stringr::str_glue("Supplementary Note {i}"),
+  table = function(i) stringr::str_glue("Table {i}"),
+  stable = function(i) stringr::str_glue("Supplementary Table {i}"),
+  section = function(i) stringr::str_glue("")
 )
 
 get_default_format <- function() {
@@ -209,7 +209,7 @@ plot_fig <- function(
   if (fs::path_ext(fig_path) == "svg" && format %in% c("pdf", "latex")) {
     new_fig_path <- fig_path
     fs::path_ext(new_fig_path) <- "pdf"
-    system(glue::glue("inkscape {fig_path} --export-pdf={new_fig_path}"))
+    system(glue::glue("inkscape {fig_path} --export-filename={new_fig_path} --export-type=pdf"))
     fig_path <- new_fig_path
   }
 

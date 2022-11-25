@@ -1,26 +1,73 @@
 #' @importFrom sigmoid sigmoid
 .benchmark_aggregate_normalisation <- list(
   scalesigmoid = function (xnona, xnazero = xnona, multiplier = 1) {
-    y <- (xnazero - mean(xnona)) / sd(xnona) * multiplier
+    vars <- list(
+      trafo_fun = "scalesigmoid",
+      mean = mean(xnona),
+      sd = sd(xnona),
+      multiplier = multiplier
+    )
+    y <- (xnazero - vars[["mean"]]) / vars[["sd"]] * vars[["multiplier"]]
 
-    sigmoid::sigmoid(y)
+    list(
+      y = sigmoid::sigmoid(y),
+      vars = vars
+    )
   },
   scaletanh = function (xnona, xnazero = xnona, multiplier = 1) {
-    y <- (xnazero - mean(xnona)) / sd(xnona) * multiplier
+    vars <- list(
+      trafo_fun = "scaletanh",
+      mean = mean(xnona),
+      sd = sd(xnona),
+      multiplier = multiplier
+    )
+    y <- (xnazero - vars[["mean"]]) / vars[["sd"]] * vars[["multiplier"]]
 
-    tanh(y)
+    list(
+      y = tanh(y),
+      vars = vars
+    )
   },
   minmax = function (xnona, xnazero = xnona) {
-    (xnazero - min(xnona)) / (max(xnona) - min(xnona))
+    vars <- list(
+      trafo_fun = "minmax",
+      min = min(xnona),
+      max = max(xnona)
+    )
+    y <- (xnazero - vars[["min"]]) / (vars[["max"]] - vars[["min"]])
+
+    list(
+      y = y,
+      vars = vars
+    )
   },
-  percentrank = function(xnona, xnazero = xnona) {
-    percent_rank(xnazero)
+  percent_rank = function(xnona, xnazero = xnona) {
+    list(
+      y = percent_rank(xnazero),
+      vars = list(
+        trafo_fun = "percent_rank"
+      )
+    )
   },
   normal = function(xnona, xnazero = xnona) {
-    y <- (xnazero - mean(xnona)) / sd(xnona)
-    pnorm(y)
+    vars <- list(
+      trafo_fun = "normal",
+      mean = mean(xnona),
+      sd = sd(xnona)
+    )
+    y <- (xnazero - vars[["mean"]]) / vars[["sd"]]
+
+    list(
+      y = pnorm(y),
+      vars = vars
+    )
   },
-  none = "none"
+  none = function(xnona, xnazero = xnona) {
+    list(
+      y = xnazero,
+      vars = list(trafo_fun = "none")
+    )
+  }
 )
 
 #' Normalisation and aggregation function
@@ -55,6 +102,7 @@ benchmark_aggregate <- function(
 
   # check normalise parameter
   if (is.character(norm_fun)) {
+    do_norm <- norm_fun != "none"
     norm_fun <- .benchmark_aggregate_normalisation[[match.arg(norm_fun, choices = names(.benchmark_aggregate_normalisation))]]
   }
 
@@ -63,27 +111,50 @@ benchmark_aggregate <- function(
     stop("Some dataset sources have no weight!")
   }
 
-  if (!identical(norm_fun, "none")) {
-    preproc_fun <- function(x) {
-      x[x < 0] <- 0
-      x[x > 1] <- 1
+  if (do_norm) {
+    dataset_ids <- unique(data$dataset_id)
 
-      xnona <- x[!is.na(x)]
-      xnazero <- ifelse(is.na(x), 0, x)
+    preproc_out <- map(dataset_ids, function(dataset_id) {
+      data_did <- data %>% filter(dataset_id == !!dataset_id)
 
-      if (length(xnazero) == 1 || all(xnazero == 0)) {
-        x
-      } else {
-        norm_fun(xnona, xnazero)
-      }
-    }
+      outs <- map(metrics, function(mid) {
+        x <- data_did[[mid]]
 
-    data <-
-      data %>%
-      group_by(dataset_id) %>%
-      mutate_at(set_names(metrics, paste0("norm_", metrics)), preproc_fun) %>%
-      ungroup()
+        x[x < 0] <- 0
+        x[x > 1] <- 1
+
+        xnona <- x[!is.na(x)]
+        xnazero <- ifelse(is.na(x), 0, x)
+
+        out <-
+          if (length(xnazero) == 1 || all(xnazero == 0)) {
+            .benchmark_aggregate_normalisation[["none"]](xnona, xnazero)
+          } else {
+            norm_fun(xnona, xnazero)
+          }
+
+        out$value <- set_names(list(out$y), paste0("norm_", mid))
+        out$vars <- out$vars %>% as_tibble() %>% mutate(metric = mid)
+        out$y <- NULL
+
+        out
+      })
+
+      values <- map(outs, "value") %>% unlist(recursive = FALSE) %>% as_tibble()
+      vars <- map_df(outs, "vars") %>% mutate(dataset_id) %>% select(dataset_id, metric, everything())
+
+      data_did <- bind_cols(data_did[, setdiff(colnames(data_did), colnames(values))], values)
+
+      lst(data = data_did, norm_vars = vars)
+    })
+    data <- map_df(preproc_out, "data")
+    norm_vars <- map_df(preproc_out, "norm_vars")
     names(mean_weights) <- paste0("norm_", names(mean_weights))
+  } else {
+    norm_vars <- tibble(
+      dataset_id = character(0),
+      metric_id = character(0)
+    )
   }
 
   # check mean parameter
@@ -148,13 +219,14 @@ benchmark_aggregate <- function(
           summarise_if(is.numeric, mean) %>%
           ungroup() %>%
           calc_mean() %>%
-          mutate(dataset_trajectory_type = factor("overall", levels = levels(data$dataset_trajectory_type)))
+          mutate(dataset_trajectory_type = "overall")
       )
     }
 
   lst(
     data,
-    data_aggregations
+    data_aggregations,
+    data_transformation = norm_vars
   )
 }
 

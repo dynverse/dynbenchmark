@@ -18,6 +18,6 @@ print_url <- function(url, text = url, format = get_default_format()) {
   if(format == "latex") {
     paste0("\\textcolor{cyan}{\\href{", url, "}{", text, "}}")
   } else {
-    pritt("[{text}]({url})")
+    stringr::str_glue("[{text}]({url})")
   }
 }

@@ -15,21 +15,21 @@ tool_qc_scores <- readRDS(result_file("tool_qc_scores.rds"))
 # merge qc scores with tools tibble
 tools <- tools %>%
   select(-tidyselect::matches("qc_score")) %>%
-  left_join(tool_qc_scores, "tool_id")
+  left_join(tool_qc_scores, by = "tool_id")
 
 methods <- methods %>%
   select(-tidyselect::matches("qc_score")) %>%
-  left_join(tool_qc_scores, "tool_id")
+  left_join(tool_qc_scores, by = c("method_tool_id" = "tool_id"))
 
 # filter evaluated
 methods_evaluated <- methods %>%
-  filter(evaluated)
+  filter(method_evaluated)
 
 tools_evaluated <- tools %>%
-  filter(evaluated)
+  filter(method_evaluated)
 
 # check that all non-control evaluated methods & tools have a QC!
-methods_evaluated_nonqc <- methods_evaluated %>% filter(source == "tool" & is.na(qc_score))
+methods_evaluated_nonqc <- methods_evaluated %>% filter(method_source == "tool" & is.na(qc_score))
 if (nrow(methods_evaluated_nonqc) != 0) {
   stop("Methods ", methods_evaluated_nonqc$id %>% glue::glue_collapse(", "), " dont have a QC score")
 }

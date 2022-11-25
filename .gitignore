@@ -9,6 +9,7 @@ analysis_output.tar
 manuscript/*.html
 manuscript/paper*.md
 manuscript/paper*.tex
+manuscript/.figures
 *.aux
 *.out
 *.bbl

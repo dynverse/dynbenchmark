@@ -29,7 +29,7 @@ replace_svg <- function(svg, replacer) {
 
     # match rect
     matched_rects <- map_chr(rects, xml2::xml_attr, "style") %>%
-      str_detect(pritt("fill: #ABCDEF; fill-opacity: {replace_id};")) %>%
+      str_detect(stringr::str_glue("fill: #ABCDEF; fill-opacity: {replace_id};")) %>%
       which()
 
     print(matched_rects)
@@ -59,7 +59,7 @@ replace_svg <- function(svg, replacer) {
         "translate({attrs$x}, {attrs$y})", # translate to box
         "translate({(attrs$width - sub_svg_width*scale)/2}, {(attrs$height - sub_svg_height*scale)/2})", # move to center
         "scale({scale})" # scale within box
-      )) %>% pritt()
+      )) %>% stringr::str_glue()
 
       sub_g %>%
         xml2::xml_set_attrs(list(

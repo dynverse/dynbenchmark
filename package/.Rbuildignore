@@ -13,3 +13,5 @@
 ^docker
 ^scripts
 ^data-raw$
+^LICENSE\.md$
+^LICENSE\.md$

@@ -1,6 +1,8 @@
 ##########################################################
 ###############     GENERATE ERROR LOGS    ###############
 ##########################################################
+method_ids <- unique(data$method_id) %>% setdiff("error")
+
 last_lines <- function(s, num) {
   s %>%
     stringr::str_split(pattern = "\n") %>%

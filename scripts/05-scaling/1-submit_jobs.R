@@ -5,6 +5,8 @@ library(tidyverse)
 
 experiment("05-scaling")
 
+options(dynwrap_backend = "r_wrapper")
+
 if (!file.exists(derived_file("design.rds"))) {
   ##########################################################
   ###############      DEFINE DATASETS       ###############
@@ -36,12 +38,18 @@ if (!file.exists(derived_file("design.rds"))) {
     dynwrap::get_ti_methods(method_ids, evaluate = FALSE) %>%
     mapdf(function(m) {
       l <- m$fun()
-      l$fun <- m$fun
-      l$type <- "function"
-      l
+      k <- list()
+      for (n in names(l)) {
+        for (p in names(l[[n]])) {
+          k[[paste0(n, "_", p)]] <- l[[n]][[p]]
+        }
+      }
+      k$fun <- m$fun
+      k$type <- "function"
+      k
     }) %>%
     list_as_tibble() %>%
-    select(id, type, fun, everything())
+    select(id = method_id, type, fun, everything())
 
   ##########################################################
   ###############       CREATE DESIGN        ###############
@@ -70,9 +78,10 @@ if (!file.exists(derived_file("design.rds"))) {
 design_filt <- read_rds(derived_file("design.rds"))
 
 # only run the next stage when the first has finished
+design_filt$crossing <- design_filt$crossing %>% filter(method_id == "scorpius")
 # design_filt$crossing <- design_filt$crossing %>% filter(category == "Cat1", method_id %in% c("angle", "paga"))
 # design_filt$crossing <- design_filt$crossing %>% filter(category == "Cat1")
-design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2"))
+# design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2"))
 # design_filt$crossing <- design_filt$crossing %>% filter(category %in% c("Cat1", "Cat2", "Cat3"))
 
 benchmark_submit(

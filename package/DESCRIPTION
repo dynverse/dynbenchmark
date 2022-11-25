@@ -1,5 +1,5 @@
 Package: dynbenchmark
-Title: Package of "A comparison of single-cell trajectory inference methods: towards more accurate and robust tools"
+Title: Helper package for benchmark manuscript
 Version: 0.1.0.9000
 Authors@R: c(
   person("Yvan", "Saeys", email = "yvan.saeys@ugent.be", role = c("ths")),
@@ -16,11 +16,11 @@ Depends:
   dynplot (>= 1.0.0),
   dynutils (>= 1.0.2),
   dynwrap (>= 1.0.0)
-License: GPL-3
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/dynverse/dynalysis
-BugReports: https://github.com/dynverse/dynalysis/issues
+URL: https://github.com/dynverse/dynbenchmark
+BugReports: https://github.com/dynverse/dynbenchmark/issues
 Imports: 
   assertthat,
   cowplot,
@@ -69,16 +69,16 @@ Suggests:
   splatter,
   SingleCellExperiment,
   tidygraph
-Remotes:
-  dynverse/dyneval,
-  dynverse/dynmethods,
-  dynverse/dynnormaliser,
-  dynverse/dynparam,
-  dynverse/dynplot,
-  dynverse/dynutils,
-  dynverse/dyntoy,
-  dynverse/dynwrap,
-  rcannood/qsub
+Remotes: 
+    rcannood/qsub,
+    dynverse/dyneval@devel,
+    dynverse/dynmethods@devel,
+    dynverse/dynnormaliser@devel,
+    dynverse/dynparam@devel,
+    dynverse/dynplot@devel,
+    dynverse/dynutils@devel,
+    dynverse/dyntoy@devel,
+    dynverse/dynwrap@devel
 RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)
 Collate: 
